@@ -1,0 +1,149 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Category Info Card -->
+    <div class="col-lg-4">
+        <div class="card h-100 radius-16 overflow-hidden">
+            <div class="card-header bg-base border-bottom py-16 px-24">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0">Category Details</h6>
+                    {% if category.is_active %}
+                        <span class="bg-success-focus text-success-600 px-16 py-4 radius-4 fw-medium text-sm">Active</span>
+                    {% else %}
+                        <span class="bg-neutral-200 text-neutral-600 px-16 py-4 radius-4 fw-medium text-sm">Inactive</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body p-24">
+                <div class="text-center mb-24">
+                    <div class="w-100-px h-100-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center mx-auto mb-16">
+                        <iconify-icon icon="ri-star-line" class="text-primary-600" style="font-size: 40px;"></iconify-icon>
+                    </div>
+                    <h5 class="mb-4">{{ category.name }}</h5>
+                    {% if category.charging == 'static' %}
+                        <span class="badge bg-info-focus text-info-600">Static Price</span>
+                    {% else %}
+                        <span class="badge bg-warning-focus text-warning-600">Per Page Pricing</span>
+                    {% endif %}
+                </div>
+
+                <div class="border-top pt-24">
+                    <ul class="list-unstyled">
+                        {% if category.description %}
+                        <li class="mb-16">
+                            <span class="text-sm text-secondary-light d-block mb-4">Description</span>
+                            <span class="text-md">{{ category.description }}</span>
+                        </li>
+                        {% endif %}
+                        <li class="mb-16">
+                            <span class="text-sm text-secondary-light d-block mb-4">Languages</span>
+                            <div>
+                                {% for lang in category.languages.all %}
+                                    <span class="badge bg-neutral-200 text-neutral-600 me-4 mb-4">{{ lang.name }}</span>
+                                {% empty %}
+                                    <span class="text-muted">No languages assigned</span>
+                                {% endfor %}
+                            </div>
+                        </li>
+                        <li class="mb-16">
+                            <span class="text-sm text-secondary-light d-block mb-4">Created At</span>
+                            <span class="text-md">{{ category.created_at|date:"d M Y, H:i" }}</span>
+                        </li>
+                        <li>
+                            <span class="text-sm text-secondary-light d-block mb-4">Last Updated</span>
+                            <span class="text-md">{{ category.updated_at|date:"d M Y, H:i" }}</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="d-flex gap-8 mt-24">
+                    <a href="{% url 'categoryList' %}" class="btn btn-outline-secondary-600 radius-8 px-20 py-11 flex-grow-1">
+                        <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
+                        Back
+                    </a>
+                    <a href="{% url 'editCategory' category.id %}" class="btn btn-primary radius-8 px-20 py-11 flex-grow-1">
+                        <iconify-icon icon="lucide:edit" class="me-4"></iconify-icon>
+                        Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products List -->
+    <div class="col-lg-8">
+        <div class="card radius-16">
+            <div class="card-header bg-base border-bottom py-16 px-24 d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">
+                    <iconify-icon icon="solar:box-linear" class="me-8 text-warning-600"></iconify-icon>
+                    Products ({{ product_count }})
+                </h6>
+                <a href="{% url 'addProduct' %}?category={{ category.id }}" class="btn btn-sm btn-primary radius-8">
+                    <iconify-icon icon="ic:baseline-plus" class="me-4"></iconify-icon>
+                    Add Product
+                </a>
+            </div>
+            <div class="card-body p-0">
+                {% if products %}
+                <div class="table-responsive">
+                    <table class="table bordered-table sm-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">Regular Price</th>
+                                <th scope="col">Agency Price</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr>
+                                <td>
+                                    <span class="fw-medium">{{ product.name }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-sm">{{ product.ordinary_first_page_price|floatformat:0 }} UZS</span>
+                                </td>
+                                <td>
+                                    <span class="text-sm">{{ product.agency_first_page_price|floatformat:0 }} UZS</span>
+                                </td>
+                                <td>
+                                    {% if product.is_active %}
+                                        <span class="badge bg-success-focus text-success-600">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-neutral-200 text-neutral-600">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex align-items-center gap-8 justify-content-center">
+                                        <a href="{% url 'productDetail' product.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-36-px h-36-px d-inline-flex justify-content-center align-items-center rounded-circle">
+                                            <iconify-icon icon="majesticons:eye-line" class="icon text-lg"></iconify-icon>
+                                        </a>
+                                        <a href="{% url 'editProduct' product.id %}" class="bg-success-focus bg-hover-success-200 text-success-600 fw-medium w-36-px h-36-px d-inline-flex justify-content-center align-items-center rounded-circle">
+                                            <iconify-icon icon="lucide:edit" class="icon text-lg"></iconify-icon>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-40">
+                    <iconify-icon icon="solar:box-linear" class="text-4xl text-secondary-light mb-8"></iconify-icon>
+                    <p class="text-secondary-light mb-16">No products in this category</p>
+                    <a href="{% url 'addProduct' %}?category={{ category.id }}" class="btn btn-sm btn-primary radius-8">
+                        <iconify-icon icon="ic:baseline-plus" class="me-4"></iconify-icon>
+                        Add First Product
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

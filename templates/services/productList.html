@@ -1,0 +1,184 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="card h-100 p-0 radius-12">
+    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+        <div class="d-flex align-items-center flex-wrap gap-3">
+            <span class="text-md fw-medium text-secondary-light mb-0">Show</span>
+            <form method="get" class="d-flex align-items-center gap-3">
+                <select name="per_page" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                    <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                    <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                </select>
+                <div class="navbar-search">
+                    <input type="text" class="bg-base h-40-px w-auto" name="search" placeholder="Search" value="{{ search_query }}">
+                    <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                </div>
+                <select name="category" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:'s' %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="status" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </form>
+        </div>
+        <a href="{% url 'addProduct' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
+            <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+            Add Product
+        </a>
+    </div>
+    <div class="card-body p-24">
+        <div class="table-responsive scroll-sm">
+            <table class="table bordered-table sm-table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Product</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Regular Price</th>
+                        <th scope="col">Agency Price</th>
+                        <th scope="col">Est. Days</th>
+                        <th scope="col" class="text-center">Status</th>
+                        <th scope="col" class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="w-40-px h-40-px rounded-circle bg-warning-100 d-flex align-items-center justify-content-center flex-shrink-0 me-12">
+                                    <iconify-icon icon="solar:box-linear" class="text-warning-600 text-xl"></iconify-icon>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <span class="text-md fw-medium text-primary-light">{{ product.name }}</span>
+                                    {% if product.description %}
+                                    <p class="text-sm text-secondary-light mb-0">{{ product.description|truncatechars:30 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{% url 'categoryDetail' product.category.id %}" class="text-primary-600">{{ product.category.name }}</a>
+                        </td>
+                        <td>
+                            <span class="text-sm">{{ product.ordinary_first_page_price|floatformat:0 }} UZS</span>
+                            {% if product.category.charging == 'dynamic' %}
+                            <small class="d-block text-secondary-light">+{{ product.ordinary_other_page_price|floatformat:0 }}/page</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="text-sm">{{ product.agency_first_page_price|floatformat:0 }} UZS</span>
+                            {% if product.category.charging == 'dynamic' %}
+                            <small class="d-block text-secondary-light">+{{ product.agency_other_page_price|floatformat:0 }}/page</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-info-focus text-info-600">{{ product.estimated_days }} days</span>
+                        </td>
+                        <td class="text-center">
+                            {% if product.is_active %}
+                                <span class="bg-success-focus text-success-600 border border-success-main px-24 py-4 radius-4 fw-medium text-sm">Active</span>
+                            {% else %}
+                                <span class="bg-neutral-200 text-neutral-600 border border-neutral-400 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex align-items-center gap-10 justify-content-center">
+                                <a href="{% url 'productDetail' product.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
+                                    <iconify-icon icon="majesticons:eye-line" class="icon text-xl"></iconify-icon>
+                                </a>
+                                <a href="{% url 'editProduct' product.id %}" class="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
+                                    <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
+                                </a>
+                                <button type="button" class="bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" 
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal{{ product.id }}">
+                                    <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                                </button>
+                            </div>
+                            
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal{{ product.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Delete Product</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to delete <strong>{{ product.name }}</strong>?</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form action="{% url 'deleteProduct' product.id %}" method="POST" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <div class="text-secondary-light">
+                                <iconify-icon icon="solar:box-linear" class="text-4xl mb-2"></iconify-icon>
+                                <p class="mb-0">No products found</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if products %}
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
+            <span>Showing {{ products.start_index }} to {{ products.end_index }} of {{ total_products }} entries</span>
+            <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
+                {% if products.has_previous %}
+                <li class="page-item">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" 
+                       href="?page={{ products.previous_page_number }}&search={{ search_query }}&category={{ category_filter }}&status={{ status_filter }}&per_page={{ per_page }}">
+                        <iconify-icon icon="ep:arrow-left"></iconify-icon>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in products.paginator.page_range %}
+                    {% if products.number == num %}
+                    <li class="page-item">
+                        <span class="page-link bg-primary-600 text-white fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px">{{ num }}</span>
+                    </li>
+                    {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" 
+                           href="?page={{ num }}&search={{ search_query }}&category={{ category_filter }}&status={{ status_filter }}&per_page={{ per_page }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if products.has_next %}
+                <li class="page-item">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" 
+                       href="?page={{ products.next_page_number }}&search={{ search_query }}&category={{ category_filter }}&status={{ status_filter }}&per_page={{ per_page }}">
+                        <iconify-icon icon="ep:arrow-right"></iconify-icon>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}

@@ -147,9 +147,58 @@ from django.db.models import Q
 
 @login_required(login_url='admin_login')
 def addUser(request):
+    """Add a new BotUser (Telegram user)"""
+    # Get all agencies for the dropdown
+    agencies = BotUser.objects.filter(is_agency=True).order_by('name')
+    
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        username = request.POST.get('username', '').strip()
+        user_id = request.POST.get('user_id', '').strip()
+        language = request.POST.get('language', 'uz')
+        is_active = request.POST.get('is_active') == 'on'
+        is_agency = request.POST.get('is_agency') == 'on'
+        agency_id = request.POST.get('agency', '')
+        
+        # Validation
+        if not name:
+            messages.error(request, 'Full name is required.')
+        elif not phone:
+            messages.error(request, 'Phone number is required.')
+        else:
+            try:
+                # Create the BotUser
+                bot_user = BotUser(
+                    name=name,
+                    phone=phone,
+                    username=username if username else None,
+                    user_id=int(user_id) if user_id else None,
+                    language=language,
+                    is_active=is_active,
+                    is_agency=is_agency,
+                )
+                
+                # Set agency if selected and not an agency itself
+                if agency_id and not is_agency:
+                    try:
+                        agency = BotUser.objects.get(id=agency_id, is_agency=True)
+                        bot_user.agency = agency
+                    except BotUser.DoesNotExist:
+                        pass
+                
+                bot_user.save()
+                messages.success(request, f'User "{name}" has been created successfully.')
+                return redirect('usersList')
+                
+            except Exception as e:
+                messages.error(request, f'Error creating user: {str(e)}')
+    
     context = {
         "title": "Add User",
         "subTitle": "Add User",
+        "agencies": agencies,
+        "languages": BotUser.LANGUAGES,
     }
     return render(request, "users/addUser.html", context)
 
@@ -203,8 +252,37 @@ def usersList(request):
 
 @login_required(login_url='admin_login')
 def viewProfile(request):
+    """View user profile details"""
+    from orders.models import Order
+    from django.shortcuts import get_object_or_404
+    
+    user_id = request.GET.get('id')
+    if not user_id:
+        messages.error(request, "User ID is required.")
+        return redirect('usersList')
+    
+    user = get_object_or_404(BotUser, id=user_id)
+    
+    # Get user's orders
+    orders = Order.objects.filter(bot_user=user).order_by('-created_at')[:10]
+    total_orders = Order.objects.filter(bot_user=user).count()
+    completed_orders = Order.objects.filter(bot_user=user, status='completed').count()
+    pending_orders = Order.objects.filter(bot_user=user, status__in=['pending', 'payment_pending', 'payment_received', 'in_progress']).count()
+    
+    # Get agency users if this user is an agency
+    agency_users = []
+    if user.is_agency:
+        agency_users = BotUser.objects.filter(agency=user).order_by('-created_at')[:5]
+    
     context = {
-        "title": "View Profile",
-        "subTitle": "View Profile",
+        "title": "User Details",
+        "subTitle": "User Details",
+        "bot_user": user,
+        "orders": orders,
+        "total_orders": total_orders,
+        "completed_orders": completed_orders,
+        "pending_orders": pending_orders,
+        "agency_users": agency_users,
+        "agency_users_count": BotUser.objects.filter(agency=user).count() if user.is_agency else 0,
     }
-    return render(request, "users/viewProfile.html", context)
+    return render(request, "users/userDetail.html", context)

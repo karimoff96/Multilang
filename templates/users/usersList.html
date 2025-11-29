@@ -1,5 +1,6 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
+{% load user_filters %}
 
 {% block content %}
 <div class="card h-100 p-0 radius-12">
@@ -71,7 +72,7 @@
                                     <span class="text-primary-600 fw-semibold">{{ user.name|slice:":1"|upper }}</span>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <span class="text-md mb-0 fw-normal text-secondary-light">{{ user.name }}</span>
+                                    <span class="text-md mb-0 fw-medium text-secondary-light">{{ user.name }}</span>
                                 </div>
                             </div>
                         </td>

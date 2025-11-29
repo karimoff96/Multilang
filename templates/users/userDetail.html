@@ -1,0 +1,358 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row gy-4">
+    <!-- User Info Card -->
+    <div class="col-lg-4">
+        <div class="card h-100 radius-16 overflow-hidden">
+            <div class="card-header bg-base border-bottom py-16 px-24">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0">User Information</h6>
+                    <div class="d-flex align-items-center gap-2">
+                        {% if bot_user.is_active %}
+                            <span class="bg-success-focus text-success-600 px-16 py-4 radius-4 fw-medium text-sm">Active</span>
+                        {% else %}
+                            <span class="bg-neutral-200 text-neutral-600 px-16 py-4 radius-4 fw-medium text-sm">Inactive</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-24">
+                <div class="text-center mb-24">
+                    <div class="w-120-px h-120-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center mx-auto mb-16">
+                        <span class="text-primary-600 fw-bold" style="font-size: 48px;">{{ bot_user.name|slice:":1"|upper }}</span>
+                    </div>
+                    <h5 class="mb-4">{{ bot_user.name }}</h5>
+                    {% if bot_user.username %}
+                        <span class="text-secondary-light">@{{ bot_user.username }}</span>
+                    {% endif %}
+                    {% if bot_user.is_agency %}
+                        <div class="mt-8">
+                            <span class="badge bg-warning-focus text-warning-600 px-12 py-6 radius-4">
+                                <iconify-icon icon="mdi:office-building" class="me-4"></iconify-icon>
+                                Agency Account
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="border-top pt-24">
+                    <h6 class="text-md mb-16">Personal Details</h6>
+                    <ul class="list-unstyled">
+                        <li class="d-flex align-items-center gap-8 mb-16">
+                            <div class="w-40-px h-40-px rounded-circle bg-primary-50 d-flex align-items-center justify-content-center flex-shrink-0">
+                                <iconify-icon icon="solar:user-linear" class="text-primary-600 text-xl"></iconify-icon>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-sm text-secondary-light d-block">Full Name</span>
+                                <span class="text-md fw-medium">{{ bot_user.name }}</span>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center gap-8 mb-16">
+                            <div class="w-40-px h-40-px rounded-circle bg-info-50 d-flex align-items-center justify-content-center flex-shrink-0">
+                                <iconify-icon icon="ic:outline-telegram" class="text-info-600 text-xl"></iconify-icon>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-sm text-secondary-light d-block">Telegram ID</span>
+                                <span class="text-md fw-medium">{{ bot_user.user_id|default:"-" }}</span>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center gap-8 mb-16">
+                            <div class="w-40-px h-40-px rounded-circle bg-success-50 d-flex align-items-center justify-content-center flex-shrink-0">
+                                <iconify-icon icon="solar:phone-linear" class="text-success-600 text-xl"></iconify-icon>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-sm text-secondary-light d-block">Phone Number</span>
+                                <span class="text-md fw-medium">{{ bot_user.phone }}</span>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center gap-8 mb-16">
+                            <div class="w-40-px h-40-px rounded-circle bg-warning-50 d-flex align-items-center justify-content-center flex-shrink-0">
+                                <iconify-icon icon="solar:global-linear" class="text-warning-600 text-xl"></iconify-icon>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-sm text-secondary-light d-block">Language</span>
+                                <span class="text-md fw-medium">
+                                    {% if bot_user.language == 'uz' %}
+                                        🇺🇿 Uzbek
+                                    {% elif bot_user.language == 'ru' %}
+                                        🇷🇺 Russian
+                                    {% elif bot_user.language == 'en' %}
+                                        🇬🇧 English
+                                    {% else %}
+                                        {{ bot_user.language }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center gap-8 mb-16">
+                            <div class="w-40-px h-40-px rounded-circle bg-danger-50 d-flex align-items-center justify-content-center flex-shrink-0">
+                                <iconify-icon icon="solar:calendar-linear" class="text-danger-600 text-xl"></iconify-icon>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-sm text-secondary-light d-block">Joined Date</span>
+                                <span class="text-md fw-medium">{{ bot_user.created_at|date:"d M Y, H:i" }}</span>
+                            </div>
+                        </li>
+                        {% if bot_user.agency %}
+                        <li class="d-flex align-items-center gap-8">
+                            <div class="w-40-px h-40-px rounded-circle bg-purple-50 d-flex align-items-center justify-content-center flex-shrink-0">
+                                <iconify-icon icon="mdi:office-building-outline" class="text-purple-600 text-xl"></iconify-icon>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-sm text-secondary-light d-block">Referred By Agency</span>
+                                <a href="{% url 'viewProfile' %}?id={{ bot_user.agency.id }}" class="text-md fw-medium text-primary-600">
+                                    {{ bot_user.agency.name }}
+                                </a>
+                            </div>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                {% if bot_user.is_agency and bot_user.agency_link %}
+                <div class="border-top pt-24 mt-8">
+                    <h6 class="text-md mb-16">Agency Invite Link</h6>
+                    <div class="bg-neutral-50 p-12 radius-8">
+                        <div class="d-flex align-items-center gap-8">
+                            <input type="text" class="form-control form-control-sm bg-base" id="agencyLink" value="{{ bot_user.agency_link }}" readonly>
+                            <button type="button" class="btn btn-sm btn-primary-600 flex-shrink-0" onclick="copyAgencyLink()">
+                                <iconify-icon icon="solar:copy-linear"></iconify-icon>
+                            </button>
+                        </div>
+                        {% if bot_user.is_used %}
+                            <span class="text-sm text-danger-600 mt-8 d-block">
+                                <iconify-icon icon="mdi:check-circle" class="me-4"></iconify-icon>
+                                This link has been used
+                            </span>
+                        {% else %}
+                            <span class="text-sm text-success-600 mt-8 d-block">
+                                <iconify-icon icon="mdi:link" class="me-4"></iconify-icon>
+                                Link is active
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="d-flex gap-8 mt-24">
+                    <a href="{% url 'usersList' %}" class="btn btn-outline-secondary-600 radius-8 px-20 py-11 flex-grow-1">
+                        <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
+                        Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-8">
+        <!-- Stats Cards -->
+        <div class="row gy-4 mb-24">
+            <div class="col-sm-4">
+                <div class="card radius-16 h-100">
+                    <div class="card-body p-24">
+                        <div class="d-flex align-items-center gap-16">
+                            <div class="w-60-px h-60-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="solar:bag-4-linear" class="text-primary-600 text-2xl"></iconify-icon>
+                            </div>
+                            <div>
+                                <span class="text-secondary-light text-sm d-block mb-4">Total Orders</span>
+                                <h4 class="mb-0">{{ total_orders }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card radius-16 h-100">
+                    <div class="card-body p-24">
+                        <div class="d-flex align-items-center gap-16">
+                            <div class="w-60-px h-60-px rounded-circle bg-success-100 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="solar:check-circle-linear" class="text-success-600 text-2xl"></iconify-icon>
+                            </div>
+                            <div>
+                                <span class="text-secondary-light text-sm d-block mb-4">Completed</span>
+                                <h4 class="mb-0">{{ completed_orders }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card radius-16 h-100">
+                    <div class="card-body p-24">
+                        <div class="d-flex align-items-center gap-16">
+                            <div class="w-60-px h-60-px rounded-circle bg-warning-100 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="solar:clock-circle-linear" class="text-warning-600 text-2xl"></iconify-icon>
+                            </div>
+                            <div>
+                                <span class="text-secondary-light text-sm d-block mb-4">In Progress</span>
+                                <h4 class="mb-0">{{ pending_orders }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="card radius-16">
+            <div class="card-header bg-base border-bottom py-16 px-24 d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">Recent Orders</h6>
+                {% if total_orders > 0 %}
+                <a href="{% url 'ordersList' %}?search={{ bot_user.name }}" class="text-primary-600 text-sm fw-medium">
+                    View All <iconify-icon icon="ep:arrow-right" class="ms-4"></iconify-icon>
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                {% if orders %}
+                <div class="table-responsive">
+                    <table class="table bordered-table sm-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Order ID</th>
+                                <th scope="col">Product</th>
+                                <th scope="col">Pages</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Date</th>
+                                <th scope="col" class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>
+                                    <span class="fw-medium">#{{ order.id }}</span>
+                                </td>
+                                <td>{{ order.product.title }}</td>
+                                <td>{{ order.total_pages }}</td>
+                                <td>
+                                    {% if order.status == 'pending' %}
+                                        <span class="badge bg-warning-focus text-warning-600">Pending</span>
+                                    {% elif order.status == 'payment_pending' %}
+                                        <span class="badge bg-info-focus text-info-600">Payment Pending</span>
+                                    {% elif order.status == 'payment_received' %}
+                                        <span class="badge bg-primary-focus text-primary-600">Payment Received</span>
+                                    {% elif order.status == 'payment_confirmed' %}
+                                        <span class="badge bg-success-focus text-success-600">Payment Confirmed</span>
+                                    {% elif order.status == 'in_progress' %}
+                                        <span class="badge bg-info-focus text-info-600">In Progress</span>
+                                    {% elif order.status == 'ready' %}
+                                        <span class="badge bg-primary-focus text-primary-600">Ready</span>
+                                    {% elif order.status == 'completed' %}
+                                        <span class="badge bg-success-focus text-success-600">Completed</span>
+                                    {% elif order.status == 'cancelled' %}
+                                        <span class="badge bg-danger-focus text-danger-600">Cancelled</span>
+                                    {% else %}
+                                        <span class="badge bg-neutral-200 text-neutral-600">{{ order.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.created_at|date:"d M Y" }}</td>
+                                <td class="text-center">
+                                    <a href="{% url 'orderDetail' order.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-36-px h-36-px d-inline-flex justify-content-center align-items-center rounded-circle">
+                                        <iconify-icon icon="majesticons:eye-line" class="icon text-lg"></iconify-icon>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-40">
+                    <iconify-icon icon="solar:bag-cross-linear" class="text-4xl text-secondary-light mb-8"></iconify-icon>
+                    <p class="text-secondary-light mb-0">No orders found for this user</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if bot_user.is_agency and agency_users %}
+        <!-- Agency Users -->
+        <div class="card radius-16 mt-24">
+            <div class="card-header bg-base border-bottom py-16 px-24 d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">
+                    <iconify-icon icon="mdi:account-group" class="me-8 text-warning-600"></iconify-icon>
+                    Referred Users ({{ agency_users_count }})
+                </h6>
+                {% if agency_users_count > 5 %}
+                <a href="{% url 'usersList' %}?status=agency" class="text-primary-600 text-sm fw-medium">
+                    View All <iconify-icon icon="ep:arrow-right" class="ms-4"></iconify-icon>
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table bordered-table sm-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Phone</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Joined</th>
+                                <th scope="col" class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for agency_user in agency_users %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="w-32-px h-32-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center flex-shrink-0 me-8">
+                                            <span class="text-primary-600 fw-semibold text-sm">{{ agency_user.name|slice:":1"|upper }}</span>
+                                        </div>
+                                        <span>{{ agency_user.name }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ agency_user.phone }}</td>
+                                <td>
+                                    {% if agency_user.is_active %}
+                                        <span class="badge bg-success-focus text-success-600">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-neutral-200 text-neutral-600">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ agency_user.created_at|date:"d M Y" }}</td>
+                                <td class="text-center">
+                                    <a href="{% url 'viewProfile' %}?id={{ agency_user.id }}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-36-px h-36-px d-inline-flex justify-content-center align-items-center rounded-circle">
+                                        <iconify-icon icon="majesticons:eye-line" class="icon text-lg"></iconify-icon>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+    function copyAgencyLink() {
+        var linkInput = document.getElementById('agencyLink');
+        linkInput.select();
+        linkInput.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(linkInput.value);
+        
+        // Show feedback
+        var btn = event.target.closest('button');
+        var originalHtml = btn.innerHTML;
+        btn.innerHTML = '<iconify-icon icon="solar:check-linear"></iconify-icon>';
+        btn.classList.remove('btn-primary-600');
+        btn.classList.add('btn-success-600');
+        
+        setTimeout(function() {
+            btn.innerHTML = originalHtml;
+            btn.classList.remove('btn-success-600');
+            btn.classList.add('btn-primary-600');
+        }, 2000);
+    }
+</script>
+{% endblock %}

@@ -1,79 +1,174 @@
-{% extends '../layout/layout.html' %} 
+{% extends '../layout/layout.html' %}
+{% load static %}
 
 {% block content %}
-
-
 <div class="card h-100 p-0 radius-12">
+    <div class="card-header border-bottom bg-base py-16 px-24">
+        <div class="d-flex align-items-center justify-content-between">
+            <h6 class="mb-0">
+                <iconify-icon icon="mdi:account-plus" class="me-8 text-primary-600"></iconify-icon>
+                Add New Telegram User
+            </h6>
+            <a href="{% url 'usersList' %}" class="btn btn-outline-secondary-600 radius-8 px-20 py-9">
+                <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
+                Back to List
+            </a>
+        </div>
+    </div>
     <div class="card-body p-24">
         <div class="row justify-content-center">
             <div class="col-xxl-6 col-xl-8 col-lg-10">
-                <div class="card border">
-                    <div class="card-body">
-                        <h6 class="text-md text-primary-light mb-16">Profile Image</h6>
+                <form method="post" action="{% url 'addUser' %}">
+                    {% csrf_token %}
+                    
+                    <!-- Basic Info Section -->
+                    <div class="mb-24">
+                        <h6 class="text-md fw-semibold text-primary-light mb-16">
+                            <iconify-icon icon="solar:user-linear" class="me-8"></iconify-icon>
+                            Basic Information
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-20">
+                                <label for="name" class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    Full Name <span class="text-danger-600">*</span>
+                                </label>
+                                <input type="text" class="form-control radius-8" id="name" name="name" 
+                                       placeholder="Enter full name" required>
+                            </div>
+                            <div class="col-md-6 mb-20">
+                                <label for="phone" class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    Phone Number <span class="text-danger-600">*</span>
+                                </label>
+                                <input type="tel" class="form-control radius-8" id="phone" name="phone" 
+                                       placeholder="+998 90 123 45 67" required>
+                            </div>
+                        </div>
+                    </div>
 
-                        <!-- Upload Image Start -->
-                        <div class="mb-24 mt-16">
-                            <div class="avatar-upload">
-                                <div class="avatar-edit position-absolute bottom-0 end-0 me-24 mt-16 z-1 cursor-pointer">
-                                    <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg" hidden>
-                                    <label for="imageUpload" class="w-32-px h-32-px d-flex justify-content-center align-items-center bg-primary-50 text-primary-600 border border-primary-600 bg-hover-primary-100 text-lg rounded-circle">
-                                        <iconify-icon icon="solar:camera-outline" class="icon"></iconify-icon>
-                                    </label>
+                    <!-- Telegram Info Section -->
+                    <div class="mb-24">
+                        <h6 class="text-md fw-semibold text-primary-light mb-16">
+                            <iconify-icon icon="ic:outline-telegram" class="me-8"></iconify-icon>
+                            Telegram Information
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-20">
+                                <label for="username" class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    Username
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-neutral-100">@</span>
+                                    <input type="text" class="form-control radius-8" id="username" name="username" 
+                                           placeholder="telegram_username">
                                 </div>
-                                <div class="avatar-preview">
-                                    <div id="imagePreview"> </div>
+                                <small class="text-secondary-light">Optional - Telegram username without @</small>
+                            </div>
+                            <div class="col-md-6 mb-20">
+                                <label for="user_id" class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    Telegram User ID
+                                </label>
+                                <input type="number" class="form-control radius-8" id="user_id" name="user_id" 
+                                       placeholder="123456789">
+                                <small class="text-secondary-light">Optional - Numeric Telegram ID</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Section -->
+                    <div class="mb-24">
+                        <h6 class="text-md fw-semibold text-primary-light mb-16">
+                            <iconify-icon icon="solar:settings-linear" class="me-8"></iconify-icon>
+                            Settings
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-20">
+                                <label for="language" class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    Language <span class="text-danger-600">*</span>
+                                </label>
+                                <select class="form-control radius-8 form-select" id="language" name="language">
+                                    {% for code, name in languages %}
+                                    <option value="{{ code }}" {% if code == 'uz' %}selected{% endif %}>
+                                        {% if code == 'uz' %}🇺🇿{% elif code == 'ru' %}🇷🇺{% elif code == 'en' %}🇬🇧{% endif %} {{ name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-20">
+                                <label for="agency" class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    Agency
+                                </label>
+                                <select class="form-control radius-8 form-select" id="agency" name="agency">
+                                    <option value="">No Agency (Direct User)</option>
+                                    {% for agency in agencies %}
+                                    <option value="{{ agency.id }}">{{ agency.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-secondary-light">Select if user was referred by an agency</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Section -->
+                    <div class="mb-24">
+                        <h6 class="text-md fw-semibold text-primary-light mb-16">
+                            <iconify-icon icon="solar:shield-check-linear" class="me-8"></iconify-icon>
+                            Status & Permissions
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-20">
+                                <div class="form-switch switch-primary py-12 px-16 border radius-8 position-relative">
+                                    <label for="is_active" class="position-absolute w-100 h-100 start-0 top-0 cursor-pointer"></label>
+                                    <div class="d-flex align-items-center gap-3 justify-content-between">
+                                        <div>
+                                            <span class="form-check-label line-height-1 fw-medium text-secondary-light">Active Status</span>
+                                            <small class="d-block text-secondary-light mt-4">User can access the bot</small>
+                                        </div>
+                                        <input class="form-check-input" type="checkbox" role="switch" id="is_active" name="is_active" checked>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-20">
+                                <div class="form-switch switch-warning py-12 px-16 border radius-8 position-relative">
+                                    <label for="is_agency" class="position-absolute w-100 h-100 start-0 top-0 cursor-pointer"></label>
+                                    <div class="d-flex align-items-center gap-3 justify-content-between">
+                                        <div>
+                                            <span class="form-check-label line-height-1 fw-medium text-secondary-light">Agency Account</span>
+                                            <small class="d-block text-secondary-light mt-4">Can refer other users</small>
+                                        </div>
+                                        <input class="form-check-input" type="checkbox" role="switch" id="is_agency" name="is_agency">
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- Upload Image End -->
-
-                        <form action="#">
-                            <div class="mb-20">
-                                <label for="name" class="form-label fw-semibold text-primary-light text-sm mb-8">Full Name <span class="text-danger-600">*</span></label>
-                                <input type="text" class="form-control radius-8" id="name" placeholder="Enter Full Name">
-                            </div>
-                            <div class="mb-20">
-                                <label for="email" class="form-label fw-semibold text-primary-light text-sm mb-8">Email <span class="text-danger-600">*</span></label>
-                                <input type="email" class="form-control radius-8" id="email" placeholder="Enter email address">
-                            </div>
-                            <div class="mb-20">
-                                <label for="number" class="form-label fw-semibold text-primary-light text-sm mb-8">Phone</label>
-                                <input type="email" class="form-control radius-8" id="number" placeholder="Enter phone number">
-                            </div>
-                            <div class="mb-20">
-                                <label for="depart" class="form-label fw-semibold text-primary-light text-sm mb-8">Department <span class="text-danger-600">*</span> </label>
-                                <select class="form-control radius-8 form-select" id="depart">
-                                    <option>Enter Event Title </option>
-                                    <option>Enter Event Title One </option>
-                                    <option>Enter Event Title Two</option>
-                                </select>
-                            </div>
-                            <div class="mb-20">
-                                <label for="desig" class="form-label fw-semibold text-primary-light text-sm mb-8">Designation <span class="text-danger-600">*</span> </label>
-                                <select class="form-control radius-8 form-select" id="desig">
-                                    <option>Enter Designation Title </option>
-                                    <option>Enter Designation Title One </option>
-                                    <option>Enter Designation Title Two</option>
-                                </select>
-                            </div>
-                            <div class="mb-20">
-                                <label for="desc" class="form-label fw-semibold text-primary-light text-sm mb-8">Description</label>
-                                <textarea name="#0" class="form-control radius-8" id="desc" placeholder="Write description..."></textarea>
-                            </div>
-                            <div class="d-flex align-items-center justify-content-center gap-3">
-                                <button type="button" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-56 py-11 radius-8">
-                                    Cancel
-                                </button>
-                                <button type="submit" class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8">
-                                    Save
-                                </button>
-                            </div>
-                        </form>
                     </div>
-                </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
+                        <a href="{% url 'usersList' %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-40 py-12 radius-8">
+                            <iconify-icon icon="mdi:content-save" class="me-8"></iconify-icon>
+                            Create User
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
-
 {% endblock content %}
+
+{% block script %}
+<script>
+    $('#is_agency').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#agency').val('').prop('disabled', true);
+            $('#agency').closest('.col-md-6').find('small').text('Agency accounts cannot belong to another agency');
+        } else {
+            $('#agency').prop('disabled', false);
+            $('#agency').closest('.col-md-6').find('small').text('Select if user was referred by an agency');
+        }
+    });
+</script>
+{% endblock %}

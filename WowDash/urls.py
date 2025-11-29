@@ -41,6 +41,9 @@ urlpatterns = [
     # Orders management
     path("orders/", include("orders.urls")),
     
+    # Services management (categories & products)
+    path("services/", include("services.urls")),
+    
     # home routes
     path("index", home_views.index, name="index"),
     path("blankpage", home_views.blankpage, name="blankpage"),
