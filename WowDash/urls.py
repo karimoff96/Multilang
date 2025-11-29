@@ -14,14 +14,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from WowDash import authentication_views
 from WowDash import blog_views
 from WowDash import chart_views
 from WowDash import components_views
-from WowDash import cryptoCurrency_views
 from WowDash import dashboard_views
 from WowDash import forms_views
 from WowDash import home_views
@@ -29,17 +27,17 @@ from WowDash import invoice_views
 from WowDash import roleAndAccess_views
 from WowDash import settings_views
 from WowDash import table_views
-from WowDash import users_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("users/", include("accounts.urls")),
+    # path("services/", include("services.urls")),
+    # path("orders/", include("orders.urls")),
     # home routes
     path("", home_views.index),
     path("index", home_views.index, name="index"),
     path("blankpage", home_views.blankpage, name="blankpage"),
     path("calendar", home_views.calendar, name="calendar"),
-    path("chat", home_views.chat, name="chat"),
-    path("chat-profile", home_views.chatProfile, name="chatProfile"),
     path("comingsoon", home_views.comingsoon, name="comingsoon"),
     path("email", home_views.email, name="email"),
     path("faqs", home_views.faqs, name="faqs"),
@@ -95,19 +93,7 @@ urlpatterns = [
     path("components/typography", components_views.typography, name="typography"),
     path("components/upload", components_views.upload, name="upload"),
     path("components/videos", components_views.videos, name="videos"),
-    # cryptoCurrency routes
-    path(
-        "crypto-currency/marketplace",
-        cryptoCurrency_views.marketplace,
-        name="marketplace",
-    ),
-    path(
-        "crypto-currency/marketplace-details",
-        cryptoCurrency_views.marketplaceDetails,
-        name="marketplaceDetails",
-    ),
-    path("crypto-currency/portfolio", cryptoCurrency_views.portfolio, name="portfolio"),
-    path("crypto-currency/wallet", cryptoCurrency_views.wallet, name="wallet"),
+   
     # dashboard routes
     path("dashboard/index2", dashboard_views.index2, name="index2"),
     # forms routes
@@ -138,17 +124,14 @@ urlpatterns = [
     # tables routes
     path("tables/basic-table", table_views.basicTable, name="basicTable"),
     path("tables/data-table", table_views.dataTable, name="dataTable"),
-    # users routes
-    path("users/add-user", users_views.addUser, name="addUser"),
-    path("users/users-grid", users_views.usersGrid, name="usersGrid"),
-    path("users/users-list", users_views.usersList, name="usersList"),
-    path("users/view-profile", users_views.viewProfile, name="viewProfile"),
+  
 ]
 from django.conf import settings
 from django.conf.urls.static import static
 from bot.main import index
 
 urlpatterns += [path("bot", index, name="bot_webhook")]
+
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

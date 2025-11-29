@@ -6,5 +6,4 @@ venv
 ./order_files
 db.sqlite3
 media
-static
 __pycache__

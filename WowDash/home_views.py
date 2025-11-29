@@ -13,20 +13,7 @@ def calendar(request):
         "subTitle": "Components / Calendar",
     }
     return render(request,"calendar.html", context)
-    
-def chat(request):
-    context={
-        "title": "Chat",
-        "subTitle": "Chat",
-    }
-    return render(request,"chat.html", context)
-    
-def chatProfile(request):
-    context={
-        "title": "Chat",
-        "subTitle": "Chat",
-    }
-    return render(request,"chatProfile.html", context)
+
     
 def comingsoon(request):
     context={

@@ -16,7 +16,10 @@ Including another URLconf
 """
 
 from django.urls import path, include
+from .views import addUser, usersList, viewProfile
 
 urlpatterns = [
-    path("users/", include("users.urls")),
+    path("/", usersList, name="usersList"),
+    path("add-user/", addUser, name="addUser"),
+    path("view-profile/", viewProfile, name="viewProfile"),
 ]
