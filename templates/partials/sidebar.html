@@ -43,26 +43,6 @@
                     </li>
                 </ul>
             </li>
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <iconify-icon icon="hugeicons:invoice-03" class="menu-icon"></iconify-icon>
-                    <span>Invoice</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    <li>
-                        <a href="{% url 'invoiceList' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> List</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'preview' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> Preview</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'addNew' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> Add new</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'edit' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> Edit</a>
-                    </li>
-                </ul>
-            </li>
             <li class="sidebar-menu-group-title">UI Elements</li>
 
             <li class="dropdown">
@@ -136,26 +116,7 @@
                     </li>
                 </ul>
             </li>
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <iconify-icon icon="heroicons:document" class="menu-icon"></iconify-icon>
-                    <span>Forms</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    <li>
-                        <a href="{% url 'inputForms' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> Input Forms</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'inputLayout' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> Input Layout</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'formValidation' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> Form Validation</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'formWizard' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> Form Wizard</a>
-                    </li>
-                </ul>
-            </li>
+
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="mingcute:storage-line" class="menu-icon"></iconify-icon>
@@ -211,95 +172,7 @@
             </li>
 
             <li class="sidebar-menu-group-title">Application</li>
-
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <iconify-icon icon="simple-line-icons:vector" class="menu-icon"></iconify-icon>
-                    <span>Authentication</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    <li>
-                        <a href="{% url 'admin_login' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> Sign In</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'admin_logout' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> Sign Out</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'forgot_password' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> Forgot Password</a>
-                    </li>
-                </ul>
-            </li>
-            <li>
-                <a href="{% url 'gallery' %}">
-                    <iconify-icon icon="solar:gallery-wide-linear" class="menu-icon"></iconify-icon>
-                    <span>Gallery</span>
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'pricing' %}">
-                    <iconify-icon icon="hugeicons:money-send-square" class="menu-icon"></iconify-icon>
-                    <span>Pricing</span>
-                </a>
-            </li>
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <i class="ri-news-line text-xl me-6 d-flex w-auto"></i>
-                    <span>Blog</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    <li>
-                        <a href="{% url 'blog' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> Blog</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'blogDetails' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> Blog Details</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'addBlog' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> Add Blog</a>
-                    </li>
-                </ul>
-            </li>
-            <li>
-                <a href="{% url 'testimonials' %}">
-                    <i class="ri-star-line text-xl me-6 d-flex w-auto"></i>
-                    <span>Testimonial</span>
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'faqs' %}">
-                    <iconify-icon icon="mage:message-question-mark-round" class="menu-icon"></iconify-icon>
-                    <span>FAQs</span>
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'notFound' %}">
-                    <iconify-icon icon="streamline:straight-face" class="menu-icon"></iconify-icon>
-                    <span>404</span>
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'termsAndConditions' %}">
-                    <iconify-icon icon="octicon:info-24" class="menu-icon"></iconify-icon>
-                    <span>Terms & Conditions</span>
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'comingsoon' %}">
-                    <i class="ri-rocket-line text-xl me-6 d-flex w-auto"></i>
-                    <span>Coming Soon</span>
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'maintenance' %}">
-                    <i class="ri-hammer-line text-xl me-6 d-flex w-auto"></i>
-                    <span>Maintenance</span>
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'blankpage' %}">
-                    <i class="ri-checkbox-multiple-blank-line text-xl me-6 d-flex w-auto"></i>
-                    <span>Blank Page</span>
-                </a>
-            </li>
+  
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="icon-park-outline:setting-two" class="menu-icon"></iconify-icon>

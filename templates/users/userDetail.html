@@ -10,6 +10,10 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <h6 class="mb-0">User Information</h6>
                     <div class="d-flex align-items-center gap-2">
+                        <a href="{% url 'editUser' bot_user.id %}" class="btn btn-sm btn-outline-warning-600 radius-8 px-12 py-6 d-flex align-items-center">
+                            <iconify-icon icon="lucide:edit" class="me-4"></iconify-icon>
+                            Edit
+                        </a>
                         {% if bot_user.is_active %}
                             <span class="bg-success-focus text-success-600 px-16 py-4 radius-4 fw-medium text-sm">Active</span>
                         {% else %}
@@ -29,7 +33,7 @@
                     {% endif %}
                     {% if bot_user.is_agency %}
                         <div class="mt-8">
-                            <span class="badge bg-warning-focus text-warning-600 px-12 py-6 radius-4">
+                            <span class="badge bg-warning-focus text-warning-600 px-12 py-6 radius-4 d-inline-flex align-items-center">
                                 <iconify-icon icon="mdi:office-building" class="me-4"></iconify-icon>
                                 Agency Account
                             </span>
@@ -122,12 +126,12 @@
                             </button>
                         </div>
                         {% if bot_user.is_used %}
-                            <span class="text-sm text-danger-600 mt-8 d-block">
+                            <span class="text-sm text-danger-600 mt-8 d-flex align-items-center">
                                 <iconify-icon icon="mdi:check-circle" class="me-4"></iconify-icon>
                                 This link has been used
                             </span>
                         {% else %}
-                            <span class="text-sm text-success-600 mt-8 d-block">
+                            <span class="text-sm text-success-600 mt-8 d-flex align-items-center">
                                 <iconify-icon icon="mdi:link" class="me-4"></iconify-icon>
                                 Link is active
                             </span>
@@ -137,7 +141,7 @@
                 {% endif %}
 
                 <div class="d-flex gap-8 mt-24">
-                    <a href="{% url 'usersList' %}" class="btn btn-outline-secondary-600 radius-8 px-20 py-11 flex-grow-1">
+                    <a href="{% url 'usersList' %}" class="btn btn-outline-secondary-600 radius-8 px-20 py-11 flex-grow-1 d-flex align-items-center justify-content-center">
                         <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
                         Back to List
                     </a>
@@ -274,12 +278,12 @@
         <!-- Agency Users -->
         <div class="card radius-16 mt-24">
             <div class="card-header bg-base border-bottom py-16 px-24 d-flex align-items-center justify-content-between">
-                <h6 class="mb-0">
+                <h6 class="mb-0 d-flex align-items-center">
                     <iconify-icon icon="mdi:account-group" class="me-8 text-warning-600"></iconify-icon>
                     Referred Users ({{ agency_users_count }})
                 </h6>
                 {% if agency_users_count > 5 %}
-                <a href="{% url 'usersList' %}?status=agency" class="text-primary-600 text-sm fw-medium">
+                <a href="{% url 'usersList' %}?status=agency" class="text-primary-600 text-sm fw-medium d-flex align-items-center">
                     View All <iconify-icon icon="ep:arrow-right" class="ms-4"></iconify-icon>
                 </a>
                 {% endif %}

@@ -5,11 +5,11 @@
 <div class="card h-100 p-0 radius-12">
     <div class="card-header border-bottom bg-base py-16 px-24">
         <div class="d-flex align-items-center justify-content-between">
-            <h6 class="mb-0">
+            <h6 class="mb-0 d-flex align-items-center">
                 <iconify-icon icon="ri-star-line" class="me-8 text-primary-600"></iconify-icon>
                 Add New Category
             </h6>
-            <a href="{% url 'categoryList' %}" class="btn btn-outline-secondary-600 radius-8 px-20 py-9">
+            <a href="{% url 'categoryList' %}" class="btn btn-outline-secondary-600 radius-8 px-20 py-9 d-flex align-items-center">
                 <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
                 Back to List
             </a>
@@ -84,7 +84,7 @@
                         <a href="{% url 'categoryList' %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8">
                             Cancel
                         </a>
-                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-40 py-12 radius-8">
+                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-40 py-12 radius-8 d-flex align-items-center">
                             <iconify-icon icon="mdi:content-save" class="me-8"></iconify-icon>
                             Create Category
                         </button>

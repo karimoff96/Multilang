@@ -10,6 +10,7 @@ from .views import (
     forgot_password,
     reset_password,
     addUser, 
+    editUser,
     usersList, 
     viewProfile
 )
@@ -24,5 +25,6 @@ urlpatterns = [
     # User management URLs
     path("", usersList, name="usersList"),
     path("add-user/", addUser, name="addUser"),
+    path("edit-user/<int:user_id>/", editUser, name="editUser"),
     path("view-profile/", viewProfile, name="viewProfile"),
 ]

@@ -251,6 +251,67 @@ def usersList(request):
 
 
 @login_required(login_url='admin_login')
+def editUser(request, user_id):
+    """Edit an existing BotUser"""
+    from django.shortcuts import get_object_or_404
+    
+    user = get_object_or_404(BotUser, id=user_id)
+    agencies = BotUser.objects.filter(is_agency=True).exclude(id=user_id).order_by('name')
+    
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        username = request.POST.get('username', '').strip()
+        user_id_field = request.POST.get('user_id', '').strip()
+        language = request.POST.get('language', 'uz')
+        is_active = request.POST.get('is_active') == 'on'
+        is_agency = request.POST.get('is_agency') == 'on'
+        agency_id = request.POST.get('agency', '')
+        
+        # Validation
+        if not name:
+            messages.error(request, 'Full name is required.')
+        elif not phone:
+            messages.error(request, 'Phone number is required.')
+        else:
+            try:
+                # Update the BotUser
+                user.name = name
+                user.phone = phone
+                user.username = username if username else None
+                user.user_id = int(user_id_field) if user_id_field else None
+                user.language = language
+                user.is_active = is_active
+                user.is_agency = is_agency
+                
+                # Set agency if selected and not an agency itself
+                if agency_id and not is_agency:
+                    try:
+                        agency = BotUser.objects.get(id=agency_id, is_agency=True)
+                        user.agency = agency
+                    except BotUser.DoesNotExist:
+                        user.agency = None
+                else:
+                    user.agency = None
+                
+                user.save()
+                messages.success(request, f'User "{name}" has been updated successfully.')
+                return redirect('usersList')
+                
+            except Exception as e:
+                messages.error(request, f'Error updating user: {str(e)}')
+    
+    context = {
+        "title": "Edit User",
+        "subTitle": "Edit User",
+        "user": user,
+        "agencies": agencies,
+        "languages": BotUser.LANGUAGES,
+    }
+    return render(request, "users/editUser.html", context)
+
+
+@login_required(login_url='admin_login')
 def viewProfile(request):
     """View user profile details"""
     from orders.models import Order

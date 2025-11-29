@@ -17,13 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
-from WowDash import blog_views
 from WowDash import chart_views
 from WowDash import components_views
 from WowDash import dashboard_views
-from WowDash import forms_views
 from WowDash import home_views
-from WowDash import invoice_views
 from WowDash import roleAndAccess_views
 from WowDash import settings_views
 from WowDash import table_views
@@ -46,25 +43,12 @@ urlpatterns = [
     
     # home routes
     path("index", home_views.index, name="index"),
-    path("blankpage", home_views.blankpage, name="blankpage"),
-    path("comingsoon", home_views.comingsoon, name="comingsoon"),
     path("email", home_views.email, name="email"),
-    path("faqs", home_views.faqs, name="faqs"),
-    path("gallery", home_views.gallery, name="gallery"),
     path("kanban", home_views.kanban, name="kanban"),
-    path("maintenance", home_views.maintenance, name="maintenance"),
-    path("not-found", home_views.notFound, name="notFound"),
-    path("pricing", home_views.pricing, name="pricing"),
     path("stared", home_views.stared, name="stared"),
-    path("terms-conditions", home_views.termsAndConditions, name="termsAndConditions"),
-    path("testimonials", home_views.testimonials, name="testimonials"),
     path("view-details", home_views.viewDetails, name="viewDetails"),
     path("widgets", home_views.widgets, name="widgets"),
     
-    # blog routes
-    path("blog/add-blog", blog_views.addBlog, name="addBlog"),
-    path("blog/blog", blog_views.blog, name="blog"),
-    path("blog/blog-details", blog_views.blogDetails, name="blogDetails"),
     # chart routes
     path("chart/column-chart", chart_views.columnChart, name="columnChart"),
     path("chart/line-chart", chart_views.lineChart, name="lineChart"),
@@ -98,16 +82,7 @@ urlpatterns = [
    
     # dashboard routes
     path("dashboard/index2", dashboard_views.index2, name="index2"),
-    # forms routes
-    path("forms/form-validation", forms_views.formValidation, name="formValidation"),
-    path("forms/form-wizard", forms_views.formWizard, name="formWizard"),
-    path("forms/input-forms", forms_views.inputForms, name="inputForms"),
-    path("forms/input-layout", forms_views.inputLayout, name="inputLayout"),
-    # invoices routes
-    path("invoice/add-new", invoice_views.addNew, name="addNew"),
-    path("invoice/edit", invoice_views.edit, name="edit"),
-    path("invoice/list", invoice_views.list, name="invoiceList"),
-    path("invoice/preview", invoice_views.preview, name="preview"),
+
     # role and access routes
     path("role-access/assign-role", roleAndAccess_views.assignRole, name="assignRole"),
     path("role-access/role-access", roleAndAccess_views.roleAccess, name="roleAccess"),

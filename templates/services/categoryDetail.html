@@ -59,11 +59,11 @@
                 </div>
 
                 <div class="d-flex gap-8 mt-24">
-                    <a href="{% url 'categoryList' %}" class="btn btn-outline-secondary-600 radius-8 px-20 py-11 flex-grow-1">
+                    <a href="{% url 'categoryList' %}" class="btn btn-outline-secondary-600 radius-8 px-20 py-11 flex-grow-1 d-flex align-items-center justify-content-center">
                         <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
                         Back
                     </a>
-                    <a href="{% url 'editCategory' category.id %}" class="btn btn-primary radius-8 px-20 py-11 flex-grow-1">
+                    <a href="{% url 'editCategory' category.id %}" class="btn btn-primary radius-8 px-20 py-11 flex-grow-1 d-flex align-items-center justify-content-center">
                         <iconify-icon icon="lucide:edit" class="me-4"></iconify-icon>
                         Edit
                     </a>
@@ -76,11 +76,11 @@
     <div class="col-lg-8">
         <div class="card radius-16">
             <div class="card-header bg-base border-bottom py-16 px-24 d-flex align-items-center justify-content-between">
-                <h6 class="mb-0">
+                <h6 class="mb-0 d-flex align-items-center">
                     <iconify-icon icon="solar:box-linear" class="me-8 text-warning-600"></iconify-icon>
                     Products ({{ product_count }})
                 </h6>
-                <a href="{% url 'addProduct' %}?category={{ category.id }}" class="btn btn-sm btn-primary radius-8">
+                <a href="{% url 'addProduct' %}?category={{ category.id }}" class="btn btn-sm btn-primary radius-8 d-flex align-items-center">
                     <iconify-icon icon="ic:baseline-plus" class="me-4"></iconify-icon>
                     Add Product
                 </a>
@@ -136,7 +136,7 @@
                 <div class="text-center py-40">
                     <iconify-icon icon="solar:box-linear" class="text-4xl text-secondary-light mb-8"></iconify-icon>
                     <p class="text-secondary-light mb-16">No products in this category</p>
-                    <a href="{% url 'addProduct' %}?category={{ category.id }}" class="btn btn-sm btn-primary radius-8">
+                    <a href="{% url 'addProduct' %}?category={{ category.id }}" class="btn btn-sm btn-primary radius-8 d-inline-flex align-items-center">
                         <iconify-icon icon="ic:baseline-plus" class="me-4"></iconify-icon>
                         Add First Product
                     </a>
