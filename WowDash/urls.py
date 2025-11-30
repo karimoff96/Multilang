@@ -28,8 +28,8 @@ from WowDash import table_views
 urlpatterns = [
     path("admin/", admin.site.urls),
     
-    # Root URL redirects to login
-    path("", lambda request: redirect('admin_login'), name="root"),
+    # Root URL redirects to dashboard
+    path("", home_views.index, name="dashboard"),
     
     # Authentication & User management (accounts app)
     path("accounts/", include("accounts.urls")),
@@ -48,6 +48,8 @@ urlpatterns = [
     path("stared", home_views.stared, name="stared"),
     path("view-details", home_views.viewDetails, name="viewDetails"),
     path("widgets", home_views.widgets, name="widgets"),
+    path("sales", home_views.sales, name="sales"),
+    path("finance", home_views.finance, name="finance"),
     
     # chart routes
     path("chart/column-chart", chart_views.columnChart, name="columnChart"),

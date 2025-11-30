@@ -12,7 +12,7 @@
     <div class="sidebar-menu-area">
         <ul class="sidebar-menu" id="sidebar-menu">
             <li>
-                <a href="{% url 'index2' %}">
+                <a href="{% url 'dashboard' %}">
                     <iconify-icon icon="solar:home-smile-angle-outline" class="menu-icon"></iconify-icon>
                     <span>Dashboard</span>
                 </a>
@@ -42,6 +42,18 @@
                         <a href="{% url 'productList' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> Products</a>
                     </li>
                 </ul>
+            </li>
+            <li>
+                <a href="{% url 'sales' %}">
+                    <iconify-icon icon="hugeicons:money-send-square" class="menu-icon"></iconify-icon>
+                    <span>Sales</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'finance' %}">
+                    <iconify-icon icon="solar:chart-2-bold-duotone" class="menu-icon"></iconify-icon>
+                    <span>Finance</span>
+                </a>
             </li>
             <li class="sidebar-menu-group-title">UI Elements</li>
 

@@ -1,0 +1,516 @@
+﻿{% extends './layout/layout.html' %} 
+
+{% block content %}
+<div class="row gy-4 mt-1">
+    <!-- Orders Overview Chart -->
+    <div class="col-12">
+        <div class="card h-100 radius-12 border-0 shadow-sm overflow-hidden">
+            <div class="card-body p-24">
+                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-lg fw-bold text-white mb-1">Orders Overview</h6>
+                        <span class="text-secondary-light text-sm">Track your order performance</span>
+                    </div>
+                    <select class="form-select form-select-sm w-auto bg-base border-0 text-white radius-8 px-16" id="ordersPeriodSelect">
+                        <option value="yearly" selected>Yearly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="today">Today</option>
+                    </select>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-3 mt-16">
+                    <h4 class="mb-0 fw-bold text-white" id="ordersRevenue">{{ yearly_revenue|floatformat:0 }} UZS</h4>
+                    <span class="text-sm fw-semibold rounded-pill px-12 py-6 bg-success-focus text-success-main" id="ordersChangeBadge">
+                        <iconify-icon icon="bxs:up-arrow" class="text-xs me-1" id="ordersChangeIcon"></iconify-icon>
+                        <span id="ordersChangeValue">{{ yearly_change }}%</span>
+                    </span>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-16 mt-8">
+                    <span class="text-secondary-light text-sm">
+                        <iconify-icon icon="solar:bag-bold" class="text-primary-600 me-1"></iconify-icon>
+                        Orders: <strong class="text-white" id="ordersCount">{{ yearly_count }}</strong>
+                    </span>
+                    <span class="text-secondary-light text-sm" id="ordersDailyAvg">
+                        <iconify-icon icon="solar:chart-2-bold" class="text-success-main me-1"></iconify-icon>
+                        + {{ yearly_daily_avg|floatformat:0 }} UZS/day
+                    </span>
+                </div>
+                <div id="chart" class="pt-28 apexcharts-tooltip-style-1"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Orders by Status -->
+    <div class="col-xxl-6 col-lg-6">
+        <div class="card h-100 radius-12 border-0 shadow-sm">
+            <div class="card-body p-24">
+                <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
+                    <h6 class="mb-0 fw-bold text-lg text-white">Orders by Status</h6>
+                    <select class="form-select form-select-sm w-auto bg-base border-0 text-white radius-8" id="statusPeriodSelect">
+                        <option value="today">Today</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly" selected>Yearly</option>
+                    </select>
+                </div>
+                <div id="orderStatusDonutChart" class="mt-16"></div>
+                <ul class="d-flex flex-wrap align-items-center justify-content-center mt-16 gap-3" id="statusLegend"></ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Order Completion Rate -->
+    <div class="col-xxl-6 col-lg-6">
+        <div class="card h-100 radius-12 border-0 shadow-sm">
+            <div class="card-body p-24">
+                <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between mb-16">
+                    <h6 class="mb-0 fw-bold text-lg text-white">Completion Rate</h6>
+                    <select class="form-select form-select-sm w-auto bg-base border-0 text-primary-light radius-8" id="completionPeriodSelect">
+                        <option value="today">Today</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly" selected>Yearly</option>
+                    </select>
+                </div>
+                <div id="completionRateChart"></div>
+                <div class="mt-20 d-flex flex-column gap-12">
+                    <div class="d-flex align-items-center justify-content-between p-14 radius-10 bg-success-focus border-start border-success-main border-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:check-circle-bold" class="text-success-main text-xl"></iconify-icon>
+                            <span class="text-primary-light text-sm fw-medium">Completed</span>
+                        </div>
+                        <span class="fw-bold text-success-main text-lg" id="completedCount">0</span>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between p-14 radius-10 bg-primary-focus border-start border-primary-600 border-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:hourglass-bold" class="text-primary-600 text-xl"></iconify-icon>
+                            <span class="text-primary-light text-sm fw-medium">In Progress</span>
+                        </div>
+                        <span class="fw-bold text-primary-600 text-lg" id="inProgressCount">0</span>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between p-14 radius-10 bg-danger-focus border-start border-danger-main border-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:close-circle-bold" class="text-danger-main text-xl"></iconify-icon>
+                            <span class="text-primary-light text-sm fw-medium">Cancelled</span>
+                        </div>
+                        <span class="fw-bold text-danger-main text-lg" id="cancelledCount">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Orders - Full Width -->
+    <div class="col-12">
+        <div class="card radius-12 border-0 shadow-sm">
+            <div class="card-header border-0 bg-transparent">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0">Recent Orders</h5>
+                    <a href="{% url 'ordersList' %}" class="btn btn-outline-primary-600 btn-sm radius-8 px-16">
+                        <iconify-icon icon="solar:eye-outline" class="me-1"></iconify-icon>View All
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table basic-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Customer</th>
+                                <th scope="col">Product</th>
+                                <th scope="col">Amount</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td>{{ order.customer }}</td>
+                                <td>
+                                    <span class="text-sm text-secondary-light fw-normal">{{ order.product }}</span>
+                                </td>
+                                <td>{{ order.total_price|floatformat:0 }} UZS</td>
+                                <td>
+                                    {% if order.status == 'completed' %}
+                                    <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.status_display }}</span>
+                                    {% elif order.status == 'cancelled' %}
+                                    <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.status_display }}</span>
+                                    {% elif order.status == 'in_progress' %}
+                                    <span class="bg-primary-focus text-primary-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.status_display }}</span>
+                                    {% elif order.status == 'pending' %}
+                                    <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.status_display }}</span>
+                                    {% else %}
+                                    <span class="bg-info-focus text-info-main px-24 py-4 rounded-pill fw-medium text-sm">{{ order.status_display }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-secondary-light">No recent orders</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Agencies Table -->
+    <div class="col-lg-6">
+        <div class="card h-100 radius-12 border-0 shadow-sm">
+            <div class="card-header border-0 bg-transparent">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0">Top 5 Agencies</h5>
+                    <select class="form-select form-select-sm w-auto" id="agenciesPeriodSelect">
+                        <option value="yearly" selected>Yearly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="today">Today</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table basic-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Agency</th>
+                                <th scope="col" class="text-center">Orders</th>
+                                <th scope="col">Total Spent</th>
+                                <th scope="col" class="text-center">Pages</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agenciesTableBody"></tbody>
+                    </table>
+                    <div id="noAgenciesMessage" class="text-center py-32 d-none">
+                        <span class="text-secondary-light text-sm">No agencies found for this period</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Customers Table -->
+    <div class="col-lg-6">
+        <div class="card h-100 radius-12 border-0 shadow-sm">
+            <div class="card-header border-0 bg-transparent">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0">Top 5 Customers</h5>
+                    <select class="form-select form-select-sm w-auto" id="customersPeriodSelect">
+                        <option value="yearly" selected>Yearly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="today">Today</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table basic-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Customer</th>
+                                <th scope="col" class="text-center">Orders</th>
+                                <th scope="col">Total Spent</th>
+                                <th scope="col" class="text-center">Pages</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody"></tbody>
+                    </table>
+                    <div id="noCustomersMessage" class="text-center py-32 d-none">
+                        <span class="text-secondary-light text-sm">No customers found for this period</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+// Data from Django
+const ordersData = {
+    today: {
+        count: {{ today_count }},
+        revenue: {{ today_revenue }},
+        change: {{ today_change }},
+        dailyAvg: {{ today_daily_avg }},
+        chartData: {{ today_chart_data|safe }},
+        chartLabels: {{ today_chart_labels|safe }}
+    },
+    weekly: {
+        count: {{ weekly_count }},
+        revenue: {{ weekly_revenue }},
+        change: {{ weekly_change }},
+        dailyAvg: {{ weekly_daily_avg }},
+        chartData: {{ weekly_chart_data|safe }},
+        chartLabels: {{ weekly_chart_labels|safe }}
+    },
+    monthly: {
+        count: {{ monthly_count }},
+        revenue: {{ monthly_revenue }},
+        change: {{ monthly_change }},
+        dailyAvg: {{ monthly_daily_avg }},
+        chartData: {{ monthly_chart_data|safe }},
+        chartLabels: {{ monthly_chart_labels|safe }}
+    },
+    yearly: {
+        count: {{ yearly_count }},
+        revenue: {{ yearly_revenue }},
+        change: {{ yearly_change }},
+        dailyAvg: {{ yearly_daily_avg }},
+        chartData: {{ yearly_chart_data|safe }},
+        chartLabels: {{ yearly_chart_labels|safe }}
+    }
+};
+
+const statusChartData = {{ status_chart_data|safe }};
+
+const topAgenciesData = {{ top_agencies_data|safe }};
+
+const topCustomersData = {{ top_customers_data|safe }};
+
+const completionRatesData = {{ completion_rates|safe }};
+
+// Format number with commas
+function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// Get theme-aware colors
+function getThemeColors() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    return {
+        textColor: isDark ? '#9CA3AF' : '#6C757D',
+        gridColor: isDark ? '#374151' : '#E4E7EC',
+        trackColor: isDark ? '#374151' : '#E4E7EC',
+        valueColor: isDark ? '#F9FAFB' : '#1B2559'
+    };
+}
+
+// ============ ORDERS OVERVIEW CHART ============
+let ordersChart;
+function updateOrdersUI(period) {
+    const data = ordersData[period];
+    
+    document.getElementById('ordersRevenue').textContent = formatNumber(data.revenue) + ' UZS';
+    document.getElementById('ordersCount').textContent = formatNumber(data.count);
+    document.getElementById('ordersChangeValue').textContent = data.change + '%';
+    document.getElementById('ordersDailyAvg').textContent = '+ ' + formatNumber(data.dailyAvg) + ' UZS Per Day';
+    
+    const badge = document.getElementById('ordersChangeBadge');
+    const icon = document.getElementById('ordersChangeIcon');
+    if (data.change >= 0) {
+        badge.classList.remove('bg-danger-focus', 'text-danger-main');
+        badge.classList.add('bg-success-focus', 'text-success-main');
+        icon.setAttribute('icon', 'bxs:up-arrow');
+    } else {
+        badge.classList.remove('bg-success-focus', 'text-success-main');
+        badge.classList.add('bg-danger-focus', 'text-danger-main');
+        icon.setAttribute('icon', 'bxs:down-arrow');
+    }
+    
+    // Update chart
+    if (ordersChart) {
+        ordersChart.updateOptions({
+            series: [{ name: 'Revenue', data: data.chartData }],
+            xaxis: { categories: data.chartLabels }
+        });
+    }
+}
+
+function initOrdersChart() {
+    const initialData = ordersData.yearly;
+    const colors = getThemeColors();
+    const options = {
+        series: [{ name: 'Revenue', data: initialData.chartData }],
+        chart: { type: 'area', height: 264, toolbar: { show: false } },
+        colors: ['#487FFF'],
+        fill: {
+            type: 'gradient',
+            gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1, stops: [0, 100] }
+        },
+        stroke: { curve: 'smooth', width: 2 },
+        dataLabels: { enabled: false },
+        xaxis: {
+            categories: initialData.chartLabels,
+            labels: { style: { colors: colors.textColor, fontSize: '12px' } }
+        },
+        yaxis: {
+            labels: {
+                formatter: function(val) {
+                    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+                    if (val >= 1000) return (val / 1000).toFixed(0) + 'K';
+                    return val;
+                },
+                style: { colors: colors.textColor, fontSize: '12px' }
+            }
+        },
+        grid: { borderColor: colors.gridColor, strokeDashArray: 3 },
+        tooltip: {
+            y: { formatter: function(val) { return formatNumber(val) + ' UZS'; } }
+        }
+    };
+    ordersChart = new ApexCharts(document.querySelector("#chart"), options);
+    ordersChart.render();
+}
+
+// ============ ORDER STATUS DONUT CHART ============
+let statusDonutChart;
+function renderStatusChart(period) {
+    const data = statusChartData[period];
+    
+    // Update legend
+    const legendHtml = data.labels.map((label, i) => `
+        <li class="d-flex align-items-center gap-2">
+            <span class="w-12-px h-12-px rounded-circle" style="background-color: ${data.colors[i]}"></span>
+            <span class="text-secondary-light text-sm fw-medium">${label}: <strong class="text-primary-light">${data.values[i]}</strong></span>
+        </li>
+    `).join('');
+    document.getElementById('statusLegend').innerHTML = legendHtml;
+    
+    const colors = getThemeColors();
+    const options = {
+        series: data.values,
+        chart: { type: 'donut', height: 250 },
+        labels: data.labels,
+        colors: data.colors,
+        legend: { show: false },
+        dataLabels: { enabled: false },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '70%',
+                    labels: {
+                        show: true,
+                        name: {
+                            show: true,
+                            color: colors.textColor,
+                            fontSize: '14px'
+                        },
+                        value: {
+                            show: true,
+                            color: colors.valueColor,
+                            fontSize: '24px',
+                            fontWeight: 600
+                        },
+                        total: {
+                            show: true,
+                            label: 'Total',
+                            color: colors.textColor,
+                            formatter: function(w) {
+                                return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    };
+    
+    if (statusDonutChart) {
+        statusDonutChart.updateOptions(options);
+    } else {
+        statusDonutChart = new ApexCharts(document.querySelector("#orderStatusDonutChart"), options);
+        statusDonutChart.render();
+    }
+}
+
+// ============ COMPLETION RATE CHART ============
+let completionRateChart;
+function renderCompletionChart(period) {
+    const data = completionRatesData[period];
+    const colors = getThemeColors();
+    
+    document.getElementById('completedCount').textContent = data.completed;
+    document.getElementById('inProgressCount').textContent = data.in_progress;
+    document.getElementById('cancelledCount').textContent = data.cancelled;
+    
+    const options = {
+        series: [data.rate],
+        chart: { type: 'radialBar', height: 200 },
+        colors: ['#45B369'],
+        plotOptions: {
+            radialBar: {
+                hollow: { size: '60%' },
+                track: { background: colors.trackColor },
+                dataLabels: {
+                    name: { show: true, fontSize: '14px', color: colors.textColor, offsetY: -10 },
+                    value: { show: true, fontSize: '24px', fontWeight: 600, color: colors.valueColor, offsetY: 5 }
+                }
+            }
+        },
+        labels: ['Completion']
+    };
+    
+    if (completionRateChart) {
+        completionRateChart.updateOptions(options);
+    } else {
+        completionRateChart = new ApexCharts(document.querySelector("#completionRateChart"), options);
+        completionRateChart.render();
+    }
+}
+
+// ============ TOP USERS TABLES ============
+function renderTopUsersTable(users, tableBodyId, noDataId) {
+    const tbody = document.getElementById(tableBodyId);
+    const noDataMsg = document.getElementById(noDataId);
+    
+    if (users.length === 0) {
+        tbody.innerHTML = '';
+        noDataMsg.classList.remove('d-none');
+        return;
+    }
+    
+    noDataMsg.classList.add('d-none');
+    tbody.innerHTML = users.map((user, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td>
+                <h6 class="text-md mb-0 fw-normal">${user.name}</h6>
+                <span class="text-sm text-secondary-light fw-normal">${user.username !== '-' ? '@' + user.username : user.phone}</span>
+            </td>
+            <td class="text-center">
+                <span class="bg-primary-focus text-primary-main px-24 py-4 rounded-pill fw-medium text-sm">${user.order_count}</span>
+            </td>
+            <td>${formatNumber(user.total_spent)} UZS</td>
+            <td class="text-center">${formatNumber(user.total_pages)}</td>
+        </tr>
+    `).join('');
+}
+
+// ============ EVENT LISTENERS ============
+document.getElementById('ordersPeriodSelect').addEventListener('change', function() {
+    updateOrdersUI(this.value);
+});
+
+document.getElementById('statusPeriodSelect').addEventListener('change', function() {
+    renderStatusChart(this.value);
+});
+
+document.getElementById('completionPeriodSelect').addEventListener('change', function() {
+    renderCompletionChart(this.value);
+});
+
+document.getElementById('agenciesPeriodSelect').addEventListener('change', function() {
+    renderTopUsersTable(topAgenciesData[this.value], 'agenciesTableBody', 'noAgenciesMessage');
+});
+
+document.getElementById('customersPeriodSelect').addEventListener('change', function() {
+    renderTopUsersTable(topCustomersData[this.value], 'customersTableBody', 'noCustomersMessage');
+});
+
+// ============ INITIALIZE ============
+document.addEventListener('DOMContentLoaded', function() {
+    initOrdersChart();
+    renderStatusChart('yearly');
+    renderCompletionChart('yearly');
+    renderTopUsersTable(topAgenciesData.yearly, 'agenciesTableBody', 'noAgenciesMessage');
+    renderTopUsersTable(topCustomersData.yearly, 'customersTableBody', 'noCustomersMessage');
+});
+</script>
+{% endblock script %}
