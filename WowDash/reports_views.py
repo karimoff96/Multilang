@@ -23,6 +23,7 @@ def financial_reports(request):
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
     branch_id = request.GET.get('branch')
+    center_id = request.GET.get('center')
     
     today = timezone.now()
     if not date_from:
@@ -41,6 +42,14 @@ def financial_reports(request):
     
     # Get available branches for filter
     branches = get_user_branches(request.user)
+    
+    # Center filter for superuser
+    centers = None
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_id:
+            orders = orders.filter(branch__center_id=center_id)
+            branches = branches.filter(center_id=center_id)
     
     if branch_id:
         orders = orders.filter(branch_id=branch_id)
@@ -123,6 +132,8 @@ def financial_reports(request):
         'date_to': date_to,
         'branches': branches,
         'selected_branch': branch_id,
+        'centers': centers,
+        'selected_center': center_id,
         # Metrics
         'total_revenue': total_revenue,
         'total_orders': total_orders,
@@ -147,6 +158,7 @@ def order_reports(request):
     date_to = request.GET.get('date_to')
     branch_id = request.GET.get('branch')
     status_filter = request.GET.get('status')
+    center_id = request.GET.get('center')
     
     today = timezone.now()
     if not date_from:
@@ -164,6 +176,14 @@ def order_reports(request):
     )
     
     branches = get_user_branches(request.user)
+    
+    # Center filter for superuser
+    centers = None
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_id:
+            orders = orders.filter(branch__center_id=center_id)
+            branches = branches.filter(center_id=center_id)
     
     if branch_id:
         orders = orders.filter(branch_id=branch_id)
@@ -226,6 +246,8 @@ def order_reports(request):
         'selected_branch': branch_id,
         'selected_status': status_filter,
         'status_choices': Order.STATUS_CHOICES,
+        'centers': centers,
+        'selected_center': center_id,
         # Metrics
         'total_orders': total_orders,
         'completed': completed,
@@ -252,6 +274,7 @@ def staff_performance(request):
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
     branch_id = request.GET.get('branch')
+    center_id = request.GET.get('center')
     
     today = timezone.now()
     if not date_from:
@@ -262,6 +285,14 @@ def staff_performance(request):
     # Get orders and branches based on user role
     all_orders = get_user_orders(request.user)
     branches = get_user_branches(request.user)
+    
+    # Center filter for superuser
+    centers = None
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_id:
+            all_orders = all_orders.filter(branch__center_id=center_id)
+            branches = branches.filter(center_id=center_id)
     
     # Filter orders by date and branch
     orders = all_orders.filter(
@@ -278,6 +309,8 @@ def staff_performance(request):
     # Get staff members based on permissions
     if request.user.is_superuser:
         staff_members = AdminUser.objects.filter(is_active=True)
+        if center_id:
+            staff_members = staff_members.filter(branch__center_id=center_id)
     elif hasattr(request, 'admin_profile') and request.admin_profile:
         if request.admin_profile.is_owner:
             staff_members = AdminUser.objects.filter(
@@ -311,6 +344,7 @@ def staff_performance(request):
         staff_data.append({
             'id': staff.id,
             'name': staff.user.get_full_name() or staff.user.username,
+            'center': staff.branch.center.name if staff.branch and staff.branch.center else 'N/A',
             'branch': staff.branch.name if staff.branch else 'N/A',
             'role': staff.role.name if staff.role else 'Staff',
             'total_assigned': total_assigned,
@@ -338,6 +372,8 @@ def staff_performance(request):
         'date_to': date_to,
         'branches': branches,
         'selected_branch': branch_id,
+        'centers': centers,
+        'selected_center': center_id,
         # Staff data
         'staff_data': staff_data,
         'top_performers': top_performers,
@@ -354,6 +390,7 @@ def branch_comparison(request):
     # Date filters
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
+    center_id = request.GET.get('center')
     
     today = timezone.now()
     if not date_from:
@@ -364,6 +401,14 @@ def branch_comparison(request):
     # Get branches based on user role
     branches = get_user_branches(request.user)
     all_orders = get_user_orders(request.user)
+    
+    # Center filter for superuser
+    centers = None
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_id:
+            branches = branches.filter(center_id=center_id)
+            all_orders = all_orders.filter(branch__center_id=center_id)
     
     orders = all_orders.filter(
         created_at__date__gte=date_from,
@@ -418,6 +463,8 @@ def branch_comparison(request):
         # Filters
         'date_from': date_from,
         'date_to': date_to,
+        'centers': centers,
+        'selected_center': center_id,
         # Data
         'branch_data': branch_data,
         # Chart data
@@ -439,6 +486,7 @@ def customer_analytics(request):
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
     branch_id = request.GET.get('branch')
+    center_id = request.GET.get('center')
     
     today = timezone.now()
     if not date_from:
@@ -450,6 +498,17 @@ def customer_analytics(request):
     customers = get_user_customers(request.user)
     orders = get_user_orders(request.user)
     branches = get_user_branches(request.user)
+    
+    # Center filter for superuser
+    centers = None
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_id:
+            # Filter customers who have orders in branches of this center
+            customer_ids = orders.filter(branch__center_id=center_id).values_list('customer_id', flat=True).distinct()
+            customers = customers.filter(id__in=customer_ids)
+            orders = orders.filter(branch__center_id=center_id)
+            branches = branches.filter(center_id=center_id)
     
     if branch_id:
         customers = customers.filter(branch_id=branch_id)
@@ -515,6 +574,8 @@ def customer_analytics(request):
         'date_to': date_to,
         'branches': branches,
         'selected_branch': branch_id,
+        'centers': centers,
+        'selected_center': center_id,
         # Metrics
         'total_customers': total_customers,
         'active_customers': active_customers,

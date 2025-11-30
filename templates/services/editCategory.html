@@ -22,6 +22,18 @@
                     {% csrf_token %}
                     
                     <div class="mb-20">
+                        <label for="branch" class="form-label fw-semibold text-primary-light text-sm mb-8">
+                            <span data-i18n="form.branch">Branch</span> <span class="text-danger-600">*</span>
+                        </label>
+                        <select class="form-control radius-8 form-select" id="branch" name="branch" required>
+                            <option value="">Select Branch</option>
+                            {% for branch in branches %}
+                            <option value="{{ branch.id }}" {% if category.branch_id == branch.id %}selected{% endif %}>{{ branch.center.name }} - {{ branch.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-20">
                         <label for="name" class="form-label fw-semibold text-primary-light text-sm mb-8">
                             <span data-i18n="form.categoryName">Category Name</span> <span class="text-danger-600">*</span>
                         </label>

@@ -19,7 +19,7 @@
         <div class="row gy-4">
             {% for branch in branches %}
             <div class="col-xxl-4 col-md-6">
-                <div class="card border radius-12 h-100">
+                <div class="card border radius-12 h-100 hover-border-primary-600 transition-all" style="cursor: pointer;" onclick="window.location.href='{% url 'branch_detail' branch.id %}'">
                     <div class="card-body p-20">
                         <div class="d-flex align-items-start justify-content-between mb-16">
                             <div class="d-flex align-items-center gap-12">
@@ -27,7 +27,7 @@
                                     <iconify-icon icon="mdi:office-building" class="text-primary-600 text-xl"></iconify-icon>
                                 </div>
                                 <div>
-                                    <h6 class="text-md fw-semibold mb-4">{{ branch.name }}</h6>
+                                    <a href="{% url 'branch_detail' branch.id %}" class="text-md fw-semibold mb-4 text-primary-light text-decoration-none d-block">{{ branch.name }}</a>
                                     <span class="text-sm text-secondary-light">{{ branch.center.name }}</span>
                                 </div>
                             </div>
@@ -40,13 +40,13 @@
                             {% if branch.region %}
                             <div class="d-flex align-items-center gap-8 mb-8">
                                 <iconify-icon icon="mdi:map-marker" class="text-secondary-light"></iconify-icon>
-                                <span class="text-sm">{{ branch.region.name }}{% if branch.district %}, {{ branch.district.name }}{% endif %}</span>
+                                <span class="text-sm text-secondary-light">{{ branch.region.name }}{% if branch.district %}, {{ branch.district.name }}{% endif %}</span>
                             </div>
                             {% endif %}
                             {% if branch.phone %}
                             <div class="d-flex align-items-center gap-8 mb-8">
                                 <iconify-icon icon="mdi:phone" class="text-secondary-light"></iconify-icon>
-                                <span class="text-sm">{{ branch.phone }}</span>
+                                <span class="text-sm text-secondary-light">{{ branch.phone }}</span>
                             </div>
                             {% endif %}
                             {% if branch.address %}
@@ -75,11 +75,11 @@
                             {% if permissions.can_manage_branches %}
                             <div class="d-flex gap-8">
                                 {% if branch.location_url %}
-                                <a href="{{ branch.location_url }}" target="_blank" class="bg-info-focus text-info-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="View on Map">
+                                <a href="{{ branch.location_url }}" target="_blank" class="bg-info-focus text-info-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="View on Map" onclick="event.stopPropagation();">
                                     <iconify-icon icon="mdi:map" class="icon"></iconify-icon>
                                 </a>
                                 {% endif %}
-                                <a href="{% url 'branch_edit' branch.id %}" class="bg-primary-focus text-primary-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="Edit">
+                                <a href="{% url 'branch_edit' branch.id %}" class="bg-primary-focus text-primary-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="Edit" onclick="event.stopPropagation();">
                                     <iconify-icon icon="lucide:edit" class="icon"></iconify-icon>
                                 </a>
                             </div>

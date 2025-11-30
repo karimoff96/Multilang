@@ -1,0 +1,383 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Branch Header -->
+<div class="card radius-12 mb-24">
+    <div class="card-body p-24">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-16">
+            <div class="d-flex align-items-center gap-16">
+                <div class="w-80-px h-80-px rounded-12 {% if branch.is_main %}bg-warning-100{% else %}bg-primary-100{% endif %} d-flex justify-content-center align-items-center flex-shrink-0">
+                    <iconify-icon icon="{% if branch.is_main %}mdi:star{% else %}mdi:source-branch{% endif %}" class="{% if branch.is_main %}text-warning-600{% else %}text-primary-600{% endif %} text-4xl"></iconify-icon>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-8 mb-4">
+                        <h4 class="text-xl fw-semibold mb-0">{{ branch.name }}</h4>
+                        {% if branch.is_main %}
+                        <span class="badge bg-warning-focus text-warning-600">Main Branch</span>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex align-items-center gap-8 text-secondary-light">
+                        <iconify-icon icon="mdi:domain" class="text-lg"></iconify-icon>
+                        <a href="{% url 'center_detail' branch.center.id %}" class="text-primary-600">{{ branch.center.name }}</a>
+                    </div>
+                    {% if branch.region %}
+                    <div class="d-flex align-items-center gap-8 text-secondary-light mt-4">
+                        <iconify-icon icon="mdi:map-marker" class="text-lg"></iconify-icon>
+                        <span>{{ branch.region.name }}{% if branch.district %}, {{ branch.district.name }}{% endif %}</span>
+                    </div>
+                    {% endif %}
+                    {% if branch.phone %}
+                    <div class="d-flex align-items-center gap-8 text-secondary-light mt-4">
+                        <iconify-icon icon="mdi:phone" class="text-lg"></iconify-icon>
+                        <span>{{ branch.phone }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="d-flex gap-8">
+                <span class="{% if branch.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-16 py-8 radius-8 text-sm fw-medium">
+                    {% if branch.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+                <a href="{% url 'branch_edit' branch.id %}" class="btn btn-outline-primary-600 btn-sm px-16 py-8 radius-8">
+                    <iconify-icon icon="lucide:edit" class="me-4"></iconify-icon>
+                    Edit
+                </a>
+                {% if branch.location_url %}
+                <a href="{{ branch.location_url }}" target="_blank" class="btn btn-outline-info-600 btn-sm px-16 py-8 radius-8">
+                    <iconify-icon icon="mdi:map" class="me-4"></iconify-icon>
+                    Map
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row gy-4 mb-24">
+    <div class="col-xxl-3 col-lg-6 col-sm-6">
+        <a href="#staff-section" class="card p-20 radius-12 h-100 text-decoration-none hover-border-success-600 transition-all">
+            <div class="d-flex align-items-center gap-12">
+                <div class="w-56-px h-56-px bg-success-100 rounded-8 d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="mdi:account-group" class="text-success-600 text-2xl"></iconify-icon>
+                </div>
+                <div>
+                    <h5 class="text-xl fw-semibold mb-0">{{ total_staff }}</h5>
+                    <span class="text-sm text-secondary-light">Staff Members</span>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xxl-3 col-lg-6 col-sm-6">
+        <a href="#categories-section" class="card p-20 radius-12 h-100 text-decoration-none hover-border-warning-600 transition-all">
+            <div class="d-flex align-items-center gap-12">
+                <div class="w-56-px h-56-px bg-warning-100 rounded-8 d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="mdi:shape" class="text-warning-600 text-2xl"></iconify-icon>
+                </div>
+                <div>
+                    <h5 class="text-xl fw-semibold mb-0">{{ total_categories }}</h5>
+                    <span class="text-sm text-secondary-light">Categories</span>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xxl-3 col-lg-6 col-sm-6">
+        <a href="#products-section" class="card p-20 radius-12 h-100 text-decoration-none hover-border-info-600 transition-all">
+            <div class="d-flex align-items-center gap-12">
+                <div class="w-56-px h-56-px bg-info-100 rounded-8 d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="mdi:package-variant" class="text-info-600 text-2xl"></iconify-icon>
+                </div>
+                <div>
+                    <h5 class="text-xl fw-semibold mb-0">{{ total_products }}</h5>
+                    <span class="text-sm text-secondary-light">Products</span>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xxl-3 col-lg-6 col-sm-6">
+        <a href="#orders-section" class="card p-20 radius-12 h-100 text-decoration-none hover-border-cyan-600 transition-all">
+            <div class="d-flex align-items-center gap-12">
+                <div class="w-56-px h-56-px bg-cyan-100 rounded-8 d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="mdi:clipboard-list" class="text-cyan-600 text-2xl"></iconify-icon>
+                </div>
+                <div>
+                    <h5 class="text-xl fw-semibold mb-0">{{ total_orders }}</h5>
+                    <span class="text-sm text-secondary-light">Total Orders</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row gy-4">
+    <!-- Staff Section -->
+    <div id="staff-section" class="col-xxl-6">
+        <div class="card radius-12 h-100">
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
+                <h6 class="text-lg fw-semibold mb-0">
+                    <iconify-icon icon="mdi:account-group" class="me-8 text-success-600"></iconify-icon>
+                    Staff ({{ total_staff }})
+                </h6>
+                <a href="{% url 'staff_create' %}" class="btn btn-primary btn-sm px-12 py-6 radius-8">
+                    <iconify-icon icon="mdi:plus"></iconify-icon> Add
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base">Name</th>
+                                <th scope="col" class="bg-base">Role</th>
+                                <th scope="col" class="bg-base">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member in staff %}
+                            <tr>
+                                <td class="bg-success-focus">
+                                    <div class="d-flex align-items-center">
+                                        <div class="w-40-px h-40-px rounded-circle bg-success-100 d-flex justify-content-center align-items-center me-12 flex-shrink-0 overflow-hidden">
+                                            <iconify-icon icon="mdi:account" class="text-success-600 text-xl"></iconify-icon>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="text-md mb-0 fw-medium">{{ member.user.get_full_name|default:member.user.username }}</h6>
+                                            <small class="text-secondary-light">{{ member.user.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="bg-success-focus">
+                                    <span class="badge bg-primary-focus text-primary-600">{{ member.role.name }}</span>
+                                </td>
+                                <td class="bg-success-focus">
+                                    <span class="{% if member.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-12 py-4 radius-4 text-xs fw-medium">
+                                        {% if member.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center py-24 text-secondary-light bg-base">
+                                    <iconify-icon icon="mdi:account-group" class="text-3xl mb-8 d-block"></iconify-icon>
+                                    No staff members
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Categories Section -->
+    <div id="categories-section" class="col-xxl-6">
+        <div class="card radius-12 h-100">
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
+                <h6 class="text-lg fw-semibold mb-0">
+                    <iconify-icon icon="mdi:shape" class="me-8 text-warning-600"></iconify-icon>
+                    Categories ({{ total_categories }})
+                </h6>
+                <a href="{% url 'addCategory' %}" class="btn btn-primary btn-sm px-12 py-6 radius-8">
+                    <iconify-icon icon="mdi:plus"></iconify-icon> Add
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base">Category</th>
+                                <th scope="col" class="bg-base">Products</th>
+                                <th scope="col" class="bg-base">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in categories %}
+                            <tr>
+                                <td class="bg-warning-focus">
+                                    <a href="{% url 'categoryDetail' category.id %}" class="fw-medium text-primary-600">{{ category.name }}</a>
+                                </td>
+                                <td class="bg-warning-focus">
+                                    <span class="badge bg-info-focus text-info-600">{{ category.product_count }} products</span>
+                                </td>
+                                <td class="bg-warning-focus">
+                                    <span class="{% if category.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-12 py-4 radius-4 text-xs fw-medium">
+                                        {% if category.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center py-24 text-secondary-light bg-base">
+                                    <iconify-icon icon="mdi:shape" class="text-3xl mb-8 d-block"></iconify-icon>
+                                    No categories
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Products Section -->
+<div id="products-section" class="card radius-12 mt-24">
+    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
+        <h6 class="text-lg fw-semibold mb-0">
+            <iconify-icon icon="mdi:package-variant" class="me-8 text-info-600"></iconify-icon>
+            Products ({{ total_products }})
+        </h6>
+        <a href="{% url 'productList' %}" class="text-primary-600 text-sm">View All</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table colored-row-table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col" class="bg-base">Product</th>
+                        <th scope="col" class="bg-base">Category</th>
+                        <th scope="col" class="bg-base">Regular Price</th>
+                        <th scope="col" class="bg-base">Agency Price</th>
+                        <th scope="col" class="bg-base">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td class="bg-info-focus">
+                            <a href="{% url 'productDetail' product.id %}" class="fw-medium text-primary-600">{{ product.name }}</a>
+                        </td>
+                        <td class="bg-info-focus">
+                            <a href="{% url 'categoryDetail' product.category.id %}" class="text-primary-600">{{ product.category.name }}</a>
+                        </td>
+                        <td class="bg-info-focus">{{ product.ordinary_first_page_price|floatformat:0 }} UZS</td>
+                        <td class="bg-info-focus">{{ product.agency_first_page_price|floatformat:0 }} UZS</td>
+                        <td class="bg-info-focus">
+                            <span class="{% if product.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-12 py-4 radius-4 text-xs fw-medium">
+                                {% if product.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-24 text-secondary-light bg-base">No products yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders Section -->
+<div id="orders-section" class="card radius-12 mt-24">
+    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
+        <h6 class="text-lg fw-semibold mb-0">
+            <iconify-icon icon="mdi:clipboard-list" class="me-8 text-cyan-600"></iconify-icon>
+            Recent Orders
+        </h6>
+        <a href="{% url 'ordersList' %}" class="text-primary-600 text-sm">View All</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table colored-row-table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col" class="bg-base">Order ID</th>
+                        <th scope="col" class="bg-base">Customer</th>
+                        <th scope="col" class="bg-base">Product</th>
+                        <th scope="col" class="bg-base">Assigned To</th>
+                        <th scope="col" class="bg-base">Status</th>
+                        <th scope="col" class="bg-base">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td class="bg-cyan-focus">
+                            <a href="{% url 'orderDetail' order.id %}" class="fw-medium text-primary-600">#{{ order.id }}</a>
+                        </td>
+                        <td class="bg-cyan-focus">{{ order.bot_user.full_name|default:order.bot_user.user_id }}</td>
+                        <td class="bg-cyan-focus">{{ order.product.name }}</td>
+                        <td class="bg-cyan-focus">
+                            {% if order.assigned_to %}
+                            {{ order.assigned_to.user.get_full_name|default:order.assigned_to.user.username }}
+                            {% else %}
+                            <span class="text-warning-600">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td class="bg-cyan-focus">
+                            <span class="badge 
+                                {% if order.status == 'completed' %}bg-success-focus text-success-main
+                                {% elif order.status == 'cancelled' %}bg-danger-focus text-danger-main
+                                {% elif order.status == 'in_progress' %}bg-info-focus text-info-main
+                                {% else %}bg-warning-focus text-warning-main{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="bg-cyan-focus text-secondary-light">{{ order.created_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-24 text-secondary-light bg-base">No orders yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Customers Section -->
+<div class="card radius-12 mt-24">
+    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
+        <h6 class="text-lg fw-semibold mb-0">
+            <iconify-icon icon="mdi:account-multiple" class="me-8 text-purple-600"></iconify-icon>
+            Recent Customers ({{ total_customers }} total)
+        </h6>
+        <a href="{% url 'usersList' %}" class="text-primary-600 text-sm">View All</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table colored-row-table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col" class="bg-base">Customer</th>
+                        <th scope="col" class="bg-base">Phone</th>
+                        <th scope="col" class="bg-base">Type</th>
+                        <th scope="col" class="bg-base">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td class="bg-purple-focus">
+                            <a href="{% url 'userDetail' %}?id={{ customer.id }}" class="fw-medium text-primary-600">
+                                {{ customer.full_name|default:customer.user_id }}
+                            </a>
+                        </td>
+                        <td class="bg-purple-focus">{{ customer.phone_number|default:"-" }}</td>
+                        <td class="bg-purple-focus">
+                            {% if customer.is_agency %}
+                            <span class="badge bg-warning-focus text-warning-600">Agency</span>
+                            {% else %}
+                            <span class="badge bg-primary-focus text-primary-600">Regular</span>
+                            {% endif %}
+                        </td>
+                        <td class="bg-purple-focus text-secondary-light">{{ customer.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-24 text-secondary-light bg-base">No customers yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -301,3 +301,25 @@ def get_user_staff(user):
         )
     
     return AdminUser.objects.none()
+
+
+def get_user_categories(user):
+    """Get all categories accessible by this user."""
+    from services.models import Category
+    
+    if user.is_superuser:
+        return Category.objects.all()
+    
+    accessible_branches = get_user_branches(user)
+    return Category.objects.filter(branch__in=accessible_branches)
+
+
+def get_user_products(user):
+    """Get all products accessible by this user."""
+    from services.models import Product
+    
+    if user.is_superuser:
+        return Product.objects.all()
+    
+    accessible_branches = get_user_branches(user)
+    return Product.objects.filter(category__branch__in=accessible_branches)

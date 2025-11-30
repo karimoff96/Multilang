@@ -207,9 +207,21 @@ def addUser(request):
 def usersList(request):
     """List all BotUsers with search and filter - RBAC filtered"""
     from organizations.rbac import get_user_customers
+    from organizations.models import TranslationCenter
     
-    # Use RBAC-filtered customers
-    users = get_user_customers(request.user).order_by('-created_at')
+    # Use RBAC-filtered customers with related branch/center data
+    users = get_user_customers(request.user).select_related(
+        'branch', 'branch__center', 'agency'
+    ).order_by('-created_at')
+    
+    # Center filter for superuser
+    centers = None
+    center_filter = request.GET.get('center', '')
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_filter:
+            # Filter users by branch center
+            users = users.filter(branch__center_id=center_filter)
     
     # Search functionality
     search_query = request.GET.get('search', '')
@@ -228,6 +240,13 @@ def usersList(request):
         users = users.filter(is_active=False)
     elif status_filter == 'agency':
         users = users.filter(is_agency=True)
+    
+    # Branch filter for owners
+    from organizations.rbac import get_user_branches
+    branches = get_user_branches(request.user)
+    branch_filter = request.GET.get('branch', '')
+    if branch_filter:
+        users = users.filter(branch_id=branch_filter)
     
     # Pagination
     per_page = request.GET.get('per_page', 10)
@@ -249,6 +268,10 @@ def usersList(request):
         "status_filter": status_filter,
         "per_page": per_page,
         "total_users": paginator.count,
+        "centers": centers,
+        "center_filter": center_filter,
+        "branches": branches,
+        "branch_filter": branch_filter,
     }
     return render(request, "users/usersList.html", context)
 

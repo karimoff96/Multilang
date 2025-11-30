@@ -4,6 +4,8 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from .models import Category, Product, Language
+from organizations.rbac import get_user_categories, get_user_products, get_user_branches
+from organizations.models import TranslationCenter
 
 
 # ============ Category Views ============
@@ -11,9 +13,29 @@ from .models import Category, Product, Language
 @login_required(login_url='admin_login')
 def categoryList(request):
     """List all categories with search and filter"""
-    categories = Category.objects.all().annotate(
+    # Use RBAC-filtered categories
+    categories = get_user_categories(request.user).select_related(
+        'branch', 'branch__center'
+    ).annotate(
         product_count=Count('product')
     ).order_by('-created_at')
+    
+    # Get accessible branches for filter dropdown
+    branches = get_user_branches(request.user).select_related('center')
+    
+    # Center filter (superuser only)
+    centers = None
+    center_filter = request.GET.get('center', '')
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_filter:
+            categories = categories.filter(branch__center_id=center_filter)
+            branches = branches.filter(center_id=center_filter)
+    
+    # Branch filter
+    branch_filter = request.GET.get('branch', '')
+    if branch_filter:
+        categories = categories.filter(branch_id=branch_filter)
     
     # Search functionality
     search_query = request.GET.get('search', '')
@@ -45,6 +67,10 @@ def categoryList(request):
         "title": "Categories",
         "subTitle": "Categories",
         "categories": page_obj,
+        "branches": branches,
+        "branch_filter": branch_filter,
+        "centers": centers,
+        "center_filter": center_filter,
         "search_query": search_query,
         "status_filter": status_filter,
         "per_page": per_page,
@@ -56,7 +82,9 @@ def categoryList(request):
 @login_required(login_url='admin_login')
 def categoryDetail(request, category_id):
     """View category details with its products"""
-    category = get_object_or_404(Category, id=category_id)
+    # Get category with RBAC check
+    accessible_categories = get_user_categories(request.user)
+    category = get_object_or_404(accessible_categories.select_related('branch', 'branch__center'), id=category_id)
     products = Product.objects.filter(category=category).order_by('-created_at')
     
     context = {
@@ -73,9 +101,11 @@ def categoryDetail(request, category_id):
 def addCategory(request):
     """Add a new category"""
     languages = Language.objects.all()
+    branches = get_user_branches(request.user).select_related('center')
     
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
+        branch_id = request.POST.get('branch', '')
         description = request.POST.get('description', '').strip()
         charging = request.POST.get('charging', 'dynamic')
         is_active = request.POST.get('is_active') == 'on'
@@ -83,12 +113,17 @@ def addCategory(request):
         
         if not name:
             messages.error(request, 'Category name is required.')
-        elif Category.objects.filter(name__iexact=name).exists():
-            messages.error(request, 'A category with this name already exists.')
+        elif not branch_id:
+            messages.error(request, 'Branch is required.')
+        elif Category.objects.filter(name__iexact=name, branch_id=branch_id).exists():
+            messages.error(request, 'A category with this name already exists for this branch.')
         else:
             try:
+                # Verify branch access
+                branch = get_object_or_404(branches, id=branch_id)
                 category = Category.objects.create(
                     name=name,
+                    branch=branch,
                     description=description,
                     charging=charging,
                     is_active=is_active,
@@ -106,6 +141,7 @@ def addCategory(request):
         "title": "Add Category",
         "subTitle": "Add Category",
         "languages": languages,
+        "branches": branches,
         "charge_types": Category.CHARGE_TYPE,
     }
     return render(request, "services/addCategory.html", context)
@@ -114,11 +150,15 @@ def addCategory(request):
 @login_required(login_url='admin_login')
 def editCategory(request, category_id):
     """Edit an existing category"""
-    category = get_object_or_404(Category, id=category_id)
+    # Get category with RBAC check
+    accessible_categories = get_user_categories(request.user)
+    category = get_object_or_404(accessible_categories.select_related('branch', 'branch__center'), id=category_id)
     languages = Language.objects.all()
+    branches = get_user_branches(request.user).select_related('center')
     
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
+        branch_id = request.POST.get('branch', '')
         description = request.POST.get('description', '').strip()
         charging = request.POST.get('charging', 'dynamic')
         is_active = request.POST.get('is_active') == 'on'
@@ -126,11 +166,16 @@ def editCategory(request, category_id):
         
         if not name:
             messages.error(request, 'Category name is required.')
-        elif Category.objects.filter(name__iexact=name).exclude(id=category_id).exists():
-            messages.error(request, 'A category with this name already exists.')
+        elif not branch_id:
+            messages.error(request, 'Branch is required.')
+        elif Category.objects.filter(name__iexact=name, branch_id=branch_id).exclude(id=category_id).exists():
+            messages.error(request, 'A category with this name already exists for this branch.')
         else:
             try:
+                # Verify branch access
+                branch = get_object_or_404(branches, id=branch_id)
                 category.name = name
+                category.branch = branch
                 category.description = description
                 category.charging = charging
                 category.is_active = is_active
@@ -149,6 +194,7 @@ def editCategory(request, category_id):
         "subTitle": "Edit Category",
         "category": category,
         "languages": languages,
+        "branches": branches,
         "charge_types": Category.CHARGE_TYPE,
     }
     return render(request, "services/editCategory.html", context)
@@ -157,7 +203,9 @@ def editCategory(request, category_id):
 @login_required(login_url='admin_login')
 def deleteCategory(request, category_id):
     """Delete a category"""
-    category = get_object_or_404(Category, id=category_id)
+    # Get category with RBAC check
+    accessible_categories = get_user_categories(request.user)
+    category = get_object_or_404(accessible_categories, id=category_id)
     
     if request.method == 'POST':
         name = category.name
@@ -172,7 +220,27 @@ def deleteCategory(request, category_id):
 @login_required(login_url='admin_login')
 def productList(request):
     """List all products with search and filter"""
-    products = Product.objects.select_related('category').all().order_by('-created_at')
+    # Use RBAC-filtered products
+    products = get_user_products(request.user).select_related(
+        'category', 'category__branch', 'category__branch__center'
+    ).order_by('-created_at')
+    
+    # Get accessible branches for filter dropdown
+    branches = get_user_branches(request.user).select_related('center')
+    
+    # Center filter (superuser only)
+    centers = None
+    center_filter = request.GET.get('center', '')
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_filter:
+            products = products.filter(category__branch__center_id=center_filter)
+            branches = branches.filter(center_id=center_filter)
+    
+    # Branch filter
+    branch_filter = request.GET.get('branch', '')
+    if branch_filter:
+        products = products.filter(category__branch_id=branch_filter)
     
     # Search functionality
     search_query = request.GET.get('search', '')
@@ -206,14 +274,18 @@ def productList(request):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     
-    # Get all categories for filter dropdown
-    categories = Category.objects.filter(is_active=True).order_by('name')
+    # Get RBAC-filtered categories for filter dropdown
+    categories = get_user_categories(request.user).filter(is_active=True).order_by('name')
     
     context = {
         "title": "Products",
         "subTitle": "Products",
         "products": page_obj,
         "categories": categories,
+        "branches": branches,
+        "branch_filter": branch_filter,
+        "centers": centers,
+        "center_filter": center_filter,
         "search_query": search_query,
         "category_filter": category_filter,
         "status_filter": status_filter,
@@ -226,7 +298,12 @@ def productList(request):
 @login_required(login_url='admin_login')
 def productDetail(request, product_id):
     """View product details"""
-    product = get_object_or_404(Product.objects.select_related('category'), id=product_id)
+    # Get product with RBAC check
+    accessible_products = get_user_products(request.user)
+    product = get_object_or_404(
+        accessible_products.select_related('category', 'category__branch', 'category__branch__center'),
+        id=product_id
+    )
     
     context = {
         "title": f"Product: {product.name}",
@@ -239,7 +316,10 @@ def productDetail(request, product_id):
 @login_required(login_url='admin_login')
 def addProduct(request):
     """Add a new product"""
-    categories = Category.objects.filter(is_active=True).order_by('name')
+    # Get RBAC-filtered categories
+    categories = get_user_categories(request.user).filter(is_active=True).select_related(
+        'branch', 'branch__center'
+    ).order_by('name')
     
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
@@ -295,8 +375,16 @@ def addProduct(request):
 @login_required(login_url='admin_login')
 def editProduct(request, product_id):
     """Edit an existing product"""
-    product = get_object_or_404(Product, id=product_id)
-    categories = Category.objects.filter(is_active=True).order_by('name')
+    # Get product with RBAC check
+    accessible_products = get_user_products(request.user)
+    product = get_object_or_404(
+        accessible_products.select_related('category', 'category__branch', 'category__branch__center'),
+        id=product_id
+    )
+    # Get RBAC-filtered categories
+    categories = get_user_categories(request.user).filter(is_active=True).select_related(
+        'branch', 'branch__center'
+    ).order_by('name')
     
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
@@ -353,7 +441,9 @@ def editProduct(request, product_id):
 @login_required(login_url='admin_login')
 def deleteProduct(request, product_id):
     """Delete a product"""
-    product = get_object_or_404(Product, id=product_id)
+    # Get product with RBAC check
+    accessible_products = get_user_products(request.user)
+    product = get_object_or_404(accessible_products, id=product_id)
     
     if request.method == 'POST':
         name = product.name

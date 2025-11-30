@@ -16,6 +16,22 @@
                     <input type="text" class="bg-base h-40-px w-auto" name="search" data-i18n-placeholder="common.search" placeholder="Search" value="{{ search_query }}">
                     <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
                 </div>
+                {% if user.is_superuser and centers %}
+                <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Centers</option>
+                    {% for center in centers %}
+                    <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+                {% if branches %}
+                <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Branches</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
                 <select name="category" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
                     <option value="" data-i18n="common.allCategories">All Categories</option>
                     {% for cat in categories %}
@@ -41,6 +57,12 @@
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col" data-i18n="table.product">Product</th>
+                        {% if user.is_superuser %}
+                        <th scope="col">Center</th>
+                        {% endif %}
+                        {% if user.is_superuser or is_owner %}
+                        <th scope="col">Branch</th>
+                        {% endif %}
                         <th scope="col" data-i18n="table.category">Category</th>
                         <th scope="col" data-i18n="table.regularPrice">Regular Price</th>
                         <th scope="col" data-i18n="table.agencyPrice">Agency Price</th>
@@ -66,6 +88,16 @@
                                 </div>
                             </div>
                         </td>
+                        {% if user.is_superuser %}
+                        <td>
+                            <a href="{% url 'center_detail' product.center.id %}" class="badge bg-info-focus text-info-600 text-decoration-none">{{ product.center.name }}</a>
+                        </td>
+                        {% endif %}
+                        {% if user.is_superuser or is_owner %}
+                        <td>
+                            <a href="{% url 'branch_detail' product.branch.id %}" class="badge bg-primary-focus text-primary-600 text-decoration-none">{{ product.branch.name }}</a>
+                        </td>
+                        {% endif %}
                         <td>
                             <a href="{% url 'categoryDetail' product.category.id %}" class="text-primary-600">{{ product.category.name }}</a>
                         </td>
@@ -130,7 +162,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center py-4">
+                        <td colspan="{% if user.is_superuser %}10{% elif is_owner %}9{% else %}8{% endif %}" class="text-center py-4">
                             <div class="text-secondary-light">
                                 <iconify-icon icon="solar:box-linear" class="text-4xl mb-2"></iconify-icon>
                                 <p class="mb-0">No products found</p>

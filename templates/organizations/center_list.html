@@ -17,7 +17,7 @@
         <div class="row gy-4">
             {% for center in centers %}
             <div class="col-xxl-4 col-md-6">
-                <div class="card border radius-12 h-100">
+                <div class="card border radius-12 h-100 hover-border-primary-600 transition-all" style="cursor: pointer;" onclick="window.location.href='{% url 'center_detail' center.id %}'">
                     <div class="card-body p-20">
                         <div class="d-flex align-items-start justify-content-between mb-16">
                             <div class="d-flex align-items-center gap-12">
@@ -29,7 +29,7 @@
                                 </div>
                                 {% endif %}
                                 <div>
-                                    <h6 class="text-lg fw-semibold mb-4">{{ center.name }}</h6>
+                                    <a href="{% url 'center_detail' center.id %}" class="text-lg fw-semibold mb-4 text-primary-light text-decoration-none d-block">{{ center.name }}</a>
                                     <span class="text-sm text-secondary-light">Owner: {{ center.owner.get_full_name|default:center.owner.username }}</span>
                                 </div>
                             </div>
@@ -39,13 +39,13 @@
                             {% if center.phone %}
                             <div class="d-flex align-items-center gap-8 mb-8">
                                 <iconify-icon icon="mdi:phone" class="text-secondary-light"></iconify-icon>
-                                <span class="text-sm">{{ center.phone }}</span>
+                                <span class="text-sm text-secondary-light">{{ center.phone }}</span>
                             </div>
                             {% endif %}
                             {% if center.email %}
                             <div class="d-flex align-items-center gap-8 mb-8">
                                 <iconify-icon icon="mdi:email" class="text-secondary-light"></iconify-icon>
-                                <span class="text-sm">{{ center.email }}</span>
+                                <span class="text-sm text-secondary-light">{{ center.email }}</span>
                             </div>
                             {% endif %}
                             {% if center.address %}
@@ -68,15 +68,18 @@
                                 {% if center.is_active %}Active{% else %}Inactive{% endif %}
                             </span>
                             <div class="d-flex gap-8">
-                                <a href="{% url 'branch_create_for_center' center.id %}" class="bg-success-focus text-success-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="Add Branch">
+                                <span class="bg-info-focus text-info-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="View Details">
+                                    <iconify-icon icon="mdi:eye" class="icon"></iconify-icon>
+                                </span>
+                                <a href="{% url 'branch_create_for_center' center.id %}" class="bg-success-focus text-success-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="Add Branch" onclick="event.stopPropagation();">
                                     <iconify-icon icon="mdi:plus" class="icon"></iconify-icon>
                                 </a>
                                 {% if center.location_url %}
-                                <a href="{{ center.location_url }}" target="_blank" class="bg-info-focus text-info-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="View on Map">
+                                <a href="{{ center.location_url }}" target="_blank" class="bg-cyan-focus text-cyan-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="View on Map" onclick="event.stopPropagation();">
                                     <iconify-icon icon="mdi:map" class="icon"></iconify-icon>
                                 </a>
                                 {% endif %}
-                                <a href="{% url 'center_edit' center.id %}" class="bg-primary-focus text-primary-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="Edit">
+                                <a href="{% url 'center_edit' center.id %}" class="bg-primary-focus text-primary-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="Edit" onclick="event.stopPropagation();">
                                     <iconify-icon icon="lucide:edit" class="icon"></iconify-icon>
                                 </a>
                             </div>

@@ -24,6 +24,22 @@
                     <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %} data-i18n="common.inactive">Inactive</option>
                     <option value="agency" {% if status_filter == 'agency' %}selected{% endif %} data-i18n="common.agencies">Agencies</option>
                 </select>
+                {% if user.is_superuser and centers %}
+                <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Centers</option>
+                    {% for center in centers %}
+                    <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+                {% if branches %}
+                <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Branches</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
             </form>
         </div>
         <a href="{% url 'addUser' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
@@ -45,6 +61,12 @@
                             </div>
                         </th>
                         <th scope="col" data-i18n="table.joinDate">Join Date</th>
+                        {% if user.is_superuser %}
+                        <th scope="col" data-i18n="table.center">Center</th>
+                        {% endif %}
+                        {% if user.is_superuser or is_owner %}
+                        <th scope="col" data-i18n="table.branch">Branch</th>
+                        {% endif %}
                         <th scope="col" data-i18n="table.name">Name</th>
                         <th scope="col" data-i18n="table.username">Username</th>
                         <th scope="col" data-i18n="table.phone">Phone</th>
@@ -55,7 +77,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for user in users %}
+                    {% for bot_user in users %}
                     <tr>
                         <td>
                             <div class="d-flex align-items-center gap-10">
@@ -65,45 +87,63 @@
                                 {{ forloop.counter }}
                             </div>
                         </td>
-                        <td>{{ user.created_at|date:"d M Y" }}</td>
+                        <td>{{ bot_user.created_at|date:"d M Y" }}</td>
+                        {% if user.is_superuser %}
+                        <td>
+                            {% if bot_user.branch and bot_user.branch.center %}
+                            <a href="{% url 'center_detail' bot_user.branch.center.id %}" class="text-md fw-medium text-primary-600">{{ bot_user.branch.center.name }}</a>
+                            {% else %}
+                            <span class="text-secondary-light">-</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                        {% if user.is_superuser or is_owner %}
+                        <td>
+                            {% if bot_user.branch %}
+                            <a href="{% url 'branch_detail' bot_user.branch.id %}" class="text-md fw-medium text-primary-600">{{ bot_user.branch.name }}</a>
+                            {% else %}
+                            <span class="text-secondary-light">-</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
                         <td>
                             <div class="d-flex align-items-center">
                                 <div class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden bg-primary-100 d-flex align-items-center justify-content-center">
-                                    <span class="text-primary-600 fw-semibold">{{ user.name|slice:":1"|upper }}</span>
+                                    <span class="text-primary-600 fw-semibold">{{ bot_user.name|slice:":1"|upper }}</span>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <span class="text-md mb-0 fw-medium text-secondary-light">{{ user.name }}</span>
+                                    <span class="text-md mb-0 fw-medium text-secondary-light">{{ bot_user.name }}</span>
                                 </div>
                             </div>
                         </td>
                         <td>
                             <span class="text-md mb-0 fw-normal text-secondary-light">
-                                {% if user.username %}@{{ user.username }}{% else %}<span class="text-muted">-</span>{% endif %}
+                                {% if bot_user.username %}@{{ bot_user.username }}{% else %}<span class="text-muted">-</span>{% endif %}
                             </span>
                         </td>
-                        <td>{{ user.phone }}</td>
+                        <td>{{ bot_user.phone }}</td>
                         <td>
-                            {% if user.language == 'uz' %}
+                            {% if bot_user.language == 'uz' %}
                                 <span class="badge bg-info-focus text-info-600">🇺🇿 Uzbek</span>
-                            {% elif user.language == 'ru' %}
+                            {% elif bot_user.language == 'ru' %}
                                 <span class="badge bg-danger-focus text-danger-600">🇷🇺 Russian</span>
-                            {% elif user.language == 'en' %}
+                            {% elif bot_user.language == 'en' %}
                                 <span class="badge bg-success-focus text-success-600">🇬🇧 English</span>
                             {% else %}
-                                <span class="badge bg-neutral-200 text-neutral-600">{{ user.language }}</span>
+                                <span class="badge bg-neutral-200 text-neutral-600">{{ bot_user.language }}</span>
                             {% endif %}
                         </td>
                         <td>
-                            {% if user.is_agency %}
+                            {% if bot_user.is_agency %}
                                 <span class="badge bg-warning-focus text-warning-600">Agency</span>
-                            {% elif user.agency %}
-                                <span class="text-sm text-secondary-light">{{ user.agency.name|truncatechars:15 }}</span>
+                            {% elif bot_user.agency %}
+                                <span class="text-sm text-secondary-light">{{ bot_user.agency.name|truncatechars:15 }}</span>
                             {% else %}
                                 <span class="bg-danger-200 text-danger-600 border border-danger-400 px-24 py-4 radius-4 fw-medium text-sm">No</span>
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            {% if user.is_active %}
+                            {% if bot_user.is_active %}
                                 <span class="bg-success-focus text-success-600 border border-success-main px-24 py-4 radius-4 fw-medium text-sm">Active</span>
                             {% else %}
                                 <span class="bg-neutral-200 text-neutral-600 border border-neutral-400 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
@@ -111,13 +151,13 @@
                         </td>
                         <td class="text-center">
                             <div class="d-flex align-items-center gap-10 justify-content-center">
-                                <a href="{% url 'userDetail' %}?id={{ user.id }}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
+                                <a href="{% url 'userDetail' %}?id={{ bot_user.id }}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
                                     <iconify-icon icon="majesticons:eye-line" class="icon text-xl"></iconify-icon>
                                 </a>
-                                <a href="{% url 'editUser' user.id %}" class="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
+                                <a href="{% url 'editUser' bot_user.id %}" class="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
                                     <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
                                 </a>
-                                <button type="button" class="remove-item-btn bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-user-id="{{ user.id }}">
+                                <button type="button" class="remove-item-btn bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-user-id="{{ bot_user.id }}">
                                     <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
                                 </button>
                             </div>
@@ -125,7 +165,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="9" class="text-center py-4">
+                        <td colspan="{% if user.is_superuser %}11{% elif is_owner %}10{% else %}9{% endif %}" class="text-center py-4">
                             <div class="text-secondary-light">
                                 <iconify-icon icon="mdi:account-off-outline" class="text-4xl mb-2"></iconify-icon>
                                 <p class="mb-0">No users found</p>

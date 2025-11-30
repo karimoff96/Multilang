@@ -20,6 +20,17 @@
                             <label class="form-label text-sm mb-1">To Date</label>
                             <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
                         </div>
+                        {% if user.is_superuser and centers %}
+                        <div>
+                            <label class="form-label text-sm mb-1">Center</label>
+                            <select name="center" class="form-select" onchange="this.form.submit()">
+                                <option value="">All Centers</option>
+                                {% for center in centers %}
+                                <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
                         {% if branches %}
                         <div>
                             <label class="form-label text-sm mb-1">Branch</label>
@@ -93,6 +104,9 @@
                         <thead>
                             <tr>
                                 <th scope="col" class="bg-base text-secondary-light">Staff Member</th>
+                                {% if user.is_superuser %}
+                                <th scope="col" class="bg-base text-secondary-light">Center</th>
+                                {% endif %}
                                 <th scope="col" class="bg-base text-secondary-light">Branch</th>
                                 <th scope="col" class="bg-base text-secondary-light">Role</th>
                                 <th scope="col" class="bg-base text-secondary-light text-center">Assigned</th>
@@ -113,6 +127,9 @@
                                         <span class="fw-medium text-secondary-light">{{ staff.name }}</span>
                                     </div>
                                 </td>
+                                {% if user.is_superuser %}
+                                <td class="{{ row_color }}"><span class="fw-medium text-primary-light">{{ staff.center }}</span></td>
+                                {% endif %}
                                 <td class="{{ row_color }} text-secondary-light">{{ staff.branch }}</td>
                                 <td class="{{ row_color }}"><span class="badge bg-light text-dark">{{ staff.role }}</span></td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ staff.total_assigned }}</td>
@@ -135,7 +152,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="7" class="text-center text-secondary-light py-4 bg-base">
+                                <td colspan="{% if user.is_superuser %}8{% else %}7{% endif %}" class="text-center text-secondary-light py-4 bg-base">
                                     No staff data available
                                 </td>
                             </tr>

@@ -16,6 +16,14 @@
                     <option value="{{ role.name }}" {% if role_filter == role.name %}selected{% endif %}>{{ role.get_name_display }}</option>
                     {% endfor %}
                 </select>
+                {% if user.is_superuser and centers %}
+                <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Centers</option>
+                    {% for center in centers %}
+                    <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
                 <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
                     <option value="">All Branches</option>
                     {% for branch in branches %}
@@ -37,6 +45,9 @@
                         <th scope="col">#</th>
                         <th scope="col">Staff Member</th>
                         <th scope="col">Role</th>
+                        {% if user.is_superuser %}
+                        <th scope="col">Center</th>
+                        {% endif %}
                         <th scope="col">Branch</th>
                         <th scope="col">Phone</th>
                         <th scope="col">Status</th>
@@ -74,10 +85,18 @@
                             <span class="bg-secondary-50 text-secondary-600 px-16 py-6 radius-4 fw-medium text-sm">Staff</span>
                             {% endif %}
                         </td>
+                        {% if user.is_superuser %}
+                        <td>
+                            {% if member.branch and member.branch.center %}
+                            <span class="text-md fw-medium text-primary-light">{{ member.branch.center.name }}</span>
+                            {% else %}
+                            <span class="text-secondary-light">-</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
                         <td>
                             {% if member.branch %}
                             <span class="text-md">{{ member.branch.name }}</span>
-                            <br><small class="text-secondary-light">{{ member.branch.center.name }}</small>
                             {% else %}
                             <span class="text-secondary-light">-</span>
                             {% endif %}
@@ -107,7 +126,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center py-24">
+                        <td colspan="{% if user.is_superuser %}9{% else %}8{% endif %}" class="text-center py-24">
                             <div class="text-secondary-light">
                                 <iconify-icon icon="mdi:account-group" class="icon text-4xl mb-8"></iconify-icon>
                                 <p class="mb-0">No staff members found</p>

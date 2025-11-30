@@ -171,7 +171,7 @@
                         {% if user.is_superuser %}
                         <td>
                             {% if order.branch and order.branch.center %}
-                            <span class="badge bg-primary-focus text-primary-600">{{ order.branch.center.name|truncatewords:2 }}</span>
+                            <a href="{% url 'center_detail' order.branch.center.id %}" class="badge bg-primary-focus text-primary-600 text-decoration-none">{{ order.branch.center.name|truncatewords:2 }}</a>
                             {% else %}
                             <span class="text-muted">-</span>
                             {% endif %}
@@ -180,7 +180,7 @@
                         {% if user.is_superuser or is_owner %}
                         <td>
                             {% if order.branch %}
-                            <span class="badge bg-info-focus text-info-600">{{ order.branch.name|truncatewords:2 }}</span>
+                            <a href="{% url 'branch_detail' order.branch.id %}" class="badge bg-info-focus text-info-600 text-decoration-none">{{ order.branch.name|truncatewords:2 }}</a>
                             {% else %}
                             <span class="text-muted">-</span>
                             {% endif %}

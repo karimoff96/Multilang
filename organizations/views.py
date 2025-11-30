@@ -110,6 +110,73 @@ def center_edit(request, center_id):
     return render(request, 'organizations/center_form.html', context)
 
 
+@login_required(login_url='admin_login')
+@owner_required
+def center_detail(request, center_id):
+    """View translation center details with branches, staff, categories, products"""
+    from services.models import Category, Product
+    from orders.models import Order
+    from accounts.models import BotUser
+    
+    if request.user.is_superuser:
+        center = get_object_or_404(TranslationCenter, pk=center_id)
+    else:
+        center = get_object_or_404(TranslationCenter, pk=center_id, owner=request.user)
+    
+    # Get branches for this center
+    branches = Branch.objects.filter(center=center).select_related(
+        'region', 'district'
+    ).annotate(
+        staff_count=Count('staff'),
+        customer_count=Count('customers'),
+        order_count=Count('orders'),
+    ).order_by('-is_main', 'name')
+    
+    # Get staff for this center
+    staff = AdminUser.objects.filter(branch__center=center).select_related(
+        'user', 'branch', 'role'
+    ).order_by('branch', 'user__first_name')
+    
+    # Get categories for this center's branches
+    categories = Category.objects.filter(
+        branch__center=center
+    ).select_related('branch').order_by('branch', 'name')
+    
+    # Get products for this center
+    products = Product.objects.filter(
+        category__branch__center=center
+    ).select_related('category', 'category__branch').order_by('category__branch', 'category', 'name')[:10]
+    
+    # Get recent orders for this center
+    recent_orders = Order.objects.filter(
+        branch__center=center
+    ).select_related('bot_user', 'branch', 'product').order_by('-created_at')[:5]
+    
+    # Get customers for this center
+    customers = BotUser.objects.filter(
+        branch__center=center
+    ).select_related('branch').order_by('-created_at')[:10]
+    
+    context = {
+        'title': center.name,
+        'subTitle': 'Center Details',
+        'center': center,
+        'branches': branches,
+        'staff': staff,
+        'categories': categories,
+        'products': products,
+        'recent_orders': recent_orders,
+        'customers': customers,
+        'total_branches': branches.count(),
+        'total_staff': staff.count(),
+        'total_categories': categories.count(),
+        'total_products': Product.objects.filter(category__branch__center=center).count(),
+        'total_orders': Order.objects.filter(branch__center=center).count(),
+        'total_customers': BotUser.objects.filter(branch__center=center).count(),
+    }
+    return render(request, 'organizations/center_detail.html', context)
+
+
 # ============ Branch Views ============
 
 @login_required(login_url='admin_login')
@@ -192,6 +259,58 @@ def branch_create(request, center_id=None):
 
 
 @login_required(login_url='admin_login')
+def branch_detail(request, branch_id):
+    """View branch details with staff, categories, products, orders"""
+    from services.models import Category, Product
+    from orders.models import Order
+    from accounts.models import BotUser
+    
+    # Get branch with RBAC check
+    accessible_branches = get_user_branches(request.user)
+    branch = get_object_or_404(accessible_branches.select_related('center', 'region', 'district'), pk=branch_id)
+    
+    # Get staff for this branch
+    staff = AdminUser.objects.filter(branch=branch).select_related(
+        'user', 'role'
+    ).order_by('user__first_name')
+    
+    # Get categories for this branch
+    categories = Category.objects.filter(branch=branch).annotate(
+        product_count=Count('product')
+    ).order_by('name')
+    
+    # Get products for this branch
+    products = Product.objects.filter(
+        category__branch=branch
+    ).select_related('category').order_by('category', 'name')[:10]
+    
+    # Get recent orders for this branch
+    recent_orders = Order.objects.filter(
+        branch=branch
+    ).select_related('bot_user', 'product', 'assigned_to__user').order_by('-created_at')[:10]
+    
+    # Get customers for this branch
+    customers = BotUser.objects.filter(branch=branch).order_by('-created_at')[:10]
+    
+    context = {
+        'title': branch.name,
+        'subTitle': 'Branch Details',
+        'branch': branch,
+        'staff': staff,
+        'categories': categories,
+        'products': products,
+        'recent_orders': recent_orders,
+        'customers': customers,
+        'total_staff': staff.count(),
+        'total_categories': categories.count(),
+        'total_products': Product.objects.filter(category__branch=branch).count(),
+        'total_orders': Order.objects.filter(branch=branch).count(),
+        'total_customers': BotUser.objects.filter(branch=branch).count(),
+    }
+    return render(request, 'organizations/branch_detail.html', context)
+
+
+@login_required(login_url='admin_login')
 @permission_required('can_manage_branches')
 def branch_edit(request, branch_id):
     """Edit an existing branch"""
@@ -251,6 +370,14 @@ def staff_list(request):
         'user', 'role', 'branch', 'branch__center'
     ).order_by('-created_at')
     
+    # Center filter for superuser
+    centers = None
+    center_filter = request.GET.get('center')
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_filter:
+            staff = staff.filter(branch__center_id=center_filter)
+    
     # Filter by role
     role_filter = request.GET.get('role')
     if role_filter:
@@ -273,6 +400,8 @@ def staff_list(request):
     
     # Get branches for filter
     accessible_branches = get_user_branches(request.user)
+    if request.user.is_superuser and center_filter:
+        accessible_branches = accessible_branches.filter(center_id=center_filter)
     roles = Role.objects.all()
     
     # Pagination
@@ -288,6 +417,8 @@ def staff_list(request):
         'role_filter': role_filter,
         'branch_filter': branch_id,
         'search': search,
+        'centers': centers,
+        'center_filter': center_filter,
     }
     return render(request, 'organizations/staff_list.html', context)
 

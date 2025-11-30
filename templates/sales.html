@@ -146,6 +146,12 @@
                         <thead>
                             <tr>
                                 <th scope="col" data-i18n="table.orderId">Order ID</th>
+                                {% if user.is_superuser %}
+                                <th scope="col" data-i18n="table.center">Center</th>
+                                {% endif %}
+                                {% if user.is_superuser or is_owner %}
+                                <th scope="col" data-i18n="table.branch">Branch</th>
+                                {% endif %}
                                 <th scope="col" data-i18n="table.customer">Customer</th>
                                 <th scope="col" data-i18n="table.product">Product</th>
                                 <th scope="col" data-i18n="table.amount">Amount</th>
@@ -157,6 +163,12 @@
                             {% for order in recent_orders %}
                             <tr>
                                 <td><span class="text-primary-600 fw-medium">#{{ order.id }}</span></td>
+                                {% if user.is_superuser %}
+                                <td><span class="text-md fw-medium text-primary-light">{{ order.branch.center.name }}</span></td>
+                                {% endif %}
+                                {% if user.is_superuser or is_owner %}
+                                <td><span class="text-md fw-medium text-secondary-light">{{ order.branch.name }}</span></td>
+                                {% endif %}
                                 <td><span class="text-primary-light fw-medium">{{ order.customer }}</span></td>
                                 <td><span class="text-secondary-light">{{ order.product }}</span></td>
                                 <td><span class="fw-medium">{{ order.total_price|floatformat:0 }} UZS</span></td>
@@ -174,7 +186,7 @@
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="6" class="text-center text-secondary-light py-24" data-i18n="table.noRecentOrders">No recent orders</td></tr>
+                            <tr><td colspan="{% if user.is_superuser %}8{% elif is_owner %}7{% else %}6{% endif %}" class="text-center text-secondary-light py-24" data-i18n="table.noRecentOrders">No recent orders</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>

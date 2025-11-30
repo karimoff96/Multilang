@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from organizations.models import Branch
 
 
 # Create your models here.
@@ -24,13 +25,20 @@ class Language(models.Model):
 
 
 class Category(models.Model):
-    """Main service categories: Translation, Apostille"""
+    """Main service categories: Translation, Apostille - per Branch"""
 
     CHARGE_TYPE = (
         ("static", _("Bir xil narx")),
         ("dynamic", _("Page soniga qarab narx")),
     )
-    name = models.CharField(max_length=100, unique=True, verbose_name=_("Service Name"))
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.CASCADE,
+        related_name='categories',
+        verbose_name=_("Branch"),
+        help_text=_("Branch this category belongs to")
+    )
+    name = models.CharField(max_length=100, verbose_name=_("Service Name"))
     description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
@@ -45,11 +53,12 @@ class Category(models.Model):
 
     def get_available_documents(self):
         """Get all active document types for this main service"""
-        return self.documenttype_set.filter(is_active=True)
+        return self.product_set.filter(is_active=True)
 
     class Meta:
         verbose_name = str(_("Main Service"))
         verbose_name_plural = str(_("Main Services"))
+        unique_together = ("branch", "name")
 
 
 class Product(models.Model):
@@ -106,6 +115,16 @@ class Product(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+
+    @property
+    def branch(self):
+        """Get branch from category"""
+        return self.category.branch
+
+    @property
+    def center(self):
+        """Get center from category's branch"""
+        return self.category.branch.center
 
     @property
     def full_name(self):

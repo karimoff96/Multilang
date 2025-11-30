@@ -20,6 +20,17 @@
                             <label class="form-label text-sm mb-1">To Date</label>
                             <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
                         </div>
+                        {% if user.is_superuser and centers %}
+                        <div>
+                            <label class="form-label text-sm mb-1">Center</label>
+                            <select name="center" class="form-select" onchange="this.form.submit()">
+                                <option value="">All Centers</option>
+                                {% for center in centers %}
+                                <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
                         <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
                             <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
                             Apply

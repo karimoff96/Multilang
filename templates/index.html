@@ -281,7 +281,7 @@
                         <tbody>
                             {% for branch in branch_performance %}
                             <tr>
-                                <td>{{ branch.name }}</td>
+                                <td><a href="{% url 'branch_detail' branch.id %}" class="text-primary-600 fw-medium">{{ branch.name }}</a></td>
                                 <td class="text-center">{{ branch.orders }}</td>
                                 <td class="text-end text-success-main">{{ branch.revenue|floatformat:0 }}</td>
                             </tr>
@@ -448,6 +448,12 @@
                     <table class="table bordered-table mb-0">
                         <thead>
                             <tr>
+                                {% if user.is_superuser %}
+                                <th scope="col" data-i18n="table.center">Center</th>
+                                {% endif %}
+                                {% if user.is_superuser or is_owner %}
+                                <th scope="col" data-i18n="table.branch">Branch</th>
+                                {% endif %}
                                 <th scope="col" data-i18n="table.customer">Customer</th>
                                 <th scope="col" data-i18n="table.amount">Amount</th>
                                 <th scope="col" data-i18n="table.status">Status</th>
@@ -456,6 +462,24 @@
                         <tbody>
                             {% for order in recent_orders %}
                             <tr>
+                                {% if user.is_superuser %}
+                                <td>
+                                    {% if order.branch and order.branch.center %}
+                                    <a href="{% url 'center_detail' order.branch.center.id %}" class="text-md fw-medium text-primary-600">{{ order.branch.center.name }}</a>
+                                    {% else %}
+                                    <span class="text-secondary-light">-</span>
+                                    {% endif %}
+                                </td>
+                                {% endif %}
+                                {% if user.is_superuser or is_owner %}
+                                <td>
+                                    {% if order.branch %}
+                                    <a href="{% url 'branch_detail' order.branch.id %}" class="text-md fw-medium text-primary-600">{{ order.branch.name }}</a>
+                                    {% else %}
+                                    <span class="text-secondary-light">-</span>
+                                    {% endif %}
+                                </td>
+                                {% endif %}
                                 <td>
                                     <div>
                                         <span class="text-md d-block line-height-1 fw-medium text-primary-light">{{ order.customer }}</span>
@@ -477,7 +501,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="3" class="text-center text-secondary-light" data-i18n="table.noRecentOrders">No recent orders</td>
+                                <td colspan="{% if user.is_superuser %}5{% elif is_owner %}4{% else %}3{% endif %}" class="text-center text-secondary-light" data-i18n="table.noRecentOrders">No recent orders</td>
                             </tr>
                             {% endfor %}
                         </tbody>

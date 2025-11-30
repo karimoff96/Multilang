@@ -16,6 +16,22 @@
                     <input type="text" class="bg-base h-40-px w-auto" name="search" data-i18n-placeholder="common.search" placeholder="Search" value="{{ search_query }}">
                     <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
                 </div>
+                {% if user.is_superuser and centers %}
+                <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Centers</option>
+                    {% for center in centers %}
+                    <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+                {% if branches %}
+                <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Branches</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
                 <select name="status" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
                     <option value="" data-i18n="common.allStatus">All Status</option>
                     <option value="active" {% if status_filter == 'active' %}selected{% endif %} data-i18n="common.active">Active</option>
@@ -35,6 +51,12 @@
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col" data-i18n="table.name">Name</th>
+                        {% if user.is_superuser %}
+                        <th scope="col">Center</th>
+                        {% endif %}
+                        {% if user.is_superuser or is_owner %}
+                        <th scope="col">Branch</th>
+                        {% endif %}
                         <th scope="col" data-i18n="table.chargingType">Charging Type</th>
                         <th scope="col" data-i18n="table.languages">Languages</th>
                         <th scope="col" data-i18n="table.products">Products</th>
@@ -59,6 +81,16 @@
                                 </div>
                             </div>
                         </td>
+                        {% if user.is_superuser %}
+                        <td>
+                            <a href="{% url 'center_detail' category.branch.center.id %}" class="badge bg-info-focus text-info-600 text-decoration-none">{{ category.branch.center.name }}</a>
+                        </td>
+                        {% endif %}
+                        {% if user.is_superuser or is_owner %}
+                        <td>
+                            <a href="{% url 'branch_detail' category.branch.id %}" class="badge bg-primary-focus text-primary-600 text-decoration-none">{{ category.branch.name }}</a>
+                        </td>
+                        {% endif %}
                         <td>
                             {% if category.charging == 'static' %}
                                 <span class="badge bg-info-focus text-info-600">Static Price</span>
@@ -123,7 +155,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center py-4">
+                        <td colspan="{% if user.is_superuser %}9{% elif is_owner %}8{% else %}7{% endif %}" class="text-center py-4">
                             <div class="text-secondary-light">
                                 <iconify-icon icon="ri-star-line" class="text-4xl mb-2"></iconify-icon>
                                 <p class="mb-0">No categories found</p>

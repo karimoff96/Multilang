@@ -5,12 +5,14 @@ urlpatterns = [
     # Translation Centers
     path('centers/', views.center_list, name='center_list'),
     path('centers/create/', views.center_create, name='center_create'),
+    path('centers/<int:center_id>/', views.center_detail, name='center_detail'),
     path('centers/<int:center_id>/edit/', views.center_edit, name='center_edit'),
     
     # Branches
     path('branches/', views.branch_list, name='branch_list'),
     path('branches/create/', views.branch_create, name='branch_create'),
     path('branches/create/<int:center_id>/', views.branch_create, name='branch_create_for_center'),
+    path('branches/<int:branch_id>/', views.branch_detail, name='branch_detail'),
     path('branches/<int:branch_id>/edit/', views.branch_edit, name='branch_edit'),
     
     # Staff
