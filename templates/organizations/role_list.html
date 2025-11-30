@@ -7,11 +7,11 @@
             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3 py-16 px-24 border-bottom bg-base">
                 <div>
                     <h6 class="mb-0 fw-bold text-lg">{{ title }}</h6>
-                    <span class="text-sm text-secondary-light">Manage roles and permissions for your platform</span>
+                    <span class="text-sm text-secondary-light" data-i18n="common.manageRoles">Manage roles and permissions for your platform</span>
                 </div>
                 <a href="{% url 'role_create' %}" class="btn btn-primary text-sm btn-sm px-12 py-6 radius-4 d-flex align-items-center gap-2">
                     <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
-                    Create New Role
+                    <span data-i18n="common.createNewRole">Create New Role</span>
                 </a>
             </div>
             <div class="card-body p-24">
@@ -19,11 +19,11 @@
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base text-secondary-light">Role Name</th>
-                                <th scope="col" class="bg-base text-secondary-light">Description</th>
-                                <th scope="col" class="bg-base text-secondary-light text-center">Users</th>
-                                <th scope="col" class="bg-base text-secondary-light">Permissions</th>
-                                <th scope="col" class="bg-base text-secondary-light text-center">Actions</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.roleName">Role Name</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.description">Description</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.users">Users</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.permissions">Permissions</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.actions">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -33,7 +33,7 @@
                                 <td class="{{ row_color }}">
                                     <div class="d-flex align-items-center gap-2">
                                         {% if role.is_system_role %}
-                                        <span class="badge bg-primary-100 text-primary-600 px-8 py-4 radius-4 text-xs">System</span>
+                                        <span class="badge bg-primary-100 text-primary-600 px-8 py-4 radius-4 text-xs" data-i18n="common.system">System</span>
                                         {% endif %}
                                         <span class="fw-semibold text-secondary-light">{{ role.display_name }}</span>
                                     </div>
@@ -47,22 +47,22 @@
                                 <td class="{{ row_color }}">
                                     <div class="d-flex flex-wrap gap-1">
                                         {% if role.can_manage_center %}
-                                        <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs">Centers</span>
+                                        <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs" data-i18n="permission.centers">Centers</span>
                                         {% endif %}
                                         {% if role.can_manage_branches %}
-                                        <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs">Branches</span>
+                                        <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs" data-i18n="permission.branches">Branches</span>
                                         {% endif %}
                                         {% if role.can_manage_staff %}
-                                        <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs">Staff</span>
+                                        <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs" data-i18n="permission.staff">Staff</span>
                                         {% endif %}
                                         {% if role.can_manage_orders %}
-                                        <span class="badge bg-info-100 text-info-600 px-6 py-2 radius-4 text-xs">Orders</span>
+                                        <span class="badge bg-info-100 text-info-600 px-6 py-2 radius-4 text-xs" data-i18n="permission.orders">Orders</span>
                                         {% endif %}
                                         {% if role.can_view_reports %}
-                                        <span class="badge bg-warning-100 text-warning-600 px-6 py-2 radius-4 text-xs">Reports</span>
+                                        <span class="badge bg-warning-100 text-warning-600 px-6 py-2 radius-4 text-xs" data-i18n="permission.reports">Reports</span>
                                         {% endif %}
                                         {% if role.can_receive_payments %}
-                                        <span class="badge bg-purple-100 text-purple-600 px-6 py-2 radius-4 text-xs">Payments</span>
+                                        <span class="badge bg-purple-100 text-purple-600 px-6 py-2 radius-4 text-xs" data-i18n="permission.payments">Payments</span>
                                         {% endif %}
                                     </div>
                                 </td>
@@ -84,7 +84,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="text-center text-secondary-light py-4 bg-base">
+                                <td colspan="5" class="text-center text-secondary-light py-4 bg-base" data-i18n="common.noRolesFound">
                                     No roles found. Create your first role!
                                 </td>
                             </tr>
@@ -100,7 +100,7 @@
     <div class="col-12">
         <div class="card radius-8 border-0">
             <div class="card-header py-16 px-24 border-bottom bg-base">
-                <h6 class="mb-0 fw-semibold">Permission Reference</h6>
+                <h6 class="mb-0 fw-semibold" data-i18n="common.permissionReference">Permission Reference</h6>
             </div>
             <div class="card-body p-24">
                 <div class="row g-3">

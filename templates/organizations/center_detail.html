@@ -67,7 +67,7 @@
                 </div>
                 <div>
                     <h6 class="text-lg fw-semibold mb-0">{{ total_branches }}</h6>
-                    <span class="text-sm text-secondary-light">Branches</span>
+                    <span class="text-sm text-secondary-light" data-i18n="sidebar.branches">Branches</span>
                 </div>
             </div>
         </a>
@@ -80,7 +80,7 @@
                 </div>
                 <div>
                     <h6 class="text-lg fw-semibold mb-0">{{ total_staff }}</h6>
-                    <span class="text-sm text-secondary-light">Staff</span>
+                    <span class="text-sm text-secondary-light" data-i18n="common.staff">Staff</span>
                 </div>
             </div>
         </a>
@@ -93,7 +93,7 @@
                 </div>
                 <div>
                     <h6 class="text-lg fw-semibold mb-0">{{ total_categories }}</h6>
-                    <span class="text-sm text-secondary-light">Categories</span>
+                    <span class="text-sm text-secondary-light" data-i18n="sidebar.categories">Categories</span>
                 </div>
             </div>
         </a>
@@ -106,7 +106,7 @@
                 </div>
                 <div>
                     <h6 class="text-lg fw-semibold mb-0">{{ total_products }}</h6>
-                    <span class="text-sm text-secondary-light">Products</span>
+                    <span class="text-sm text-secondary-light" data-i18n="sidebar.products">Products</span>
                 </div>
             </div>
         </a>
@@ -119,7 +119,7 @@
                 </div>
                 <div>
                     <h6 class="text-lg fw-semibold mb-0">{{ total_orders }}</h6>
-                    <span class="text-sm text-secondary-light">Orders</span>
+                    <span class="text-sm text-secondary-light" data-i18n="sidebar.orders">Orders</span>
                 </div>
             </div>
         </a>
@@ -132,7 +132,7 @@
                 </div>
                 <div>
                     <h6 class="text-lg fw-semibold mb-0">{{ total_customers }}</h6>
-                    <span class="text-sm text-secondary-light">Customers</span>
+                    <span class="text-sm text-secondary-light" data-i18n="sidebar.users">Customers</span>
                 </div>
             </div>
         </a>
@@ -144,11 +144,11 @@
     <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
         <h6 class="text-lg fw-semibold mb-0">
             <iconify-icon icon="mdi:source-branch" class="me-8 text-primary-600"></iconify-icon>
-            Branches ({{ total_branches }})
+            <span data-i18n="sidebar.branches">Branches</span> ({{ total_branches }})
         </h6>
         <a href="{% url 'branch_create_for_center' center.id %}" class="btn btn-primary btn-sm px-16 py-8 radius-8">
             <iconify-icon icon="mdi:plus" class="me-4"></iconify-icon>
-            Add Branch
+            <span data-i18n="common.addBranch">Add Branch</span>
         </a>
     </div>
     <div class="card-body p-24">
@@ -165,12 +165,12 @@
                                 <div>
                                     <h6 class="text-md fw-semibold mb-4 text-primary-light">{{ branch.name }}</h6>
                                     {% if branch.is_main %}
-                                    <span class="badge bg-warning-focus text-warning-600 text-xs">Main Branch</span>
+                                    <span class="badge bg-warning-focus text-warning-600 text-xs" data-i18n="common.mainBranch">Main Branch</span>
                                     {% endif %}
                                 </div>
                             </div>
                             <span class="{% if branch.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-12 py-4 radius-4 text-xs fw-medium">
-                                {% if branch.is_active %}Active{% else %}Inactive{% endif %}
+                                {% if branch.is_active %}<span data-i18n="common.active">Active</span>{% else %}<span data-i18n="common.inactive">Inactive</span>{% endif %}
                             </span>
                         </div>
                         
@@ -184,15 +184,15 @@
                         <div class="d-flex gap-12 mt-16 pt-16 border-top">
                             <div class="text-center flex-grow-1">
                                 <h6 class="text-md fw-semibold mb-0">{{ branch.staff_count }}</h6>
-                                <span class="text-xs text-secondary-light">Staff</span>
+                                <span class="text-xs text-secondary-light" data-i18n="common.staff">Staff</span>
                             </div>
                             <div class="text-center flex-grow-1">
                                 <h6 class="text-md fw-semibold mb-0">{{ branch.customer_count }}</h6>
-                                <span class="text-xs text-secondary-light">Customers</span>
+                                <span class="text-xs text-secondary-light" data-i18n="sidebar.users">Customers</span>
                             </div>
                             <div class="text-center flex-grow-1">
                                 <h6 class="text-md fw-semibold mb-0">{{ branch.order_count }}</h6>
-                                <span class="text-xs text-secondary-light">Orders</span>
+                                <span class="text-xs text-secondary-light" data-i18n="sidebar.orders">Orders</span>
                             </div>
                         </div>
                     </div>
@@ -201,8 +201,8 @@
             {% empty %}
             <div class="col-12 text-center py-24">
                 <iconify-icon icon="mdi:source-branch" class="text-4xl text-secondary-light mb-8"></iconify-icon>
-                <p class="text-secondary-light mb-16">No branches yet</p>
-                <a href="{% url 'branch_create_for_center' center.id %}" class="btn btn-primary btn-sm">Add Branch</a>
+                <p class="text-secondary-light mb-16" data-i18n="common.noBranchesYet">No branches yet</p>
+                <a href="{% url 'branch_create_for_center' center.id %}" class="btn btn-primary btn-sm" data-i18n="common.addBranch">Add Branch</a>
             </div>
             {% endfor %}
         </div>
@@ -216,18 +216,18 @@
             <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="text-lg fw-semibold mb-0">
                     <iconify-icon icon="mdi:account-group" class="me-8 text-success-600"></iconify-icon>
-                    Staff ({{ total_staff }})
+                    <span data-i18n="common.staff">Staff</span> ({{ total_staff }})
                 </h6>
-                <a href="{% url 'staff_list' %}" class="text-primary-600 text-sm">View All</a>
+                <a href="{% url 'staff_list' %}" class="text-primary-600 text-sm" data-i18n="common.viewAll">View All</a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base">Name</th>
-                                <th scope="col" class="bg-base">Branch</th>
-                                <th scope="col" class="bg-base">Role</th>
+                                <th scope="col" class="bg-base" data-i18n="table.name">Name</th>
+                                <th scope="col" class="bg-base" data-i18n="table.branch">Branch</th>
+                                <th scope="col" class="bg-base" data-i18n="table.role">Role</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -250,7 +250,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="3" class="text-center py-24 text-secondary-light bg-base">No staff members</td>
+                                <td colspan="3" class="text-center py-24 text-secondary-light bg-base" data-i18n="common.noStaffMembers">No staff members</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -266,18 +266,18 @@
             <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="text-lg fw-semibold mb-0">
                     <iconify-icon icon="mdi:shape" class="me-8 text-warning-600"></iconify-icon>
-                    Categories ({{ total_categories }})
+                    <span data-i18n="sidebar.categories">Categories</span> ({{ total_categories }})
                 </h6>
-                <a href="{% url 'categoryList' %}" class="text-primary-600 text-sm">View All</a>
+                <a href="{% url 'categoryList' %}" class="text-primary-600 text-sm" data-i18n="common.viewAll">View All</a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base">Category</th>
-                                <th scope="col" class="bg-base">Branch</th>
-                                <th scope="col" class="bg-base">Status</th>
+                                <th scope="col" class="bg-base" data-i18n="table.category">Category</th>
+                                <th scope="col" class="bg-base" data-i18n="table.branch">Branch</th>
+                                <th scope="col" class="bg-base" data-i18n="table.status">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -291,13 +291,13 @@
                                 </td>
                                 <td class="bg-warning-focus">
                                     <span class="{% if category.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-12 py-4 radius-4 text-xs fw-medium">
-                                        {% if category.is_active %}Active{% else %}Inactive{% endif %}
+                                        {% if category.is_active %}<span data-i18n="common.active">Active</span>{% else %}<span data-i18n="common.inactive">Inactive</span>{% endif %}
                                     </span>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="3" class="text-center py-24 text-secondary-light bg-base">No categories</td>
+                                <td colspan="3" class="text-center py-24 text-secondary-light bg-base" data-i18n="common.noCategories">No categories</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -313,21 +313,21 @@
     <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
         <h6 class="text-lg fw-semibold mb-0">
             <iconify-icon icon="mdi:clipboard-list" class="me-8 text-cyan-600"></iconify-icon>
-            Recent Orders
+            <span data-i18n="common.recentOrders">Recent Orders</span>
         </h6>
-        <a href="{% url 'ordersList' %}" class="text-primary-600 text-sm">View All</a>
+        <a href="{% url 'ordersList' %}" class="text-primary-600 text-sm" data-i18n="common.viewAll">View All</a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table colored-row-table mb-0">
                 <thead>
                     <tr>
-                        <th scope="col" class="bg-base">Order ID</th>
-                        <th scope="col" class="bg-base">Customer</th>
-                        <th scope="col" class="bg-base">Branch</th>
-                        <th scope="col" class="bg-base">Product</th>
-                        <th scope="col" class="bg-base">Status</th>
-                        <th scope="col" class="bg-base">Date</th>
+                        <th scope="col" class="bg-base" data-i18n="table.orderId">Order ID</th>
+                        <th scope="col" class="bg-base" data-i18n="table.customer">Customer</th>
+                        <th scope="col" class="bg-base" data-i18n="table.branch">Branch</th>
+                        <th scope="col" class="bg-base" data-i18n="table.product">Product</th>
+                        <th scope="col" class="bg-base" data-i18n="table.status">Status</th>
+                        <th scope="col" class="bg-base" data-i18n="table.date">Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -354,7 +354,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center py-24 text-secondary-light bg-base">No orders yet</td>
+                        <td colspan="6" class="text-center py-24 text-secondary-light bg-base" data-i18n="common.noOrdersYet">No orders yet</td>
                     </tr>
                     {% endfor %}
                 </tbody>

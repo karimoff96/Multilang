@@ -8,23 +8,23 @@
             <div class="card-body p-24">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                     <div>
-                        <h5 class="fw-bold mb-0">{{ title }}</h5>
-                        <p class="text-secondary-light mb-0">Revenue and financial analytics</p>
+                        <h5 class="fw-bold mb-0" data-i18n="report.financialReport">{{ title }}</h5>
+                        <p class="text-secondary-light mb-0" data-i18n="report.revenueAnalytics">Revenue and financial analytics</p>
                     </div>
                     <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
                         <div>
-                            <label class="form-label text-sm mb-1">From Date</label>
+                            <label class="form-label text-sm mb-1" data-i18n="form.fromDate">From Date</label>
                             <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
                         </div>
                         <div>
-                            <label class="form-label text-sm mb-1">To Date</label>
+                            <label class="form-label text-sm mb-1" data-i18n="form.toDate">To Date</label>
                             <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
                         </div>
                         {% if user.is_superuser and centers %}
                         <div>
-                            <label class="form-label text-sm mb-1">Center</label>
+                            <label class="form-label text-sm mb-1" data-i18n="common.center">Center</label>
                             <select name="center" class="form-select" onchange="this.form.submit()">
-                                <option value="">All Centers</option>
+                                <option value="" data-i18n="common.allCenters">All Centers</option>
                                 {% for center in centers %}
                                 <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
                                 {% endfor %}
@@ -33,9 +33,9 @@
                         {% endif %}
                         {% if branches %}
                         <div>
-                            <label class="form-label text-sm mb-1">Branch</label>
+                            <label class="form-label text-sm mb-1" data-i18n="common.branch">Branch</label>
                             <select name="branch" class="form-select">
-                                <option value="">All Branches</option>
+                                <option value="" data-i18n="common.allBranches">All Branches</option>
                                 {% for branch in branches %}
                                 <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
                                 {% endfor %}
@@ -44,11 +44,11 @@
                         {% endif %}
                         <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
                             <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
-                            Apply
+                            <span data-i18n="common.apply">Apply</span>
                         </button>
                         <a href="{% url 'export_report' 'financial' %}?date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
                             <iconify-icon icon="solar:download-bold" class="icon line-height-1"></iconify-icon>
-                            Export
+                            <span data-i18n="common.export">Export</span>
                         </a>
                     </form>
                 </div>
@@ -65,7 +65,7 @@
                         <iconify-icon icon="solar:wallet-money-bold" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">Total Revenue</span>
+                        <span class="text-secondary-light text-sm" data-i18n="report.totalRevenue">Total Revenue</span>
                         <h4 class="fw-bold mb-0">{{ total_revenue|floatformat:0 }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                         <iconify-icon icon="solar:check-circle-bold" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">Completed Revenue</span>
+                        <span class="text-secondary-light text-sm" data-i18n="report.completedRevenue">Completed Revenue</span>
                         <h4 class="fw-bold mb-0">{{ completed_revenue|floatformat:0 }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
@@ -95,7 +95,7 @@
                         <iconify-icon icon="solar:bag-4-bold" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">Total Orders</span>
+                        <span class="text-secondary-light text-sm" data-i18n="report.totalOrders">Total Orders</span>
                         <h4 class="fw-bold mb-0">{{ total_orders }}</h4>
                     </div>
                 </div>
@@ -110,7 +110,7 @@
                         <iconify-icon icon="solar:chart-bold" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">Avg Order Value</span>
+                        <span class="text-secondary-light text-sm" data-i18n="report.avgOrderValue">Avg Order Value</span>
                         <h4 class="fw-bold mb-0">{{ avg_order_value|floatformat:0 }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
@@ -122,7 +122,7 @@
     <div class="col-xxl-8">
         <div class="card radius-8 border-0 h-100">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Daily Revenue Trend</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.dailyRevenueTrend">Daily Revenue Trend</h6>
                 <div id="dailyRevenueChart" style="min-height: 300px;"></div>
             </div>
         </div>
@@ -132,14 +132,14 @@
     <div class="col-xxl-4">
         <div class="card radius-8 border-0 h-100">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Revenue by Status</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.revenueByStatus">Revenue by Status</h6>
                 <div class="table-responsive">
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base text-secondary-light">Status</th>
-                                <th scope="col" class="bg-base text-secondary-light text-end">Revenue</th>
-                                <th scope="col" class="bg-base text-secondary-light text-center">Orders</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.status">Status</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="report.revenue">Revenue</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.orders">Orders</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -148,20 +148,20 @@
                             <tr>
                                 <td class="{{ row_color }}">
                                     {% if item.status == 'completed' %}
-                                    <span class="badge bg-success-focus text-success-main">{{ item.status_display }}</span>
+                                    <span class="badge bg-success-focus text-success-main" data-i18n="status.completed">{{ item.status_display }}</span>
                                     {% elif item.status == 'cancelled' %}
-                                    <span class="badge bg-danger-focus text-danger-main">{{ item.status_display }}</span>
+                                    <span class="badge bg-danger-focus text-danger-main" data-i18n="status.cancelled">{{ item.status_display }}</span>
                                     {% elif item.status == 'in_progress' %}
-                                    <span class="badge bg-info-focus text-info-main">{{ item.status_display }}</span>
+                                    <span class="badge bg-info-focus text-info-main" data-i18n="status.inProgress">{{ item.status_display }}</span>
                                     {% else %}
-                                    <span class="badge bg-warning-focus text-warning-main">{{ item.status_display }}</span>
+                                    <span class="badge bg-warning-focus text-warning-main" data-i18n="status.pending">{{ item.status_display }}</span>
                                     {% endif %}
                                 </td>
                                 <td class="{{ row_color }} text-end text-secondary-light">{{ item.revenue|floatformat:0 }}</td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ item.count }}</td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="3" class="text-center text-secondary-light bg-base">No data</td></tr>
+                            <tr><td colspan="3" class="text-center text-secondary-light bg-base" data-i18n="common.noData">No data</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -175,14 +175,14 @@
     <div class="col-xxl-6">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Revenue by Branch</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.revenueByBranch">Revenue by Branch</h6>
                 <div class="table-responsive">
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base text-secondary-light">Branch</th>
-                                <th scope="col" class="bg-base text-secondary-light text-end">Revenue</th>
-                                <th scope="col" class="bg-base text-secondary-light text-center">Orders</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="common.branch">Branch</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="report.revenue">Revenue</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.orders">Orders</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -206,14 +206,14 @@
     <div class="col-xxl-{% if branch_revenue %}6{% else %}12{% endif %}">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Top Products by Revenue</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.topProductsByRevenue">Top Products by Revenue</h6>
                 <div class="table-responsive">
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base text-secondary-light">Product</th>
-                                <th scope="col" class="bg-base text-secondary-light text-end">Revenue</th>
-                                <th scope="col" class="bg-base text-secondary-light text-center">Orders</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.product">Product</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="report.revenue">Revenue</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.orders">Orders</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -225,7 +225,7 @@
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ item.count }}</td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="3" class="text-center text-secondary-light bg-base">No products data</td></tr>
+                            <tr><td colspan="3" class="text-center text-secondary-light bg-base" data-i18n="common.noProductsData">No products data</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>

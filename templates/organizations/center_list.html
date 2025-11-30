@@ -6,11 +6,11 @@
     <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
         <div>
             <h6 class="text-lg fw-semibold mb-0">{{ title }}</h6>
-            <span class="text-sm text-secondary-light">Manage your translation centers</span>
+            <span class="text-sm text-secondary-light" data-i18n="common.manageCenters">Manage your translation centers</span>
         </div>
         <a href="{% url 'center_create' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
             <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
-            Add New Center
+            <span data-i18n="common.addNewCenter">Add New Center</span>
         </a>
     </div>
     <div class="card-body p-24">
@@ -59,12 +59,12 @@
                         <div class="d-flex gap-12 mb-16">
                             <div class="bg-neutral-100 rounded-8 p-12 text-center flex-grow-1">
                                 <h6 class="text-lg fw-semibold mb-4">{{ center.branch_count }}</h6>
-                                <span class="text-xs text-secondary-light">Branches</span>
+                                <span class="text-xs text-secondary-light" data-i18n="common.branches">Branches</span>
                             </div>
                         </div>
                         
                         <div class="d-flex align-items-center justify-content-between pt-16 border-top">
-                            <span class="{% if center.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-16 py-4 radius-4 text-xs fw-medium">
+                            <span class="{% if center.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-16 py-4 radius-4 text-xs fw-medium" data-i18n="{% if center.is_active %}common.active{% else %}common.inactive{% endif %}">
                                 {% if center.is_active %}Active{% else %}Inactive{% endif %}
                             </span>
                             <div class="d-flex gap-8">
@@ -91,11 +91,11 @@
             <div class="col-12">
                 <div class="text-center py-40">
                     <iconify-icon icon="mdi:domain" class="icon text-5xl text-secondary-light mb-16"></iconify-icon>
-                    <h6 class="text-lg fw-medium mb-8">No translation centers found</h6>
-                    <p class="text-secondary-light mb-16">Get started by creating your first translation center</p>
+                    <h6 class="text-lg fw-medium mb-8" data-i18n="common.noCentersFound">No translation centers found</h6>
+                    <p class="text-secondary-light mb-16" data-i18n="common.startByCreatingCenter">Get started by creating your first translation center</p>
                     <a href="{% url 'center_create' %}" class="btn btn-primary d-inline-flex align-items-center gap-2">
                         <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
-                        Add Center
+                        <span data-i18n="common.addCenter">Add Center</span>
                     </a>
                 </div>
             </div>

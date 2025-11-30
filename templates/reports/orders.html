@@ -9,22 +9,22 @@
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                     <div>
                         <h5 class="fw-bold mb-0">{{ title }}</h5>
-                        <p class="text-secondary-light mb-0">Order statistics and analytics</p>
+                        <p class="text-secondary-light mb-0" data-i18n="report.orderStatistics">Order statistics and analytics</p>
                     </div>
                     <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
                         <div>
-                            <label class="form-label text-sm mb-1">From Date</label>
+                            <label class="form-label text-sm mb-1" data-i18n="report.fromDate">From Date</label>
                             <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
                         </div>
                         <div>
-                            <label class="form-label text-sm mb-1">To Date</label>
+                            <label class="form-label text-sm mb-1" data-i18n="report.toDate">To Date</label>
                             <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
                         </div>
                         {% if user.is_superuser and centers %}
                         <div>
-                            <label class="form-label text-sm mb-1">Center</label>
+                            <label class="form-label text-sm mb-1" data-i18n="table.center">Center</label>
                             <select name="center" class="form-select" onchange="this.form.submit()">
-                                <option value="">All Centers</option>
+                                <option value="" data-i18n="common.allCenters">All Centers</option>
                                 {% for center in centers %}
                                 <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
                                 {% endfor %}
@@ -33,9 +33,9 @@
                         {% endif %}
                         {% if branches %}
                         <div>
-                            <label class="form-label text-sm mb-1">Branch</label>
+                            <label class="form-label text-sm mb-1" data-i18n="table.branch">Branch</label>
                             <select name="branch" class="form-select">
-                                <option value="">All Branches</option>
+                                <option value="" data-i18n="common.allBranches">All Branches</option>
                                 {% for branch in branches %}
                                 <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
                                 {% endfor %}
@@ -43,9 +43,9 @@
                         </div>
                         {% endif %}
                         <div>
-                            <label class="form-label text-sm mb-1">Status</label>
+                            <label class="form-label text-sm mb-1" data-i18n="table.status">Status</label>
                             <select name="status" class="form-select">
-                                <option value="">All Statuses</option>
+                                <option value="" data-i18n="common.allStatuses">All Statuses</option>
                                 {% for value, label in status_choices %}
                                 <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
                                 {% endfor %}
@@ -53,11 +53,11 @@
                         </div>
                         <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
                             <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
-                            Apply
+                            <span data-i18n="common.apply">Apply</span>
                         </button>
                         <a href="{% url 'export_report' 'orders' %}?date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
                             <iconify-icon icon="solar:download-bold" class="icon line-height-1"></iconify-icon>
-                            Export
+                            <span data-i18n="common.export">Export</span>
                         </a>
                     </form>
                 </div>
@@ -73,7 +73,7 @@
                     <iconify-icon icon="solar:bag-4-bold" class="text-xl"></iconify-icon>
                 </span>
                 <h4 class="fw-bold mb-0">{{ total_orders }}</h4>
-                <small class="text-secondary-light">Total Orders</small>
+                <small class="text-secondary-light" data-i18n="status.totalOrders">Total Orders</small>
             </div>
         </div>
     </div>
@@ -84,7 +84,7 @@
                     <iconify-icon icon="solar:check-circle-bold" class="text-xl"></iconify-icon>
                 </span>
                 <h4 class="fw-bold mb-0">{{ completed }}</h4>
-                <small class="text-secondary-light">Completed</small>
+                <small class="text-secondary-light" data-i18n="status.completed">Completed</small>
             </div>
         </div>
     </div>
@@ -95,7 +95,7 @@
                     <iconify-icon icon="solar:hourglass-bold" class="text-xl"></iconify-icon>
                 </span>
                 <h4 class="fw-bold mb-0">{{ in_progress }}</h4>
-                <small class="text-secondary-light">In Progress</small>
+                <small class="text-secondary-light" data-i18n="status.inProgress">In Progress</small>
             </div>
         </div>
     </div>
@@ -106,7 +106,7 @@
                     <iconify-icon icon="solar:clock-circle-bold" class="text-xl"></iconify-icon>
                 </span>
                 <h4 class="fw-bold mb-0">{{ pending }}</h4>
-                <small class="text-secondary-light">Pending</small>
+                <small class="text-secondary-light" data-i18n="status.pending">Pending</small>
             </div>
         </div>
     </div>
@@ -117,7 +117,7 @@
                     <iconify-icon icon="solar:close-circle-bold" class="text-xl"></iconify-icon>
                 </span>
                 <h4 class="fw-bold mb-0">{{ cancelled }}</h4>
-                <small class="text-secondary-light">Cancelled</small>
+                <small class="text-secondary-light" data-i18n="status.cancelled">Cancelled</small>
             </div>
         </div>
     </div>
@@ -128,7 +128,7 @@
                     <iconify-icon icon="solar:chart-bold" class="text-xl"></iconify-icon>
                 </span>
                 <h4 class="fw-bold mb-0">{{ completion_rate }}%</h4>
-                <small class="text-secondary-light">Completion Rate</small>
+                <small class="text-secondary-light" data-i18n="report.completionRate">Completion Rate</small>
             </div>
         </div>
     </div>
@@ -137,7 +137,7 @@
     <div class="col-xxl-8">
         <div class="card radius-8 border-0 h-100">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Daily Order Trend</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.dailyOrderTrend">Daily Order Trend</h6>
                 <div id="orderTrendChart" style="min-height: 300px;"></div>
             </div>
         </div>
@@ -147,7 +147,7 @@
     <div class="col-xxl-4">
         <div class="card radius-8 border-0 h-100">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Status Distribution</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.statusDistribution">Status Distribution</h6>
                 <div id="statusPieChart" style="min-height: 280px;"></div>
             </div>
         </div>
@@ -157,13 +157,13 @@
     <div class="col-xxl-4">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Top Language Pairs</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.topLanguagePairs">Top Language Pairs</h6>
                 <div class="table-responsive">
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base text-neutral-600">Language Pair</th>
-                                <th scope="col" class="bg-base text-neutral-600 text-end">Count</th>
+                                <th scope="col" class="bg-base text-neutral-600" data-i18n="report.languagePair">Language Pair</th>
+                                <th scope="col" class="bg-base text-neutral-600 text-end" data-i18n="report.count">Count</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -177,7 +177,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="2" class="text-center text-secondary-light bg-base py-4">No data</td>
+                                <td colspan="2" class="text-center text-secondary-light bg-base py-4" data-i18n="common.noData">No data</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -190,17 +190,17 @@
     <div class="col-xxl-8">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Recent Orders</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="dashboard.recentOrders">Recent Orders</h6>
                 <div class="table-responsive">
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base text-neutral-600">ID</th>
-                                <th scope="col" class="bg-base text-neutral-600">Customer</th>
-                                <th scope="col" class="bg-base text-neutral-600">Product</th>
-                                <th scope="col" class="bg-base text-neutral-600">Assigned To</th>
-                                <th scope="col" class="bg-base text-neutral-600">Status</th>
-                                <th scope="col" class="bg-base text-neutral-600 text-end">Amount</th>
+                                <th scope="col" class="bg-base text-neutral-600" data-i18n="table.id">ID</th>
+                                <th scope="col" class="bg-base text-neutral-600" data-i18n="table.customer">Customer</th>
+                                <th scope="col" class="bg-base text-neutral-600" data-i18n="table.product">Product</th>
+                                <th scope="col" class="bg-base text-neutral-600" data-i18n="table.assignedTo">Assigned To</th>
+                                <th scope="col" class="bg-base text-neutral-600" data-i18n="table.status">Status</th>
+                                <th scope="col" class="bg-base text-neutral-600 text-end" data-i18n="table.amount">Amount</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -214,24 +214,24 @@
                                     {% if order.assigned_to %}
                                     {{ order.assigned_to.user.get_full_name|default:order.assigned_to.user.username }}
                                     {% else %}
-                                    <span class="text-warning-main">Unassigned</span>
+                                    <span class="text-warning-main" data-i18n="status.unassigned">Unassigned</span>
                                     {% endif %}
                                 </td>
                                 <td class="{{ row_color }}">
                                     {% if order.status == 'completed' %}
-                                    <span class="badge bg-success-focus text-success-main">Completed</span>
+                                    <span class="badge bg-success-focus text-success-main" data-i18n="status.completed">Completed</span>
                                     {% elif order.status == 'cancelled' %}
-                                    <span class="badge bg-danger-focus text-danger-main">Cancelled</span>
+                                    <span class="badge bg-danger-focus text-danger-main" data-i18n="status.cancelled">Cancelled</span>
                                     {% elif order.status == 'in_progress' %}
-                                    <span class="badge bg-info-focus text-info-main">In Progress</span>
+                                    <span class="badge bg-info-focus text-info-main" data-i18n="status.inProgress">In Progress</span>
                                     {% else %}
-                                    <span class="badge bg-warning-focus text-warning-main">{{ order.get_status_display }}</span>
+                                    <span class="badge bg-warning-focus text-warning-main" data-i18n="status.pending">{{ order.get_status_display }}</span>
                                     {% endif %}
                                 </td>
                                 <td class="{{ row_color }} text-end fw-medium text-secondary-light">{{ order.total_price|floatformat:0 }}</td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="6" class="text-center text-secondary-light bg-base">No orders found</td></tr>
+                            <tr><td colspan="6" class="text-center text-secondary-light bg-base" data-i18n="common.noOrdersFound">No orders found</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>

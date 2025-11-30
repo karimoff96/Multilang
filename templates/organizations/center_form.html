@@ -15,52 +15,52 @@
                     <div class="row gy-3">
                         <!-- Basic Info -->
                         <div class="col-12">
-                            <h6 class="text-md fw-semibold mb-16 pb-8 border-bottom">Center Information</h6>
+                            <h6 class="text-md fw-semibold mb-16 pb-8 border-bottom" data-i18n="form.centerInfo">Center Information</h6>
                         </div>
                         
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                Center Name <span class="text-danger">*</span>
+                                <span data-i18n="form.centerName">Center Name</span> <span class="text-danger">*</span>
                             </label>
                             <input type="text" name="name" class="form-control radius-8" 
                                    value="{% if center %}{{ center.name }}{% endif %}"
-                                   placeholder="Enter center name" required>
+                                   data-i18n-placeholder="form.enterCenterName" placeholder="Enter center name" required>
                         </div>
                         
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Phone</label>
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.phone">Phone</label>
                             <input type="tel" name="phone" class="form-control radius-8" 
                                    value="{% if center %}{{ center.phone|default:'' }}{% endif %}"
-                                   placeholder="Enter phone number">
+                                   data-i18n-placeholder="form.enterPhone" placeholder="Enter phone number">
                         </div>
                         
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Email</label>
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.email">Email</label>
                             <input type="email" name="email" class="form-control radius-8" 
                                    value="{% if center %}{{ center.email|default:'' }}{% endif %}"
-                                   placeholder="Enter email">
+                                   data-i18n-placeholder="form.enterEmail" placeholder="Enter email">
                         </div>
                         
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Location URL</label>
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.locationUrl">Location URL</label>
                             <input type="url" name="location_url" class="form-control radius-8" 
                                    value="{% if center %}{{ center.location_url|default:'' }}{% endif %}"
                                    placeholder="Google Maps or Yandex Maps URL">
                         </div>
                         
                         <div class="col-12">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Address</label>
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.address">Address</label>
                             <textarea name="address" class="form-control radius-8" rows="2" 
-                                      placeholder="Enter full address">{% if center %}{{ center.address|default:'' }}{% endif %}</textarea>
+                                      data-i18n-placeholder="form.enterAddress" placeholder="Enter full address">{% if center %}{{ center.address|default:'' }}{% endif %}</textarea>
                         </div>
                         
                         {% if center %}
                         <div class="col-md-6 mt-24">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Status</label>
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.status">Status</label>
                             <div class="form-check form-switch switch-primary d-flex align-items-center gap-3">
                                 <input class="form-check-input" type="checkbox" role="switch" 
                                        name="is_active" id="is_active" {% if center.is_active %}checked{% endif %}>
-                                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="is_active">
+                                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="is_active" data-i18n="common.active">
                                     Active
                                 </label>
                             </div>
@@ -69,10 +69,10 @@
                     </div>
                     
                     <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
-                        <a href="{% url 'center_list' %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8">
+                        <a href="{% url 'center_list' %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8" data-i18n="common.cancel">
                             Cancel
                         </a>
-                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8">
+                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8" data-i18n="{% if center %}form.updateCenter{% else %}form.createCenter{% endif %}">
                             {% if center %}Update{% else %}Create{% endif %} Center
                         </button>
                     </div>

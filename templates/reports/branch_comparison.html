@@ -8,23 +8,23 @@
             <div class="card-body p-24">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                     <div>
-                        <h5 class="fw-bold mb-0">{{ title }}</h5>
-                        <p class="text-secondary-light mb-0">Compare performance across all branches</p>
+                        <h5 class="fw-bold mb-0" data-i18n="report.branchComparison">{{ title }}</h5>
+                        <p class="text-secondary-light mb-0" data-i18n="report.branchComparisonDesc">Compare performance across all branches</p>
                     </div>
                     <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
                         <div>
-                            <label class="form-label text-sm mb-1">From Date</label>
+                            <label class="form-label text-sm mb-1" data-i18n="form.fromDate">From Date</label>
                             <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
                         </div>
                         <div>
-                            <label class="form-label text-sm mb-1">To Date</label>
+                            <label class="form-label text-sm mb-1" data-i18n="form.toDate">To Date</label>
                             <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
                         </div>
                         {% if user.is_superuser and centers %}
                         <div>
-                            <label class="form-label text-sm mb-1">Center</label>
+                            <label class="form-label text-sm mb-1" data-i18n="common.center">Center</label>
                             <select name="center" class="form-select" onchange="this.form.submit()">
-                                <option value="">All Centers</option>
+                                <option value="" data-i18n="common.allCenters">All Centers</option>
                                 {% for center in centers %}
                                 <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
                                 {% endfor %}
@@ -33,7 +33,7 @@
                         {% endif %}
                         <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
                             <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
-                            Apply
+                            <span data-i18n="common.apply">Apply</span>
                         </button>
                     </form>
                 </div>
@@ -50,7 +50,7 @@
                         <iconify-icon icon="solar:wallet-money-bold" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">Total Revenue</span>
+                        <span class="text-secondary-light text-sm" data-i18n="report.totalRevenue">Total Revenue</span>
                         <h4 class="fw-bold mb-0">{{ total_revenue|floatformat:0 }} <small class="text-sm">UZS</small></h4>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
                         <iconify-icon icon="solar:bag-4-bold" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">Total Orders</span>
+                        <span class="text-secondary-light text-sm" data-i18n="report.totalOrders">Total Orders</span>
                         <h4 class="fw-bold mb-0">{{ total_orders_count }}</h4>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                         <iconify-icon icon="solar:users-group-rounded-bold" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">Total Staff</span>
+                        <span class="text-secondary-light text-sm" data-i18n="report.totalStaff">Total Staff</span>
                         <h4 class="fw-bold mb-0">{{ total_staff }}</h4>
                     </div>
                 </div>
@@ -95,7 +95,7 @@
                         <iconify-icon icon="solar:user-bold" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">Total Customers</span>
+                        <span class="text-secondary-light text-sm" data-i18n="report.totalCustomers">Total Customers</span>
                         <h4 class="fw-bold mb-0">{{ total_customers }}</h4>
                     </div>
                 </div>
@@ -107,7 +107,7 @@
     <div class="col-xxl-6">
         <div class="card radius-8 border-0 h-100">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Revenue by Branch</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.revenueByBranch">Revenue by Branch</h6>
                 <div id="revenueChart" style="min-height: 300px;"></div>
             </div>
         </div>
@@ -117,7 +117,7 @@
     <div class="col-xxl-6">
         <div class="card radius-8 border-0 h-100">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Orders by Branch</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.ordersByBranch">Orders by Branch</h6>
                 <div id="ordersChart" style="min-height: 300px;"></div>
             </div>
         </div>
@@ -127,20 +127,20 @@
     <div class="col-12">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Branch Performance Details</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.branchPerformanceDetails">Branch Performance Details</h6>
                 <div class="table-responsive">
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base text-secondary-light">Branch</th>
-                                <th scope="col" class="bg-base text-secondary-light">Center</th>
-                                <th scope="col" class="bg-base text-secondary-light text-center">Orders</th>
-                                <th scope="col" class="bg-base text-secondary-light text-center">Completed</th>
-                                <th scope="col" class="bg-base text-secondary-light text-center">Rate</th>
-                                <th scope="col" class="bg-base text-secondary-light text-end">Revenue</th>
-                                <th scope="col" class="bg-base text-secondary-light text-end">Avg Value</th>
-                                <th scope="col" class="bg-base text-secondary-light text-center">Staff</th>
-                                <th scope="col" class="bg-base text-secondary-light text-center">Customers</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="common.branch">Branch</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="common.center">Center</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.orders">Orders</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="status.completed">Completed</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.rate">Rate</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="report.revenue">Revenue</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="report.avgValue">Avg Value</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="common.staff">Staff</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="sidebar.customers">Customers</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -176,7 +176,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="9" class="text-center text-secondary-light py-4 bg-base">
+                                <td colspan="9" class="text-center text-secondary-light py-4 bg-base" data-i18n="report.noBranchesToCompare">
                                     No branches to compare
                                 </td>
                             </tr>
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Revenue chart
     if (branchLabels.length > 0) {
         new ApexCharts(document.querySelector("#revenueChart"), {
-            series: [{ name: 'Revenue', data: branchRevenue }],
+            series: [{ name: LanguageManager.translate('report.revenue') || 'Revenue', data: branchRevenue }],
             chart: { type: 'bar', height: 300, toolbar: { show: false } },
             colors: ['#22c55e'],
             plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '60%' } },
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Orders chart
         new ApexCharts(document.querySelector("#ordersChart"), {
-            series: [{ name: 'Orders', data: branchOrders }],
+            series: [{ name: LanguageManager.translate('table.orders') || 'Orders', data: branchOrders }],
             chart: { type: 'bar', height: 300, toolbar: { show: false } },
             colors: ['#487FFF'],
             plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '60%' } },
@@ -239,8 +239,8 @@ document.addEventListener('DOMContentLoaded', function() {
             grid: { borderColor: '#E4E7EC', strokeDashArray: 3 }
         }).render();
     } else {
-        document.querySelector("#revenueChart").innerHTML = '<div class="text-center text-secondary-light py-4 bg-base">No branch data</div>';
-        document.querySelector("#ordersChart").innerHTML = '<div class="text-center text-secondary-light py-4 bg-base">No branch data</div>';
+        document.querySelector("#revenueChart").innerHTML = '<div class="text-center text-secondary-light py-4 bg-base" data-i18n="report.noBranchData">No branch data</div>';
+        document.querySelector("#ordersChart").innerHTML = '<div class="text-center text-secondary-light py-4 bg-base" data-i18n="report.noBranchData">No branch data</div>';
     }
 });
 </script>

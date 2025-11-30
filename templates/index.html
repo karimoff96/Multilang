@@ -176,7 +176,7 @@
                                 <iconify-icon icon="solar:inbox-line-bold" class="text-xxl"></iconify-icon>
                             </span>
                             <h4 class="fw-bold mb-0">{{ my_total_assigned }}</h4>
-                            <small class="text-secondary-light">Total Assigned</small>
+                            <small class="text-secondary-light" data-i18n="dashboard.totalAssigned">Total Assigned</small>
                         </div>
                     </div>
                     <div class="col-6">
@@ -185,7 +185,7 @@
                                 <iconify-icon icon="solar:clock-circle-bold" class="text-xxl"></iconify-icon>
                             </span>
                             <h4 class="fw-bold mb-0">{{ my_pending }}</h4>
-                            <small class="text-secondary-light">Pending</small>
+                            <small class="text-secondary-light" data-i18n="status.pending">Pending</small>
                         </div>
                     </div>
                     <div class="col-6">
@@ -194,7 +194,7 @@
                                 <iconify-icon icon="solar:check-circle-bold" class="text-xxl"></iconify-icon>
                             </span>
                             <h4 class="fw-bold mb-0">{{ my_completed_today }}</h4>
-                            <small class="text-secondary-light">Completed Today</small>
+                            <small class="text-secondary-light" data-i18n="dashboard.completedTodayShort">Completed Today</small>
                         </div>
                     </div>
                     <div class="col-6">
@@ -203,7 +203,7 @@
                                 <iconify-icon icon="solar:medal-star-bold" class="text-xxl"></iconify-icon>
                             </span>
                             <h4 class="fw-bold mb-0">{{ my_total_completed }}</h4>
-                            <small class="text-secondary-light">Total Completed</small>
+                            <small class="text-secondary-light" data-i18n="dashboard.totalCompleted">Total Completed</small>
                         </div>
                     </div>
                 </div>
@@ -215,19 +215,19 @@
                         <span class="fw-semibold">{{ branch_name }}</span>
                     </div>
                     <div class="bg-primary-50 p-3 rounded-3 d-flex align-items-center justify-content-between mb-3">
-                        <span class="text-secondary-light">Staff Members</span>
+                        <span class="text-secondary-light" data-i18n="common.staffMembers">Staff Members</span>
                         <span class="fw-bold text-lg">{{ total_staff }}</span>
                     </div>
                 </div>
                 {% if staff_performance %}
-                <h6 class="text-sm fw-semibold mb-2">Staff Performance</h6>
+                <h6 class="text-sm fw-semibold mb-2" data-i18n="dashboard.staffPerformance">Staff Performance</h6>
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
                         <thead>
                             <tr>
-                                <th>Staff</th>
-                                <th class="text-center">Assigned</th>
-                                <th class="text-center">Done</th>
+                                <th data-i18n="common.staff">Staff</th>
+                                <th class="text-center" data-i18n="status.assigned">Assigned</th>
+                                <th class="text-center" data-i18n="common.done">Done</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -249,33 +249,33 @@
                         <div class="bg-primary-50 p-3 rounded-3 text-center">
                             <iconify-icon icon="solar:buildings-bold" class="text-xxl text-primary-600 d-block mb-1"></iconify-icon>
                             <h5 class="fw-bold mb-0">{{ total_centers }}</h5>
-                            <small class="text-secondary-light">Centers</small>
+                            <small class="text-secondary-light" data-i18n="common.centers">Centers</small>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="bg-success-50 p-3 rounded-3 text-center">
                             <iconify-icon icon="solar:building-bold" class="text-xxl text-success-600 d-block mb-1"></iconify-icon>
                             <h5 class="fw-bold mb-0">{{ total_branches }}</h5>
-                            <small class="text-secondary-light">Branches</small>
+                            <small class="text-secondary-light" data-i18n="common.branches">Branches</small>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="bg-info-50 p-3 rounded-3 text-center">
                             <iconify-icon icon="solar:users-group-rounded-bold" class="text-xxl text-info-600 d-block mb-1"></iconify-icon>
                             <h5 class="fw-bold mb-0">{{ total_staff }}</h5>
-                            <small class="text-secondary-light">Staff</small>
+                            <small class="text-secondary-light" data-i18n="common.staff">Staff</small>
                         </div>
                     </div>
                 </div>
                 {% if branch_performance %}
-                <h6 class="text-sm fw-semibold mb-2">Branch Performance (This Month)</h6>
+                <h6 class="text-sm fw-semibold mb-2" data-i18n="dashboard.branchPerformanceThisMonth">Branch Performance (This Month)</h6>
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
                         <thead>
                             <tr>
-                                <th>Branch</th>
-                                <th class="text-center">Orders</th>
-                                <th class="text-end">Revenue</th>
+                                <th data-i18n="table.branch">Branch</th>
+                                <th class="text-center" data-i18n="sidebar.orders">Orders</th>
+                                <th class="text-end" data-i18n="dashboard.revenue">Revenue</th>
                             </tr>
                         </thead>
                         <tbody>

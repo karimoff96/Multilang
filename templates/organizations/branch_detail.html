@@ -64,7 +64,7 @@
                 </div>
                 <div>
                     <h5 class="text-xl fw-semibold mb-0">{{ total_staff }}</h5>
-                    <span class="text-sm text-secondary-light">Staff Members</span>
+                    <span class="text-sm text-secondary-light" data-i18n="common.staffMembers">Staff Members</span>
                 </div>
             </div>
         </a>
@@ -77,7 +77,7 @@
                 </div>
                 <div>
                     <h5 class="text-xl fw-semibold mb-0">{{ total_categories }}</h5>
-                    <span class="text-sm text-secondary-light">Categories</span>
+                    <span class="text-sm text-secondary-light" data-i18n="sidebar.categories">Categories</span>
                 </div>
             </div>
         </a>
@@ -90,7 +90,7 @@
                 </div>
                 <div>
                     <h5 class="text-xl fw-semibold mb-0">{{ total_products }}</h5>
-                    <span class="text-sm text-secondary-light">Products</span>
+                    <span class="text-sm text-secondary-light" data-i18n="sidebar.products">Products</span>
                 </div>
             </div>
         </a>
@@ -103,7 +103,7 @@
                 </div>
                 <div>
                     <h5 class="text-xl fw-semibold mb-0">{{ total_orders }}</h5>
-                    <span class="text-sm text-secondary-light">Total Orders</span>
+                    <span class="text-sm text-secondary-light" data-i18n="common.totalOrders">Total Orders</span>
                 </div>
             </div>
         </a>
@@ -117,10 +117,10 @@
             <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="text-lg fw-semibold mb-0">
                     <iconify-icon icon="mdi:account-group" class="me-8 text-success-600"></iconify-icon>
-                    Staff ({{ total_staff }})
+                    <span data-i18n="common.staff">Staff</span> ({{ total_staff }})
                 </h6>
                 <a href="{% url 'staff_create' %}" class="btn btn-primary btn-sm px-12 py-6 radius-8">
-                    <iconify-icon icon="mdi:plus"></iconify-icon> Add
+                    <iconify-icon icon="mdi:plus"></iconify-icon> <span data-i18n="common.add">Add</span>
                 </a>
             </div>
             <div class="card-body p-0">

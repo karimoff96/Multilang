@@ -7,25 +7,25 @@
         <div class="d-flex align-items-center flex-wrap gap-3">
             <form method="get" class="d-flex align-items-center gap-3">
                 <div class="navbar-search">
-                    <input type="text" class="bg-base h-40-px w-auto" name="search" placeholder="Search staff..." value="{{ search }}">
+                    <input type="text" class="bg-base h-40-px w-auto" name="search" data-i18n-placeholder="common.searchStaff" placeholder="Search staff..." value="{{ search }}">
                     <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
                 </div>
                 <select name="role" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="">All Roles</option>
+                    <option value="" data-i18n="common.allRoles">All Roles</option>
                     {% for role in roles %}
                     <option value="{{ role.name }}" {% if role_filter == role.name %}selected{% endif %}>{{ role.get_name_display }}</option>
                     {% endfor %}
                 </select>
                 {% if user.is_superuser and centers %}
                 <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="">All Centers</option>
+                    <option value="" data-i18n="common.allCenters">All Centers</option>
                     {% for center in centers %}
                     <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
                     {% endfor %}
                 </select>
                 {% endif %}
                 <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="">All Branches</option>
+                    <option value="" data-i18n="common.allBranches">All Branches</option>
                     {% for branch in branches %}
                     <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.name }}</option>
                     {% endfor %}
@@ -34,7 +34,7 @@
         </div>
         <a href="{% url 'staff_create' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
             <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
-            Add New Staff
+            <span data-i18n="common.addNewStaff">Add New Staff</span>
         </a>
     </div>
     <div class="card-body p-24">
@@ -43,16 +43,16 @@
                 <thead>
                     <tr>
                         <th scope="col">#</th>
-                        <th scope="col">Staff Member</th>
-                        <th scope="col">Role</th>
+                        <th scope="col" data-i18n="table.staffMember">Staff Member</th>
+                        <th scope="col" data-i18n="table.role">Role</th>
                         {% if user.is_superuser %}
-                        <th scope="col">Center</th>
+                        <th scope="col" data-i18n="table.center">Center</th>
                         {% endif %}
-                        <th scope="col">Branch</th>
-                        <th scope="col">Phone</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Created</th>
-                        <th scope="col" class="text-center">Action</th>
+                        <th scope="col" data-i18n="table.branch">Branch</th>
+                        <th scope="col" data-i18n="table.phone">Phone</th>
+                        <th scope="col" data-i18n="table.status">Status</th>
+                        <th scope="col" data-i18n="table.created">Created</th>
+                        <th scope="col" class="text-center" data-i18n="table.action">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -78,11 +78,11 @@
                         </td>
                         <td>
                             {% if member.role.name == 'owner' %}
-                            <span class="bg-primary-50 text-primary-600 px-16 py-6 radius-4 fw-medium text-sm">Owner</span>
+                            <span class="bg-primary-50 text-primary-600 px-16 py-6 radius-4 fw-medium text-sm" data-i18n="role.owner">Owner</span>
                             {% elif member.role.name == 'manager' %}
-                            <span class="bg-info-50 text-info-600 px-16 py-6 radius-4 fw-medium text-sm">Manager</span>
+                            <span class="bg-info-50 text-info-600 px-16 py-6 radius-4 fw-medium text-sm" data-i18n="role.manager">Manager</span>
                             {% else %}
-                            <span class="bg-secondary-50 text-secondary-600 px-16 py-6 radius-4 fw-medium text-sm">Staff</span>
+                            <span class="bg-secondary-50 text-secondary-600 px-16 py-6 radius-4 fw-medium text-sm" data-i18n="role.staff">Staff</span>
                             {% endif %}
                         </td>
                         {% if user.is_superuser %}
@@ -104,9 +104,9 @@
                         <td>{{ member.phone|default:"-" }}</td>
                         <td>
                             {% if member.is_active %}
-                            <span class="bg-success-focus text-success-main px-24 py-4 radius-4 fw-medium text-sm">Active</span>
+                            <span class="bg-success-focus text-success-main px-24 py-4 radius-4 fw-medium text-sm" data-i18n="common.active">Active</span>
                             {% else %}
-                            <span class="bg-danger-focus text-danger-main px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
+                            <span class="bg-danger-focus text-danger-main px-24 py-4 radius-4 fw-medium text-sm" data-i18n="common.inactive">Inactive</span>
                             {% endif %}
                         </td>
                         <td>{{ member.created_at|date:"M d, Y" }}</td>
@@ -129,7 +129,7 @@
                         <td colspan="{% if user.is_superuser %}9{% else %}8{% endif %}" class="text-center py-24">
                             <div class="text-secondary-light">
                                 <iconify-icon icon="mdi:account-group" class="icon text-4xl mb-8"></iconify-icon>
-                                <p class="mb-0">No staff members found</p>
+                                <p class="mb-0" data-i18n="common.noStaffMembersFound">No staff members found</p>
                             </div>
                         </td>
                     </tr>
@@ -140,7 +140,7 @@
         
         {% if staff.has_other_pages %}
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
-            <span class="text-sm text-secondary-light">
+            <span class="text-sm text-secondary-light" data-i18n="common.showing">
                 Showing {{ staff.start_index }} to {{ staff.end_index }} of {{ staff.paginator.count }} entries
             </span>
             <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">

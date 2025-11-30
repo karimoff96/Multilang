@@ -211,26 +211,26 @@
             <div class="card-header py-16 px-24 border-bottom bg-base">
                 <h6 class="mb-0 fw-semibold">
                     <iconify-icon icon="lucide:help-circle" class="me-1"></iconify-icon>
-                    Permission Guide
+                    <span data-i18n="form.permissionGuide">Permission Guide</span>
                 </h6>
             </div>
             <div class="card-body p-24">
                 <div class="d-flex flex-column gap-16">
                     <div>
-                        <h6 class="text-sm fw-semibold text-primary-main mb-4">Organization Permissions</h6>
-                        <p class="text-sm text-secondary-light mb-0">
+                        <h6 class="text-sm fw-semibold text-primary-main mb-4" data-i18n="form.organizationPermissions">Organization Permissions</h6>
+                        <p class="text-sm text-secondary-light mb-0" data-i18n="form.organizationPermissionsDesc">
                             Control access to centers, branches, and staff management. Usually for owners and managers.
                         </p>
                     </div>
                     <div>
-                        <h6 class="text-sm fw-semibold text-info-main mb-4">Order Permissions</h6>
-                        <p class="text-sm text-secondary-light mb-0">
+                        <h6 class="text-sm fw-semibold text-info-main mb-4" data-i18n="form.orderPermissions">Order Permissions</h6>
+                        <p class="text-sm text-secondary-light mb-0" data-i18n="form.orderPermissionsDesc">
                             "View All Orders" shows all branch orders. "Manage Orders" allows status updates. "Assign Orders" allows delegation to staff.
                         </p>
                     </div>
                     <div>
-                        <h6 class="text-sm fw-semibold text-success-main mb-4">Financial Permissions</h6>
-                        <p class="text-sm text-secondary-light mb-0">
+                        <h6 class="text-sm fw-semibold text-success-main mb-4" data-i18n="form.financialPermissions">Financial Permissions</h6>
+                        <p class="text-sm text-secondary-light mb-0" data-i18n="form.financialPermissionsDesc">
                             "Receive Payments" allows marking orders as paid. "View Reports" shows analytics dashboards.
                         </p>
                     </div>
@@ -238,7 +238,7 @@
                     {% if role.is_system_role %}
                     <div class="alert alert-warning-100 text-warning-600 radius-8 py-12 px-16">
                         <iconify-icon icon="lucide:alert-triangle" class="me-1"></iconify-icon>
-                        <strong>System Role:</strong> The role name cannot be changed as it's used internally.
+                        <span data-i18n="form.systemRoleNote"><strong>System Role:</strong> The role name cannot be changed as it's used internally.</span>
                     </div>
                     {% endif %}
                 </div>

@@ -118,6 +118,76 @@ const translations = {
         ru: 'Элементы UI',
         en: 'UI Elements'
     },
+    'sidebar.reports': {
+        uz: 'Hisobotlar',
+        ru: 'Отчеты',
+        en: 'Reports'
+    },
+    'sidebar.financialReports': {
+        uz: 'Moliyaviy hisobotlar',
+        ru: 'Финансовые отчеты',
+        en: 'Financial Reports'
+    },
+    'sidebar.orderReports': {
+        uz: 'Buyurtma hisobotlari',
+        ru: 'Отчеты по заказам',
+        en: 'Order Reports'
+    },
+    'sidebar.staffPerformance': {
+        uz: 'Xodimlar samaradorligi',
+        ru: 'Эффективность сотрудников',
+        en: 'Staff Performance'
+    },
+    'sidebar.branchComparison': {
+        uz: 'Filiallarni taqqoslash',
+        ru: 'Сравнение филиалов',
+        en: 'Branch Comparison'
+    },
+    'sidebar.customerAnalytics': {
+        uz: 'Mijozlar tahlili',
+        ru: 'Аналитика клиентов',
+        en: 'Customer Analytics'
+    },
+    'sidebar.organization': {
+        uz: 'Tashkilot',
+        ru: 'Организация',
+        en: 'Organization'
+    },
+    'sidebar.centers': {
+        uz: 'Markazlar',
+        ru: 'Центры',
+        en: 'Centers'
+    },
+    'sidebar.branches': {
+        uz: 'Filiallar',
+        ru: 'Филиалы',
+        en: 'Branches'
+    },
+    'sidebar.staff': {
+        uz: 'Xodimlar',
+        ru: 'Сотрудники',
+        en: 'Staff'
+    },
+    'sidebar.rolesPermissions': {
+        uz: 'Rollar va ruxsatlar',
+        ru: 'Роли и права',
+        en: 'Roles & Permissions'
+    },
+    'sidebar.myBranch': {
+        uz: 'Mening filialim',
+        ru: 'Мой филиал',
+        en: 'My Branch'
+    },
+    'sidebar.branchInfo': {
+        uz: 'Filial ma\'lumotlari',
+        ru: 'Информация о филиале',
+        en: 'Branch Info'
+    },
+    'sidebar.myOrders': {
+        uz: 'Mening buyurtmalarim',
+        ru: 'Мои заказы',
+        en: 'My Orders'
+    },
 
     // ========== DASHBOARD/INDEX ==========
     'dashboard.title': {
@@ -159,6 +229,36 @@ const translations = {
         uz: 'Bekor qilindi',
         ru: 'Отменено',
         en: 'Cancelled'
+    },
+    'dashboard.totalAssigned': {
+        uz: 'Jami tayinlangan',
+        ru: 'Всего назначено',
+        en: 'Total Assigned'
+    },
+    'dashboard.completedTodayShort': {
+        uz: 'Bugun bajarildi',
+        ru: 'Выполнено сегодня',
+        en: 'Completed Today'
+    },
+    'dashboard.totalCompleted': {
+        uz: 'Jami bajarilgan',
+        ru: 'Всего выполнено',
+        en: 'Total Completed'
+    },
+    'dashboard.staffPerformance': {
+        uz: 'Xodimlar samaradorligi',
+        ru: 'Эффективность сотрудников',
+        en: 'Staff Performance'
+    },
+    'common.done': {
+        uz: 'Bajarildi',
+        ru: 'Выполнено',
+        en: 'Done'
+    },
+    'common.centers': {
+        uz: 'Markazlar',
+        ru: 'Центры',
+        en: 'Centers'
     },
     'dashboard.pending': {
         uz: 'Kutilmoqda',
@@ -224,6 +324,16 @@ const translations = {
         uz: 'E\'tibor talab qiladi',
         ru: 'Требует внимания',
         en: 'Requires attention'
+    },
+    'dashboard.branchPerformanceThisMonth': {
+        uz: 'Filiallar samaradorligi (bu oy)',
+        ru: 'Производительность филиалов (за этот месяц)',
+        en: 'Branch Performance (This Month)'
+    },
+    'dashboard.revenue': {
+        uz: 'Daromad',
+        ru: 'Выручка',
+        en: 'Revenue'
     },
     'dashboard.processingNow': {
         uz: 'Hozirda ishlanmoqda',
@@ -1220,6 +1330,76 @@ const translations = {
         ru: 'Последние клиенты',
         en: 'Recent Customers'
     },
+    'common.staff': {
+        uz: 'Xodimlar',
+        ru: 'Сотрудники',
+        en: 'Staff'
+    },
+    'common.staffMembers': {
+        uz: 'Xodimlar',
+        ru: 'Сотрудники',
+        en: 'Staff Members'
+    },
+    'common.totalOrders': {
+        uz: 'Jami buyurtmalar',
+        ru: 'Всего заказов',
+        en: 'Total Orders'
+    },
+    'common.add': {
+        uz: 'Qo\'shish',
+        ru: 'Добавить',
+        en: 'Add'
+    },
+    'common.addBranch': {
+        uz: 'Filial qo\'shish',
+        ru: 'Добавить филиал',
+        en: 'Add Branch'
+    },
+    'common.mainBranch': {
+        uz: 'Asosiy filial',
+        ru: 'Главный филиал',
+        en: 'Main Branch'
+    },
+    'common.noBranchesYet': {
+        uz: 'Filiallar hali yo\'q',
+        ru: 'Филиалов пока нет',
+        en: 'No branches yet'
+    },
+    'common.noStaffMembers': {
+        uz: 'Xodimlar yo\'q',
+        ru: 'Нет сотрудников',
+        en: 'No staff members'
+    },
+    'common.noCategories': {
+        uz: 'Kategoriyalar yo\'q',
+        ru: 'Нет категорий',
+        en: 'No categories'
+    },
+    'common.noOrdersYet': {
+        uz: 'Buyurtmalar hali yo\'q',
+        ru: 'Заказов пока нет',
+        en: 'No orders yet'
+    },
+    'common.noOrdersFound': {
+        uz: 'Buyurtmalar topilmadi',
+        ru: 'Заказы не найдены',
+        en: 'No orders found'
+    },
+    'common.noUsersFound': {
+        uz: 'Foydalanuvchilar topilmadi',
+        ru: 'Пользователи не найдены',
+        en: 'No users found'
+    },
+    'common.noCategoriesFound': {
+        uz: 'Kategoriyalar topilmadi',
+        ru: 'Категории не найдены',
+        en: 'No categories found'
+    },
+    'common.noProductsFound': {
+        uz: 'Mahsulotlar topilmadi',
+        ru: 'Продукты не найдены',
+        en: 'No products found'
+    },
     'common.viewAll': {
         uz: 'Hammasini ko\'rish',
         ru: 'Смотреть все',
@@ -1264,6 +1444,96 @@ const translations = {
         uz: 'Boshqarish',
         ru: 'Управление',
         en: 'Manage'
+    },
+    'common.manageBranches': {
+        uz: 'Filiallaringizni boshqaring',
+        ru: 'Управляйте своими филиалами',
+        en: 'Manage your branches'
+    },
+    'common.manageCenters': {
+        uz: 'Tarjima markazlaringizni boshqaring',
+        ru: 'Управляйте своими центрами перевода',
+        en: 'Manage your translation centers'
+    },
+    'common.manageRoles': {
+        uz: 'Platformangiz uchun rollar va ruxsatlarni boshqaring',
+        ru: 'Управляйте ролями и разрешениями для вашей платформы',
+        en: 'Manage roles and permissions for your platform'
+    },
+    'common.addNewBranch': {
+        uz: 'Yangi filial qo\'shish',
+        ru: 'Добавить новый филиал',
+        en: 'Add New Branch'
+    },
+    'common.addNewCenter': {
+        uz: 'Yangi markaz qo\'shish',
+        ru: 'Добавить новый центр',
+        en: 'Add New Center'
+    },
+    'common.addNewStaff': {
+        uz: 'Yangi xodim qo\'shish',
+        ru: 'Добавить нового сотрудника',
+        en: 'Add New Staff'
+    },
+    'common.createNewRole': {
+        uz: 'Yangi rol yaratish',
+        ru: 'Создать новую роль',
+        en: 'Create New Role'
+    },
+    'common.addCenter': {
+        uz: 'Markaz qo\'shish',
+        ru: 'Добавить центр',
+        en: 'Add Center'
+    },
+    'common.noBranchesFound': {
+        uz: 'Filiallar topilmadi',
+        ru: 'Филиалы не найдены',
+        en: 'No branches found'
+    },
+    'common.noCentersFound': {
+        uz: 'Markazlar topilmadi',
+        ru: 'Центры не найдены',
+        en: 'No translation centers found'
+    },
+    'common.startByCreatingBranch': {
+        uz: 'Birinchi filialingizni yaratishdan boshlang',
+        ru: 'Начните с создания первого филиала',
+        en: 'Get started by creating your first branch'
+    },
+    'common.startByCreatingCenter': {
+        uz: 'Birinchi tarjima markazingizni yaratishdan boshlang',
+        ru: 'Начните с создания первого центра перевода',
+        en: 'Get started by creating your first translation center'
+    },
+    'common.noStaffMembersFound': {
+        uz: 'Xodimlar topilmadi',
+        ru: 'Сотрудники не найдены',
+        en: 'No staff members found'
+    },
+    'common.noRolesFound': {
+        uz: 'Rollar topilmadi. Birinchi rolingizni yarating!',
+        ru: 'Роли не найдены. Создайте свою первую роль!',
+        en: 'No roles found. Create your first role!'
+    },
+    'common.searchStaff': {
+        uz: 'Xodimlarni qidirish...',
+        ru: 'Поиск сотрудников...',
+        en: 'Search staff...'
+    },
+    'common.allRoles': {
+        uz: 'Barcha rollar',
+        ru: 'Все роли',
+        en: 'All Roles'
+    },
+    'common.system': {
+        uz: 'Tizim',
+        ru: 'Система',
+        en: 'System'
+    },
+    'common.permissionReference': {
+        uz: 'Ruxsatlar ma\'lumotnomasi',
+        ru: 'Справочник разрешений',
+        en: 'Permission Reference'
     },
 
     // ========== TABLE HEADERS ==========
@@ -1326,6 +1596,362 @@ const translations = {
         uz: 'Mahsulotlar topilmadi',
         ru: 'Продукты не найдены',
         en: 'No products found'
+    },
+    'table.staffMember': {
+        uz: 'Xodim',
+        ru: 'Сотрудник',
+        en: 'Staff Member'
+    },
+    'table.phone': {
+        uz: 'Telefon',
+        ru: 'Телефон',
+        en: 'Phone'
+    },
+    'table.created': {
+        uz: 'Yaratilgan',
+        ru: 'Создан',
+        en: 'Created'
+    },
+    'table.action': {
+        uz: 'Amallar',
+        ru: 'Действия',
+        en: 'Action'
+    },
+    'table.actions': {
+        uz: 'Amallar',
+        ru: 'Действия',
+        en: 'Actions'
+    },
+    'table.roleName': {
+        uz: 'Rol nomi',
+        ru: 'Название роли',
+        en: 'Role Name'
+    },
+    'table.description': {
+        uz: 'Tavsif',
+        ru: 'Описание',
+        en: 'Description'
+    },
+    'table.users': {
+        uz: 'Foydalanuvchilar',
+        ru: 'Пользователи',
+        en: 'Users'
+    },
+    'table.permissions': {
+        uz: 'Ruxsatlar',
+        ru: 'Разрешения',
+        en: 'Permissions'
+    },
+
+    // ========== ROLES ==========
+    'role.owner': {
+        uz: 'Egasi',
+        ru: 'Владелец',
+        en: 'Owner'
+    },
+    'role.manager': {
+        uz: 'Menejer',
+        ru: 'Менеджер',
+        en: 'Manager'
+    },
+    'role.staff': {
+        uz: 'Xodim',
+        ru: 'Сотрудник',
+        en: 'Staff'
+    },
+
+    // ========== PERMISSIONS ==========
+    'permission.centers': {
+        uz: 'Markazlar',
+        ru: 'Центры',
+        en: 'Centers'
+    },
+    'permission.branches': {
+        uz: 'Filiallar',
+        ru: 'Филиалы',
+        en: 'Branches'
+    },
+    'permission.staff': {
+        uz: 'Xodimlar',
+        ru: 'Сотрудники',
+        en: 'Staff'
+    },
+    'permission.orders': {
+        uz: 'Buyurtmalar',
+        ru: 'Заказы',
+        en: 'Orders'
+    },
+    'permission.reports': {
+        uz: 'Hisobotlar',
+        ru: 'Отчеты',
+        en: 'Reports'
+    },
+    'permission.payments': {
+        uz: 'To\'lovlar',
+        ru: 'Платежи',
+        en: 'Payments'
+    },
+
+    // ========== FORMS ==========
+    'form.accountInfo': {
+        uz: 'Hisob ma\'lumotlari',
+        ru: 'Информация об аккаунте',
+        en: 'Account Information'
+    },
+    'form.username': {
+        uz: 'Foydalanuvchi nomi',
+        ru: 'Имя пользователя',
+        en: 'Username'
+    },
+    'form.email': {
+        uz: 'Email',
+        ru: 'Email',
+        en: 'Email'
+    },
+    'form.firstName': {
+        uz: 'Ism',
+        ru: 'Имя',
+        en: 'First Name'
+    },
+    'form.lastName': {
+        uz: 'Familiya',
+        ru: 'Фамилия',
+        en: 'Last Name'
+    },
+    'form.password': {
+        uz: 'Parol',
+        ru: 'Пароль',
+        en: 'Password'
+    },
+    'form.phone': {
+        uz: 'Telefon',
+        ru: 'Телефон',
+        en: 'Phone'
+    },
+    'form.roleAssignment': {
+        uz: 'Rol va tayinlash',
+        ru: 'Роль и назначение',
+        en: 'Role & Assignment'
+    },
+    'form.role': {
+        uz: 'Rol',
+        ru: 'Роль',
+        en: 'Role'
+    },
+    'form.branch': {
+        uz: 'Filial',
+        ru: 'Филиал',
+        en: 'Branch'
+    },
+    'form.status': {
+        uz: 'Holat',
+        ru: 'Статус',
+        en: 'Status'
+    },
+    'form.selectRole': {
+        uz: 'Rolni tanlang',
+        ru: 'Выберите роль',
+        en: 'Select Role'
+    },
+    'form.selectBranch': {
+        uz: 'Filialni tanlang',
+        ru: 'Выберите филиал',
+        en: 'Select Branch'
+    },
+    'form.selectCenter': {
+        uz: 'Markazni tanlang',
+        ru: 'Выберите центр',
+        en: 'Select Center'
+    },
+    'form.selectRegion': {
+        uz: 'Viloyatni tanlang',
+        ru: 'Выберите регион',
+        en: 'Select Region'
+    },
+    'form.selectDistrict': {
+        uz: 'Tumanni tanlang',
+        ru: 'Выберите район',
+        en: 'Select District'
+    },
+    'form.enterUsername': {
+        uz: 'Foydalanuvchi nomini kiriting',
+        ru: 'Введите имя пользователя',
+        en: 'Enter username'
+    },
+    'form.enterEmail': {
+        uz: 'Email kiriting',
+        ru: 'Введите email',
+        en: 'Enter email'
+    },
+    'form.enterFirstName': {
+        uz: 'Ismni kiriting',
+        ru: 'Введите имя',
+        en: 'Enter first name'
+    },
+    'form.enterLastName': {
+        uz: 'Familiyani kiriting',
+        ru: 'Введите фамилию',
+        en: 'Enter last name'
+    },
+    'form.enterPassword': {
+        uz: 'Parolni kiriting',
+        ru: 'Введите пароль',
+        en: 'Enter password'
+    },
+    'form.enterPhone': {
+        uz: 'Telefon raqamini kiriting',
+        ru: 'Введите номер телефона',
+        en: 'Enter phone number'
+    },
+    'form.leaveBlankToKeep': {
+        uz: 'Joriy parolni saqlash uchun bo\'sh qoldiring',
+        ru: 'Оставьте пустым для сохранения текущего',
+        en: 'Leave blank to keep current'
+    },
+    'form.usernameCannotChange': {
+        uz: 'Foydalanuvchi nomini o\'zgartirib bo\'lmaydi',
+        ru: 'Имя пользователя нельзя изменить',
+        en: 'Username cannot be changed'
+    },
+    'form.createStaff': {
+        uz: 'Xodim yaratish',
+        ru: 'Создать сотрудника',
+        en: 'Create Staff'
+    },
+    'form.updateStaff': {
+        uz: 'Xodimni yangilash',
+        ru: 'Обновить сотрудника',
+        en: 'Update Staff'
+    },
+    'form.centerInfo': {
+        uz: 'Markaz ma\'lumotlari',
+        ru: 'Информация о центре',
+        en: 'Center Information'
+    },
+    'form.branchInfo': {
+        uz: 'Filial ma\'lumotlari',
+        ru: 'Информация о филиале',
+        en: 'Branch Information'
+    },
+    'form.locationUrl': {
+        uz: 'Joylashuv havolasi',
+        ru: 'Ссылка на местоположение',
+        en: 'Location URL'
+    },
+    'form.pasteMapLink': {
+        uz: 'Google Maps yoki Yandex Maps havolasini joylashtiring',
+        ru: 'Вставьте ссылку из Google Maps или Yandex Maps',
+        en: 'Paste a link from Google Maps or Yandex Maps'
+    },
+    'form.organizationPermissions': {
+        uz: 'Tashkilot ruxsatlari',
+        ru: 'Разрешения организации',
+        en: 'Organization Permissions'
+    },
+    'form.orderPermissions': {
+        uz: 'Buyurtma ruxsatlari',
+        ru: 'Разрешения заказов',
+        en: 'Order Permissions'
+    },
+    'form.financialPermissions': {
+        uz: 'Moliyaviy ruxsatlar',
+        ru: 'Финансовые разрешения',
+        en: 'Financial Permissions'
+    },
+    'form.systemRoleNote': {
+        uz: 'Tizim roli: Rol nomi o\'zgartirilmaydi, chunki u ichki foydalaniladi.',
+        ru: 'Системная роль: Название роли нельзя изменить, так как оно используется внутренне.',
+        en: 'System Role: The role name cannot be changed as it\'s used internally.'
+    },
+    'form.translationCenter': {
+        uz: 'Tarjima markazi',
+        ru: 'Центр перевода',
+        en: 'Translation Center'
+    },
+    'form.branchName': {
+        uz: 'Filial nomi',
+        ru: 'Название филиала',
+        en: 'Branch Name'
+    },
+    'form.enterBranchName': {
+        uz: 'Filial nomini kiriting',
+        ru: 'Введите название филиала',
+        en: 'Enter branch name'
+    },
+    'form.location': {
+        uz: 'Joylashuv',
+        ru: 'Местоположение',
+        en: 'Location'
+    },
+    'form.region': {
+        uz: 'Viloyat',
+        ru: 'Регион',
+        en: 'Region'
+    },
+    'form.district': {
+        uz: 'Tuman',
+        ru: 'Район',
+        en: 'District'
+    },
+    'form.address': {
+        uz: 'Manzil',
+        ru: 'Адрес',
+        en: 'Address'
+    },
+    'form.enterAddress': {
+        uz: 'To\'liq manzilni kiriting',
+        ru: 'Введите полный адрес',
+        en: 'Enter full address'
+    },
+    'form.createBranch': {
+        uz: 'Filial yaratish',
+        ru: 'Создать филиал',
+        en: 'Create Branch'
+    },
+    'form.updateBranch': {
+        uz: 'Filialni yangilash',
+        ru: 'Обновить филиал',
+        en: 'Update Branch'
+    },
+    'form.createCenter': {
+        uz: 'Markaz yaratish',
+        ru: 'Создать центр',
+        en: 'Create Center'
+    },
+    'form.updateCenter': {
+        uz: 'Markazni yangilash',
+        ru: 'Обновить центр',
+        en: 'Update Center'
+    },
+    'form.centerName': {
+        uz: 'Markaz nomi',
+        ru: 'Название центра',
+        en: 'Center Name'
+    },
+    'form.enterCenterName': {
+        uz: 'Markaz nomini kiriting',
+        ru: 'Введите название центра',
+        en: 'Enter center name'
+    },
+    'form.permissionGuide': {
+        uz: 'Ruxsatlar qo\'llanmasi',
+        ru: 'Руководство по разрешениям',
+        en: 'Permission Guide'
+    },
+    'form.organizationPermissionsDesc': {
+        uz: 'Markazlar, filiallar va xodimlarni boshqarishga kirishni nazorat qilish. Odatda egalar va menejerlar uchun.',
+        ru: 'Контроль доступа к центрам, филиалам и управлению персоналом. Обычно для владельцев и менеджеров.',
+        en: 'Control access to centers, branches, and staff management. Usually for owners and managers.'
+    },
+    'form.orderPermissionsDesc': {
+        uz: '"Barcha buyurtmalarni ko\'rish" filial buyurtmalarini ko\'rsatadi. "Buyurtmalarni boshqarish" holat yangilashga imkon beradi. "Buyurtmalarni tayinlash" xodimlarga topshirishga imkon beradi.',
+        ru: '"Просмотр всех заказов" показывает все заказы филиала. "Управление заказами" позволяет обновлять статус. "Назначение заказов" позволяет делегировать сотрудникам.',
+        en: '"View All Orders" shows all branch orders. "Manage Orders" allows status updates. "Assign Orders" allows delegation to staff.'
+    },
+    'form.financialPermissionsDesc': {
+        uz: '"To\'lovlarni qabul qilish" buyurtmalarni to\'langan deb belgilashga imkon beradi. "Hisobotlarni ko\'rish" tahlil panellarini ko\'rsatadi.',
+        ru: '"Получение платежей" позволяет отмечать заказы как оплаченные. "Просмотр отчетов" показывает аналитические панели.',
+        en: '"Receive Payments" allows marking orders as paid. "View Reports" shows analytics dashboards.'
     },
 
     // ========== DETAIL PAGES ==========
@@ -1895,6 +2521,353 @@ const translations = {
         uz: 'Joriy parolni kiriting',
         ru: 'Введите текущий пароль',
         en: 'Enter Current Password'
+    },
+
+    // ========== REPORTS ==========
+    'report.orderStats': {
+        uz: 'Buyurtma statistikasi',
+        ru: 'Статистика заказов',
+        en: 'Order Statistics'
+    },
+    'report.dailyOrderTrend': {
+        uz: 'Kunlik buyurtma tendentsiyasi',
+        ru: 'Ежедневный тренд заказов',
+        en: 'Daily Order Trend'
+    },
+    'report.statusDistribution': {
+        uz: 'Holat taqsimoti',
+        ru: 'Распределение статусов',
+        en: 'Status Distribution'
+    },
+    'report.topLanguagePairs': {
+        uz: 'Eng ko\'p til juftliklari',
+        ru: 'Топ языковых пар',
+        en: 'Top Language Pairs'
+    },
+    'report.languagePair': {
+        uz: 'Til juftligi',
+        ru: 'Языковая пара',
+        en: 'Language Pair'
+    },
+    'report.count': {
+        uz: 'Soni',
+        ru: 'Количество',
+        en: 'Count'
+    },
+    'report.completionRate': {
+        uz: 'Bajarilish darajasi',
+        ru: 'Процент выполнения',
+        en: 'Completion Rate'
+    },
+    'report.totalOrders': {
+        uz: 'Jami buyurtmalar',
+        ru: 'Всего заказов',
+        en: 'Total Orders'
+    },
+    'report.completed': {
+        uz: 'Bajarilgan',
+        ru: 'Выполнено',
+        en: 'Completed'
+    },
+    'report.inProgress': {
+        uz: 'Jarayonda',
+        ru: 'В процессе',
+        en: 'In Progress'
+    },
+    'report.pending': {
+        uz: 'Kutilmoqda',
+        ru: 'Ожидание',
+        en: 'Pending'
+    },
+    'report.cancelled': {
+        uz: 'Bekor qilingan',
+        ru: 'Отменено',
+        en: 'Cancelled'
+    },
+    'form.fromDate': {
+        uz: 'Boshlanish sanasi',
+        ru: 'Дата начала',
+        en: 'From Date'
+    },
+    'form.toDate': {
+        uz: 'Tugash sanasi',
+        ru: 'Дата окончания',
+        en: 'To Date'
+    },
+    'common.apply': {
+        uz: 'Qo\'llash',
+        ru: 'Применить',
+        en: 'Apply'
+    },
+    'common.export': {
+        uz: 'Eksport',
+        ru: 'Экспорт',
+        en: 'Export'
+    },
+    'common.allCenters': {
+        uz: 'Barcha markazlar',
+        ru: 'Все центры',
+        en: 'All Centers'
+    },
+    'common.allBranches': {
+        uz: 'Barcha filiallar',
+        ru: 'Все филиалы',
+        en: 'All Branches'
+    },
+    'common.allStatuses': {
+        uz: 'Barcha holatlar',
+        ru: 'Все статусы',
+        en: 'All Statuses'
+    },
+    'common.noData': {
+        uz: 'Ma\'lumot yo\'q',
+        ru: 'Нет данных',
+        en: 'No data'
+    },
+    'common.noOrdersFound': {
+        uz: 'Buyurtmalar topilmadi',
+        ru: 'Заказы не найдены',
+        en: 'No orders found'
+    },
+    'common.noProductsData': {
+        uz: 'Mahsulot ma\'lumotlari yo\'q',
+        ru: 'Нет данных о продуктах',
+        en: 'No products data'
+    },
+    'common.agency': {
+        uz: 'Agentlik',
+        ru: 'Агентство',
+        en: 'Agency'
+    },
+
+    // ========== FINANCIAL REPORTS ==========
+    'report.financialReport': {
+        uz: 'Moliyaviy hisobot',
+        ru: 'Финансовый отчет',
+        en: 'Financial Report'
+    },
+    'report.revenueAnalytics': {
+        uz: 'Daromad va moliyaviy tahlil',
+        ru: 'Анализ доходов и финансов',
+        en: 'Revenue and financial analytics'
+    },
+    'report.totalRevenue': {
+        uz: 'Jami daromad',
+        ru: 'Общий доход',
+        en: 'Total Revenue'
+    },
+    'report.completedRevenue': {
+        uz: 'Bajarilgan daromad',
+        ru: 'Доход по выполненным',
+        en: 'Completed Revenue'
+    },
+    'report.avgOrderValue': {
+        uz: 'O\'rtacha buyurtma qiymati',
+        ru: 'Средняя стоимость заказа',
+        en: 'Avg Order Value'
+    },
+    'report.dailyRevenueTrend': {
+        uz: 'Kunlik daromad tendentsiyasi',
+        ru: 'Ежедневный тренд дохода',
+        en: 'Daily Revenue Trend'
+    },
+    'report.revenueByStatus': {
+        uz: 'Holat bo\'yicha daromad',
+        ru: 'Доход по статусам',
+        en: 'Revenue by Status'
+    },
+    'report.revenue': {
+        uz: 'Daromad',
+        ru: 'Доход',
+        en: 'Revenue'
+    },
+    'report.revenueByBranch': {
+        uz: 'Filial bo\'yicha daromad',
+        ru: 'Доход по филиалам',
+        en: 'Revenue by Branch'
+    },
+    'report.topProductsByRevenue': {
+        uz: 'Daromad bo\'yicha eng yaxshi mahsulotlar',
+        ru: 'Топ продуктов по доходу',
+        en: 'Top Products by Revenue'
+    },
+
+    // ========== STAFF PERFORMANCE REPORTS ==========
+    'report.staffPerformance': {
+        uz: 'Xodimlar samaradorligi',
+        ru: 'Эффективность сотрудников',
+        en: 'Staff Performance'
+    },
+    'report.staffPerformanceDesc': {
+        uz: 'Xodimlar samaradorligi ko\'rsatkichlarini kuzatish va tahlil qilish',
+        ru: 'Отслеживание и анализ показателей эффективности сотрудников',
+        en: 'Track and analyze staff performance metrics'
+    },
+    'report.topPerformersCompleted': {
+        uz: 'Eng yaxshi ijrochilar - Bajarilgan buyurtmalar',
+        ru: 'Лучшие исполнители - Выполненные заказы',
+        en: 'Top Performers - Completed Orders'
+    },
+    'report.topPerformers': {
+        uz: 'Eng yaxshi ijrochilar',
+        ru: 'Лучшие исполнители',
+        en: 'Top Performers'
+    },
+    'report.noPerformanceData': {
+        uz: 'Samaradorlik ma\'lumotlari yo\'q',
+        ru: 'Нет данных об эффективности',
+        en: 'No performance data yet'
+    },
+    'report.allStaffPerformance': {
+        uz: 'Barcha xodimlar samaradorligi',
+        ru: 'Эффективность всех сотрудников',
+        en: 'All Staff Performance'
+    },
+    'report.revenueGenerated': {
+        uz: 'Olingan daromad',
+        ru: 'Сгенерированный доход',
+        en: 'Revenue Generated'
+    },
+    'report.noStaffData': {
+        uz: 'Xodimlar ma\'lumotlari mavjud emas',
+        ru: 'Данные о сотрудниках недоступны',
+        en: 'No staff data available'
+    },
+    'report.completedOrders': {
+        uz: 'Bajarilgan buyurtmalar',
+        ru: 'Выполненные заказы',
+        en: 'Completed Orders'
+    },
+
+    // ========== BRANCH COMPARISON REPORTS ==========
+    'report.branchComparison': {
+        uz: 'Filiallarni taqqoslash',
+        ru: 'Сравнение филиалов',
+        en: 'Branch Comparison'
+    },
+    'report.branchComparisonDesc': {
+        uz: 'Barcha filiallar bo\'yicha samaradorlikni taqqoslash',
+        ru: 'Сравнение эффективности всех филиалов',
+        en: 'Compare performance across all branches'
+    },
+    'report.totalStaff': {
+        uz: 'Jami xodimlar',
+        ru: 'Всего сотрудников',
+        en: 'Total Staff'
+    },
+    'report.totalCustomers': {
+        uz: 'Jami mijozlar',
+        ru: 'Всего клиентов',
+        en: 'Total Customers'
+    },
+    'report.ordersByBranch': {
+        uz: 'Filial bo\'yicha buyurtmalar',
+        ru: 'Заказы по филиалам',
+        en: 'Orders by Branch'
+    },
+    'report.branchPerformanceDetails': {
+        uz: 'Filial samaradorligi tafsilotlari',
+        ru: 'Детали эффективности филиалов',
+        en: 'Branch Performance Details'
+    },
+    'report.avgValue': {
+        uz: 'O\'rtacha qiymat',
+        ru: 'Средняя стоимость',
+        en: 'Avg Value'
+    },
+    'report.noBranchesToCompare': {
+        uz: 'Taqqoslash uchun filiallar yo\'q',
+        ru: 'Нет филиалов для сравнения',
+        en: 'No branches to compare'
+    },
+    'report.noBranchData': {
+        uz: 'Filial ma\'lumotlari yo\'q',
+        ru: 'Нет данных о филиалах',
+        en: 'No branch data'
+    },
+
+    // ========== CUSTOMER ANALYTICS REPORTS ==========
+    'report.customerAnalytics': {
+        uz: 'Mijozlar tahlili',
+        ru: 'Аналитика клиентов',
+        en: 'Customer Analytics'
+    },
+    'report.customerAnalyticsDesc': {
+        uz: 'Mijozlarni jalb qilish va xulq-atvor tahlili',
+        ru: 'Анализ привлечения и поведения клиентов',
+        en: 'Customer acquisition and behavior analytics'
+    },
+    'report.activeCustomers': {
+        uz: 'Faol mijozlar',
+        ru: 'Активные клиенты',
+        en: 'Active Customers'
+    },
+    'report.newPeriod': {
+        uz: 'Yangi (Davr)',
+        ru: 'Новые (Период)',
+        en: 'New (Period)'
+    },
+    'report.customerAcquisitionTrend': {
+        uz: 'Mijozlarni jalb qilish tendentsiyasi',
+        ru: 'Тренд привлечения клиентов',
+        en: 'Customer Acquisition Trend'
+    },
+    'report.customerTypes': {
+        uz: 'Mijoz turlari',
+        ru: 'Типы клиентов',
+        en: 'Customer Types'
+    },
+    'report.topCustomersByRevenue': {
+        uz: 'Daromad bo\'yicha eng yaxshi mijozlar',
+        ru: 'Топ клиентов по доходу',
+        en: 'Top Customers by Revenue'
+    },
+    'report.totalSpent': {
+        uz: 'Jami sarflangan',
+        ru: 'Всего потрачено',
+        en: 'Total Spent'
+    },
+    'report.noCustomerData': {
+        uz: 'Mijoz ma\'lumotlari mavjud emas',
+        ru: 'Данные о клиентах недоступны',
+        en: 'No customer data available'
+    },
+    'report.newCustomers': {
+        uz: 'Yangi mijozlar',
+        ru: 'Новые клиенты',
+        en: 'New Customers'
+    },
+    'report.noAcquisitionData': {
+        uz: 'Bu davr uchun jalb qilish ma\'lumotlari yo\'q',
+        ru: 'Нет данных о привлечении за этот период',
+        en: 'No acquisition data for this period'
+    },
+
+    // ========== TABLE HEADERS ==========
+    'table.staffMember': {
+        uz: 'Xodim',
+        ru: 'Сотрудник',
+        en: 'Staff Member'
+    },
+    'table.assigned': {
+        uz: 'Tayinlangan',
+        ru: 'Назначено',
+        en: 'Assigned'
+    },
+    'table.rate': {
+        uz: 'Daraja',
+        ru: 'Ставка',
+        en: 'Rate'
+    },
+    'table.type': {
+        uz: 'Turi',
+        ru: 'Тип',
+        en: 'Type'
+    },
+    'table.orders': {
+        uz: 'Buyurtmalar',
+        ru: 'Заказы',
+        en: 'Orders'
     }
 };
 

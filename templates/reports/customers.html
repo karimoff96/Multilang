@@ -8,23 +8,23 @@
             <div class="card-body p-24">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                     <div>
-                        <h5 class="fw-bold mb-0">{{ title }}</h5>
-                        <p class="text-secondary-light mb-0">Customer acquisition and behavior analytics</p>
+                        <h5 class="fw-bold mb-0" data-i18n="report.customerAnalytics">{{ title }}</h5>
+                        <p class="text-secondary-light mb-0" data-i18n="report.customerAnalyticsDesc">Customer acquisition and behavior analytics</p>
                     </div>
                     <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
                         <div>
-                            <label class="form-label text-sm mb-1">From Date</label>
+                            <label class="form-label text-sm mb-1" data-i18n="form.fromDate">From Date</label>
                             <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
                         </div>
                         <div>
-                            <label class="form-label text-sm mb-1">To Date</label>
+                            <label class="form-label text-sm mb-1" data-i18n="form.toDate">To Date</label>
                             <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
                         </div>
                         {% if user.is_superuser and centers %}
                         <div>
-                            <label class="form-label text-sm mb-1">Center</label>
+                            <label class="form-label text-sm mb-1" data-i18n="common.center">Center</label>
                             <select name="center" class="form-select" onchange="this.form.submit()">
-                                <option value="">All Centers</option>
+                                <option value="" data-i18n="common.allCenters">All Centers</option>
                                 {% for center in centers %}
                                 <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
                                 {% endfor %}
@@ -33,9 +33,9 @@
                         {% endif %}
                         {% if branches %}
                         <div>
-                            <label class="form-label text-sm mb-1">Branch</label>
+                            <label class="form-label text-sm mb-1" data-i18n="common.branch">Branch</label>
                             <select name="branch" class="form-select">
-                                <option value="">All Branches</option>
+                                <option value="" data-i18n="common.allBranches">All Branches</option>
                                 {% for branch in branches %}
                                 <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
                                 {% endfor %}
@@ -44,7 +44,7 @@
                         {% endif %}
                         <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
                             <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
-                            Apply
+                            <span data-i18n="common.apply">Apply</span>
                         </button>
                     </form>
                 </div>
@@ -61,7 +61,7 @@
                         <iconify-icon icon="solar:users-group-rounded-bold" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">Total Customers</span>
+                        <span class="text-secondary-light text-sm" data-i18n="report.totalCustomers">Total Customers</span>
                         <h4 class="fw-bold mb-0">{{ total_customers }}</h4>
                     </div>
                 </div>
@@ -76,7 +76,7 @@
                         <iconify-icon icon="solar:check-circle-bold" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">Active Customers</span>
+                        <span class="text-secondary-light text-sm" data-i18n="report.activeCustomers">Active Customers</span>
                         <h4 class="fw-bold mb-0">{{ active_customers }}</h4>
                     </div>
                 </div>
@@ -91,7 +91,7 @@
                         <iconify-icon icon="solar:user-plus-bold" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">New (Period)</span>
+                        <span class="text-secondary-light text-sm" data-i18n="report.newPeriod">New (Period)</span>
                         <h4 class="fw-bold mb-0">{{ new_customers }}</h4>
                     </div>
                 </div>
@@ -106,7 +106,7 @@
                         <iconify-icon icon="solar:buildings-bold" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">Agencies</span>
+                        <span class="text-secondary-light text-sm" data-i18n="sidebar.agencies">Agencies</span>
                         <h4 class="fw-bold mb-0">{{ agencies }}</h4>
                     </div>
                 </div>
@@ -118,7 +118,7 @@
     <div class="col-xxl-8">
         <div class="card radius-8 border-0 h-100">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Customer Acquisition Trend</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.customerAcquisitionTrend">Customer Acquisition Trend</h6>
                 <div id="acquisitionChart" style="min-height: 300px;"></div>
             </div>
         </div>
@@ -128,7 +128,7 @@
     <div class="col-xxl-4">
         <div class="card radius-8 border-0 h-100">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Customer Types</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.customerTypes">Customer Types</h6>
                 <div class="d-flex flex-column gap-3">
                     {% for type in type_breakdown %}
                     <div class="p-3 rounded-3 bg-{% if type.type == 'Agencies' %}primary{% else %}secondary{% endif %}-50">
@@ -151,16 +151,16 @@
     <div class="col-12">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4">Top Customers by Revenue</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.topCustomersByRevenue">Top Customers by Revenue</h6>
                 <div class="table-responsive">
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
                                 <th scope="col" class="bg-base text-secondary-light">#</th>
-                                <th scope="col" class="bg-base text-secondary-light">Customer</th>
-                                <th scope="col" class="bg-base text-secondary-light">Type</th>
-                                <th scope="col" class="bg-base text-secondary-light text-center">Orders</th>
-                                <th scope="col" class="bg-base text-secondary-light text-end">Total Spent</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.customer">Customer</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.type">Type</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.orders">Orders</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="report.totalSpent">Total Spent</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -186,9 +186,9 @@
                                 </td>
                                 <td class="{{ row_color }}">
                                     {% if customer.is_agency %}
-                                    <span class="badge bg-primary-focus text-primary-main">Agency</span>
+                                    <span class="badge bg-primary-focus text-primary-main" data-i18n="common.agency">Agency</span>
                                     {% else %}
-                                    <span class="badge bg-success-focus text-success-main">Customer</span>
+                                    <span class="badge bg-success-focus text-success-main" data-i18n="table.customer">Customer</span>
                                     {% endif %}
                                 </td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ customer.order_count }}</td>
@@ -199,7 +199,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="text-center text-secondary-light py-4 bg-base">
+                                <td colspan="5" class="text-center text-secondary-light py-4 bg-base" data-i18n="report.noCustomerData">
                                     No customer data available
                                 </td>
                             </tr>
@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (acquisitionLabels.length > 0) {
         new ApexCharts(document.querySelector("#acquisitionChart"), {
-            series: [{ name: 'New Customers', data: acquisitionValues }],
+            series: [{ name: LanguageManager.translate('report.newCustomers') || 'New Customers', data: acquisitionValues }],
             chart: { type: 'area', height: 300, toolbar: { show: false } },
             colors: ['#487FFF'],
             fill: {
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
             grid: { borderColor: '#E4E7EC', strokeDashArray: 3 }
         }).render();
     } else {
-        document.querySelector("#acquisitionChart").innerHTML = '<div class="text-center text-secondary-light py-4 bg-base">No acquisition data for this period</div>';
+        document.querySelector("#acquisitionChart").innerHTML = '<div class="text-center text-secondary-light py-4 bg-base" data-i18n="report.noAcquisitionData">No acquisition data for this period</div>';
     }
 });
 </script>
