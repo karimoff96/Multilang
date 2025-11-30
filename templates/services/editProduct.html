@@ -29,13 +29,6 @@
                         </h6>
                         <div class="row">
                             <div class="col-md-6 mb-20">
-                                <label for="name" class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                    <span data-i18n="form.productName">Product Name</span> <span class="text-danger-600">*</span>
-                                </label>
-                                <input type="text" class="form-control radius-8" id="name" name="name" 
-                                       data-i18n-placeholder="form.enterProductName" placeholder="Enter product name" value="{{ product.name }}" required>
-                            </div>
-                            <div class="col-md-6 mb-20">
                                 <label for="category" class="form-label fw-semibold text-primary-light text-sm mb-8">
                                     <span data-i18n="table.category">Category</span> <span class="text-danger-600">*</span>
                                 </label>
@@ -46,12 +39,65 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-12 mb-20">
-                                <label for="description" class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.description">
-                                    Description
-                                </label>
-                                <textarea class="form-control radius-8" id="description" name="description" 
-                                          rows="2" data-i18n-placeholder="form.enterDescription" placeholder="Enter product description">{{ product.description|default:'' }}</textarea>
+                        </div>
+                        
+                        <!-- Translatable Product Name -->
+                        <div class="mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <span data-i18n="form.productName">Product Name</span> <span class="text-danger-600">*</span>
+                            </label>
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light-100 border-end-0 text-sm px-12">🇺🇿 UZ</span>
+                                        <input type="text" class="form-control radius-8 border-start-0" id="name_uz" name="name_uz" 
+                                               placeholder="O'zbek tilida" value="{{ product.name_uz|default:'' }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light-100 border-end-0 text-sm px-12">🇷🇺 RU</span>
+                                        <input type="text" class="form-control radius-8 border-start-0" id="name_ru" name="name_ru" 
+                                               placeholder="На русском" value="{{ product.name_ru|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light-100 border-end-0 text-sm px-12">🇬🇧 EN</span>
+                                        <input type="text" class="form-control radius-8 border-start-0" id="name_en" name="name_en" 
+                                               placeholder="In English" value="{{ product.name_en|default:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Translatable Description -->
+                        <div class="mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.description">
+                                Description
+                            </label>
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light-100 border-end-0 text-sm px-12 align-items-start pt-12">🇺🇿 UZ</span>
+                                        <textarea class="form-control radius-8 border-start-0" id="description_uz" name="description_uz" 
+                                                  rows="2" placeholder="Tavsif o'zbek tilida">{{ product.description_uz|default:'' }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light-100 border-end-0 text-sm px-12 align-items-start pt-12">🇷🇺 RU</span>
+                                        <textarea class="form-control radius-8 border-start-0" id="description_ru" name="description_ru" 
+                                                  rows="2" placeholder="Описание на русском">{{ product.description_ru|default:'' }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light-100 border-end-0 text-sm px-12 align-items-start pt-12">🇬🇧 EN</span>
+                                        <textarea class="form-control radius-8 border-start-0" id="description_en" name="description_en" 
+                                                  rows="2" placeholder="Description in English">{{ product.description_en|default:'' }}</textarea>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

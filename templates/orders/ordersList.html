@@ -11,7 +11,7 @@
                     <iconify-icon icon="solar:document-text-bold" class="text-primary-600 text-xl"></iconify-icon>
                 </div>
                 <div>
-                    <span class="text-secondary-light text-xs">Total</span>
+                    <span class="text-secondary-light text-xs" data-i18n="table.total">Total</span>
                     <h6 class="mb-0">{{ stats.total }}</h6>
                 </div>
             </div>
@@ -24,7 +24,7 @@
                     <iconify-icon icon="solar:hourglass-bold" class="text-warning-600 text-xl"></iconify-icon>
                 </div>
                 <div>
-                    <span class="text-secondary-light text-xs">Pending</span>
+                    <span class="text-secondary-light text-xs" data-i18n="status.pending">Pending</span>
                     <h6 class="mb-0">{{ stats.pending }}</h6>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                     <iconify-icon icon="solar:play-bold" class="text-info-600 text-xl"></iconify-icon>
                 </div>
                 <div>
-                    <span class="text-secondary-light text-xs">In Progress</span>
+                    <span class="text-secondary-light text-xs" data-i18n="status.inProgress">In Progress</span>
                     <h6 class="mb-0">{{ stats.in_progress }}</h6>
                 </div>
             </div>
@@ -50,7 +50,7 @@
                     <iconify-icon icon="solar:check-circle-bold" class="text-success-600 text-xl"></iconify-icon>
                 </div>
                 <div>
-                    <span class="text-secondary-light text-xs">Completed</span>
+                    <span class="text-secondary-light text-xs" data-i18n="status.completed">Completed</span>
                     <h6 class="mb-0">{{ stats.completed }}</h6>
                 </div>
             </div>
@@ -63,7 +63,7 @@
                     <iconify-icon icon="solar:user-cross-bold" class="text-danger-600 text-xl"></iconify-icon>
                 </div>
                 <div>
-                    <span class="text-secondary-light text-xs">Unassigned</span>
+                    <span class="text-secondary-light text-xs" data-i18n="status.unassigned">Unassigned</span>
                     <h6 class="mb-0">{{ stats.unassigned }}</h6>
                 </div>
             </div>
@@ -100,7 +100,7 @@
                 </select>
                 {% if user.is_superuser and centers %}
                 <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="">All Centers</option>
+                    <option value="" data-i18n="common.allCenters">All Centers</option>
                     {% for center in centers %}
                     <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
                     {% endfor %}
@@ -108,18 +108,18 @@
                 {% endif %}
                 {% if branches %}
                 <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="">All Branches</option>
+                    <option value="" data-i18n="common.allBranches">All Branches</option>
                     {% for branch in branches %}
                     <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.name }}</option>
                     {% endfor %}
                 </select>
                 {% endif %}
                 <select name="assignment" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="">All Orders</option>
-                    <option value="unassigned" {% if assignment_filter == 'unassigned' %}selected{% endif %}>Unassigned</option>
-                    <option value="assigned" {% if assignment_filter == 'assigned' %}selected{% endif %}>Assigned</option>
+                    <option value="" data-i18n="common.allOrders">All Orders</option>
+                    <option value="unassigned" {% if assignment_filter == 'unassigned' %}selected{% endif %} data-i18n="status.unassigned">Unassigned</option>
+                    <option value="assigned" {% if assignment_filter == 'assigned' %}selected{% endif %} data-i18n="status.assigned">Assigned</option>
                     {% if request.admin_profile %}
-                    <option value="mine" {% if assignment_filter == 'mine' %}selected{% endif %}>Assigned to Me</option>
+                    <option value="mine" {% if assignment_filter == 'mine' %}selected{% endif %} data-i18n="status.assignedToMe">Assigned to Me</option>
                     {% endif %}
                 </select>
             </form>
@@ -140,10 +140,10 @@
                         </th>
                         <th scope="col" data-i18n="table.date">Date</th>
                         {% if user.is_superuser %}
-                        <th scope="col">Center</th>
+                        <th scope="col" data-i18n="table.center">Center</th>
                         {% endif %}
                         {% if user.is_superuser or is_owner %}
-                        <th scope="col">Branch</th>
+                        <th scope="col" data-i18n="table.branch">Branch</th>
                         {% endif %}
                         <th scope="col" data-i18n="table.customer">Customer</th>
                         <th scope="col" data-i18n="table.product">Product</th>
@@ -151,7 +151,7 @@
                         <th scope="col" data-i18n="table.copies">Copies</th>
                         <th scope="col" data-i18n="table.total">Total</th>
                         <th scope="col" data-i18n="table.payment">Payment</th>
-                        <th scope="col">Assigned</th>
+                        <th scope="col" data-i18n="table.assigned">Assigned</th>
                         <th scope="col" class="text-center" data-i18n="table.status">Status</th>
                         <th scope="col" class="text-center" data-i18n="table.action">Action</th>
                     </tr>

@@ -26,27 +26,70 @@
                             <span data-i18n="form.branch">Branch</span> <span class="text-danger-600">*</span>
                         </label>
                         <select class="form-control radius-8 form-select" id="branch" name="branch" required>
-                            <option value="">Select Branch</option>
+                            <option value="" data-i18n="common.selectBranch">Select Branch</option>
                             {% for branch in branches %}
                             <option value="{{ branch.id }}" {% if category.branch_id == branch.id %}selected{% endif %}>{{ branch.center.name }} - {{ branch.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     
+                    <!-- Translatable Fields -->
                     <div class="mb-20">
-                        <label for="name" class="form-label fw-semibold text-primary-light text-sm mb-8">
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                             <span data-i18n="form.categoryName">Category Name</span> <span class="text-danger-600">*</span>
                         </label>
-                        <input type="text" class="form-control radius-8" id="name" name="name" 
-                               data-i18n-placeholder="form.enterCategoryName" placeholder="Enter category name" value="{{ category.name }}" required>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light-100 border-end-0 text-sm px-12">🇺🇿 UZ</span>
+                                    <input type="text" class="form-control radius-8 border-start-0" id="name_uz" name="name_uz" 
+                                           placeholder="O'zbek tilida" value="{{ category.name_uz|default:'' }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light-100 border-end-0 text-sm px-12">🇷🇺 RU</span>
+                                    <input type="text" class="form-control radius-8 border-start-0" id="name_ru" name="name_ru" 
+                                           placeholder="На русском" value="{{ category.name_ru|default:'' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light-100 border-end-0 text-sm px-12">🇬🇧 EN</span>
+                                    <input type="text" class="form-control radius-8 border-start-0" id="name_en" name="name_en" 
+                                           placeholder="In English" value="{{ category.name_en|default:'' }}">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-20">
-                        <label for="description" class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.description">
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.description">
                             Description
                         </label>
-                        <textarea class="form-control radius-8" id="description" name="description" 
-                                  rows="3" data-i18n-placeholder="form.enterDescription" placeholder="Enter description">{{ category.description|default:'' }}</textarea>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light-100 border-end-0 text-sm px-12 align-items-start pt-12">🇺🇿 UZ</span>
+                                    <textarea class="form-control radius-8 border-start-0" id="description_uz" name="description_uz" 
+                                              rows="2" placeholder="Tavsif o'zbek tilida">{{ category.description_uz|default:'' }}</textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light-100 border-end-0 text-sm px-12 align-items-start pt-12">🇷🇺 RU</span>
+                                    <textarea class="form-control radius-8 border-start-0" id="description_ru" name="description_ru" 
+                                              rows="2" placeholder="Описание на русском">{{ category.description_ru|default:'' }}</textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light-100 border-end-0 text-sm px-12 align-items-start pt-12">🇬🇧 EN</span>
+                                    <textarea class="form-control radius-8 border-start-0" id="description_en" name="description_en" 
+                                              rows="2" placeholder="Description in English">{{ category.description_en|default:'' }}</textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-20">

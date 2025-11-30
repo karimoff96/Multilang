@@ -104,18 +104,27 @@ def addCategory(request):
     branches = get_user_branches(request.user).select_related('center')
     
     if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
+        # Get translated fields
+        name_uz = request.POST.get('name_uz', '').strip()
+        name_ru = request.POST.get('name_ru', '').strip()
+        name_en = request.POST.get('name_en', '').strip()
+        description_uz = request.POST.get('description_uz', '').strip()
+        description_ru = request.POST.get('description_ru', '').strip()
+        description_en = request.POST.get('description_en', '').strip()
+        
         branch_id = request.POST.get('branch', '')
-        description = request.POST.get('description', '').strip()
         charging = request.POST.get('charging', 'dynamic')
         is_active = request.POST.get('is_active') == 'on'
         selected_languages = request.POST.getlist('languages')
         
+        # Use Uzbek name as primary (fallback to any available)
+        name = name_uz or name_ru or name_en
+        
         if not name:
-            messages.error(request, 'Category name is required.')
+            messages.error(request, 'Category name is required in at least one language.')
         elif not branch_id:
             messages.error(request, 'Branch is required.')
-        elif Category.objects.filter(name__iexact=name, branch_id=branch_id).exists():
+        elif Category.objects.filter(name_uz__iexact=name_uz, branch_id=branch_id).exists():
             messages.error(request, 'A category with this name already exists for this branch.')
         else:
             try:
@@ -123,8 +132,14 @@ def addCategory(request):
                 branch = get_object_or_404(branches, id=branch_id)
                 category = Category.objects.create(
                     name=name,
+                    name_uz=name_uz or None,
+                    name_ru=name_ru or None,
+                    name_en=name_en or None,
+                    description=description_uz or description_ru or description_en,
+                    description_uz=description_uz or None,
+                    description_ru=description_ru or None,
+                    description_en=description_en or None,
                     branch=branch,
-                    description=description,
                     charging=charging,
                     is_active=is_active,
                 )
@@ -157,26 +172,41 @@ def editCategory(request, category_id):
     branches = get_user_branches(request.user).select_related('center')
     
     if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
+        # Get translated fields
+        name_uz = request.POST.get('name_uz', '').strip()
+        name_ru = request.POST.get('name_ru', '').strip()
+        name_en = request.POST.get('name_en', '').strip()
+        description_uz = request.POST.get('description_uz', '').strip()
+        description_ru = request.POST.get('description_ru', '').strip()
+        description_en = request.POST.get('description_en', '').strip()
+        
         branch_id = request.POST.get('branch', '')
-        description = request.POST.get('description', '').strip()
         charging = request.POST.get('charging', 'dynamic')
         is_active = request.POST.get('is_active') == 'on'
         selected_languages = request.POST.getlist('languages')
         
+        # Use Uzbek name as primary (fallback to any available)
+        name = name_uz or name_ru or name_en
+        
         if not name:
-            messages.error(request, 'Category name is required.')
+            messages.error(request, 'Category name is required in at least one language.')
         elif not branch_id:
             messages.error(request, 'Branch is required.')
-        elif Category.objects.filter(name__iexact=name, branch_id=branch_id).exclude(id=category_id).exists():
+        elif Category.objects.filter(name_uz__iexact=name_uz, branch_id=branch_id).exclude(id=category_id).exists():
             messages.error(request, 'A category with this name already exists for this branch.')
         else:
             try:
                 # Verify branch access
                 branch = get_object_or_404(branches, id=branch_id)
                 category.name = name
+                category.name_uz = name_uz or None
+                category.name_ru = name_ru or None
+                category.name_en = name_en or None
+                category.description = description_uz or description_ru or description_en
+                category.description_uz = description_uz or None
+                category.description_ru = description_ru or None
+                category.description_en = description_en or None
                 category.branch = branch
-                category.description = description
                 category.charging = charging
                 category.is_active = is_active
                 category.save()
@@ -322,9 +352,19 @@ def addProduct(request):
     ).order_by('name')
     
     if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
+        # Get translated fields
+        name_uz = request.POST.get('name_uz', '').strip()
+        name_ru = request.POST.get('name_ru', '').strip()
+        name_en = request.POST.get('name_en', '').strip()
+        description_uz = request.POST.get('description_uz', '').strip()
+        description_ru = request.POST.get('description_ru', '').strip()
+        description_en = request.POST.get('description_en', '').strip()
+        
         category_id = request.POST.get('category', '')
-        description = request.POST.get('description', '').strip()
+        
+        # Use Uzbek name as primary (fallback to any available)
+        name = name_uz or name_ru or name_en
+        description = description_uz or description_ru or description_en
         
         # Pricing
         ordinary_first_page_price = request.POST.get('ordinary_first_page_price', '0')
@@ -340,15 +380,21 @@ def addProduct(request):
         is_active = request.POST.get('is_active') == 'on'
         
         if not name:
-            messages.error(request, 'Product name is required.')
+            messages.error(request, 'Product name is required in at least one language.')
         elif not category_id:
             messages.error(request, 'Please select a category.')
         else:
             try:
                 product = Product.objects.create(
                     name=name,
+                    name_uz=name_uz or None,
+                    name_ru=name_ru or None,
+                    name_en=name_en or None,
                     category_id=category_id,
                     description=description,
+                    description_uz=description_uz or None,
+                    description_ru=description_ru or None,
+                    description_en=description_en or None,
                     ordinary_first_page_price=ordinary_first_page_price or 0,
                     ordinary_other_page_price=ordinary_other_page_price or 0,
                     agency_first_page_price=agency_first_page_price or 0,
@@ -387,9 +433,19 @@ def editProduct(request, product_id):
     ).order_by('name')
     
     if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
+        # Get translated fields
+        name_uz = request.POST.get('name_uz', '').strip()
+        name_ru = request.POST.get('name_ru', '').strip()
+        name_en = request.POST.get('name_en', '').strip()
+        description_uz = request.POST.get('description_uz', '').strip()
+        description_ru = request.POST.get('description_ru', '').strip()
+        description_en = request.POST.get('description_en', '').strip()
+        
         category_id = request.POST.get('category', '')
-        description = request.POST.get('description', '').strip()
+        
+        # Use Uzbek name as primary (fallback to any available)
+        name = name_uz or name_ru or name_en
+        description = description_uz or description_ru or description_en
         
         # Pricing
         ordinary_first_page_price = request.POST.get('ordinary_first_page_price', '0')
@@ -405,14 +461,20 @@ def editProduct(request, product_id):
         is_active = request.POST.get('is_active') == 'on'
         
         if not name:
-            messages.error(request, 'Product name is required.')
+            messages.error(request, 'Product name is required in at least one language.')
         elif not category_id:
             messages.error(request, 'Please select a category.')
         else:
             try:
                 product.name = name
+                product.name_uz = name_uz or None
+                product.name_ru = name_ru or None
+                product.name_en = name_en or None
                 product.category_id = category_id
                 product.description = description
+                product.description_uz = description_uz or None
+                product.description_ru = description_ru or None
+                product.description_en = description_en or None
                 product.ordinary_first_page_price = ordinary_first_page_price or 0
                 product.ordinary_other_page_price = ordinary_other_page_price or 0
                 product.agency_first_page_price = agency_first_page_price or 0

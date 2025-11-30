@@ -1,5 +1,6 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
+{% load translation_filters %}
 
 {% block content %}
 <div class="row gy-4">
@@ -40,8 +41,8 @@
                     <div class="w-120-px h-120-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center mb-16">
                         <iconify-icon icon="solar:box-minimalistic-bold-duotone" class="text-primary-600" style="font-size: 64px;"></iconify-icon>
                     </div>
-                    <h5 class="mb-8">{{ product.name }}</h5>
-                    <span class="text-secondary-light text-md mb-16">{{ product.category.name }}</span>
+                    <h5 class="mb-8">{{ product|trans_name }}</h5>
+                    <span class="text-secondary-light text-md mb-16">{{ product.category|trans_name }}</span>
                     
                     <!-- Status Badge -->
                     {% if product.is_active %}

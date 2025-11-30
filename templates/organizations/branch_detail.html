@@ -128,9 +128,9 @@
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base">Name</th>
-                                <th scope="col" class="bg-base">Role</th>
-                                <th scope="col" class="bg-base">Status</th>
+                                <th scope="col" class="bg-base" data-i18n="table.name">Name</th>
+                                <th scope="col" class="bg-base" data-i18n="table.role">Role</th>
+                                <th scope="col" class="bg-base" data-i18n="table.status">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -152,7 +152,7 @@
                                 </td>
                                 <td class="bg-success-focus">
                                     <span class="{% if member.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-12 py-4 radius-4 text-xs fw-medium">
-                                        {% if member.is_active %}Active{% else %}Inactive{% endif %}
+                                        {% if member.is_active %}<span data-i18n="common.active">Active</span>{% else %}<span data-i18n="common.inactive">Inactive</span>{% endif %}
                                     </span>
                                 </td>
                             </tr>
@@ -188,9 +188,9 @@
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base">Category</th>
-                                <th scope="col" class="bg-base">Products</th>
-                                <th scope="col" class="bg-base">Status</th>
+                                <th scope="col" class="bg-base" data-i18n="table.category">Category</th>
+                                <th scope="col" class="bg-base" data-i18n="table.products">Products</th>
+                                <th scope="col" class="bg-base" data-i18n="table.status">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -200,11 +200,11 @@
                                     <a href="{% url 'categoryDetail' category.id %}" class="fw-medium text-primary-600">{{ category.name }}</a>
                                 </td>
                                 <td class="bg-warning-focus">
-                                    <span class="badge bg-info-focus text-info-600">{{ category.product_count }} products</span>
+                                    <span class="badge bg-info-focus text-info-600">{{ category.product_count }} <span data-i18n="table.products">products</span></span>
                                 </td>
                                 <td class="bg-warning-focus">
                                     <span class="{% if category.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-12 py-4 radius-4 text-xs fw-medium">
-                                        {% if category.is_active %}Active{% else %}Inactive{% endif %}
+                                        {% if category.is_active %}<span data-i18n="common.active">Active</span>{% else %}<span data-i18n="common.inactive">Inactive</span>{% endif %}
                                     </span>
                                 </td>
                             </tr>
@@ -238,11 +238,11 @@
             <table class="table colored-row-table mb-0">
                 <thead>
                     <tr>
-                        <th scope="col" class="bg-base">Product</th>
-                        <th scope="col" class="bg-base">Category</th>
-                        <th scope="col" class="bg-base">Regular Price</th>
-                        <th scope="col" class="bg-base">Agency Price</th>
-                        <th scope="col" class="bg-base">Status</th>
+                        <th scope="col" class="bg-base" data-i18n="table.product">Product</th>
+                        <th scope="col" class="bg-base" data-i18n="table.category">Category</th>
+                        <th scope="col" class="bg-base" data-i18n="table.regularPrice">Regular Price</th>
+                        <th scope="col" class="bg-base" data-i18n="table.agencyPrice">Agency Price</th>
+                        <th scope="col" class="bg-base" data-i18n="table.status">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -278,21 +278,21 @@
     <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
         <h6 class="text-lg fw-semibold mb-0">
             <iconify-icon icon="mdi:clipboard-list" class="me-8 text-cyan-600"></iconify-icon>
-            Recent Orders
+            <span data-i18n="common.recentOrders">Recent Orders</span>
         </h6>
-        <a href="{% url 'ordersList' %}" class="text-primary-600 text-sm">View All</a>
+        <a href="{% url 'ordersList' %}" class="text-primary-600 text-sm" data-i18n="common.viewAll">View All</a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table colored-row-table mb-0">
                 <thead>
                     <tr>
-                        <th scope="col" class="bg-base">Order ID</th>
-                        <th scope="col" class="bg-base">Customer</th>
-                        <th scope="col" class="bg-base">Product</th>
-                        <th scope="col" class="bg-base">Assigned To</th>
-                        <th scope="col" class="bg-base">Status</th>
-                        <th scope="col" class="bg-base">Date</th>
+                        <th scope="col" class="bg-base" data-i18n="table.orderId">Order ID</th>
+                        <th scope="col" class="bg-base" data-i18n="table.customer">Customer</th>
+                        <th scope="col" class="bg-base" data-i18n="table.product">Product</th>
+                        <th scope="col" class="bg-base" data-i18n="table.assignedTo">Assigned To</th>
+                        <th scope="col" class="bg-base" data-i18n="table.status">Status</th>
+                        <th scope="col" class="bg-base" data-i18n="table.date">Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -307,7 +307,7 @@
                             {% if order.assigned_to %}
                             {{ order.assigned_to.user.get_full_name|default:order.assigned_to.user.username }}
                             {% else %}
-                            <span class="text-warning-600">Unassigned</span>
+                            <span class="text-warning-600" data-i18n="status.unassigned">Unassigned</span>
                             {% endif %}
                         </td>
                         <td class="bg-cyan-focus">
@@ -337,19 +337,19 @@
     <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
         <h6 class="text-lg fw-semibold mb-0">
             <iconify-icon icon="mdi:account-multiple" class="me-8 text-purple-600"></iconify-icon>
-            Recent Customers ({{ total_customers }} total)
+            <span data-i18n="common.recentCustomers">Recent Customers</span> ({{ total_customers }} <span data-i18n="table.total">total</span>)
         </h6>
-        <a href="{% url 'usersList' %}" class="text-primary-600 text-sm">View All</a>
+        <a href="{% url 'usersList' %}" class="text-primary-600 text-sm" data-i18n="common.viewAll">View All</a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table colored-row-table mb-0">
                 <thead>
                     <tr>
-                        <th scope="col" class="bg-base">Customer</th>
-                        <th scope="col" class="bg-base">Phone</th>
-                        <th scope="col" class="bg-base">Type</th>
-                        <th scope="col" class="bg-base">Joined</th>
+                        <th scope="col" class="bg-base" data-i18n="table.customer">Customer</th>
+                        <th scope="col" class="bg-base" data-i18n="table.phone">Phone</th>
+                        <th scope="col" class="bg-base" data-i18n="table.type">Type</th>
+                        <th scope="col" class="bg-base" data-i18n="table.joined">Joined</th>
                     </tr>
                 </thead>
                 <tbody>

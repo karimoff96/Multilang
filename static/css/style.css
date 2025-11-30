@@ -15094,3 +15094,21 @@ td.fc-header-center {
 }
 
 /* === footer css end === */
+
+/* === Icon alignment fix for buttons === */
+.btn iconify-icon,
+.d-flex.align-items-center iconify-icon,
+a.d-flex.align-items-center iconify-icon,
+button iconify-icon {
+  vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+/* Ensure icons in buttons are properly centered */
+.btn.d-flex iconify-icon,
+.btn.d-inline-flex iconify-icon {
+  flex-shrink: 0;
+}
+/* === Icon alignment fix end === */

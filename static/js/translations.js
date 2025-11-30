@@ -586,6 +586,26 @@ const translations = {
         ru: 'Действие',
         en: 'Action'
     },
+    'table.role': {
+        uz: 'Rol',
+        ru: 'Роль',
+        en: 'Role'
+    },
+    'table.type': {
+        uz: 'Turi',
+        ru: 'Тип',
+        en: 'Type'
+    },
+    'table.joined': {
+        uz: 'Qo\'shilgan',
+        ru: 'Присоединился',
+        en: 'Joined'
+    },
+    'table.assignedTo': {
+        uz: 'Tayinlangan',
+        ru: 'Назначено',
+        en: 'Assigned To'
+    },
     'table.name': {
         uz: 'Nomi',
         ru: 'Название',
@@ -606,6 +626,16 @@ const translations = {
         ru: 'Продукты',
         en: 'Products'
     },
+    'table.center': {
+        uz: 'Markaz',
+        ru: 'Центр',
+        en: 'Center'
+    },
+    'table.branch': {
+        uz: 'Filial',
+        ru: 'Филиал',
+        en: 'Branch'
+    },
     'table.category': {
         uz: 'Kategoriya',
         ru: 'Категория',
@@ -620,6 +650,11 @@ const translations = {
         uz: 'Agentlik narxi',
         ru: 'Цена для агентства',
         en: 'Agency Price'
+    },
+    'table.assigned': {
+        uz: 'Tayinlangan',
+        ru: 'Назначен',
+        en: 'Assigned'
     },
     'table.estDays': {
         uz: 'Taxminiy kunlar',
@@ -652,6 +687,16 @@ const translations = {
         uz: 'Barcha kategoriyalar',
         ru: 'Все категории',
         en: 'All Categories'
+    },
+    'common.yes': {
+        uz: 'Ha',
+        ru: 'Да',
+        en: 'Yes'
+    },
+    'common.no': {
+        uz: 'Yo\'q',
+        ru: 'Нет',
+        en: 'No'
     },
     'common.active': {
         uz: 'Faol',
@@ -727,6 +772,46 @@ const translations = {
         uz: 'Agentliklar',
         ru: 'Агентства',
         en: 'Agencies'
+    },
+    'common.allCenters': {
+        uz: 'Barcha markazlar',
+        ru: 'Все центры',
+        en: 'All Centers'
+    },
+    'common.allBranches': {
+        uz: 'Barcha filiallar',
+        ru: 'Все филиалы',
+        en: 'All Branches'
+    },
+    'common.allOrders': {
+        uz: 'Barcha buyurtmalar',
+        ru: 'Все заказы',
+        en: 'All Orders'
+    },
+    'common.selectBranch': {
+        uz: 'Filialni tanlang',
+        ru: 'Выберите филиал',
+        en: 'Select Branch'
+    },
+    'common.noCategoriesFound': {
+        uz: 'Kategoriyalar topilmadi',
+        ru: 'Категории не найдены',
+        en: 'No categories found'
+    },
+    'common.noProductsFound': {
+        uz: 'Mahsulotlar topilmadi',
+        ru: 'Продукты не найдены',
+        en: 'No products found'
+    },
+    'common.noLanguagesAvailable': {
+        uz: 'Tillar mavjud emas',
+        ru: 'Языки недоступны',
+        en: 'No languages available'
+    },
+    'common.confirmDelete': {
+        uz: 'Haqiqatan ham o\'chirmoqchimisiz?',
+        ru: 'Вы уверены, что хотите удалить?',
+        en: 'Are you sure you want to delete?'
     },
 
     // ========== TABLE - USERS ==========
@@ -1076,6 +1161,21 @@ const translations = {
         ru: 'Отменено',
         en: 'Cancelled'
     },
+    'status.unassigned': {
+        uz: 'Tayinlanmagan',
+        ru: 'Не назначен',
+        en: 'Unassigned'
+    },
+    'status.assigned': {
+        uz: 'Tayinlangan',
+        ru: 'Назначен',
+        en: 'Assigned'
+    },
+    'status.assignedToMe': {
+        uz: 'Menga tayinlangan',
+        ru: 'Назначено мне',
+        en: 'Assigned to Me'
+    },
 
     // ========== FOOTER ==========
     'footer.allRightsReserved': {
@@ -1109,6 +1209,16 @@ const translations = {
         uz: 'foydalanuvchilar',
         ru: 'пользователей',
         en: 'users'
+    },
+    'common.recentOrders': {
+        uz: 'So\'nggi buyurtmalar',
+        ru: 'Последние заказы',
+        en: 'Recent Orders'
+    },
+    'common.recentCustomers': {
+        uz: 'So\'nggi mijozlar',
+        ru: 'Последние клиенты',
+        en: 'Recent Customers'
     },
     'common.viewAll': {
         uz: 'Hammasini ko\'rish',
@@ -1835,6 +1945,36 @@ const LanguageManager = {
             if (translation !== key) {
                 element.placeholder = translation;
             }
+        });
+        
+        // Translate model name fields (from Django models with modeltranslation)
+        document.querySelectorAll('.translatable-name').forEach(element => {
+            const nameUz = element.getAttribute('data-name-uz');
+            const nameRu = element.getAttribute('data-name-ru');
+            const nameEn = element.getAttribute('data-name-en');
+            const fallback = element.getAttribute('data-name-fallback');
+            
+            let displayName = fallback;
+            if (this.currentLang === 'uz' && nameUz) displayName = nameUz;
+            else if (this.currentLang === 'ru' && nameRu) displayName = nameRu;
+            else if (this.currentLang === 'en' && nameEn) displayName = nameEn;
+            
+            element.textContent = displayName || fallback;
+        });
+        
+        // Translate model description fields
+        document.querySelectorAll('.translatable-desc').forEach(element => {
+            const descUz = element.getAttribute('data-desc-uz');
+            const descRu = element.getAttribute('data-desc-ru');
+            const descEn = element.getAttribute('data-desc-en');
+            const fallback = element.getAttribute('data-desc-fallback');
+            
+            let displayDesc = fallback;
+            if (this.currentLang === 'uz' && descUz) displayDesc = descUz;
+            else if (this.currentLang === 'ru' && descRu) displayDesc = descRu;
+            else if (this.currentLang === 'en' && descEn) displayDesc = descEn;
+            
+            element.textContent = displayDesc || fallback;
         });
     },
     

@@ -1,5 +1,6 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
+{% load translation_filters %}
 
 {% block content %}
 <div class="row gy-4">
@@ -21,7 +22,7 @@
                     <div class="w-100-px h-100-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center mx-auto mb-16">
                         <iconify-icon icon="ri-star-line" class="text-primary-600" style="font-size: 40px;"></iconify-icon>
                     </div>
-                    <h5 class="mb-4">{{ category.name }}</h5>
+                    <h5 class="mb-4">{{ category|trans_name }}</h5>
                     {% if category.charging == 'static' %}
                         <span class="badge bg-info-focus text-info-600" data-i18n="detail.staticPrice">Static Price</span>
                     {% else %}
@@ -34,7 +35,7 @@
                         {% if category.description %}
                         <li class="mb-16">
                             <span class="text-sm text-secondary-light d-block mb-4" data-i18n="form.description">Description</span>
-                            <span class="text-md">{{ category.description }}</span>
+                            <span class="text-md">{{ category|trans_desc }}</span>
                         </li>
                         {% endif %}
                         <li class="mb-16">
@@ -102,7 +103,7 @@
                             {% for product in products %}
                             <tr>
                                 <td>
-                                    <span class="fw-medium">{{ product.name }}</span>
+                                    <span class="fw-medium">{{ product|trans_name }}</span>
                                 </td>
                                 <td>
                                     <span class="text-sm">{{ product.ordinary_first_page_price|floatformat:0 }} UZS</span>
