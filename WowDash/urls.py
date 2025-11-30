@@ -23,6 +23,7 @@ from WowDash import home_views
 from WowDash import roleAndAccess_views
 from WowDash import settings_views
 from WowDash import table_views
+from WowDash import reports_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -33,6 +34,9 @@ urlpatterns = [
     # Authentication & User management (accounts app)
     path("accounts/", include("accounts.urls")),
     path("users/", include("accounts.urls")),
+    
+    # Organizations management (centers, branches, staff)
+    path("organizations/", include("organizations.urls")),
     
     # Orders management
     path("orders/", include("orders.urls")),
@@ -99,6 +103,14 @@ urlpatterns = [
     # tables routes
     path("tables/basic-table", table_views.basicTable, name="basicTable"),
     path("tables/data-table", table_views.dataTable, name="dataTable"),
+    
+    # Reports & Analytics routes
+    path("reports/financial", reports_views.financial_reports, name="financial_reports"),
+    path("reports/orders", reports_views.order_reports, name="order_reports"),
+    path("reports/staff-performance", reports_views.staff_performance, name="staff_performance"),
+    path("reports/branch-comparison", reports_views.branch_comparison, name="branch_comparison"),
+    path("reports/customers", reports_views.customer_analytics, name="customer_analytics"),
+    path("reports/export/<str:report_type>", reports_views.export_report, name="export_report"),
   
 ]
 from django.conf import settings

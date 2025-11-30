@@ -205,8 +205,11 @@ def addUser(request):
 
 @login_required(login_url='admin_login')
 def usersList(request):
-    """List all BotUsers with search and filter"""
-    users = BotUser.objects.all().order_by('-created_at')
+    """List all BotUsers with search and filter - RBAC filtered"""
+    from organizations.rbac import get_user_customers
+    
+    # Use RBAC-filtered customers
+    users = get_user_customers(request.user).order_by('-created_at')
     
     # Search functionality
     search_query = request.GET.get('search', '')

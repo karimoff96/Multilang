@@ -1,0 +1,160 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="card h-100 p-0 radius-12">
+    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+        <div class="d-flex align-items-center flex-wrap gap-3">
+            <form method="get" class="d-flex align-items-center gap-3">
+                <div class="navbar-search">
+                    <input type="text" class="bg-base h-40-px w-auto" name="search" placeholder="Search staff..." value="{{ search }}">
+                    <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                </div>
+                <select name="role" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Roles</option>
+                    {% for role in roles %}
+                    <option value="{{ role.name }}" {% if role_filter == role.name %}selected{% endif %}>{{ role.get_name_display }}</option>
+                    {% endfor %}
+                </select>
+                <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Branches</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.name }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <a href="{% url 'staff_create' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
+            <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+            Add New Staff
+        </a>
+    </div>
+    <div class="card-body p-24">
+        <div class="table-responsive scroll-sm">
+            <table class="table bordered-table sm-table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Staff Member</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Branch</th>
+                        <th scope="col">Phone</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Created</th>
+                        <th scope="col" class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in staff %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 me-12">
+                                    {% if member.avatar %}
+                                    <img src="{{ member.avatar.url }}" alt="" class="w-40-px h-40-px rounded-circle">
+                                    {% else %}
+                                    <div class="w-40-px h-40-px rounded-circle bg-primary-100 d-flex justify-content-center align-items-center">
+                                        <span class="text-primary-600 fw-semibold">{{ member.user.first_name|slice:":1" }}{{ member.user.last_name|slice:":1" }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="text-md mb-0 fw-medium">{{ member.user.get_full_name }}</h6>
+                                    <span class="text-sm text-secondary-light fw-normal">{{ member.user.email|default:member.user.username }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if member.role.name == 'owner' %}
+                            <span class="bg-primary-50 text-primary-600 px-16 py-6 radius-4 fw-medium text-sm">Owner</span>
+                            {% elif member.role.name == 'manager' %}
+                            <span class="bg-info-50 text-info-600 px-16 py-6 radius-4 fw-medium text-sm">Manager</span>
+                            {% else %}
+                            <span class="bg-secondary-50 text-secondary-600 px-16 py-6 radius-4 fw-medium text-sm">Staff</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if member.branch %}
+                            <span class="text-md">{{ member.branch.name }}</span>
+                            <br><small class="text-secondary-light">{{ member.branch.center.name }}</small>
+                            {% else %}
+                            <span class="text-secondary-light">-</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ member.phone|default:"-" }}</td>
+                        <td>
+                            {% if member.is_active %}
+                            <span class="bg-success-focus text-success-main px-24 py-4 radius-4 fw-medium text-sm">Active</span>
+                            {% else %}
+                            <span class="bg-danger-focus text-danger-main px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ member.created_at|date:"M d, Y" }}</td>
+                        <td class="text-center">
+                            <div class="d-flex align-items-center gap-10 justify-content-center">
+                                <a href="{% url 'staff_edit' member.id %}" class="bg-info-focus text-info-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="Edit">
+                                    <iconify-icon icon="lucide:edit" class="icon"></iconify-icon>
+                                </a>
+                                <form method="post" action="{% url 'staff_toggle_active' member.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="{% if member.is_active %}bg-warning-focus text-warning-main{% else %}bg-success-focus text-success-main{% endif %} w-32-px h-32-px d-flex justify-content-center align-items-center radius-4 border-0" title="{% if member.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                        <iconify-icon icon="{% if member.is_active %}mdi:account-off{% else %}mdi:account-check{% endif %}" class="icon"></iconify-icon>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-24">
+                            <div class="text-secondary-light">
+                                <iconify-icon icon="mdi:account-group" class="icon text-4xl mb-8"></iconify-icon>
+                                <p class="mb-0">No staff members found</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if staff.has_other_pages %}
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
+            <span class="text-sm text-secondary-light">
+                Showing {{ staff.start_index }} to {{ staff.end_index }} of {{ staff.paginator.count }} entries
+            </span>
+            <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
+                {% if staff.has_previous %}
+                <li class="page-item">
+                    <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 px-20 py-10" href="?page={{ staff.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}">
+                        <iconify-icon icon="ep:d-arrow-left" class="icon"></iconify-icon>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in staff.paginator.page_range %}
+                    {% if staff.number == num %}
+                    <li class="page-item">
+                        <a class="page-link bg-primary-600 text-white fw-semibold radius-8 border-0 px-20 py-10" href="#">{{ num }}</a>
+                    </li>
+                    {% elif num > staff.number|add:'-3' and num < staff.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 px-20 py-10" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if staff.has_next %}
+                <li class="page-item">
+                    <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 px-20 py-10" href="?page={{ staff.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}">
+                        <iconify-icon icon="ep:d-arrow-right" class="icon"></iconify-icon>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

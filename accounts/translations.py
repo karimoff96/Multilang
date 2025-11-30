@@ -1,9 +1,5 @@
 from modeltranslation.translator import translator, TranslationOptions
-from .models import AdditionalInfo
 
 
-class AdditionalInfoTranslationOptions(TranslationOptions):
-    fields = ("help_text", "about_us")
-
-
-translator.register(AdditionalInfo, AdditionalInfoTranslationOptions)
+# No translated models in accounts app anymore
+# BotUser doesn't need translations

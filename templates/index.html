@@ -159,6 +159,143 @@
         </div>
     </div>
 
+    <!-- Role-Specific Dashboard Section -->
+    {% if role_title %}
+    <div class="col-xxl-4">
+        <div class="card h-100 radius-8 border">
+            <div class="card-header border-bottom bg-base py-16 px-24">
+                <h6 class="text-lg fw-semibold mb-0">{{ role_title }}</h6>
+            </div>
+            <div class="card-body p-24">
+                {% if my_total_assigned is not None %}
+                <!-- Staff View -->
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="bg-primary-50 p-3 rounded-3 text-center">
+                            <span class="text-primary-600 d-block mb-1">
+                                <iconify-icon icon="solar:inbox-line-bold" class="text-xxl"></iconify-icon>
+                            </span>
+                            <h4 class="fw-bold mb-0">{{ my_total_assigned }}</h4>
+                            <small class="text-secondary-light">Total Assigned</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bg-warning-50 p-3 rounded-3 text-center">
+                            <span class="text-warning-600 d-block mb-1">
+                                <iconify-icon icon="solar:clock-circle-bold" class="text-xxl"></iconify-icon>
+                            </span>
+                            <h4 class="fw-bold mb-0">{{ my_pending }}</h4>
+                            <small class="text-secondary-light">Pending</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bg-success-50 p-3 rounded-3 text-center">
+                            <span class="text-success-600 d-block mb-1">
+                                <iconify-icon icon="solar:check-circle-bold" class="text-xxl"></iconify-icon>
+                            </span>
+                            <h4 class="fw-bold mb-0">{{ my_completed_today }}</h4>
+                            <small class="text-secondary-light">Completed Today</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bg-info-50 p-3 rounded-3 text-center">
+                            <span class="text-info-600 d-block mb-1">
+                                <iconify-icon icon="solar:medal-star-bold" class="text-xxl"></iconify-icon>
+                            </span>
+                            <h4 class="fw-bold mb-0">{{ my_total_completed }}</h4>
+                            <small class="text-secondary-light">Total Completed</small>
+                        </div>
+                    </div>
+                </div>
+                {% elif branch_name %}
+                <!-- Manager View -->
+                <div class="mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <iconify-icon icon="solar:building-bold" class="text-xl text-primary-600"></iconify-icon>
+                        <span class="fw-semibold">{{ branch_name }}</span>
+                    </div>
+                    <div class="bg-primary-50 p-3 rounded-3 d-flex align-items-center justify-content-between mb-3">
+                        <span class="text-secondary-light">Staff Members</span>
+                        <span class="fw-bold text-lg">{{ total_staff }}</span>
+                    </div>
+                </div>
+                {% if staff_performance %}
+                <h6 class="text-sm fw-semibold mb-2">Staff Performance</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Staff</th>
+                                <th class="text-center">Assigned</th>
+                                <th class="text-center">Done</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for staff in staff_performance %}
+                            <tr>
+                                <td>{{ staff.name }}</td>
+                                <td class="text-center">{{ staff.assigned }}</td>
+                                <td class="text-center text-success-main">{{ staff.completed }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+                {% elif total_centers is not None %}
+                <!-- Owner/Superuser View -->
+                <div class="row g-3 mb-3">
+                    <div class="col-4">
+                        <div class="bg-primary-50 p-3 rounded-3 text-center">
+                            <iconify-icon icon="solar:buildings-bold" class="text-xxl text-primary-600 d-block mb-1"></iconify-icon>
+                            <h5 class="fw-bold mb-0">{{ total_centers }}</h5>
+                            <small class="text-secondary-light">Centers</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-success-50 p-3 rounded-3 text-center">
+                            <iconify-icon icon="solar:building-bold" class="text-xxl text-success-600 d-block mb-1"></iconify-icon>
+                            <h5 class="fw-bold mb-0">{{ total_branches }}</h5>
+                            <small class="text-secondary-light">Branches</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-info-50 p-3 rounded-3 text-center">
+                            <iconify-icon icon="solar:users-group-rounded-bold" class="text-xxl text-info-600 d-block mb-1"></iconify-icon>
+                            <h5 class="fw-bold mb-0">{{ total_staff }}</h5>
+                            <small class="text-secondary-light">Staff</small>
+                        </div>
+                    </div>
+                </div>
+                {% if branch_performance %}
+                <h6 class="text-sm fw-semibold mb-2">Branch Performance (This Month)</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Branch</th>
+                                <th class="text-center">Orders</th>
+                                <th class="text-end">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for branch in branch_performance %}
+                            <tr>
+                                <td>{{ branch.name }}</td>
+                                <td class="text-center">{{ branch.orders }}</td>
+                                <td class="text-end text-success-main">{{ branch.revenue|floatformat:0 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Revenue Growth Chart (Right side) -->
     <div class="col-xxl-4">
         <div class="card h-100 radius-8 border">

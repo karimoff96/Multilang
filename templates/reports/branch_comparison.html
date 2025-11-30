@@ -1,0 +1,236 @@
+{% extends 'layout/layout.html' %} 
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Report Header with Filters -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-0">{{ title }}</h5>
+                        <p class="text-secondary-light mb-0">Compare performance across all branches</p>
+                    </div>
+                    <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                        <div>
+                            <label class="form-label text-sm mb-1">From Date</label>
+                            <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                        </div>
+                        <div>
+                            <label class="form-label text-sm mb-1">To Date</label>
+                            <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
+                            Apply
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-1 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="w-48-px h-48-px bg-primary-600 text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:wallet-money-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Total Revenue</span>
+                        <h4 class="fw-bold mb-0">{{ total_revenue|floatformat:0 }} <small class="text-sm">UZS</small></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-2 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="w-48-px h-48-px bg-success-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:bag-4-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Total Orders</span>
+                        <h4 class="fw-bold mb-0">{{ total_orders_count }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-3 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="w-48-px h-48-px bg-warning-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:users-group-rounded-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Total Staff</span>
+                        <h4 class="fw-bold mb-0">{{ total_staff }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-4 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="w-48-px h-48-px bg-info-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:user-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Total Customers</span>
+                        <h4 class="fw-bold mb-0">{{ total_customers }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Comparison Chart -->
+    <div class="col-xxl-6">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">Revenue by Branch</h6>
+                <div id="revenueChart" style="min-height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Comparison Chart -->
+    <div class="col-xxl-6">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">Orders by Branch</h6>
+                <div id="ordersChart" style="min-height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branch Comparison Table -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">Branch Performance Details</h6>
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-secondary-light">Branch</th>
+                                <th scope="col" class="bg-base text-secondary-light">Center</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center">Orders</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center">Completed</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center">Rate</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end">Revenue</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end">Avg Value</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center">Staff</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center">Customers</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for branch in branch_data %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="w-36-px h-36-px rounded-circle bg-primary-100 text-primary-600 d-flex justify-content-center align-items-center">
+                                            <iconify-icon icon="solar:building-bold"></iconify-icon>
+                                        </div>
+                                        <span class="fw-medium text-secondary-light">{{ branch.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="{{ row_color }} text-secondary-light">{{ branch.center }}</td>
+                                <td class="{{ row_color }} text-center fw-semibold text-secondary-light">{{ branch.total_orders }}</td>
+                                <td class="{{ row_color }} text-center text-success-main">{{ branch.completed }}</td>
+                                <td class="{{ row_color }} text-center">
+                                    <div class="d-flex align-items-center gap-2 justify-content-center">
+                                        <div class="progress w-50-px" style="height: 6px;">
+                                            <div class="progress-bar bg-{% if branch.completion_rate >= 80 %}success{% elif branch.completion_rate >= 50 %}warning{% else %}danger{% endif %}" 
+                                                 style="width: {{ branch.completion_rate }}%;"></div>
+                                        </div>
+                                        <span class="text-sm text-secondary-light">{{ branch.completion_rate }}%</span>
+                                    </div>
+                                </td>
+                                <td class="{{ row_color }} text-end">
+                                    <span class="fw-semibold text-success-main">{{ branch.revenue|floatformat:0 }}</span>
+                                </td>
+                                <td class="{{ row_color }} text-end text-secondary-light">{{ branch.avg_value|floatformat:0 }}</td>
+                                <td class="{{ row_color }} text-center text-secondary-light">{{ branch.staff_count }}</td>
+                                <td class="{{ row_color }} text-center text-secondary-light">{{ branch.customer_count }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center text-secondary-light py-4 bg-base">
+                                    No branches to compare
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const branchLabels = {{ branch_labels|safe }};
+    const branchRevenue = {{ branch_revenue|safe }};
+    const branchOrders = {{ branch_orders_count|safe }};
+    
+    // Revenue chart
+    if (branchLabels.length > 0) {
+        new ApexCharts(document.querySelector("#revenueChart"), {
+            series: [{ name: 'Revenue', data: branchRevenue }],
+            chart: { type: 'bar', height: 300, toolbar: { show: false } },
+            colors: ['#22c55e'],
+            plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '60%' } },
+            dataLabels: {
+                enabled: true,
+                formatter: function(val) { return val.toLocaleString() + ' UZS'; },
+                style: { fontSize: '10px', colors: ['#fff'] }
+            },
+            xaxis: {
+                categories: branchLabels,
+                labels: {
+                    formatter: function(val) { return val.toLocaleString(); },
+                    style: { colors: '#9CA3AF', fontSize: '11px' }
+                }
+            },
+            yaxis: { labels: { style: { colors: '#374151', fontSize: '12px' } } },
+            grid: { borderColor: '#E4E7EC', strokeDashArray: 3 }
+        }).render();
+        
+        // Orders chart
+        new ApexCharts(document.querySelector("#ordersChart"), {
+            series: [{ name: 'Orders', data: branchOrders }],
+            chart: { type: 'bar', height: 300, toolbar: { show: false } },
+            colors: ['#487FFF'],
+            plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '60%' } },
+            dataLabels: {
+                enabled: true,
+                style: { fontSize: '12px', colors: ['#fff'] }
+            },
+            xaxis: {
+                categories: branchLabels,
+                labels: { style: { colors: '#9CA3AF', fontSize: '11px' } }
+            },
+            yaxis: { labels: { style: { colors: '#374151', fontSize: '12px' } } },
+            grid: { borderColor: '#E4E7EC', strokeDashArray: 3 }
+        }).render();
+    } else {
+        document.querySelector("#revenueChart").innerHTML = '<div class="text-center text-secondary-light py-4 bg-base">No branch data</div>';
+        document.querySelector("#ordersChart").innerHTML = '<div class="text-center text-secondary-light py-4 bg-base">No branch data</div>';
+    }
+});
+</script>
+{% endblock script %}

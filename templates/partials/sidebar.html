@@ -17,18 +17,77 @@
                     <span data-i18n="sidebar.dashboard">Dashboard</span>
                 </a>
             </li>
+            
+            <!-- Organizations Menu - visible based on role -->
+            {% if is_owner or user.is_superuser %}
+            <li class="dropdown">
+                <a href="javascript:void(0)">
+                    <iconify-icon icon="mdi:domain" class="menu-icon"></iconify-icon>
+                    <span>Organization</span>
+                </a>
+                <ul class="sidebar-submenu">
+                    <li>
+                        <a href="{% url 'center_list' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> Centers</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'branch_list' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> Branches</a>
+                    </li>
+                    {% if permissions.can_manage_staff %}
+                    <li>
+                        <a href="{% url 'staff_list' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> Staff</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </li>
+            {% elif is_manager %}
+            <li class="dropdown">
+                <a href="javascript:void(0)">
+                    <iconify-icon icon="mdi:domain" class="menu-icon"></iconify-icon>
+                    <span>My Branch</span>
+                </a>
+                <ul class="sidebar-submenu">
+                    <li>
+                        <a href="{% url 'branch_list' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> Branch Info</a>
+                    </li>
+                    {% if permissions.can_manage_staff %}
+                    <li>
+                        <a href="{% url 'staff_list' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> Staff</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </li>
+            {% endif %}
+            
+            {% if user.is_superuser %}
+            <li>
+                <a href="{% url 'role_list' %}">
+                    <iconify-icon icon="mdi:shield-account-outline" class="menu-icon"></iconify-icon>
+                    <span>Roles & Permissions</span>
+                </a>
+            </li>
+            {% endif %}
+            
             <li>
                 <a href="{% url 'usersList' %}">
                     <iconify-icon icon="flowbite:users-group-outline" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.users">Users</span>
+                    <span data-i18n="sidebar.users">Customers</span>
                 </a>
             </li>
+            {% if is_staff_member %}
+            <li>
+                <a href="{% url 'myOrders' %}">
+                    <iconify-icon icon="fa-solid:box-open" class="menu-icon"></iconify-icon>
+                    <span>My Orders</span>
+                </a>
+            </li>
+            {% endif %}
              <li>
                 <a href="{% url 'ordersList' %}">
-                    <iconify-icon icon="fa-solid:box-open" class="menu-icon"></iconify-icon>
+                    <iconify-icon icon="solar:bag-4-bold" class="menu-icon"></iconify-icon>
                     <span data-i18n="sidebar.orders">Orders</span>
                 </a>
             </li>
+            {% if permissions.can_manage_products or user.is_superuser %}
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="ri-star-line" class="menu-icon"></iconify-icon>
@@ -43,6 +102,8 @@
                     </li>
                 </ul>
             </li>
+            {% endif %}
+            {% if permissions.can_view_reports or user.is_superuser %}
             <li>
                 <a href="{% url 'sales' %}">
                     <iconify-icon icon="hugeicons:money-send-square" class="menu-icon"></iconify-icon>
@@ -55,6 +116,32 @@
                     <span data-i18n="sidebar.finance">Finance</span>
                 </a>
             </li>
+            <li class="dropdown">
+                <a href="javascript:void(0)">
+                    <iconify-icon icon="solar:chart-square-bold-duotone" class="menu-icon"></iconify-icon>
+                    <span>Reports</span>
+                </a>
+                <ul class="sidebar-submenu">
+                    <li>
+                        <a href="{% url 'financial_reports' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> Financial Reports</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'order_reports' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> Order Reports</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'staff_performance' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> Staff Performance</a>
+                    </li>
+                    {% if is_owner or user.is_superuser %}
+                    <li>
+                        <a href="{% url 'branch_comparison' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> Branch Comparison</a>
+                    </li>
+                    {% endif %}
+                    <li>
+                        <a href="{% url 'customer_analytics' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> Customer Analytics</a>
+                    </li>
+                </ul>
+            </li>
+            {% endif %}
             <li class="sidebar-menu-group-title" data-i18n="sidebar.uiElements">UI Elements</li>
 
             <li class="dropdown">

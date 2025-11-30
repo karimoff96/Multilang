@@ -1,0 +1,193 @@
+{% extends 'layout/layout.html' %} 
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Report Header with Filters -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-0">{{ title }}</h5>
+                        <p class="text-secondary-light mb-0">Track and analyze staff performance metrics</p>
+                    </div>
+                    <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                        <div>
+                            <label class="form-label text-sm mb-1">From Date</label>
+                            <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                        </div>
+                        <div>
+                            <label class="form-label text-sm mb-1">To Date</label>
+                            <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                        </div>
+                        {% if branches %}
+                        <div>
+                            <label class="form-label text-sm mb-1">Branch</label>
+                            <select name="branch" class="form-select">
+                                <option value="">All Branches</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
+                            Apply
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Performers Chart -->
+    <div class="col-xxl-8">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">Top Performers - Completed Orders</h6>
+                <div id="performanceChart" style="min-height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top 5 Performers Card -->
+    <div class="col-xxl-4">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">
+                    <iconify-icon icon="solar:cup-star-bold" class="text-warning-main me-1"></iconify-icon>
+                    Top Performers
+                </h6>
+                {% for staff in top_performers %}
+                <div class="d-flex align-items-center gap-3 mb-3 {% if not forloop.last %}pb-3 border-bottom{% endif %}">
+                    <div class="w-40-px h-40-px rounded-circle bg-{% if forloop.counter == 1 %}warning{% elif forloop.counter == 2 %}secondary{% elif forloop.counter == 3 %}info{% else %}primary{% endif %}-100 d-flex justify-content-center align-items-center flex-shrink-0">
+                        <span class="fw-bold text-{% if forloop.counter == 1 %}warning{% elif forloop.counter == 2 %}secondary{% elif forloop.counter == 3 %}info{% else %}primary{% endif %}-main">{{ forloop.counter }}</span>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="fw-semibold text-md mb-0">{{ staff.name }}</h6>
+                        <small class="text-secondary-light">{{ staff.branch }}</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="fw-bold text-success-main d-block">{{ staff.completed }}</span>
+                        <small class="text-secondary-light">completed</small>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-4">
+                    <iconify-icon icon="solar:users-group-rounded-line-duotone" class="text-xxl mb-2"></iconify-icon>
+                    <p class="text-center text-secondary-light py-4 bg-base">No performance data yet</p> 
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Performance Table -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">All Staff Performance</h6>
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-secondary-light">Staff Member</th>
+                                <th scope="col" class="bg-base text-secondary-light">Branch</th>
+                                <th scope="col" class="bg-base text-secondary-light">Role</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center">Assigned</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center">Completed</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center">Completion Rate</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end">Revenue Generated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for staff in staff_data %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="w-36-px h-36-px rounded-circle bg-primary-100 text-primary-600 d-flex justify-content-center align-items-center">
+                                            <iconify-icon icon="solar:user-bold"></iconify-icon>
+                                        </div>
+                                        <span class="fw-medium text-secondary-light">{{ staff.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="{{ row_color }} text-secondary-light">{{ staff.branch }}</td>
+                                <td class="{{ row_color }}"><span class="badge bg-light text-dark">{{ staff.role }}</span></td>
+                                <td class="{{ row_color }} text-center text-secondary-light">{{ staff.total_assigned }}</td>
+                                <td class="{{ row_color }} text-center">
+                                    <span class="text-success-main fw-semibold">{{ staff.completed }}</span>
+                                </td>
+                                <td class="{{ row_color }} text-center">
+                                    <div class="d-flex align-items-center gap-2 justify-content-center">
+                                        <div class="progress w-60-px" style="height: 6px;">
+                                            <div class="progress-bar bg-{% if staff.completion_rate >= 80 %}success{% elif staff.completion_rate >= 50 %}warning{% else %}danger{% endif %}" 
+                                                 style="width: {{ staff.completion_rate }}%;"></div>
+                                        </div>
+                                        <span class="text-sm text-secondary-light">{{ staff.completion_rate }}%</span>
+                                    </div>
+                                </td>
+                                <td class="{{ row_color }} text-end">
+                                    <span class="fw-semibold text-secondary-light">{{ staff.revenue|floatformat:0 }}</span>
+                                    <small class="text-secondary-light">UZS</small>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-secondary-light py-4 bg-base">
+                                    No staff data available
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const staffLabels = {{ staff_labels|safe }};
+    const staffCompleted = {{ staff_completed|safe }};
+    
+    if (staffLabels.length > 0) {
+        new ApexCharts(document.querySelector("#performanceChart"), {
+            series: [{
+                name: 'Completed Orders',
+                data: staffCompleted
+            }],
+            chart: { type: 'bar', height: 300, toolbar: { show: false } },
+            colors: ['#22c55e'],
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 4,
+                    barHeight: '60%'
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function(val) { return val; },
+                style: { fontSize: '12px', colors: ['#fff'] }
+            },
+            xaxis: {
+                categories: staffLabels,
+                labels: { style: { colors: '#9CA3AF', fontSize: '12px' } }
+            },
+            yaxis: {
+                labels: { style: { colors: '#374151', fontSize: '12px' } }
+            },
+            grid: { borderColor: '#E4E7EC', strokeDashArray: 3 }
+        }).render();
+    } else {
+        document.querySelector("#performanceChart").innerHTML = '<div class="text-center text-secondary-light py-4 bg-base">No performance data to display</div>';
+    }
+});
+</script>
+{% endblock script %}

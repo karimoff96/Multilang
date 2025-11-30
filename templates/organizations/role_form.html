@@ -1,0 +1,249 @@
+{% extends 'layout/layout.html' %}
+
+{% block content %}
+<div class="row gy-4">
+    <div class="col-lg-8">
+        <div class="card radius-8 border-0">
+            <div class="card-header py-16 px-24 border-bottom bg-base">
+                <h6 class="mb-0 fw-bold text-lg">{{ title }}</h6>
+            </div>
+            <div class="card-body p-24">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <!-- Role Name -->
+                    <div class="row mb-20">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                Role Name (ID) <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   name="name" 
+                                   class="form-control radius-8" 
+                                   placeholder="e.g. senior_translator"
+                                   value="{{ role.name|default:'' }}"
+                                   {% if role.is_system_role %}readonly{% endif %}
+                                   required>
+                            <small class="text-secondary-light">Lowercase, underscores instead of spaces</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                Display Name
+                            </label>
+                            <input type="text" 
+                                   name="display_name" 
+                                   class="form-control radius-8" 
+                                   placeholder="e.g. Senior Translator"
+                                   value="{{ role.display_name|default:'' }}">
+                            <small class="text-secondary-light">Human-readable name shown in UI</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-20">
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Description</label>
+                        <textarea name="description" 
+                                  class="form-control radius-8" 
+                                  rows="2" 
+                                  placeholder="Describe this role's responsibilities...">{{ role.description|default:'' }}</textarea>
+                    </div>
+                    
+                    <!-- Permissions -->
+                    <div class="mb-20">
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-12">Permissions</label>
+                        
+                        <div class="row g-3">
+                            <!-- Organization Management -->
+                            <div class="col-12">
+                                <h6 class="text-sm fw-semibold text-secondary-light mb-12 border-bottom pb-8">
+                                    <iconify-icon icon="lucide:building-2" class="me-1"></iconify-icon>
+                                    Organization Management
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="can_manage_center" id="can_manage_center"
+                                           {% if role.can_manage_center %}checked{% endif %}>
+                                    <label class="form-check-label" for="can_manage_center">
+                                        {{ permission_labels.can_manage_center }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="can_manage_branches" id="can_manage_branches"
+                                           {% if role.can_manage_branches %}checked{% endif %}>
+                                    <label class="form-check-label" for="can_manage_branches">
+                                        {{ permission_labels.can_manage_branches }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="can_manage_staff" id="can_manage_staff"
+                                           {% if role.can_manage_staff %}checked{% endif %}>
+                                    <label class="form-check-label" for="can_manage_staff">
+                                        {{ permission_labels.can_manage_staff }}
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Order Management -->
+                            <div class="col-12 mt-16">
+                                <h6 class="text-sm fw-semibold text-secondary-light mb-12 border-bottom pb-8">
+                                    <iconify-icon icon="lucide:package" class="me-1"></iconify-icon>
+                                    Order Management
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="can_view_all_orders" id="can_view_all_orders"
+                                           {% if role.can_view_all_orders %}checked{% endif %}>
+                                    <label class="form-check-label" for="can_view_all_orders">
+                                        {{ permission_labels.can_view_all_orders }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="can_manage_orders" id="can_manage_orders"
+                                           {% if role.can_manage_orders %}checked{% endif %}>
+                                    <label class="form-check-label" for="can_manage_orders">
+                                        {{ permission_labels.can_manage_orders }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="can_assign_orders" id="can_assign_orders"
+                                           {% if role.can_assign_orders %}checked{% endif %}>
+                                    <label class="form-check-label" for="can_assign_orders">
+                                        {{ permission_labels.can_assign_orders }}
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Financial & Reports -->
+                            <div class="col-12 mt-16">
+                                <h6 class="text-sm fw-semibold text-secondary-light mb-12 border-bottom pb-8">
+                                    <iconify-icon icon="lucide:bar-chart-3" class="me-1"></iconify-icon>
+                                    Financial & Reports
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="can_receive_payments" id="can_receive_payments"
+                                           {% if role.can_receive_payments %}checked{% endif %}>
+                                    <label class="form-check-label" for="can_receive_payments">
+                                        {{ permission_labels.can_receive_payments }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="can_view_reports" id="can_view_reports"
+                                           {% if role.can_view_reports %}checked{% endif %}>
+                                    <label class="form-check-label" for="can_view_reports">
+                                        {{ permission_labels.can_view_reports }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="can_export_data" id="can_export_data"
+                                           {% if role.can_export_data %}checked{% endif %}>
+                                    <label class="form-check-label" for="can_export_data">
+                                        {{ permission_labels.can_export_data }}
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Other -->
+                            <div class="col-12 mt-16">
+                                <h6 class="text-sm fw-semibold text-secondary-light mb-12 border-bottom pb-8">
+                                    <iconify-icon icon="lucide:settings" class="me-1"></iconify-icon>
+                                    Other
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="can_manage_products" id="can_manage_products"
+                                           {% if role.can_manage_products %}checked{% endif %}>
+                                    <label class="form-check-label" for="can_manage_products">
+                                        {{ permission_labels.can_manage_products }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="can_manage_customers" id="can_manage_customers"
+                                           {% if role.can_manage_customers %}checked{% endif %}>
+                                    <label class="form-check-label" for="can_manage_customers">
+                                        {{ permission_labels.can_manage_customers }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit -->
+                    <div class="d-flex align-items-center justify-content-between gap-3 mt-24">
+                        <a href="{% url 'role_list' %}" class="btn btn-outline-secondary radius-4 px-20 d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="lucide:arrow-left" class="line-height-1"></iconify-icon> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary radius-4 px-20 d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="lucide:save" class="line-height-1"></iconify-icon>
+                            {% if role %}Update Role{% else %}Create Role{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Help Panel -->
+    <div class="col-lg-4">
+        <div class="card radius-8 border-0">
+            <div class="card-header py-16 px-24 border-bottom bg-base">
+                <h6 class="mb-0 fw-semibold">
+                    <iconify-icon icon="lucide:help-circle" class="me-1"></iconify-icon>
+                    Permission Guide
+                </h6>
+            </div>
+            <div class="card-body p-24">
+                <div class="d-flex flex-column gap-16">
+                    <div>
+                        <h6 class="text-sm fw-semibold text-primary-main mb-4">Organization Permissions</h6>
+                        <p class="text-sm text-secondary-light mb-0">
+                            Control access to centers, branches, and staff management. Usually for owners and managers.
+                        </p>
+                    </div>
+                    <div>
+                        <h6 class="text-sm fw-semibold text-info-main mb-4">Order Permissions</h6>
+                        <p class="text-sm text-secondary-light mb-0">
+                            "View All Orders" shows all branch orders. "Manage Orders" allows status updates. "Assign Orders" allows delegation to staff.
+                        </p>
+                    </div>
+                    <div>
+                        <h6 class="text-sm fw-semibold text-success-main mb-4">Financial Permissions</h6>
+                        <p class="text-sm text-secondary-light mb-0">
+                            "Receive Payments" allows marking orders as paid. "View Reports" shows analytics dashboards.
+                        </p>
+                    </div>
+                    
+                    {% if role.is_system_role %}
+                    <div class="alert alert-warning-100 text-warning-600 radius-8 py-12 px-16">
+                        <iconify-icon icon="lucide:alert-triangle" class="me-1"></iconify-icon>
+                        <strong>System Role:</strong> The role name cannot be changed as it's used internally.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,148 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row gy-4">
+    <div class="col-12">
+        <div class="card h-100 p-0 radius-12">
+            <div class="card-header border-bottom bg-base py-16 px-24">
+                <h6 class="text-lg fw-semibold mb-0">{{ title }}</h6>
+            </div>
+            <div class="card-body p-24">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row gy-3">
+                        <!-- Basic Info -->
+                        <div class="col-12">
+                            <h6 class="text-md fw-semibold mb-16 pb-8 border-bottom">Branch Information</h6>
+                        </div>
+                        
+                        {% if not branch %}
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                Translation Center <span class="text-danger">*</span>
+                            </label>
+                            <select name="center" class="form-select radius-8" required>
+                                <option value="">Select Center</option>
+                                {% for center in centers %}
+                                <option value="{{ center.id }}" {% if selected_center and selected_center.id == center.id %}selected{% endif %}>
+                                    {{ center.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                Branch Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="name" class="form-control radius-8" 
+                                   value="{% if branch %}{{ branch.name }}{% endif %}"
+                                   placeholder="Enter branch name" required>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Phone</label>
+                            <input type="tel" name="phone" class="form-control radius-8" 
+                                   value="{% if branch %}{{ branch.phone|default:'' }}{% endif %}"
+                                   placeholder="Enter phone number">
+                        </div>
+                        
+                        <!-- Location -->
+                        <div class="col-12 mt-24">
+                            <h6 class="text-md fw-semibold mb-16 pb-8 border-bottom">Location</h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Region</label>
+                            <select name="region" id="region-select" class="form-select radius-8">
+                                <option value="">Select Region</option>
+                                {% for region in regions %}
+                                <option value="{{ region.id }}" {% if branch and branch.region_id == region.id %}selected{% endif %}>
+                                    {{ region.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">District</label>
+                            <select name="district" id="district-select" class="form-select radius-8">
+                                <option value="">Select District</option>
+                                {% for district in districts %}
+                                <option value="{{ district.id }}" {% if branch and branch.district_id == district.id %}selected{% endif %}>
+                                    {{ district.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Address</label>
+                            <textarea name="address" class="form-control radius-8" rows="2" 
+                                      placeholder="Enter full address">{% if branch %}{{ branch.address|default:'' }}{% endif %}</textarea>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Location URL</label>
+                            <input type="url" name="location_url" class="form-control radius-8" 
+                                   value="{% if branch %}{{ branch.location_url|default:'' }}{% endif %}"
+                                   placeholder="Google Maps or Yandex Maps URL">
+                            <small class="text-secondary-light">Paste a link from Google Maps or Yandex Maps</small>
+                        </div>
+                        
+                        {% if branch %}
+                        <div class="col-md-6 mt-24">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Status</label>
+                            <div class="form-check form-switch switch-primary d-flex align-items-center gap-3">
+                                <input class="form-check-input" type="checkbox" role="switch" 
+                                       name="is_active" id="is_active" {% if branch.is_active %}checked{% endif %}>
+                                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="is_active">
+                                    Active
+                                </label>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
+                        <a href="{% url 'branch_list' %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8">
+                            {% if branch %}Update{% else %}Create{% endif %} Branch
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const regionSelect = document.getElementById('region-select');
+    const districtSelect = document.getElementById('district-select');
+    
+    regionSelect.addEventListener('change', function() {
+        const regionId = this.value;
+        districtSelect.innerHTML = '<option value="">Select District</option>';
+        
+        if (regionId) {
+            fetch(`/organizations/api/districts/${regionId}/`)
+                .then(response => response.json())
+                .then(districts => {
+                    districts.forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district.id;
+                        option.textContent = district.name;
+                        districtSelect.appendChild(option);
+                    });
+                });
+        }
+    });
+});
+</script>
+{% endblock %}

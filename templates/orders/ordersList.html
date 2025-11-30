@@ -2,11 +2,80 @@
 {% load static %}
 
 {% block content %}
+<!-- Stats Cards -->
+<div class="row gy-4 mb-24">
+    <div class="col-xxl-2 col-lg-4 col-sm-6">
+        <div class="card px-16 py-12 shadow-none radius-8 border h-100">
+            <div class="d-flex align-items-center gap-2">
+                <div class="w-48-px h-48-px radius-8 bg-primary-100 d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="solar:document-text-bold" class="text-primary-600 text-xl"></iconify-icon>
+                </div>
+                <div>
+                    <span class="text-secondary-light text-xs">Total</span>
+                    <h6 class="mb-0">{{ stats.total }}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-2 col-lg-4 col-sm-6">
+        <div class="card px-16 py-12 shadow-none radius-8 border h-100">
+            <div class="d-flex align-items-center gap-2">
+                <div class="w-48-px h-48-px radius-8 bg-warning-100 d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="solar:hourglass-bold" class="text-warning-600 text-xl"></iconify-icon>
+                </div>
+                <div>
+                    <span class="text-secondary-light text-xs">Pending</span>
+                    <h6 class="mb-0">{{ stats.pending }}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-2 col-lg-4 col-sm-6">
+        <div class="card px-16 py-12 shadow-none radius-8 border h-100">
+            <div class="d-flex align-items-center gap-2">
+                <div class="w-48-px h-48-px radius-8 bg-info-100 d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="solar:play-bold" class="text-info-600 text-xl"></iconify-icon>
+                </div>
+                <div>
+                    <span class="text-secondary-light text-xs">In Progress</span>
+                    <h6 class="mb-0">{{ stats.in_progress }}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-2 col-lg-4 col-sm-6">
+        <div class="card px-16 py-12 shadow-none radius-8 border h-100">
+            <div class="d-flex align-items-center gap-2">
+                <div class="w-48-px h-48-px radius-8 bg-success-100 d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="solar:check-circle-bold" class="text-success-600 text-xl"></iconify-icon>
+                </div>
+                <div>
+                    <span class="text-secondary-light text-xs">Completed</span>
+                    <h6 class="mb-0">{{ stats.completed }}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-2 col-lg-4 col-sm-6">
+        <div class="card px-16 py-12 shadow-none radius-8 border h-100">
+            <div class="d-flex align-items-center gap-2">
+                <div class="w-48-px h-48-px radius-8 bg-danger-100 d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="solar:user-cross-bold" class="text-danger-600 text-xl"></iconify-icon>
+                </div>
+                <div>
+                    <span class="text-secondary-light text-xs">Unassigned</span>
+                    <h6 class="mb-0">{{ stats.unassigned }}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card h-100 p-0 radius-12">
     <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
         <div class="d-flex align-items-center flex-wrap gap-3">
             <span class="text-md fw-medium text-secondary-light mb-0" data-i18n="common.show">Show</span>
-            <form method="get" class="d-flex align-items-center gap-3">
+            <form method="get" class="d-flex align-items-center gap-3 flex-wrap">
                 <select name="per_page" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
                     <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
                     <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
@@ -29,6 +98,30 @@
                     <option value="{{ value }}" {% if payment_filter == value %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                 </select>
+                {% if user.is_superuser and centers %}
+                <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Centers</option>
+                    {% for center in centers %}
+                    <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+                {% if branches %}
+                <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Branches</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+                <select name="assignment" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">All Orders</option>
+                    <option value="unassigned" {% if assignment_filter == 'unassigned' %}selected{% endif %}>Unassigned</option>
+                    <option value="assigned" {% if assignment_filter == 'assigned' %}selected{% endif %}>Assigned</option>
+                    {% if request.admin_profile %}
+                    <option value="mine" {% if assignment_filter == 'mine' %}selected{% endif %}>Assigned to Me</option>
+                    {% endif %}
+                </select>
             </form>
         </div>
     </div>
@@ -46,12 +139,19 @@
                             </div>
                         </th>
                         <th scope="col" data-i18n="table.date">Date</th>
+                        {% if user.is_superuser %}
+                        <th scope="col">Center</th>
+                        {% endif %}
+                        {% if user.is_superuser or is_owner %}
+                        <th scope="col">Branch</th>
+                        {% endif %}
                         <th scope="col" data-i18n="table.customer">Customer</th>
                         <th scope="col" data-i18n="table.product">Product</th>
                         <th scope="col" data-i18n="table.pages">Pages</th>
                         <th scope="col" data-i18n="table.copies">Copies</th>
                         <th scope="col" data-i18n="table.total">Total</th>
                         <th scope="col" data-i18n="table.payment">Payment</th>
+                        <th scope="col">Assigned</th>
                         <th scope="col" class="text-center" data-i18n="table.status">Status</th>
                         <th scope="col" class="text-center" data-i18n="table.action">Action</th>
                     </tr>
@@ -68,6 +168,24 @@
                             </div>
                         </td>
                         <td>{{ order.created_at|date:"d M Y H:i" }}</td>
+                        {% if user.is_superuser %}
+                        <td>
+                            {% if order.branch and order.branch.center %}
+                            <span class="badge bg-primary-focus text-primary-600">{{ order.branch.center.name|truncatewords:2 }}</span>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                        {% if user.is_superuser or is_owner %}
+                        <td>
+                            {% if order.branch %}
+                            <span class="badge bg-info-focus text-info-600">{{ order.branch.name|truncatewords:2 }}</span>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
                         <td>
                             <div class="d-flex align-items-center">
                                 <div class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden bg-primary-100 d-flex align-items-center justify-content-center">
@@ -110,6 +228,18 @@
                                 </span>
                             {% endif %}
                         </td>
+                        <td>
+                            {% if order.assigned_to %}
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="w-24-px h-24-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center">
+                                        <span class="text-primary-600 fw-bold text-xs">{{ order.assigned_to.user.first_name|slice:":1"|upper }}{{ order.assigned_to.user.last_name|slice:":1"|upper }}</span>
+                                    </div>
+                                    <small>{{ order.assigned_to.user.get_full_name|default:order.assigned_to.user.username|truncatewords:2 }}</small>
+                                </div>
+                            {% else %}
+                                <span class="badge bg-warning-focus text-warning-600">Unassigned</span>
+                            {% endif %}
+                        </td>
                         <td class="text-center">
                             {% if order.status == 'pending' %}
                                 <span class="bg-warning-focus text-warning-600 border border-warning-main px-12 py-4 radius-4 fw-medium text-sm">Pending</span>
@@ -136,11 +266,14 @@
                                 <a href="{% url 'orderDetail' order.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
                                     <iconify-icon icon="majesticons:eye-line" class="icon text-xl"></iconify-icon>
                                 </a>
+                                {% if request.user.is_superuser or is_owner %}
                                 <button type="button" class="bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-bs-toggle="modal" data-bs-target="#deleteModal{{ order.id }}">
                                     <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
                                 </button>
+                                {% endif %}
                             </div>
                             
+                            {% if request.user.is_superuser or is_owner %}
                             <!-- Delete Modal -->
                             <div class="modal fade" id="deleteModal{{ order.id }}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered">
@@ -162,11 +295,12 @@
                                     </div>
                                 </div>
                             </div>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="10" class="text-center py-4">
+                        <td colspan="11" class="text-center py-4">
                             <div class="text-secondary-light">
                                 <iconify-icon icon="mdi:package-variant-closed" class="text-4xl mb-2"></iconify-icon>
                                 <p class="mb-0">No orders found</p>
@@ -184,12 +318,12 @@
             <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                 {% if orders.has_previous %}
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page=1&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page=1&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:d-arrow-left"></iconify-icon>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:arrow-left"></iconify-icon>
                     </a>
                 </li>
@@ -202,19 +336,19 @@
                     </li>
                     {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
                     <li class="page-item">
-                        <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" href="?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&per_page={{ per_page }}">{{ num }}</a>
+                        <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" href="?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">{{ num }}</a>
                     </li>
                     {% endif %}
                 {% endfor %}
                 
                 {% if orders.has_next %}
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.next_page_number }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.next_page_number }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:arrow-right"></iconify-icon>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.paginator.num_pages }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.paginator.num_pages }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:d-arrow-right"></iconify-icon>
                     </a>
                 </li>

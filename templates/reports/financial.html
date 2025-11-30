@@ -1,0 +1,288 @@
+{% extends 'layout/layout.html' %} 
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Report Header with Filters -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-0">{{ title }}</h5>
+                        <p class="text-secondary-light mb-0">Revenue and financial analytics</p>
+                    </div>
+                    <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                        <div>
+                            <label class="form-label text-sm mb-1">From Date</label>
+                            <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                        </div>
+                        <div>
+                            <label class="form-label text-sm mb-1">To Date</label>
+                            <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                        </div>
+                        {% if branches %}
+                        <div>
+                            <label class="form-label text-sm mb-1">Branch</label>
+                            <select name="branch" class="form-select">
+                                <option value="">All Branches</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
+                            Apply
+                        </button>
+                        <a href="{% url 'export_report' 'financial' %}?date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:download-bold" class="icon line-height-1"></iconify-icon>
+                            Export
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-1 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-primary-600 text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:wallet-money-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Total Revenue</span>
+                        <h4 class="fw-bold mb-0">{{ total_revenue|floatformat:0 }} <small class="text-sm fw-normal">UZS</small></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-2 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-success-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:check-circle-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Completed Revenue</span>
+                        <h4 class="fw-bold mb-0">{{ completed_revenue|floatformat:0 }} <small class="text-sm fw-normal">UZS</small></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-3 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-warning-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:bag-4-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Total Orders</span>
+                        <h4 class="fw-bold mb-0">{{ total_orders }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-4 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-info-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:chart-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Avg Order Value</span>
+                        <h4 class="fw-bold mb-0">{{ avg_order_value|floatformat:0 }} <small class="text-sm fw-normal">UZS</small></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Revenue Chart -->
+    <div class="col-xxl-8">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">Daily Revenue Trend</h6>
+                <div id="dailyRevenueChart" style="min-height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue by Status -->
+    <div class="col-xxl-4">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">Revenue by Status</h6>
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-secondary-light">Status</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end">Revenue</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center">Orders</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in status_data %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }}">
+                                    {% if item.status == 'completed' %}
+                                    <span class="badge bg-success-focus text-success-main">{{ item.status_display }}</span>
+                                    {% elif item.status == 'cancelled' %}
+                                    <span class="badge bg-danger-focus text-danger-main">{{ item.status_display }}</span>
+                                    {% elif item.status == 'in_progress' %}
+                                    <span class="badge bg-info-focus text-info-main">{{ item.status_display }}</span>
+                                    {% else %}
+                                    <span class="badge bg-warning-focus text-warning-main">{{ item.status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="{{ row_color }} text-end text-secondary-light">{{ item.revenue|floatformat:0 }}</td>
+                                <td class="{{ row_color }} text-center text-secondary-light">{{ item.count }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" class="text-center text-secondary-light bg-base">No data</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branch Revenue (if owner/superuser) -->
+    {% if branch_revenue %}
+    <div class="col-xxl-6">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">Revenue by Branch</h6>
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-secondary-light">Branch</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end">Revenue</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center">Orders</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in branch_revenue %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }} fw-medium text-secondary-light">{{ item.branch }}</td>
+                                <td class="{{ row_color }} text-end text-success-main fw-semibold">{{ item.revenue|floatformat:0 }}</td>
+                                <td class="{{ row_color }} text-center text-secondary-light">{{ item.count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Top Products -->
+    <div class="col-xxl-{% if branch_revenue %}6{% else %}12{% endif %}">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">Top Products by Revenue</h6>
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-secondary-light">Product</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end">Revenue</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center">Orders</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in product_data %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }} fw-medium text-secondary-light">{{ item.product }}</td>
+                                <td class="{{ row_color }} text-end text-success-main fw-semibold">{{ item.revenue|floatformat:0 }}</td>
+                                <td class="{{ row_color }} text-center text-secondary-light">{{ item.count }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" class="text-center text-secondary-light bg-base">No products data</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dailyLabels = {{ daily_labels|safe }};
+    const dailyValues = {{ daily_values|safe }};
+    
+    if (dailyLabels.length > 0) {
+        const options = {
+            series: [{
+                name: 'Revenue',
+                data: dailyValues
+            }],
+            chart: {
+                type: 'area',
+                height: 300,
+                toolbar: { show: false }
+            },
+            colors: ['#487FFF'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.4,
+                    opacityTo: 0.1,
+                }
+            },
+            dataLabels: { enabled: false },
+            stroke: { curve: 'smooth', width: 2 },
+            xaxis: {
+                categories: dailyLabels,
+                labels: {
+                    style: { colors: '#9CA3AF', fontSize: '12px' }
+                }
+            },
+            yaxis: {
+                labels: {
+                    formatter: function(val) {
+                        return val.toLocaleString() + ' UZS';
+                    },
+                    style: { colors: '#9CA3AF', fontSize: '12px' }
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val) {
+                        return val.toLocaleString() + ' UZS';
+                    }
+                }
+            },
+            grid: {
+                borderColor: '#E4E7EC',
+                strokeDashArray: 3
+            }
+        };
+        
+        new ApexCharts(document.querySelector("#dailyRevenueChart"), options).render();
+    }
+});
+</script>
+{% endblock script %}

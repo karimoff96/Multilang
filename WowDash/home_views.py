@@ -4,6 +4,8 @@ from django.utils import timezone
 from django.db.models import Sum, Count
 from datetime import timedelta
 from orders.models import Order
+from organizations.rbac import get_user_orders, get_user_customers, get_user_branches, get_user_staff
+from organizations.models import AdminUser
 import json
 
 
@@ -19,14 +21,15 @@ def email(request):
 
 @login_required(login_url='admin_login')
 def index(request):
-    """Dashboard - Executive Summary with brief overview"""
+    """Dashboard - Executive Summary with brief overview - Role-specific"""
     now = timezone.now()
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     yesterday_start = today_start - timedelta(days=1)
     week_start = today_start - timedelta(days=today_start.weekday())
     month_start = today_start.replace(day=1)
     
-    all_orders = Order.objects.all()
+    # Use RBAC-filtered orders
+    all_orders = get_user_orders(request.user)
     
     # Quick stats
     today_orders = all_orders.filter(created_at__gte=today_start)
@@ -46,10 +49,10 @@ def index(request):
     order_change = today_count - yesterday_count
     revenue_change = today_revenue - yesterday_revenue
     
-    # User stats
-    from accounts.models import BotUser
-    total_users = BotUser.objects.count()
-    total_agencies = BotUser.objects.filter(is_agency=True).count()
+    # User stats - RBAC filtered
+    customers = get_user_customers(request.user)
+    total_users = customers.count()
+    total_agencies = customers.filter(is_agency=True).count()
     
     # Status counts for today
     completed_today = today_orders.filter(status='completed').count()
@@ -59,6 +62,12 @@ def index(request):
     # Pending orders (orders requiring attention)
     pending_orders = all_orders.filter(
         status__in=['pending', 'payment_pending', 'payment_received', 'payment_confirmed', 'in_progress', 'ready']
+    ).count()
+    
+    # Unassigned orders (for managers/owners)
+    unassigned_orders = all_orders.filter(
+        assigned_to__isnull=True,
+        status__in=['pending', 'payment_pending', 'payment_received', 'payment_confirmed']
     ).count()
     
     # Cancelled orders this week (alert)
@@ -116,6 +125,85 @@ def index(request):
     total_revenue = float(all_orders.aggregate(total=Sum('total_price'))['total'] or 0)
     total_orders = all_orders.count()
     
+    # Role-specific data
+    role_context = {}
+    
+    if request.user.is_superuser:
+        # Superuser sees everything
+        from organizations.models import TranslationCenter, Branch
+        role_context = {
+            'total_centers': TranslationCenter.objects.filter(is_active=True).count(),
+            'total_branches': Branch.objects.filter(is_active=True).count(),
+            'total_staff': AdminUser.objects.filter(is_active=True).count(),
+            'role_title': 'System Overview',
+        }
+    elif hasattr(request, 'admin_profile') and request.admin_profile:
+        profile = request.admin_profile
+        
+        if profile.is_owner:
+            # Owner sees their centers and all branches
+            from organizations.models import TranslationCenter, Branch
+            centers = TranslationCenter.objects.filter(owner=request.user, is_active=True)
+            branches = Branch.objects.filter(center__owner=request.user, is_active=True)
+            staff = AdminUser.objects.filter(branch__center__owner=request.user, is_active=True)
+            
+            # Branch performance data
+            branch_performance = []
+            for branch in branches[:5]:
+                branch_orders = all_orders.filter(branch=branch, created_at__gte=month_start)
+                branch_revenue = float(branch_orders.aggregate(total=Sum('total_price'))['total'] or 0)
+                branch_performance.append({
+                    'name': branch.name,
+                    'orders': branch_orders.count(),
+                    'revenue': branch_revenue,
+                })
+            
+            role_context = {
+                'total_centers': centers.count(),
+                'total_branches': branches.count(),
+                'total_staff': staff.count(),
+                'branch_performance': branch_performance,
+                'role_title': 'Owner Dashboard',
+            }
+            
+        elif profile.is_manager:
+            # Manager sees their branch
+            branch = profile.branch
+            branch_staff = AdminUser.objects.filter(branch=branch, is_active=True) if branch else AdminUser.objects.none()
+            
+            # Staff performance
+            staff_performance = []
+            for staff_member in branch_staff.exclude(pk=profile.pk)[:5]:
+                staff_orders = all_orders.filter(assigned_to=staff_member, created_at__gte=month_start)
+                staff_completed = staff_orders.filter(status='completed').count()
+                staff_performance.append({
+                    'name': staff_member.user.get_full_name() or staff_member.user.username,
+                    'assigned': staff_orders.count(),
+                    'completed': staff_completed,
+                })
+            
+            role_context = {
+                'branch_name': branch.name if branch else 'No Branch',
+                'total_staff': branch_staff.count(),
+                'staff_performance': staff_performance,
+                'role_title': 'Manager Dashboard',
+            }
+            
+        else:
+            # Staff sees their assigned orders
+            my_orders = all_orders.filter(assigned_to=profile)
+            my_pending = my_orders.filter(status__in=['in_progress', 'ready']).count()
+            my_completed_today = my_orders.filter(status='completed', updated_at__gte=today_start).count()
+            my_total_completed = my_orders.filter(status='completed').count()
+            
+            role_context = {
+                'my_pending': my_pending,
+                'my_completed_today': my_completed_today,
+                'my_total_completed': my_total_completed,
+                'my_total_assigned': my_orders.count(),
+                'role_title': 'My Dashboard',
+            }
+    
     context = {
         "title": "Dashboard",
         "subTitle": "Executive Summary",
@@ -137,6 +225,7 @@ def index(request):
         "completion_rate": completion_rate,
         # Alerts
         "pending_orders": pending_orders,
+        "unassigned_orders": unassigned_orders,
         "cancelled_week": cancelled_week,
         # Charts
         "weekly_chart_data": json.dumps(weekly_chart_data),
@@ -147,6 +236,8 @@ def index(request):
         # Totals
         "total_revenue": total_revenue,
         "total_orders": total_orders,
+        # Role-specific
+        **role_context,
     }
     return render(request, "index.html", context)
     

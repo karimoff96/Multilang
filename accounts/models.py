@@ -5,12 +5,22 @@ from django.utils.translation import gettext_lazy as _
 
 
 class BotUser(models.Model):
-    """Model for Telegram bot users"""
+    """Model for Telegram bot users (customers)"""
 
     LANGUAGES = (
         ("uz", "Uzbek"),
         ("ru", "Russian"),
         ("en", "English"),
+    )
+
+    # Branch relationship - customers are tied to specific branches
+    branch = models.ForeignKey(
+        'organizations.Branch',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='customers',
+        verbose_name=_("Branch")
     )
 
     # Telegram user data
@@ -63,6 +73,11 @@ class BotUser(models.Model):
     def display_name(self):
         """Get display name for user"""
         return self.name or f"User {self.user_id}"
+    
+    @property
+    def full_name(self):
+        """Alias for name field for compatibility"""
+        return self.name
 
     @property
     def is_registered(self):
@@ -149,28 +164,3 @@ class BotUser(models.Model):
             print(f"[ERROR] Unexpected error in get_agency_by_token: {e}")
             traceback.print_exc()
             return None
-
-
-class AdditionalInfo(models.Model):
-    bank_card = models.PositiveBigIntegerField(
-        blank=True, null=True, verbose_name=_("Bank Card")
-    )
-    holder_name = models.CharField(
-        max_length=100, blank=True, null=True, verbose_name=_("Holder Name")
-    )
-    phone_number = models.PositiveBigIntegerField(
-        default=0, verbose_name=_("Phone Number")
-    )
-    location = models.URLField(blank=True, null=True, verbose_name=_("Office location"))
-    # Fields that will be translated using modeltranslation
-    help_text = models.TextField(blank=True, null=True, verbose_name=_("Help Text"))
-    about_us = models.TextField(blank=True, null=True, verbose_name=_("About Us"))
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
-
-    def __str__(self):
-        return "Additional Info"
-
-    class Meta:
-        verbose_name = str(_("Additional Info"))
-        verbose_name_plural = str(_("Additional Info"))

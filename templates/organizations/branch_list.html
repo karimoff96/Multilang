@@ -1,0 +1,109 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="card h-100 p-0 radius-12">
+    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+        <div>
+            <h6 class="text-lg fw-semibold mb-0">{{ title }}</h6>
+            <span class="text-sm text-secondary-light">Manage your branches</span>
+        </div>
+        {% if permissions.can_manage_branches %}
+        <a href="{% url 'branch_create' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
+            <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+            Add New Branch
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body p-24">
+        <div class="row gy-4">
+            {% for branch in branches %}
+            <div class="col-xxl-4 col-md-6">
+                <div class="card border radius-12 h-100">
+                    <div class="card-body p-20">
+                        <div class="d-flex align-items-start justify-content-between mb-16">
+                            <div class="d-flex align-items-center gap-12">
+                                <div class="w-48-px h-48-px rounded-circle bg-primary-100 d-flex justify-content-center align-items-center flex-shrink-0">
+                                    <iconify-icon icon="mdi:office-building" class="text-primary-600 text-xl"></iconify-icon>
+                                </div>
+                                <div>
+                                    <h6 class="text-md fw-semibold mb-4">{{ branch.name }}</h6>
+                                    <span class="text-sm text-secondary-light">{{ branch.center.name }}</span>
+                                </div>
+                            </div>
+                            {% if branch.is_main %}
+                            <span class="bg-success-focus text-success-main px-12 py-4 radius-4 text-xs fw-medium">Main</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-16">
+                            {% if branch.region %}
+                            <div class="d-flex align-items-center gap-8 mb-8">
+                                <iconify-icon icon="mdi:map-marker" class="text-secondary-light"></iconify-icon>
+                                <span class="text-sm">{{ branch.region.name }}{% if branch.district %}, {{ branch.district.name }}{% endif %}</span>
+                            </div>
+                            {% endif %}
+                            {% if branch.phone %}
+                            <div class="d-flex align-items-center gap-8 mb-8">
+                                <iconify-icon icon="mdi:phone" class="text-secondary-light"></iconify-icon>
+                                <span class="text-sm">{{ branch.phone }}</span>
+                            </div>
+                            {% endif %}
+                            {% if branch.address %}
+                            <div class="d-flex align-items-center gap-8">
+                                <iconify-icon icon="mdi:home" class="text-secondary-light"></iconify-icon>
+                                <span class="text-sm text-secondary-light">{{ branch.address|truncatewords:10 }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex gap-12 mb-16">
+                            <div class="bg-neutral-100 rounded-8 p-12 text-center flex-grow-1">
+                                <h6 class="text-lg fw-semibold mb-4">{{ branch.staff_count }}</h6>
+                                <span class="text-xs text-secondary-light">Staff</span>
+                            </div>
+                            <div class="bg-neutral-100 rounded-8 p-12 text-center flex-grow-1">
+                                <h6 class="text-lg fw-semibold mb-4">{{ branch.customer_count }}</h6>
+                                <span class="text-xs text-secondary-light">Customers</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center justify-content-between pt-16 border-top">
+                            <span class="{% if branch.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-16 py-4 radius-4 text-xs fw-medium">
+                                {% if branch.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                            {% if permissions.can_manage_branches %}
+                            <div class="d-flex gap-8">
+                                {% if branch.location_url %}
+                                <a href="{{ branch.location_url }}" target="_blank" class="bg-info-focus text-info-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="View on Map">
+                                    <iconify-icon icon="mdi:map" class="icon"></iconify-icon>
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'branch_edit' branch.id %}" class="bg-primary-focus text-primary-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="Edit">
+                                    <iconify-icon icon="lucide:edit" class="icon"></iconify-icon>
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center py-40">
+                    <iconify-icon icon="mdi:office-building-outline" class="icon text-5xl text-secondary-light mb-16"></iconify-icon>
+                    <h6 class="text-lg fw-medium mb-8">No branches found</h6>
+                    <p class="text-secondary-light mb-16">Get started by creating your first branch</p>
+                    {% if permissions.can_manage_branches %}
+                    <a href="{% url 'branch_create' %}" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                        <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+                        Add Branch
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

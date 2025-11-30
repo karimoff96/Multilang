@@ -1,0 +1,120 @@
+{% extends 'layout/layout.html' %}
+
+{% block content %}
+<div class="row gy-4">
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3 py-16 px-24 border-bottom bg-base">
+                <div>
+                    <h6 class="mb-0 fw-bold text-lg">{{ title }}</h6>
+                    <span class="text-sm text-secondary-light">Manage roles and permissions for your platform</span>
+                </div>
+                <a href="{% url 'role_create' %}" class="btn btn-primary text-sm btn-sm px-12 py-6 radius-4 d-flex align-items-center gap-2">
+                    <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+                    Create New Role
+                </a>
+            </div>
+            <div class="card-body p-24">
+                <div class="table-responsive scroll-sm">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-secondary-light">Role Name</th>
+                                <th scope="col" class="bg-base text-secondary-light">Description</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center">Users</th>
+                                <th scope="col" class="bg-base text-secondary-light">Permissions</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for role in roles %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        {% if role.is_system_role %}
+                                        <span class="badge bg-primary-100 text-primary-600 px-8 py-4 radius-4 text-xs">System</span>
+                                        {% endif %}
+                                        <span class="fw-semibold text-secondary-light">{{ role.display_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="{{ row_color }}">
+                                    <span class="text-secondary-light">{{ role.description|default:"-" }}</span>
+                                </td>
+                                <td class="{{ row_color }} text-center">
+                                    <span class="badge bg-info-100 text-info-600 px-8 py-4 radius-4">{{ role.user_count }}</span>
+                                </td>
+                                <td class="{{ row_color }}">
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% if role.can_manage_center %}
+                                        <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs">Centers</span>
+                                        {% endif %}
+                                        {% if role.can_manage_branches %}
+                                        <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs">Branches</span>
+                                        {% endif %}
+                                        {% if role.can_manage_staff %}
+                                        <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs">Staff</span>
+                                        {% endif %}
+                                        {% if role.can_manage_orders %}
+                                        <span class="badge bg-info-100 text-info-600 px-6 py-2 radius-4 text-xs">Orders</span>
+                                        {% endif %}
+                                        {% if role.can_view_reports %}
+                                        <span class="badge bg-warning-100 text-warning-600 px-6 py-2 radius-4 text-xs">Reports</span>
+                                        {% endif %}
+                                        {% if role.can_receive_payments %}
+                                        <span class="badge bg-purple-100 text-purple-600 px-6 py-2 radius-4 text-xs">Payments</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="{{ row_color }} text-center">
+                                    <div class="d-flex align-items-center justify-content-center gap-2">
+                                        <a href="{% url 'role_edit' role.id %}" class="btn btn-sm btn-icon btn-outline-primary radius-4" title="Edit">
+                                            <iconify-icon icon="lucide:edit" class="icon"></iconify-icon>
+                                        </a>
+                                        {% if not role.is_system_role and role.user_count == 0 %}
+                                        <form method="POST" action="{% url 'role_delete' role.id %}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this role?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-icon btn-outline-danger radius-4" title="Delete">
+                                                <iconify-icon icon="lucide:trash-2" class="icon"></iconify-icon>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-secondary-light py-4 bg-base">
+                                    No roles found. Create your first role!
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Permission Legend -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-header py-16 px-24 border-bottom bg-base">
+                <h6 class="mb-0 fw-semibold">Permission Reference</h6>
+            </div>
+            <div class="card-body p-24">
+                <div class="row g-3">
+                    {% for perm in permissions %}
+                    <div class="col-md-4 col-sm-6">
+                        <div class="d-flex align-items-center gap-2">
+                            <iconify-icon icon="lucide:check-circle" class="text-success-main"></iconify-icon>
+                            <span class="text-sm">{{ perm|cut:"can_"|title }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

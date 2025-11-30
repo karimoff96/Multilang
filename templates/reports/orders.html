@@ -1,0 +1,295 @@
+{% extends 'layout/layout.html' %} 
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Report Header with Filters -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-0">{{ title }}</h5>
+                        <p class="text-secondary-light mb-0">Order statistics and analytics</p>
+                    </div>
+                    <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                        <div>
+                            <label class="form-label text-sm mb-1">From Date</label>
+                            <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                        </div>
+                        <div>
+                            <label class="form-label text-sm mb-1">To Date</label>
+                            <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                        </div>
+                        {% if branches %}
+                        <div>
+                            <label class="form-label text-sm mb-1">Branch</label>
+                            <select name="branch" class="form-select">
+                                <option value="">All Branches</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <label class="form-label text-sm mb-1">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="">All Statuses</option>
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
+                            Apply
+                        </button>
+                        <a href="{% url 'export_report' 'orders' %}?date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:download-bold" class="icon line-height-1"></iconify-icon>
+                            Export
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="col-xxl-2 col-sm-4">
+        <div class="card p-3 radius-8 border shadow-none h-100">
+            <div class="card-body p-0 text-center">
+                <span class="w-44-px h-44-px bg-primary-100 text-primary-600 d-inline-flex justify-content-center align-items-center rounded-circle mb-2">
+                    <iconify-icon icon="solar:bag-4-bold" class="text-xl"></iconify-icon>
+                </span>
+                <h4 class="fw-bold mb-0">{{ total_orders }}</h4>
+                <small class="text-secondary-light">Total Orders</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-2 col-sm-4">
+        <div class="card p-3 radius-8 border shadow-none h-100">
+            <div class="card-body p-0 text-center">
+                <span class="w-44-px h-44-px bg-success-100 text-success-600 d-inline-flex justify-content-center align-items-center rounded-circle mb-2">
+                    <iconify-icon icon="solar:check-circle-bold" class="text-xl"></iconify-icon>
+                </span>
+                <h4 class="fw-bold mb-0">{{ completed }}</h4>
+                <small class="text-secondary-light">Completed</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-2 col-sm-4">
+        <div class="card p-3 radius-8 border shadow-none h-100">
+            <div class="card-body p-0 text-center">
+                <span class="w-44-px h-44-px bg-info-100 text-info-600 d-inline-flex justify-content-center align-items-center rounded-circle mb-2">
+                    <iconify-icon icon="solar:hourglass-bold" class="text-xl"></iconify-icon>
+                </span>
+                <h4 class="fw-bold mb-0">{{ in_progress }}</h4>
+                <small class="text-secondary-light">In Progress</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-2 col-sm-4">
+        <div class="card p-3 radius-8 border shadow-none h-100">
+            <div class="card-body p-0 text-center">
+                <span class="w-44-px h-44-px bg-warning-100 text-warning-600 d-inline-flex justify-content-center align-items-center rounded-circle mb-2">
+                    <iconify-icon icon="solar:clock-circle-bold" class="text-xl"></iconify-icon>
+                </span>
+                <h4 class="fw-bold mb-0">{{ pending }}</h4>
+                <small class="text-secondary-light">Pending</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-2 col-sm-4">
+        <div class="card p-3 radius-8 border shadow-none h-100">
+            <div class="card-body p-0 text-center">
+                <span class="w-44-px h-44-px bg-danger-100 text-danger-600 d-inline-flex justify-content-center align-items-center rounded-circle mb-2">
+                    <iconify-icon icon="solar:close-circle-bold" class="text-xl"></iconify-icon>
+                </span>
+                <h4 class="fw-bold mb-0">{{ cancelled }}</h4>
+                <small class="text-secondary-light">Cancelled</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-2 col-sm-4">
+        <div class="card p-3 radius-8 border shadow-none h-100">
+            <div class="card-body p-0 text-center">
+                <span class="w-44-px h-44-px bg-purple-100 text-purple-600 d-inline-flex justify-content-center align-items-center rounded-circle mb-2">
+                    <iconify-icon icon="solar:chart-bold" class="text-xl"></iconify-icon>
+                </span>
+                <h4 class="fw-bold mb-0">{{ completion_rate }}%</h4>
+                <small class="text-secondary-light">Completion Rate</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Trend Chart -->
+    <div class="col-xxl-8">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">Daily Order Trend</h6>
+                <div id="orderTrendChart" style="min-height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Breakdown -->
+    <div class="col-xxl-4">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">Status Distribution</h6>
+                <div id="statusPieChart" style="min-height: 280px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Pairs -->
+    <div class="col-xxl-4">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">Top Language Pairs</h6>
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-neutral-600">Language Pair</th>
+                                <th scope="col" class="bg-base text-neutral-600 text-end">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in language_data %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }} text-neutral-600 fw-medium">{{ item.pair }}</td>
+                                <td class="{{ row_color }} text-end">
+                                    <span class="badge bg-primary-focus text-primary-main rounded-pill">{{ item.count }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-secondary-light bg-base py-4">No data</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Recent Orders Table -->
+    <div class="col-xxl-8">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">Recent Orders</h6>
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-neutral-600">ID</th>
+                                <th scope="col" class="bg-base text-neutral-600">Customer</th>
+                                <th scope="col" class="bg-base text-neutral-600">Product</th>
+                                <th scope="col" class="bg-base text-neutral-600">Assigned To</th>
+                                <th scope="col" class="bg-base text-neutral-600">Status</th>
+                                <th scope="col" class="bg-base text-neutral-600 text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }}"><a href="{% url 'orderDetail' order.id %}" class="fw-medium text-primary-main">#{{ order.id }}</a></td>
+                                <td class="{{ row_color }} text-secondary-light">{{ order.bot_user.name|default:"Unknown" }}</td>
+                                <td class="{{ row_color }} text-secondary-light">{{ order.product.name|default:"N/A" }}</td>
+                                <td class="{{ row_color }} text-secondary-light">
+                                    {% if order.assigned_to %}
+                                    {{ order.assigned_to.user.get_full_name|default:order.assigned_to.user.username }}
+                                    {% else %}
+                                    <span class="text-warning-main">Unassigned</span>
+                                    {% endif %}
+                                </td>
+                                <td class="{{ row_color }}">
+                                    {% if order.status == 'completed' %}
+                                    <span class="badge bg-success-focus text-success-main">Completed</span>
+                                    {% elif order.status == 'cancelled' %}
+                                    <span class="badge bg-danger-focus text-danger-main">Cancelled</span>
+                                    {% elif order.status == 'in_progress' %}
+                                    <span class="badge bg-info-focus text-info-main">In Progress</span>
+                                    {% else %}
+                                    <span class="badge bg-warning-focus text-warning-main">{{ order.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="{{ row_color }} text-end fw-medium text-secondary-light">{{ order.total_price|floatformat:0 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center text-secondary-light bg-base">No orders found</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dailyLabels = {{ daily_labels|safe }};
+    const dailyValues = {{ daily_values|safe }};
+    const statusLabels = {{ status_labels|safe }};
+    const statusValues = {{ status_values|safe }};
+    
+    // Order trend chart
+    if (dailyLabels.length > 0) {
+        new ApexCharts(document.querySelector("#orderTrendChart"), {
+            series: [{ name: 'Orders', data: dailyValues }],
+            chart: { type: 'bar', height: 300, toolbar: { show: false } },
+            colors: ['#487FFF'],
+            plotOptions: { bar: { borderRadius: 4, columnWidth: '60%' } },
+            dataLabels: { enabled: false },
+            xaxis: {
+                categories: dailyLabels,
+                labels: { style: { colors: '#9CA3AF', fontSize: '11px' } }
+            },
+            yaxis: {
+                labels: { style: { colors: '#9CA3AF', fontSize: '12px' } }
+            },
+            grid: { borderColor: '#E4E7EC', strokeDashArray: 3 }
+        }).render();
+    }
+    
+    // Status pie chart
+    if (statusLabels.length > 0) {
+        new ApexCharts(document.querySelector("#statusPieChart"), {
+            series: statusValues,
+            labels: statusLabels,
+            chart: { type: 'donut', height: 280 },
+            colors: ['#22c55e', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6'],
+            dataLabels: { enabled: true },
+            legend: {
+                position: 'bottom',
+                fontSize: '12px'
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '65%',
+                        labels: {
+                            show: true,
+                            total: {
+                                show: true,
+                                label: 'Total',
+                                formatter: function(w) {
+                                    return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }).render();
+    }
+});
+</script>
+{% endblock script %}

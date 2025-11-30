@@ -1,0 +1,228 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Stats Cards -->
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card px-24 py-16 shadow-none radius-8 border h-100 bg-gradient-start-1">
+            <div class="d-flex align-items-center gap-3">
+                <div class="w-64-px h-64-px radius-8 bg-base d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="solar:document-text-bold" class="text-primary-600 text-2xl"></iconify-icon>
+                </div>
+                <div>
+                    <span class="text-secondary-light text-sm fw-medium">Total Assigned</span>
+                    <h6 class="mb-0 mt-1">{{ stats.total }}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card px-24 py-16 shadow-none radius-8 border h-100 bg-gradient-start-2">
+            <div class="d-flex align-items-center gap-3">
+                <div class="w-64-px h-64-px radius-8 bg-base d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="solar:hourglass-bold" class="text-warning-600 text-2xl"></iconify-icon>
+                </div>
+                <div>
+                    <span class="text-secondary-light text-sm fw-medium">In Progress</span>
+                    <h6 class="mb-0 mt-1">{{ stats.in_progress }}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card px-24 py-16 shadow-none radius-8 border h-100 bg-gradient-start-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="w-64-px h-64-px radius-8 bg-base d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="solar:check-circle-bold" class="text-info-600 text-2xl"></iconify-icon>
+                </div>
+                <div>
+                    <span class="text-secondary-light text-sm fw-medium">Ready</span>
+                    <h6 class="mb-0 mt-1">{{ stats.ready }}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card px-24 py-16 shadow-none radius-8 border h-100 bg-gradient-start-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="w-64-px h-64-px radius-8 bg-base d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="solar:check-read-bold" class="text-success-600 text-2xl"></iconify-icon>
+                </div>
+                <div>
+                    <span class="text-secondary-light text-sm fw-medium">Completed</span>
+                    <h6 class="mb-0 mt-1">{{ stats.completed }}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="col-12">
+        <div class="card h-100 p-0 radius-12">
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+                <h6 class="text-lg fw-semibold mb-0">My Assigned Orders</h6>
+                
+                <!-- Filters -->
+                <form method="get" class="d-flex align-items-center gap-2">
+                    <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <option value="">All Statuses</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <select name="per_page" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <option value="10" {% if per_page == 10 %}selected{% endif %}>10 per page</option>
+                        <option value="25" {% if per_page == 25 %}selected{% endif %}>25 per page</option>
+                        <option value="50" {% if per_page == 50 %}selected{% endif %}>50 per page</option>
+                    </select>
+                </form>
+            </div>
+            <div class="card-body p-24">
+                {% if orders %}
+                <div class="table-responsive">
+                    <table class="table bordered-table sm-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Pages</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>{{ order.id }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="w-32-px h-32-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center">
+                                            <span class="text-primary-600 fw-bold text-sm">{{ order.bot_user.name|slice:":1"|upper }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="d-block fw-medium">{{ order.bot_user.name }}</span>
+                                            <small class="text-muted">{{ order.bot_user.phone }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {{ order.product.name }}
+                                    {% if order.language %}<br><small class="text-muted">{{ order.language.name }}</small>{% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info-focus text-info-600">{{ order.total_pages }}</span>
+                                </td>
+                                <td>
+                                    <span class="fw-medium text-success-600">{{ order.total_price|floatformat:0 }} UZS</span>
+                                </td>
+                                <td>
+                                    {% if order.status == 'pending' %}
+                                        <span class="badge bg-warning-focus text-warning-600">Pending</span>
+                                    {% elif order.status == 'payment_pending' %}
+                                        <span class="badge bg-info-focus text-info-600">Payment Pending</span>
+                                    {% elif order.status == 'payment_received' %}
+                                        <span class="badge bg-primary-focus text-primary-600">Payment Received</span>
+                                    {% elif order.status == 'payment_confirmed' %}
+                                        <span class="badge bg-cyan-focus text-cyan">Payment Confirmed</span>
+                                    {% elif order.status == 'in_progress' %}
+                                        <span class="badge bg-lilac-focus text-lilac-600">In Progress</span>
+                                    {% elif order.status == 'ready' %}
+                                        <span class="badge bg-success-focus text-success-600">Ready</span>
+                                    {% elif order.status == 'completed' %}
+                                        <span class="badge bg-success-focus text-success-600">Completed</span>
+                                    {% elif order.status == 'cancelled' %}
+                                        <span class="badge bg-danger-focus text-danger-600">Cancelled</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ order.created_at|date:"d M Y" }}</small><br>
+                                    <small class="text-muted">{{ order.created_at|time:"H:i" }}</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a href="{% url 'orderDetail' order.id %}" class="btn btn-sm btn-primary-100 text-primary-600 px-12 py-6">
+                                            <iconify-icon icon="iconamoon:eye-light" class="text-lg"></iconify-icon>
+                                        </a>
+                                        
+                                        {% if order.status == 'in_progress' %}
+                                        <form method="post" action="{% url 'updateOrderStatus' order.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="status" value="ready">
+                                            <button type="submit" class="btn btn-sm btn-success-100 text-success-600 px-12 py-6" title="Mark Ready">
+                                                <iconify-icon icon="mdi:check" class="text-lg"></iconify-icon>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        
+                                        {% if order.status == 'ready' %}
+                                        <form method="post" action="{% url 'completeOrder' order.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-success-100 text-success-600 px-12 py-6" title="Complete">
+                                                <iconify-icon icon="mdi:check-all" class="text-lg"></iconify-icon>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if paginator.num_pages > 1 %}
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
+                    <span>Showing {{ orders.start_index }} to {{ orders.end_index }} of {{ paginator.count }} orders</span>
+                    <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
+                        {% if orders.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px text-md" 
+                               href="?page={{ orders.previous_page_number }}&status={{ status_filter }}&per_page={{ per_page }}">
+                                <iconify-icon icon="ep:d-arrow-left"></iconify-icon>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in paginator.page_range %}
+                            {% if num == orders.number %}
+                            <li class="page-item">
+                                <a class="page-link bg-primary-600 text-white fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="#">{{ num }}</a>
+                            </li>
+                            {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" 
+                                   href="?page={{ num }}&status={{ status_filter }}&per_page={{ per_page }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if orders.has_next %}
+                        <li class="page-item">
+                            <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px text-md" 
+                               href="?page={{ orders.next_page_number }}&status={{ status_filter }}&per_page={{ per_page }}">
+                                <iconify-icon icon="ep:d-arrow-right"></iconify-icon>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="text-center py-40">
+                    <iconify-icon icon="solar:document-text-bold-duotone" class="text-primary-200 mb-16" style="font-size: 80px;"></iconify-icon>
+                    <h6 class="text-secondary-light mb-8">No Orders Assigned</h6>
+                    <p class="text-muted mb-0">You don't have any orders assigned to you yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

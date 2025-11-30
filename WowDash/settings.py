@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "core",
+    "organizations",
     "accounts",
     "services",
     "bot",
@@ -56,6 +58,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "organizations.rbac.RBACMiddleware",
 ]
 
 ROOT_URLCONF = "WowDash.urls"
@@ -71,6 +74,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "organizations.context_processors.rbac_context",
             ],
         },
     },
@@ -146,7 +150,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MODELTRANSLATION_DEFAULT_LANGUAGE = "uz"
 MODELTRANSLATION_LANGUAGES = ("uz", "ru", "en")
 MODELTRANSLATION_TRANSLATION_FILES = (
-    "accounts.translations",
+    "core.translations",
     "services.translations",
 )
 STATIC_URL = "static/"

@@ -67,6 +67,42 @@
                     </div>
                 </div>
 
+                <!-- Branch & Assignment Info -->
+                <div class="mt-24">
+                    <h6 class="text-md fw-semibold mb-16">Branch & Assignment</h6>
+                    <div class="row gy-3">
+                        <div class="col-sm-6">
+                            <div class="p-16 bg-neutral-50 radius-8">
+                                <span class="text-secondary-light text-sm d-block mb-8">Branch</span>
+                                <h6 class="text-md fw-semibold mb-0">
+                                    {% if order.branch %}
+                                        {{ order.branch.name }}
+                                        <small class="text-muted d-block">{{ order.branch.center.name }}</small>
+                                    {% else %}
+                                        <span class="text-muted">Not assigned to branch</span>
+                                    {% endif %}
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-16 bg-neutral-50 radius-8">
+                                <span class="text-secondary-light text-sm d-block mb-8">Assigned To</span>
+                                <h6 class="text-md fw-semibold mb-0">
+                                    {% if order.assigned_to %}
+                                        {{ order.assigned_to.user.get_full_name|default:order.assigned_to.user.username }}
+                                        <small class="text-muted d-block">
+                                            Assigned {{ order.assigned_at|date:"d M Y H:i" }}
+                                            {% if order.assigned_by %}by {{ order.assigned_by.user.get_full_name|default:order.assigned_by.user.username }}{% endif %}
+                                        </small>
+                                    {% else %}
+                                        <span class="text-warning-600">Unassigned</span>
+                                    {% endif %}
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Payment Info -->
                 <div class="mt-24">
                     <h6 class="text-md fw-semibold mb-16" data-i18n="detail.paymentInformation">Payment Information</h6>
@@ -80,6 +116,13 @@
                                 <iconify-icon icon="mdi:credit-card" class="me-1 text-lg"></iconify-icon> <span data-i18n="detail.cardPayment">Card Payment</span>
                             </span>
                         {% endif %}
+                        
+                        {% if order.payment_received_by %}
+                            <span class="badge bg-success-focus text-success-600 px-16 py-8">
+                                <iconify-icon icon="mdi:check-circle" class="me-1"></iconify-icon>
+                                Payment received by {{ order.payment_received_by.user.get_full_name|default:order.payment_received_by.user.username }}
+                            </span>
+                        {% endif %}
                     </div>
                     {% if order.recipt %}
                     <div class="mt-16">
@@ -90,6 +133,20 @@
                     </div>
                     {% endif %}
                 </div>
+
+                <!-- Completion Info -->
+                {% if order.completed_by %}
+                <div class="mt-24">
+                    <h6 class="text-md fw-semibold mb-16">Completion</h6>
+                    <div class="p-16 bg-success-50 radius-8">
+                        <span class="text-success-600 d-block">
+                            <iconify-icon icon="mdi:check-circle" class="me-1 text-lg"></iconify-icon>
+                            Completed by {{ order.completed_by.user.get_full_name|default:order.completed_by.user.username }}
+                            on {{ order.completed_at|date:"d M Y H:i" }}
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
 
                 <!-- Description -->
                 {% if order.description %}
@@ -180,39 +237,106 @@
         <!-- Update Status -->
         <div class="card radius-12">
             <div class="card-header border-bottom bg-base py-16 px-24">
-                <h6 class="text-md fw-semibold mb-0" data-i18n="detail.updateStatus">Update Status</h6>
+                <h6 class="text-md fw-semibold mb-0">Actions</h6>
             </div>
             <div class="card-body p-24">
-                <form method="post" action="{% url 'updateOrderStatus' order.id %}">
-                    {% csrf_token %}
-                    <div class="mb-16">
-                        <label class="form-label text-secondary-light text-sm mb-8" data-i18n="detail.newStatus">New Status</label>
-                        <select name="status" class="form-select radius-8">
-                            <option value="pending" {% if order.status == 'pending' %}selected{% endif %} data-i18n="status.pending">Pending</option>
-                            <option value="payment_pending" {% if order.status == 'payment_pending' %}selected{% endif %} data-i18n="status.paymentPending">Payment Pending</option>
-                            <option value="payment_received" {% if order.status == 'payment_received' %}selected{% endif %} data-i18n="status.paymentReceived">Payment Received</option>
-                            <option value="payment_confirmed" {% if order.status == 'payment_confirmed' %}selected{% endif %} data-i18n="status.paymentConfirmed">Payment Confirmed</option>
-                            <option value="in_progress" {% if order.status == 'in_progress' %}selected{% endif %} data-i18n="status.inProgress">In Progress</option>
-                            <option value="ready" {% if order.status == 'ready' %}selected{% endif %} data-i18n="status.ready">Ready</option>
-                            <option value="completed" {% if order.status == 'completed' %}selected{% endif %} data-i18n="status.completed">Completed</option>
-                            <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %} data-i18n="status.cancelled">Cancelled</option>
+                <!-- Assignment Section -->
+                {% if can_assign %}
+                <div class="mb-24">
+                    <h6 class="text-sm fw-semibold mb-12">Assignment</h6>
+                    {% if order.assigned_to %}
+                        <div class="d-flex align-items-center gap-2 mb-12">
+                            <div class="w-40-px h-40-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center">
+                                <span class="text-primary-600 fw-bold">{{ order.assigned_to.user.first_name|slice:":1"|upper }}{{ order.assigned_to.user.last_name|slice:":1"|upper }}</span>
+                            </div>
+                            <div>
+                                <span class="d-block fw-medium">{{ order.assigned_to.user.get_full_name|default:order.assigned_to.user.username }}</span>
+                                <small class="text-muted">{{ order.assigned_to.role.get_display_name }}</small>
+                            </div>
+                        </div>
+                        <form method="post" action="{% url 'unassignOrder' order.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-warning btn-sm w-100">
+                                <iconify-icon icon="mdi:account-remove" class="me-1"></iconify-icon> Unassign
+                            </button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{% url 'assignOrder' order.id %}">
+                            {% csrf_token %}
+                            <select name="staff_id" class="form-select radius-8 mb-12" required>
+                                <option value="">Select staff member...</option>
+                                {% for staff in available_staff %}
+                                <option value="{{ staff.pk }}">
+                                    {{ staff.user.get_full_name|default:staff.user.username }} ({{ staff.role.get_display_name }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                                <iconify-icon icon="mdi:account-plus" class="me-1"></iconify-icon> Assign
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+                <hr>
+                {% endif %}
+
+                <!-- Quick Actions -->
+                {% if can_receive_payment and order.status in 'payment_received,payment_pending' %}
+                <div class="mb-16">
+                    <form method="post" action="{% url 'receivePayment' order.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success w-100 d-flex align-items-center justify-content-center">
+                            <iconify-icon icon="mdi:cash-check" class="me-1"></iconify-icon> Confirm Payment
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+                {% if can_complete and order.status in 'ready,in_progress' %}
+                <div class="mb-16">
+                    <form method="post" action="{% url 'completeOrder' order.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success w-100 d-flex align-items-center justify-content-center">
+                            <iconify-icon icon="mdi:check-all" class="me-1"></iconify-icon> Complete Order
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+                <!-- Status Update -->
+                {% if can_update_status and allowed_transitions %}
+                <div class="mb-16">
+                    <h6 class="text-sm fw-semibold mb-12" data-i18n="detail.updateStatus">Update Status</h6>
+                    <form method="post" action="{% url 'updateOrderStatus' order.id %}">
+                        {% csrf_token %}
+                        <select name="status" class="form-select radius-8 mb-12">
+                            {% for status_value in allowed_transitions %}
+                                {% for choice_value, choice_label in status_choices %}
+                                    {% if choice_value == status_value %}
+                                        <option value="{{ choice_value }}">{{ choice_label }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
                         </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
-                        <iconify-icon icon="mdi:check" class="me-1"></iconify-icon> <span data-i18n="detail.updateStatus">Update Status</span>
-                    </button>
-                </form>
+                        <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+                            <iconify-icon icon="mdi:check" class="me-1"></iconify-icon> <span data-i18n="detail.updateStatus">Update Status</span>
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
                 
                 <hr class="my-16">
                 
-                <a href="{% url 'categoryList' %}" class="btn btn-secondary radius-8 px-20 py-11 flex-grow-1 d-flex align-items-center justify-content-center">
-                        <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
-                        <span data-i18n="detail.back">Back</span>
-                    </a>
+                <a href="{% url 'ordersList' %}" class="btn btn-secondary radius-8 px-20 py-11 w-100 d-flex align-items-center justify-content-center mb-12">
+                    <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
+                    <span data-i18n="detail.back">Back to Orders</span>
+                </a>
                 
+                {% if request.user.is_superuser or is_owner %}
                 <button type="button" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#deleteOrderModal">
                     <iconify-icon icon="mdi:delete" class="me-1"></iconify-icon> <span data-i18n="detail.deleteOrder">Delete Order</span>
                 </button>
+                {% endif %}
             </div>
         </div>
     </div>

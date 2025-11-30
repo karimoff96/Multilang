@@ -1,8 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
-from modeltranslation.admin import TranslationAdmin
 from django.utils.html import format_html
-from accounts.models import BotUser, AdditionalInfo
+from accounts.models import BotUser
 
 
 admin.site.unregister(Group)
@@ -14,6 +13,7 @@ class BotUserAdmin(admin.ModelAdmin):
         "display_name",
         "username",
         "phone",
+        "branch",
         "is_agency",
         "is_used",
         "agency_display",
@@ -22,6 +22,7 @@ class BotUserAdmin(admin.ModelAdmin):
         "is_active",
     )
     list_filter = (
+        "branch",
         "language",
         "is_active",
         "is_agency",
@@ -31,10 +32,19 @@ class BotUserAdmin(admin.ModelAdmin):
     )
     search_fields = ("name", "username", "phone", "user_id", "agency_token")
     ordering = ("-created_at",)
-    list_select_related = ("agency",)
+    list_select_related = ("agency", "branch")
     actions = ["mark_as_unused"]
+    autocomplete_fields = ['branch', 'agency']
 
     fieldsets = (
+        (
+            "Branch Assignment",
+            {
+                "fields": (
+                    "branch",
+                )
+            },
+        ),
         (
             "Telegram User Information",
             {
@@ -140,30 +150,6 @@ class BotUserAdmin(admin.ModelAdmin):
             )
 
     mark_as_unused.short_description = "Reset invitation link (mark as unused)"
-
-    def get_queryset(self, request):
-        return super().get_queryset(request)
-
-
-@admin.register(AdditionalInfo)
-class AdditionalInfoAdmin(TranslationAdmin):
-    list_display = ("holder_name", "bank_card", "created_at")
-    list_filter = ("created_at",)
-    search_fields = ("holder_name",)
-    ordering = ("-created_at",)
-
-    # TranslationAdmin will automatically handle the translated fields
-    # Fields: help_text, description, about_us will be available in all languages
-
-    readonly_fields = ("created_at", "updated_at")
-    fields = (
-        "bank_card",
-        "holder_name",
-        "help_text",
-        "about_us",
-        "created_at",
-        "updated_at",
-    )
 
     def get_queryset(self, request):
         return super().get_queryset(request)
