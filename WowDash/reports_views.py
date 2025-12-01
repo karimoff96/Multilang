@@ -5,10 +5,12 @@ Financial/order reports per branch/center with date filtering
 
 from django.shortcuts import render
 from django.db.models import Sum, Count, Avg, Q
-from django.db.models.functions import TruncDate, TruncMonth, TruncWeek
+from django.db.models.functions import TruncDate, TruncMonth, TruncWeek, TruncYear
 from django.utils import timezone
+from django.core.paginator import Paginator
 from datetime import timedelta
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 import json
 
 from orders.models import Order
@@ -18,27 +20,154 @@ from organizations.models import Branch, TranslationCenter, AdminUser
 from organizations.rbac import get_user_orders, get_user_customers, get_user_branches
 
 
+# Period choices for the unified filter
+PERIOD_CHOICES = [
+    ("today", "Today"),
+    ("yesterday", "Yesterday"),
+    ("week", "This Week"),
+    ("month", "This Month"),
+    ("quarter", "This Quarter"),
+    ("year", "This Year"),
+    ("custom", "Custom Range"),
+]
+
+
+def get_period_dates(period, custom_from=None, custom_to=None):
+    """
+    Calculate date range based on selected period.
+    Returns (date_from, date_to, period_label, trunc_function)
+    """
+    today = timezone.now()
+
+    if period == "today":
+        date_from = today.replace(hour=0, minute=0, second=0, microsecond=0)
+        date_to = today
+        label = "Today"
+        trunc_func = TruncDate
+        date_format = "%H:%M"
+    elif period == "yesterday":
+        yesterday = today - timedelta(days=1)
+        date_from = yesterday.replace(hour=0, minute=0, second=0, microsecond=0)
+        date_to = yesterday.replace(hour=23, minute=59, second=59, microsecond=999999)
+        label = "Yesterday"
+        trunc_func = TruncDate
+        date_format = "%H:%M"
+    elif period == "week":
+        # Start of current week (Monday)
+        start_of_week = today - timedelta(days=today.weekday())
+        date_from = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
+        date_to = today
+        label = "This Week"
+        trunc_func = TruncDate
+        date_format = "%a"
+    elif period == "month":
+        # Start of current month
+        date_from = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        date_to = today
+        label = "This Month"
+        trunc_func = TruncDate
+        date_format = "%b %d"
+    elif period == "quarter":
+        # Start of current quarter
+        quarter_month = ((today.month - 1) // 3) * 3 + 1
+        date_from = today.replace(
+            month=quarter_month, day=1, hour=0, minute=0, second=0, microsecond=0
+        )
+        date_to = today
+        label = "This Quarter"
+        trunc_func = TruncWeek
+        date_format = "Week %W"
+    elif period == "year":
+        # Start of current year
+        date_from = today.replace(
+            month=1, day=1, hour=0, minute=0, second=0, microsecond=0
+        )
+        date_to = today
+        label = "This Year"
+        trunc_func = TruncMonth
+        date_format = "%b"
+    elif period == "custom" and custom_from and custom_to:
+        from datetime import datetime
+
+        date_from = datetime.strptime(custom_from, "%Y-%m-%d")
+        date_to = datetime.strptime(custom_to, "%Y-%m-%d").replace(
+            hour=23, minute=59, second=59
+        )
+        # Make timezone aware
+        date_from = (
+            timezone.make_aware(date_from)
+            if timezone.is_naive(date_from)
+            else date_from
+        )
+        date_to = (
+            timezone.make_aware(date_to) if timezone.is_naive(date_to) else date_to
+        )
+        days_diff = (date_to - date_from).days
+        label = f"{custom_from} to {custom_to}"
+        # Choose appropriate truncation based on range
+        if days_diff <= 1:
+            trunc_func = TruncDate
+            date_format = "%H:%M"
+        elif days_diff <= 31:
+            trunc_func = TruncDate
+            date_format = "%b %d"
+        elif days_diff <= 90:
+            trunc_func = TruncWeek
+            date_format = "Week %W"
+        else:
+            trunc_func = TruncMonth
+            date_format = "%b %Y"
+    else:
+        # Default to last 30 days
+        date_from = today - timedelta(days=30)
+        date_to = today
+        label = "Last 30 Days"
+        trunc_func = TruncDate
+        date_format = "%b %d"
+        period = "month"
+
+    return {
+        "date_from": date_from,
+        "date_to": date_to,
+        "date_from_str": (
+            date_from.strftime("%Y-%m-%d")
+            if hasattr(date_from, "strftime")
+            else str(date_from)[:10]
+        ),
+        "date_to_str": (
+            date_to.strftime("%Y-%m-%d")
+            if hasattr(date_to, "strftime")
+            else str(date_to)[:10]
+        ),
+        "label": label,
+        "trunc_func": trunc_func,
+        "date_format": date_format,
+        "period": period,
+    }
+
+
+@login_required(login_url="admin_login")
 def financial_reports(request):
     """Financial reports view with revenue analytics"""
-    # Date filters
-    date_from = request.GET.get("date_from")
-    date_to = request.GET.get("date_to")
+    # Period filter
+    period = request.GET.get("period", "month")
+    custom_from = request.GET.get("date_from")
+    custom_to = request.GET.get("date_to")
     branch_id = request.GET.get("branch")
     center_id = request.GET.get("center")
 
-    today = timezone.now()
-    if not date_from:
-        date_from = (today - timedelta(days=30)).strftime("%Y-%m-%d")
-    if not date_to:
-        date_to = today.strftime("%Y-%m-%d")
+    # Get period dates
+    period_data = get_period_dates(period, custom_from, custom_to)
+    date_from = period_data["date_from"]
+    date_to = period_data["date_to"]
+    trunc_func = period_data["trunc_func"]
+    date_format = period_data["date_format"]
 
     # Get orders based on user role
     all_orders = get_user_orders(request.user)
 
     # Apply date filters
-    orders = all_orders.filter(
-        created_at__date__gte=date_from, created_at__date__lte=date_to
-    )
+    orders = all_orders.filter(created_at__gte=date_from, created_at__lte=date_to)
 
     # Get available branches for filter
     branches = get_user_branches(request.user)
@@ -65,21 +194,22 @@ def financial_reports(request):
         completed_orders.aggregate(total=Sum("total_price"))["total"] or 0
     )
 
-    # Daily revenue breakdown
-    daily_revenue = (
-        orders.annotate(date=TruncDate("created_at"))
-        .values("date")
+    # Revenue breakdown by period
+    revenue_by_period = (
+        orders.annotate(period=trunc_func("created_at"))
+        .values("period")
         .annotate(revenue=Sum("total_price"), count=Count("id"))
-        .order_by("date")
+        .order_by("period")
     )
 
     daily_labels = []
     daily_values = []
     daily_counts = []
-    for item in daily_revenue:
-        daily_labels.append(item["date"].strftime("%b %d"))
-        daily_values.append(float(item["revenue"] or 0))
-        daily_counts.append(item["count"])
+    for item in revenue_by_period:
+        if item["period"]:
+            daily_labels.append(item["period"].strftime(date_format))
+            daily_values.append(float(item["revenue"] or 0))
+            daily_counts.append(item["count"])
 
     # Revenue by status
     status_breakdown = (
@@ -103,17 +233,22 @@ def financial_reports(request):
 
     # Revenue by branch (if owner/superuser)
     branch_revenue = []
-    if hasattr(request, "admin_profile") and request.admin_profile:
-        if request.admin_profile.is_owner or request.user.is_superuser:
-            branch_data = (
-                orders.values("branch__name")
-                .annotate(revenue=Sum("total_price"), count=Count("id"))
-                .order_by("-revenue")[:10]
-            )
+    is_owner = False
+    if hasattr(request.user, "admin_profile") and request.user.admin_profile:
+        is_owner = request.user.admin_profile.is_owner
 
-            for item in branch_data:
+    if is_owner or request.user.is_superuser:
+        branch_data = (
+            orders.values("branch__id", "branch__name")
+            .annotate(revenue=Sum("total_price"), count=Count("id"))
+            .order_by("-revenue")[:10]
+        )
+
+        for item in branch_data:
+            if item["branch__id"]:  # Only include if branch exists
                 branch_revenue.append(
                     {
+                        "id": item["branch__id"],
                         "branch": item["branch__name"] or "Unassigned",
                         "revenue": float(item["revenue"] or 0),
                         "count": item["count"],
@@ -137,6 +272,11 @@ def financial_reports(request):
             }
         )
 
+    # Chart data for branches
+    branch_labels = [b["branch"] for b in branch_revenue]
+    branch_revenue_values = [b["revenue"] for b in branch_revenue]
+    branch_order_counts = [b["count"] for b in branch_revenue]
+
     context = {
         "title": "Financial Reports",
         "subTitle": "Reports / Financial",
@@ -147,15 +287,26 @@ def financial_reports(request):
         "selected_branch": branch_id,
         "centers": centers,
         "selected_center": center_id,
+        # User role
+        "is_owner": is_owner,
         # Metrics
         "total_revenue": total_revenue,
         "total_orders": total_orders,
         "avg_order_value": avg_order_value,
         "completed_revenue": completed_revenue,
+        # Period filter
+        "period": period_data["period"],
+        "period_label": period_data["label"],
+        "period_choices": PERIOD_CHOICES,
+        "date_from": period_data["date_from_str"],
+        "date_to": period_data["date_to_str"],
         # Chart data
         "daily_labels": json.dumps(daily_labels),
         "daily_values": json.dumps(daily_values),
         "daily_counts": json.dumps(daily_counts),
+        "branch_labels": json.dumps(branch_labels),
+        "branch_revenue_values": json.dumps(branch_revenue_values),
+        "branch_order_counts": json.dumps(branch_order_counts),
         # Breakdowns
         "status_data": status_data,
         "branch_revenue": branch_revenue,
@@ -164,28 +315,29 @@ def financial_reports(request):
     return render(request, "reports/financial.html", context)
 
 
+@login_required(login_url="admin_login")
 def order_reports(request):
     """Order analytics and reports"""
-    # Date filters
-    date_from = request.GET.get("date_from")
-    date_to = request.GET.get("date_to")
+    # Period filter
+    period = request.GET.get("period", "month")
+    custom_from = request.GET.get("date_from")
+    custom_to = request.GET.get("date_to")
     branch_id = request.GET.get("branch")
     status_filter = request.GET.get("status")
     center_id = request.GET.get("center")
 
-    today = timezone.now()
-    if not date_from:
-        date_from = (today - timedelta(days=30)).strftime("%Y-%m-%d")
-    if not date_to:
-        date_to = today.strftime("%Y-%m-%d")
+    # Get period dates
+    period_data = get_period_dates(period, custom_from, custom_to)
+    date_from = period_data["date_from"]
+    date_to = period_data["date_to"]
+    trunc_func = period_data["trunc_func"]
+    date_format = period_data["date_format"]
 
     # Get orders based on user role
     all_orders = get_user_orders(request.user)
 
     # Apply filters
-    orders = all_orders.filter(
-        created_at__date__gte=date_from, created_at__date__lte=date_to
-    )
+    orders = all_orders.filter(created_at__gte=date_from, created_at__lte=date_to)
 
     branches = get_user_branches(request.user)
 
@@ -216,16 +368,20 @@ def order_reports(request):
         (cancelled / total_orders * 100) if total_orders > 0 else 0, 1
     )
 
-    # Daily order counts
-    daily_orders = (
-        orders.annotate(date=TruncDate("created_at"))
-        .values("date")
+    # Order counts by period
+    orders_by_period = (
+        orders.annotate(period=trunc_func("created_at"))
+        .values("period")
         .annotate(count=Count("id"))
-        .order_by("date")
+        .order_by("period")
     )
 
-    daily_labels = [item["date"].strftime("%b %d") for item in daily_orders]
-    daily_values = [item["count"] for item in daily_orders]
+    daily_labels = []
+    daily_values = []
+    for item in orders_by_period:
+        if item["period"]:
+            daily_labels.append(item["period"].strftime(date_format))
+            daily_values.append(item["count"])
 
     # Orders by status breakdown for pie chart
     status_breakdown = (
@@ -235,9 +391,9 @@ def order_reports(request):
     status_labels = []
     status_values = []
     for item in status_breakdown:
-        status_labels.append(
-            dict(Order.STATUS_CHOICES).get(item["status"], item["status"])
-        )
+        # Convert __proxy__ to string for JSON serialization
+        label = dict(Order.STATUS_CHOICES).get(item["status"], item["status"])
+        status_labels.append(str(label))
         status_values.append(item["count"])
 
     # Orders by language pair
@@ -253,17 +409,25 @@ def order_reports(request):
             {"pair": item["language__name"] or "N/A", "count": item["count"]}
         )
 
-    # Recent orders list
-    recent_orders = orders.select_related(
+    # Recent orders list with pagination
+    recent_orders_qs = orders.select_related(
         "bot_user", "product", "assigned_to__user"
-    ).order_by("-created_at")[:20]
+    ).order_by("-created_at")
+
+    page = request.GET.get("page", 1)
+    paginator = Paginator(recent_orders_qs, 10)  # 10 orders per page
+    recent_orders = paginator.get_page(page)
 
     context = {
         "title": "Order Reports",
         "subTitle": "Reports / Orders",
+        # Period filter
+        "period": period_data["period"],
+        "period_label": period_data["label"],
+        "period_choices": PERIOD_CHOICES,
+        "date_from": period_data["date_from_str"],
+        "date_to": period_data["date_to_str"],
         # Filters
-        "date_from": date_from,
-        "date_to": date_to,
         "branches": branches,
         "selected_branch": branch_id,
         "selected_status": status_filter,
@@ -286,23 +450,25 @@ def order_reports(request):
         # Breakdowns
         "language_data": language_data,
         "recent_orders": recent_orders,
+        "orders_page": recent_orders,
     }
     return render(request, "reports/orders.html", context)
 
 
+@login_required(login_url="admin_login")
 def staff_performance(request):
     """Staff performance reports - for managers and owners"""
-    # Date filters
-    date_from = request.GET.get("date_from")
-    date_to = request.GET.get("date_to")
+    # Period filter
+    period = request.GET.get("period", "month")
+    custom_from = request.GET.get("date_from")
+    custom_to = request.GET.get("date_to")
     branch_id = request.GET.get("branch")
     center_id = request.GET.get("center")
 
-    today = timezone.now()
-    if not date_from:
-        date_from = (today - timedelta(days=30)).strftime("%Y-%m-%d")
-    if not date_to:
-        date_to = today.strftime("%Y-%m-%d")
+    # Get period dates
+    period_data = get_period_dates(period, custom_from, custom_to)
+    date_from = period_data["date_from"]
+    date_to = period_data["date_to"]
 
     # Get orders and branches based on user role
     all_orders = get_user_orders(request.user)
@@ -317,9 +483,7 @@ def staff_performance(request):
             branches = branches.filter(center_id=center_id)
 
     # Filter orders by date and branch
-    orders = all_orders.filter(
-        created_at__date__gte=date_from, created_at__date__lte=date_to
-    )
+    orders = all_orders.filter(created_at__gte=date_from, created_at__lte=date_to)
 
     if branch_id:
         orders = orders.filter(branch_id=branch_id)
@@ -396,18 +560,28 @@ def staff_performance(request):
     staff_completed = [s["completed"] for s in top_performers]
     staff_revenue = [s["revenue"] for s in top_performers]
 
+    # Pagination for staff data
+    page = request.GET.get("page", 1)
+    paginator = Paginator(staff_data, 10)  # 10 staff per page
+    staff_page = paginator.get_page(page)
+
     context = {
         "title": "Staff Performance",
         "subTitle": "Reports / Staff Performance",
+        # Period filter
+        "period": period_data["period"],
+        "period_label": period_data["label"],
+        "period_choices": PERIOD_CHOICES,
+        "date_from": period_data["date_from_str"],
+        "date_to": period_data["date_to_str"],
         # Filters
-        "date_from": date_from,
-        "date_to": date_to,
         "branches": branches,
         "selected_branch": branch_id,
         "centers": centers,
         "selected_center": center_id,
-        # Staff data
-        "staff_data": staff_data,
+        # Staff data with pagination
+        "staff_data": staff_page,
+        "staff_page": staff_page,
         "top_performers": top_performers,
         # Chart data
         "staff_labels": json.dumps(staff_labels),
@@ -417,18 +591,19 @@ def staff_performance(request):
     return render(request, "reports/staff_performance.html", context)
 
 
+@login_required(login_url="admin_login")
 def branch_comparison(request):
     """Compare branch performance - for owners and superusers"""
-    # Date filters
-    date_from = request.GET.get("date_from")
-    date_to = request.GET.get("date_to")
+    # Period filter
+    period = request.GET.get("period", "month")
+    custom_from = request.GET.get("date_from")
+    custom_to = request.GET.get("date_to")
     center_id = request.GET.get("center")
 
-    today = timezone.now()
-    if not date_from:
-        date_from = (today - timedelta(days=30)).strftime("%Y-%m-%d")
-    if not date_to:
-        date_to = today.strftime("%Y-%m-%d")
+    # Get period dates
+    period_data = get_period_dates(period, custom_from, custom_to)
+    date_from = period_data["date_from"]
+    date_to = period_data["date_to"]
 
     # Get branches based on user role
     branches = get_user_branches(request.user)
@@ -442,9 +617,7 @@ def branch_comparison(request):
             branches = branches.filter(center_id=center_id)
             all_orders = all_orders.filter(branch__center_id=center_id)
 
-    orders = all_orders.filter(
-        created_at__date__gte=date_from, created_at__date__lte=date_to
-    )
+    orders = all_orders.filter(created_at__gte=date_from, created_at__lte=date_to)
 
     # Calculate metrics for each branch
     branch_data = []
@@ -495,9 +668,13 @@ def branch_comparison(request):
     context = {
         "title": "Branch Comparison",
         "subTitle": "Reports / Branch Comparison",
+        # Period filter
+        "period": period_data["period"],
+        "period_label": period_data["label"],
+        "period_choices": PERIOD_CHOICES,
+        "date_from": period_data["date_from_str"],
+        "date_to": period_data["date_to_str"],
         # Filters
-        "date_from": date_from,
-        "date_to": date_to,
         "centers": centers,
         "selected_center": center_id,
         # Data
@@ -515,19 +692,22 @@ def branch_comparison(request):
     return render(request, "reports/branch_comparison.html", context)
 
 
+@login_required(login_url="admin_login")
 def customer_analytics(request):
     """Customer analytics - acquisition, retention, etc."""
-    # Date filters
-    date_from = request.GET.get("date_from")
-    date_to = request.GET.get("date_to")
+    # Period filter
+    period = request.GET.get("period", "month")
+    custom_from = request.GET.get("date_from")
+    custom_to = request.GET.get("date_to")
     branch_id = request.GET.get("branch")
     center_id = request.GET.get("center")
 
-    today = timezone.now()
-    if not date_from:
-        date_from = (today - timedelta(days=30)).strftime("%Y-%m-%d")
-    if not date_to:
-        date_to = today.strftime("%Y-%m-%d")
+    # Get period dates
+    period_data = get_period_dates(period, custom_from, custom_to)
+    date_from = period_data["date_from"]
+    date_to = period_data["date_to"]
+    trunc_func = period_data["trunc_func"]
+    date_format = period_data["date_format"]
 
     # Get customers and orders based on user role
     customers = get_user_customers(request.user)
@@ -554,30 +734,32 @@ def customer_analytics(request):
         orders = orders.filter(branch_id=branch_id)
 
     # Date range filter
-    orders = orders.filter(
-        created_at__date__gte=date_from, created_at__date__lte=date_to
-    )
+    orders = orders.filter(created_at__gte=date_from, created_at__lte=date_to)
 
     # Customer metrics
     total_customers = customers.count()
     active_customers = customers.filter(is_active=True).count()
     new_customers = customers.filter(
-        created_at__date__gte=date_from, created_at__date__lte=date_to
+        created_at__gte=date_from, created_at__lte=date_to
     ).count()
 
     agencies = customers.filter(is_agency=True).count()
 
     # Customer acquisition trend
     acquisition_data = (
-        customers.filter(created_at__date__gte=date_from, created_at__date__lte=date_to)
-        .annotate(date=TruncDate("created_at"))
-        .values("date")
+        customers.filter(created_at__gte=date_from, created_at__lte=date_to)
+        .annotate(period=trunc_func("created_at"))
+        .values("period")
         .annotate(count=Count("id"))
-        .order_by("date")
+        .order_by("period")
     )
 
-    acquisition_labels = [item["date"].strftime("%b %d") for item in acquisition_data]
-    acquisition_values = [item["count"] for item in acquisition_data]
+    acquisition_labels = []
+    acquisition_values = []
+    for item in acquisition_data:
+        if item["period"]:
+            acquisition_labels.append(item["period"].strftime(date_format))
+            acquisition_values.append(item["count"])
 
     # Top customers by orders
     top_customers = (
@@ -606,9 +788,13 @@ def customer_analytics(request):
     context = {
         "title": "Customer Analytics",
         "subTitle": "Reports / Customers",
+        # Period filter
+        "period": period_data["period"],
+        "period_label": period_data["label"],
+        "period_choices": PERIOD_CHOICES,
+        "date_from": period_data["date_from_str"],
+        "date_to": period_data["date_to_str"],
         # Filters
-        "date_from": date_from,
-        "date_to": date_to,
         "branches": branches,
         "selected_branch": branch_id,
         "centers": centers,
@@ -628,6 +814,7 @@ def customer_analytics(request):
     return render(request, "reports/customers.html", context)
 
 
+@login_required(login_url="admin_login")
 def export_report(request, report_type):
     """Export report data as JSON (can be extended to CSV/Excel)"""
     import csv
@@ -704,12 +891,23 @@ def export_report(request, report_type):
     return JsonResponse({"error": "Invalid report type"}, status=400)
 
 
+@login_required(login_url="admin_login")
 def my_statistics(request):
     """
     Personal statistics view for staff members.
     Shows only orders assigned to the current user.
     """
-    from django.contrib.auth.decorators import login_required
+    # Period filter
+    period = request.GET.get("period", "month")
+    custom_from = request.GET.get("date_from")
+    custom_to = request.GET.get("date_to")
+
+    # Get period dates
+    period_data = get_period_dates(period, custom_from, custom_to)
+    date_from = period_data["date_from"]
+    date_to = period_data["date_to"]
+    trunc_func = period_data["trunc_func"]
+    date_format = period_data["date_format"]
 
     today = timezone.now()
     today_start = today.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -727,6 +925,9 @@ def my_statistics(request):
         my_orders = Order.objects.filter(assigned_to=admin_profile)
     else:
         my_orders = Order.objects.none()
+
+    # Orders for selected period
+    period_orders = my_orders.filter(created_at__gte=date_from, created_at__lte=date_to)
 
     # Today's stats
     today_orders = my_orders.filter(created_at__gte=today_start)
@@ -762,9 +963,9 @@ def my_statistics(request):
         round((total_completed / total_count * 100), 1) if total_count > 0 else 0
     )
 
-    # Status breakdown for current month
+    # Status breakdown for selected period
     status_breakdown = (
-        month_orders.values("status").annotate(count=Count("id")).order_by("-count")
+        period_orders.values("status").annotate(count=Count("id")).order_by("-count")
     )
 
     STATUS_LABELS = {
@@ -800,21 +1001,22 @@ def my_statistics(request):
             }
         )
 
-    # Daily performance for the month (chart data)
+    # Daily performance for selected period (chart data)
     daily_performance = (
-        month_orders.annotate(date=TruncDate("created_at"))
-        .values("date")
+        period_orders.annotate(period=trunc_func("created_at"))
+        .values("period")
         .annotate(count=Count("id"), pages=Sum("total_pages"))
-        .order_by("date")
+        .order_by("period")
     )
 
     daily_labels = []
     daily_counts = []
     daily_pages = []
     for item in daily_performance:
-        daily_labels.append(item["date"].strftime("%d"))
-        daily_counts.append(item["count"])
-        daily_pages.append(item["pages"] or 0)
+        if item["period"]:
+            daily_labels.append(item["period"].strftime(date_format))
+            daily_counts.append(item["count"])
+            daily_pages.append(item["pages"] or 0)
 
     # Recent orders (last 10)
     recent_orders = my_orders.select_related("bot_user", "product").order_by(
@@ -824,6 +1026,12 @@ def my_statistics(request):
     context = {
         "title": "My Statistics",
         "subTitle": "Your Personal Performance",
+        # Period filter
+        "period": period_data["period"],
+        "period_label": period_data["label"],
+        "period_choices": PERIOD_CHOICES,
+        "date_from": period_data["date_from_str"],
+        "date_to": period_data["date_to_str"],
         # Today
         "today_count": today_count,
         "today_completed": today_completed,

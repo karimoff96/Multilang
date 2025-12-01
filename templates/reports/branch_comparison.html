@@ -1,4 +1,5 @@
 {% extends 'layout/layout.html' %} 
+{% load number_filters %}
 
 {% block content %}
 <div class="row gy-4">
@@ -12,13 +13,25 @@
                         <p class="text-secondary-light mb-0" data-i18n="report.branchComparisonDesc">Compare performance across all branches</p>
                     </div>
                     <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                        <!-- Period Filter -->
                         <div>
-                            <label class="form-label text-sm mb-1" data-i18n="form.fromDate">From Date</label>
-                            <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                            <label class="form-label text-sm mb-1" data-i18n="filter.period">Period</label>
+                            <select name="period" id="periodSelect" class="form-select" style="min-width: 140px;">
+                                {% for value, label in period_choices %}
+                                <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <div>
-                            <label class="form-label text-sm mb-1" data-i18n="form.toDate">To Date</label>
-                            <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                        <!-- Custom Date Range -->
+                        <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                            <div>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.from">From</label>
+                                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                            </div>
+                            <div>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.to">To</label>
+                                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                            </div>
                         </div>
                         {% if user.is_superuser and centers %}
                         <div>
@@ -37,6 +50,14 @@
                         </button>
                     </form>
                 </div>
+                {% if period_label %}
+                <div class="mt-3">
+                    <span class="badge bg-primary-light text-primary-main px-12 py-6">
+                        <iconify-icon icon="solar:calendar-bold" class="me-1"></iconify-icon>
+                        {{ period_label }}
+                    </span>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -51,7 +72,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="report.totalRevenue">Total Revenue</span>
-                        <h4 class="fw-bold mb-0">{{ total_revenue|floatformat:0 }} <small class="text-sm">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ total_revenue|short_number }} <small class="text-sm">UZS</small></h4>
                     </div>
                 </div>
             </div>
@@ -168,9 +189,9 @@
                                     </div>
                                 </td>
                                 <td class="{{ row_color }} text-end">
-                                    <span class="fw-semibold text-success-main">{{ branch.revenue|floatformat:0 }}</span>
+                                    <span class="fw-semibold text-success-main">{{ branch.revenue|short_number }}</span>
                                 </td>
-                                <td class="{{ row_color }} text-end text-secondary-light">{{ branch.avg_value|floatformat:0 }}</td>
+                                <td class="{{ row_color }} text-end text-secondary-light">{{ branch.avg_value|short_number }}</td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ branch.staff_count }}</td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ branch.customer_count }}</td>
                             </tr>
@@ -191,39 +212,64 @@
 {% endblock content %}
 
 {% block script %}
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
+function formatShortNumber(num) {
+    if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B';
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Period selection toggle for custom date range
+    const periodSelect = document.getElementById('periodSelect');
+    const customDateRange = document.getElementById('customDateRange');
+    
+    if (periodSelect && customDateRange) {
+        periodSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customDateRange.style.display = 'flex';
+            } else {
+                customDateRange.style.display = 'none';
+                // Auto-submit when not custom
+                this.form.submit();
+            }
+        });
+    }
+
     const branchLabels = {{ branch_labels|safe }};
     const branchRevenue = {{ branch_revenue|safe }};
     const branchOrders = {{ branch_orders_count|safe }};
     
+    console.log('Branch data:', { branchLabels, branchRevenue, branchOrders });
+    
     // Revenue chart
-    if (branchLabels.length > 0) {
+    if (branchLabels && branchLabels.length > 0 && branchRevenue.some(v => v > 0)) {
         new ApexCharts(document.querySelector("#revenueChart"), {
-            series: [{ name: LanguageManager.translate('report.revenue') || 'Revenue', data: branchRevenue }],
+            series: [{ name: (typeof LanguageManager !== 'undefined' && LanguageManager.translate('report.revenue')) || 'Revenue', data: branchRevenue }],
             chart: { type: 'bar', height: 300, toolbar: { show: false } },
             colors: ['#22c55e'],
             plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '60%' } },
             dataLabels: {
                 enabled: true,
-                formatter: function(val) { return val.toLocaleString() + ' UZS'; },
+                formatter: function(val) { return formatShortNumber(val); },
                 style: { fontSize: '10px', colors: ['#fff'] }
             },
             xaxis: {
                 categories: branchLabels,
                 labels: {
-                    formatter: function(val) { return val.toLocaleString(); },
+                    formatter: function(val) { return formatShortNumber(val); },
                     style: { colors: '#9CA3AF', fontSize: '11px' }
                 }
             },
             yaxis: { labels: { style: { colors: '#374151', fontSize: '12px' } } },
-            grid: { borderColor: '#E4E7EC', strokeDashArray: 3 }
+            grid: { borderColor: '#E4E7EC', strokeDashArray: 3 },
+            tooltip: { y: { formatter: function(val) { return val.toLocaleString() + ' UZS'; } } }
         }).render();
         
         // Orders chart
         new ApexCharts(document.querySelector("#ordersChart"), {
-            series: [{ name: LanguageManager.translate('table.orders') || 'Orders', data: branchOrders }],
+            series: [{ name: (typeof LanguageManager !== 'undefined' && LanguageManager.translate('table.orders')) || 'Orders', data: branchOrders }],
             chart: { type: 'bar', height: 300, toolbar: { show: false } },
             colors: ['#487FFF'],
             plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '60%' } },
@@ -239,8 +285,8 @@ document.addEventListener('DOMContentLoaded', function() {
             grid: { borderColor: '#E4E7EC', strokeDashArray: 3 }
         }).render();
     } else {
-        document.querySelector("#revenueChart").innerHTML = '<div class="text-center text-secondary-light py-4 bg-base" data-i18n="report.noBranchData">No branch data</div>';
-        document.querySelector("#ordersChart").innerHTML = '<div class="text-center text-secondary-light py-4 bg-base" data-i18n="report.noBranchData">No branch data</div>';
+        document.querySelector("#revenueChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:chart-square-line-duotone" class="text-4xl mb-2"></iconify-icon><span>No branch revenue data</span></div>';
+        document.querySelector("#ordersChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:chart-square-line-duotone" class="text-4xl mb-2"></iconify-icon><span>No branch order data</span></div>';
     }
 });
 </script>

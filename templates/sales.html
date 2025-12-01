@@ -164,10 +164,10 @@
                             <tr>
                                 <td><span class="text-primary-600 fw-medium">#{{ order.id }}</span></td>
                                 {% if user.is_superuser %}
-                                <td><span class="text-md fw-medium text-primary-light">{{ order.branch.center.name }}</span></td>
+                                <td><span class="text-md fw-medium text-primary-light">{{ order.center|default:"-" }}</span></td>
                                 {% endif %}
                                 {% if user.is_superuser or is_owner %}
-                                <td><span class="text-md fw-medium text-secondary-light">{{ order.branch.name }}</span></td>
+                                <td><span class="text-md fw-medium text-secondary-light">{{ order.branch|default:"-" }}</span></td>
                                 {% endif %}
                                 <td><span class="text-primary-light fw-medium">{{ order.customer }}</span></td>
                                 <td><span class="text-secondary-light">{{ order.product }}</span></td>
@@ -308,16 +308,16 @@ function initOrdersChart() {
     const colors = getThemeColors();
     const data = ordersData.yearly;
     ordersChart = new ApexCharts(document.querySelector("#ordersChart"), {
-        series: [{ name: 'Revenue', data: data.chartData }],
+        series: [{ name: 'Orders', data: data.chartData }],
         chart: { type: 'area', height: 264, toolbar: { show: false } },
         colors: ['#487FFF'],
         fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1 } },
         stroke: { curve: 'smooth', width: 2 },
         dataLabels: { enabled: false },
         xaxis: { categories: data.chartLabels, labels: { style: { colors: colors.textColor, fontSize: '12px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-        yaxis: { labels: { formatter: val => val >= 1000000 ? (val/1000000).toFixed(1)+'M' : val >= 1000 ? (val/1000).toFixed(0)+'K' : val, style: { colors: colors.textColor, fontSize: '12px' } } },
+        yaxis: { labels: { style: { colors: colors.textColor, fontSize: '12px' } } },
         grid: { borderColor: colors.gridColor, strokeDashArray: 3 },
-        tooltip: { y: { formatter: val => formatNumber(val) + ' UZS' } }
+        tooltip: { y: { formatter: val => formatNumber(val) + ' orders' } }
     });
     ordersChart.render();
 }
@@ -325,7 +325,7 @@ function initOrdersChart() {
 function updateOrdersChart(period) {
     const data = ordersData[period];
     ordersChart.updateOptions({ xaxis: { categories: data.chartLabels } });
-    ordersChart.updateSeries([{ name: 'Revenue', data: data.chartData }]);
+    ordersChart.updateSeries([{ name: 'Orders', data: data.chartData }]);
 }
 
 // Status Donut Chart

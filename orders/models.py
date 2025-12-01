@@ -40,17 +40,17 @@ class Order(models.Model):
         ("cash", _("Cash")),
         ("card", _("Card")),
     )
-    
+
     # Branch relationship - orders belong to specific branches
     branch = models.ForeignKey(
         Branch,
         on_delete=models.CASCADE,
-        related_name='orders',
+        related_name="orders",
         verbose_name=_("Branch"),
         null=True,
-        blank=True
+        blank=True,
     )
-    
+
     bot_user = models.ForeignKey(
         BotUser, on_delete=models.CASCADE, verbose_name=_("Telegram User")
     )
@@ -73,7 +73,10 @@ class Order(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name=_("Language"),
+        verbose_name=_("Translation Language"),
+        help_text=_(
+            "The target language selected by user from category's available languages"
+        ),
     )
     payment_type = models.CharField(
         max_length=100,
@@ -93,49 +96,55 @@ class Order(models.Model):
         help_text=_("Additional copies needed (0 means only original)"),
     )
     files = models.ManyToManyField(OrderMedia, verbose_name=_("Files"))
-    
+
     # Staff assignment fields
     assigned_to = models.ForeignKey(
         AdminUser,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='assigned_orders',
+        related_name="assigned_orders",
         verbose_name=_("Assigned To"),
-        limit_choices_to={'role__name': 'staff'}
+        limit_choices_to={"role__name": "staff"},
     )
     assigned_by = models.ForeignKey(
         AdminUser,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='orders_assigned',
+        related_name="orders_assigned",
         verbose_name=_("Assigned By"),
-        limit_choices_to={'role__name__in': ['owner', 'manager']}
+        limit_choices_to={"role__name__in": ["owner", "manager"]},
     )
-    assigned_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Assigned At"))
-    
+    assigned_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Assigned At")
+    )
+
     # Payment tracking
     payment_received_by = models.ForeignKey(
         AdminUser,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='payments_received',
-        verbose_name=_("Payment Received By")
+        related_name="payments_received",
+        verbose_name=_("Payment Received By"),
     )
-    payment_received_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Payment Received At"))
-    
+    payment_received_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Payment Received At")
+    )
+
     # Order completion tracking
     completed_by = models.ForeignKey(
         AdminUser,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='completed_orders',
-        verbose_name=_("Completed By")
+        related_name="completed_orders",
+        verbose_name=_("Completed By"),
     )
-    completed_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Completed At"))
+    completed_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Completed At")
+    )
 
     def __str__(self):
         return f"Order {self.id} - {self.bot_user.display_name} - {self.product} ({self.total_pages} pages)"
@@ -165,6 +174,19 @@ class Order(models.Model):
         return self.product.category
 
     @property
+    def available_languages(self):
+        """Get available languages from product's category"""
+        if self.product and self.product.category:
+            return self.product.category.languages.all()
+        return Language.objects.none()
+
+    def is_valid_language(self, language):
+        """Check if the given language is valid for this order's category"""
+        if not language:
+            return True  # Allow null
+        return self.available_languages.filter(pk=language.pk).exists()
+
+    @property
     def complexity_level(self):
         """Get complexity level from document type"""
         return self.product.complexity_level
@@ -183,34 +205,68 @@ class Order(models.Model):
         """Update total pages from all files"""
         self.total_pages = self.files.aggregate(total=models.Sum("pages"))["total"] or 0
         return self.total_pages
-    
+
     def assign_to_staff(self, staff_member, assigned_by):
         """Assign this order to a staff member"""
         self.assigned_to = staff_member
         self.assigned_by = assigned_by
         self.assigned_at = timezone.now()
-        self.status = 'in_progress'
-        self.save(update_fields=['assigned_to', 'assigned_by', 'assigned_at', 'status', 'updated_at'])
-    
+        self.status = "in_progress"
+        self.save(
+            update_fields=[
+                "assigned_to",
+                "assigned_by",
+                "assigned_at",
+                "status",
+                "updated_at",
+            ]
+        )
+
     def mark_payment_received(self, received_by):
         """Mark payment as received"""
         self.payment_received_by = received_by
         self.payment_received_at = timezone.now()
-        self.status = 'payment_confirmed'
-        self.save(update_fields=['payment_received_by', 'payment_received_at', 'status', 'updated_at'])
-    
+        self.status = "payment_confirmed"
+        self.save(
+            update_fields=[
+                "payment_received_by",
+                "payment_received_at",
+                "status",
+                "updated_at",
+            ]
+        )
+
     def mark_completed(self, completed_by):
         """Mark order as completed"""
         self.completed_by = completed_by
         self.completed_at = timezone.now()
-        self.status = 'completed'
-        self.save(update_fields=['completed_by', 'completed_at', 'status', 'updated_at'])
+        self.status = "completed"
+        self.save(
+            update_fields=["completed_by", "completed_at", "status", "updated_at"]
+        )
 
     def save(self, *args, **kwargs):
         # Auto-set branch from bot_user if not set
         if not self.branch and self.bot_user and self.bot_user.branch:
             self.branch = self.bot_user.branch
-        
+
+        # Validate that the selected language is available in the product's category
+        if self.language and self.product and self.product.category:
+            available_languages = self.product.category.languages.all()
+            if (
+                available_languages.exists()
+                and not available_languages.filter(pk=self.language.pk).exists()
+            ):
+                from django.core.exceptions import ValidationError
+
+                raise ValidationError(
+                    {
+                        "language": _(
+                            "Selected language is not available for this product's category."
+                        )
+                    }
+                )
+
         # Update total pages before calculating price
         if hasattr(self, "_update_pages") and self._update_pages:
             self.update_total_pages()
@@ -224,7 +280,7 @@ class Order(models.Model):
     class Meta:
         verbose_name = _("Order")
         verbose_name_plural = _("Orders")
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
 
 @receiver(pre_save, sender=Order)

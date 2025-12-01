@@ -1,4 +1,5 @@
 {% extends 'layout/layout.html' %} 
+{% load number_filters %}
 
 {% block content %}
 <div class="row gy-4">
@@ -12,13 +13,25 @@
                         <p class="text-secondary-light mb-0" data-i18n="report.revenueAnalytics">Revenue and financial analytics</p>
                     </div>
                     <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                        <!-- Period Filter -->
                         <div>
-                            <label class="form-label text-sm mb-1" data-i18n="form.fromDate">From Date</label>
-                            <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                            <label class="form-label text-sm mb-1" data-i18n="filter.period">Period</label>
+                            <select name="period" id="periodSelect" class="form-select" style="min-width: 140px;">
+                                {% for value, label in period_choices %}
+                                <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <div>
-                            <label class="form-label text-sm mb-1" data-i18n="form.toDate">To Date</label>
-                            <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                        <!-- Custom Date Range -->
+                        <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                            <div>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.from">From</label>
+                                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                            </div>
+                            <div>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.to">To</label>
+                                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                            </div>
                         </div>
                         {% if user.is_superuser and centers %}
                         <div>
@@ -46,12 +59,20 @@
                             <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
                             <span data-i18n="common.apply">Apply</span>
                         </button>
-                        <a href="{% url 'export_report' 'financial' %}?date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
+                        <a href="{% url 'export_report' 'financial' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
                             <iconify-icon icon="solar:download-bold" class="icon line-height-1"></iconify-icon>
                             <span data-i18n="common.export">Export</span>
                         </a>
                     </form>
                 </div>
+                {% if period_label %}
+                <div class="mt-3">
+                    <span class="badge bg-primary-light text-primary-main px-12 py-6">
+                        <iconify-icon icon="solar:calendar-bold" class="me-1"></iconify-icon>
+                        {{ period_label }}
+                    </span>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -66,7 +87,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="report.totalRevenue">Total Revenue</span>
-                        <h4 class="fw-bold mb-0">{{ total_revenue|floatformat:0 }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ total_revenue|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
             </div>
@@ -81,7 +102,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="report.completedRevenue">Completed Revenue</span>
-                        <h4 class="fw-bold mb-0">{{ completed_revenue|floatformat:0 }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ completed_revenue|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
             </div>
@@ -111,7 +132,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="report.avgOrderValue">Avg Order Value</span>
-                        <h4 class="fw-bold mb-0">{{ avg_order_value|floatformat:0 }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ avg_order_value|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
             </div>
@@ -157,7 +178,7 @@
                                     <span class="badge bg-warning-focus text-warning-main" data-i18n="status.pending">{{ item.status_display }}</span>
                                     {% endif %}
                                 </td>
-                                <td class="{{ row_color }} text-end text-secondary-light">{{ item.revenue|floatformat:0 }}</td>
+                                <td class="{{ row_color }} text-end text-secondary-light">{{ item.revenue|short_number }}</td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ item.count }}</td>
                             </tr>
                             {% empty %}
@@ -171,12 +192,14 @@
     </div>
 
     <!-- Branch Revenue (if owner/superuser) -->
-    {% if branch_revenue %}
+    {% if user.is_superuser or is_owner %}
     <div class="col-xxl-6">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
                 <h6 class="fw-bold text-lg mb-4" data-i18n="report.revenueByBranch">Revenue by Branch</h6>
-                <div class="table-responsive">
+                {% if branch_revenue %}
+                <div id="branchRevenueChart" style="min-height: 250px;"></div>
+                <div class="table-responsive mt-3">
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
@@ -190,20 +213,29 @@
                             {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
                             <tr>
                                 <td class="{{ row_color }} fw-medium text-secondary-light">{{ item.branch }}</td>
-                                <td class="{{ row_color }} text-end text-success-main fw-semibold">{{ item.revenue|floatformat:0 }}</td>
+                                <td class="{{ row_color }} text-end text-success-main fw-semibold">{{ item.revenue|short_number }}</td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ item.count }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
+                {% else %}
+                <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                    <span class="mb-0 w-64-px h-64-px bg-neutral-100 flex-shrink-0 text-secondary-light d-flex justify-content-center align-items-center rounded-circle mb-3">
+                        <iconify-icon icon="solar:buildings-line-duotone" class="text-xxl"></iconify-icon>
+                    </span>
+                    <h6 class="fw-semibold text-secondary-light mb-1" data-i18n="report.noBranchData">No branch data available</h6>
+                    <p class="text-sm text-secondary-light mb-0" data-i18n="report.noBranchDataDesc">No orders found for branches in this period</p>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
     {% endif %}
 
     <!-- Top Products -->
-    <div class="col-xxl-{% if branch_revenue %}6{% else %}12{% endif %}">
+    <div class="col-xxl-{% if user.is_superuser or is_owner %}6{% else %}12{% endif %}">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
                 <h6 class="fw-bold text-lg mb-4" data-i18n="report.topProductsByRevenue">Top Products by Revenue</h6>
@@ -221,7 +253,7 @@
                             {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
                             <tr>
                                 <td class="{{ row_color }} fw-medium text-secondary-light">{{ item.product }}</td>
-                                <td class="{{ row_color }} text-end text-success-main fw-semibold">{{ item.revenue|floatformat:0 }}</td>
+                                <td class="{{ row_color }} text-end text-success-main fw-semibold">{{ item.revenue|short_number }}</td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ item.count }}</td>
                             </tr>
                             {% empty %}
@@ -237,62 +269,154 @@
 {% endblock content %}
 
 {% block script %}
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
+function formatShortNumber(num) {
+    if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B';
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Period selection toggle for custom date range
+    const periodSelect = document.getElementById('periodSelect');
+    const customDateRange = document.getElementById('customDateRange');
+    
+    if (periodSelect && customDateRange) {
+        periodSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customDateRange.style.display = 'flex';
+            } else {
+                customDateRange.style.display = 'none';
+                // Auto-submit when not custom
+                this.form.submit();
+            }
+        });
+    }
+
     const dailyLabels = {{ daily_labels|safe }};
     const dailyValues = {{ daily_values|safe }};
+    const branchLabels = {{ branch_labels|safe }};
+    const branchRevenueValues = {{ branch_revenue_values|safe }};
     
-    if (dailyLabels.length > 0) {
-        const options = {
-            series: [{
-                name: 'Revenue',
-                data: dailyValues
-            }],
-            chart: {
-                type: 'area',
-                height: 300,
-                toolbar: { show: false }
-            },
-            colors: ['#487FFF'],
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    shadeIntensity: 1,
-                    opacityFrom: 0.4,
-                    opacityTo: 0.1,
+    console.log('Financial data:', { dailyLabels, dailyValues, branchLabels, branchRevenueValues });
+    console.log('ApexCharts available:', typeof ApexCharts !== 'undefined');
+    
+    // Check if ApexCharts is loaded
+    if (typeof ApexCharts === 'undefined') {
+        console.error('ApexCharts is not loaded!');
+        return;
+    }
+    
+    // Daily Revenue Chart
+    if (dailyLabels && dailyLabels.length > 0 && dailyValues.some(v => v > 0)) {
+        try {
+            const options = {
+                series: [{
+                    name: 'Revenue',
+                    data: dailyValues
+                }],
+                chart: {
+                    type: 'area',
+                    height: 300,
+                    toolbar: { show: false }
+                },
+                colors: ['#487FFF'],
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.4,
+                        opacityTo: 0.1,
+                    }
+                },
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth', width: 2 },
+                xaxis: {
+                    categories: dailyLabels,
+                    labels: {
+                        style: { colors: '#9CA3AF', fontSize: '12px' }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        formatter: function(val) {
+                            return formatShortNumber(val) + ' UZS';
+                        },
+                        style: { colors: '#9CA3AF', fontSize: '12px' }
+                    }
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return val.toLocaleString() + ' UZS';
+                        }
+                    }
+                },
+                grid: {
+                    borderColor: '#E4E7EC',
+                    strokeDashArray: 3
                 }
-            },
-            dataLabels: { enabled: false },
-            stroke: { curve: 'smooth', width: 2 },
-            xaxis: {
-                categories: dailyLabels,
-                labels: {
-                    style: { colors: '#9CA3AF', fontSize: '12px' }
-                }
-            },
-            yaxis: {
-                labels: {
-                    formatter: function(val) {
-                        return val.toLocaleString() + ' UZS';
-                    },
-                    style: { colors: '#9CA3AF', fontSize: '12px' }
-                }
-            },
-            tooltip: {
-                y: {
-                    formatter: function(val) {
-                        return val.toLocaleString() + ' UZS';
+            };
+            
+            var revenueChart = new ApexCharts(document.querySelector("#dailyRevenueChart"), options);
+            revenueChart.render();
+            console.log('Daily revenue chart rendered');
+        } catch(e) {
+            console.error('Error rendering revenue chart:', e);
+        }
+    } else {
+        var el = document.querySelector("#dailyRevenueChart");
+        if (el) el.innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:chart-square-line-duotone" class="text-4xl mb-2"></iconify-icon><span>No revenue data for this period</span></div>';
+    }
+    
+    // Branch Revenue Chart
+    var branchEl = document.querySelector("#branchRevenueChart");
+    if (branchLabels && branchLabels.length > 0 && branchEl) {
+        try {
+            var branchChart = new ApexCharts(branchEl, {
+                series: [{
+                    name: 'Revenue',
+                    data: branchRevenueValues
+                }],
+                chart: { type: 'bar', height: 250, toolbar: { show: false } },
+                colors: ['#45B369'],
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        borderRadius: 4,
+                        barHeight: '60%'
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function(val) { return formatShortNumber(val); },
+                    style: { fontSize: '11px', colors: ['#fff'] }
+                },
+                xaxis: {
+                    categories: branchLabels,
+                    labels: {
+                        formatter: function(val) { return formatShortNumber(val); },
+                        style: { colors: '#9CA3AF', fontSize: '11px' }
+                    }
+                },
+                yaxis: {
+                    labels: { style: { colors: '#9CA3AF', fontSize: '11px' } }
+                },
+                grid: { borderColor: '#E4E7EC', strokeDashArray: 3 },
+                tooltip: {
+                    y: {
+                        formatter: function(val) { return val.toLocaleString() + ' UZS'; }
                     }
                 }
-            },
-            grid: {
-                borderColor: '#E4E7EC',
-                strokeDashArray: 3
-            }
-        };
-        
-        new ApexCharts(document.querySelector("#dailyRevenueChart"), options).render();
+            });
+            branchChart.render();
+            console.log('Branch revenue chart rendered');
+        } catch(e) {
+            console.error('Error rendering branch chart:', e);
+        }
+    } else if (branchEl) {
+        branchEl.innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-4 text-secondary-light"><iconify-icon icon="solar:buildings-line-duotone" class="text-3xl mb-2"></iconify-icon><span>No branch data</span></div>';
     }
 });
 </script>

@@ -1,4 +1,5 @@
 {% extends 'layout/layout.html' %} 
+{% load number_filters %}
 
 {% block content %}
 <div class="row gy-4">
@@ -12,13 +13,25 @@
                         <p class="text-secondary-light mb-0" data-i18n="report.orderStatistics">Order statistics and analytics</p>
                     </div>
                     <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                        <!-- Period Filter -->
                         <div>
-                            <label class="form-label text-sm mb-1" data-i18n="report.fromDate">From Date</label>
-                            <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                            <label class="form-label text-sm mb-1" data-i18n="filter.period">Period</label>
+                            <select name="period" id="periodSelect" class="form-select" style="min-width: 140px;">
+                                {% for value, label in period_choices %}
+                                <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <div>
-                            <label class="form-label text-sm mb-1" data-i18n="report.toDate">To Date</label>
-                            <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                        <!-- Custom Date Range -->
+                        <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                            <div>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.from">From</label>
+                                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                            </div>
+                            <div>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.to">To</label>
+                                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                            </div>
                         </div>
                         {% if user.is_superuser and centers %}
                         <div>
@@ -55,12 +68,20 @@
                             <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
                             <span data-i18n="common.apply">Apply</span>
                         </button>
-                        <a href="{% url 'export_report' 'orders' %}?date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
+                        <a href="{% url 'export_report' 'orders' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
                             <iconify-icon icon="solar:download-bold" class="icon line-height-1"></iconify-icon>
                             <span data-i18n="common.export">Export</span>
                         </a>
                     </form>
                 </div>
+                {% if period_label %}
+                <div class="mt-3">
+                    <span class="badge bg-primary-light text-primary-main px-12 py-6">
+                        <iconify-icon icon="solar:calendar-bold" class="me-1"></iconify-icon>
+                        {{ period_label }}
+                    </span>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -190,7 +211,14 @@
     <div class="col-xxl-8">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4" data-i18n="dashboard.recentOrders">Recent Orders</h6>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="fw-bold text-lg mb-0" data-i18n="dashboard.recentOrders">Recent Orders</h6>
+                    {% if orders_page.paginator.count > 0 %}
+                    <small class="text-secondary-light">
+                        Showing {{ orders_page.start_index }}-{{ orders_page.end_index }} of {{ orders_page.paginator.count }}
+                    </small>
+                    {% endif %}
+                </div>
                 <div class="table-responsive">
                     <table class="table colored-row-table mb-0">
                         <thead>
@@ -236,6 +264,44 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Pagination -->
+                {% if orders_page.has_other_pages %}
+                <nav class="d-flex justify-content-center mt-4">
+                    <ul class="pagination mb-0">
+                        {% if orders_page.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link bg-base text-secondary-light fw-medium radius-8 border-0 px-20 py-10 d-flex align-items-center justify-content-center h-48-px" 
+                               href="?page={{ orders_page.previous_page_number }}&period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}">
+                                <iconify-icon icon="ep:d-arrow-left" class="text-xl"></iconify-icon>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in orders_page.paginator.page_range %}
+                            {% if orders_page.number == num %}
+                            <li class="page-item">
+                                <span class="page-link bg-primary-600 text-white fw-medium radius-8 border-0 px-20 py-10 d-flex align-items-center justify-content-center h-48-px w-48-px">{{ num }}</span>
+                            </li>
+                            {% elif num > orders_page.number|add:'-3' and num < orders_page.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link bg-base text-secondary-light fw-medium radius-8 border-0 px-20 py-10 d-flex align-items-center justify-content-center h-48-px w-48-px" 
+                                   href="?page={{ num }}&period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if orders_page.has_next %}
+                        <li class="page-item">
+                            <a class="page-link bg-base text-secondary-light fw-medium radius-8 border-0 px-20 py-10 d-flex align-items-center justify-content-center h-48-px" 
+                               href="?page={{ orders_page.next_page_number }}&period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}">
+                                <iconify-icon icon="ep:d-arrow-right" class="text-xl"></iconify-icon>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -243,63 +309,105 @@
 {% endblock content %}
 
 {% block script %}
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Period selection toggle for custom date range
+    const periodSelect = document.getElementById('periodSelect');
+    const customDateRange = document.getElementById('customDateRange');
+    
+    if (periodSelect && customDateRange) {
+        periodSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customDateRange.style.display = 'flex';
+            } else {
+                customDateRange.style.display = 'none';
+                // Auto-submit when not custom
+                this.form.submit();
+            }
+        });
+    }
+
     const dailyLabels = {{ daily_labels|safe }};
     const dailyValues = {{ daily_values|safe }};
     const statusLabels = {{ status_labels|safe }};
     const statusValues = {{ status_values|safe }};
     
+    console.log('Orders data:', { dailyLabels, dailyValues, statusLabels, statusValues });
+    console.log('ApexCharts available:', typeof ApexCharts !== 'undefined');
+    
+    // Check if ApexCharts is loaded
+    if (typeof ApexCharts === 'undefined') {
+        console.error('ApexCharts is not loaded!');
+        document.querySelector("#orderTrendChart").innerHTML = '<div class="alert alert-danger">Chart library not loaded</div>';
+        document.querySelector("#statusPieChart").innerHTML = '<div class="alert alert-danger">Chart library not loaded</div>';
+        return;
+    }
+    
     // Order trend chart
-    if (dailyLabels.length > 0) {
-        new ApexCharts(document.querySelector("#orderTrendChart"), {
-            series: [{ name: 'Orders', data: dailyValues }],
-            chart: { type: 'bar', height: 300, toolbar: { show: false } },
-            colors: ['#487FFF'],
-            plotOptions: { bar: { borderRadius: 4, columnWidth: '60%' } },
-            dataLabels: { enabled: false },
-            xaxis: {
-                categories: dailyLabels,
-                labels: { style: { colors: '#9CA3AF', fontSize: '11px' } }
-            },
-            yaxis: {
-                labels: { style: { colors: '#9CA3AF', fontSize: '12px' } }
-            },
-            grid: { borderColor: '#E4E7EC', strokeDashArray: 3 }
-        }).render();
+    if (dailyLabels && dailyLabels.length > 0) {
+        try {
+            var orderChart = new ApexCharts(document.querySelector("#orderTrendChart"), {
+                series: [{ name: 'Orders', data: dailyValues }],
+                chart: { type: 'bar', height: 300, toolbar: { show: false } },
+                colors: ['#487FFF'],
+                plotOptions: { bar: { borderRadius: 4, columnWidth: '60%' } },
+                dataLabels: { enabled: false },
+                xaxis: {
+                    categories: dailyLabels,
+                    labels: { style: { colors: '#9CA3AF', fontSize: '11px' } }
+                },
+                yaxis: {
+                    labels: { style: { colors: '#9CA3AF', fontSize: '12px' } }
+                },
+                grid: { borderColor: '#E4E7EC', strokeDashArray: 3 }
+            });
+            orderChart.render();
+            console.log('Order trend chart rendered');
+        } catch(e) {
+            console.error('Error rendering order chart:', e);
+        }
+    } else {
+        document.querySelector("#orderTrendChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:chart-square-line-duotone" class="text-4xl mb-2"></iconify-icon><span>No order data for this period</span></div>';
     }
     
     // Status pie chart
-    if (statusLabels.length > 0) {
-        new ApexCharts(document.querySelector("#statusPieChart"), {
-            series: statusValues,
-            labels: statusLabels,
-            chart: { type: 'donut', height: 280 },
-            colors: ['#22c55e', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6'],
-            dataLabels: { enabled: true },
-            legend: {
-                position: 'bottom',
-                fontSize: '12px'
-            },
-            plotOptions: {
-                pie: {
-                    donut: {
-                        size: '65%',
-                        labels: {
-                            show: true,
-                            total: {
+    if (statusLabels && statusLabels.length > 0 && statusValues.some(v => v > 0)) {
+        try {
+            var statusChart = new ApexCharts(document.querySelector("#statusPieChart"), {
+                series: statusValues,
+                labels: statusLabels,
+                chart: { type: 'donut', height: 280 },
+                colors: ['#22c55e', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6'],
+                dataLabels: { enabled: true },
+                legend: {
+                    position: 'bottom',
+                    fontSize: '12px'
+                },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '65%',
+                            labels: {
                                 show: true,
-                                label: 'Total',
-                                formatter: function(w) {
-                                    return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                                total: {
+                                    show: true,
+                                    label: 'Total',
+                                    formatter: function(w) {
+                                        return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-        }).render();
+            });
+            statusChart.render();
+            console.log('Status chart rendered');
+        } catch(e) {
+            console.error('Error rendering status chart:', e);
+        }
+    } else {
+        document.querySelector("#statusPieChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:pie-chart-2-line-duotone" class="text-4xl mb-2"></iconify-icon><span>No status data</span></div>';
     }
 });
 </script>

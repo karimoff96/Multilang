@@ -135,21 +135,14 @@
                                 <div class="form-check style-check d-flex align-items-center">
                                     <input class="form-check-input radius-4 border input-form-dark" type="checkbox" name="checkbox" id="selectAll">
                                 </div>
-                                <span data-i18n="table.orderId">Order ID</span>
+                                <span data-i18n="table.order">Order</span>
                             </div>
                         </th>
-                        <th scope="col" data-i18n="table.date">Date</th>
-                        {% if user.is_superuser %}
-                        <th scope="col" data-i18n="table.center">Center</th>
-                        {% endif %}
                         {% if user.is_superuser or is_owner %}
-                        <th scope="col" data-i18n="table.branch">Branch</th>
+                        <th scope="col" data-i18n="table.location">Location</th>
                         {% endif %}
                         <th scope="col" data-i18n="table.customer">Customer</th>
-                        <th scope="col" data-i18n="table.product">Product</th>
-                        <th scope="col" data-i18n="table.pages">Pages</th>
-                        <th scope="col" data-i18n="table.copies">Copies</th>
-                        <th scope="col" data-i18n="table.total">Total</th>
+                        <th scope="col" data-i18n="table.details">Details</th>
                         <th scope="col" data-i18n="table.payment">Payment</th>
                         <th scope="col" data-i18n="table.assigned">Assigned</th>
                         <th scope="col" class="text-center" data-i18n="table.status">Status</th>
@@ -159,116 +152,115 @@
                 <tbody>
                     {% for order in orders %}
                     <tr>
+                        <!-- Order ID + Date (combined) -->
                         <td>
                             <div class="d-flex align-items-center gap-10">
                                 <div class="form-check style-check d-flex align-items-center">
                                     <input class="form-check-input radius-4 border border-neutral-400" type="checkbox" name="checkbox">
                                 </div>
-                                #{{ order.id }}
+                                <div>
+                                    <span class="fw-semibold text-primary-600">#{{ order.id }}</span>
+                                    <br><small class="text-secondary-light">{{ order.created_at|date:"d M, H:i" }}</small>
+                                </div>
                             </div>
                         </td>
-                        <td>{{ order.created_at|date:"d M Y H:i" }}</td>
-                        {% if user.is_superuser %}
-                        <td>
-                            {% if order.branch and order.branch.center %}
-                            <a href="{% url 'center_detail' order.branch.center.id %}" class="badge bg-primary-focus text-primary-600 text-decoration-none">{{ order.branch.center.name|truncatewords:2 }}</a>
-                            {% else %}
-                            <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
-                        {% endif %}
+                        <!-- Location: Center + Branch (combined) -->
                         {% if user.is_superuser or is_owner %}
                         <td>
                             {% if order.branch %}
-                            <a href="{% url 'branch_detail' order.branch.id %}" class="badge bg-info-focus text-info-600 text-decoration-none">{{ order.branch.name|truncatewords:2 }}</a>
+                            <div class="d-flex flex-column gap-1">
+                                {% if user.is_superuser and order.branch.center %}
+                                <a href="{% url 'center_detail' order.branch.center.id %}" class="text-xs text-primary-600 fw-medium">{{ order.branch.center.name|truncatechars:15 }}</a>
+                                {% endif %}
+                                <a href="{% url 'branch_detail' order.branch.id %}" class="text-xs text-info-600">{{ order.branch.name|truncatechars:15 }}</a>
+                            </div>
                             {% else %}
-                            <span class="text-muted">-</span>
+                            <span class="text-secondary-light">-</span>
                             {% endif %}
                         </td>
                         {% endif %}
+                        <!-- Customer -->
                         <td>
                             <div class="d-flex align-items-center">
-                                <div class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden bg-primary-100 d-flex align-items-center justify-content-center">
-                                    <span class="text-primary-600 fw-semibold">{{ order.bot_user.name|slice:":1"|upper }}</span>
+                                <div class="w-32-px h-32-px rounded-circle flex-shrink-0 me-8 overflow-hidden bg-primary-100 d-flex align-items-center justify-content-center">
+                                    <span class="text-primary-600 fw-semibold text-xs">{{ order.bot_user.name|slice:":1"|upper }}</span>
                                 </div>
-                                <div class="flex-grow-1">
-                                    <span class="text-md mb-0 fw-medium text-secondary-light">{{ order.bot_user.name }}</span>
-                                    <br>
-                                    <small class="text-muted">{{ order.bot_user.phone }}</small>
+                                <div>
+                                    <span class="text-sm fw-medium text-secondary-light d-block" style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ order.bot_user.name }}</span>
+                                    <small class="text-secondary-light" style="font-size: 11px;">{{ order.bot_user.phone }}</small>
                                 </div>
                             </div>
                         </td>
+                        <!-- Details: Product + Pages + Copies (combined) -->
                         <td>
-                            <span class="text-md fw-medium">{{ order.product.name }}</span>
-                            {% if order.language %}
-                            <br><small class="text-muted">{{ order.language.name }}</small>
-                            {% endif %}
+                            <div class="d-flex flex-column">
+                                <span class="text-sm fw-medium text-secondary-light" style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ order.product.name }}</span>
+                                <div class="d-flex align-items-center gap-1 mt-1">
+                                    <span class="badge bg-info-focus text-info-600 text-xs px-6 py-2">{{ order.total_pages }}p</span>
+                                    {% if order.copy_number > 0 %}
+                                    <span class="badge bg-warning-focus text-warning-600 text-xs px-6 py-2">+{{ order.copy_number }}c</span>
+                                    {% endif %}
+                                    {% if order.language %}
+                                    <span class="badge bg-neutral-200 text-neutral-600 text-xs px-6 py-2">{{ order.language.short_name|default:order.language.name|slice:":2"|upper }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </td>
+                        <!-- Payment: Total + Type (combined) -->
                         <td>
-                            <span class="badge bg-info-focus text-info-600">{{ order.total_pages }} pages</span>
+                            <div class="d-flex flex-column">
+                                <span class="fw-semibold text-success-600 text-sm">{{ order.total_price|floatformat:0 }}</span>
+                                {% if order.payment_type == 'cash' %}
+                                <span class="text-xs text-success-600"><iconify-icon icon="mdi:cash" class="text-sm"></iconify-icon> Cash</span>
+                                {% else %}
+                                <span class="text-xs text-primary-600"><iconify-icon icon="mdi:credit-card" class="text-sm"></iconify-icon> Card</span>
+                                {% endif %}
+                            </div>
                         </td>
-                        <td>
-                            {% if order.copy_number > 0 %}
-                            <span class="badge bg-warning-focus text-warning-600">+{{ order.copy_number }}</span>
-                            {% else %}
-                            <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="fw-semibold text-success-600">{{ order.total_price|floatformat:0 }} UZS</span>
-                        </td>
-                        <td>
-                            {% if order.payment_type == 'cash' %}
-                                <span class="badge bg-success-focus text-success-600 d-inline-flex align-items-center">
-                                    <iconify-icon icon="mdi:cash" class="me-1"></iconify-icon> Cash
-                                </span>
-                            {% else %}
-                                <span class="badge bg-primary-focus text-primary-600 d-inline-flex align-items-center">
-                                    <iconify-icon icon="mdi:credit-card" class="me-1"></iconify-icon> Card
-                                </span>
-                            {% endif %}
-                        </td>
+                        <!-- Assigned -->
                         <td>
                             {% if order.assigned_to %}
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="w-24-px h-24-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center">
-                                        <span class="text-primary-600 fw-bold text-xs">{{ order.assigned_to.user.first_name|slice:":1"|upper }}{{ order.assigned_to.user.last_name|slice:":1"|upper }}</span>
-                                    </div>
-                                    <small>{{ order.assigned_to.user.get_full_name|default:order.assigned_to.user.username|truncatewords:2 }}</small>
+                            <div class="d-flex align-items-center gap-1">
+                                <div class="w-24-px h-24-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center flex-shrink-0">
+                                    <span class="text-primary-600 fw-bold text-xs">{{ order.assigned_to.user.first_name|slice:":1"|upper }}</span>
                                 </div>
+                                <small class="text-secondary-light text-xs" style="max-width: 60px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ order.assigned_to.user.first_name }}</small>
+                            </div>
                             {% else %}
-                                <span class="badge bg-warning-focus text-warning-600">Unassigned</span>
+                            <span class="badge bg-warning-focus text-warning-600 text-xs">Unassigned</span>
                             {% endif %}
                         </td>
+                        <!-- Status -->
                         <td class="text-center">
                             {% if order.status == 'pending' %}
-                                <span class="bg-warning-focus text-warning-600 border border-warning-main px-12 py-4 radius-4 fw-medium text-sm">Pending</span>
+                                <span class="bg-warning-focus text-warning-600 px-8 py-2 radius-4 fw-medium text-xs">Pending</span>
                             {% elif order.status == 'payment_pending' %}
-                                <span class="bg-info-focus text-info-600 border border-info-main px-12 py-4 radius-4 fw-medium text-sm">Payment Pending</span>
+                                <span class="bg-info-focus text-info-600 px-8 py-2 radius-4 fw-medium text-xs">Pay Pend</span>
                             {% elif order.status == 'payment_received' %}
-                                <span class="bg-primary-focus text-primary-600 border border-primary-main px-12 py-4 radius-4 fw-medium text-sm">Payment Received</span>
+                                <span class="bg-primary-focus text-primary-600 px-8 py-2 radius-4 fw-medium text-xs">Pay Recv</span>
                             {% elif order.status == 'payment_confirmed' %}
-                                <span class="bg-cyan-focus text-cyan border border-cyan px-12 py-4 radius-4 fw-medium text-sm">Payment Confirmed</span>
+                                <span class="bg-cyan-focus text-cyan px-8 py-2 radius-4 fw-medium text-xs">Pay Conf</span>
                             {% elif order.status == 'in_progress' %}
-                                <span class="bg-lilac-focus text-lilac-600 border border-lilac-600 px-12 py-4 radius-4 fw-medium text-sm">In Progress</span>
+                                <span class="bg-lilac-focus text-lilac-600 px-8 py-2 radius-4 fw-medium text-xs">Progress</span>
                             {% elif order.status == 'ready' %}
-                                <span class="bg-success-focus text-success-600 border border-success-main px-12 py-4 radius-4 fw-medium text-sm">Ready</span>
+                                <span class="bg-success-focus text-success-600 px-8 py-2 radius-4 fw-medium text-xs">Ready</span>
                             {% elif order.status == 'completed' %}
-                                <span class="bg-success-focus text-success-600 border border-success-main px-12 py-4 radius-4 fw-medium text-sm">Completed</span>
+                                <span class="bg-success-focus text-success-600 px-8 py-2 radius-4 fw-medium text-xs">Done</span>
                             {% elif order.status == 'cancelled' %}
-                                <span class="bg-danger-focus text-danger-600 border border-danger-main px-12 py-4 radius-4 fw-medium text-sm">Cancelled</span>
+                                <span class="bg-danger-focus text-danger-600 px-8 py-2 radius-4 fw-medium text-xs">Cancelled</span>
                             {% else %}
-                                <span class="bg-neutral-200 text-neutral-600 border border-neutral-400 px-12 py-4 radius-4 fw-medium text-sm">{{ order.status }}</span>
+                                <span class="bg-neutral-200 text-neutral-600 px-8 py-2 radius-4 fw-medium text-xs">{{ order.status }}</span>
                             {% endif %}
                         </td>
+                        <!-- Action -->
                         <td class="text-center">
-                            <div class="d-flex align-items-center gap-10 justify-content-center">
-                                <a href="{% url 'orderDetail' order.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                    <iconify-icon icon="majesticons:eye-line" class="icon text-xl"></iconify-icon>
+                            <div class="d-flex align-items-center gap-4 justify-content-center">
+                                <a href="{% url 'orderDetail' order.id %}" class="bg-info-focus text-info-600 w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" title="View">
+                                    <iconify-icon icon="majesticons:eye-line" class="text-lg"></iconify-icon>
                                 </a>
                                 {% if request.user.is_superuser or is_owner %}
-                                <button type="button" class="bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-bs-toggle="modal" data-bs-target="#deleteModal{{ order.id }}">
-                                    <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                                <button type="button" class="bg-danger-focus text-danger-600 w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle border-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ order.id }}" title="Delete">
+                                    <iconify-icon icon="fluent:delete-24-regular" class="text-lg"></iconify-icon>
                                 </button>
                                 {% endif %}
                             </div>
@@ -300,7 +292,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="11" class="text-center py-4">
+                        <td colspan="8" class="text-center py-4">
                             <div class="text-secondary-light">
                                 <iconify-icon icon="mdi:package-variant-closed" class="text-4xl mb-2"></iconify-icon>
                                 <p class="mb-0" data-i18n="common.noOrdersFound">No orders found</p>
