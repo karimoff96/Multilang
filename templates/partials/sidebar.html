@@ -99,19 +99,41 @@
                 </ul>
             </li>
             {% endif %}
-            {% if permissions.can_view_reports or user.is_superuser %}
+            
+            <!-- Analytics Section - Role-based visibility -->
+            {% if permissions.can_view_reports or user.is_superuser or is_owner or is_manager %}
+            <li class="sidebar-menu-group-title" data-i18n="sidebar.analyticsReports">Analytics & Reports</li>
+            
+            <!-- My Statistics - Visible to all staff -->
+            {% if is_staff_member and not is_manager and not is_owner %}
             <li>
-                <a href="{% url 'sales' %}">
-                    <iconify-icon icon="hugeicons:money-send-square" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.sales">Sales</span>
+                <a href="{% url 'my_statistics' %}">
+                    <iconify-icon icon="solar:chart-bold" class="menu-icon"></iconify-icon>
+                    <span data-i18n="sidebar.myStatistics">My Statistics</span>
                 </a>
             </li>
-            <li>
-                <a href="{% url 'finance' %}">
-                    <iconify-icon icon="solar:chart-2-bold-duotone" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.finance">Finance</span>
+            {% endif %}
+            
+            <!-- Sales & Finance Dashboards - Managers and above -->
+            {% if permissions.can_view_reports or user.is_superuser or is_owner or is_manager %}
+            <li class="dropdown">
+                <a href="javascript:void(0)">
+                    <iconify-icon icon="solar:wallet-money-bold-duotone" class="menu-icon"></iconify-icon>
+                    <span data-i18n="sidebar.dashboards">Dashboards</span>
                 </a>
+                <ul class="sidebar-submenu">
+                    <li>
+                        <a href="{% url 'sales' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> <span data-i18n="sidebar.salesDashboard">Sales Overview</span></a>
+                    </li>
+                    <li>
+                        <a href="{% url 'finance' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.financeDashboard">Finance & Payments</span></a>
+                    </li>
+                </ul>
             </li>
+            {% endif %}
+            
+            <!-- Detailed Reports - Owners and Superusers -->
+            {% if is_owner or user.is_superuser %}
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="solar:chart-square-bold-duotone" class="menu-icon"></iconify-icon>
@@ -127,17 +149,33 @@
                     <li>
                         <a href="{% url 'staff_performance' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.staffPerformance">Staff Performance</span></a>
                     </li>
-                    {% if is_owner or user.is_superuser %}
                     <li>
                         <a href="{% url 'branch_comparison' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.branchComparison">Branch Comparison</span></a>
                     </li>
-                    {% endif %}
                     <li>
                         <a href="{% url 'customer_analytics' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.customerAnalytics">Customer Analytics</span></a>
                     </li>
                 </ul>
             </li>
+            {% elif is_manager %}
+            <!-- Managers get limited reports -->
+            <li class="dropdown">
+                <a href="javascript:void(0)">
+                    <iconify-icon icon="solar:chart-square-bold-duotone" class="menu-icon"></iconify-icon>
+                    <span data-i18n="sidebar.reports">Reports</span>
+                </a>
+                <ul class="sidebar-submenu">
+                    <li>
+                        <a href="{% url 'order_reports' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> <span data-i18n="sidebar.orderReports">Order Reports</span></a>
+                    </li>
+                    <li>
+                        <a href="{% url 'staff_performance' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.staffPerformance">Staff Performance</span></a>
+                    </li>
+                </ul>
+            </li>
             {% endif %}
+            {% endif %}
+            
             <li class="sidebar-menu-group-title" data-i18n="sidebar.uiElements">UI Elements</li>
 
             <li class="dropdown">
@@ -178,53 +216,6 @@
                 </a>
             </li>
 
-
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <i class="ri-user-settings-line text-xl me-6 d-flex w-auto"></i>
-                    <span>Role & Access</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    <li>
-                        <a href="{% url 'roleAccess' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> Role & Access</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'assignRole' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> Assign Role</a>
-                    </li>
-                </ul>
-            </li>
-
-            <li class="sidebar-menu-group-title">Application</li>
-  
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <iconify-icon icon="icon-park-outline:setting-two" class="menu-icon"></iconify-icon>
-                    <span>Settings</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    <li>
-                        <a href="{% url 'company' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> Company</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'notification' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> Notification</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'notificationAlert' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> Notification Alert</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'theme' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> Theme</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'currencies' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> Currencies</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'languages' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> Languages</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'paymentGetway' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> Payment Gateway</a>
-                    </li>
-                </ul>
-            </li>
         </ul>
     </div>
 </aside>

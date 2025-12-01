@@ -14,36 +14,28 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
-from django.shortcuts import redirect
 from WowDash import chart_views
 from WowDash import components_views
 from WowDash import home_views
-from WowDash import roleAndAccess_views
-from WowDash import settings_views
 from WowDash import table_views
 from WowDash import reports_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    
     # Root URL redirects to dashboard
     path("", home_views.index, name="dashboard"),
-    
     # Authentication & User management (accounts app)
     path("accounts/", include("accounts.urls")),
     path("users/", include("accounts.urls")),
-    
     # Organizations management (centers, branches, staff)
     path("organizations/", include("organizations.urls")),
-    
     # Orders management
     path("orders/", include("orders.urls")),
-    
     # Services management (categories & products)
     path("services/", include("services.urls")),
-    
     # home routes
     path("index", home_views.index, name="index"),
     path("email", home_views.email, name="email"),
@@ -53,7 +45,6 @@ urlpatterns = [
     path("widgets", home_views.widgets, name="widgets"),
     path("sales", home_views.sales, name="sales"),
     path("finance", home_views.finance, name="finance"),
-    
     # chart routes
     path("chart/column-chart", chart_views.columnChart, name="columnChart"),
     path("chart/line-chart", chart_views.lineChart, name="lineChart"),
@@ -84,34 +75,37 @@ urlpatterns = [
     path("components/typography", components_views.typography, name="typography"),
     path("components/upload", components_views.upload, name="upload"),
     path("components/videos", components_views.videos, name="videos"),
-   
-    # role and access routes
-    path("role-access/assign-role", roleAndAccess_views.assignRole, name="assignRole"),
-    path("role-access/role-access", roleAndAccess_views.roleAccess, name="roleAccess"),
-    # settings routes
-    path("settings/company", settings_views.company, name="company"),
-    path("settings/currencies", settings_views.currencies, name="currencies"),
-    path("settings/languages", settings_views.languages, name="languages"),
-    path("settings/notification", settings_views.notification, name="notification"),
-    path(
-        "settings/notification-alert",
-        settings_views.notificationAlert,
-        name="notificationAlert",
-    ),
-    path("settings/payment-getway", settings_views.paymentGetway, name="paymentGetway"),
-    path("settings/theme", settings_views.theme, name="theme"),
     # tables routes
     path("tables/basic-table", table_views.basicTable, name="basicTable"),
     path("tables/data-table", table_views.dataTable, name="dataTable"),
-    
     # Reports & Analytics routes
-    path("reports/financial", reports_views.financial_reports, name="financial_reports"),
+    path(
+        "reports/financial", reports_views.financial_reports, name="financial_reports"
+    ),
     path("reports/orders", reports_views.order_reports, name="order_reports"),
-    path("reports/staff-performance", reports_views.staff_performance, name="staff_performance"),
-    path("reports/branch-comparison", reports_views.branch_comparison, name="branch_comparison"),
-    path("reports/customers", reports_views.customer_analytics, name="customer_analytics"),
-    path("reports/export/<str:report_type>", reports_views.export_report, name="export_report"),
-  
+    path(
+        "reports/staff-performance",
+        reports_views.staff_performance,
+        name="staff_performance",
+    ),
+    path(
+        "reports/branch-comparison",
+        reports_views.branch_comparison,
+        name="branch_comparison",
+    ),
+    path(
+        "reports/customers", reports_views.customer_analytics, name="customer_analytics"
+    ),
+    path(
+        "reports/export/<str:report_type>",
+        reports_views.export_report,
+        name="export_report",
+    ),
+    path(
+        "my-statistics",
+        reports_views.my_statistics,
+        name="my_statistics",
+    ),
 ]
 from django.conf import settings
 from django.conf.urls.static import static

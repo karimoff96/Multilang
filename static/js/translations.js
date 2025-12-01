@@ -118,6 +118,31 @@ const translations = {
         ru: 'Элементы UI',
         en: 'UI Elements'
     },
+    'sidebar.analyticsReports': {
+        uz: 'Tahlillar va hisobotlar',
+        ru: 'Аналитика и отчеты',
+        en: 'Analytics & Reports'
+    },
+    'sidebar.myStatistics': {
+        uz: 'Mening statistikam',
+        ru: 'Моя статистика',
+        en: 'My Statistics'
+    },
+    'sidebar.dashboards': {
+        uz: 'Boshqaruv panellari',
+        ru: 'Дашборды',
+        en: 'Dashboards'
+    },
+    'sidebar.salesDashboard': {
+        uz: 'Savdo boshqaruvi',
+        ru: 'Продажи',
+        en: 'Sales Overview'
+    },
+    'sidebar.financeDashboard': {
+        uz: 'Moliya va to\'lovlar',
+        ru: 'Финансы и платежи',
+        en: 'Finance & Payments'
+    },
     'sidebar.reports': {
         uz: 'Hisobotlar',
         ru: 'Отчеты',
@@ -2584,6 +2609,66 @@ const translations = {
         ru: 'Отменено',
         en: 'Cancelled'
     },
+    'report.myStatistics': {
+        uz: 'Mening statistikam',
+        ru: 'Моя статистика',
+        en: 'My Statistics'
+    },
+    'report.myStatisticsDesc': {
+        uz: 'Shaxsiy samaradorlik ko\'rsatkichlaringiz',
+        ru: 'Ваши личные показатели эффективности',
+        en: 'Your Personal Performance'
+    },
+    'report.today': {
+        uz: 'Bugun',
+        ru: 'Сегодня',
+        en: 'Today'
+    },
+    'report.thisWeek': {
+        uz: 'Shu hafta',
+        ru: 'На этой неделе',
+        en: 'This Week'
+    },
+    'report.thisMonth': {
+        uz: 'Shu oy',
+        ru: 'В этом месяце',
+        en: 'This Month'
+    },
+    'report.allTime': {
+        uz: 'Barcha vaqt',
+        ru: 'За все время',
+        en: 'All Time'
+    },
+    'report.ordersAssigned': {
+        uz: 'Tayinlangan buyurtmalar',
+        ru: 'Назначенные заказы',
+        en: 'Orders Assigned'
+    },
+    'report.pages': {
+        uz: 'Sahifalar',
+        ru: 'Страницы',
+        en: 'Pages'
+    },
+    'report.dailyPerformance': {
+        uz: 'Kunlik samaradorlik (Shu oy)',
+        ru: 'Ежедневная производительность (Этот месяц)',
+        en: 'Daily Performance (This Month)'
+    },
+    'report.ordersByStatus': {
+        uz: 'Status bo\'yicha buyurtmalar (Shu oy)',
+        ru: 'Заказы по статусу (Этот месяц)',
+        en: 'Orders by Status (This Month)'
+    },
+    'report.recentOrders': {
+        uz: 'So\'nggi buyurtmalar',
+        ru: 'Последние заказы',
+        en: 'Recent Orders'
+    },
+    'report.noOrdersFound': {
+        uz: 'Buyurtmalar topilmadi',
+        ru: 'Заказы не найдены',
+        en: 'No orders found'
+    },
     'form.fromDate': {
         uz: 'Boshlanish sanasi',
         ru: 'Дата начала',
@@ -2868,32 +2953,190 @@ const translations = {
         uz: 'Buyurtmalar',
         ru: 'Заказы',
         en: 'Orders'
+    },
+
+    // ========== ROLE FORM ==========
+    'form.createRole': {
+        uz: 'Rol yaratish',
+        ru: 'Создать роль',
+        en: 'Create Role'
+    },
+    'form.editRole': {
+        uz: 'Rolni tahrirlash',
+        ru: 'Редактировать роль',
+        en: 'Edit Role'
+    },
+    'form.roleNameId': {
+        uz: 'Rol nomi (ID)',
+        ru: 'Название роли (ID)',
+        en: 'Role Name (ID)'
+    },
+    'form.roleNamePlaceholder': {
+        uz: 'masalan, katta_tarjimon',
+        ru: 'например, старший_переводчик',
+        en: 'e.g. senior_translator'
+    },
+    'form.roleNameHint': {
+        uz: 'Kichik harflar, bo\'shliqlar o\'rniga pastki chiziq',
+        ru: 'Строчные буквы, подчеркивания вместо пробелов',
+        en: 'Lowercase, underscores instead of spaces'
+    },
+    'form.displayName': {
+        uz: 'Ko\'rsatiladigan nom',
+        ru: 'Отображаемое имя',
+        en: 'Display Name'
+    },
+    'form.displayNamePlaceholder': {
+        uz: 'masalan, Katta Tarjimon',
+        ru: 'например, Старший Переводчик',
+        en: 'e.g. Senior Translator'
+    },
+    'form.displayNameHint': {
+        uz: 'Foydalanuvchi interfeysida ko\'rsatiladigan nom',
+        ru: 'Удобочитаемое имя, отображаемое в интерфейсе',
+        en: 'Human-readable name shown in UI'
+    },
+    'form.description': {
+        uz: 'Tavsif',
+        ru: 'Описание',
+        en: 'Description'
+    },
+    'form.roleDescriptionPlaceholder': {
+        uz: 'Bu rol vazifalarini tavsiflang...',
+        ru: 'Опишите обязанности этой роли...',
+        en: 'Describe this role\'s responsibilities...'
+    },
+    'form.permissions': {
+        uz: 'Ruxsatlar',
+        ru: 'Разрешения',
+        en: 'Permissions'
+    },
+    'form.organizationManagement': {
+        uz: 'Tashkilot boshqaruvi',
+        ru: 'Управление организацией',
+        en: 'Organization Management'
+    },
+    'form.orderManagement': {
+        uz: 'Buyurtmalar boshqaruvi',
+        ru: 'Управление заказами',
+        en: 'Order Management'
+    },
+    'form.financialReports': {
+        uz: 'Moliya va hisobotlar',
+        ru: 'Финансы и отчеты',
+        en: 'Financial & Reports'
+    },
+    'form.otherPermissions': {
+        uz: 'Boshqa',
+        ru: 'Другое',
+        en: 'Other'
+    },
+
+    // ========== PERMISSION LABELS ==========
+    'permission.manageCenter': {
+        uz: 'Tarjima markazlarini boshqarish',
+        ru: 'Управление центрами перевода',
+        en: 'Manage Translation Centers'
+    },
+    'permission.manageBranches': {
+        uz: 'Filiallarni boshqarish',
+        ru: 'Управление филиалами',
+        en: 'Manage Branches'
+    },
+    'permission.manageStaff': {
+        uz: 'Xodimlarni boshqarish',
+        ru: 'Управление сотрудниками',
+        en: 'Manage Staff Members'
+    },
+    'permission.viewAllOrders': {
+        uz: 'Barcha buyurtmalarni ko\'rish',
+        ru: 'Просмотр всех заказов',
+        en: 'View All Orders'
+    },
+    'permission.manageOrders': {
+        uz: 'Buyurtmalarni boshqarish',
+        ru: 'Управление заказами',
+        en: 'Manage Orders'
+    },
+    'permission.assignOrders': {
+        uz: 'Buyurtmalarni xodimlarga tayinlash',
+        ru: 'Назначение заказов сотрудникам',
+        en: 'Assign Orders to Staff'
+    },
+    'permission.receivePayments': {
+        uz: 'To\'lovlarni qabul qilish',
+        ru: 'Прием платежей',
+        en: 'Receive Payments'
+    },
+    'permission.viewReports': {
+        uz: 'Hisobotlar va tahlillarni ko\'rish',
+        ru: 'Просмотр отчетов и аналитики',
+        en: 'View Reports & Analytics'
+    },
+    'permission.exportData': {
+        uz: 'Ma\'lumotlarni eksport qilish',
+        ru: 'Экспорт данных',
+        en: 'Export Data'
+    },
+    'permission.manageProducts': {
+        uz: 'Mahsulotlar va xizmatlarni boshqarish',
+        ru: 'Управление продуктами и услугами',
+        en: 'Manage Products & Services'
+    },
+    'permission.manageCustomers': {
+        uz: 'Mijozlarni boshqarish',
+        ru: 'Управление клиентами',
+        en: 'Manage Customers'
+    },
+
+    // ========== ROLE ACTIVE STATUS ==========
+    'form.activeStatus': {
+        uz: 'Faol',
+        ru: 'Активен',
+        en: 'Active'
+    },
+    'form.activeStatusHint': {
+        uz: 'Faol bo\'lmagan rollar yangi xodimlarga tayinlanmaydi',
+        ru: 'Неактивные роли нельзя назначить новым сотрудникам',
+        en: 'Inactive roles cannot be assigned to new staff members'
+    },
+
+    // ========== ROLE FORM COMMON ==========
+    'common.createRole': {
+        uz: 'Rol yaratish',
+        ru: 'Создать роль',
+        en: 'Create Role'
+    },
+    'common.updateRole': {
+        uz: 'Rolni yangilash',
+        ru: 'Обновить роль',
+        en: 'Update Role'
     }
 };
 
 // Language management
 const LanguageManager = {
     currentLang: localStorage.getItem('dashboardLanguage') || 'en',
-    
+
     init() {
         this.setLanguage(this.currentLang);
         this.updateLanguageIndicator();
     },
-    
+
     setLanguage(lang) {
         this.currentLang = lang;
         localStorage.setItem('dashboardLanguage', lang);
         this.translatePage();
         this.updateLanguageIndicator();
     },
-    
+
     translate(key) {
         if (translations[key] && translations[key][this.currentLang]) {
             return translations[key][this.currentLang];
         }
         return key;
     },
-    
+
     translatePage() {
         // Translate all elements with data-i18n attribute
         document.querySelectorAll('[data-i18n]').forEach(element => {
@@ -2910,7 +3153,7 @@ const LanguageManager = {
                 }
             }
         });
-        
+
         // Translate placeholders
         document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
             const key = element.getAttribute('data-i18n-placeholder');
@@ -2919,50 +3162,50 @@ const LanguageManager = {
                 element.placeholder = translation;
             }
         });
-        
+
         // Translate model name fields (from Django models with modeltranslation)
         document.querySelectorAll('.translatable-name').forEach(element => {
             const nameUz = element.getAttribute('data-name-uz');
             const nameRu = element.getAttribute('data-name-ru');
             const nameEn = element.getAttribute('data-name-en');
             const fallback = element.getAttribute('data-name-fallback');
-            
+
             let displayName = fallback;
             if (this.currentLang === 'uz' && nameUz) displayName = nameUz;
             else if (this.currentLang === 'ru' && nameRu) displayName = nameRu;
             else if (this.currentLang === 'en' && nameEn) displayName = nameEn;
-            
+
             element.textContent = displayName || fallback;
         });
-        
+
         // Translate model description fields
         document.querySelectorAll('.translatable-desc').forEach(element => {
             const descUz = element.getAttribute('data-desc-uz');
             const descRu = element.getAttribute('data-desc-ru');
             const descEn = element.getAttribute('data-desc-en');
             const fallback = element.getAttribute('data-desc-fallback');
-            
+
             let displayDesc = fallback;
             if (this.currentLang === 'uz' && descUz) displayDesc = descUz;
             else if (this.currentLang === 'ru' && descRu) displayDesc = descRu;
             else if (this.currentLang === 'en' && descEn) displayDesc = descEn;
-            
+
             element.textContent = displayDesc || fallback;
         });
     },
-    
+
     updateLanguageIndicator() {
         const flagMap = {
             uz: '/static/images/flags/uz.png',
             ru: '/static/images/flags/ru.png',
             en: '/static/images/flags/en.png'
         };
-        
+
         const langFlag = document.querySelector('.lang-flag-indicator');
         if (langFlag) {
             langFlag.src = flagMap[this.currentLang] || flagMap.en;
         }
-        
+
         // Update active state in dropdown
         document.querySelectorAll('.lang-option').forEach(option => {
             const lang = option.getAttribute('data-lang');
@@ -2975,12 +3218,12 @@ const LanguageManager = {
 };
 
 // Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     LanguageManager.init();
-    
+
     // Add click handlers for language options
     document.querySelectorAll('.lang-option').forEach(option => {
-        option.addEventListener('click', function(e) {
+        option.addEventListener('click', function (e) {
             e.preventDefault();
             const lang = this.getAttribute('data-lang');
             if (lang) {
