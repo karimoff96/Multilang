@@ -42,26 +42,20 @@
             <table class="table bordered-table sm-table mb-0">
                 <thead>
                     <tr>
-                        <th scope="col">#</th>
                         <th scope="col" data-i18n="table.staffMember">Staff Member</th>
                         <th scope="col" data-i18n="table.role">Role</th>
-                        {% if user.is_superuser %}
-                        <th scope="col" data-i18n="table.center">Center</th>
-                        {% endif %}
-                        <th scope="col" data-i18n="table.branch">Branch</th>
-                        <th scope="col" data-i18n="table.phone">Phone</th>
-                        <th scope="col" data-i18n="table.status">Status</th>
-                        <th scope="col" data-i18n="table.created">Created</th>
+                        <th scope="col" data-i18n="table.location">Location</th>
+                        <th scope="col" data-i18n="table.contact">Contact</th>
                         <th scope="col" class="text-center" data-i18n="table.action">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for member in staff %}
                     <tr>
-                        <td>{{ forloop.counter }}</td>
+                        <!-- Staff Member with Status Indicator -->
                         <td>
                             <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0 me-12">
+                                <div class="flex-shrink-0 me-12 position-relative">
                                     {% if member.avatar %}
                                     <img src="{{ member.avatar.url }}" alt="" class="w-40-px h-40-px rounded-circle">
                                     {% else %}
@@ -69,56 +63,65 @@
                                         <span class="text-primary-600 fw-semibold">{{ member.user.first_name|slice:":1" }}{{ member.user.last_name|slice:":1" }}</span>
                                     </div>
                                     {% endif %}
+                                    <!-- Status dot indicator -->
+                                    <span class="w-10-px h-10-px rounded-circle {% if member.is_active %}bg-success-main{% else %}bg-danger-main{% endif %} position-absolute bottom-0 end-0 border border-2 border-white" title="{% if member.is_active %}Active{% else %}Inactive{% endif %}"></span>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <h6 class="text-md mb-0 fw-medium">{{ member.user.get_full_name }}</h6>
-                                    <span class="text-sm text-secondary-light fw-normal">{{ member.user.email|default:member.user.username }}</span>
+                                    <h6 class="text-md mb-0 fw-medium">{{ member.user.get_full_name|truncatechars:20 }}</h6>
+                                    <span class="text-xs text-secondary-light fw-normal">{{ member.user.email|default:member.user.username|truncatechars:25 }}</span>
                                 </div>
                             </div>
                         </td>
+                        <!-- Role Badge (compact) -->
                         <td>
                             {% if member.role.name == 'owner' %}
-                            <span class="bg-primary-50 text-primary-600 px-16 py-6 radius-4 fw-medium text-sm" data-i18n="role.owner">Owner</span>
+                            <span class="bg-primary-50 text-primary-600 px-8 py-4 radius-4 fw-medium text-xs d-inline-flex align-items-center">
+                                <iconify-icon icon="solar:crown-bold" class="me-4"></iconify-icon><span data-i18n="role.owner">Owner</span>
+                            </span>
                             {% elif member.role.name == 'manager' %}
-                            <span class="bg-info-50 text-info-600 px-16 py-6 radius-4 fw-medium text-sm" data-i18n="role.manager">Manager</span>
+                            <span class="bg-info-50 text-info-600 px-8 py-4 radius-4 fw-medium text-xs d-inline-flex align-items-center">
+                                <iconify-icon icon="solar:user-check-bold" class="me-4"></iconify-icon><span data-i18n="role.manager">Manager</span>
+                            </span>
                             {% else %}
-                            <span class="bg-secondary-50 text-secondary-600 px-16 py-6 radius-4 fw-medium text-sm" data-i18n="role.staff">Staff</span>
+                            <span class="bg-secondary-50 text-secondary-600 px-8 py-4 radius-4 fw-medium text-xs d-inline-flex align-items-center">
+                                <iconify-icon icon="solar:user-bold" class="me-4"></iconify-icon><span data-i18n="role.staff">Staff</span>
+                            </span>
                             {% endif %}
                         </td>
-                        {% if user.is_superuser %}
+                        <!-- Location: Center + Branch combined -->
                         <td>
-                            {% if member.branch and member.branch.center %}
-                            <span class="text-md fw-medium text-primary-light">{{ member.branch.center.name }}</span>
-                            {% else %}
-                            <span class="text-secondary-light">-</span>
-                            {% endif %}
+                            <div class="d-flex flex-column">
+                                {% if user.is_superuser and member.branch and member.branch.center %}
+                                <a href="{% url 'center_detail' member.branch.center.id %}" class="text-xs text-primary-600 fw-medium">{{ member.branch.center.name|truncatechars:15 }}</a>
+                                {% endif %}
+                                {% if member.branch %}
+                                <a href="{% url 'branch_detail' member.branch.id %}" class="text-xs text-info-600">{{ member.branch.name|truncatechars:15 }}</a>
+                                {% else %}
+                                <span class="text-secondary-light text-xs">-</span>
+                                {% endif %}
+                            </div>
                         </td>
-                        {% endif %}
+                        <!-- Contact: Phone with icon -->
                         <td>
-                            {% if member.branch %}
-                            <span class="text-md">{{ member.branch.name }}</span>
+                            {% if member.phone %}
+                            <a href="tel:{{ member.phone }}" class="text-secondary-light text-sm d-flex align-items-center gap-4">
+                                <iconify-icon icon="solar:phone-bold" class="text-success-600"></iconify-icon>
+                                {{ member.phone }}
+                            </a>
                             {% else %}
-                            <span class="text-secondary-light">-</span>
+                            <span class="text-secondary-light text-xs">-</span>
                             {% endif %}
                         </td>
-                        <td>{{ member.phone|default:"-" }}</td>
-                        <td>
-                            {% if member.is_active %}
-                            <span class="bg-success-focus text-success-main px-24 py-4 radius-4 fw-medium text-sm" data-i18n="common.active">Active</span>
-                            {% else %}
-                            <span class="bg-danger-focus text-danger-main px-24 py-4 radius-4 fw-medium text-sm" data-i18n="common.inactive">Inactive</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ member.created_at|date:"M d, Y" }}</td>
+                        <!-- Actions (compact icons) -->
                         <td class="text-center">
-                            <div class="d-flex align-items-center gap-10 justify-content-center">
-                                <a href="{% url 'staff_edit' member.id %}" class="bg-info-focus text-info-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="Edit">
-                                    <iconify-icon icon="lucide:edit" class="icon"></iconify-icon>
+                            <div class="d-flex align-items-center gap-6 justify-content-center">
+                                <a href="{% url 'staff_edit' member.id %}" class="bg-info-focus text-info-main w-28-px h-28-px d-flex justify-content-center align-items-center radius-4" data-bs-toggle="tooltip" title="Edit">
+                                    <iconify-icon icon="lucide:edit" class="text-sm"></iconify-icon>
                                 </a>
-                                <form method="post" action="{% url 'staff_toggle_active' member.id %}" style="display: inline;">
+                                <form method="post" action="{% url 'staff_toggle_active' member.id %}" class="d-inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="{% if member.is_active %}bg-warning-focus text-warning-main{% else %}bg-success-focus text-success-main{% endif %} w-32-px h-32-px d-flex justify-content-center align-items-center radius-4 border-0" title="{% if member.is_active %}Deactivate{% else %}Activate{% endif %}">
-                                        <iconify-icon icon="{% if member.is_active %}mdi:account-off{% else %}mdi:account-check{% endif %}" class="icon"></iconify-icon>
+                                    <button type="submit" class="{% if member.is_active %}bg-warning-focus text-warning-main{% else %}bg-success-focus text-success-main{% endif %} w-28-px h-28-px d-flex justify-content-center align-items-center radius-4 border-0" data-bs-toggle="tooltip" title="{% if member.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                        <iconify-icon icon="{% if member.is_active %}solar:user-cross-bold{% else %}solar:user-check-bold{% endif %}" class="text-sm"></iconify-icon>
                                     </button>
                                 </form>
                             </div>
@@ -126,9 +129,9 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="{% if user.is_superuser %}9{% else %}8{% endif %}" class="text-center py-24">
+                        <td colspan="5" class="text-center py-24">
                             <div class="text-secondary-light">
-                                <iconify-icon icon="mdi:account-group" class="icon text-4xl mb-8"></iconify-icon>
+                                <iconify-icon icon="solar:users-group-rounded-bold" class="icon text-4xl mb-8"></iconify-icon>
                                 <p class="mb-0" data-i18n="common.noStaffMembersFound">No staff members found</p>
                             </div>
                         </td>
@@ -146,7 +149,7 @@
             <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                 {% if staff.has_previous %}
                 <li class="page-item">
-                    <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 px-20 py-10" href="?page={{ staff.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}">
+                    <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 px-20 py-10" href="?page={{ staff.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}">
                         <iconify-icon icon="ep:d-arrow-left" class="icon"></iconify-icon>
                     </a>
                 </li>
@@ -159,14 +162,14 @@
                     </li>
                     {% elif num > staff.number|add:'-3' and num < staff.number|add:'3' %}
                     <li class="page-item">
-                        <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 px-20 py-10" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}">{{ num }}</a>
+                        <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 px-20 py-10" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}">{{ num }}</a>
                     </li>
                     {% endif %}
                 {% endfor %}
                 
                 {% if staff.has_next %}
                 <li class="page-item">
-                    <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 px-20 py-10" href="?page={{ staff.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}">
+                    <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 px-20 py-10" href="?page={{ staff.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}">
                         <iconify-icon icon="ep:d-arrow-right" class="icon"></iconify-icon>
                     </a>
                 </li>

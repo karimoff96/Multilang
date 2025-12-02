@@ -956,7 +956,7 @@ const translations = {
         en: 'Join Date'
     },
     'table.username': {
-        uz: 'Foydalanuvchi nomi',
+        uz: 'Login',
         ru: 'Имя пользователя',
         en: 'Username'
     },
@@ -1138,7 +1138,7 @@ const translations = {
         en: 'Telegram Information'
     },
     'form.username': {
-        uz: 'Foydalanuvchi nomi',
+        uz: 'Login',
         ru: 'Имя пользователя',
         en: 'Username'
     },
@@ -1724,7 +1724,7 @@ const translations = {
         en: 'Account Information'
     },
     'form.username': {
-        uz: 'Foydalanuvchi nomi',
+        uz: 'Login',
         ru: 'Имя пользователя',
         en: 'Username'
     },
@@ -1799,7 +1799,7 @@ const translations = {
         en: 'Select District'
     },
     'form.enterUsername': {
-        uz: 'Foydalanuvchi nomini kiriting',
+        uz: 'Loginni kiriting',
         ru: 'Введите имя пользователя',
         en: 'Enter username'
     },
@@ -1834,7 +1834,7 @@ const translations = {
         en: 'Leave blank to keep current'
     },
     'form.usernameCannotChange': {
-        uz: 'Foydalanuvchi nomini o\'zgartirib bo\'lmaydi',
+        uz: 'Loginni o\'zgartirib bo\'lmaydi',
         ru: 'Имя пользователя нельзя изменить',
         en: 'Username cannot be changed'
     },
@@ -2518,7 +2518,7 @@ const translations = {
         en: 'Staff'
     },
     'profile.username': {
-        uz: 'Foydalanuvchi nomi',
+        uz: 'Login',
         ru: 'Имя пользователя',
         en: 'Username'
     },

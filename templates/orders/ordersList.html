@@ -310,12 +310,12 @@
             <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                 {% if orders.has_previous %}
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page=1&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page=1&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:d-arrow-left"></iconify-icon>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:arrow-left"></iconify-icon>
                     </a>
                 </li>
@@ -328,19 +328,19 @@
                     </li>
                     {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
                     <li class="page-item">
-                        <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" href="?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">{{ num }}</a>
+                        <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" href="?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">{{ num }}</a>
                     </li>
                     {% endif %}
                 {% endfor %}
                 
                 {% if orders.has_next %}
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.next_page_number }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.next_page_number }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:arrow-right"></iconify-icon>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.paginator.num_pages }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.paginator.num_pages }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:d-arrow-right"></iconify-icon>
                     </a>
                 </li>

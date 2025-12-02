@@ -7,6 +7,9 @@
         <div>
             <h6 class="text-lg fw-semibold mb-0">{{ title }}</h6>
             <span class="text-sm text-secondary-light" data-i18n="common.manageCenters">Manage your translation centers</span>
+            {% if total_centers > 0 %}
+            <span class="badge bg-primary-focus text-primary-main ms-2">{{ total_centers }} total</span>
+            {% endif %}
         </div>
         <a href="{% url 'center_create' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
             <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
@@ -24,8 +27,8 @@
                                 {% if center.logo %}
                                 <img src="{{ center.logo.url }}" alt="{{ center.name }}" class="w-56-px h-56-px rounded-8 object-fit-cover">
                                 {% else %}
-                                <div class="w-56-px h-56-px rounded-8 bg-primary-100 d-flex justify-content-center align-items-center flex-shrink-0">
-                                    <iconify-icon icon="mdi:domain" class="text-primary-600 text-2xl"></iconify-icon>
+                                <div class="w-56-px h-56-px rounded-8 bg-gradient-end-1 d-flex justify-content-center align-items-center flex-shrink-0">
+                                    <iconify-icon icon="solar:buildings-2-bold" class="text-primary-600 text-2xl"></iconify-icon>
                                 </div>
                                 {% endif %}
                                 <div>
@@ -38,19 +41,19 @@
                         <div class="mb-16">
                             {% if center.phone %}
                             <div class="d-flex align-items-center gap-8 mb-8">
-                                <iconify-icon icon="mdi:phone" class="text-secondary-light"></iconify-icon>
+                                <iconify-icon icon="solar:phone-bold" class="text-success-600"></iconify-icon>
                                 <span class="text-sm text-secondary-light">{{ center.phone }}</span>
                             </div>
                             {% endif %}
                             {% if center.email %}
                             <div class="d-flex align-items-center gap-8 mb-8">
-                                <iconify-icon icon="mdi:email" class="text-secondary-light"></iconify-icon>
+                                <iconify-icon icon="solar:letter-bold" class="text-info-600"></iconify-icon>
                                 <span class="text-sm text-secondary-light">{{ center.email }}</span>
                             </div>
                             {% endif %}
                             {% if center.address %}
                             <div class="d-flex align-items-center gap-8">
-                                <iconify-icon icon="mdi:home" class="text-secondary-light"></iconify-icon>
+                                <iconify-icon icon="solar:home-2-bold" class="text-warning-600"></iconify-icon>
                                 <span class="text-sm text-secondary-light">{{ center.address|truncatewords:10 }}</span>
                             </div>
                             {% endif %}
@@ -68,19 +71,19 @@
                                 {% if center.is_active %}Active{% else %}Inactive{% endif %}
                             </span>
                             <div class="d-flex gap-8">
-                                <span class="bg-info-focus text-info-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="View Details">
-                                    <iconify-icon icon="mdi:eye" class="icon"></iconify-icon>
+                                <span class="bg-info-focus text-info-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" title="View Details">
+                                    <iconify-icon icon="solar:eye-bold" class="icon"></iconify-icon>
                                 </span>
-                                <a href="{% url 'branch_create_for_center' center.id %}" class="bg-success-focus text-success-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="Add Branch" onclick="event.stopPropagation();">
-                                    <iconify-icon icon="mdi:plus" class="icon"></iconify-icon>
+                                <a href="{% url 'branch_create_for_center' center.id %}" class="bg-success-focus text-success-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" title="Add Branch" onclick="event.stopPropagation();">
+                                    <iconify-icon icon="solar:add-circle-bold" class="icon"></iconify-icon>
                                 </a>
                                 {% if center.location_url %}
-                                <a href="{{ center.location_url }}" target="_blank" class="bg-cyan-focus text-cyan-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="View on Map" onclick="event.stopPropagation();">
-                                    <iconify-icon icon="mdi:map" class="icon"></iconify-icon>
+                                <a href="{{ center.location_url }}" target="_blank" class="bg-cyan-focus text-cyan-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" title="View on Map" onclick="event.stopPropagation();">
+                                    <iconify-icon icon="solar:map-point-bold" class="icon"></iconify-icon>
                                 </a>
                                 {% endif %}
-                                <a href="{% url 'center_edit' center.id %}" class="bg-primary-focus text-primary-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="Edit" onclick="event.stopPropagation();">
-                                    <iconify-icon icon="lucide:edit" class="icon"></iconify-icon>
+                                <a href="{% url 'center_edit' center.id %}" class="bg-primary-focus text-primary-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" title="Edit" onclick="event.stopPropagation();">
+                                    <iconify-icon icon="solar:pen-bold" class="icon"></iconify-icon>
                                 </a>
                             </div>
                         </div>
@@ -90,7 +93,7 @@
             {% empty %}
             <div class="col-12">
                 <div class="text-center py-40">
-                    <iconify-icon icon="mdi:domain" class="icon text-5xl text-secondary-light mb-16"></iconify-icon>
+                    <iconify-icon icon="solar:buildings-2-bold-duotone" class="icon text-5xl text-secondary-light mb-16"></iconify-icon>
                     <h6 class="text-lg fw-medium mb-8" data-i18n="common.noCentersFound">No translation centers found</h6>
                     <p class="text-secondary-light mb-16" data-i18n="common.startByCreatingCenter">Get started by creating your first translation center</p>
                     <a href="{% url 'center_create' %}" class="btn btn-primary d-inline-flex align-items-center gap-2">
@@ -101,6 +104,43 @@
             </div>
             {% endfor %}
         </div>
+        
+        <!-- Pagination -->
+        {% if centers.has_other_pages %}
+        <div class="d-flex justify-content-center mt-24">
+            <nav aria-label="Page navigation">
+                <ul class="pagination mb-0">
+                    {% if centers.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link bg-base text-secondary-light fw-medium radius-8 border-0 px-20 py-10 d-flex align-items-center justify-content-center h-48-px" href="?page={{ centers.previous_page_number }}">
+                            <iconify-icon icon="ep:d-arrow-left" class="text-xl"></iconify-icon>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in centers.paginator.page_range %}
+                        {% if centers.number == num %}
+                        <li class="page-item">
+                            <span class="page-link bg-primary-600 text-white fw-medium radius-8 border-0 px-20 py-10 d-flex align-items-center justify-content-center h-48-px w-48-px">{{ num }}</span>
+                        </li>
+                        {% elif num > centers.number|add:'-3' and num < centers.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link bg-base text-secondary-light fw-medium radius-8 border-0 px-20 py-10 d-flex align-items-center justify-content-center h-48-px w-48-px" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if centers.has_next %}
+                    <li class="page-item">
+                        <a class="page-link bg-base text-secondary-light fw-medium radius-8 border-0 px-20 py-10 d-flex align-items-center justify-content-center h-48-px" href="?page={{ centers.next_page_number }}">
+                            <iconify-icon icon="ep:d-arrow-right" class="text-xl"></iconify-icon>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

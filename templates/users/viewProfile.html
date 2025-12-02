@@ -31,17 +31,29 @@
                             <span class="w-70 text-secondary-light fw-medium">: {{ user.email|default:"-" }}</span>
                         </li>
                         <li class="d-flex align-items-center gap-1 mb-12">
-                            <span class="w-30 text-md fw-semibold text-primary-light" data-i18n="profile.designation">Designation</span>
+                            <span class="w-30 text-md fw-semibold text-primary-light" data-i18n="profile.role">Role</span>
                             <span class="w-70 text-secondary-light fw-medium">:
                                 {% if user.is_superuser %}
-                                    <span data-i18n="profile.superAdmin">Super Admin</span>
-                                {% elif user.is_staff %}
-                                    <span data-i18n="profile.admin">Admin</span>
+                                    <span class="badge bg-danger-focus text-danger-600 px-8 py-4 radius-4">Super Admin</span>
+                                {% elif user.admin_profile %}
+                                    <span class="badge bg-primary-focus text-primary-600 px-8 py-4 radius-4">{{ user.admin_profile.role }}</span>
                                 {% else %}
-                                    <span data-i18n="profile.staff">Staff</span>
+                                    <span class="badge bg-neutral-200 text-neutral-600 px-8 py-4 radius-4">User</span>
                                 {% endif %}
                             </span>
                         </li>
+                        {% if user.admin_profile.center %}
+                        <li class="d-flex align-items-center gap-1 mb-12">
+                            <span class="w-30 text-md fw-semibold text-primary-light" data-i18n="profile.center">Center</span>
+                            <span class="w-70 text-secondary-light fw-medium">: {{ user.admin_profile.center.name }}</span>
+                        </li>
+                        {% endif %}
+                        {% if user.admin_profile.branch %}
+                        <li class="d-flex align-items-center gap-1 mb-12">
+                            <span class="w-30 text-md fw-semibold text-primary-light" data-i18n="profile.branch">Branch</span>
+                            <span class="w-70 text-secondary-light fw-medium">: {{ user.admin_profile.branch.name }}</span>
+                        </li>
+                        {% endif %}
                         <li class="d-flex align-items-center gap-1 mb-12">
                             <span class="w-30 text-md fw-semibold text-primary-light" data-i18n="profile.dateJoined">Date Joined</span>
                             <span class="w-70 text-secondary-light fw-medium">: {{ user.date_joined|date:"d M Y" }}</span>
@@ -114,10 +126,10 @@
                                 <div class="col-sm-6">
                                     <div class="mb-20">
                                         <label for="email" class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                            <span data-i18n="profile.email">Email</span> <span class="text-danger-600">*</span>
+                                            <span data-i18n="profile.email">Email</span>
                                         </label>
                                         <input type="email" class="form-control radius-8" id="email" name="email" 
-                                               value="{{ user.email }}" data-i18n-placeholder="profile.enterEmail" placeholder="Enter email address">
+                                               value="{{ user.email }}" data-i18n-placeholder="profile.enterEmail" placeholder="Enter email address (optional)">
                                     </div>
                                 </div>
                                 <div class="col-sm-6">

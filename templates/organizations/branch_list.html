@@ -4,9 +4,24 @@
 {% block content %}
 <div class="card h-100 p-0 radius-12">
     <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
-        <div>
-            <h6 class="text-lg fw-semibold mb-0">{{ title }}</h6>
-            <span class="text-sm text-secondary-light" data-i18n="common.manageBranches">Manage your branches</span>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div>
+                <h6 class="text-lg fw-semibold mb-0">{{ title }}</h6>
+                <span class="text-sm text-secondary-light" data-i18n="common.manageBranches">Manage your branches</span>
+                {% if total_branches > 0 %}
+                <span class="badge bg-primary-focus text-primary-main ms-2">{{ total_branches }} total</span>
+                {% endif %}
+            </div>
+            {% if centers %}
+            <form method="GET" class="d-flex align-items-center gap-2 ms-3">
+                <select name="center" class="form-select form-select-sm" style="min-width: 200px;" onchange="this.form.submit()">
+                    <option value="">All Centers</option>
+                    {% for center in centers %}
+                    <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+            {% endif %}
         </div>
         {% if permissions.can_manage_branches %}
         <a href="{% url 'branch_create' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
@@ -23,8 +38,8 @@
                     <div class="card-body p-20">
                         <div class="d-flex align-items-start justify-content-between mb-16">
                             <div class="d-flex align-items-center gap-12">
-                                <div class="w-48-px h-48-px rounded-circle bg-primary-100 d-flex justify-content-center align-items-center flex-shrink-0">
-                                    <iconify-icon icon="mdi:office-building" class="text-primary-600 text-xl"></iconify-icon>
+                                <div class="w-48-px h-48-px rounded-circle {% if branch.is_main %}bg-warning-100{% else %}bg-primary-100{% endif %} d-flex justify-content-center align-items-center flex-shrink-0">
+                                    <iconify-icon icon="{% if branch.is_main %}fluent:star-20-filled{% else %}fluent:building-20-filled{% endif %}" class="{% if branch.is_main %}text-warning-600{% else %}text-primary-600{% endif %} text-xl"></iconify-icon>
                                 </div>
                                 <div>
                                     <a href="{% url 'branch_detail' branch.id %}" class="text-md fw-semibold mb-4 text-primary-light text-decoration-none d-block">{{ branch.name }}</a>
@@ -39,19 +54,19 @@
                         <div class="mb-16">
                             {% if branch.region %}
                             <div class="d-flex align-items-center gap-8 mb-8">
-                                <iconify-icon icon="mdi:map-marker" class="text-secondary-light"></iconify-icon>
+                                <iconify-icon icon="fluent:location-20-filled" class="text-danger-600"></iconify-icon>
                                 <span class="text-sm text-secondary-light">{{ branch.region.name }}{% if branch.district %}, {{ branch.district.name }}{% endif %}</span>
                             </div>
                             {% endif %}
                             {% if branch.phone %}
                             <div class="d-flex align-items-center gap-8 mb-8">
-                                <iconify-icon icon="mdi:phone" class="text-secondary-light"></iconify-icon>
+                                <iconify-icon icon="fluent:call-20-filled" class="text-success-600"></iconify-icon>
                                 <span class="text-sm text-secondary-light">{{ branch.phone }}</span>
                             </div>
                             {% endif %}
                             {% if branch.address %}
                             <div class="d-flex align-items-center gap-8">
-                                <iconify-icon icon="mdi:home" class="text-secondary-light"></iconify-icon>
+                                <iconify-icon icon="fluent:home-20-filled" class="text-warning-600"></iconify-icon>
                                 <span class="text-sm text-secondary-light">{{ branch.address|truncatewords:10 }}</span>
                             </div>
                             {% endif %}
@@ -75,12 +90,12 @@
                             {% if permissions.can_manage_branches %}
                             <div class="d-flex gap-8">
                                 {% if branch.location_url %}
-                                <a href="{{ branch.location_url }}" target="_blank" class="bg-info-focus text-info-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="View on Map" onclick="event.stopPropagation();">
-                                    <iconify-icon icon="mdi:map" class="icon"></iconify-icon>
+                                <a href="{{ branch.location_url }}" target="_blank" class="bg-info-focus text-info-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" title="View on Map" onclick="event.stopPropagation();">
+                                    <iconify-icon icon="fluent:map-20-filled" class="icon"></iconify-icon>
                                 </a>
                                 {% endif %}
-                                <a href="{% url 'branch_edit' branch.id %}" class="bg-primary-focus text-primary-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-4" title="Edit" onclick="event.stopPropagation();">
-                                    <iconify-icon icon="lucide:edit" class="icon"></iconify-icon>
+                                <a href="{% url 'branch_edit' branch.id %}" class="bg-primary-focus text-primary-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" title="Edit" onclick="event.stopPropagation();">
+                                    <iconify-icon icon="fluent:edit-20-filled" class="icon"></iconify-icon>
                                 </a>
                             </div>
                             {% endif %}
@@ -91,7 +106,7 @@
             {% empty %}
             <div class="col-12">
                 <div class="text-center py-40">
-                    <iconify-icon icon="mdi:office-building-outline" class="icon text-5xl text-secondary-light mb-16"></iconify-icon>
+                    <iconify-icon icon="fluent:building-20-regular" class="icon text-5xl text-secondary-light mb-16"></iconify-icon>
                     <h6 class="text-lg fw-medium mb-8" data-i18n="common.noBranchesFound">No branches found</h6>
                     <p class="text-secondary-light mb-16" data-i18n="common.startByCreatingBranch">Get started by creating your first branch</p>
                     {% if permissions.can_manage_branches %}
@@ -104,6 +119,43 @@
             </div>
             {% endfor %}
         </div>
+        
+        <!-- Pagination -->
+        {% if branches.has_other_pages %}
+        <div class="d-flex justify-content-center mt-24">
+            <nav aria-label="Page navigation">
+                <ul class="pagination mb-0">
+                    {% if branches.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link bg-base text-secondary-light fw-medium radius-8 border-0 px-20 py-10 d-flex align-items-center justify-content-center h-48-px" href="?page={{ branches.previous_page_number }}{% if selected_center %}&center={{ selected_center }}{% endif %}">
+                            <iconify-icon icon="ep:d-arrow-left" class="text-xl"></iconify-icon>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in branches.paginator.page_range %}
+                        {% if branches.number == num %}
+                        <li class="page-item">
+                            <span class="page-link bg-primary-600 text-white fw-medium radius-8 border-0 px-20 py-10 d-flex align-items-center justify-content-center h-48-px w-48-px">{{ num }}</span>
+                        </li>
+                        {% elif num > branches.number|add:'-3' and num < branches.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link bg-base text-secondary-light fw-medium radius-8 border-0 px-20 py-10 d-flex align-items-center justify-content-center h-48-px w-48-px" href="?page={{ num }}{% if selected_center %}&center={{ selected_center }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if branches.has_next %}
+                    <li class="page-item">
+                        <a class="page-link bg-base text-secondary-light fw-medium radius-8 border-0 px-20 py-10 d-flex align-items-center justify-content-center h-48-px" href="?page={{ branches.next_page_number }}{% if selected_center %}&center={{ selected_center }}{% endif %}">
+                            <iconify-icon icon="ep:d-arrow-right" class="text-xl"></iconify-icon>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

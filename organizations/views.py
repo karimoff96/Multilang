@@ -36,10 +36,17 @@ def center_list(request):
         branch_count=Count("branches"),
     ).order_by("-created_at")
 
+    # Pagination - 6 items per page to fit screen nicely
+    paginator = Paginator(centers, 6)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
     context = {
         "title": "Translation Centers",
         "subTitle": "Manage Your Centers",
-        "centers": centers,
+        "centers": page_obj,
+        "paginator": paginator,
+        "total_centers": paginator.count,
     }
     return render(request, "organizations/center_list.html", context)
 
@@ -219,10 +226,25 @@ def branch_list(request):
     if center_id:
         branches = branches.filter(center_id=center_id)
 
+    # Pagination - 6 items per page
+    paginator = Paginator(branches, 6)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    # Get centers for filter dropdown
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+    else:
+        centers = TranslationCenter.objects.filter(owner=request.user, is_active=True)
+
     context = {
         "title": "Branches",
         "subTitle": "Manage Branches",
-        "branches": branches,
+        "branches": page_obj,
+        "paginator": paginator,
+        "total_branches": paginator.count,
+        "centers": centers,
+        "selected_center": center_id,
     }
     return render(request, "organizations/branch_list.html", context)
 

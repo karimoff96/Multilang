@@ -210,11 +210,14 @@ def usersList(request):
     """List all BotUsers with search and filter - RBAC filtered"""
     from organizations.rbac import get_user_customers
     from organizations.models import TranslationCenter
+    from django.db.models import Count, Max
 
     # Use RBAC-filtered customers with related branch/center data
+    # Add order statistics for each user
     users = (
         get_user_customers(request.user)
         .select_related("branch", "branch__center", "agency")
+        .annotate(order_count=Count("order"), last_order_date=Max("order__created_at"))
         .order_by("-created_at")
     )
 
@@ -417,12 +420,8 @@ def updateProfile(request):
             messages.error(request, "First name is required.")
             return redirect("viewProfile")
 
-        if not email:
-            messages.error(request, "Email is required.")
-            return redirect("viewProfile")
-
-        # Check if email is already used by another user
-        if User.objects.filter(email=email).exclude(pk=user.pk).exists():
+        # Check if email is already used by another user (only if email is provided)
+        if email and User.objects.filter(email=email).exclude(pk=user.pk).exists():
             messages.error(request, "This email is already in use.")
             return redirect("viewProfile")
 
