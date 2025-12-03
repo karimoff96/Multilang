@@ -6,13 +6,14 @@ from django.urls import path
 from .views import (
     ordersList, orderDetail, orderEdit, updateOrderStatus, deleteOrder,
     assignOrder, unassignOrder, receivePayment, completeOrder,
-    api_order_stats, api_branch_staff, myOrders
+    api_order_stats, api_branch_staff, myOrders, orderCreate
 )
 
 urlpatterns = [
     # Order list and detail
     path("", ordersList, name="ordersList"),
     path("my-orders/", myOrders, name="myOrders"),
+    path("create/", orderCreate, name="orderCreate"),
     path("<int:order_id>/", orderDetail, name="orderDetail"),
     path("<int:order_id>/edit/", orderEdit, name="orderEdit"),
     

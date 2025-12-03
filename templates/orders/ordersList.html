@@ -27,26 +27,36 @@
     </div>
     {% endif %}
     
-    <!-- Quick stats for current view -->
-    {% if view_mode == 'mine' and my_stats %}
-    <div class="d-flex gap-12">
-        <span class="badge bg-info-100 text-info-600 px-12 py-6">
-            <iconify-icon icon="mdi:progress-clock" class="me-4"></iconify-icon>In Progress: {{ my_stats.in_progress }}
-        </span>
-        <span class="badge bg-success-100 text-success-600 px-12 py-6">
-            <iconify-icon icon="mdi:check-circle" class="me-4"></iconify-icon>Completed: {{ my_stats.completed }}
-        </span>
+    <div class="d-flex align-items-center gap-12">
+        <!-- Quick stats for current view -->
+        {% if view_mode == 'mine' and my_stats %}
+        <div class="d-flex gap-12">
+            <span class="badge bg-info-100 text-info-600 px-12 py-6">
+                <iconify-icon icon="mdi:progress-clock" class="me-4"></iconify-icon>In Progress: {{ my_stats.in_progress }}
+            </span>
+            <span class="badge bg-success-100 text-success-600 px-12 py-6">
+                <iconify-icon icon="mdi:check-circle" class="me-4"></iconify-icon>Completed: {{ my_stats.completed }}
+            </span>
+        </div>
+        {% elif not can_view_all %}
+        <div class="d-flex gap-12">
+            <span class="badge bg-info-100 text-info-600 px-12 py-6">
+                <iconify-icon icon="mdi:progress-clock" class="me-4"></iconify-icon>In Progress: {{ stats.in_progress }}
+            </span>
+            <span class="badge bg-success-100 text-success-600 px-12 py-6">
+                <iconify-icon icon="mdi:check-circle" class="me-4"></iconify-icon>Completed: {{ stats.completed }}
+            </span>
+        </div>
+        {% endif %}
+        
+        <!-- Create Order Button - only for users with can_create_orders permission -->
+        {% if can_create_orders %}
+        <a href="{% url 'orderCreate' %}" class="btn btn-success btn-sm px-16 d-flex align-items-center gap-4">
+            <iconify-icon icon="solar:add-circle-bold" class="text-lg"></iconify-icon>
+            Create Order
+        </a>
+        {% endif %}
     </div>
-    {% elif not can_view_all %}
-    <div class="d-flex gap-12">
-        <span class="badge bg-info-100 text-info-600 px-12 py-6">
-            <iconify-icon icon="mdi:progress-clock" class="me-4"></iconify-icon>In Progress: {{ stats.in_progress }}
-        </span>
-        <span class="badge bg-success-100 text-success-600 px-12 py-6">
-            <iconify-icon icon="mdi:check-circle" class="me-4"></iconify-icon>Completed: {{ stats.completed }}
-        </span>
-    </div>
-    {% endif %}
 </div>
 
 <!-- Stats Cards -->

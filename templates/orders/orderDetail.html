@@ -36,7 +36,7 @@
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.productService">Product / Service</span>
                             <h6 class="text-lg fw-semibold mb-0">{{ order.product.name }}</h6>
                             {% if order.language %}
-                            <small class="text-muted"><span data-i18n="form.language">Language</span>: {{ order.language.name }}</small>
+                            <small class="text-primary-light"><span data-i18n="form.language">Language</span>: {{ order.language.name }}</small>
                             {% endif %}
                         </div>
                     </div>
@@ -44,7 +44,7 @@
                         <div class="p-16 bg-neutral-50 radius-8">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.orderDate">Order Date</span>
                             <h6 class="text-lg fw-semibold mb-0">{{ order.created_at|date:"d M Y" }}</h6>
-                            <small class="text-muted">{{ order.created_at|time:"H:i" }}</small>
+                            <small class="text-primary-light">{{ order.created_at|time:"H:i" }}</small>
                         </div>
                     </div>
                     <div class="col-sm-4">
@@ -77,9 +77,9 @@
                                 <h6 class="text-md fw-semibold mb-0">
                                     {% if order.branch %}
                                         {{ order.branch.name }}
-                                        <small class="text-muted d-block">{{ order.branch.center.name }}</small>
+                                        <small class="text-primary-light d-block">{{ order.branch.center.name }}</small>
                                     {% else %}
-                                        <span class="text-muted">Not assigned to branch</span>
+                                        <span class="text-primary-light">Not assigned to branch</span>
                                     {% endif %}
                                 </h6>
                             </div>
@@ -90,7 +90,7 @@
                                 <h6 class="text-md fw-semibold mb-0">
                                     {% if order.assigned_to %}
                                         {{ order.assigned_to.user.get_full_name|default:order.assigned_to.user.username }}
-                                        <small class="text-muted d-block">
+                                        <small class="text-primary-light d-block">
                                             Assigned {{ order.assigned_at|date:"d M Y H:i" }}
                                             {% if order.assigned_by %}by {{ order.assigned_by.user.get_full_name|default:order.assigned_by.user.username }}{% endif %}
                                         </small>
@@ -261,7 +261,7 @@
                             </div>
                             <div>
                                 <span class="d-block fw-medium">{{ order.assigned_to.user.get_full_name|default:order.assigned_to.user.username }}</span>
-                                <small class="text-muted">{{ order.assigned_to.role.get_display_name }}</small>
+                                <small class="text-primary-light">{{ order.assigned_to.role.get_display_name }}</small>
                             </div>
                         </div>
                         <form method="post" action="{% url 'unassignOrder' order.id %}">

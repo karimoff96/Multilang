@@ -106,13 +106,13 @@
                                         </div>
                                         <div>
                                             <span class="d-block fw-medium">{{ order.bot_user.name }}</span>
-                                            <small class="text-muted">{{ order.bot_user.phone }}</small>
+                                            <small class="text-primary-light">{{ order.bot_user.phone }}</small>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
                                     {{ order.product.name }}
-                                    {% if order.language %}<br><small class="text-muted">{{ order.language.name }}</small>{% endif %}
+                                    {% if order.language %}<br><small class="text-primary-light">{{ order.language.name }}</small>{% endif %}
                                 </td>
                                 <td>
                                     <span class="badge bg-info-focus text-info-600">{{ order.total_pages }}</span>
@@ -141,7 +141,7 @@
                                 </td>
                                 <td>
                                     <small>{{ order.created_at|date:"d M Y" }}</small><br>
-                                    <small class="text-muted">{{ order.created_at|time:"H:i" }}</small>
+                                    <small class="text-primary-light">{{ order.created_at|time:"H:i" }}</small>
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">
@@ -218,7 +218,7 @@
                 <div class="text-center py-40">
                     <iconify-icon icon="solar:document-text-bold-duotone" class="text-primary-200 mb-16" style="font-size: 80px;"></iconify-icon>
                     <h6 class="text-secondary-light mb-8">No Orders Assigned</h6>
-                    <p class="text-muted mb-0">You don't have any orders assigned to you yet.</p>
+                    <p class="text-primary-light mb-0">You don't have any orders assigned to you yet.</p>
                 </div>
                 {% endif %}
             </div>

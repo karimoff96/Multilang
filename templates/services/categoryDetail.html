@@ -44,7 +44,7 @@
                                 {% for lang in category.languages.all %}
                                     <span class="badge bg-neutral-200 text-neutral-600 me-4 mb-4">{{ lang.name }}</span>
                                 {% empty %}
-                                    <span class="text-muted" data-i18n="detail.noLanguagesAssigned">No languages assigned</span>
+                                    <span class="text-primary-light" data-i18n="detail.noLanguagesAssigned">No languages assigned</span>
                                 {% endfor %}
                             </div>
                         </li>

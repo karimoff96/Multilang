@@ -12,7 +12,7 @@ from organizations.rbac import (
     admin_profile_required, role_required, manager_or_owner_required,
     permission_required
 )
-from organizations.models import AdminUser
+from organizations.models import AdminUser, Branch, TranslationCenter
 from core.audit import log_action, log_order_assign, log_status_change
 
 
@@ -220,6 +220,11 @@ def ordersList(request):
             'completed': my_orders.filter(status='completed').count(),
         }
     
+    # Check if user can create orders
+    can_create_orders = request.user.is_superuser
+    if not can_create_orders and request.admin_profile:
+        can_create_orders = request.admin_profile.has_permission('can_create_orders')
+    
     context = {
         "title": "My Orders" if (can_view_own_only or view_mode == 'mine') else "Orders",
         "subTitle": "Orders assigned to me" if (can_view_own_only or view_mode == 'mine') else "All Orders",
@@ -242,6 +247,7 @@ def ordersList(request):
         "can_view_all": can_view_all,
         "can_view_own_only": can_view_own_only,
         "view_mode": view_mode,
+        "can_create_orders": can_create_orders,
     }
     return render(request, "orders/ordersList.html", context)
 
@@ -834,3 +840,108 @@ def myOrders(request):
         "stats": stats,
     }
     return render(request, "orders/myOrders.html", context)
+
+
+@login_required(login_url='admin_login')
+@permission_required('can_create_orders')
+def orderCreate(request):
+    """Create a new order - requires can_create_orders permission"""
+    from services.models import Product, Language
+    from accounts.models import BotUser
+    
+    # Get accessible centers and branches
+    centers = None
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        branches = Branch.objects.filter(is_active=True).select_related('center')
+    elif request.admin_profile:
+        branches = request.admin_profile.get_accessible_branches()
+    else:
+        branches = Branch.objects.none()
+    
+    # Get products and languages
+    products = Product.objects.filter(is_active=True)
+    languages = Language.objects.all()  # Language model doesn't have is_active field
+    
+    # Get bot users for selection (recent 100)
+    bot_users = BotUser.objects.all().order_by('-created_at')[:100]
+    
+    if request.method == 'POST':
+        try:
+            # Get form data
+            bot_user_id = request.POST.get('bot_user')
+            product_id = request.POST.get('product')
+            language_id = request.POST.get('language')
+            branch_id = request.POST.get('branch')
+            total_pages = int(request.POST.get('total_pages', 1))
+            copy_number = int(request.POST.get('copy_number', 0))
+            payment_type = request.POST.get('payment_type', 'cash')
+            description = request.POST.get('description', '')
+            
+            # Validate required fields
+            if not bot_user_id or not product_id or not branch_id:
+                messages.error(request, _("Please fill in all required fields"))
+                return redirect('orderCreate')
+            
+            # Get related objects
+            bot_user = BotUser.objects.get(id=bot_user_id)
+            product = Product.objects.get(id=product_id)
+            branch = Branch.objects.get(id=branch_id)
+            language = Language.objects.get(id=language_id) if language_id else None
+            
+            # Calculate price (base price * pages * copies)
+            base_price = product.price_per_page if hasattr(product, 'price_per_page') else 0
+            total_price = base_price * total_pages * max(1, copy_number + 1)
+            
+            # Create the order
+            order = Order.objects.create(
+                bot_user=bot_user,
+                product=product,
+                branch=branch,
+                language=language,
+                total_pages=total_pages,
+                copy_number=copy_number,
+                payment_type=payment_type,
+                description=description,
+                total_price=total_price,
+                status='pending',
+                is_active=True,
+            )
+            
+            # Handle file uploads
+            files = request.FILES.getlist('files')
+            for file in files:
+                media = OrderMedia.objects.create(
+                    file=file,
+                    pages=1  # Default to 1 page per file
+                )
+                order.files.add(media)
+            
+            # Log the action
+            log_action(
+                user=request.user,
+                action='create',
+                model_name='Order',
+                instance_id=order.id,
+                description=f"Created order for {bot_user.display_name} - {product.name}"
+            )
+            
+            messages.success(request, _("Order created successfully"))
+            return redirect('orderDetail', order_id=order.id)
+            
+        except Exception as e:
+            messages.error(request, str(e))
+            return redirect('orderCreate')
+    
+    context = {
+        "title": "Create Order",
+        "subTitle": "Create a new order manually",
+        "centers": centers,
+        "branches": branches,
+        "products": products,
+        "languages": languages,
+        "bot_users": bot_users,
+        "payment_choices": Order.PAYMENT_TYPE,
+        "is_superuser": request.user.is_superuser,
+    }
+    return render(request, "orders/orderCreate.html", context)
