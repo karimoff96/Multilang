@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 
 
 class TranslationCenter(models.Model):
@@ -114,18 +115,42 @@ class Role(models.Model):
         _("System Role"), default=False, help_text=_("System roles cannot be deleted")
     )
 
-    # Permissions
+    # Permissions - Organization Management
     can_manage_center = models.BooleanField(_("Can manage center"), default=False)
     can_manage_branches = models.BooleanField(_("Can manage branches"), default=False)
+    
+    # Permissions - Staff Management
     can_manage_staff = models.BooleanField(_("Can manage staff"), default=False)
+    can_view_staff = models.BooleanField(_("Can view staff details"), default=False)
+    
+    # Permissions - Order Management (Granular)
     can_view_all_orders = models.BooleanField(_("Can view all orders"), default=False)
-    can_manage_orders = models.BooleanField(_("Can manage orders"), default=False)
+    can_view_own_orders = models.BooleanField(_("Can view own orders"), default=True)
+    can_create_orders = models.BooleanField(_("Can create orders"), default=False)
+    can_edit_orders = models.BooleanField(_("Can edit orders"), default=False)
+    can_delete_orders = models.BooleanField(_("Can delete orders"), default=False)
     can_assign_orders = models.BooleanField(_("Can assign orders"), default=False)
+    can_update_order_status = models.BooleanField(_("Can update order status"), default=False)
+    can_complete_orders = models.BooleanField(_("Can complete orders"), default=False)
+    can_cancel_orders = models.BooleanField(_("Can cancel orders"), default=False)
+    can_manage_orders = models.BooleanField(_("Can manage orders (full access)"), default=False, 
+        help_text=_("Full order management - overrides other order permissions"))
+    
+    # Permissions - Financial
     can_receive_payments = models.BooleanField(_("Can receive payments"), default=False)
+    can_view_financial_reports = models.BooleanField(_("Can view financial reports"), default=False)
+    can_apply_discounts = models.BooleanField(_("Can apply discounts"), default=False)
+    can_refund_orders = models.BooleanField(_("Can refund orders"), default=False)
+    
+    # Permissions - Reports & Analytics
     can_view_reports = models.BooleanField(_("Can view reports"), default=False)
+    can_view_analytics = models.BooleanField(_("Can view analytics"), default=False)
+    can_export_data = models.BooleanField(_("Can export data"), default=False)
+    
+    # Permissions - Products & Customers
     can_manage_products = models.BooleanField(_("Can manage products"), default=False)
     can_manage_customers = models.BooleanField(_("Can manage customers"), default=False)
-    can_export_data = models.BooleanField(_("Can export data"), default=False)
+    can_view_customer_details = models.BooleanField(_("Can view customer details"), default=False)
 
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True, null=True)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True, null=True)
@@ -153,20 +178,272 @@ class Role(models.Model):
 
     @classmethod
     def get_all_permissions(cls):
-        """Return list of all permission field names"""
+        """Return list of all permission field names grouped by category"""
         return [
+            # Organization Management
             "can_manage_center",
             "can_manage_branches",
+            # Staff Management
             "can_manage_staff",
+            "can_view_staff",
+            # Order Management
             "can_view_all_orders",
-            "can_manage_orders",
+            "can_view_own_orders",
+            "can_create_orders",
+            "can_edit_orders",
+            "can_delete_orders",
             "can_assign_orders",
+            "can_update_order_status",
+            "can_complete_orders",
+            "can_cancel_orders",
+            "can_manage_orders",
+            # Financial
             "can_receive_payments",
+            "can_view_financial_reports",
+            "can_apply_discounts",
+            "can_refund_orders",
+            # Reports & Analytics
             "can_view_reports",
+            "can_view_analytics",
+            "can_export_data",
+            # Products & Customers
             "can_manage_products",
             "can_manage_customers",
-            "can_export_data",
+            "can_view_customer_details",
         ]
+
+    @classmethod
+    def get_permission_categories(cls):
+        """Return permissions grouped by category for UI"""
+        return {
+            "organization": {
+                "title": _("Organization Management"),
+                "icon": "fa-building",
+                "color": "primary",
+                "permissions": ["can_manage_center", "can_manage_branches"],
+            },
+            "staff": {
+                "title": _("Staff Management"),
+                "icon": "fa-users",
+                "color": "info",
+                "permissions": ["can_manage_staff", "can_view_staff"],
+            },
+            "orders": {
+                "title": _("Order Management"),
+                "icon": "fa-file-lines",
+                "color": "success",
+                "permissions": [
+                    "can_view_all_orders",
+                    "can_view_own_orders",
+                    "can_create_orders",
+                    "can_edit_orders",
+                    "can_delete_orders",
+                    "can_assign_orders",
+                    "can_update_order_status",
+                    "can_complete_orders",
+                    "can_cancel_orders",
+                    "can_manage_orders",
+                ],
+            },
+            "financial": {
+                "title": _("Financial"),
+                "icon": "fa-money-bill-wave",
+                "color": "warning",
+                "permissions": [
+                    "can_receive_payments",
+                    "can_view_financial_reports",
+                    "can_apply_discounts",
+                    "can_refund_orders",
+                ],
+            },
+            "reports": {
+                "title": _("Reports & Analytics"),
+                "icon": "fa-chart-line",
+                "color": "purple",
+                "permissions": ["can_view_reports", "can_view_analytics", "can_export_data"],
+            },
+            "products": {
+                "title": _("Products & Customers"),
+                "icon": "fa-box",
+                "color": "danger",
+                "permissions": ["can_manage_products", "can_manage_customers", "can_view_customer_details"],
+            },
+        }
+
+    @classmethod
+    def get_permission_labels(cls):
+        """Return human-readable labels for all permissions"""
+        return {
+            # Organization Management
+            "can_manage_center": _("Manage Translation Centers"),
+            "can_manage_branches": _("Manage Branches"),
+            # Staff Management
+            "can_manage_staff": _("Manage Staff Members"),
+            "can_view_staff": _("View Staff Details (Read-Only)"),
+            # Order Management
+            "can_view_all_orders": _("View All Orders"),
+            "can_view_own_orders": _("View Own Orders"),
+            "can_create_orders": _("Create New Orders"),
+            "can_edit_orders": _("Edit Orders"),
+            "can_delete_orders": _("Delete Orders"),
+            "can_assign_orders": _("Assign Orders to Staff"),
+            "can_update_order_status": _("Update Order Status"),
+            "can_complete_orders": _("Complete Orders"),
+            "can_cancel_orders": _("Cancel Orders"),
+            "can_manage_orders": _("Full Order Management"),
+            # Financial
+            "can_receive_payments": _("Receive Payments"),
+            "can_view_financial_reports": _("View Financial Reports"),
+            "can_apply_discounts": _("Apply Discounts"),
+            "can_refund_orders": _("Refund Orders"),
+            # Reports & Analytics
+            "can_view_reports": _("View Reports"),
+            "can_view_analytics": _("View Analytics Dashboard"),
+            "can_export_data": _("Export Data"),
+            # Products & Customers
+            "can_manage_products": _("Manage Products & Services"),
+            "can_manage_customers": _("Manage Customers"),
+            "can_view_customer_details": _("View Customer Details"),
+        }
+    
+    @classmethod
+    def get_permission_descriptions(cls):
+        """Return detailed descriptions for all permissions"""
+        return {
+            # Organization Management
+            "can_manage_center": _("Create, edit, and delete translation centers"),
+            "can_manage_branches": _("Create, edit, and delete branches within centers"),
+            # Staff Management
+            "can_manage_staff": _("Add, edit, remove staff members and change their roles"),
+            "can_view_staff": _("View staff profiles and details without editing"),
+            # Order Management
+            "can_view_all_orders": _("View all orders in the center/branch, not just assigned ones"),
+            "can_view_own_orders": _("View orders assigned to this user"),
+            "can_create_orders": _("Create new translation orders"),
+            "can_edit_orders": _("Modify existing order details, files, and settings"),
+            "can_delete_orders": _("Permanently remove orders from the system"),
+            "can_assign_orders": _("Assign orders to other staff members"),
+            "can_update_order_status": _("Change order status (pending, in progress, etc.)"),
+            "can_complete_orders": _("Mark orders as completed/delivered"),
+            "can_cancel_orders": _("Cancel active orders"),
+            "can_manage_orders": _("Full control over all order operations - overrides individual permissions"),
+            # Financial
+            "can_receive_payments": _("Accept and record customer payments"),
+            "can_view_financial_reports": _("Access financial reports and revenue data"),
+            "can_apply_discounts": _("Apply discounts to orders"),
+            "can_refund_orders": _("Process refunds for completed or cancelled orders"),
+            # Reports & Analytics
+            "can_view_reports": _("Access performance and activity reports"),
+            "can_view_analytics": _("View analytics dashboard with charts and metrics"),
+            "can_export_data": _("Export data to Excel, PDF, or other formats"),
+            # Products & Customers
+            "can_manage_products": _("Add, edit, and remove services and products"),
+            "can_manage_customers": _("Add, edit customer records and contact information"),
+            "can_view_customer_details": _("View customer information and history"),
+        }
+
+    @classmethod
+    def get_default_permissions_for_role(cls, role_name):
+        """Return default permissions for system roles"""
+        defaults = {
+            cls.OWNER: {
+                # Organization
+                "can_manage_center": True,
+                "can_manage_branches": True,
+                # Staff
+                "can_manage_staff": True,
+                "can_view_staff": True,
+                # Orders (all)
+                "can_view_all_orders": True,
+                "can_view_own_orders": True,
+                "can_create_orders": True,
+                "can_edit_orders": True,
+                "can_delete_orders": True,
+                "can_assign_orders": True,
+                "can_update_order_status": True,
+                "can_complete_orders": True,
+                "can_cancel_orders": True,
+                "can_manage_orders": True,
+                # Financial
+                "can_receive_payments": True,
+                "can_view_financial_reports": True,
+                "can_apply_discounts": True,
+                "can_refund_orders": True,
+                # Reports
+                "can_view_reports": True,
+                "can_view_analytics": True,
+                "can_export_data": True,
+                # Products & Customers
+                "can_manage_products": True,
+                "can_manage_customers": True,
+                "can_view_customer_details": True,
+            },
+            cls.MANAGER: {
+                # Organization
+                "can_manage_center": False,
+                "can_manage_branches": False,
+                # Staff
+                "can_manage_staff": False,
+                "can_view_staff": True,
+                # Orders
+                "can_view_all_orders": True,
+                "can_view_own_orders": True,
+                "can_create_orders": True,
+                "can_edit_orders": True,
+                "can_delete_orders": False,
+                "can_assign_orders": True,
+                "can_update_order_status": True,
+                "can_complete_orders": True,
+                "can_cancel_orders": True,
+                "can_manage_orders": True,
+                # Financial
+                "can_receive_payments": True,
+                "can_view_financial_reports": True,
+                "can_apply_discounts": True,
+                "can_refund_orders": False,
+                # Reports
+                "can_view_reports": True,
+                "can_view_analytics": True,
+                "can_export_data": False,
+                # Products & Customers
+                "can_manage_products": False,
+                "can_manage_customers": True,
+                "can_view_customer_details": True,
+            },
+            cls.STAFF: {
+                # Organization
+                "can_manage_center": False,
+                "can_manage_branches": False,
+                # Staff
+                "can_manage_staff": False,
+                "can_view_staff": False,
+                # Orders (limited)
+                "can_view_all_orders": False,
+                "can_view_own_orders": True,
+                "can_create_orders": False,
+                "can_edit_orders": False,
+                "can_delete_orders": False,
+                "can_assign_orders": False,
+                "can_update_order_status": True,
+                "can_complete_orders": True,
+                "can_cancel_orders": False,
+                "can_manage_orders": False,
+                # Financial
+                "can_receive_payments": True,
+                "can_view_financial_reports": False,
+                "can_apply_discounts": False,
+                "can_refund_orders": False,
+                # Reports
+                "can_view_reports": False,
+                "can_view_analytics": False,
+                "can_export_data": False,
+                # Products & Customers
+                "can_manage_products": False,
+                "can_manage_customers": False,
+                "can_view_customer_details": True,
+            },
+        }
+        return defaults.get(role_name, {})
 
 
 class AdminUser(models.Model):
@@ -220,6 +497,81 @@ class AdminUser(models.Model):
 
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.username} ({self.role})"
+
+    def clean(self):
+        """Validate model data - enforce single owner per center"""
+        super().clean()
+        
+        # Check for single owner per center
+        if self.role and self.role.name == Role.OWNER and self.center:
+            existing_owner = AdminUser.objects.filter(
+                role__name=Role.OWNER,
+                center=self.center,
+                is_active=True
+            ).exclude(pk=self.pk).first()
+            
+            if existing_owner:
+                raise ValidationError({
+                    'role': _(
+                        f'This center already has an owner: {existing_owner.user.get_full_name()}. '
+                        'Each center can only have one owner.'
+                    )
+                })
+
+    def save(self, *args, **kwargs):
+        """Override save to run validation"""
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def can_assign_owner_role(cls, requesting_user, center=None):
+        """
+        Check if the requesting user can assign the owner role.
+        Only superusers can assign the owner role.
+        """
+        if not requesting_user.is_superuser:
+            return False
+        
+        # If center specified, check if it already has an active owner
+        if center:
+            existing_owner = cls.objects.filter(
+                role__name=Role.OWNER,
+                center=center,
+                is_active=True
+            ).exists()
+            return not existing_owner
+        
+        return True
+
+    @classmethod
+    def validate_role_assignment(cls, requesting_user, target_role, center=None, exclude_pk=None):
+        """
+        Validate if the requesting user can assign the specified role.
+        Returns (is_valid, error_message).
+        """
+        if target_role.name == Role.OWNER:
+            # Only superusers can assign owner role
+            if not requesting_user.is_superuser:
+                return False, _("Only superusers can create or assign the Owner role.")
+            
+            # Check if center already has an owner
+            if center:
+                query = cls.objects.filter(
+                    role__name=Role.OWNER,
+                    center=center,
+                    is_active=True
+                )
+                if exclude_pk:
+                    query = query.exclude(pk=exclude_pk)
+                
+                if query.exists():
+                    existing = query.first()
+                    return False, _(
+                        f"This center already has an owner: {existing.user.get_full_name()}. "
+                        "Each center can only have one owner."
+                    )
+        
+        return True, None
 
     @property
     def is_owner(self):

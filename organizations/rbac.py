@@ -143,6 +143,35 @@ def permission_required(*permissions):
     return decorator
 
 
+def any_permission_required(*permissions):
+    """
+    Decorator that requires user to have ANY ONE of the specified permissions.
+    Superusers are always allowed.
+    
+    Usage:
+        @any_permission_required('can_view_reports', 'can_view_analytics')
+    """
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            if request.user.is_superuser:
+                return view_func(request, *args, **kwargs)
+            
+            if not request.admin_profile:
+                messages.error(request, "You need an admin profile to access this page.")
+                return redirect('index')
+            
+            # Check if user has ANY of the permissions
+            has_any = any(request.admin_profile.has_permission(perm) for perm in permissions)
+            if not has_any:
+                messages.error(request, "You don't have permission to access this page.")
+                return redirect('index')
+            
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
 def owner_required(view_func):
     """Shortcut decorator for owner-only views."""
     return role_required('owner')(view_func)
@@ -151,6 +180,109 @@ def owner_required(view_func):
 def manager_or_owner_required(view_func):
     """Shortcut decorator for manager or owner views."""
     return role_required('owner', 'manager')(view_func)
+
+
+def can_view_staff_required(view_func):
+    """Decorator for views that require can_view_staff or can_manage_staff permission."""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if request.user.is_superuser:
+            return view_func(request, *args, **kwargs)
+        
+        if not request.admin_profile:
+            messages.error(request, "You need an admin profile to access this page.")
+            return redirect('index')
+        
+        # Check if user has either view or manage staff permission
+        if not (request.admin_profile.has_permission('can_view_staff') or 
+                request.admin_profile.has_permission('can_manage_staff')):
+            messages.error(request, "You don't have permission to view staff details.")
+            return redirect('index')
+        
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def can_edit_staff(user, staff_member=None):
+    """
+    Check if user can edit staff members.
+    - Superusers can edit anyone
+    - Owners can edit anyone in their center (except other owners)
+    - Managers can only view, not edit (unless can_manage_staff is granted)
+    """
+    if user.is_superuser:
+        return True
+    
+    admin_profile = get_admin_profile(user)
+    if not admin_profile:
+        return False
+    
+    # Must have can_manage_staff permission
+    if not admin_profile.has_permission('can_manage_staff'):
+        return False
+    
+    # If checking specific staff member
+    if staff_member:
+        # Cannot edit owners unless you're superuser
+        if staff_member.is_owner:
+            return False
+        
+        # Must be in same center
+        if admin_profile.center and staff_member.center:
+            return admin_profile.center.id == staff_member.center.id
+    
+    return True
+
+
+def get_assignable_roles(user):
+    """
+    Get roles that the user can assign to others.
+    - Superusers can assign all roles including Owner
+    - Owners can assign Manager and Staff roles
+    - Managers can only assign Staff role
+    """
+    from organizations.models import Role
+    
+    if user.is_superuser:
+        return Role.objects.filter(is_active=True)
+    
+    admin_profile = get_admin_profile(user)
+    if not admin_profile:
+        return Role.objects.none()
+    
+    if admin_profile.is_owner:
+        # Owners can assign any role EXCEPT owner
+        return Role.objects.filter(is_active=True).exclude(name=Role.OWNER)
+    elif admin_profile.is_manager:
+        # Managers can only assign staff role
+        return Role.objects.filter(name=Role.STAFF, is_active=True)
+    
+    return Role.objects.none()
+
+
+def validate_owner_creation(requesting_user, center=None):
+    """
+    Validate that the requesting user can create an owner.
+    Returns (is_valid, error_message)
+    """
+    from organizations.models import AdminUser, Role
+    
+    # Only superusers can create owners
+    if not requesting_user.is_superuser:
+        return False, "Only superusers can create the Owner role."
+    
+    # Check if center already has an owner
+    if center:
+        existing_owner = AdminUser.objects.filter(
+            role__name=Role.OWNER,
+            center=center,
+            is_active=True
+        ).exists()
+        
+        if existing_owner:
+            return False, "This center already has an active owner. Each center can only have one owner."
+    
+    return True, None
 
 
 def branch_access_required(view_func):

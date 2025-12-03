@@ -9,6 +9,38 @@ register = template.Library()
 
 
 @register.filter
+def getattr_filter(obj, attr):
+    """
+    Get an attribute from an object dynamically.
+    Usage: {{ object|getattr:"attribute_name" }}
+    """
+    try:
+        return getattr(obj, attr, None)
+    except (TypeError, AttributeError):
+        return None
+
+
+@register.filter(name='getattr')
+def getattr_alias(obj, attr):
+    """Alias for getattr_filter"""
+    return getattr_filter(obj, attr)
+
+
+@register.filter
+def get_item(dictionary, key):
+    """
+    Get an item from a dictionary by key.
+    Usage: {{ dict|get_item:key }}
+    """
+    if dictionary is None:
+        return ''
+    try:
+        return dictionary.get(key, key)
+    except (TypeError, AttributeError):
+        return key
+
+
+@register.filter
 def short_number(value):
     """
     Convert large numbers to shortened format (K, M, B)
@@ -48,6 +80,24 @@ def format_currency(value, short=False):
 
     # Format with thousand separators
     return f"{value:,.0f}"
+
+
+@register.filter
+def intcomma(value):
+    """
+    Add commas to an integer or float value for readability.
+    Similar to Django's humanize intcomma filter.
+    Examples:
+        1234 -> 1,234
+        1234567 -> 1,234,567
+    """
+    try:
+        value = float(value)
+        if value == int(value):
+            return f"{int(value):,}"
+        return f"{value:,.2f}"
+    except (TypeError, ValueError):
+        return value
 
 
 @register.filter

@@ -9,6 +9,7 @@ from organizations.rbac import (
     get_user_customers,
     get_user_branches,
     get_user_staff,
+    any_permission_required,
 )
 from organizations.models import AdminUser
 import json
@@ -332,7 +333,10 @@ def widgets(request):
     return render(request, "widgets.html", context)
 
 
+@login_required(login_url="admin_login")
+@any_permission_required('can_view_reports', 'can_view_analytics')
 def sales(request):
+    """Sales Dashboard - requires can_view_reports or can_view_analytics permission"""
     now = timezone.now()
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     week_start = today_start - timedelta(days=today_start.weekday())
@@ -743,8 +747,10 @@ def sales(request):
     return render(request, "sales.html", context)
 
 
+@login_required(login_url="admin_login")
+@any_permission_required('can_view_financial_reports', 'can_view_analytics')
 def finance(request):
-    """Finance/Analytics page - focuses on revenue and payment analytics"""
+    """Finance/Analytics page - requires can_view_financial_reports or can_view_analytics permission"""
     now = timezone.now()
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     week_start = today_start - timedelta(days=today_start.weekday())

@@ -227,10 +227,10 @@
                         <tbody>
                             {% for order in recent_orders %}
                             <tr>
-                                <td><a href="{% url 'order_detail' order.id %}" class="text-primary-600 fw-medium">#{{ order.id }}</a></td>
+                                <td><a href="{% url 'orderDetail' order.id %}" class="text-primary-600 fw-medium">#{{ order.id }}</a></td>
                                 <td>
                                     <div>
-                                        <span class="text-md d-block line-height-1 fw-medium text-primary-light">{{ order.bot_user.full_name|default:order.bot_user.phone_number }}</span>
+                                        <span class="text-md d-block line-height-1 fw-medium text-primary-light">{{ order.bot_user.name|default:order.bot_user.phone }}</span>
                                     </div>
                                 </td>
                                 <td>{{ order.product.name|default:"-" }}</td>

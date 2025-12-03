@@ -4,7 +4,7 @@ URL configuration for orders app.
 
 from django.urls import path
 from .views import (
-    ordersList, orderDetail, updateOrderStatus, deleteOrder,
+    ordersList, orderDetail, orderEdit, updateOrderStatus, deleteOrder,
     assignOrder, unassignOrder, receivePayment, completeOrder,
     api_order_stats, api_branch_staff, myOrders
 )
@@ -14,6 +14,7 @@ urlpatterns = [
     path("", ordersList, name="ordersList"),
     path("my-orders/", myOrders, name="myOrders"),
     path("<int:order_id>/", orderDetail, name="orderDetail"),
+    path("<int:order_id>/edit/", orderEdit, name="orderEdit"),
     
     # Order actions
     path("<int:order_id>/update-status/", updateOrderStatus, name="updateOrderStatus"),

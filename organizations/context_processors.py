@@ -18,8 +18,42 @@ def rbac_context(request):
     - is_staff_member: Boolean
     - current_center: TranslationCenter instance
     - current_branch: Branch instance
-    - permissions: Dict of all permissions
+    - permissions: Dict of all permissions (granular)
     """
+    # Define all available permissions
+    all_permissions = {
+        # Organization Management
+        'can_manage_center': False,
+        'can_manage_branches': False,
+        # Staff Management
+        'can_manage_staff': False,
+        'can_view_staff': False,
+        # Order Management (Granular)
+        'can_view_all_orders': False,
+        'can_view_own_orders': False,
+        'can_create_orders': False,
+        'can_edit_orders': False,
+        'can_delete_orders': False,
+        'can_assign_orders': False,
+        'can_update_order_status': False,
+        'can_complete_orders': False,
+        'can_cancel_orders': False,
+        'can_manage_orders': False,
+        # Financial
+        'can_receive_payments': False,
+        'can_view_financial_reports': False,
+        'can_apply_discounts': False,
+        'can_refund_orders': False,
+        # Reports & Analytics
+        'can_view_reports': False,
+        'can_view_analytics': False,
+        'can_export_data': False,
+        # Products & Customers
+        'can_manage_products': False,
+        'can_manage_customers': False,
+        'can_view_customer_details': False,
+    }
+    
     context = {
         'admin_profile': None,
         'user_role': None,
@@ -29,7 +63,7 @@ def rbac_context(request):
         'is_staff_member': False,
         'current_center': None,
         'current_branch': None,
-        'permissions': {},
+        'permissions': all_permissions.copy(),
     }
     
     if not request.user.is_authenticated:
@@ -37,22 +71,14 @@ def rbac_context(request):
     
     # Superuser has all permissions
     if request.user.is_superuser:
+        superuser_permissions = {k: True for k in all_permissions}
         context.update({
             'user_role': 'superuser',
             'user_role_display': 'Super Admin',
             'is_owner': True,
             'is_manager': True,
             'is_staff_member': False,  # Superuser is not a staff member - they see aggregated data
-            'permissions': {
-                'can_manage_center': True,
-                'can_manage_branches': True,
-                'can_manage_staff': True,
-                'can_view_all_orders': True,
-                'can_manage_orders': True,
-                'can_receive_payments': True,
-                'can_view_reports': True,
-                'can_manage_products': True,
-            }
+            'permissions': superuser_permissions,
         })
         return context
     
@@ -60,6 +86,11 @@ def rbac_context(request):
     
     if admin_profile:
         role = admin_profile.role
+        # Build permissions dict from role fields
+        permissions = {}
+        for perm_name in all_permissions.keys():
+            permissions[perm_name] = getattr(role, perm_name, False)
+        
         context.update({
             'admin_profile': admin_profile,
             'user_role': role.name,
@@ -69,16 +100,7 @@ def rbac_context(request):
             'is_staff_member': admin_profile.is_staff_role,
             'current_center': admin_profile.center,
             'current_branch': admin_profile.branch,
-            'permissions': {
-                'can_manage_center': role.can_manage_center,
-                'can_manage_branches': role.can_manage_branches,
-                'can_manage_staff': role.can_manage_staff,
-                'can_view_all_orders': role.can_view_all_orders,
-                'can_manage_orders': role.can_manage_orders,
-                'can_receive_payments': role.can_receive_payments,
-                'can_view_reports': role.can_view_reports,
-                'can_manage_products': role.can_manage_products,
-            }
+            'permissions': permissions,
         })
     
     return context

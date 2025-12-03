@@ -240,6 +240,16 @@
                 <h6 class="text-md fw-semibold mb-0">Actions</h6>
             </div>
             <div class="card-body p-24">
+                <!-- Edit Button -->
+                {% if can_edit %}
+                <div class="mb-16">
+                    <a href="{% url 'orderEdit' order.id %}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+                        <iconify-icon icon="lucide:edit" class="me-1"></iconify-icon> <span data-i18n="common.edit">Edit Order</span>
+                    </a>
+                </div>
+                <hr class="my-16">
+                {% endif %}
+                
                 <!-- Assignment Section -->
                 {% if can_assign %}
                 <div class="mb-24">
@@ -281,7 +291,7 @@
                 {% endif %}
 
                 <!-- Quick Actions -->
-                {% if can_receive_payment and order.status in 'payment_received,payment_pending' %}
+                {% if can_receive_payment and order.status == 'payment_received' or can_receive_payment and order.status == 'payment_pending' %}
                 <div class="mb-16">
                     <form method="post" action="{% url 'receivePayment' order.id %}">
                         {% csrf_token %}
@@ -292,7 +302,7 @@
                 </div>
                 {% endif %}
 
-                {% if can_complete and order.status in 'ready,in_progress' %}
+                {% if can_complete and order.status == 'ready' or can_complete and order.status == 'in_progress' %}
                 <div class="mb-16">
                     <form method="post" action="{% url 'completeOrder' order.id %}">
                         {% csrf_token %}
@@ -332,7 +342,7 @@
                     <span data-i18n="detail.back">Back to Orders</span>
                 </a>
                 
-                {% if request.user.is_superuser or is_owner %}
+                {% if can_delete %}
                 <button type="button" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#deleteOrderModal">
                     <iconify-icon icon="mdi:delete" class="me-1"></iconify-icon> <span data-i18n="detail.deleteOrder">Delete Order</span>
                 </button>

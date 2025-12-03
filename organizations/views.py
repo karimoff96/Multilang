@@ -16,6 +16,10 @@ from .rbac import (
     owner_required,
     get_user_branches,
     get_user_staff,
+    can_view_staff_required,
+    can_edit_staff,
+    get_assignable_roles,
+    validate_owner_creation,
 )
 from core.audit import log_create, log_update, log_delete
 
@@ -425,13 +429,28 @@ def branch_edit(request, branch_id):
 
 
 @login_required(login_url="admin_login")
-@permission_required("can_manage_staff")
+@can_view_staff_required
 def staff_list(request):
-    """List staff members the current user can manage"""
+    """List staff members the current user can manage or view"""
+    from django.db.models import Count, Q as DQ
+    
     staff = (
         get_user_staff(request.user)
         .select_related("user", "role", "branch", "branch__center")
+        .annotate(
+            orders_in_progress=Count('assigned_orders', filter=DQ(assigned_orders__status='in_progress')),
+            orders_completed=Count('assigned_orders', filter=DQ(assigned_orders__status='completed')),
+            orders_cancelled=Count('assigned_orders', filter=DQ(assigned_orders__status='cancelled')),
+            orders_pending=Count('assigned_orders', filter=DQ(assigned_orders__status='pending')),
+            orders_total=Count('assigned_orders'),
+        )
         .order_by("-created_at")
+    )
+
+    # Determine if user can manage staff (for showing add/edit buttons)
+    user_can_manage_staff = (
+        request.user.is_superuser or 
+        (request.admin_profile and request.admin_profile.has_permission('can_manage_staff'))
     )
 
     # Center filter for superuser
@@ -483,6 +502,7 @@ def staff_list(request):
         "search": search,
         "centers": centers,
         "center_filter": center_filter,
+        "can_manage_staff": user_can_manage_staff,
     }
     return render(request, "organizations/staff_list.html", context)
 
@@ -493,12 +513,8 @@ def staff_create(request):
     """Create a new staff member"""
     accessible_branches = get_user_branches(request.user)
 
-    # Get all active roles except owner for assignment
-    # Managers can only assign staff role, owners/superusers can assign any role except owner
-    if request.admin_profile and request.admin_profile.is_manager:
-        roles = Role.objects.filter(name="staff", is_active=True)
-    else:
-        roles = Role.objects.filter(is_active=True).exclude(name="owner")
+    # Get assignable roles for current user using RBAC helper
+    roles = get_assignable_roles(request.user)
 
     if request.method == "POST":
         # User info
@@ -517,6 +533,8 @@ def staff_create(request):
         errors = []
         if not username:
             errors.append("Username is required.")
+        if not email:
+            errors.append("Email is required.")
         if not first_name:
             errors.append("First name is required.")
         if not password:
@@ -529,6 +547,26 @@ def staff_create(request):
         if User.objects.filter(username=username).exists():
             errors.append("Username already exists.")
 
+        # Validate role assignment
+        if role_id and branch_id:
+            try:
+                role = Role.objects.get(pk=role_id)
+                branch = Branch.objects.get(pk=branch_id)
+                center = branch.center
+                
+                # Validate role assignment using RBAC helper
+                is_valid, error_msg = AdminUser.validate_role_assignment(
+                    request.user, role, center=center
+                )
+                if not is_valid:
+                    errors.append(error_msg)
+                
+                # Verify the role is in the assignable roles list
+                if not roles.filter(pk=role_id).exists():
+                    errors.append("You don't have permission to assign this role.")
+            except (Role.DoesNotExist, Branch.DoesNotExist):
+                errors.append("Invalid role or branch selected.")
+
         if errors:
             for error in errors:
                 messages.error(request, error)
@@ -536,7 +574,7 @@ def staff_create(request):
             # Create user
             user = User.objects.create_user(
                 username=username,
-                email=email or None,
+                email=email,
                 password=password,
                 first_name=first_name,
                 last_name=last_name,
@@ -548,34 +586,45 @@ def staff_create(request):
             branch = get_object_or_404(accessible_branches, pk=branch_id)
 
             # Create admin profile
-            admin_profile = AdminUser.objects.create(
-                user=user,
-                role=role,
-                branch=branch,
-                center=branch.center,
-                phone=phone or None,
-                created_by=request.user,
-            )
+            try:
+                admin_profile = AdminUser.objects.create(
+                    user=user,
+                    role=role,
+                    branch=branch,
+                    center=branch.center,
+                    phone=phone or None,
+                    created_by=request.user,
+                )
 
-            # Audit log the creation
-            log_create(
-                user=request.user,
-                target=admin_profile,
-                request=request,
-                details=f"Created staff: {first_name} {last_name} ({role.name}) in {branch.name}",
-            )
+                # Audit log the creation
+                log_create(
+                    user=request.user,
+                    target=admin_profile,
+                    request=request,
+                    details=f"Created staff: {first_name} {last_name} ({role.name}) in {branch.name}",
+                )
 
-            messages.success(
-                request,
-                f'Staff member "{first_name} {last_name}" created successfully!',
-            )
-            return redirect("staff_list")
+                messages.success(
+                    request,
+                    f'Staff member "{first_name} {last_name}" created successfully!',
+                )
+                return redirect("staff_list")
+            except Exception as e:
+                # Clean up the created user if AdminUser creation fails
+                user.delete()
+                messages.error(request, f"Failed to create staff member: {str(e)}")
+
+    # Get all permissions for display in form
+    all_permissions = Role.get_all_permissions()
+    permission_labels = Role.get_permission_labels()
 
     context = {
         "title": "Add Staff",
         "subTitle": "Create New Staff Member",
         "branches": accessible_branches,
         "roles": roles,
+        "all_permissions": all_permissions,
+        "permission_labels": permission_labels,
     }
     return render(request, "organizations/staff_form.html", context)
 
@@ -586,22 +635,17 @@ def staff_edit(request, staff_id):
     """Edit an existing staff member"""
     staff_member = get_object_or_404(AdminUser, pk=staff_id)
 
-    # Check access
-    if not request.user.is_superuser:
-        accessible_staff = get_user_staff(request.user)
-        if not accessible_staff.filter(pk=staff_id).exists():
-            messages.error(
-                request, "You don't have permission to edit this staff member."
-            )
-            return redirect("staff_list")
+    # Check if user can edit this staff member
+    if not can_edit_staff(request.user, staff_member):
+        messages.error(
+            request, "You don't have permission to edit this staff member."
+        )
+        return redirect("staff_detail", staff_id=staff_id)
 
     accessible_branches = get_user_branches(request.user)
 
-    # Owners can manage all roles except owner, managers can only manage staff
-    if request.admin_profile and request.admin_profile.is_manager:
-        roles = Role.objects.filter(name="staff")
-    else:
-        roles = Role.objects.exclude(name="owner")
+    # Use RBAC helper for assignable roles
+    roles = get_assignable_roles(request.user)
 
     if request.method == "POST":
         # User info
@@ -616,33 +660,77 @@ def staff_edit(request, staff_id):
         phone = request.POST.get("phone", "").strip()
         is_active = request.POST.get("is_active") == "on"
 
+        errors = []
         if not first_name:
-            messages.error(request, "First name is required.")
+            errors.append("First name is required.")
+        if not email:
+            errors.append("Email is required.")
+
+        # Validate role assignment
+        if role_id and branch_id:
+            try:
+                role = Role.objects.get(pk=role_id)
+                branch = Branch.objects.get(pk=branch_id)
+                center = branch.center
+                
+                # Validate role assignment using RBAC helper
+                is_valid, error_msg = AdminUser.validate_role_assignment(
+                    request.user, role, center=center, exclude_pk=staff_member.pk
+                )
+                if not is_valid:
+                    errors.append(error_msg)
+                
+                # Verify the role is in the assignable roles list
+                if not roles.filter(pk=role_id).exists():
+                    errors.append("You don't have permission to assign this role.")
+            except (Role.DoesNotExist, Branch.DoesNotExist):
+                errors.append("Invalid role or branch selected.")
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
         else:
             # Update user
             user = staff_member.user
-            user.email = email or None
+            user.email = email
             user.first_name = first_name
             user.last_name = last_name
+            user.is_staff = True  # Ensure admin access is enabled
             if password:
                 user.set_password(password)
             user.save()
 
             # Update profile
-            staff_member.role_id = role_id
-            staff_member.branch_id = branch_id
-            staff_member.center = (
-                Branch.objects.get(pk=branch_id).center if branch_id else None
-            )
-            staff_member.phone = phone or None
-            staff_member.is_active = is_active
-            staff_member.save()
+            try:
+                old_role = staff_member.role
+                staff_member.role_id = role_id
+                staff_member.branch_id = branch_id
+                staff_member.center = (
+                    Branch.objects.get(pk=branch_id).center if branch_id else None
+                )
+                staff_member.phone = phone or None
+                staff_member.is_active = is_active
+                staff_member.save()
 
-            messages.success(
-                request,
-                f'Staff member "{first_name} {last_name}" updated successfully!',
-            )
-            return redirect("staff_list")
+                # Log the update
+                log_update(
+                    user=request.user,
+                    target=staff_member,
+                    changes={"role": f"{old_role.name} -> {staff_member.role.name}"},
+                    request=request,
+                )
+
+                messages.success(
+                    request,
+                    f'Staff member "{first_name} {last_name}" updated successfully!',
+                )
+                return redirect("staff_list")
+            except Exception as e:
+                messages.error(request, f"Failed to update staff member: {str(e)}")
+
+    # Get all permissions for display in form
+    all_permissions = Role.get_all_permissions()
+    permission_labels = Role.get_permission_labels()
 
     context = {
         "title": "Edit Staff",
@@ -650,6 +738,8 @@ def staff_edit(request, staff_id):
         "staff_member": staff_member,
         "branches": accessible_branches,
         "roles": roles,
+        "all_permissions": all_permissions,
+        "permission_labels": permission_labels,
     }
     return render(request, "organizations/staff_form.html", context)
 
@@ -680,6 +770,97 @@ def staff_toggle_active(request, staff_id):
         request, f"Staff member {staff_member.user.get_full_name()} has been {status}."
     )
     return redirect("staff_list")
+
+
+@login_required(login_url="admin_login")
+@can_view_staff_required
+def staff_detail(request, staff_id):
+    """
+    View staff member details including profile and related objects.
+    Managers have read-only access, Owners/Superusers can edit.
+    """
+    from orders.models import Order
+    from django.db.models import Sum, Count
+    from django.utils import timezone
+    from datetime import timedelta
+
+    staff_member = get_object_or_404(
+        AdminUser.objects.select_related("user", "role", "branch", "branch__center", "created_by"),
+        pk=staff_id
+    )
+
+    # Check access - user must be able to view this staff member
+    if not request.user.is_superuser:
+        accessible_staff = get_user_staff(request.user)
+        # Also allow viewing if user has can_view_staff permission and is in same center
+        if not accessible_staff.filter(pk=staff_id).exists():
+            if request.admin_profile and request.admin_profile.center:
+                if staff_member.center and staff_member.center.id != request.admin_profile.center.id:
+                    messages.error(request, "You don't have permission to view this staff member.")
+                    return redirect("staff_list")
+            else:
+                messages.error(request, "You don't have permission to view this staff member.")
+                return redirect("staff_list")
+
+    # Determine if user can edit this staff member
+    user_can_edit = can_edit_staff(request.user, staff_member)
+
+    # Get assigned orders for this staff member
+    assigned_orders = Order.objects.filter(
+        assigned_to=staff_member
+    ).select_related("bot_user", "product", "branch").order_by("-created_at")[:10]
+
+    # Get orders completed by this staff member
+    completed_orders = Order.objects.filter(
+        completed_by=staff_member
+    ).select_related("bot_user", "product", "branch").order_by("-completed_at")[:10]
+
+    # Get orders where payment was received by this staff member
+    payments_received = Order.objects.filter(
+        payment_received_by=staff_member
+    ).select_related("bot_user", "product", "branch").order_by("-payment_received_at")[:10]
+
+    # Statistics
+    today = timezone.now().date()
+    last_30_days = today - timedelta(days=30)
+
+    stats = {
+        "total_assigned": Order.objects.filter(assigned_to=staff_member).count(),
+        "total_completed": Order.objects.filter(completed_by=staff_member).count(),
+        "total_payments_received": Order.objects.filter(payment_received_by=staff_member).count(),
+        "completed_this_month": Order.objects.filter(
+            completed_by=staff_member,
+            completed_at__date__gte=last_30_days
+        ).count(),
+        "total_revenue_received": Order.objects.filter(
+            payment_received_by=staff_member
+        ).aggregate(total=Sum("total_price"))["total"] or 0,
+        "active_orders": Order.objects.filter(
+            assigned_to=staff_member,
+            status__in=["pending", "in_progress", "payment_pending", "payment_received"]
+        ).count(),
+    }
+
+    # Get role permissions for display
+    role_permissions = []
+    for perm in Role.get_all_permissions():
+        if getattr(staff_member.role, perm, False):
+            label = Role.get_permission_labels().get(perm, perm.replace("_", " ").title())
+            role_permissions.append({"name": perm, "label": label})
+
+    context = {
+        "title": staff_member.user.get_full_name() or staff_member.user.username,
+        "subTitle": "Staff Details",
+        "staff_member": staff_member,
+        "assigned_orders": assigned_orders,
+        "completed_orders": completed_orders,
+        "payments_received": payments_received,
+        "stats": stats,
+        "role_permissions": role_permissions,
+        "can_edit": user_can_edit,
+        "is_read_only": not user_can_edit,
+    }
+    return render(request, "organizations/staff_detail.html", context)
 
 
 # ============ API Endpoints ============
@@ -792,19 +973,7 @@ def role_create(request):
         "title": "Create Role",
         "subTitle": "Create New Role",
         "available_permissions": available_permissions,
-        "permission_labels": {
-            "can_manage_center": "Manage Translation Centers",
-            "can_manage_branches": "Manage Branches",
-            "can_manage_staff": "Manage Staff Members",
-            "can_view_all_orders": "View All Orders",
-            "can_manage_orders": "Manage Orders",
-            "can_assign_orders": "Assign Orders to Staff",
-            "can_receive_payments": "Receive Payments",
-            "can_view_reports": "View Reports & Analytics",
-            "can_manage_products": "Manage Products & Services",
-            "can_manage_customers": "Manage Customers",
-            "can_export_data": "Export Data",
-        },
+        "permission_labels": Role.get_permission_labels(),
     }
     return render(request, "organizations/role_form.html", context)
 
@@ -857,19 +1026,7 @@ def role_edit(request, role_id):
         "subTitle": f"Edit Role: {role.display_name}",
         "role": role,
         "available_permissions": available_permissions,
-        "permission_labels": {
-            "can_manage_center": "Manage Translation Centers",
-            "can_manage_branches": "Manage Branches",
-            "can_manage_staff": "Manage Staff Members",
-            "can_view_all_orders": "View All Orders",
-            "can_manage_orders": "Manage Orders",
-            "can_assign_orders": "Assign Orders to Staff",
-            "can_receive_payments": "Receive Payments",
-            "can_view_reports": "View Reports & Analytics",
-            "can_manage_products": "Manage Products & Services",
-            "can_manage_customers": "Manage Customers",
-            "can_export_data": "Export Data",
-        },
+        "permission_labels": Role.get_permission_labels(),
     }
     return render(request, "organizations/role_form.html", context)
 

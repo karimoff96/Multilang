@@ -17,7 +17,13 @@ from orders.models import Order
 from accounts.models import BotUser
 from services.models import Product
 from organizations.models import Branch, TranslationCenter, AdminUser
-from organizations.rbac import get_user_orders, get_user_customers, get_user_branches
+from organizations.rbac import (
+    get_user_orders,
+    get_user_customers,
+    get_user_branches,
+    any_permission_required,
+    permission_required,
+)
 
 
 # Period choices for the unified filter
@@ -147,8 +153,9 @@ def get_period_dates(period, custom_from=None, custom_to=None):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_view_financial_reports')
 def financial_reports(request):
-    """Financial reports view with revenue analytics"""
+    """Financial reports view with revenue analytics - requires can_view_financial_reports permission"""
     # Period filter
     period = request.GET.get("period", "month")
     custom_from = request.GET.get("date_from")
@@ -316,8 +323,9 @@ def financial_reports(request):
 
 
 @login_required(login_url="admin_login")
+@any_permission_required('can_view_reports', 'can_view_analytics')
 def order_reports(request):
-    """Order analytics and reports"""
+    """Order analytics and reports - requires can_view_reports or can_view_analytics permission"""
     # Period filter
     period = request.GET.get("period", "month")
     custom_from = request.GET.get("date_from")
@@ -456,8 +464,9 @@ def order_reports(request):
 
 
 @login_required(login_url="admin_login")
+@any_permission_required('can_view_reports', 'can_view_analytics')
 def staff_performance(request):
-    """Staff performance reports - for managers and owners"""
+    """Staff performance reports - requires can_view_reports or can_view_analytics permission"""
     # Period filter
     period = request.GET.get("period", "month")
     custom_from = request.GET.get("date_from")
@@ -592,8 +601,9 @@ def staff_performance(request):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_view_analytics')
 def branch_comparison(request):
-    """Compare branch performance - for owners and superusers"""
+    """Compare branch performance - requires can_view_analytics permission"""
     # Period filter
     period = request.GET.get("period", "month")
     custom_from = request.GET.get("date_from")
@@ -693,8 +703,9 @@ def branch_comparison(request):
 
 
 @login_required(login_url="admin_login")
+@any_permission_required('can_view_analytics', 'can_view_customer_details')
 def customer_analytics(request):
-    """Customer analytics - acquisition, retention, etc."""
+    """Customer analytics - requires can_view_analytics or can_view_customer_details permission"""
     # Period filter
     period = request.GET.get("period", "month")
     custom_from = request.GET.get("date_from")
@@ -815,8 +826,9 @@ def customer_analytics(request):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_export_data')
 def export_report(request, report_type):
-    """Export report data as JSON (can be extended to CSV/Excel)"""
+    """Export report data - requires can_export_data permission"""
     import csv
     from django.http import HttpResponse
 

@@ -16,19 +16,120 @@ from organizations.models import AdminUser
 from core.audit import log_action, log_order_assign, log_status_change
 
 
+def has_order_permission(request, permission_name, order=None):
+    """
+    Check if user has a specific order permission.
+    
+    Args:
+        request: The HTTP request with user and admin_profile
+        permission_name: The permission to check (e.g., 'can_edit_orders')
+        order: Optional Order object to check branch access
+    
+    Returns:
+        bool: True if user has permission, False otherwise
+    """
+    # Superusers have all permissions
+    if request.user.is_superuser:
+        return True
+    
+    # Must have admin profile
+    if not request.admin_profile:
+        return False
+    
+    role = request.admin_profile.role
+    
+    # Check if user has full order management (overrides individual permissions)
+    if role.can_manage_orders:
+        # Still need to check branch access
+        if order and order.branch:
+            accessible_branches = request.admin_profile.get_accessible_branches()
+            if order.branch not in accessible_branches:
+                return False
+        return True
+    
+    # Check specific permission on role
+    if not getattr(role, permission_name, False):
+        return False
+    
+    # If order specified, check branch access
+    if order and order.branch:
+        accessible_branches = request.admin_profile.get_accessible_branches()
+        if order.branch not in accessible_branches:
+            return False
+    
+    # For staff-level users, check if they can only work on their own orders
+    if not request.is_owner and not request.is_manager:
+        # Staff can only work on orders assigned to them
+        if order and order.assigned_to != request.admin_profile:
+            # Except for view permissions
+            if permission_name not in ['can_view_own_orders', 'can_view_all_orders']:
+                return False
+    
+    return True
+
+
+def get_user_order_permissions(request, order=None):
+    """
+    Get all order-related permissions for a user.
+    Returns a dict of permission name -> boolean.
+    """
+    permissions = {
+        'can_view_all_orders': has_order_permission(request, 'can_view_all_orders', order),
+        'can_view_own_orders': has_order_permission(request, 'can_view_own_orders', order),
+        'can_create_orders': has_order_permission(request, 'can_create_orders', order),
+        'can_edit_orders': has_order_permission(request, 'can_edit_orders', order),
+        'can_delete_orders': has_order_permission(request, 'can_delete_orders', order),
+        'can_assign_orders': has_order_permission(request, 'can_assign_orders', order),
+        'can_update_order_status': has_order_permission(request, 'can_update_order_status', order),
+        'can_complete_orders': has_order_permission(request, 'can_complete_orders', order),
+        'can_cancel_orders': has_order_permission(request, 'can_cancel_orders', order),
+        'can_manage_orders': has_order_permission(request, 'can_manage_orders', order),
+        'can_receive_payments': has_order_permission(request, 'can_receive_payments', order),
+        'can_apply_discounts': has_order_permission(request, 'can_apply_discounts', order),
+        'can_refund_orders': has_order_permission(request, 'can_refund_orders', order),
+    }
+    return permissions
+
+
 @login_required(login_url='admin_login')
 def ordersList(request):
-    """List all orders with search and filter - RBAC aware"""
-    # Get orders based on user's role and permissions
+    """List orders with search and filter - Permission-based access"""
+    
+    # Determine what orders user can see based on permissions
+    can_view_all = request.user.is_superuser
+    can_view_own_only = False
+    
+    if not request.user.is_superuser and request.admin_profile:
+        can_view_all = request.admin_profile.has_permission('can_view_all_orders')
+        can_view_own_only = request.admin_profile.has_permission('can_view_own_orders') and not can_view_all
+    
+    # Get base queryset based on permissions
     if request.user.is_superuser:
         orders = Order.objects.all()
-    else:
+    elif can_view_all:
+        # User can view all orders in their scope (branch/center)
         orders = get_user_orders(request.user)
+    elif can_view_own_only:
+        # User can only view orders assigned to them
+        orders = Order.objects.filter(assigned_to=request.admin_profile)
+    elif request.admin_profile:
+        # Fallback: user has admin profile but no specific order permissions
+        # Show orders in their scope (same as can_view_all but they'll have limited actions)
+        orders = get_user_orders(request.user)
+        can_view_all = True  # For UI purposes - they can see all but with limited actions
+    else:
+        # No admin profile - show nothing
+        orders = Order.objects.none()
     
     orders = orders.select_related(
         'bot_user', 'product', 'language', 'branch', 'branch__center',
         'assigned_to', 'assigned_to__user'
     ).order_by('-created_at')
+    
+    # View mode filter (for users who can view all - let them switch to "my orders" view)
+    view_mode = request.GET.get('view', 'all' if can_view_all else 'mine')
+    if can_view_all and view_mode == 'mine' and request.admin_profile:
+        orders = orders.filter(assigned_to=request.admin_profile)
     
     # Search functionality
     search_query = request.GET.get('search', '')
@@ -61,14 +162,13 @@ def ordersList(request):
     if branch_filter:
         orders = orders.filter(branch_id=branch_filter)
     
-    # Assignment filter
+    # Assignment filter (only show for users who can view all)
     assignment_filter = request.GET.get('assignment', '')
-    if assignment_filter == 'unassigned':
-        orders = orders.filter(assigned_to__isnull=True)
-    elif assignment_filter == 'assigned':
-        orders = orders.filter(assigned_to__isnull=False)
-    elif assignment_filter == 'mine' and request.admin_profile:
-        orders = orders.filter(assigned_to=request.admin_profile)
+    if can_view_all:
+        if assignment_filter == 'unassigned':
+            orders = orders.filter(assigned_to__isnull=True)
+        elif assignment_filter == 'assigned':
+            orders = orders.filter(assigned_to__isnull=False)
     
     # Pagination
     per_page = request.GET.get('per_page', 10)
@@ -94,19 +194,35 @@ def ordersList(request):
         branches = Branch.objects.filter(is_active=True).select_related('center')
         centers = TranslationCenter.objects.filter(is_active=True)
     
-    # Get order statistics
-    base_orders = get_user_orders(request.user) if not request.user.is_superuser else Order.objects.all()
+    # Get order statistics based on what user can see
+    if request.user.is_superuser:
+        base_orders = Order.objects.all()
+    elif can_view_all:
+        base_orders = get_user_orders(request.user)
+    else:
+        base_orders = Order.objects.filter(assigned_to=request.admin_profile) if request.admin_profile else Order.objects.none()
+    
     stats = {
         'total': base_orders.count(),
         'pending': base_orders.filter(status='pending').count(),
         'in_progress': base_orders.filter(status='in_progress').count(),
         'completed': base_orders.filter(status='completed').count(),
-        'unassigned': base_orders.filter(assigned_to__isnull=True).count(),
+        'unassigned': base_orders.filter(assigned_to__isnull=True).count() if can_view_all else 0,
     }
     
+    # Stats for "my orders" (for users who can view all)
+    my_stats = None
+    if can_view_all and request.admin_profile:
+        my_orders = Order.objects.filter(assigned_to=request.admin_profile)
+        my_stats = {
+            'total': my_orders.count(),
+            'in_progress': my_orders.filter(status='in_progress').count(),
+            'completed': my_orders.filter(status='completed').count(),
+        }
+    
     context = {
-        "title": "Orders List",
-        "subTitle": "Orders List",
+        "title": "My Orders" if (can_view_own_only or view_mode == 'mine') else "Orders",
+        "subTitle": "Orders assigned to me" if (can_view_own_only or view_mode == 'mine') else "All Orders",
         "orders": page_obj,
         "paginator": paginator,
         "search_query": search_query,
@@ -122,13 +238,17 @@ def ordersList(request):
         "centers": centers,
         "branches": branches,
         "stats": stats,
+        "my_stats": my_stats,
+        "can_view_all": can_view_all,
+        "can_view_own_only": can_view_own_only,
+        "view_mode": view_mode,
     }
     return render(request, "orders/ordersList.html", context)
 
 
 @login_required(login_url='admin_login')
 def orderDetail(request, order_id):
-    """View order details with RBAC check"""
+    """View order details with permission-based access control"""
     order = get_object_or_404(
         Order.objects.select_related(
             'bot_user', 'product', 'language', 'branch', 'branch__center',
@@ -139,48 +259,47 @@ def orderDetail(request, order_id):
         id=order_id
     )
     
-    # Check access permissions
-    if not request.user.is_superuser and request.admin_profile:
-        accessible_branches = request.admin_profile.get_accessible_branches()
-        if order.branch not in accessible_branches:
-            messages.error(request, "You don't have access to this order.")
-            return redirect('ordersList')
-        
-        # Staff can only see orders assigned to them
-        if request.is_staff_member and order.assigned_to != request.admin_profile:
-            messages.error(request, "You can only view orders assigned to you.")
-            return redirect('ordersList')
+    # Check view permission
+    can_view = has_order_permission(request, 'can_view_all_orders', order)
+    if not can_view:
+        # Check if user can view their own orders and this is assigned to them
+        if request.admin_profile and order.assigned_to == request.admin_profile:
+            if has_order_permission(request, 'can_view_own_orders', order):
+                can_view = True
     
-    # Get available staff for assignment (for owners/managers)
+    if not can_view:
+        messages.error(request, "You don't have permission to view this order.")
+        return redirect('ordersList')
+    
+    # Get all order permissions for current user
+    order_permissions = get_user_order_permissions(request, order)
+    
+    # Get available staff for assignment
     available_staff = []
-    can_assign = False
-    can_update_status = False
-    can_receive_payment = False
-    can_complete = False
-    
-    if request.user.is_superuser:
-        can_assign = True
-        can_update_status = True
-        can_receive_payment = True
-        can_complete = True
-        available_staff = AdminUser.objects.filter(
-            branch=order.branch,
-            is_active=True
-        ).select_related('user', 'role')
-    elif request.admin_profile:
-        # Owners and managers can assign orders
-        if request.is_owner or request.is_manager:
-            can_assign = True
-            can_update_status = True
-            can_receive_payment = True
-            can_complete = True
-            available_staff = AdminUser.objects.filter(
-                branch=order.branch,
-                is_active=True
-            ).select_related('user', 'role')
-        elif request.is_staff_member and order.assigned_to == request.admin_profile:
-            # Staff can update status of their assigned orders
-            can_update_status = True
+    if order_permissions['can_assign_orders']:
+        # Get staff from the order's branch, or all staff if no branch
+        if request.user.is_superuser:
+            if order.branch:
+                available_staff = AdminUser.objects.filter(
+                    branch=order.branch,
+                    is_active=True
+                ).select_related('user', 'role')
+            else:
+                available_staff = AdminUser.objects.filter(
+                    is_active=True
+                ).select_related('user', 'role')
+        elif request.admin_profile:
+            if order.branch:
+                available_staff = AdminUser.objects.filter(
+                    branch=order.branch,
+                    is_active=True
+                ).select_related('user', 'role')
+            else:
+                accessible_branches = request.admin_profile.get_accessible_branches()
+                available_staff = AdminUser.objects.filter(
+                    branch__in=accessible_branches,
+                    is_active=True
+                ).select_related('user', 'role')
     
     # Get allowed status transitions based on current status
     allowed_transitions = get_allowed_status_transitions(order.status)
@@ -190,14 +309,146 @@ def orderDetail(request, order_id):
         "subTitle": "Order Details",
         "order": order,
         "available_staff": available_staff,
-        "can_assign": can_assign,
-        "can_update_status": can_update_status,
-        "can_receive_payment": can_receive_payment,
-        "can_complete": can_complete,
+        # Permission flags from the granular permission system
+        "can_assign": order_permissions['can_assign_orders'],
+        "can_update_status": order_permissions['can_update_order_status'],
+        "can_receive_payment": order_permissions['can_receive_payments'],
+        "can_complete": order_permissions['can_complete_orders'],
+        "can_edit": order_permissions['can_edit_orders'],
+        "can_delete": order_permissions['can_delete_orders'],
+        "can_cancel": order_permissions['can_cancel_orders'],
+        # All order permissions for template use
+        "order_permissions": order_permissions,
         "allowed_transitions": allowed_transitions,
         "status_choices": Order.STATUS_CHOICES,
     }
     return render(request, "orders/orderDetail.html", context)
+
+
+@login_required(login_url='admin_login')
+def orderEdit(request, order_id):
+    """Edit an order - permission-based access control"""
+    from services.models import Product, Language
+    
+    order = get_object_or_404(
+        Order.objects.select_related('bot_user', 'product', 'language', 'branch'),
+        id=order_id
+    )
+    
+    # Check permission using granular permission system
+    if not has_order_permission(request, 'can_edit_orders', order):
+        messages.error(request, "You don't have permission to edit this order.")
+        return redirect('orderDetail', order_id=order_id)
+    
+    # Get available products and languages
+    products = Product.objects.filter(is_active=True)
+    languages = Language.objects.all()  # Language model doesn't have is_active field
+    
+    if request.method == 'POST':
+        # Get form data
+        product_id = request.POST.get('product')
+        language_id = request.POST.get('language')
+        total_pages = request.POST.get('total_pages')
+        copy_number = request.POST.get('copy_number', 0)
+        payment_type = request.POST.get('payment_type')
+        description = request.POST.get('description', '')
+        
+        # Store old values for audit
+        old_values = {
+            'product': str(order.product),
+            'language': str(order.language) if order.language else None,
+            'total_pages': order.total_pages,
+            'copy_number': order.copy_number,
+            'payment_type': order.payment_type,
+            'total_price': str(order.total_price),
+            'description': order.description,
+            'files_count': order.files.count(),
+        }
+        
+        try:
+            # Update order
+            if product_id:
+                order.product = Product.objects.get(pk=product_id)
+            if language_id:
+                order.language = Language.objects.get(pk=language_id)
+            elif language_id == '':
+                order.language = None
+            
+            order.total_pages = int(total_pages) if total_pages else order.total_pages
+            order.copy_number = int(copy_number) if copy_number else 0
+            order.payment_type = payment_type if payment_type else order.payment_type
+            order.description = description
+            
+            # Handle file deletions
+            files_to_delete = request.POST.getlist('delete_files')
+            if files_to_delete:
+                for file_id in files_to_delete:
+                    try:
+                        file_obj = OrderMedia.objects.get(pk=file_id)
+                        order.files.remove(file_obj)
+                        file_obj.delete()
+                    except OrderMedia.DoesNotExist:
+                        pass
+            
+            # Handle new file uploads
+            new_files = request.FILES.getlist('new_files')
+            for uploaded_file in new_files:
+                # Create OrderMedia instance
+                file_pages = request.POST.get(f'file_pages_{uploaded_file.name}', 1)
+                try:
+                    file_pages = int(file_pages)
+                except (ValueError, TypeError):
+                    file_pages = 1
+                
+                order_media = OrderMedia.objects.create(
+                    file=uploaded_file,
+                    pages=file_pages
+                )
+                order.files.add(order_media)
+            
+            # Recalculate price
+            base_price = order.product.price * order.total_pages
+            copy_price = order.product.copy_price * order.copy_number * order.total_pages if order.copy_number > 0 else 0
+            order.total_price = base_price + copy_price
+            
+            order.save()
+            
+            # Audit log the edit
+            new_values = {
+                'product': str(order.product),
+                'language': str(order.language) if order.language else None,
+                'total_pages': order.total_pages,
+                'copy_number': order.copy_number,
+                'payment_type': order.payment_type,
+                'total_price': str(order.total_price),
+                'description': order.description,
+                'files_count': order.files.count(),
+            }
+            
+            log_action(
+                user=request.user,
+                action='update',
+                target=order,
+                details=f'Order #{order.id} edited',
+                changes={'old': old_values, 'new': new_values},
+                request=request
+            )
+            
+            messages.success(request, f'Order #{order_id} updated successfully.')
+            return redirect('orderDetail', order_id=order_id)
+            
+        except Exception as e:
+            messages.error(request, f'Error updating order: {str(e)}')
+    
+    context = {
+        "title": f"Edit Order #{order.id}",
+        "subTitle": "Edit Order",
+        "order": order,
+        "products": products,
+        "languages": languages,
+        "payment_choices": Order.PAYMENT_TYPE,
+    }
+    return render(request, "orders/orderEdit.html", context)
 
 
 def get_allowed_status_transitions(current_status):
@@ -218,22 +469,24 @@ def get_allowed_status_transitions(current_status):
 @login_required(login_url='admin_login')
 @require_POST
 def updateOrderStatus(request, order_id):
-    """Update order status with RBAC check"""
+    """Update order status with permission-based access control"""
     order = get_object_or_404(Order, id=order_id)
     
-    # Check access permissions
-    if not request.user.is_superuser and request.admin_profile:
-        accessible_branches = request.admin_profile.get_accessible_branches()
-        if order.branch not in accessible_branches:
-            messages.error(request, "You don't have access to this order.")
-            return redirect('ordersList')
-        
-        # Staff can only update orders assigned to them
-        if request.is_staff_member and order.assigned_to != request.admin_profile:
-            messages.error(request, "You can only update orders assigned to you.")
-            return redirect('ordersList')
-    
     new_status = request.POST.get('status')
+    
+    # Determine which permission is needed based on target status
+    if new_status == 'completed':
+        required_permission = 'can_complete_orders'
+    elif new_status == 'cancelled':
+        required_permission = 'can_cancel_orders'
+    else:
+        required_permission = 'can_update_order_status'
+    
+    # Check permission
+    if not has_order_permission(request, required_permission, order):
+        messages.error(request, f"You don't have permission to change order status.")
+        return redirect('orderDetail', order_id=order_id)
+    
     if new_status not in dict(Order.STATUS_CHOICES):
         messages.error(request, 'Invalid status')
         return redirect('orderDetail', order_id=order_id)
@@ -280,21 +533,24 @@ def updateOrderStatus(request, order_id):
 
 @login_required(login_url='admin_login')
 def deleteOrder(request, order_id):
-    """Delete an order - only owners/superusers"""
+    """Delete an order - permission-based access control"""
     order = get_object_or_404(Order, id=order_id)
     
-    # Only superusers and owners can delete orders
-    if not request.user.is_superuser:
-        if not request.admin_profile or not request.is_owner:
-            messages.error(request, "Only owners can delete orders.")
-            return redirect('ordersList')
-        
-        # Check if owner has access to this order's branch
-        if order.branch and order.branch.center.owner != request.user:
-            messages.error(request, "You don't have access to this order.")
-            return redirect('ordersList')
+    # Check permission using granular permission system
+    if not has_order_permission(request, 'can_delete_orders', order):
+        messages.error(request, "You don't have permission to delete orders.")
+        return redirect('ordersList')
     
     if request.method == 'POST':
+        # Audit log before deletion
+        log_action(
+            user=request.user,
+            action='delete',
+            target=order,
+            details=f'Order #{order.id} deleted',
+            changes={'order_id': order.id, 'status': order.status},
+            request=request
+        )
         order.delete()
         messages.success(request, f'Order #{order_id} has been deleted')
         return redirect('ordersList')
@@ -305,24 +561,13 @@ def deleteOrder(request, order_id):
 @login_required(login_url='admin_login')
 @require_POST
 def assignOrder(request, order_id):
-    """Assign an order to a staff member - owners/managers only"""
+    """Assign an order to a staff member - permission-based access control"""
     order = get_object_or_404(Order, id=order_id)
     
-    # Check permissions
-    if not request.user.is_superuser:
-        if not request.admin_profile:
-            messages.error(request, "You need an admin profile to assign orders.")
-            return redirect('ordersList')
-        
-        if not (request.is_owner or request.is_manager):
-            messages.error(request, "Only owners and managers can assign orders.")
-            return redirect('orderDetail', order_id=order_id)
-        
-        # Check branch access
-        accessible_branches = request.admin_profile.get_accessible_branches()
-        if order.branch not in accessible_branches:
-            messages.error(request, "You don't have access to this order.")
-            return redirect('ordersList')
+    # Check permission using granular permission system
+    if not has_order_permission(request, 'can_assign_orders', order):
+        messages.error(request, "You don't have permission to assign orders.")
+        return redirect('orderDetail', order_id=order_id)
     
     staff_id = request.POST.get('staff_id')
     if not staff_id:
@@ -335,10 +580,16 @@ def assignOrder(request, order_id):
         messages.error(request, "Invalid staff member selected.")
         return redirect('orderDetail', order_id=order_id)
     
-    # Verify staff is in the same branch as the order
-    if staff_member.branch != order.branch:
-        messages.error(request, "Staff member must be in the same branch as the order.")
-        return redirect('orderDetail', order_id=order_id)
+    # For superusers, allow any assignment - also set the order's branch if not set
+    if request.user.is_superuser:
+        if not order.branch and staff_member.branch:
+            order.branch = staff_member.branch
+            order.save(update_fields=['branch'])
+    else:
+        # Verify staff is in the same branch as the order (if order has a branch)
+        if order.branch and staff_member.branch != order.branch:
+            messages.error(request, "Staff member must be in the same branch as the order.")
+            return redirect('orderDetail', order_id=order_id)
     
     # Assign the order
     assigner = request.admin_profile if request.admin_profile else None
@@ -371,21 +622,10 @@ def unassignOrder(request, order_id):
     """Unassign an order from a staff member - owners/managers only"""
     order = get_object_or_404(Order, id=order_id)
     
-    # Check permissions
-    if not request.user.is_superuser:
-        if not request.admin_profile:
-            messages.error(request, "You need an admin profile to unassign orders.")
-            return redirect('ordersList')
-        
-        if not (request.is_owner or request.is_manager):
-            messages.error(request, "Only owners and managers can unassign orders.")
-            return redirect('orderDetail', order_id=order_id)
-        
-        # Check branch access
-        accessible_branches = request.admin_profile.get_accessible_branches()
-        if order.branch not in accessible_branches:
-            messages.error(request, "You don't have access to this order.")
-            return redirect('ordersList')
+    # Check permission using granular permission system
+    if not has_order_permission(request, 'can_assign_orders', order):
+        messages.error(request, "You don't have permission to unassign orders.")
+        return redirect('orderDetail', order_id=order_id)
     
     # Clear assignment
     previous_assignee = order.assigned_to
@@ -422,24 +662,13 @@ def unassignOrder(request, order_id):
 @login_required(login_url='admin_login')
 @require_POST
 def receivePayment(request, order_id):
-    """Mark payment as received - owners/managers only"""
+    """Mark payment as received - permission-based access control"""
     order = get_object_or_404(Order, id=order_id)
     
-    # Check permissions
-    if not request.user.is_superuser:
-        if not request.admin_profile:
-            messages.error(request, "You need an admin profile to receive payments.")
-            return redirect('ordersList')
-        
-        if not (request.is_owner or request.is_manager):
-            messages.error(request, "Only owners and managers can receive payments.")
-            return redirect('orderDetail', order_id=order_id)
-        
-        # Check branch access
-        accessible_branches = request.admin_profile.get_accessible_branches()
-        if order.branch not in accessible_branches:
-            messages.error(request, "You don't have access to this order.")
-            return redirect('ordersList')
+    # Check permission using granular permission system
+    if not has_order_permission(request, 'can_receive_payments', order):
+        messages.error(request, "You don't have permission to receive payments.")
+        return redirect('orderDetail', order_id=order_id)
     
     # Mark payment received
     receiver = request.admin_profile if request.admin_profile else None
@@ -461,25 +690,13 @@ def receivePayment(request, order_id):
 @login_required(login_url='admin_login')
 @require_POST
 def completeOrder(request, order_id):
-    """Mark order as completed"""
+    """Mark order as completed - permission-based access control"""
     order = get_object_or_404(Order, id=order_id)
     
-    # Check permissions
-    if not request.user.is_superuser:
-        if not request.admin_profile:
-            messages.error(request, "You need an admin profile to complete orders.")
-            return redirect('ordersList')
-        
-        # Check branch access
-        accessible_branches = request.admin_profile.get_accessible_branches()
-        if order.branch not in accessible_branches:
-            messages.error(request, "You don't have access to this order.")
-            return redirect('ordersList')
-        
-        # Staff can only complete orders assigned to them
-        if request.is_staff_member and order.assigned_to != request.admin_profile:
-            messages.error(request, "You can only complete orders assigned to you.")
-            return redirect('orderDetail', order_id=order_id)
+    # Check permission using granular permission system
+    if not has_order_permission(request, 'can_complete_orders', order):
+        messages.error(request, "You don't have permission to complete orders.")
+        return redirect('orderDetail', order_id=order_id)
     
     # Check if order is ready to be completed
     if order.status not in ['ready', 'in_progress']:

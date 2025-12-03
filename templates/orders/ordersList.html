@@ -2,6 +2,53 @@
 {% load static %}
 
 {% block content %}
+<!-- View Mode Toggle -->
+<div class="d-flex align-items-center justify-content-between mb-16">
+    {% if can_view_all %}
+    <!-- User can view all orders - show toggle buttons -->
+    <div class="btn-group" role="group">
+        <a href="?view=all{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}" 
+           class="btn {% if view_mode == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm px-16">
+            <iconify-icon icon="solar:documents-bold" class="me-4"></iconify-icon>
+            All Orders <span class="badge {% if view_mode == 'all' %}bg-white text-primary-600{% else %}bg-primary-100 text-primary-600{% endif %} ms-4">{{ stats.total }}</span>
+        </a>
+        <a href="?view=mine{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}" 
+           class="btn {% if view_mode == 'mine' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm px-16">
+            <iconify-icon icon="solar:user-bold" class="me-4"></iconify-icon>
+            My Orders {% if my_stats %}<span class="badge {% if view_mode == 'mine' %}bg-white text-primary-600{% else %}bg-primary-100 text-primary-600{% endif %} ms-4">{{ my_stats.total }}</span>{% endif %}
+        </a>
+    </div>
+    {% else %}
+    <!-- User can only view their own orders - show title only -->
+    <div class="d-flex align-items-center gap-8">
+        <iconify-icon icon="solar:user-bold" class="text-primary-600 text-xl"></iconify-icon>
+        <h6 class="mb-0 fw-semibold">My Orders</h6>
+        <span class="badge bg-primary-100 text-primary-600 px-12 py-4">{{ stats.total }}</span>
+    </div>
+    {% endif %}
+    
+    <!-- Quick stats for current view -->
+    {% if view_mode == 'mine' and my_stats %}
+    <div class="d-flex gap-12">
+        <span class="badge bg-info-100 text-info-600 px-12 py-6">
+            <iconify-icon icon="mdi:progress-clock" class="me-4"></iconify-icon>In Progress: {{ my_stats.in_progress }}
+        </span>
+        <span class="badge bg-success-100 text-success-600 px-12 py-6">
+            <iconify-icon icon="mdi:check-circle" class="me-4"></iconify-icon>Completed: {{ my_stats.completed }}
+        </span>
+    </div>
+    {% elif not can_view_all %}
+    <div class="d-flex gap-12">
+        <span class="badge bg-info-100 text-info-600 px-12 py-6">
+            <iconify-icon icon="mdi:progress-clock" class="me-4"></iconify-icon>In Progress: {{ stats.in_progress }}
+        </span>
+        <span class="badge bg-success-100 text-success-600 px-12 py-6">
+            <iconify-icon icon="mdi:check-circle" class="me-4"></iconify-icon>Completed: {{ stats.completed }}
+        </span>
+    </div>
+    {% endif %}
+</div>
+
 <!-- Stats Cards -->
 <div class="row gy-4 mb-24">
     <div class="col-xxl-2 col-lg-4 col-sm-6">
@@ -56,6 +103,7 @@
             </div>
         </div>
     </div>
+    {% if can_view_all %}
     <div class="col-xxl-2 col-lg-4 col-sm-6">
         <div class="card px-16 py-12 shadow-none radius-8 border h-100">
             <div class="d-flex align-items-center gap-2">
@@ -69,6 +117,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 
 <div class="card h-100 p-0 radius-12">
@@ -114,14 +163,15 @@
                     {% endfor %}
                 </select>
                 {% endif %}
+                {% if can_view_all %}
                 <select name="assignment" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
                     <option value="" data-i18n="common.allOrders">All Orders</option>
                     <option value="unassigned" {% if assignment_filter == 'unassigned' %}selected{% endif %} data-i18n="status.unassigned">Unassigned</option>
                     <option value="assigned" {% if assignment_filter == 'assigned' %}selected{% endif %} data-i18n="status.assigned">Assigned</option>
-                    {% if request.admin_profile %}
-                    <option value="mine" {% if assignment_filter == 'mine' %}selected{% endif %} data-i18n="status.assignedToMe">Assigned to Me</option>
-                    {% endif %}
                 </select>
+                {% endif %}
+                <!-- Preserve view mode in form -->
+                <input type="hidden" name="view" value="{{ view_mode }}">
             </form>
         </div>
     </div>
@@ -258,6 +308,11 @@
                                 <a href="{% url 'orderDetail' order.id %}" class="bg-info-focus text-info-600 w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" title="View">
                                     <iconify-icon icon="majesticons:eye-line" class="text-lg"></iconify-icon>
                                 </a>
+                                {% if request.user.is_superuser or is_owner or is_manager %}
+                                <a href="{% url 'orderEdit' order.id %}" class="bg-success-focus text-success-600 w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" title="Edit">
+                                    <iconify-icon icon="lucide:edit" class="text-lg"></iconify-icon>
+                                </a>
+                                {% endif %}
                                 {% if request.user.is_superuser or is_owner %}
                                 <button type="button" class="bg-danger-focus text-danger-600 w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle border-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ order.id }}" title="Delete">
                                     <iconify-icon icon="fluent:delete-24-regular" class="text-lg"></iconify-icon>

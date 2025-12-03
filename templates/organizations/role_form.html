@@ -5,7 +5,7 @@
     /* Checkbox spacing fix */
     .form-check {
         padding-left: 1.75em;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
     }
     .form-check .form-check-input {
         margin-left: -1.75em;
@@ -35,6 +35,21 @@
         border-bottom: 1px solid var(--border-color);
         padding-bottom: 0.5rem;
         margin-bottom: 1rem;
+    }
+    .perm-hint {
+        font-size: 10px;
+        margin-left: 1.75em;
+        margin-bottom: 0.5rem;
+    }
+    .master-permission {
+        background: linear-gradient(135deg, rgba(var(--warning-rgb), 0.1) 0%, transparent 100%);
+        border-radius: 6px;
+        padding: 8px;
+        margin-bottom: 8px;
+        border: 1px dashed rgba(var(--warning-rgb), 0.5);
+    }
+    .master-permission .form-check-label {
+        font-weight: 600;
     }
 </style>
 <div class="row gy-4">
@@ -101,124 +116,319 @@
                     
                     <!-- Permissions -->
                     <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-12" data-i18n="form.permissions">Permissions</label>
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-12 d-flex align-items-center gap-2">
+                            <iconify-icon icon="lucide:shield-check"></iconify-icon>
+                            <span data-i18n="form.permissions">Permissions</span>
+                        </label>
                         
                         <div class="row g-3">
                             <!-- Organization Management -->
-                            <div class="col-md-6 col-lg-3">
-                                <div class="permission-card border">
-                                    <h6 class="text-sm fw-semibold text-secondary-light permission-section-header">
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-card border border-primary-100">
+                                    <h6 class="text-sm fw-semibold text-primary-main permission-section-header">
                                         <iconify-icon icon="lucide:building-2"></iconify-icon>
-                                        <span data-i18n="form.organizationManagement">Organization</span>
+                                        <span>Organization</span>
                                     </h6>
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_manage_center" id="can_manage_center"
                                                {% if role.can_manage_center %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_manage_center" data-i18n="permission.manageCenter">
+                                        <label class="form-check-label" for="can_manage_center">
                                             Manage Centers
                                         </label>
                                     </div>
+                                    <div class="perm-hint text-secondary-light">Create, edit, delete centers</div>
+                                    
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_manage_branches" id="can_manage_branches"
                                                {% if role.can_manage_branches %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_manage_branches" data-i18n="permission.manageBranches">
+                                        <label class="form-check-label" for="can_manage_branches">
                                             Manage Branches
                                         </label>
                                     </div>
+                                    <div class="perm-hint text-secondary-light">Create, edit branches</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Staff Management -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-card border border-info-100">
+                                    <h6 class="text-sm fw-semibold text-info-main permission-section-header">
+                                        <iconify-icon icon="lucide:users"></iconify-icon>
+                                        <span>Staff Management</span>
+                                    </h6>
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_manage_staff" id="can_manage_staff"
                                                {% if role.can_manage_staff %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_manage_staff" data-i18n="permission.manageStaff">
+                                        <label class="form-check-label" for="can_manage_staff">
                                             Manage Staff
                                         </label>
                                     </div>
+                                    <div class="perm-hint text-secondary-light">Add, edit, remove staff members</div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_view_staff" id="can_view_staff"
+                                               {% if role.can_view_staff %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_view_staff">
+                                            View Staff (Read-Only)
+                                        </label>
+                                    </div>
+                                    <div class="perm-hint text-secondary-light">View staff profiles</div>
                                 </div>
                             </div>
                             
-                            <!-- Order Management -->
-                            <div class="col-md-6 col-lg-3">
-                                <div class="permission-card border">
-                                    <h6 class="text-sm fw-semibold text-secondary-light permission-section-header">
-                                        <iconify-icon icon="lucide:package"></iconify-icon>
-                                        <span data-i18n="form.orderManagement">Orders</span>
+                            <!-- Order Management - Full Width for more permissions -->
+                            <div class="col-12">
+                                <div class="permission-card border border-success-100">
+                                    <h6 class="text-sm fw-semibold text-success-main permission-section-header">
+                                        <iconify-icon icon="lucide:file-text"></iconify-icon>
+                                        <span>Order Management</span>
+                                        <span class="badge bg-success-100 text-success-600 text-xs ms-2">Granular</span>
                                     </h6>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_view_all_orders" id="can_view_all_orders"
-                                               {% if role.can_view_all_orders %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_view_all_orders" data-i18n="permission.viewAllOrders">
-                                            View All Orders
-                                        </label>
+                                    
+                                    <!-- Master Permission -->
+                                    <div class="master-permission">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="can_manage_orders" id="can_manage_orders"
+                                                   {% if role.can_manage_orders %}checked{% endif %}>
+                                            <label class="form-check-label text-warning-600" for="can_manage_orders">
+                                                <iconify-icon icon="lucide:crown" class="me-1"></iconify-icon>
+                                                Full Order Management
+                                            </label>
+                                        </div>
+                                        <div class="perm-hint text-secondary-light">Master permission - grants all order operations</div>
                                     </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_manage_orders" id="can_manage_orders"
-                                               {% if role.can_manage_orders %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_manage_orders" data-i18n="permission.manageOrders">
-                                            Manage Orders
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_assign_orders" id="can_assign_orders"
-                                               {% if role.can_assign_orders %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_assign_orders" data-i18n="permission.assignOrders">
-                                            Assign Orders
-                                        </label>
+                                    
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <strong class="text-xs text-secondary-light d-block mb-2">View Orders</strong>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="can_view_all_orders" id="can_view_all_orders"
+                                                       {% if role.can_view_all_orders %}checked{% endif %}>
+                                                <label class="form-check-label" for="can_view_all_orders">
+                                                    View All Orders
+                                                </label>
+                                            </div>
+                                            <div class="perm-hint text-secondary-light">See all orders in branch/center</div>
+                                            
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="can_view_own_orders" id="can_view_own_orders"
+                                                       {% if role.can_view_own_orders %}checked{% endif %} checked>
+                                                <label class="form-check-label" for="can_view_own_orders">
+                                                    View Own Orders
+                                                </label>
+                                            </div>
+                                            <div class="perm-hint text-secondary-light">See assigned orders only</div>
+                                        </div>
+                                        
+                                        <div class="col-md-4">
+                                            <strong class="text-xs text-secondary-light d-block mb-2">Create & Modify</strong>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="can_create_orders" id="can_create_orders"
+                                                       {% if role.can_create_orders %}checked{% endif %}>
+                                                <label class="form-check-label" for="can_create_orders">
+                                                    Create Orders
+                                                </label>
+                                            </div>
+                                            <div class="perm-hint text-secondary-light">Create new orders</div>
+                                            
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="can_edit_orders" id="can_edit_orders"
+                                                       {% if role.can_edit_orders %}checked{% endif %}>
+                                                <label class="form-check-label" for="can_edit_orders">
+                                                    Edit Orders
+                                                </label>
+                                            </div>
+                                            <div class="perm-hint text-secondary-light">Modify order details & files</div>
+                                            
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="can_delete_orders" id="can_delete_orders"
+                                                       {% if role.can_delete_orders %}checked{% endif %}>
+                                                <label class="form-check-label text-danger-500" for="can_delete_orders">
+                                                    Delete Orders
+                                                </label>
+                                            </div>
+                                            <div class="perm-hint text-secondary-light">Permanently remove orders</div>
+                                        </div>
+                                        
+                                        <div class="col-md-4">
+                                            <strong class="text-xs text-secondary-light d-block mb-2">Workflow & Status</strong>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="can_assign_orders" id="can_assign_orders"
+                                                       {% if role.can_assign_orders %}checked{% endif %}>
+                                                <label class="form-check-label" for="can_assign_orders">
+                                                    Assign Orders
+                                                </label>
+                                            </div>
+                                            <div class="perm-hint text-secondary-light">Assign to staff members</div>
+                                            
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="can_update_order_status" id="can_update_order_status"
+                                                       {% if role.can_update_order_status %}checked{% endif %}>
+                                                <label class="form-check-label" for="can_update_order_status">
+                                                    Update Status
+                                                </label>
+                                            </div>
+                                            <div class="perm-hint text-secondary-light">Change order status</div>
+                                            
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="can_complete_orders" id="can_complete_orders"
+                                                       {% if role.can_complete_orders %}checked{% endif %}>
+                                                <label class="form-check-label" for="can_complete_orders">
+                                                    Complete Orders
+                                                </label>
+                                            </div>
+                                            <div class="perm-hint text-secondary-light">Mark as completed</div>
+                                            
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="can_cancel_orders" id="can_cancel_orders"
+                                                       {% if role.can_cancel_orders %}checked{% endif %}>
+                                                <label class="form-check-label text-danger-500" for="can_cancel_orders">
+                                                    Cancel Orders
+                                                </label>
+                                            </div>
+                                            <div class="perm-hint text-secondary-light">Cancel active orders</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Financial & Reports -->
-                            <div class="col-md-6 col-lg-3">
-                                <div class="permission-card border">
-                                    <h6 class="text-sm fw-semibold text-secondary-light permission-section-header">
-                                        <iconify-icon icon="lucide:bar-chart-3"></iconify-icon>
-                                        <span data-i18n="form.financialReports">Financial</span>
+                            <!-- Financial -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-card border border-warning-100">
+                                    <h6 class="text-sm fw-semibold text-warning-main permission-section-header">
+                                        <iconify-icon icon="lucide:banknote"></iconify-icon>
+                                        <span>Financial</span>
                                     </h6>
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_receive_payments" id="can_receive_payments"
                                                {% if role.can_receive_payments %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_receive_payments" data-i18n="permission.receivePayments">
+                                        <label class="form-check-label" for="can_receive_payments">
                                             Receive Payments
                                         </label>
                                     </div>
+                                    <div class="perm-hint text-secondary-light">Record customer payments</div>
+                                    
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_view_reports" id="can_view_reports"
-                                               {% if role.can_view_reports %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_view_reports" data-i18n="permission.viewReports">
-                                            View Reports
+                                        <input class="form-check-input" type="checkbox" name="can_view_financial_reports" id="can_view_financial_reports"
+                                               {% if role.can_view_financial_reports %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_view_financial_reports">
+                                            View Financial Reports
                                         </label>
                                     </div>
+                                    <div class="perm-hint text-secondary-light">Access revenue data</div>
+                                    
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_export_data" id="can_export_data"
-                                               {% if role.can_export_data %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_export_data" data-i18n="permission.exportData">
-                                            Export Data
+                                        <input class="form-check-input" type="checkbox" name="can_apply_discounts" id="can_apply_discounts"
+                                               {% if role.can_apply_discounts %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_apply_discounts">
+                                            Apply Discounts
                                         </label>
                                     </div>
+                                    <div class="perm-hint text-secondary-light">Give discounts to orders</div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_refund_orders" id="can_refund_orders"
+                                               {% if role.can_refund_orders %}checked{% endif %}>
+                                        <label class="form-check-label text-danger-500" for="can_refund_orders">
+                                            Refund Orders
+                                        </label>
+                                    </div>
+                                    <div class="perm-hint text-secondary-light">Process refunds</div>
                                 </div>
                             </div>
                             
-                            <!-- Other -->
-                            <div class="col-md-6 col-lg-3">
-                                <div class="permission-card border">
-                                    <h6 class="text-sm fw-semibold text-secondary-light permission-section-header">
-                                        <iconify-icon icon="lucide:settings"></iconify-icon>
-                                        <span data-i18n="form.otherPermissions">Other</span>
+                            <!-- Reports & Analytics -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-card border border-purple-100">
+                                    <h6 class="text-sm fw-semibold text-purple-main permission-section-header">
+                                        <iconify-icon icon="lucide:bar-chart-3"></iconify-icon>
+                                        <span>Reports & Analytics</span>
+                                    </h6>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_view_reports" id="can_view_reports"
+                                               {% if role.can_view_reports %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_view_reports">
+                                            View Reports
+                                        </label>
+                                    </div>
+                                    <div class="perm-hint text-secondary-light">Access performance reports</div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_view_analytics" id="can_view_analytics"
+                                               {% if role.can_view_analytics %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_view_analytics">
+                                            View Analytics
+                                        </label>
+                                    </div>
+                                    <div class="perm-hint text-secondary-light">Dashboard with charts</div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_export_data" id="can_export_data"
+                                               {% if role.can_export_data %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_export_data">
+                                            Export Data
+                                        </label>
+                                    </div>
+                                    <div class="perm-hint text-secondary-light">Download Excel/CSV files</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Products & Customers -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-card border border-danger-100">
+                                    <h6 class="text-sm fw-semibold text-danger-main permission-section-header">
+                                        <iconify-icon icon="lucide:box"></iconify-icon>
+                                        <span>Products & Customers</span>
                                     </h6>
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_manage_products" id="can_manage_products"
                                                {% if role.can_manage_products %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_manage_products" data-i18n="permission.manageProducts">
+                                        <label class="form-check-label" for="can_manage_products">
                                             Manage Products
                                         </label>
                                     </div>
+                                    <div class="perm-hint text-secondary-light">Add, edit services & pricing</div>
+                                    
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_manage_customers" id="can_manage_customers"
                                                {% if role.can_manage_customers %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_manage_customers" data-i18n="permission.manageCustomers">
+                                        <label class="form-check-label" for="can_manage_customers">
                                             Manage Customers
                                         </label>
                                     </div>
+                                    <div class="perm-hint text-secondary-light">Edit customer records</div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_view_customer_details" id="can_view_customer_details"
+                                               {% if role.can_view_customer_details %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_view_customer_details">
+                                            View Customers (Read-Only)
+                                        </label>
+                                    </div>
+                                    <div class="perm-hint text-secondary-light">View customer info</div>
                                 </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Permission Templates -->
+                        <div class="mt-16 p-16 bg-neutral-50 radius-8">
+                            <h6 class="text-sm fw-semibold mb-12">
+                                <iconify-icon icon="lucide:zap" class="me-1"></iconify-icon>
+                                <span data-i18n="form.quickTemplates">Quick Permission Templates</span>
+                            </h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="applyTemplate('owner')">
+                                    <iconify-icon icon="lucide:crown" class="me-1"></iconify-icon> Owner (All)
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-info" onclick="applyTemplate('manager')">
+                                    <iconify-icon icon="lucide:user-cog" class="me-1"></iconify-icon> Manager
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick="applyTemplate('staff')">
+                                    <iconify-icon icon="lucide:user" class="me-1"></iconify-icon> Staff
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="applyTemplate('none')">
+                                    <iconify-icon icon="lucide:x" class="me-1"></iconify-icon> Clear All
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -251,33 +461,177 @@
             <div class="card-body p-24">
                 <div class="d-flex flex-column gap-16">
                     <div>
-                        <h6 class="text-sm fw-semibold text-primary-main mb-4" data-i18n="form.organizationPermissions">Organization Permissions</h6>
-                        <p class="text-sm text-secondary-light mb-0" data-i18n="form.organizationPermissionsDesc">
-                            Control access to centers, branches, and staff management. Usually for owners and managers.
+                        <h6 class="text-sm fw-semibold text-primary-main mb-4">Organization Permissions</h6>
+                        <p class="text-sm text-secondary-light mb-0">
+                            Control access to centers, branches, and staff management. Usually for owners.
                         </p>
                     </div>
                     <div>
-                        <h6 class="text-sm fw-semibold text-info-main mb-4" data-i18n="form.orderPermissions">Order Permissions</h6>
-                        <p class="text-sm text-secondary-light mb-0" data-i18n="form.orderPermissionsDesc">
-                            "View All Orders" shows all branch orders. "Manage Orders" allows status updates. "Assign Orders" allows delegation to staff.
+                        <h6 class="text-sm fw-semibold text-success-main mb-4">Order Permissions</h6>
+                        <p class="text-sm text-secondary-light mb-0">
+                            <strong>Full Order Management</strong> grants all order operations. Otherwise, use granular permissions for specific actions.
                         </p>
                     </div>
                     <div>
-                        <h6 class="text-sm fw-semibold text-success-main mb-4" data-i18n="form.financialPermissions">Financial Permissions</h6>
-                        <p class="text-sm text-secondary-light mb-0" data-i18n="form.financialPermissionsDesc">
-                            "Receive Payments" allows marking orders as paid. "View Reports" shows analytics dashboards.
+                        <h6 class="text-sm fw-semibold text-warning-main mb-4">Financial Permissions</h6>
+                        <p class="text-sm text-secondary-light mb-0">
+                            Control who can receive payments, view revenue, apply discounts, and process refunds.
+                        </p>
+                    </div>
+                    <div>
+                        <h6 class="text-sm fw-semibold text-purple-main mb-4">Reports Permissions</h6>
+                        <p class="text-sm text-secondary-light mb-0">
+                            Separate permissions for reports, analytics, and data export capabilities.
                         </p>
                     </div>
                     
                     {% if role.is_system_role %}
                     <div class="alert alert-warning-100 text-warning-600 radius-8 py-12 px-16 d-flex align-items-start gap-2">
                         <iconify-icon icon="lucide:alert-triangle" class="flex-shrink-0 mt-1"></iconify-icon>
-                        <span data-i18n="form.systemRoleNote">System Role: The role name cannot be changed as it's used internally.</span>
+                        <span>System Role: The role name cannot be changed as it's used internally.</span>
                     </div>
                     {% endif %}
                 </div>
             </div>
         </div>
+        
+        <!-- Permission Count Summary -->
+        <div class="card radius-8 border-0 mt-3">
+            <div class="card-header py-12 px-24 border-bottom bg-base">
+                <h6 class="mb-0 fw-semibold text-sm d-flex align-items-center gap-2">
+                    <iconify-icon icon="lucide:check-circle"></iconify-icon>
+                    <span id="permission-count">0</span> Permissions Selected
+                </h6>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+// All permission checkboxes IDs
+const allPermissions = [
+    // Organization
+    'can_manage_center', 'can_manage_branches',
+    // Staff
+    'can_manage_staff', 'can_view_staff',
+    // Orders
+    'can_view_all_orders', 'can_view_own_orders', 'can_create_orders', 'can_edit_orders',
+    'can_delete_orders', 'can_assign_orders', 'can_update_order_status', 'can_complete_orders',
+    'can_cancel_orders', 'can_manage_orders',
+    // Financial
+    'can_receive_payments', 'can_view_financial_reports', 'can_apply_discounts', 'can_refund_orders',
+    // Reports
+    'can_view_reports', 'can_view_analytics', 'can_export_data',
+    // Products & Customers
+    'can_manage_products', 'can_manage_customers', 'can_view_customer_details'
+];
+
+// Order-related permissions (excluding the master permission)
+const orderPermissions = [
+    'can_view_all_orders', 'can_view_own_orders', 'can_create_orders', 'can_edit_orders',
+    'can_delete_orders', 'can_assign_orders', 'can_update_order_status', 'can_complete_orders',
+    'can_cancel_orders'
+];
+
+// Templates
+const templates = {
+    'owner': {
+        'can_manage_center': true, 'can_manage_branches': true,
+        'can_manage_staff': true, 'can_view_staff': true,
+        'can_view_all_orders': true, 'can_view_own_orders': true, 'can_create_orders': true, 'can_edit_orders': true,
+        'can_delete_orders': true, 'can_assign_orders': true, 'can_update_order_status': true, 'can_complete_orders': true,
+        'can_cancel_orders': true, 'can_manage_orders': true,
+        'can_receive_payments': true, 'can_view_financial_reports': true, 'can_apply_discounts': true, 'can_refund_orders': true,
+        'can_view_reports': true, 'can_view_analytics': true, 'can_export_data': true,
+        'can_manage_products': true, 'can_manage_customers': true, 'can_view_customer_details': true
+    },
+    'manager': {
+        'can_manage_center': false, 'can_manage_branches': false,
+        'can_manage_staff': false, 'can_view_staff': true,
+        'can_view_all_orders': true, 'can_view_own_orders': true, 'can_create_orders': true, 'can_edit_orders': true,
+        'can_delete_orders': false, 'can_assign_orders': true, 'can_update_order_status': true, 'can_complete_orders': true,
+        'can_cancel_orders': true, 'can_manage_orders': true,
+        'can_receive_payments': true, 'can_view_financial_reports': true, 'can_apply_discounts': true, 'can_refund_orders': false,
+        'can_view_reports': true, 'can_view_analytics': true, 'can_export_data': false,
+        'can_manage_products': false, 'can_manage_customers': true, 'can_view_customer_details': true
+    },
+    'staff': {
+        'can_manage_center': false, 'can_manage_branches': false,
+        'can_manage_staff': false, 'can_view_staff': false,
+        'can_view_all_orders': false, 'can_view_own_orders': true, 'can_create_orders': false, 'can_edit_orders': false,
+        'can_delete_orders': false, 'can_assign_orders': false, 'can_update_order_status': true, 'can_complete_orders': true,
+        'can_cancel_orders': false, 'can_manage_orders': false,
+        'can_receive_payments': true, 'can_view_financial_reports': false, 'can_apply_discounts': false, 'can_refund_orders': false,
+        'can_view_reports': false, 'can_view_analytics': false, 'can_export_data': false,
+        'can_manage_products': false, 'can_manage_customers': false, 'can_view_customer_details': true
+    },
+    'none': {}  // All false
+};
+
+function applyTemplate(template) {
+    const selectedTemplate = templates[template] || {};
+    allPermissions.forEach(perm => {
+        const checkbox = document.getElementById(perm);
+        if (checkbox) {
+            checkbox.checked = selectedTemplate[perm] || false;
+        }
+    });
+    updateOrderPermissionsState();
+    updatePermissionCount();
+}
+
+function updatePermissionCount() {
+    let count = 0;
+    allPermissions.forEach(perm => {
+        const checkbox = document.getElementById(perm);
+        if (checkbox && checkbox.checked) {
+            count++;
+        }
+    });
+    document.getElementById('permission-count').textContent = count;
+}
+
+function updateOrderPermissionsState() {
+    const masterCheckbox = document.getElementById('can_manage_orders');
+    const isFullManagement = masterCheckbox && masterCheckbox.checked;
+    
+    orderPermissions.forEach(perm => {
+        const checkbox = document.getElementById(perm);
+        if (checkbox) {
+            if (isFullManagement) {
+                // Auto-check and disable when master is checked
+                checkbox.checked = true;
+                checkbox.disabled = true;
+                checkbox.parentElement.classList.add('opacity-50');
+            } else {
+                // Enable when master is unchecked
+                checkbox.disabled = false;
+                checkbox.parentElement.classList.remove('opacity-50');
+            }
+        }
+    });
+    updatePermissionCount();
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up master permission toggle
+    const masterCheckbox = document.getElementById('can_manage_orders');
+    if (masterCheckbox) {
+        masterCheckbox.addEventListener('change', updateOrderPermissionsState);
+        // Apply initial state
+        updateOrderPermissionsState();
+    }
+    
+    // Set up permission count updates
+    allPermissions.forEach(perm => {
+        const checkbox = document.getElementById(perm);
+        if (checkbox) {
+            checkbox.addEventListener('change', updatePermissionCount);
+        }
+    });
+    
+    updatePermissionCount();
+});
+</script>
 {% endblock content %}
