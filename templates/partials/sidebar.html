@@ -1,3 +1,4 @@
+{% load permission_tags %}
 <aside class="sidebar">
     <button type="button" class="sidebar-close-btn">
         <iconify-icon icon="radix-icons:cross-2"></iconify-icon>
@@ -19,7 +20,8 @@
             </li>
             
             <!-- Organizations Menu - visible based on role -->
-            {% if is_owner or user.is_superuser %}
+            {% is_at_least 'owner' as is_owner_plus %}
+            {% if is_owner_plus %}
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="mdi:domain" class="menu-icon"></iconify-icon>
@@ -32,19 +34,23 @@
                     <li>
                         <a href="{% url 'branch_list' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.branches">Branches</span></a>
                     </li>
-                    {% if permissions.can_manage_staff or permissions.can_view_staff %}
+                    {% has_any_perm 'can_manage_staff,can_view_staff' as can_view_staff_menu %}
+                    {% if can_view_staff_menu %}
                     <li>
                         <a href="{% url 'staff_list' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.staff">Staff</span></a>
                     </li>
                     {% endif %}
-                    {% if user.is_superuser %}
+                    {% is_role 'superuser' as is_super %}
+                    {% if is_super %}
                     <li>
                         <a href="{% url 'role_list' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.rolesPermissions">Roles & Permissions</span></a>
                     </li>
                     {% endif %}
                 </ul>
             </li>
-            {% elif is_manager or permissions.can_view_staff or permissions.can_manage_staff %}
+            {% else %}
+            {% has_any_perm 'can_view_staff,can_manage_staff' as can_staff_section %}
+            {% if is_manager or can_staff_section %}
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="mdi:domain" class="menu-icon"></iconify-icon>
@@ -54,13 +60,14 @@
                     <li>
                         <a href="{% url 'branch_list' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.branchInfo">Branch Info</span></a>
                     </li>
-                    {% if permissions.can_manage_staff or permissions.can_view_staff %}
+                    {% if can_staff_section %}
                     <li>
                         <a href="{% url 'staff_list' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.staff">Staff</span></a>
                     </li>
                     {% endif %}
                 </ul>
             </li>
+            {% endif %}
             {% endif %}
             
             <li>
@@ -75,7 +82,9 @@
                     <span data-i18n="sidebar.orders">Orders</span>
                 </a>
             </li>
-            {% if permissions.can_manage_products or user.is_superuser %}
+            
+            {% can_do 'products.manage' as can_products %}
+            {% if can_products %}
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="ri-star-line" class="menu-icon"></iconify-icon>
@@ -93,7 +102,8 @@
             {% endif %}
             
             <!-- Analytics Section - Permission-based visibility -->
-            {% if permissions.can_view_reports or permissions.can_view_analytics or permissions.can_view_financial_reports or user.is_superuser or is_staff_member %}
+            {% has_any_perm 'can_view_reports,can_view_analytics,can_view_financial_reports' as can_any_reports %}
+            {% if can_any_reports or is_staff_member %}
             <li class="sidebar-menu-group-title" data-i18n="sidebar.analyticsReports">Analytics & Reports</li>
             
             <!-- My Statistics - Visible to all staff members (their own stats) -->
@@ -107,19 +117,22 @@
             {% endif %}
             
             <!-- Sales & Finance Dashboards - Permission-based -->
-            {% if permissions.can_view_reports or permissions.can_view_analytics or user.is_superuser %}
+            {% has_any_perm 'can_view_reports,can_view_analytics' as can_dashboards %}
+            {% if can_dashboards %}
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="solar:wallet-money-bold-duotone" class="menu-icon"></iconify-icon>
                     <span data-i18n="sidebar.dashboards">Dashboards</span>
                 </a>
                 <ul class="sidebar-submenu">
-                    {% if permissions.can_view_reports or permissions.can_view_analytics or user.is_superuser %}
+                    {% can_do 'reports.view' as can_sales %}
+                    {% if can_sales %}
                     <li>
                         <a href="{% url 'sales' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> <span data-i18n="sidebar.salesDashboard">Sales Overview</span></a>
                     </li>
                     {% endif %}
-                    {% if permissions.can_view_financial_reports or permissions.can_view_analytics or user.is_superuser %}
+                    {% has_any_perm 'can_view_financial_reports,can_view_analytics' as can_finance %}
+                    {% if can_finance %}
                     <li>
                         <a href="{% url 'finance' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.financeDashboard">Finance & Payments</span></a>
                     </li>
@@ -129,34 +142,36 @@
             {% endif %}
             
             <!-- Detailed Reports - Permission-based -->
-            {% if permissions.can_view_reports or permissions.can_view_analytics or permissions.can_view_financial_reports or user.is_superuser %}
+            {% if can_any_reports %}
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="solar:chart-square-bold-duotone" class="menu-icon"></iconify-icon>
                     <span data-i18n="sidebar.reports">Reports</span>
                 </a>
                 <ul class="sidebar-submenu">
-                    {% if permissions.can_view_financial_reports or user.is_superuser %}
+                    {% can_do 'reports.financial' as can_financial %}
+                    {% if can_financial %}
                     <li>
                         <a href="{% url 'financial_reports' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.financialReports">Financial Reports</span></a>
                     </li>
                     {% endif %}
-                    {% if permissions.can_view_reports or permissions.can_view_analytics or user.is_superuser %}
+                    {% can_do 'reports.view' as can_order_reports %}
+                    {% if can_order_reports %}
                     <li>
                         <a href="{% url 'order_reports' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> <span data-i18n="sidebar.orderReports">Order Reports</span></a>
                     </li>
-                    {% endif %}
-                    {% if permissions.can_view_reports or permissions.can_view_analytics or user.is_superuser %}
                     <li>
                         <a href="{% url 'staff_performance' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.staffPerformance">Staff Performance</span></a>
                     </li>
                     {% endif %}
-                    {% if permissions.can_view_analytics or user.is_superuser %}
+                    {% can_do 'analytics.view' as can_analytics %}
+                    {% if can_analytics %}
                     <li>
                         <a href="{% url 'branch_comparison' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.branchComparison">Branch Comparison</span></a>
                     </li>
                     {% endif %}
-                    {% if permissions.can_view_analytics or permissions.can_view_customer_details or user.is_superuser %}
+                    {% has_any_perm 'can_view_analytics,can_view_customer_details' as can_customer_analytics %}
+                    {% if can_customer_analytics %}
                     <li>
                         <a href="{% url 'customer_analytics' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.customerAnalytics">Customer Analytics</span></a>
                     </li>
@@ -167,7 +182,8 @@
             {% endif %}
             
             <!-- Marketing & Broadcasts - Permission-based -->
-            {% if permissions.can_create_marketing_posts or permissions.can_send_branch_broadcasts or permissions.can_send_center_broadcasts or permissions.can_view_broadcast_stats or user.is_superuser or is_owner %}
+            {% has_any_perm 'can_create_marketing_posts,can_send_branch_broadcasts,can_send_center_broadcasts,can_view_broadcast_stats' as can_marketing %}
+            {% if can_marketing or is_owner %}
             <li>
                 <a href="{% url 'marketing_list' %}">
                     <iconify-icon icon="mdi:bullhorn" class="menu-icon"></iconify-icon>
@@ -175,46 +191,6 @@
                 </a>
             </li>
             {% endif %}
-            
-            <li class="sidebar-menu-group-title" data-i18n="sidebar.uiElements">UI Elements</li>
-
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <iconify-icon icon="mingcute:storage-line" class="menu-icon"></iconify-icon>
-                    <span>Table</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    <li>
-                        <a href="{% url 'basicTable' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> Basic Table</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'dataTable' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> Data Table</a>
-                    </li>
-                </ul>
-            </li>
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <iconify-icon icon="solar:pie-chart-outline" class="menu-icon"></iconify-icon>
-                    <span>Chart</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    <li>
-                        <a href="{% url 'lineChart' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> Line Chart</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'columnChart' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> Column Chart</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'pieChart' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> Pie Chart</a>
-                    </li>
-                </ul>
-            </li>
-            <li>
-                <a href="{% url 'widgets' %}">
-                    <iconify-icon icon="fe:vector" class="menu-icon"></iconify-icon>
-                    <span>Widgets</span>
-                </a>
-            </li>
 
         </ul>
     </div>

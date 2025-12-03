@@ -1,11 +1,22 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
+{% load permission_tags %}
 
 {% block content %}
 <!-- View Mode Toggle -->
 <div class="d-flex align-items-center justify-content-between mb-16">
-    {% if can_view_all %}
-    <!-- User can view all orders - show toggle buttons -->
+    {% can_do 'orders.view_all' as can_view_all_orders %}
+    {% if can_view_all_orders or can_view_all %}
+    <!-- User can view all orders -->
+    {% if user.is_superuser or user_role.name == 'Owner' %}
+    <!-- Superuser/Owner: Just show title, no My Orders toggle -->
+    <div class="d-flex align-items-center gap-8">
+        <iconify-icon icon="solar:documents-bold" class="text-primary-600 text-xl"></iconify-icon>
+        <h6 class="mb-0 fw-semibold">All Orders</h6>
+        <span class="badge bg-primary-100 text-primary-600 px-12 py-4">{{ stats.total }}</span>
+    </div>
+    {% else %}
+    <!-- Other users with view_all permission: Show toggle buttons -->
     <div class="btn-group" role="group">
         <a href="?view=all{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}" 
            class="btn {% if view_mode == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm px-16">
@@ -18,6 +29,7 @@
             My Orders {% if my_stats %}<span class="badge {% if view_mode == 'mine' %}bg-white text-primary-600{% else %}bg-primary-100 text-primary-600{% endif %} ms-4">{{ my_stats.total }}</span>{% endif %}
         </a>
     </div>
+    {% endif %}
     {% else %}
     <!-- User can only view their own orders - show title only -->
     <div class="d-flex align-items-center gap-8">
@@ -50,7 +62,8 @@
         {% endif %}
         
         <!-- Create Order Button - only for users with can_create_orders permission -->
-        {% if can_create_orders %}
+        {% can_do 'orders.create' as can_create %}
+        {% if can_create or can_create_orders %}
         <a href="{% url 'orderCreate' %}" class="btn btn-success btn-sm px-16 d-flex align-items-center gap-4">
             <iconify-icon icon="solar:add-circle-bold" class="text-lg"></iconify-icon>
             Create Order
@@ -323,19 +336,21 @@
                                 <a href="{% url 'orderDetail' order.id %}" class="bg-info-focus text-info-600 w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" title="View">
                                     <iconify-icon icon="majesticons:eye-line" class="text-lg"></iconify-icon>
                                 </a>
-                                {% if request.user.is_superuser or is_owner or is_manager %}
+                                {% can_do 'orders.edit' as can_edit_order %}
+                                {% if can_edit_order or is_manager %}
                                 <a href="{% url 'orderEdit' order.id %}" class="bg-success-focus text-success-600 w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" title="Edit">
                                     <iconify-icon icon="lucide:edit" class="text-lg"></iconify-icon>
                                 </a>
                                 {% endif %}
-                                {% if request.user.is_superuser or is_owner %}
+                                {% can_do 'orders.delete' as can_delete_order %}
+                                {% if can_delete_order %}
                                 <button type="button" class="bg-danger-focus text-danger-600 w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle border-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ order.id }}" title="Delete">
                                     <iconify-icon icon="fluent:delete-24-regular" class="text-lg"></iconify-icon>
                                 </button>
                                 {% endif %}
                             </div>
                             
-                            {% if request.user.is_superuser or is_owner %}
+                            {% if can_delete_order %}
                             <!-- Delete Modal -->
                             <div class="modal fade" id="deleteModal{{ order.id }}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered">

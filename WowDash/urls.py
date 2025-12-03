@@ -17,10 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from WowDash import chart_views
-from WowDash import components_views
 from WowDash import home_views
-from WowDash import table_views
 from WowDash import reports_views
 
 urlpatterns = [
@@ -40,46 +37,11 @@ urlpatterns = [
     path("marketing/", include("marketing.urls")),
     # home routes
     path("index", home_views.index, name="index"),
-    path("email", home_views.email, name="email"),
-    path("kanban", home_views.kanban, name="kanban"),
-    path("stared", home_views.stared, name="stared"),
     path("view-details", home_views.viewDetails, name="viewDetails"),
-    path("widgets", home_views.widgets, name="widgets"),
     path("sales", home_views.sales, name="sales"),
     path("finance", home_views.finance, name="finance"),
     # chart routes
-    path("chart/column-chart", chart_views.columnChart, name="columnChart"),
-    path("chart/line-chart", chart_views.lineChart, name="lineChart"),
-    path("chart/pie-chart", chart_views.pieChart, name="pieChart"),
-    # components routes
-    path("components/alerts", components_views.alerts, name="alerts"),
-    path("components/avatars", components_views.avatars, name="avatars"),
-    path("components/badges", components_views.badges, name="badges"),
-    path("components/button", components_views.button, name="button"),
-    path("components/calendar", components_views.calendar, name="calendarMain"),
-    path("components/card", components_views.card, name="card"),
-    path("components/carousel", components_views.carousel, name="carousel"),
-    path("components/colors", components_views.colors, name="colors"),
-    path("components/dropdown", components_views.dropdown, name="dropdown"),
-    path("components/list", components_views.list, name="list"),
-    path("components/pagination", components_views.pagination, name="pagination"),
-    path("components/progressbar", components_views.progressbar, name="progressbar"),
-    path("components/radio", components_views.radio, name="radio"),
-    path("components/star-ratings", components_views.starRatings, name="starRatings"),
-    path("components/switch", components_views.switch, name="switch"),
-    path(
-        "components/tab-accordion",
-        components_views.tabAndAccordion,
-        name="tabAndAccordion",
-    ),
-    path("components/tags", components_views.tags, name="tags"),
-    path("components/tooltip", components_views.tooltip, name="tooltip"),
-    path("components/typography", components_views.typography, name="typography"),
-    path("components/upload", components_views.upload, name="upload"),
-    path("components/videos", components_views.videos, name="videos"),
-    # tables routes
-    path("tables/basic-table", table_views.basicTable, name="basicTable"),
-    path("tables/data-table", table_views.dataTable, name="dataTable"),
+  
     # Reports & Analytics routes
     path(
         "reports/financial", reports_views.financial_reports, name="financial_reports"
