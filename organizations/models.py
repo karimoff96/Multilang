@@ -26,6 +26,22 @@ class TranslationCenter(models.Model):
         null=True,
         help_text=_("Google Maps or Yandex Maps URL"),
     )
+    # Bot integration fields
+    bot_token = models.CharField(
+        _("Bot Token"),
+        max_length=100,
+        blank=True,
+        null=True,
+        unique=True,
+        help_text=_("Telegram Bot Token for this center (unique, superuser only)"),
+    )
+    company_orders_channel_id = models.CharField(
+        _("Company Orders Channel ID"),
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text=_("Telegram channel ID for all company orders"),
+    )
     is_active = models.BooleanField(_("Active"), default=True)
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
@@ -37,6 +53,22 @@ class TranslationCenter(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        """Validate model data"""
+        super().clean()
+        # Warn if trying to delete center with bot_token
+        if self.bot_token:
+            # This will be checked in delete() method
+            pass
+
+    def delete(self, *args, **kwargs):
+        """Override delete to warn about bot_token"""
+        if self.bot_token:
+            raise ValidationError(
+                _("Cannot delete center with active bot token. Remove the bot token first.")
+            )
+        super().delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
@@ -83,6 +115,21 @@ class Branch(models.Model):
         help_text=_("Google Maps or Yandex Maps URL"),
     )
     is_main = models.BooleanField(_("Main Branch"), default=False)
+    # Bot channel fields for order routing
+    b2c_orders_channel_id = models.CharField(
+        _("B2C Orders Channel ID"),
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text=_("Telegram channel ID for B2C (individual customer) orders"),
+    )
+    b2b_orders_channel_id = models.CharField(
+        _("B2B Orders Channel ID"),
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text=_("Telegram channel ID for B2B (agency/business) orders"),
+    )
     is_active = models.BooleanField(_("Active"), default=True)
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)

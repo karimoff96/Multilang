@@ -1,12 +1,15 @@
 """
 Bot integration helpers for the translation center services
 """
-
+import logging
 from services.models import Category, Product
 from orders.models import Order, OrderMedia
 from accounts.models import TelegramUser
 from services.page_counter import count_pages_from_uploaded_file
+from bot.notification_service import send_order_notification
 import os
+
+logger = logging.getLogger(__name__)
 
 
 class ServiceManager:
@@ -85,6 +88,12 @@ class ServiceManager:
                 order.update_total_pages()
                 order.total_price = order.calculated_price
                 order.save()
+            
+            # Send notification to Telegram channels
+            try:
+                send_order_notification(order.id)
+            except Exception as e:
+                logger.warning(f"Failed to send order notification for order {order.id}: {e}")
 
             return order
         except (TelegramUser.DoesNotExist, Product.DoesNotExist):

@@ -105,6 +105,34 @@
                             </div>
                         </div>
                         {% endif %}
+                        
+                        <!-- Bot Channels Section -->
+                        <div class="col-12 mt-24">
+                            <h6 class="text-md fw-semibold mb-16 pb-8 border-bottom" data-i18n="form.botChannels">
+                                <iconify-icon icon="mdi:telegram" class="me-2"></iconify-icon>
+                                Telegram Notification Channels
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <span data-i18n="form.b2cOrdersChannel">B2C Orders Channel ID</span>
+                            </label>
+                            <input type="text" name="b2c_orders_channel_id" class="form-control radius-8" 
+                                   value="{% if branch %}{{ branch.b2c_orders_channel_id|default:'' }}{% endif %}"
+                                   placeholder="Enter Telegram channel ID (e.g., -1001234567890)">
+                            <small class="text-secondary-light">Orders from individual customers (non-agency)</small>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <span data-i18n="form.b2bOrdersChannel">B2B Orders Channel ID</span>
+                            </label>
+                            <input type="text" name="b2b_orders_channel_id" class="form-control radius-8" 
+                                   value="{% if branch %}{{ branch.b2b_orders_channel_id|default:'' }}{% endif %}"
+                                   placeholder="Enter Telegram channel ID (e.g., -1001234567890)">
+                            <small class="text-secondary-light">Orders from agencies (is_agency=True)</small>
+                        </div>
                     </div>
                     
                     <div class="d-flex align-items-center justify-content-center gap-3 mt-24">

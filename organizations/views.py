@@ -65,26 +65,39 @@ def center_create(request):
         email = request.POST.get("email", "").strip()
         address = request.POST.get("address", "").strip()
         location_url = request.POST.get("location_url", "").strip()
+        
+        # Bot fields - only superuser can set bot_token
+        bot_token = None
+        company_orders_channel_id = request.POST.get("company_orders_channel_id", "").strip() or None
+        if request.user.is_superuser:
+            bot_token = request.POST.get("bot_token", "").strip() or None
 
         if not name:
             messages.error(request, "Center name is required.")
         else:
-            center = TranslationCenter.objects.create(
-                name=name,
-                owner=request.user,
-                phone=phone or None,
-                email=email or None,
-                address=address or None,
-                location_url=location_url or None,
-            )
-            messages.success(
-                request, f'Translation center "{name}" created successfully!'
-            )
-            return redirect("center_list")
+            # Check bot_token uniqueness
+            if bot_token and TranslationCenter.objects.filter(bot_token=bot_token).exists():
+                messages.error(request, "This bot token is already in use by another center.")
+            else:
+                center = TranslationCenter.objects.create(
+                    name=name,
+                    owner=request.user,
+                    phone=phone or None,
+                    email=email or None,
+                    address=address or None,
+                    location_url=location_url or None,
+                    bot_token=bot_token,
+                    company_orders_channel_id=company_orders_channel_id,
+                )
+                messages.success(
+                    request, f'Translation center "{name}" created successfully!'
+                )
+                return redirect("center_list")
 
     context = {
         "title": "Create Center",
         "subTitle": "Add New Translation Center",
+        "is_superuser": request.user.is_superuser,
     }
     return render(request, "organizations/center_form.html", context)
 
@@ -105,24 +118,39 @@ def center_edit(request, center_id):
         address = request.POST.get("address", "").strip()
         location_url = request.POST.get("location_url", "").strip()
         is_active = request.POST.get("is_active") == "on"
+        
+        # Bot fields
+        company_orders_channel_id = request.POST.get("company_orders_channel_id", "").strip() or None
+        # Only superuser can edit bot_token
+        if request.user.is_superuser:
+            bot_token = request.POST.get("bot_token", "").strip() or None
+        else:
+            bot_token = center.bot_token  # Keep existing
 
         if not name:
             messages.error(request, "Center name is required.")
         else:
-            center.name = name
-            center.phone = phone or None
-            center.email = email or None
-            center.address = address or None
-            center.location_url = location_url or None
-            center.is_active = is_active
-            center.save()
-            messages.success(request, f'Center "{name}" updated successfully!')
-            return redirect("center_list")
+            # Check bot_token uniqueness (excluding current center)
+            if bot_token and TranslationCenter.objects.filter(bot_token=bot_token).exclude(pk=center_id).exists():
+                messages.error(request, "This bot token is already in use by another center.")
+            else:
+                center.name = name
+                center.phone = phone or None
+                center.email = email or None
+                center.address = address or None
+                center.location_url = location_url or None
+                center.is_active = is_active
+                center.bot_token = bot_token
+                center.company_orders_channel_id = company_orders_channel_id
+                center.save()
+                messages.success(request, f'Center "{name}" updated successfully!')
+                return redirect("center_list")
 
     context = {
         "title": "Edit Center",
         "subTitle": f"Edit {center.name}",
         "center": center,
+        "is_superuser": request.user.is_superuser,
     }
     return render(request, "organizations/center_form.html", context)
 
@@ -280,6 +308,9 @@ def branch_create(request, center_id=None):
         address = request.POST.get("address", "").strip()
         phone = request.POST.get("phone", "").strip()
         location_url = request.POST.get("location_url", "").strip()
+        # Channel fields
+        b2c_orders_channel_id = request.POST.get("b2c_orders_channel_id", "").strip() or None
+        b2b_orders_channel_id = request.POST.get("b2b_orders_channel_id", "").strip() or None
 
         if not name:
             messages.error(request, "Branch name is required.")
@@ -295,6 +326,8 @@ def branch_create(request, center_id=None):
                 address=address or None,
                 phone=phone or None,
                 location_url=location_url or None,
+                b2c_orders_channel_id=b2c_orders_channel_id,
+                b2b_orders_channel_id=b2b_orders_channel_id,
             )
             messages.success(request, f'Branch "{name}" created successfully!')
             return redirect("branch_list")
@@ -400,6 +433,9 @@ def branch_edit(request, branch_id):
         phone = request.POST.get("phone", "").strip()
         location_url = request.POST.get("location_url", "").strip()
         is_active = request.POST.get("is_active") == "on"
+        # Channel fields
+        b2c_orders_channel_id = request.POST.get("b2c_orders_channel_id", "").strip() or None
+        b2b_orders_channel_id = request.POST.get("b2b_orders_channel_id", "").strip() or None
 
         if not name:
             messages.error(request, "Branch name is required.")
@@ -411,6 +447,8 @@ def branch_edit(request, branch_id):
             branch.phone = phone or None
             branch.location_url = location_url or None
             branch.is_active = is_active
+            branch.b2c_orders_channel_id = b2c_orders_channel_id
+            branch.b2b_orders_channel_id = b2b_orders_channel_id
             branch.save()
             messages.success(request, f'Branch "{name}" updated successfully!')
             return redirect("branch_list")
@@ -1059,3 +1097,75 @@ def role_delete(request, role_id):
         return redirect("role_list")
 
     return redirect("role_list")
+
+
+# ============ Webhook Management Views ============
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
+
+@login_required(login_url="admin_login")
+@require_POST
+def setup_center_webhook(request, center_id):
+    """Set up Telegram webhook for a center - superuser only"""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "Superuser access required"}, status=403)
+    
+    center = get_object_or_404(TranslationCenter, pk=center_id)
+    
+    if not center.bot_token:
+        return JsonResponse({"success": False, "error": "No bot token configured"}, status=400)
+    
+    # Get base URL from request or settings
+    base_url = request.POST.get("base_url") or request.build_absolute_uri("/").rstrip("/")
+    
+    from bot.webhook_manager import setup_webhook_for_center
+    result = setup_webhook_for_center(center, base_url)
+    
+    if result["success"]:
+        log_update(
+            user=request.user,
+            target=center,
+            changes={"webhook": f"Set up: {result.get('webhook_url')}"},
+            request=request
+        )
+    
+    return JsonResponse(result)
+
+
+@login_required(login_url="admin_login")
+@require_POST
+def remove_center_webhook(request, center_id):
+    """Remove Telegram webhook for a center - superuser only"""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "Superuser access required"}, status=403)
+    
+    center = get_object_or_404(TranslationCenter, pk=center_id)
+    
+    from bot.webhook_manager import remove_webhook_for_center
+    result = remove_webhook_for_center(center)
+    
+    if result["success"]:
+        log_update(
+            user=request.user,
+            target=center,
+            changes={"webhook": "Removed"},
+            request=request
+        )
+    
+    return JsonResponse(result)
+
+
+@login_required(login_url="admin_login")
+def get_center_webhook_info(request, center_id):
+    """Get webhook info for a center - superuser only"""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "Superuser access required"}, status=403)
+    
+    center = get_object_or_404(TranslationCenter, pk=center_id)
+    
+    from bot.webhook_manager import get_webhook_info
+    result = get_webhook_info(center)
+    
+    return JsonResponse(result)

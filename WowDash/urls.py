@@ -110,8 +110,13 @@ urlpatterns = [
 from django.conf import settings
 from django.conf.urls.static import static
 from bot.main import index
+from bot.webhook_manager import webhook_handler
 
+# Legacy single-bot webhook (for backward compatibility)
 urlpatterns += [path("bot", index, name="bot_webhook")]
+
+# Multi-tenant webhook - each center has its own endpoint
+urlpatterns += [path("bot/webhook/<int:center_id>/", webhook_handler, name="center_webhook")]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

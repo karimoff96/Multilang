@@ -66,6 +66,84 @@
                             </div>
                         </div>
                         {% endif %}
+                        
+                        <!-- Bot Configuration Section -->
+                        <div class="col-12 mt-24">
+                            <h6 class="text-md fw-semibold mb-16 pb-8 border-bottom" data-i18n="form.botConfiguration">
+                                <iconify-icon icon="mdi:robot" class="me-2"></iconify-icon>
+                                Bot Configuration
+                            </h6>
+                        </div>
+                        
+                        {% if request.user.is_superuser %}
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <span data-i18n="form.botToken">Bot Token</span>
+                                <span class="text-warning-600 ms-2" data-bs-toggle="tooltip" title="Only superusers can edit this field">
+                                    <iconify-icon icon="mdi:shield-lock"></iconify-icon>
+                                </span>
+                            </label>
+                            <input type="text" name="bot_token" class="form-control radius-8" 
+                                   value="{% if center %}{{ center.bot_token|default:'' }}{% endif %}"
+                                   placeholder="Enter Telegram bot token (e.g., 123456:ABC-DEF...)">
+                            <small class="text-secondary-light">Get this from @BotFather on Telegram</small>
+                        </div>
+                        {% else %}
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <span data-i18n="form.botToken">Bot Token</span>
+                                <span class="text-warning-600 ms-2" data-bs-toggle="tooltip" title="Only superusers can edit this field">
+                                    <iconify-icon icon="mdi:shield-lock"></iconify-icon>
+                                </span>
+                            </label>
+                            <input type="text" class="form-control radius-8 bg-neutral-100" 
+                                   value="{% if center and center.bot_token %}••••••••{% endif %}"
+                                   disabled readonly>
+                            <small class="text-secondary-light">Contact administrator to change bot token</small>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <span data-i18n="form.companyOrdersChannel">Company Orders Channel ID</span>
+                            </label>
+                            <input type="text" name="company_orders_channel_id" class="form-control radius-8" 
+                                   value="{% if center %}{{ center.company_orders_channel_id|default:'' }}{% endif %}"
+                                   placeholder="Enter Telegram channel ID (e.g., -1001234567890)">
+                            <small class="text-secondary-light">All orders from this center will be sent here</small>
+                        </div>
+                        
+                        {% if center and center.bot_token and request.user.is_superuser %}
+                        <!-- Webhook Management -->
+                        <div class="col-12 mt-16">
+                            <div class="card bg-neutral-50 border-0">
+                                <div class="card-body p-16">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <h6 class="text-sm fw-semibold mb-4">
+                                                <iconify-icon icon="mdi:webhook" class="me-2"></iconify-icon>
+                                                Webhook Status
+                                            </h6>
+                                            <p class="text-xs text-secondary-light mb-0" id="webhook-status">
+                                                Click "Check Status" to view webhook info
+                                            </p>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-outline-info btn-sm" onclick="checkWebhook()">
+                                                <iconify-icon icon="mdi:information"></iconify-icon> Check Status
+                                            </button>
+                                            <button type="button" class="btn btn-success btn-sm" onclick="setupWebhook()">
+                                                <iconify-icon icon="mdi:check"></iconify-icon> Activate
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeWebhook()">
+                                                <iconify-icon icon="mdi:close"></iconify-icon> Deactivate
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                     
                     <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
@@ -81,4 +159,87 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block script %}
+{% if center and center.bot_token and request.user.is_superuser %}
+<script>
+const centerId = {{ center.id }};
+const csrfToken = '{{ csrf_token }}';
+
+function updateStatus(message, type = 'info') {
+    const statusEl = document.getElementById('webhook-status');
+    statusEl.innerHTML = message;
+    statusEl.className = `text-xs mb-0 text-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'secondary'}-light`;
+}
+
+async function checkWebhook() {
+    updateStatus('Checking...', 'info');
+    try {
+        const response = await fetch(`/organizations/api/centers/${centerId}/webhook/info/`);
+        const data = await response.json();
+        
+        if (data.success) {
+            if (data.url) {
+                updateStatus(`<strong>Active:</strong> ${data.url}<br>Pending updates: ${data.pending_update_count || 0}`, 'success');
+            } else {
+                updateStatus('Webhook not configured', 'info');
+            }
+        } else {
+            updateStatus(`Error: ${data.error}`, 'error');
+        }
+    } catch (e) {
+        updateStatus(`Error: ${e.message}`, 'error');
+    }
+}
+
+async function setupWebhook() {
+    updateStatus('Setting up webhook...', 'info');
+    try {
+        const response = await fetch(`/organizations/api/centers/${centerId}/webhook/setup/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            updateStatus(`<strong>✅ Activated:</strong> ${data.webhook_url}`, 'success');
+        } else {
+            updateStatus(`Error: ${data.error}`, 'error');
+        }
+    } catch (e) {
+        updateStatus(`Error: ${e.message}`, 'error');
+    }
+}
+
+async function removeWebhook() {
+    if (!confirm('Are you sure you want to deactivate the webhook?')) return;
+    
+    updateStatus('Removing webhook...', 'info');
+    try {
+        const response = await fetch(`/organizations/api/centers/${centerId}/webhook/remove/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+            }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            updateStatus('Webhook deactivated', 'info');
+        } else {
+            updateStatus(`Error: ${data.error}`, 'error');
+        }
+    } catch (e) {
+        updateStatus(`Error: ${e.message}`, 'error');
+    }
+}
+
+// Check status on page load
+document.addEventListener('DOMContentLoaded', checkWebhook);
+</script>
+{% endif %}
 {% endblock %}

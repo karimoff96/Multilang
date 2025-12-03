@@ -14,6 +14,7 @@ from organizations.rbac import (
 )
 from organizations.models import AdminUser, Branch, TranslationCenter
 from core.audit import log_action, log_order_assign, log_status_change
+from bot.notification_service import send_order_notification
 
 
 def has_order_permission(request, permission_name, order=None):
@@ -916,6 +917,14 @@ def orderCreate(request):
                     pages=1  # Default to 1 page per file
                 )
                 order.files.add(media)
+            
+            # Send Telegram notification to channels
+            try:
+                send_order_notification(order.id)
+            except Exception as e:
+                # Log but don't fail - order creation is more important
+                import logging
+                logging.getLogger(__name__).warning(f"Failed to send order notification: {e}")
             
             # Log the action
             log_action(

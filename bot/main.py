@@ -5,7 +5,9 @@ from telebot.apihelper import ApiTelegramException
 from django.http import HttpResponse
 from dotenv import load_dotenv
 import os
+import logging
 from .translations import get_text, create_or_update_user
+from .notification_service import send_order_notification
 from django.core.files.base import ContentFile
 import tempfile
 from django.utils import timezone
@@ -17,6 +19,8 @@ import uuid
 from accounts.models import BotUser
 from io import BytesIO
 import zipfile
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -378,11 +382,29 @@ def generate_order_summary_caption(order, language):
 
 def forward_order_to_channel(order, language):
     """
-    Forward order with all files to appropriate channel
+    Forward order with all files to appropriate channel(s).
+    Uses multi-tenant notification system that sends to:
+    1. Center's company_orders_channel_id (if configured)
+    2. Branch's B2C or B2B channel based on customer type
+    
+    Falls back to env-based channels if branch/center channels not configured.
     """
     try:
-        # Determine channel based on user type
+        # Try multi-tenant notification first
+        try:
+            notification_result = send_order_notification(order.id)
+            if notification_result.get('success'):
+                logger.info(f"Order {order.id} sent via multi-tenant notification")
+                return True
+        except Exception as e:
+            logger.warning(f"Multi-tenant notification failed: {e}, falling back to legacy")
+        
+        # Fallback to legacy env-based channel forwarding
         channel_id = B2B_CHANNEL_ID if order.bot_user.is_agency else B2C_CHANNEL_ID
+        
+        if not channel_id:
+            logger.warning(f"No channel configured for order {order.id}")
+            return False
 
         print(f"[DEBUG] Forwarding order {order.id} to channel {channel_id}")
 
