@@ -48,11 +48,11 @@
         </a>
     </div>
     <div class="card-body p-24">
-        <div class="table-responsive scroll-sm">
+        <div class="table-responsive">
             <table class="table bordered-table sm-table mb-0">
                 <thead>
                     <tr>
-                        <th scope="col" style="width: 70px;">
+                        <th scope="col" class="col-id">
                             <div class="d-flex align-items-center gap-10">
                                 <div class="form-check style-check d-flex align-items-center">
                                     <input class="form-check-input radius-4 border input-form-dark" type="checkbox" name="checkbox" id="selectAll">
@@ -61,21 +61,21 @@
                             </div>
                         </th>
                         {% if user.is_superuser or is_owner %}
-                        <th scope="col" data-i18n="table.location">Location</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.location">Location</th>
                         {% endif %}
                         <th scope="col" data-i18n="table.customer">Customer</th>
-                        <th scope="col" data-i18n="table.contact">Contact</th>
-                        <th scope="col" data-i18n="table.orders">Orders</th>
-                        <th scope="col" data-i18n="table.details">Details</th>
-                        <th scope="col" class="text-center" data-i18n="table.status">Status</th>
-                        <th scope="col" class="text-center" data-i18n="table.action">Action</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.contact">Contact</th>
+                        <th scope="col" class="col-id" data-i18n="table.orders">#</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.details">Details</th>
+                        <th scope="col" class="text-center col-status" data-i18n="table.status">Status</th>
+                        <th scope="col" class="text-center col-action" data-i18n="table.action">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for bot_user in users %}
                     <tr>
                         <!-- # -->
-                        <td>
+                        <td class="col-id">
                             <div class="d-flex align-items-center gap-10">
                                 <div class="form-check style-check d-flex align-items-center">
                                     <input class="form-check-input radius-4 border border-neutral-400" type="checkbox" name="checkbox">
@@ -85,13 +85,13 @@
                         </td>
                         <!-- Location: Center + Branch (combined) -->
                         {% if user.is_superuser or is_owner %}
-                        <td>
+                        <td class="hide-mobile">
                             {% if bot_user.branch %}
-                            <div class="d-flex flex-column gap-1">
+                            <div class="cell-merged-info">
                                 {% if user.is_superuser and bot_user.branch.center %}
-                                <a href="{% url 'center_detail' bot_user.branch.center.id %}" class="text-xs text-primary-600 fw-medium">{{ bot_user.branch.center.name|truncatechars:15 }}</a>
+                                <a href="{% url 'center_detail' bot_user.branch.center.id %}" class="cell-primary text-primary-600">{{ bot_user.branch.center.name|truncatechars:12 }}</a>
                                 {% endif %}
-                                <a href="{% url 'branch_detail' bot_user.branch.id %}" class="text-xs text-info-600">{{ bot_user.branch.name|truncatechars:15 }}</a>
+                                <a href="{% url 'branch_detail' bot_user.branch.id %}" class="cell-secondary text-info-600">{{ bot_user.branch.name|truncatechars:12 }}</a>
                             </div>
                             {% else %}
                             <span class="text-secondary-light">-</span>
@@ -105,62 +105,62 @@
                                     <span class="text-primary-600 fw-semibold text-xs">{{ bot_user.name|slice:":1"|upper }}</span>
                                 </div>
                                 <div>
-                                    <span class="text-sm fw-medium text-secondary-light d-block" style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ bot_user.name }}</span>
-                                    {% if bot_user.username %}<small class="text-secondary-light text-xs">@{{ bot_user.username|truncatechars:12 }}</small>{% endif %}
+                                    <span class="text-sm fw-medium text-secondary-light d-block truncate-120">{{ bot_user.name|truncatechars:15 }}</span>
+                                    {% if bot_user.username %}<small class="text-secondary-light text-xs">@{{ bot_user.username|truncatechars:10 }}</small>{% endif %}
                                 </div>
                             </div>
                         </td>
                         <!-- Contact: Phone -->
-                        <td>
-                            <span class="text-secondary-light text-sm">{{ bot_user.phone }}</span>
+                        <td class="hide-mobile">
+                            <span class="text-secondary-light text-sm nowrap">{{ bot_user.phone }}</span>
                         </td>
                         <!-- Orders: Count + Last Order -->
-                        <td>
+                        <td class="col-id">
                             <div class="d-flex flex-column">
-                                <span class="badge bg-primary-focus text-primary-600 text-xs px-8 py-2 d-inline-block" style="width: fit-content;">{{ bot_user.order_count }} orders</span>
+                                <span class="badge bg-primary-focus text-primary-600 badge-compact">{{ bot_user.order_count }}</span>
                                 {% if bot_user.last_order_date %}
-                                <small class="text-secondary-light text-xs mt-1">{{ bot_user.last_order_date|date:"d M" }}</small>
+                                <small class="text-secondary-light text-xs mt-1">{{ bot_user.last_order_date|date:"d/m" }}</small>
                                 {% endif %}
                             </div>
                         </td>
                         <!-- Details: Language + Agency (combined) -->
-                        <td>
+                        <td class="hide-mobile">
                             <div class="d-flex flex-wrap gap-1">
                                 {% if bot_user.language == 'uz' %}
-                                    <span class="badge bg-info-focus text-info-600 text-xs px-6 py-2">🇺🇿</span>
+                                    <span class="badge bg-info-focus text-info-600 badge-compact">🇺🇿</span>
                                 {% elif bot_user.language == 'ru' %}
-                                    <span class="badge bg-danger-focus text-danger-600 text-xs px-6 py-2">🇷🇺</span>
+                                    <span class="badge bg-danger-focus text-danger-600 badge-compact">🇷🇺</span>
                                 {% elif bot_user.language == 'en' %}
-                                    <span class="badge bg-success-focus text-success-600 text-xs px-6 py-2">🇬🇧</span>
+                                    <span class="badge bg-success-focus text-success-600 badge-compact">🇬🇧</span>
                                 {% else %}
-                                    <span class="badge bg-neutral-200 text-neutral-600 text-xs px-6 py-2">{{ bot_user.language|upper }}</span>
+                                    <span class="badge bg-neutral-200 text-neutral-600 badge-compact">{{ bot_user.language|upper }}</span>
                                 {% endif %}
                                 {% if bot_user.is_agency %}
-                                    <span class="badge bg-warning-focus text-warning-600 text-xs px-6 py-2">Agency</span>
+                                    <span class="badge bg-warning-focus text-warning-600 badge-compact">Agn</span>
                                 {% elif bot_user.agency %}
-                                    <span class="badge bg-neutral-200 text-neutral-600 text-xs px-6 py-2">{{ bot_user.agency.name|slice:":8" }}</span>
+                                    <span class="badge bg-neutral-200 text-neutral-600 badge-compact">{{ bot_user.agency.name|slice:":5" }}</span>
                                 {% endif %}
                             </div>
                         </td>
                         <!-- Status -->
-                        <td class="text-center">
+                        <td class="text-center col-status">
                             {% if bot_user.is_active %}
-                                <span class="bg-success-focus text-success-600 px-8 py-2 radius-4 fw-medium text-xs">Active</span>
+                                <span class="bg-success-focus text-success-600 status-badge-sm radius-4 fw-medium">Active</span>
                             {% else %}
-                                <span class="bg-neutral-200 text-neutral-600 px-8 py-2 radius-4 fw-medium text-xs">Inactive</span>
+                                <span class="bg-neutral-200 text-neutral-600 status-badge-sm radius-4 fw-medium">Off</span>
                             {% endif %}
                         </td>
                         <!-- Action -->
-                        <td class="text-center">
+                        <td class="text-center col-action">
                             <div class="d-flex align-items-center gap-4 justify-content-center">
-                                <a href="{% url 'userDetail' %}?id={{ bot_user.id }}" class="bg-info-focus text-info-600 w-28-px h-28-px d-flex justify-content-center align-items-center rounded-circle" title="View">
-                                    <iconify-icon icon="majesticons:eye-line" class="text-sm"></iconify-icon>
+                                <a href="{% url 'userDetail' %}?id={{ bot_user.id }}" class="bg-info-focus text-info-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="View">
+                                    <iconify-icon icon="majesticons:eye-line"></iconify-icon>
                                 </a>
-                                <a href="{% url 'editUser' bot_user.id %}" class="bg-success-focus text-success-600 w-28-px h-28-px d-flex justify-content-center align-items-center rounded-circle" title="Edit">
-                                    <iconify-icon icon="lucide:edit" class="text-sm"></iconify-icon>
+                                <a href="{% url 'editUser' bot_user.id %}" class="bg-success-focus text-success-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="Edit">
+                                    <iconify-icon icon="lucide:edit"></iconify-icon>
                                 </a>
-                                <button type="button" class="remove-item-btn bg-danger-focus text-danger-600 w-28-px h-28-px d-flex justify-content-center align-items-center rounded-circle border-0" data-user-id="{{ bot_user.id }}" title="Delete">
-                                    <iconify-icon icon="fluent:delete-24-regular" class="text-sm"></iconify-icon>
+                                <button type="button" class="remove-item-btn bg-danger-focus text-danger-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle border-0" data-user-id="{{ bot_user.id }}" title="Delete">
+                                    <iconify-icon icon="fluent:delete-24-regular"></iconify-icon>
                                 </button>
                             </div>
                         </td>

@@ -52,16 +52,16 @@
         </a>
     </div>
     <div class="card-body p-24">
-        <div class="table-responsive scroll-sm">
+        <div class="table-responsive">
             <table class="table bordered-table sm-table mb-0">
                 <thead>
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col" data-i18n="table.product">Product</th>
                         {% if user.is_superuser or is_owner %}
-                        <th scope="col" data-i18n="table.location">Location</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.location">Office</th>
                         {% endif %}
-                        <th scope="col" data-i18n="table.category">Category</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.category">Category</th>
                         <th scope="col" data-i18n="table.price">Price</th>
                         <th scope="col" class="text-center" data-i18n="table.status">Status</th>
                         <th scope="col" class="text-center" data-i18n="table.action">Action</th>
@@ -72,43 +72,43 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>
-                            <span class="text-md fw-medium text-primary-light">{{ product|trans_name }}</span>
+                            <a href="{% url 'productDetail' product.id %}" class="fw-medium text-primary-600">{{ product.name|truncatechars:25 }}</a>
                         </td>
                         {% if user.is_superuser or is_owner %}
-                        <td>
+                        <td class="hide-mobile">
                             {% if user.is_superuser %}
-                            <a href="{% url 'center_detail' product.center.id %}" class="badge bg-info-focus text-info-600 text-decoration-none me-1">{{ product.center.name }}</a>
+                            <span class="text-info-600 d-block text-sm">{{ product.category.branch.center.name|truncatechars:12 }}</span>
                             {% endif %}
-                            <a href="{% url 'branch_detail' product.branch.id %}" class="badge bg-primary-focus text-primary-600 text-decoration-none">{{ product.branch.name }}</a>
+                            <span class="text-secondary-light text-xs">{{ product.category.branch.name|truncatechars:15 }}</span>
                         </td>
                         {% endif %}
-                        <td>
-                            <a href="{% url 'categoryDetail' product.category.id %}" class="text-primary-600">{{ product.category|trans_name }}</a>
+                        <td class="hide-mobile">
+                            <a href="{% url 'categoryDetail' product.category.id %}" class="text-primary-600 text-sm">{{ product.category.name|truncatechars:15 }}</a>
                         </td>
                         <td>
-                            <div class="d-flex flex-column">
-                                <small class="text-secondary-light">Reg: {{ product.ordinary_first_page_price|floatformat:0 }}</small>
-                                <small class="text-secondary-light">Agn: {{ product.agency_first_page_price|floatformat:0 }}</small>
+                            <div class="text-sm">
+                                <span class="text-secondary-light">Reg:</span> <span class="fw-medium">{{ product.ordinary_first_page_price|floatformat:0 }}</span><br>
+                                <span class="text-info-600">Agn:</span> <span class="fw-medium">{{ product.agency_first_page_price|floatformat:0 }}</span>
                             </div>
                         </td>
                         <td class="text-center">
                             {% if product.is_active %}
-                                <span class="bg-success-focus text-success-600 border border-success-main px-12 py-4 radius-4 fw-medium text-sm" data-i18n="common.active">Active</span>
+                                <span class="bg-success-focus text-success-600 px-8 py-2 radius-4 fw-medium text-xs">Active</span>
                             {% else %}
-                                <span class="bg-neutral-200 text-neutral-600 border border-neutral-400 px-12 py-4 radius-4 fw-medium text-sm" data-i18n="common.inactive">Inactive</span>
+                                <span class="bg-neutral-200 text-neutral-600 px-8 py-2 radius-4 fw-medium text-xs">Inactive</span>
                             {% endif %}
                         </td>
                         <td class="text-center">
                             <div class="d-flex align-items-center gap-6 justify-content-center">
-                                <a href="{% url 'productDetail' product.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" title="View">
-                                    <iconify-icon icon="majesticons:eye-line" class="text-lg"></iconify-icon>
+                                <a href="{% url 'productDetail' product.id %}" class="bg-info-focus text-info-600 w-28-px h-28-px d-flex justify-content-center align-items-center rounded-circle" title="View">
+                                    <iconify-icon icon="majesticons:eye-line" class="text-sm"></iconify-icon>
                                 </a>
-                                <a href="{% url 'editProduct' product.id %}" class="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" title="Edit">
-                                    <iconify-icon icon="lucide:edit" class="text-lg"></iconify-icon>
+                                <a href="{% url 'editProduct' product.id %}" class="bg-success-focus text-success-600 w-28-px h-28-px d-flex justify-content-center align-items-center rounded-circle" title="Edit">
+                                    <iconify-icon icon="lucide:edit" class="text-sm"></iconify-icon>
                                 </a>
-                                <button type="button" class="bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" 
+                                <button type="button" class="bg-danger-focus text-danger-600 w-28-px h-28-px d-flex justify-content-center align-items-center rounded-circle border-0" 
                                         data-bs-toggle="modal" data-bs-target="#deleteModal{{ product.id }}" title="Delete">
-                                    <iconify-icon icon="fluent:delete-24-regular" class="text-lg"></iconify-icon>
+                                    <iconify-icon icon="fluent:delete-24-regular" class="text-sm"></iconify-icon>
                                 </button>
                             </div>
                             

@@ -199,7 +199,7 @@
         </div>
     </div>
     <div class="card-body p-24">
-        <div class="table-responsive scroll-sm">
+        <div class="table-responsive">
             <table class="table bordered-table sm-table mb-0">
                 <thead>
                     <tr>
@@ -212,14 +212,14 @@
                             </div>
                         </th>
                         {% if user.is_superuser or is_owner %}
-                        <th scope="col" data-i18n="table.location">Location</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.location">Location</th>
                         {% endif %}
                         <th scope="col" data-i18n="table.customer">Customer</th>
-                        <th scope="col" data-i18n="table.details">Details</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.details">Details</th>
                         <th scope="col" data-i18n="table.payment">Payment</th>
-                        <th scope="col" data-i18n="table.assigned">Assigned</th>
-                        <th scope="col" class="text-center" data-i18n="table.status">Status</th>
-                        <th scope="col" class="text-center" data-i18n="table.action">Action</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.assigned">Assigned</th>
+                        <th scope="col" class="text-center col-status" data-i18n="table.status">Status</th>
+                        <th scope="col" class="text-center col-action" data-i18n="table.action">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -239,13 +239,13 @@
                         </td>
                         <!-- Location: Center + Branch (combined) -->
                         {% if user.is_superuser or is_owner %}
-                        <td>
+                        <td class="hide-mobile">
                             {% if order.branch %}
-                            <div class="d-flex flex-column gap-1">
+                            <div class="cell-merged-info">
                                 {% if user.is_superuser and order.branch.center %}
-                                <a href="{% url 'center_detail' order.branch.center.id %}" class="text-xs text-primary-600 fw-medium">{{ order.branch.center.name|truncatechars:15 }}</a>
+                                <a href="{% url 'center_detail' order.branch.center.id %}" class="cell-primary text-primary-600">{{ order.branch.center.name|truncatechars:12 }}</a>
                                 {% endif %}
-                                <a href="{% url 'branch_detail' order.branch.id %}" class="text-xs text-info-600">{{ order.branch.name|truncatechars:15 }}</a>
+                                <a href="{% url 'branch_detail' order.branch.id %}" class="cell-secondary text-info-600">{{ order.branch.name|truncatechars:12 }}</a>
                             </div>
                             {% else %}
                             <span class="text-secondary-light">-</span>
@@ -265,16 +265,16 @@
                             </div>
                         </td>
                         <!-- Details: Product + Pages + Copies (combined) -->
-                        <td>
+                        <td class="hide-mobile">
                             <div class="d-flex flex-column">
-                                <span class="text-sm fw-medium text-secondary-light" style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ order.product.name }}</span>
+                                <span class="text-sm fw-medium text-secondary-light truncate-120">{{ order.product.name|truncatechars:15 }}</span>
                                 <div class="d-flex align-items-center gap-1 mt-1">
-                                    <span class="badge bg-info-focus text-info-600 text-xs px-6 py-2">{{ order.total_pages }}p</span>
+                                    <span class="badge bg-info-focus text-info-600 badge-compact">{{ order.total_pages }}p</span>
                                     {% if order.copy_number > 0 %}
-                                    <span class="badge bg-warning-focus text-warning-600 text-xs px-6 py-2">+{{ order.copy_number }}c</span>
+                                    <span class="badge bg-warning-focus text-warning-600 badge-compact">+{{ order.copy_number }}c</span>
                                     {% endif %}
                                     {% if order.language %}
-                                    <span class="badge bg-neutral-200 text-neutral-600 text-xs px-6 py-2">{{ order.language.short_name|default:order.language.name|slice:":2"|upper }}</span>
+                                    <span class="badge bg-neutral-200 text-neutral-600 badge-compact">{{ order.language.short_name|default:order.language.name|slice:":2"|upper }}</span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -296,16 +296,16 @@
                             </div>
                         </td>
                         <!-- Assigned -->
-                        <td>
+                        <td class="hide-mobile">
                             {% if order.assigned_to %}
                             <div class="d-flex align-items-center gap-1">
                                 <div class="w-24-px h-24-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center flex-shrink-0">
                                     <span class="text-primary-600 fw-bold text-xs">{{ order.assigned_to.user.first_name|slice:":1"|upper }}</span>
                                 </div>
-                                <small class="text-secondary-light text-xs" style="max-width: 60px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ order.assigned_to.user.first_name }}</small>
+                                <small class="text-secondary-light text-xs truncate-120">{{ order.assigned_to.user.first_name|truncatechars:8 }}</small>
                             </div>
                             {% else %}
-                            <span class="badge bg-warning-focus text-warning-600 text-xs">Unassigned</span>
+                            <span class="badge bg-warning-focus text-warning-600 badge-compact">Unassigned</span>
                             {% endif %}
                         </td>
                         <!-- Status -->
@@ -331,21 +331,21 @@
                             {% endif %}
                         </td>
                         <!-- Action -->
-                        <td class="text-center">
+                        <td class="text-center col-action">
                             <div class="d-flex align-items-center gap-4 justify-content-center">
-                                <a href="{% url 'orderDetail' order.id %}" class="bg-info-focus text-info-600 w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" title="View">
-                                    <iconify-icon icon="majesticons:eye-line" class="text-lg"></iconify-icon>
+                                <a href="{% url 'orderDetail' order.id %}" class="bg-info-focus text-info-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="View">
+                                    <iconify-icon icon="majesticons:eye-line"></iconify-icon>
                                 </a>
                                 {% can_do 'orders.edit' as can_edit_order %}
                                 {% if can_edit_order or is_manager %}
-                                <a href="{% url 'orderEdit' order.id %}" class="bg-success-focus text-success-600 w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" title="Edit">
-                                    <iconify-icon icon="lucide:edit" class="text-lg"></iconify-icon>
+                                <a href="{% url 'orderEdit' order.id %}" class="bg-success-focus text-success-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="Edit">
+                                    <iconify-icon icon="lucide:edit"></iconify-icon>
                                 </a>
                                 {% endif %}
                                 {% can_do 'orders.delete' as can_delete_order %}
                                 {% if can_delete_order %}
-                                <button type="button" class="bg-danger-focus text-danger-600 w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle border-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ order.id }}" title="Delete">
-                                    <iconify-icon icon="fluent:delete-24-regular" class="text-lg"></iconify-icon>
+                                <button type="button" class="bg-danger-focus text-danger-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle border-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ order.id }}" title="Delete">
+                                    <iconify-icon icon="fluent:delete-24-regular"></iconify-icon>
                                 </button>
                                 {% endif %}
                             </div>

@@ -15,7 +15,7 @@
                 </a>
             </div>
             <div class="card-body p-24">
-                <form method="post" action="{% url 'marketing_edit' post.id %}" enctype="multipart/form-data">
+                <form method="post" action="{% url 'marketing_edit' post.id %}" enctype="multipart/form-data" id="editForm">
                     {% csrf_token %}
                     
                     <!-- Title -->
@@ -108,6 +108,45 @@
                 <h6 class="text-md fw-semibold mb-0">Target Info</h6>
             </div>
             <div class="card-body p-24">
+                {% if post.status == 'draft' %}
+                <!-- Editable for draft posts -->
+                <div class="mb-16">
+                    <label class="form-label fw-semibold text-primary-light text-sm mb-8">Target Scope</label>
+                    <select name="target_scope" form="editForm" class="form-select radius-8" id="targetScope" onchange="toggleTargetFields()">
+                        <option value="all" {% if post.target_scope == 'all' %}selected{% endif %}>All Users</option>
+                        <option value="center" {% if post.target_scope == 'center' %}selected{% endif %}>Specific Center</option>
+                        <option value="branch" {% if post.target_scope == 'branch' %}selected{% endif %}>Specific Branch</option>
+                    </select>
+                </div>
+                
+                <div class="mb-16" id="centerSelectDiv" style="{% if post.target_scope != 'center' and post.target_scope != 'branch' %}display:none;{% endif %}">
+                    <label class="form-label fw-semibold text-primary-light text-sm mb-8">Center</label>
+                    <select name="target_center" form="editForm" class="form-select radius-8" id="targetCenter">
+                        <option value="">-- Select Center --</option>
+                        {% for center in centers %}
+                        <option value="{{ center.id }}" {% if post.target_center_id == center.id %}selected{% endif %}>{{ center.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-16" id="branchSelectDiv" style="{% if post.target_scope != 'branch' %}display:none;{% endif %}">
+                    <label class="form-label fw-semibold text-primary-light text-sm mb-8">Branch</label>
+                    <select name="target_branch" form="editForm" class="form-select radius-8" id="targetBranch">
+                        <option value="">-- Select Branch --</option>
+                        {% for branch in branches %}
+                        <option value="{{ branch.id }}" {% if post.target_branch_id == branch.id %}selected{% endif %}>{{ branch.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="alert alert-success mt-16 mb-0">
+                    <small>
+                        <iconify-icon icon="mdi:check-circle" class="me-1"></iconify-icon>
+                        Draft posts can have their target scope modified.
+                    </small>
+                </div>
+                {% else %}
+                <!-- Read-only for non-draft posts -->
                 <div class="mb-12">
                     <span class="text-secondary-light text-sm d-block">Scope</span>
                     <span class="fw-medium">{{ post.get_target_scope_display }}</span>
@@ -127,9 +166,10 @@
                 <div class="alert alert-info mt-16 mb-0">
                     <small>
                         <iconify-icon icon="mdi:information" class="me-1"></iconify-icon>
-                        Target scope cannot be changed after creation.
+                        Target scope cannot be changed after sending.
                     </small>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -144,6 +184,23 @@ function toggleMediaUpload() {
         mediaSection.style.display = 'none';
     } else {
         mediaSection.style.display = 'block';
+    }
+}
+
+function toggleTargetFields() {
+    const scope = document.getElementById('targetScope').value;
+    const centerDiv = document.getElementById('centerSelectDiv');
+    const branchDiv = document.getElementById('branchSelectDiv');
+    
+    if (scope === 'all') {
+        centerDiv.style.display = 'none';
+        branchDiv.style.display = 'none';
+    } else if (scope === 'center') {
+        centerDiv.style.display = 'block';
+        branchDiv.style.display = 'none';
+    } else if (scope === 'branch') {
+        centerDiv.style.display = 'block';
+        branchDiv.style.display = 'block';
     }
 }
 </script>

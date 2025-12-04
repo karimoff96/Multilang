@@ -39,17 +39,17 @@
         </a>
         {% endif %}
     </div>
-    <div class="card-body p-24">
+    <div class="card-body p-24 compact-table">
         <div class="table-responsive scroll-sm">
             <table class="table bordered-table sm-table mb-0">
                 <thead>
                     <tr>
                         <th scope="col" data-i18n="table.staffMember">Staff Member</th>
                         <th scope="col" data-i18n="table.role">Role</th>
-                        <th scope="col" data-i18n="table.location">Location</th>
-                        <th scope="col" data-i18n="table.orders">Orders</th>
-                        <th scope="col" data-i18n="table.contact">Contact</th>
-                        <th scope="col" class="text-center" data-i18n="table.action">Action</th>
+                        <th scope="col" class="hide-tablet" data-i18n="table.location">Location</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.orders">Orders</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.contact">Contact</th>
+                        <th scope="col" class="text-center col-action" data-i18n="table.action">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -92,7 +92,7 @@
                             {% endif %}
                         </td>
                         <!-- Location: Center + Branch combined -->
-                        <td>
+                        <td class="hide-tablet">
                             <div class="d-flex flex-column">
                                 {% if user.is_superuser and member.branch and member.branch.center %}
                                 <a href="{% url 'center_detail' member.branch.center.id %}" class="text-xs text-primary-600 fw-medium">{{ member.branch.center.name|truncatechars:15 }}</a>
@@ -105,7 +105,7 @@
                             </div>
                         </td>
                         <!-- Orders by Status -->
-                        <td>
+                        <td class="hide-mobile">
                             <div class="d-flex flex-wrap gap-4">
                                 {% if member.orders_in_progress > 0 %}
                                 <span class="badge bg-info-100 text-info-600 px-8 py-4 radius-4 text-xs" data-bs-toggle="tooltip" data-bs-placement="top" title="In Progress">
@@ -133,7 +133,7 @@
                             </div>
                         </td>
                         <!-- Contact: Phone with icon -->
-                        <td>
+                        <td class="hide-mobile">
                             {% if member.phone %}
                             <a href="tel:{{ member.phone }}" class="text-secondary-light text-sm d-flex align-items-center gap-4">
                                 <iconify-icon icon="solar:phone-bold" class="text-success-600"></iconify-icon>
@@ -144,19 +144,19 @@
                             {% endif %}
                         </td>
                         <!-- Actions (compact icons) -->
-                        <td class="text-center">
-                            <div class="d-flex align-items-center gap-6 justify-content-center">
-                                <a href="{% url 'staff_detail' member.id %}" class="bg-primary-focus text-primary-main w-28-px h-28-px d-flex justify-content-center align-items-center radius-4" data-bs-toggle="tooltip" title="View Details">
-                                    <iconify-icon icon="lucide:eye" class="text-sm"></iconify-icon>
+                        <td class="text-center col-action">
+                            <div class="d-flex align-items-center gap-4 justify-content-center">
+                                <a href="{% url 'staff_detail' member.id %}" class="bg-primary-focus text-primary-main action-btn-sm d-flex justify-content-center align-items-center radius-4" data-bs-toggle="tooltip" title="View Details">
+                                    <iconify-icon icon="lucide:eye"></iconify-icon>
                                 </a>
                                 {% if can_manage_staff %}
-                                <a href="{% url 'staff_edit' member.id %}" class="bg-info-focus text-info-main w-28-px h-28-px d-flex justify-content-center align-items-center radius-4" data-bs-toggle="tooltip" title="Edit">
-                                    <iconify-icon icon="lucide:edit" class="text-sm"></iconify-icon>
+                                <a href="{% url 'staff_edit' member.id %}" class="bg-info-focus text-info-main action-btn-sm d-flex justify-content-center align-items-center radius-4" data-bs-toggle="tooltip" title="Edit">
+                                    <iconify-icon icon="lucide:edit"></iconify-icon>
                                 </a>
                                 <form method="post" action="{% url 'staff_toggle_active' member.id %}" class="d-inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="{% if member.is_active %}bg-warning-focus text-warning-main{% else %}bg-success-focus text-success-main{% endif %} w-28-px h-28-px d-flex justify-content-center align-items-center radius-4 border-0" data-bs-toggle="tooltip" title="{% if member.is_active %}Deactivate{% else %}Activate{% endif %}">
-                                        <iconify-icon icon="{% if member.is_active %}solar:user-cross-bold{% else %}solar:user-check-bold{% endif %}" class="text-sm"></iconify-icon>
+                                    <button type="submit" class="{% if member.is_active %}bg-warning-focus text-warning-main{% else %}bg-success-focus text-success-main{% endif %} action-btn-sm d-flex justify-content-center align-items-center radius-4 border-0" data-bs-toggle="tooltip" title="{% if member.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                        <iconify-icon icon="{% if member.is_active %}solar:user-cross-bold{% else %}solar:user-check-bold{% endif %}"></iconify-icon>
                                     </button>
                                 </form>
                                 {% endif %}

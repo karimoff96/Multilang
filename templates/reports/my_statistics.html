@@ -211,17 +211,17 @@
                     <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
                 </a>
             </div>
-            <div class="card-body p-24">
+            <div class="card-body p-24 compact-table">
                 <div class="table-responsive scroll-sm">
                     <table class="table bordered-table mb-0">
                         <thead>
                             <tr>
                                 <th scope="col" data-i18n="order.id">Order ID</th>
                                 <th scope="col" data-i18n="order.customer">Customer</th>
-                                <th scope="col" data-i18n="order.product">Product</th>
-                                <th scope="col" data-i18n="order.pages">Pages</th>
+                                <th scope="col" class="hide-mobile" data-i18n="order.product">Product</th>
+                                <th scope="col" class="hide-tablet" data-i18n="order.pages">Pages</th>
                                 <th scope="col" data-i18n="order.status">Status</th>
-                                <th scope="col" data-i18n="order.createdAt">Created</th>
+                                <th scope="col" class="hide-mobile" data-i18n="order.createdAt">Created</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -230,24 +230,24 @@
                                 <td><a href="{% url 'orderDetail' order.id %}" class="text-primary-600 fw-medium">#{{ order.id }}</a></td>
                                 <td>
                                     <div>
-                                        <span class="text-md d-block line-height-1 fw-medium text-primary-light">{{ order.bot_user.name|default:order.bot_user.phone }}</span>
+                                        <span class="text-md d-block line-height-1 fw-medium text-primary-light text-truncate-sm">{{ order.bot_user.name|default:order.bot_user.phone }}</span>
                                     </div>
                                 </td>
-                                <td>{{ order.product.name|default:"-" }}</td>
-                                <td>{{ order.total_pages|default:0 }}</td>
+                                <td class="hide-mobile">{{ order.product.name|default:"-"|truncatechars:20 }}</td>
+                                <td class="hide-tablet">{{ order.total_pages|default:0 }}</td>
                                 <td>
                                     {% if order.status == 'completed' %}
-                                    <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm" data-i18n="status.completed">Completed</span>
+                                    <span class="bg-success-focus text-success-main status-badge-sm rounded-pill fw-medium" data-i18n="status.completed">Done</span>
                                     {% elif order.status == 'cancelled' %}
-                                    <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm" data-i18n="status.cancelled">Cancelled</span>
+                                    <span class="bg-danger-focus text-danger-main status-badge-sm rounded-pill fw-medium" data-i18n="status.cancelled">Can</span>
                                     {% elif order.status == 'in_progress' %}
-                                    <span class="bg-info-focus text-info-main px-24 py-4 rounded-pill fw-medium text-sm" data-i18n="status.inProgress">In Progress</span>
+                                    <span class="bg-info-focus text-info-main status-badge-sm rounded-pill fw-medium" data-i18n="status.inProgress">WIP</span>
                                     {% else %}
-                                    <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm" data-i18n="status.pending">{{ order.status }}</span>
+                                    <span class="bg-warning-focus text-warning-main status-badge-sm rounded-pill fw-medium" data-i18n="status.pending">{{ order.status|slice:":4" }}</span>
                                     {% endif %}
                                 </td>
-                                <td>
-                                    <span class="text-sm text-secondary-light">{{ order.created_at|date:"d M Y H:i" }}</span>
+                                <td class="hide-mobile">
+                                    <span class="text-sm text-secondary-light">{{ order.created_at|date:"d M" }}</span>
                                 </td>
                             </tr>
                             {% empty %}

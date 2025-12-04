@@ -80,75 +80,77 @@
     </div>
     
     <div class="card-body p-24">
-        <div class="table-responsive scroll-sm">
+        <div class="table-responsive">
             <table class="table bordered-table sm-table mb-0">
                 <thead>
                     <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Expense Name</th>
+                        <th scope="col" class="col-id">#</th>
+                        <th scope="col">Expense</th>
                         {% if user.is_superuser or is_owner %}
-                        <th scope="col" data-i18n="table.location">Location</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.location">Location</th>
                         {% endif %}
-                        <th scope="col">Price</th>
-                        <th scope="col">Type</th>
-                        <th scope="col">Products</th>
-                        <th scope="col" class="text-center" data-i18n="table.status">Status</th>
-                        <th scope="col" class="text-center" data-i18n="table.action">Action</th>
+                        <th scope="col" class="col-amount">Price</th>
+                        <th scope="col" class="hide-mobile">Type</th>
+                        <th scope="col" class="col-id" title="Products">Products</th>
+                        <th scope="col" class="text-center col-status" data-i18n="table.status">Status</th>
+                        <th scope="col" class="text-center col-action" data-i18n="table.action">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for expense in expenses %}
                     <tr>
-                        <td>{{ forloop.counter }}</td>
+                        <td class="col-id">{{ forloop.counter }}</td>
                         <td>
-                            <div class="d-flex flex-column">
-                                <span class="text-md fw-medium text-primary-light">{{ expense.name }}</span>
+                            <div class="cell-merged-info">
+                                <span class="cell-primary">{{ expense.name|truncatechars:18 }}</span>
                                 {% if expense.description %}
-                                <small class="text-secondary-light text-truncate" style="max-width: 200px;">{{ expense.description }}</small>
+                                <small class="cell-secondary">{{ expense.description|truncatechars:25 }}</small>
                                 {% endif %}
                             </div>
                         </td>
                         {% if user.is_superuser or is_owner %}
-                        <td>
-                            {% if user.is_superuser %}
-                            <span class="badge bg-info-focus text-info-600 me-1">{{ expense.branch.center.name }}</span>
-                            {% endif %}
-                            <span class="badge bg-primary-focus text-primary-600">{{ expense.branch.name }}</span>
+                        <td class="hide-mobile">
+                            <div class="cell-merged-info">
+                                {% if user.is_superuser %}
+                                <span class="cell-primary text-info-600">{{ expense.branch.center.name|truncatechars:12 }}</span>
+                                {% endif %}
+                                <span class="cell-secondary text-primary-600">{{ expense.branch.name|truncatechars:12 }}</span>
+                            </div>
                         </td>
                         {% endif %}
-                        <td>
-                            <span class="text-success-600 fw-semibold">{{ expense.price|format_number }}</span>
+                        <td class="col-amount">
+                            <span class="text-success-600 fw-semibold nowrap">{{ expense.price|format_number }}</span>
                         </td>
-                        <td>
+                        <td class="hide-mobile">
                             {% if expense.expense_type == 'b2b' %}
-                            <span class="badge bg-info-100 text-info-600 px-12 py-6">B2B</span>
+                            <span class="badge bg-info-100 text-info-600 badge-compact">B2B</span>
                             {% elif expense.expense_type == 'b2c' %}
-                            <span class="badge bg-success-100 text-success-600 px-12 py-6">B2C</span>
+                            <span class="badge bg-success-100 text-success-600 badge-compact">B2C</span>
                             {% else %}
-                            <span class="badge bg-warning-100 text-warning-600 px-12 py-6">Both</span>
+                            <span class="badge bg-warning-100 text-warning-600 badge-compact">Both</span>
                             {% endif %}
                         </td>
-                        <td>
-                            <span class="badge bg-neutral-200 text-neutral-600 px-12 py-6">{{ expense.product_count }}</span>
+                        <td class="col-id">
+                            <span class="badge bg-neutral-200 text-neutral-600 badge-compact">{{ expense.product_count }}</span>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center col-status">
                             {% if expense.is_active %}
-                                <span class="bg-success-focus text-success-600 border border-success-main px-12 py-4 radius-4 fw-medium text-sm" data-i18n="common.active">Active</span>
+                                <span class="bg-success-focus text-success-600 border border-success-main status-badge-sm radius-4 fw-medium" data-i18n="common.active">Active</span>
                             {% else %}
-                                <span class="bg-neutral-200 text-neutral-600 border border-neutral-400 px-12 py-4 radius-4 fw-medium text-sm" data-i18n="common.inactive">Inactive</span>
+                                <span class="bg-neutral-200 text-neutral-600 border border-neutral-400 status-badge-sm radius-4 fw-medium" data-i18n="common.inactive">Off</span>
                             {% endif %}
                         </td>
-                        <td class="text-center">
-                            <div class="d-flex align-items-center gap-6 justify-content-center">
-                                <a href="{% url 'expenseDetail' expense.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" title="View">
-                                    <iconify-icon icon="majesticons:eye-line" class="text-lg"></iconify-icon>
+                        <td class="text-center col-action">
+                            <div class="d-flex align-items-center gap-4 justify-content-center">
+                                <a href="{% url 'expenseDetail' expense.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="View">
+                                    <iconify-icon icon="majesticons:eye-line"></iconify-icon>
                                 </a>
-                                <a href="{% url 'editExpense' expense.id %}" class="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" title="Edit">
-                                    <iconify-icon icon="lucide:edit" class="text-lg"></iconify-icon>
+                                <a href="{% url 'editExpense' expense.id %}" class="bg-success-focus text-success-600 bg-hover-success-200 fw-medium action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="Edit">
+                                    <iconify-icon icon="lucide:edit"></iconify-icon>
                                 </a>
-                                <button type="button" class="bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" 
+                                <button type="button" class="bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium action-btn-sm d-flex justify-content-center align-items-center rounded-circle" 
                                         data-bs-toggle="modal" data-bs-target="#deleteModal{{ expense.id }}" title="Delete">
-                                    <iconify-icon icon="fluent:delete-24-regular" class="text-lg"></iconify-icon>
+                                    <iconify-icon icon="fluent:delete-24-regular"></iconify-icon>
                                 </button>
                             </div>
                             

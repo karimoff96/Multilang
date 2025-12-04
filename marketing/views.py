@@ -340,12 +340,47 @@ def marketing_edit(request, post_id):
         messages.error(request, _("You can only edit your own posts."))
         return redirect('marketing_detail', post_id=post_id)
     
+    # Get centers and branches for target scope editing (draft only)
+    from organizations.models import TranslationCenter, Branch
+    centers = []
+    branches = []
+    if post.status == MarketingPost.STATUS_DRAFT:
+        if request.user.is_superuser:
+            centers = TranslationCenter.objects.filter(is_active=True)
+            branches = Branch.objects.filter(is_active=True)
+        elif hasattr(request.user, 'staff_profile'):
+            staff = request.user.staff_profile
+            if staff.branch:
+                centers = [staff.branch.center]
+                branches = Branch.objects.filter(center=staff.branch.center, is_active=True)
+    
     if request.method == 'POST':
         post.title = request.POST.get('title', post.title).strip()
         post.content = request.POST.get('content', post.content).strip()
         post.content_type = request.POST.get('content_type', post.content_type)
         post.include_b2c = request.POST.get('include_b2c') == 'on'
         post.include_b2b = request.POST.get('include_b2b') == 'on'
+        
+        # Handle target scope changes (only for draft posts)
+        if post.status == MarketingPost.STATUS_DRAFT:
+            target_scope = request.POST.get('target_scope', post.target_scope)
+            post.target_scope = target_scope
+            
+            if target_scope == 'all':
+                post.target_center = None
+                post.target_branch = None
+            elif target_scope == 'center':
+                center_id = request.POST.get('target_center')
+                if center_id:
+                    post.target_center_id = center_id
+                post.target_branch = None
+            elif target_scope == 'branch':
+                center_id = request.POST.get('target_center')
+                branch_id = request.POST.get('target_branch')
+                if center_id:
+                    post.target_center_id = center_id
+                if branch_id:
+                    post.target_branch_id = branch_id
         
         # Handle media file
         if 'media_file' in request.FILES:
@@ -382,6 +417,8 @@ def marketing_edit(request, post_id):
         'post': post,
         'permissions': permissions,
         'content_type_choices': MarketingPost.CONTENT_TYPE_CHOICES,
+        'centers': centers,
+        'branches': branches,
     }
     
     return render(request, 'marketing/edit.html', context)

@@ -14,7 +14,7 @@
                     <span data-i18n="common.createNewRole">Create New Role</span>
                 </a>
             </div>
-            <div class="card-body p-24">
+            <div class="card-body p-24 compact-table">
                 <div class="table-responsive scroll-sm">
                     <table class="table colored-row-table mb-0">
                         <thead>
@@ -41,13 +41,13 @@
                                         <span class="fw-semibold text-secondary-light">{{ role.display_name }}</span>
                                     </div>
                                 </td>
-                                <td class="{{ row_color }}">
+                                <td class="{{ row_color }} hide-mobile">
                                     <span class="text-secondary-light">{{ role.description|default:"-"|truncatechars:50 }}</span>
                                 </td>
                                 <td class="{{ row_color }} text-center">
                                     <span class="badge bg-info-100 text-info-600 px-8 py-4 radius-4">{{ role.user_count }}</span>
                                 </td>
-                                <td class="{{ row_color }}">
+                                <td class="{{ row_color }} hide-tablet">
                                     <div class="d-flex flex-wrap gap-1">
                                         <!-- Organization -->
                                         {% if role.can_manage_center %}
@@ -101,7 +101,7 @@
                                         {% endif %}
                                     </div>
                                 </td>
-                                <td class="{{ row_color }} text-center">
+                                <td class="{{ row_color }} text-center col-action">
                                     <div class="d-flex align-items-center justify-content-center gap-2">
                                         <a href="{% url 'role_edit' role.id %}" class="btn btn-sm btn-icon btn-outline-primary radius-4" title="Edit">
                                             <iconify-icon icon="lucide:edit" class="icon"></iconify-icon>

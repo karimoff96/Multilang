@@ -141,52 +141,51 @@
                 </a>
             </div>
             <div class="card-body p-24">
-                <div class="table-responsive scroll-sm">
+                <div class="table-responsive">
                     <table class="table bordered-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" data-i18n="table.orderId">Order ID</th>
-                                {% if user.is_superuser %}
-                                <th scope="col" data-i18n="table.center">Center</th>
-                                {% endif %}
+                                <th scope="col" class="col-id" data-i18n="table.orderId">#</th>
                                 {% if user.is_superuser or is_owner %}
-                                <th scope="col" data-i18n="table.branch">Branch</th>
+                                <th scope="col" data-i18n="table.location">Location</th>
                                 {% endif %}
                                 <th scope="col" data-i18n="table.customer">Customer</th>
-                                <th scope="col" data-i18n="table.product">Product</th>
-                                <th scope="col" data-i18n="table.amount">Amount</th>
-                                <th scope="col" data-i18n="table.date">Date</th>
-                                <th scope="col" data-i18n="table.status">Status</th>
+                                <th scope="col" class="hide-mobile" data-i18n="table.product">Product</th>
+                                <th scope="col" class="col-amount" data-i18n="table.amount">Amount</th>
+                                <th scope="col" class="col-date hide-mobile" data-i18n="table.date">Date</th>
+                                <th scope="col" class="col-status" data-i18n="table.status">Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for order in recent_orders %}
                             <tr>
-                                <td><span class="text-primary-600 fw-medium">#{{ order.id }}</span></td>
-                                {% if user.is_superuser %}
-                                <td><span class="text-md fw-medium text-primary-light">{{ order.center|default:"-" }}</span></td>
-                                {% endif %}
+                                <td class="col-id"><span class="text-primary-600 fw-medium">{{ order.id }}</span></td>
                                 {% if user.is_superuser or is_owner %}
-                                <td><span class="text-md fw-medium text-secondary-light">{{ order.branch|default:"-" }}</span></td>
+                                <td class="cell-merged-info">
+                                    {% if user.is_superuser %}
+                                    <span class="cell-primary truncate-120">{{ order.center|default:"-"|truncatechars:12 }}</span>
+                                    {% endif %}
+                                    <span class="cell-secondary truncate-120">{{ order.branch|default:"-"|truncatechars:15 }}</span>
+                                </td>
                                 {% endif %}
-                                <td><span class="text-primary-light fw-medium">{{ order.customer }}</span></td>
-                                <td><span class="text-secondary-light">{{ order.product }}</span></td>
-                                <td><span class="fw-medium">{{ order.total_price|floatformat:0 }} UZS</span></td>
-                                <td><span class="text-secondary-light text-sm">{{ order.created_at }}</span></td>
-                                <td>
+                                <td class="truncate-150"><span class="text-primary-light fw-medium">{{ order.customer|truncatechars:18 }}</span></td>
+                                <td class="truncate-120 hide-mobile"><span class="text-secondary-light">{{ order.product|truncatechars:15 }}</span></td>
+                                <td class="col-amount"><span class="fw-medium nowrap">{{ order.total_price|floatformat:0 }}</span></td>
+                                <td class="col-date hide-mobile"><span class="text-secondary-light text-xs">{{ order.created_at|date:"d/m H:i" }}</span></td>
+                                <td class="col-status">
                                     {% if order.status == 'completed' %}
-                                    <span class="bg-success-focus text-success-main px-16 py-4 rounded-pill fw-medium text-sm" data-i18n="status.completed">{{ order.status_display }}</span>
+                                    <span class="bg-success-focus text-success-main status-badge-sm rounded-pill fw-medium" data-i18n="status.completed">Done</span>
                                     {% elif order.status == 'cancelled' %}
-                                    <span class="bg-danger-focus text-danger-main px-16 py-4 rounded-pill fw-medium text-sm" data-i18n="status.cancelled">{{ order.status_display }}</span>
+                                    <span class="bg-danger-focus text-danger-main status-badge-sm rounded-pill fw-medium" data-i18n="status.cancelled">Cancel</span>
                                     {% elif order.status == 'in_progress' %}
-                                    <span class="bg-info-focus text-info-main px-16 py-4 rounded-pill fw-medium text-sm" data-i18n="status.inProgress">{{ order.status_display }}</span>
+                                    <span class="bg-info-focus text-info-main status-badge-sm rounded-pill fw-medium" data-i18n="status.inProgress">Active</span>
                                     {% else %}
-                                    <span class="bg-warning-focus text-warning-main px-16 py-4 rounded-pill fw-medium text-sm" data-i18n="status.pending">{{ order.status_display }}</span>
+                                    <span class="bg-warning-focus text-warning-main status-badge-sm rounded-pill fw-medium" data-i18n="status.pending">Pend</span>
                                     {% endif %}
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="{% if user.is_superuser %}8{% elif is_owner %}7{% else %}6{% endif %}" class="text-center text-secondary-light py-24" data-i18n="table.noRecentOrders">No recent orders</td></tr>
+                            <tr><td colspan="{% if user.is_superuser or is_owner %}7{% else %}5{% endif %}" class="text-center text-secondary-light py-24" data-i18n="table.noRecentOrders">No recent orders</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -208,14 +207,14 @@
                 </select>
             </div>
             <div class="card-body p-24">
-                <div class="table-responsive scroll-sm">
+                <div class="table-responsive">
                     <table class="table bordered-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col">#</th>
+                                <th scope="col" class="col-id">#</th>
                                 <th scope="col" data-i18n="table.agency">Agency</th>
-                                <th scope="col" class="text-center" data-i18n="table.orders">Orders</th>
-                                <th scope="col" data-i18n="table.revenue">Revenue</th>
+                                <th scope="col" class="text-center col-id" data-i18n="table.orders">#</th>
+                                <th scope="col" class="col-amount" data-i18n="table.revenue">Revenue</th>
                             </tr>
                         </thead>
                         <tbody id="agenciesTableBody"></tbody>
@@ -240,14 +239,14 @@
                 </select>
             </div>
             <div class="card-body p-24">
-                <div class="table-responsive scroll-sm">
+                <div class="table-responsive">
                     <table class="table bordered-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col">#</th>
+                                <th scope="col" class="col-id">#</th>
                                 <th scope="col" data-i18n="table.customer">Customer</th>
-                                <th scope="col" class="text-center" data-i18n="table.orders">Orders</th>
-                                <th scope="col" data-i18n="table.revenue">Revenue</th>
+                                <th scope="col" class="text-center col-id" data-i18n="table.orders">#</th>
+                                <th scope="col" class="col-amount" data-i18n="table.revenue">Revenue</th>
                             </tr>
                         </thead>
                         <tbody id="customersTableBody"></tbody>

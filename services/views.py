@@ -66,6 +66,11 @@ def categoryList(request):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     
+    # Check if user is owner
+    is_owner = False
+    if hasattr(request.user, 'staff_profile') and request.user.staff_profile.role:
+        is_owner = request.user.staff_profile.role.name == 'owner'
+    
     context = {
         "title": "Categories",
         "subTitle": "Categories",
@@ -78,6 +83,7 @@ def categoryList(request):
         "status_filter": status_filter,
         "per_page": per_page,
         "total_categories": paginator.count,
+        "is_owner": is_owner,
     }
     return render(request, "services/categoryList.html", context)
 
@@ -310,6 +316,11 @@ def productList(request):
     # Get RBAC-filtered categories for filter dropdown
     categories = get_user_categories(request.user).filter(is_active=True).order_by('name')
     
+    # Check if user is owner
+    is_owner = False
+    if hasattr(request.user, 'staff_profile') and request.user.staff_profile.role:
+        is_owner = request.user.staff_profile.role.name == 'owner'
+    
     context = {
         "title": "Products",
         "subTitle": "Products",
@@ -324,6 +335,7 @@ def productList(request):
         "status_filter": status_filter,
         "per_page": per_page,
         "total_products": paginator.count,
+        "is_owner": is_owner,
     }
     return render(request, "services/productList.html", context)
 

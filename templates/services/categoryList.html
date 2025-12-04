@@ -46,16 +46,16 @@
         </a>
     </div>
     <div class="card-body p-24">
-        <div class="table-responsive scroll-sm">
+        <div class="table-responsive">
             <table class="table bordered-table sm-table mb-0">
                 <thead>
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col" data-i18n="table.name">Name</th>
                         {% if user.is_superuser or is_owner %}
-                        <th scope="col" data-i18n="table.location">Location</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.location">Location</th>
                         {% endif %}
-                        <th scope="col" data-i18n="table.type">Type</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.type">Type</th>
                         <th scope="col" data-i18n="table.products">Products</th>
                         <th scope="col" class="text-center" data-i18n="table.status">Status</th>
                         <th scope="col" class="text-center" data-i18n="table.action">Action</th>
@@ -66,17 +66,17 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>
-                            <span class="text-md fw-medium text-primary-light">{{ category|trans_name }}</span>
+                            <a href="{% url 'categoryDetail' category.id %}" class="fw-medium text-primary-600">{{ category.name|truncatechars:25 }}</a>
                         </td>
                         {% if user.is_superuser or is_owner %}
-                        <td>
+                        <td class="hide-mobile">
                             {% if user.is_superuser %}
-                            <a href="{% url 'center_detail' category.branch.center.id %}" class="badge bg-info-focus text-info-600 text-decoration-none me-1">{{ category.branch.center.name }}</a>
+                            <span class="text-info-600 d-block text-sm">{{ category.branch.center.name|truncatechars:12 }}</span>
                             {% endif %}
-                            <a href="{% url 'branch_detail' category.branch.id %}" class="badge bg-primary-focus text-primary-600 text-decoration-none">{{ category.branch.name }}</a>
+                            <span class="text-secondary-light text-xs">{{ category.branch.name|truncatechars:15 }}</span>
                         </td>
                         {% endif %}
-                        <td>
+                        <td class="hide-mobile">
                             {% if category.charging == 'static' %}
                                 <span class="badge bg-info-focus text-info-600">Static</span>
                             {% else %}
@@ -88,22 +88,22 @@
                         </td>
                         <td class="text-center">
                             {% if category.is_active %}
-                                <span class="bg-success-focus text-success-600 border border-success-main px-12 py-4 radius-4 fw-medium text-sm" data-i18n="common.active">Active</span>
+                                <span class="bg-success-focus text-success-600 px-8 py-2 radius-4 fw-medium text-xs">Active</span>
                             {% else %}
-                                <span class="bg-neutral-200 text-neutral-600 border border-neutral-400 px-12 py-4 radius-4 fw-medium text-sm" data-i18n="common.inactive">Inactive</span>
+                                <span class="bg-neutral-200 text-neutral-600 px-8 py-2 radius-4 fw-medium text-xs">Inactive</span>
                             {% endif %}
                         </td>
                         <td class="text-center">
                             <div class="d-flex align-items-center gap-6 justify-content-center">
-                                <a href="{% url 'categoryDetail' category.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" title="View">
-                                    <iconify-icon icon="majesticons:eye-line" class="text-lg"></iconify-icon>
+                                <a href="{% url 'categoryDetail' category.id %}" class="bg-info-focus text-info-600 w-28-px h-28-px d-flex justify-content-center align-items-center rounded-circle" title="View">
+                                    <iconify-icon icon="majesticons:eye-line" class="text-sm"></iconify-icon>
                                 </a>
-                                <a href="{% url 'editCategory' category.id %}" class="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" title="Edit">
-                                    <iconify-icon icon="lucide:edit" class="text-lg"></iconify-icon>
+                                <a href="{% url 'editCategory' category.id %}" class="bg-success-focus text-success-600 w-28-px h-28-px d-flex justify-content-center align-items-center rounded-circle" title="Edit">
+                                    <iconify-icon icon="lucide:edit" class="text-sm"></iconify-icon>
                                 </a>
-                                <button type="button" class="bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle" 
+                                <button type="button" class="bg-danger-focus text-danger-600 w-28-px h-28-px d-flex justify-content-center align-items-center rounded-circle border-0" 
                                         data-bs-toggle="modal" data-bs-target="#deleteModal{{ category.id }}" title="Delete">
-                                    <iconify-icon icon="fluent:delete-24-regular" class="text-lg"></iconify-icon>
+                                    <iconify-icon icon="fluent:delete-24-regular" class="text-sm"></iconify-icon>
                                 </button>
                             </div>
                             
