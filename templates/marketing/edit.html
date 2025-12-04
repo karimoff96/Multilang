@@ -108,14 +108,14 @@
                 <h6 class="text-md fw-semibold mb-0">Target Info</h6>
             </div>
             <div class="card-body p-24">
-                {% if post.status == 'draft' %}
-                <!-- Editable for draft posts -->
+                {% if can_edit_target %}
+                <!-- Editable for draft and scheduled posts -->
                 <div class="mb-16">
                     <label class="form-label fw-semibold text-primary-light text-sm mb-8">Target Scope</label>
                     <select name="target_scope" form="editForm" class="form-select radius-8" id="targetScope" onchange="toggleTargetFields()">
-                        <option value="all" {% if post.target_scope == 'all' %}selected{% endif %}>All Users</option>
-                        <option value="center" {% if post.target_scope == 'center' %}selected{% endif %}>Specific Center</option>
-                        <option value="branch" {% if post.target_scope == 'branch' %}selected{% endif %}>Specific Branch</option>
+                        {% for value, label in scope_choices %}
+                        <option value="{{ value }}" {% if post.target_scope == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
                     </select>
                 </div>
                 
@@ -142,11 +142,11 @@
                 <div class="alert alert-success mt-16 mb-0">
                     <small>
                         <iconify-icon icon="mdi:check-circle" class="me-1"></iconify-icon>
-                        Draft posts can have their target scope modified.
+                        Target audience can be modified before sending.
                     </small>
                 </div>
                 {% else %}
-                <!-- Read-only for non-draft posts -->
+                <!-- Read-only for sent posts -->
                 <div class="mb-12">
                     <span class="text-secondary-light text-sm d-block">Scope</span>
                     <span class="fw-medium">{{ post.get_target_scope_display }}</span>

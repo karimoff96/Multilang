@@ -828,79 +828,72 @@ def customer_analytics(request):
 @login_required(login_url="admin_login")
 @permission_required('can_export_data')
 def export_report(request, report_type):
-    """Export report data - requires can_export_data permission"""
-    import csv
+    """
+    Comprehensive Excel export for all report types.
+    Uses the ReportExporter service for multi-sheet Excel generation.
+    
+    Supports:
+    - orders: Order analytics with details
+    - financial: Financial/revenue reports
+    - staff_performance: Staff performance metrics
+    - branch_comparison: Branch comparison analytics
+    - customers: Customer analytics
+    - unit_economy: Remaining balances/debts
+    - my_statistics: Personal staff statistics
+    """
+    from core.export_service import ReportExporter
     from django.http import HttpResponse
-
-    date_from = request.GET.get("date_from")
-    date_to = request.GET.get("date_to")
-
-    today = timezone.now()
-    if not date_from:
-        date_from = (today - timedelta(days=30)).strftime("%Y-%m-%d")
-    if not date_to:
-        date_to = today.strftime("%Y-%m-%d")
-
-    orders = get_user_orders(request.user).filter(
-        created_at__date__gte=date_from, created_at__date__lte=date_to
-    )
-
-    if report_type == "orders":
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = (
-            f'attachment; filename="orders_report_{date_from}_to_{date_to}.csv"'
+    from django.contrib import messages
+    
+    # Collect all filter parameters
+    filters = {
+        'period': request.GET.get('period', 'month'),
+        'date_from': request.GET.get('date_from'),
+        'date_to': request.GET.get('date_to'),
+        'branch_id': request.GET.get('branch'),
+        'center_id': request.GET.get('center'),
+        'status': request.GET.get('status'),
+        'product_id': request.GET.get('product'),
+        'staff_id': request.GET.get('staff'),
+        'language': request.GET.get('language'),
+    }
+    
+    # Validate report type
+    valid_types = [
+        'orders', 'financial', 'staff_performance', 
+        'branch_comparison', 'customers', 'unit_economy', 'my_statistics'
+    ]
+    if report_type not in valid_types:
+        return JsonResponse({'error': f'Invalid report type. Valid types: {", ".join(valid_types)}'}, status=400)
+    
+    try:
+        # Create exporter and generate Excel
+        exporter = ReportExporter(request.user)
+        result = exporter.export(report_type, filters)
+        
+        if not result['success']:
+            # Return JSON error for AJAX or redirect with message
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'error': result['message']}, status=400)
+            messages.warning(request, result['message'])
+            return JsonResponse({'error': result['message']}, status=400)
+        
+        # Create HTTP response with Excel file
+        response = HttpResponse(
+            result['file_content'],
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-
-        writer = csv.writer(response)
-        writer.writerow(
-            ["Order ID", "Customer", "Product", "Status", "Total Price", "Created At"]
-        )
-
-        for order in orders.select_related("bot_user", "product"):
-            writer.writerow(
-                [
-                    order.id,
-                    order.bot_user.name if order.bot_user else "Unknown",
-                    order.product.name if order.product else "Unknown",
-                    order.get_status_display(),
-                    order.total_price,
-                    order.created_at.strftime("%Y-%m-%d %H:%M"),
-                ]
-            )
-
+        response['Content-Disposition'] = f'attachment; filename="{result["filename"]}"'
         return response
-
-    elif report_type == "financial":
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = (
-            f'attachment; filename="financial_report_{date_from}_to_{date_to}.csv"'
-        )
-
-        writer = csv.writer(response)
-        writer.writerow(["Date", "Orders", "Revenue", "Avg Order Value"])
-
-        daily_data = (
-            orders.annotate(date=TruncDate("created_at"))
-            .values("date")
-            .annotate(
-                count=Count("id"), revenue=Sum("total_price"), avg=Avg("total_price")
-            )
-            .order_by("date")
-        )
-
-        for item in daily_data:
-            writer.writerow(
-                [
-                    item["date"].strftime("%Y-%m-%d"),
-                    item["count"],
-                    float(item["revenue"] or 0),
-                    float(item["avg"] or 0),
-                ]
-            )
-
-        return response
-
-    return JsonResponse({"error": "Invalid report type"}, status=400)
+        
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.exception(f"Error exporting {report_type} report")
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'An error occurred while generating the report'}, status=500)
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 @login_required(login_url="admin_login")

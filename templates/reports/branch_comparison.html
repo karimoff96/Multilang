@@ -48,6 +48,10 @@
                             <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
                             <span data-i18n="common.apply">Apply</span>
                         </button>
+                        <a href="{% url 'export_report' 'branch_comparison' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_center %}&center={{ selected_center }}{% endif %}" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="vscode-icons:file-type-excel" class="icon line-height-1"></iconify-icon>
+                            <span data-i18n="common.exportExcel">Export Excel</span>
+                        </a>
                     </form>
                 </div>
                 {% if period_label %}

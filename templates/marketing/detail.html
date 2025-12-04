@@ -170,9 +170,20 @@
                 <div class="alert alert-danger mt-20">
                     <h6 class="text-danger mb-8">
                         <iconify-icon icon="mdi:alert-circle" class="me-2"></iconify-icon>
-                        Errors
+                        Delivery Issues
                     </h6>
-                    <pre class="text-sm mb-0" style="white-space: pre-wrap;">{{ post.last_error }}</pre>
+                    <p class="text-sm text-secondary-light mb-8">
+                        Some messages could not be delivered. Common reasons:
+                    </p>
+                    <ul class="text-sm mb-12 ps-16">
+                        <li><strong>User blocked the bot</strong> - User has blocked/stopped the bot</li>
+                        <li><strong>User not found</strong> - User deleted their account or never started the bot</li>
+                        <li><strong>Network error</strong> - Temporary connection issue (may retry)</li>
+                    </ul>
+                    <details class="text-sm">
+                        <summary class="cursor-pointer fw-medium">View error details</summary>
+                        <pre class="mt-8 mb-0 text-sm bg-neutral-100 p-12 radius-8" style="white-space: pre-wrap;">{{ post.last_error }}</pre>
+                    </details>
                 </div>
                 {% endif %}
             </div>
@@ -219,9 +230,20 @@
                                     {% elif recipient.status == 'delivered' %}
                                     <span class="badge bg-success-focus text-success-main">Delivered</span>
                                     {% elif recipient.status == 'failed' %}
-                                    <span class="badge bg-danger-focus text-danger-main" title="{{ recipient.error_message }}">Failed</span>
+                                    <span class="badge bg-danger-focus text-danger-main" 
+                                          title="{{ recipient.error_message|default:'Delivery failed' }}"
+                                          data-bs-toggle="tooltip">
+                                        Failed
+                                    </span>
+                                    {% if recipient.error_message %}
+                                    <br><small class="text-danger-main">{{ recipient.error_message }}</small>
+                                    {% endif %}
                                     {% elif recipient.status == 'blocked' %}
-                                    <span class="badge bg-warning-focus text-warning-main">Blocked</span>
+                                    <span class="badge bg-warning-focus text-warning-main"
+                                          title="{{ recipient.error_message|default:'User blocked the bot' }}"
+                                          data-bs-toggle="tooltip">
+                                        Blocked
+                                    </span>
                                     {% elif recipient.status == 'skipped' %}
                                     <span class="badge bg-secondary-focus text-secondary-main">Skipped</span>
                                     {% endif %}

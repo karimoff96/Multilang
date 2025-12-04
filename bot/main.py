@@ -119,6 +119,7 @@ STEP_UPLOADING_FILES = 13
 STEP_PAYMENT_METHOD = 14
 STEP_AWAITING_PAYMENT = 15
 STEP_UPLOADING_RECEIPT = 16
+STEP_AWAITING_RECEIPT = 17  # For additional payment receipts on existing orders
 
 
 def is_valid_file_format(file_name):
@@ -2092,12 +2093,41 @@ def show_user_orders(message, language):
                 order_text += f"{status_emoji} Status: {status_text}\n"
                 order_text += f"📅 Date: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
 
-            # Send individual message for this order (no inline buttons)
-            send_message(
-                chat_id=message.chat.id,
-                text=order_text,
-                parse_mode="HTML",
-            )
+            # Add payment info if partially paid
+            if order.received > 0 or order.remaining > 0:
+                if language == "uz":
+                    order_text += f"\n💰 To'langan: {order.received:,.0f} so'm\n"
+                    order_text += f"💳 Qoldiq: {order.remaining:,.0f} so'm\n"
+                elif language == "ru":
+                    order_text += f"\n💰 Оплачено: {order.received:,.0f} сум\n"
+                    order_text += f"💳 Остаток: {order.remaining:,.0f} сум\n"
+                else:
+                    order_text += f"\n💰 Paid: {order.received:,.0f} sum\n"
+                    order_text += f"💳 Remaining: {order.remaining:,.0f} sum\n"
+
+            # Check if order has unpaid balance
+            has_remaining = order.remaining > 0 and not order.is_fully_paid
+            
+            # Create inline keyboard for Pay button if unpaid
+            if has_remaining:
+                markup = types.InlineKeyboardMarkup()
+                pay_text = get_text("btn_pay", language)
+                markup.add(types.InlineKeyboardButton(
+                    text=pay_text,
+                    callback_data=f"pay_order_{order.id}"
+                ))
+                send_message(
+                    chat_id=message.chat.id,
+                    text=order_text,
+                    parse_mode="HTML",
+                    reply_markup=markup
+                )
+            else:
+                send_message(
+                    chat_id=message.chat.id,
+                    text=order_text,
+                    parse_mode="HTML",
+                )
 
         # After showing all orders, display main menu
         show_main_menu(message, language)
@@ -2115,6 +2145,114 @@ def show_user_orders(message, language):
 
         send_message(message.chat.id, error_text)
         show_main_menu(message, language)
+
+
+# Payment callback handler
+@bot.callback_query_handler(func=lambda call: call.data.startswith("pay_order_"))
+def handle_pay_order(call):
+    """Handle pay order button click"""
+    from orders.models import Order
+    
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    order_id = call.data.replace("pay_order_", "")
+    
+    try:
+        order = Order.objects.get(id=order_id)
+        user = get_bot_user(user_id)
+        
+        # Verify this order belongs to this user
+        if order.bot_user_id != user.id:
+            bot.answer_callback_query(call.id, "❌ Access denied")
+            return
+        
+        # Store order in user session for receipt upload
+        if user_id not in uploaded_files:
+            uploaded_files[user_id] = {}
+        uploaded_files[user_id]["pending_payment_order_id"] = order_id
+        update_user_step(user_id, STEP_AWAITING_RECEIPT)
+        
+        # Get bank card info from AdditionalInfo
+        from accounts.models import AdditionalInfo
+        additional_info = AdditionalInfo.get_for_user(user)
+        
+        # Build payment instructions
+        amount = order.remaining
+        
+        if language == "uz":
+            text = f"💳 <b>To'lov qilish</b>\n\n"
+            text += f"📋 Buyurtma #{order.id}\n"
+            text += f"💰 To'lov miqdori: <b>{amount:,.0f}</b> so'm\n\n"
+            if additional_info and additional_info.bank_card:
+                text += f"💳 Karta raqami: <code>{additional_info.bank_card}</code>\n"
+                if additional_info.holder_name:
+                    text += f"👤 Karta egasi: {additional_info.holder_name}\n"
+            text += f"\n📎 To'lovni amalga oshirib, chekni yuboring.\n"
+            text += f"📷 Rasm yoki hujjat sifatida yuborishingiz mumkin."
+        elif language == "ru":
+            text = f"💳 <b>Оплата</b>\n\n"
+            text += f"📋 Заказ #{order.id}\n"
+            text += f"💰 Сумма оплаты: <b>{amount:,.0f}</b> сум\n\n"
+            if additional_info and additional_info.bank_card:
+                text += f"💳 Номер карты: <code>{additional_info.bank_card}</code>\n"
+                if additional_info.holder_name:
+                    text += f"👤 Владелец карты: {additional_info.holder_name}\n"
+            text += f"\n📎 Произведите оплату и отправьте чек.\n"
+            text += f"📷 Можете отправить как фото или документ."
+        else:
+            text = f"💳 <b>Payment</b>\n\n"
+            text += f"📋 Order #{order.id}\n"
+            text += f"💰 Payment amount: <b>{amount:,.0f}</b> sum\n\n"
+            if additional_info and additional_info.bank_card:
+                text += f"💳 Card number: <code>{additional_info.bank_card}</code>\n"
+                if additional_info.holder_name:
+                    text += f"👤 Card holder: {additional_info.holder_name}\n"
+            text += f"\n📎 Make the payment and send the receipt.\n"
+            text += f"📷 You can send it as a photo or document."
+        
+        # Create cancel button
+        markup = types.InlineKeyboardMarkup()
+        cancel_text = get_text("btn_back_to_orders", language)
+        markup.add(types.InlineKeyboardButton(
+            text=cancel_text,
+            callback_data="cancel_payment"
+        ))
+        
+        bot.answer_callback_query(call.id)
+        send_message(
+            chat_id=call.message.chat.id,
+            text=text,
+            parse_mode="HTML",
+            reply_markup=markup
+        )
+        
+    except Order.DoesNotExist:
+        bot.answer_callback_query(call.id, "❌ Order not found")
+    except Exception as e:
+        print(f"[ERROR] handle_pay_order: {e}")
+        bot.answer_callback_query(call.id, "❌ Error")
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "cancel_payment")
+def handle_cancel_payment(call):
+    """Cancel payment and return to orders"""
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    
+    # Clear payment state
+    if user_id in uploaded_files:
+        uploaded_files[user_id].pop("pending_payment_order_id", None)
+    update_user_step(user_id, STEP_REGISTERED)
+    
+    bot.answer_callback_query(call.id)
+    
+    # Delete the payment message
+    try:
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+    except:
+        pass
+    
+    show_main_menu(call.message, language)
 
 
 def show_profile(message, language):
@@ -3674,6 +3812,115 @@ def handle_file_upload(message):
 
             except Exception as e:
                 print(f"[ERROR] Failed to handle receipt upload: {e}")
+                import traceback
+
+                traceback.print_exc()
+                bot.send_message(
+                    message.chat.id,
+                    "❌ Chek yuklanmadi. Iltimos, qayta urinib ko'ring.",
+                )
+                return
+
+    # Handle additional receipt uploads for existing orders
+    if current_step == STEP_AWAITING_RECEIPT:
+        if message.document or message.photo:
+            try:
+                user_data = uploaded_files.get(user_id, {})
+                order_id = user_data.get("pending_payment_order_id")
+                
+                if not order_id:
+                    bot.send_message(
+                        message.chat.id,
+                        "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang.",
+                    )
+                    return
+
+                from orders.models import Order, Receipt
+
+                order = Order.objects.get(id=order_id)
+                user = get_bot_user(user_id)
+
+                # Save receipt file
+                from django.core.files.base import ContentFile
+                from django.core.files.storage import default_storage
+                import time
+
+                if message.document:
+                    file_info = bot.get_file(message.document.file_id)
+                    downloaded_file = bot.download_file(file_info.file_path)
+                    file_name = f"receipt_{order_id}_{int(time.time())}_{message.document.file_name}"
+                else:  # message.photo
+                    file_info = bot.get_file(message.photo[-1].file_id)
+                    downloaded_file = bot.download_file(file_info.file_path)
+                    file_name = f"receipt_{order_id}_{int(time.time())}_{message.photo[-1].file_id}.jpg"
+
+                # Save receipt to storage
+                file_content = ContentFile(downloaded_file, name=file_name)
+                receipt_path = default_storage.save(
+                    f"receipts/{file_name}", file_content
+                )
+
+                # Get telegram file id for quick access
+                telegram_file_id = None
+                if message.document:
+                    telegram_file_id = message.document.file_id
+                elif message.photo:
+                    telegram_file_id = message.photo[-1].file_id
+
+                # Create Receipt record
+                receipt = Receipt.objects.create(
+                    order=order,
+                    file=receipt_path,
+                    telegram_file_id=telegram_file_id,
+                    amount=order.remaining,  # Default to remaining amount
+                    source='bot',
+                    status='pending',
+                    uploaded_by_user=user,
+                )
+
+                # Clear user state
+                if user_id in uploaded_files:
+                    uploaded_files[user_id].pop("pending_payment_order_id", None)
+                update_user_step(user_id, STEP_REGISTERED)
+
+                # Send success message
+                if language == "uz":
+                    success_text = f"✅ <b>Chek yuklandi!</b>\n\n"
+                    success_text += f"📋 Buyurtma #{order.id}\n"
+                    success_text += f"💰 Qoldiq: {order.remaining:,.0f} so'm\n\n"
+                    success_text += "⏳ To'lov tekshiruvga yuborildi.\n"
+                    success_text += "📞 Tasdiqlanganidan keyin sizga xabar beramiz."
+                elif language == "ru":
+                    success_text = f"✅ <b>Чек загружен!</b>\n\n"
+                    success_text += f"📋 Заказ #{order.id}\n"
+                    success_text += f"💰 Остаток: {order.remaining:,.0f} сум\n\n"
+                    success_text += "⏳ Оплата отправлена на проверку.\n"
+                    success_text += "📞 Мы уведомим вас после подтверждения."
+                else:
+                    success_text = f"✅ <b>Receipt uploaded!</b>\n\n"
+                    success_text += f"📋 Order #{order.id}\n"
+                    success_text += f"💰 Remaining: {order.remaining:,.0f} sum\n\n"
+                    success_text += "⏳ Payment sent for verification.\n"
+                    success_text += "📞 We will notify you after confirmation."
+
+                bot.send_message(
+                    chat_id=message.chat.id,
+                    text=success_text,
+                    parse_mode="HTML",
+                )
+
+                # Return to main menu
+                show_main_menu(message, language)
+                return
+
+            except Order.DoesNotExist:
+                bot.send_message(
+                    message.chat.id,
+                    "❌ Buyurtma topilmadi.",
+                )
+                return
+            except Exception as e:
+                print(f"[ERROR] Failed to handle additional receipt upload: {e}")
                 import traceback
 
                 traceback.print_exc()

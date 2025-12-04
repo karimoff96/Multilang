@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import reverse
-from .models import BotUser, Order, OrderMedia
+from .models import BotUser, Order, OrderMedia, Receipt
 from django.utils.html import format_html
 
 
@@ -114,3 +114,78 @@ class OrderMediaAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request)
+
+
+@admin.register(Receipt)
+class ReceiptAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "order_link",
+        "amount",
+        "verified_amount",
+        "source",
+        "status_display",
+        "uploaded_by_user",
+        "verified_by",
+        "created_at",
+    )
+    list_filter = ("status", "source", "created_at")
+    search_fields = (
+        "order__id",
+        "order__bot_user__name",
+        "comment",
+    )
+    ordering = ("-created_at",)
+    readonly_fields = ("created_at", "updated_at", "verified_at")
+    autocomplete_fields = ["order", "uploaded_by_user", "verified_by"]
+    
+    def order_link(self, obj):
+        url = reverse("admin:orders_order_change", args=[obj.order_id])
+        return format_html('<a href="{}">Order #{}</a>', url, obj.order_id)
+    order_link.short_description = "Order"
+    
+    def status_display(self, obj):
+        colors = {
+            "pending": "orange",
+            "verified": "green",
+            "rejected": "red",
+        }
+        color = colors.get(obj.status, "black")
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span>',
+            color,
+            obj.get_status_display(),
+        )
+    status_display.short_description = "Status"
+    
+    fieldsets = (
+        (
+            "Receipt Information",
+            {
+                "fields": (
+                    "order",
+                    "file",
+                    "telegram_file_id",
+                    "source",
+                    "uploaded_by_user",
+                )
+            },
+        ),
+        (
+            "Amount & Verification",
+            {
+                "fields": (
+                    "amount",
+                    "verified_amount",
+                    "status",
+                    "verified_by",
+                    "verified_at",
+                    "comment",
+                )
+            },
+        ),
+        (
+            "Timestamps",
+            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
+        ),
+    )

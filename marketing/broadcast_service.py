@@ -36,6 +36,67 @@ TELEGRAM_CHAT_NOT_FOUND = 400
 TELEGRAM_TOO_MANY_REQUESTS = 429
 
 
+def get_friendly_error_message(error_code: int, error_description: str) -> str:
+    """
+    Convert raw Telegram API errors into short, human-readable admin messages.
+    
+    Args:
+        error_code: Telegram API error code (e.g., 400, 403)
+        error_description: Raw error description from Telegram
+    
+    Returns:
+        Human-readable error message for admin UI
+    """
+    error_lower = error_description.lower() if error_description else ""
+    
+    # User blocked the bot
+    if error_code == 403 or 'forbidden' in error_lower or 'blocked' in error_lower:
+        return "User blocked the bot"
+    
+    # Chat not found (user deleted account, never started bot, invalid ID)
+    if 'chat not found' in error_lower or 'user not found' in error_lower:
+        return "User not found or never started bot"
+    
+    # User deactivated account
+    if 'user is deactivated' in error_lower or 'deactivated' in error_lower:
+        return "User account deactivated"
+    
+    # Invalid chat ID
+    if 'bad request' in error_lower and 'chat_id' in error_lower:
+        return "Invalid chat ID"
+    
+    # Bot was kicked from group/channel
+    if 'bot was kicked' in error_lower or 'bot is not a member' in error_lower:
+        return "Bot removed from chat"
+    
+    # Rate limiting
+    if error_code == 429 or 'too many requests' in error_lower:
+        return "Rate limited - will retry"
+    
+    # Bot token issues
+    if 'unauthorized' in error_lower or error_code == 401:
+        return "Bot token invalid"
+    
+    # Network/timeout errors
+    if 'timeout' in error_lower or 'connection' in error_lower:
+        return "Network error"
+    
+    # Default: truncate and clean the original error
+    if error_description:
+        # Remove "Error code XXX: " prefix if present
+        clean_msg = error_description
+        if ':' in clean_msg:
+            parts = clean_msg.split(':', 1)
+            if len(parts) > 1 and len(parts[1].strip()) > 0:
+                clean_msg = parts[1].strip()
+        # Truncate to max 50 chars
+        if len(clean_msg) > 50:
+            clean_msg = clean_msg[:47] + "..."
+        return clean_msg.capitalize()
+    
+    return "Unknown error"
+
+
 @dataclass
 class BroadcastResult:
     """Result of a broadcast operation"""
@@ -123,14 +184,20 @@ class BroadcastService:
         elif self.post.target_scope == MarketingPost.SCOPE_CENTER:
             if not self.post.target_center:
                 return []
-            # All users from branches belonging to this center
-            center_branches = self.post.target_center.branches.values_list('id', flat=True)
-            base_query = base_query.filter(branch_id__in=center_branches)
+            # All users belonging to this center (either via center or branch)
+            center_branches = list(self.post.target_center.branches.values_list('id', flat=True))
+            base_query = base_query.filter(
+                Q(center=self.post.target_center) | Q(branch_id__in=center_branches)
+            )
         
         elif self.post.target_scope == MarketingPost.SCOPE_BRANCH:
             if not self.post.target_branch:
                 return []
-            base_query = base_query.filter(branch=self.post.target_branch)
+            # Users belonging to this branch OR users with center but no branch who are in this center
+            base_query = base_query.filter(
+                Q(branch=self.post.target_branch) |
+                Q(branch__isnull=True, center=self.post.target_branch.center)
+            )
         
         # Filter by customer type
         if not self.post.include_b2c and not self.post.include_b2b:
@@ -253,21 +320,23 @@ class BroadcastService:
             return True, msg.message_id, None
         
         except ApiTelegramException as e:
-            error_msg = str(e)
+            # Get friendly error message for admin UI
+            friendly_error = get_friendly_error_message(e.error_code, str(e))
             
-            # Check for specific errors
-            if e.error_code == TELEGRAM_USER_BLOCKED:
-                return False, None, "User blocked the bot"
-            elif e.error_code == TELEGRAM_TOO_MANY_REQUESTS:
-                # Rate limited - should retry
+            # Check for rate limiting - should retry after delay
+            if e.error_code == TELEGRAM_TOO_MANY_REQUESTS:
                 retry_after = getattr(e, 'retry_after', 30)
                 time.sleep(retry_after)
-                return False, None, f"Rate limited, retry after {retry_after}s"
+                return False, None, friendly_error
             
-            return False, None, error_msg
+            return False, None, friendly_error
         
         except Exception as e:
-            return False, None, str(e)
+            # Handle non-Telegram exceptions
+            error_str = str(e)
+            if 'timeout' in error_str.lower() or 'connection' in error_str.lower():
+                return False, None, "Network error"
+            return False, None, get_friendly_error_message(0, error_str)
     
     def send_with_retry(
         self, 
@@ -288,7 +357,12 @@ class BroadcastService:
                 return True, None
             
             # Check if error is permanent (no retry needed)
-            if error and ('blocked' in error.lower() or 'deactivated' in error.lower()):
+            # These errors indicate the user cannot receive messages
+            permanent_errors = [
+                'blocked', 'deactivated', 'not found', 'never started',
+                'account deactivated', 'removed from chat', 'invalid'
+            ]
+            if error and any(pe in error.lower() for pe in permanent_errors):
                 recipient.status = BroadcastRecipient.STATUS_BLOCKED
                 recipient.error_message = error
                 recipient.save()

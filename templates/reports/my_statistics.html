@@ -206,10 +206,16 @@
         <div class="card h-100">
             <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="text-lg fw-semibold mb-0" data-i18n="report.recentOrders">Recent Orders</h6>
-                <a href="{% url 'ordersList' %}?assignment=mine" class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
-                    <span data-i18n="common.viewAll">View All</span>
-                    <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
-                </a>
+                <div class="d-flex gap-2 align-items-center">
+                    <a href="{% url 'export_report' 'my_statistics' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1">
+                        <iconify-icon icon="vscode-icons:file-type-excel" class="icon line-height-1"></iconify-icon>
+                        <span data-i18n="common.exportExcel">Export Excel</span>
+                    </a>
+                    <a href="{% url 'ordersList' %}?assignment=mine" class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
+                        <span data-i18n="common.viewAll">View All</span>
+                        <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
+                    </a>
+                </div>
             </div>
             <div class="card-body p-24 compact-table">
                 <div class="table-responsive scroll-sm">

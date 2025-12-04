@@ -382,6 +382,145 @@ class Order(models.Model):
         ordering = ["-created_at"]
 
 
+class Receipt(models.Model):
+    """
+    Payment receipts/proofs for orders.
+    Supports multiple receipts per order for partial payments.
+    """
+    SOURCE_CHOICES = (
+        ("bot", _("Bot (User Upload)")),
+        ("admin", _("Admin Upload")),
+        ("phone", _("Phone Confirmation")),
+    )
+    
+    STATUS_CHOICES = (
+        ("pending", _("Pending Verification")),
+        ("verified", _("Verified")),
+        ("rejected", _("Rejected")),
+    )
+    
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="receipts",
+        verbose_name=_("Order"),
+    )
+    file = models.FileField(
+        upload_to="receipts/%Y/%m/",
+        blank=True,
+        null=True,
+        verbose_name=_("Receipt File"),
+        help_text=_("Receipt image or document"),
+    )
+    telegram_file_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name=_("Telegram File ID"),
+        help_text=_("File ID from Telegram for quick access"),
+    )
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        verbose_name=_("Amount"),
+        help_text=_("Amount claimed in this receipt"),
+    )
+    verified_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        verbose_name=_("Verified Amount"),
+        help_text=_("Amount verified by admin"),
+    )
+    source = models.CharField(
+        max_length=20,
+        choices=SOURCE_CHOICES,
+        default="bot",
+        verbose_name=_("Source"),
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending",
+        verbose_name=_("Status"),
+    )
+    comment = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Comment"),
+        help_text=_("Admin notes or rejection reason"),
+    )
+    uploaded_by_user = models.ForeignKey(
+        BotUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="uploaded_receipts",
+        verbose_name=_("Uploaded By (User)"),
+    )
+    verified_by = models.ForeignKey(
+        AdminUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="verified_receipts",
+        verbose_name=_("Verified By"),
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
+    verified_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_("Verified At"),
+    )
+    
+    def __str__(self):
+        return f"Receipt #{self.id} for Order #{self.order_id} - {self.get_status_display()}"
+    
+    def verify(self, admin_user, amount=None, comment=None):
+        """Verify this receipt and update order payment"""
+        from decimal import Decimal
+        
+        self.status = "verified"
+        self.verified_by = admin_user
+        self.verified_at = timezone.now()
+        
+        if amount is not None:
+            self.verified_amount = Decimal(str(amount))
+        else:
+            self.verified_amount = self.amount
+        
+        if comment:
+            self.comment = comment
+        
+        self.save()
+        
+        # Update order's received amount
+        self.order.received = Decimal(str(self.order.received or 0)) + self.verified_amount
+        self.order.save(update_fields=['received', 'updated_at'])
+        
+        return self
+    
+    def reject(self, admin_user, comment=None):
+        """Reject this receipt"""
+        self.status = "rejected"
+        self.verified_by = admin_user
+        self.verified_at = timezone.now()
+        self.verified_amount = 0
+        
+        if comment:
+            self.comment = comment
+        
+        self.save()
+        return self
+    
+    class Meta:
+        verbose_name = _("Receipt")
+        verbose_name_plural = _("Receipts")
+        ordering = ["-created_at"]
+
+
 @receiver(pre_save, sender=Order)
 def track_status_change(sender, instance, **kwargs):
     """Track status and payment changes before save"""

@@ -321,7 +321,7 @@ def marketing_detail(request, post_id):
 
 @login_required
 def marketing_edit(request, post_id):
-    """Edit a marketing post (only if draft or scheduled)"""
+    """Edit a marketing post (draft or scheduled status)"""
     post = get_object_or_404(MarketingPost, id=post_id)
     permissions = get_user_scope_permissions(request)
     
@@ -330,9 +330,9 @@ def marketing_edit(request, post_id):
         messages.error(request, _("You don't have permission to edit marketing posts."))
         return redirect('marketing_detail', post_id=post_id)
     
-    # Check if editable
+    # Check if editable (allow draft and scheduled)
     if post.status not in [MarketingPost.STATUS_DRAFT, MarketingPost.STATUS_SCHEDULED]:
-        messages.error(request, _("Cannot edit post that has been sent."))
+        messages.error(request, _("Cannot edit post that has been sent or is currently sending."))
         return redirect('marketing_detail', post_id=post_id)
     
     # Check access
@@ -340,19 +340,30 @@ def marketing_edit(request, post_id):
         messages.error(request, _("You can only edit your own posts."))
         return redirect('marketing_detail', post_id=post_id)
     
-    # Get centers and branches for target scope editing (draft only)
+    # Get centers and branches for target scope editing (always editable for draft/scheduled)
     from organizations.models import TranslationCenter, Branch
     centers = []
     branches = []
-    if post.status == MarketingPost.STATUS_DRAFT:
-        if request.user.is_superuser:
-            centers = TranslationCenter.objects.filter(is_active=True)
-            branches = Branch.objects.filter(is_active=True)
-        elif hasattr(request.user, 'staff_profile'):
-            staff = request.user.staff_profile
-            if staff.branch:
-                centers = [staff.branch.center]
-                branches = Branch.objects.filter(center=staff.branch.center, is_active=True)
+    
+    # Always provide centers/branches for editable posts
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        branches = Branch.objects.filter(is_active=True)
+    else:
+        admin_profile = getattr(request, 'admin_profile', None)
+        if not admin_profile:
+            try:
+                admin_profile = AdminUser.objects.get(user=request.user)
+            except AdminUser.DoesNotExist:
+                pass
+        
+        if admin_profile:
+            if admin_profile.is_owner and admin_profile.center:
+                centers = [admin_profile.center]
+                branches = Branch.objects.filter(center=admin_profile.center, is_active=True)
+            elif admin_profile.branch:
+                centers = [admin_profile.branch.center] if admin_profile.branch.center else []
+                branches = Branch.objects.filter(center=admin_profile.branch.center, is_active=True) if admin_profile.branch.center else []
     
     if request.method == 'POST':
         post.title = request.POST.get('title', post.title).strip()
@@ -361,9 +372,19 @@ def marketing_edit(request, post_id):
         post.include_b2c = request.POST.get('include_b2c') == 'on'
         post.include_b2b = request.POST.get('include_b2b') == 'on'
         
-        # Handle target scope changes (only for draft posts)
-        if post.status == MarketingPost.STATUS_DRAFT:
-            target_scope = request.POST.get('target_scope', post.target_scope)
+        # Handle target scope changes (allowed for draft and scheduled posts)
+        target_scope = request.POST.get('target_scope', post.target_scope)
+        
+        # Validate scope permissions before allowing change
+        scope_allowed = True
+        if target_scope == 'all' and not permissions['can_platform_wide']:
+            scope_allowed = False
+            messages.error(request, _("You don't have permission for platform-wide scope."))
+        elif target_scope == 'center' and not permissions['can_center_wide']:
+            scope_allowed = False
+            messages.error(request, _("You don't have permission for center-wide scope."))
+        
+        if scope_allowed:
             post.target_scope = target_scope
             
             if target_scope == 'all':
@@ -372,15 +393,34 @@ def marketing_edit(request, post_id):
             elif target_scope == 'center':
                 center_id = request.POST.get('target_center')
                 if center_id:
-                    post.target_center_id = center_id
+                    try:
+                        center = TranslationCenter.objects.get(id=center_id)
+                        if center in permissions['centers'] or request.user.is_superuser:
+                            post.target_center = center
+                        else:
+                            messages.error(request, _("You don't have access to this center."))
+                    except TranslationCenter.DoesNotExist:
+                        pass
                 post.target_branch = None
             elif target_scope == 'branch':
                 center_id = request.POST.get('target_center')
                 branch_id = request.POST.get('target_branch')
                 if center_id:
-                    post.target_center_id = center_id
+                    try:
+                        center = TranslationCenter.objects.get(id=center_id)
+                        if center in permissions['centers'] or request.user.is_superuser:
+                            post.target_center = center
+                    except TranslationCenter.DoesNotExist:
+                        pass
                 if branch_id:
-                    post.target_branch_id = branch_id
+                    try:
+                        branch = Branch.objects.get(id=branch_id)
+                        if branch in permissions['branches'] or request.user.is_superuser:
+                            post.target_branch = branch
+                        else:
+                            messages.error(request, _("You don't have access to this branch."))
+                    except Branch.DoesNotExist:
+                        pass
         
         # Handle media file
         if 'media_file' in request.FILES:
@@ -411,14 +451,23 @@ def marketing_edit(request, post_id):
         messages.success(request, _("Marketing post updated successfully."))
         return redirect('marketing_detail', post_id=post_id)
     
+    # Build scope choices based on permissions
+    scope_choices = [(MarketingPost.SCOPE_BRANCH, _('Branch Users'))]
+    if permissions['can_center_wide']:
+        scope_choices.insert(0, (MarketingPost.SCOPE_CENTER, _('Center Users')))
+    if permissions['can_platform_wide']:
+        scope_choices.insert(0, (MarketingPost.SCOPE_ALL, _('All Platform Users')))
+    
     context = {
         'title': _('Edit Marketing Post'),
         'subTitle': post.title,
         'post': post,
         'permissions': permissions,
         'content_type_choices': MarketingPost.CONTENT_TYPE_CHOICES,
+        'scope_choices': scope_choices,
         'centers': centers,
         'branches': branches,
+        'can_edit_target': True,  # Always true for draft/scheduled
     }
     
     return render(request, 'marketing/edit.html', context)
