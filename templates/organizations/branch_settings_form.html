@@ -233,6 +233,32 @@
         </div>
     </div>
 
+    <!-- Guide Link -->
+    <div class="col-12">
+        <div class="card radius-12">
+            <div class="card-header py-16 px-24 bg-base d-flex align-items-center gap-12">
+                <div class="w-40-px h-40-px bg-purple-100 rounded-8 d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="fluent:book-20-filled" class="text-purple-600 text-xl"></iconify-icon>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-semibold">Guide Link</h6>
+                    <small class="text-secondary-light">Link to guide resource (Telegram, YouTube, documentation, etc.)</small>
+                </div>
+            </div>
+            <div class="card-body p-24">
+                <div class="row">
+                    <div class="col-12">
+                        <label for="guide" class="form-label fw-medium text-secondary-light">Guide URL</label>
+                        <input type="url" class="form-control radius-8" id="guide" name="guide"
+                               value="{{ info.guide|default:'' }}"
+                               placeholder="https://t.me/channel/123 or https://youtube.com/watch?v=...">
+                        <small class="text-secondary-light mt-4 d-block">Enter a valid URL to a guide, tutorial, or documentation page</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Description (Translated) -->
     <div class="col-12">
         <div class="card radius-12">

@@ -1075,3 +1075,105 @@ def my_statistics(request):
     }
 
     return render(request, "reports/my_statistics.html", context)
+
+
+# ============ UNIT ECONOMY ANALYTICS ============
+
+@login_required(login_url="admin_login")
+@permission_required('can_view_financial_reports')
+def unit_economy(request):
+    """
+    Unit Economy Analytics View
+    Shows remaining debts/receivables broken down by branch, client type, and center.
+    """
+    from services.analytics import (
+        get_remaining_balance_summary,
+        get_remaining_by_branch,
+        get_remaining_by_client_type,
+        get_remaining_by_center,
+        get_top_debtors,
+    )
+    
+    # Get branch and center filters
+    branch_id = request.GET.get("branch")
+    center_id = request.GET.get("center")
+    
+    # Get available branches for filter
+    branches = get_user_branches(request.user)
+    
+    # Center filter for superuser
+    centers = None
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_id:
+            branches = branches.filter(center_id=center_id)
+    
+    # Check if user is owner
+    is_owner = False
+    if hasattr(request.user, "admin_profile") and request.user.admin_profile:
+        is_owner = request.user.admin_profile.is_owner
+    
+    # Get analytics data
+    summary = get_remaining_balance_summary(request.user)
+    by_branch = get_remaining_by_branch(request.user)
+    by_client_type = get_remaining_by_client_type(request.user)
+    by_center = get_remaining_by_center(request.user)
+    top_debtors = get_top_debtors(request.user)
+    
+    # Prepare chart data for branch remaining
+    branch_labels = [b['branch_name'] for b in by_branch]
+    branch_remaining_values = [b['remaining'] for b in by_branch]
+    
+    # Prepare chart data for client type
+    client_type_labels = [by_client_type['agency']['label'], by_client_type['regular']['label']]
+    client_type_values = [by_client_type['agency']['remaining'], by_client_type['regular']['remaining']]
+    
+    # Prepare chart data for center
+    center_labels = [c['center_name'] for c in by_center]
+    center_remaining_values = [c['remaining'] for c in by_center]
+    
+    context = {
+        "title": "Unit Economy",
+        "subTitle": "Reports / Unit Economy",
+        # Filters
+        "branches": branches,
+        "selected_branch": branch_id,
+        "centers": centers,
+        "selected_center": center_id,
+        # User role
+        "is_owner": is_owner,
+        # Summary
+        "total_remaining": summary['total_remaining'],
+        "total_orders_with_debt": summary['total_orders_with_debt'],
+        "fully_paid_count": summary['fully_paid_count'],
+        "total_received": summary['total_received'],
+        "total_expected": summary['total_expected'],
+        "collection_rate": summary['collection_rate'],
+        # Breakdowns
+        "by_branch": by_branch,
+        "by_client_type": by_client_type,
+        "by_center": by_center,
+        "top_debtors": top_debtors,
+        # Chart data
+        "branch_labels": json.dumps(branch_labels),
+        "branch_remaining_values": json.dumps(branch_remaining_values),
+        "client_type_labels": json.dumps(client_type_labels),
+        "client_type_values": json.dumps(client_type_values),
+        "center_labels": json.dumps(center_labels),
+        "center_remaining_values": json.dumps(center_remaining_values),
+    }
+    
+    return render(request, "reports/unit_economy.html", context)
+
+
+@login_required(login_url="admin_login")
+@permission_required('can_view_financial_reports')
+def unit_economy_api(request):
+    """
+    API endpoint for Unit Economy data.
+    Returns JSON for AJAX requests / dashboard widgets.
+    """
+    from services.analytics import get_unit_economy_analytics
+    
+    data = get_unit_economy_analytics(request.user)
+    return JsonResponse(data)

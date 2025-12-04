@@ -173,6 +173,11 @@ const translations = {
         ru: 'Аналитика клиентов',
         en: 'Customer Analytics'
     },
+    'sidebar.unitEconomy': {
+        uz: 'Birlik iqtisodiyoti',
+        ru: 'Юнит-экономика',
+        en: 'Unit Economy'
+    },
     'sidebar.organization': {
         uz: 'Tashkilot',
         ru: 'Организация',
@@ -2926,6 +2931,113 @@ const translations = {
         uz: 'Bu davr uchun jalb qilish ma\'lumotlari yo\'q',
         ru: 'Нет данных о привлечении за этот период',
         en: 'No acquisition data for this period'
+    },
+
+    // ========== UNIT ECONOMY ==========
+    'unitEconomy.title': {
+        uz: 'Birlik iqtisodiyoti',
+        ru: 'Юнит-экономика',
+        en: 'Unit Economy'
+    },
+    'unitEconomy.subtitle': {
+        uz: 'Qoldiq va to\'lovlarni yig\'ish tahlili',
+        ru: 'Аналитика остатков и сбора платежей',
+        en: 'Receivables and payment collection analytics'
+    },
+    'unitEconomy.totalRemaining': {
+        uz: 'Jami qoldiq',
+        ru: 'Всего остаток',
+        en: 'Total Remaining'
+    },
+    'unitEconomy.ordersWithDebt': {
+        uz: 'qarzli buyurtmalar',
+        ru: 'заказов с долгом',
+        en: 'orders with debt'
+    },
+    'unitEconomy.totalReceived': {
+        uz: 'Jami olingan',
+        ru: 'Всего получено',
+        en: 'Total Received'
+    },
+    'unitEconomy.fullyPaid': {
+        uz: 'to\'liq to\'langan',
+        ru: 'полностью оплачено',
+        en: 'fully paid'
+    },
+    'unitEconomy.totalExpected': {
+        uz: 'Jami kutilayotgan',
+        ru: 'Всего ожидается',
+        en: 'Total Expected'
+    },
+    'unitEconomy.collectionRate': {
+        uz: 'Yig\'ish foizi',
+        ru: 'Процент сбора',
+        en: 'Collection Rate'
+    },
+    'unitEconomy.byClientType': {
+        uz: 'Mijoz turi bo\'yicha',
+        ru: 'По типу клиента',
+        en: 'By Client Type'
+    },
+    'unitEconomy.byBranch': {
+        uz: 'Filial bo\'yicha qoldiq',
+        ru: 'Остаток по филиалам',
+        en: 'Remaining by Branch'
+    },
+    'unitEconomy.byCenter': {
+        uz: 'Markaz bo\'yicha qoldiq',
+        ru: 'Остаток по центрам',
+        en: 'Remaining by Center'
+    },
+    'unitEconomy.topDebtors': {
+        uz: 'Eng katta qarzdorlar',
+        ru: 'Топ должников',
+        en: 'Top Debtors'
+    },
+    'unitEconomy.remaining': {
+        uz: 'Qoldiq',
+        ru: 'Остаток',
+        en: 'Remaining'
+    },
+    'unitEconomy.received': {
+        uz: 'Olingan',
+        ru: 'Получено',
+        en: 'Received'
+    },
+    'unitEconomy.expected': {
+        uz: 'Kutilayotgan',
+        ru: 'Ожидается',
+        en: 'Expected'
+    },
+    'unitEconomy.type': {
+        uz: 'Turi',
+        ru: 'Тип',
+        en: 'Type'
+    },
+    'unitEconomy.noDebt': {
+        uz: 'Qarzlar yo\'q',
+        ru: 'Нет долгов',
+        en: 'No outstanding debts'
+    },
+    'unitEconomy.allPaid': {
+        uz: 'Barcha buyurtmalar to\'liq to\'langan',
+        ru: 'Все заказы полностью оплачены',
+        en: 'All orders are fully paid'
+    },
+    'unitEconomy.noDebtors': {
+        uz: 'Qarzdorlar yo\'q',
+        ru: 'Нет должников',
+        en: 'No debtors'
+    },
+    'unitEconomy.allCustomersPaid': {
+        uz: 'Barcha mijozlar to\'liq to\'lagan',
+        ru: 'Все клиенты оплатили полностью',
+        en: 'All customers have paid in full'
+    },
+    'unitEconomy.branchDetails': {
+        uz: 'Filial tafsilotlari',
+        ru: 'Детали по филиалам',
+        en: 'Branch Details'
     },
 
     // ========== TABLE HEADERS ==========

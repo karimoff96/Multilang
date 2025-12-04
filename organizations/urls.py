@@ -35,6 +35,8 @@ urlpatterns = [
     # API endpoints
     path('api/districts/<int:region_id>/', views.get_districts, name='get_districts'),
     path('api/branch/<int:branch_id>/staff/', views.get_branch_staff, name='get_branch_staff'),
+    path('api/region/create/', views.create_region, name='create_region'),
+    path('api/district/create/', views.create_district, name='create_district'),
     
     # Webhook management (Superuser only)
     path('api/centers/<int:center_id>/webhook/setup/', views.setup_center_webhook, name='setup_center_webhook'),

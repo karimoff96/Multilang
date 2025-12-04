@@ -311,6 +311,8 @@ def branch_create(request, center_id=None):
         # Channel fields
         b2c_orders_channel_id = request.POST.get("b2c_orders_channel_id", "").strip() or None
         b2b_orders_channel_id = request.POST.get("b2b_orders_channel_id", "").strip() or None
+        # Bot settings
+        show_pricelist = request.POST.get("show_pricelist") == "on"
 
         if not name:
             messages.error(request, "Branch name is required.")
@@ -328,6 +330,7 @@ def branch_create(request, center_id=None):
                 location_url=location_url or None,
                 b2c_orders_channel_id=b2c_orders_channel_id,
                 b2b_orders_channel_id=b2b_orders_channel_id,
+                show_pricelist=show_pricelist,
             )
             messages.success(request, f'Branch "{name}" created successfully!')
             return redirect("branch_list")
@@ -436,6 +439,8 @@ def branch_edit(request, branch_id):
         # Channel fields
         b2c_orders_channel_id = request.POST.get("b2c_orders_channel_id", "").strip() or None
         b2b_orders_channel_id = request.POST.get("b2b_orders_channel_id", "").strip() or None
+        # Bot settings
+        show_pricelist = request.POST.get("show_pricelist") == "on"
 
         if not name:
             messages.error(request, "Branch name is required.")
@@ -449,6 +454,7 @@ def branch_edit(request, branch_id):
             branch.is_active = is_active
             branch.b2c_orders_channel_id = b2c_orders_channel_id
             branch.b2b_orders_channel_id = b2b_orders_channel_id
+            branch.show_pricelist = show_pricelist
             branch.save()
             messages.success(request, f'Branch "{name}" updated successfully!')
             return redirect("branch_list")
@@ -946,6 +952,75 @@ def get_branch_staff(request, branch_id):
     return JsonResponse(result, safe=False)
 
 
+@login_required(login_url="admin_login")
+def create_region(request):
+    """API endpoint to create a new region (superuser only)"""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "Permission denied"}, status=403)
+    
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
+    
+    from core.models import Region
+    
+    name = request.POST.get("name", "").strip()
+    code = request.POST.get("code", "").strip().upper()
+    
+    if not name or not code:
+        return JsonResponse({"success": False, "error": "Name and code are required"})
+    
+    # Check for duplicate code
+    if Region.objects.filter(code=code).exists():
+        return JsonResponse({"success": False, "error": f"Region with code '{code}' already exists"})
+    
+    try:
+        region = Region.objects.create(name=name, code=code, is_active=True)
+        return JsonResponse({
+            "success": True,
+            "region": {"id": region.id, "name": region.name, "code": region.code}
+        })
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@login_required(login_url="admin_login")
+def create_district(request):
+    """API endpoint to create a new district (superuser only)"""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "Permission denied"}, status=403)
+    
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Invalid method"}, status=405)
+    
+    from core.models import Region, District
+    
+    region_id = request.POST.get("region")
+    name = request.POST.get("name", "").strip()
+    code = request.POST.get("code", "").strip().upper()
+    
+    if not region_id or not name or not code:
+        return JsonResponse({"success": False, "error": "Region, name and code are required"})
+    
+    # Verify region exists
+    try:
+        region = Region.objects.get(pk=region_id)
+    except Region.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Region not found"})
+    
+    # Check for duplicate code
+    if District.objects.filter(code=code).exists():
+        return JsonResponse({"success": False, "error": f"District with code '{code}' already exists"})
+    
+    try:
+        district = District.objects.create(region=region, name=name, code=code, is_active=True)
+        return JsonResponse({
+            "success": True,
+            "district": {"id": district.id, "name": district.name, "code": district.code, "region_id": region.id}
+        })
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
 # ============ Role Management Views (Superuser Only) ============
 
 
@@ -1289,6 +1364,9 @@ def branch_settings_edit(request, branch_id):
         additional_info.about_us_uz = request.POST.get("about_us_uz", "").strip() or None
         additional_info.about_us_ru = request.POST.get("about_us_ru", "").strip() or None
         additional_info.about_us_en = request.POST.get("about_us_en", "").strip() or None
+        
+        # Guide URL
+        additional_info.guide = request.POST.get("guide", "").strip() or None
         
         additional_info.save()
         

@@ -350,6 +350,52 @@ def editUser(request, user_id):
 
 
 @login_required(login_url="admin_login")
+def deleteUser(request, user_id):
+    """Delete a BotUser"""
+    from django.shortcuts import get_object_or_404
+    from django.http import JsonResponse
+    from core.audit import log_delete
+    
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    
+    user = get_object_or_404(BotUser, id=user_id)
+    user_name = user.name or user.username or f"User #{user_id}"
+    
+    # Check permissions - only superuser or owner can delete
+    if not request.user.is_superuser:
+        # Check if user is owner and has access to this branch
+        if hasattr(request, 'is_owner') and request.is_owner:
+            if user.branch and hasattr(request, 'admin_profile') and request.admin_profile:
+                # Owner can only delete users from their center's branches
+                if user.branch.center != request.admin_profile.branch.center:
+                    messages.error(request, "You don't have permission to delete this user.")
+                    return redirect("usersList")
+        else:
+            messages.error(request, "You don't have permission to delete users.")
+            return redirect("usersList")
+    
+    try:
+        # Log the deletion before deleting
+        log_delete(
+            user=request.user,
+            target=user,
+            request=request
+        )
+        
+        user.delete()
+        messages.success(request, f'User "{user_name}" has been deleted successfully.')
+    except Exception as e:
+        messages.error(request, f"Error deleting user: {str(e)}")
+    
+    # Check if AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({"success": True, "message": f'User "{user_name}" deleted.'})
+    
+    return redirect("usersList")
+
+
+@login_required(login_url="admin_login")
 def userDetail(request):
     """View BotUser (Telegram user) profile details"""
     from orders.models import Order

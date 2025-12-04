@@ -92,6 +92,14 @@ TRANSLATIONS = {
         "status_ready": "✅ <b>Buyurtmangiz tayyor!</b>\n\n📋 Buyurtma #{order_id}\n📦 Buyurtmangizni olib ketishingiz mumkin.\n\n📞 Telefon: {phone}\n📍 Manzil: {address}",
         "status_completed": "✅ <b>Buyurtma yakunlandi!</b>\n\n📋 Buyurtma #{order_id}\n\n🙏 Xizmatimizdan foydalanganingiz uchun rahmat!\n⭐ Fikr-mulohazalaringizni kutamiz.",
         "status_cancelled": "❌ <b>Buyurtma bekor qilindi</b>\n\n📋 Buyurtma #{order_id}\n\n📞 Savollar bo'lsa, operatorlar bilan bog'laning.",
+        # Price list
+        "menu_pricelist": "💰 Narxlar ro'yxati",
+        "pricelist_title": "💰 <b>Narxlar ro'yxati</b>\n\n",
+        "pricelist_category": "📂 <b>{category}</b>\n",
+        "pricelist_product": "  • {product}: {price} so'm/sahifa\n",
+        "pricelist_empty": "❌ Narxlar topilmadi.",
+        "pricelist_b2b_note": "💼 <b>B2B narxlari</b> (agentlik uchun)",
+        "pricelist_b2c_note": "👤 <b>B2C narxlari</b> (oddiy mijozlar uchun)",
     },
     "ru": {
         "welcome": "🎉 <b>Добро пожаловать!</b>\n\nДобро пожаловать в наш центр переводов. Пожалуйста, выберите язык:",
@@ -185,6 +193,14 @@ TRANSLATIONS = {
         "status_ready": "✅ <b>Ваш заказ готов!</b>\n\n📋 Заказ #{order_id}\n📦 Вы можете забрать свой заказ.\n\n📞 Телефон: {phone}\n📍 Адрес: {address}",
         "status_completed": "✅ <b>Заказ завершен!</b>\n\n📋 Заказ #{order_id}\n\n🙏 Спасибо за использование наших услуг!\n⭐ Ждем ваших отзывов.",
         "status_cancelled": "❌ <b>Заказ отменен</b>\n\n📋 Заказ #{order_id}\n\n📞 Если у вас есть вопросы, свяжитесь с операторами.",
+        # Price list
+        "menu_pricelist": "💰 Прайс-лист",
+        "pricelist_title": "💰 <b>Прайс-лист</b>\n\n",
+        "pricelist_category": "📂 <b>{category}</b>\n",
+        "pricelist_product": "  • {product}: {price} сум/страница\n",
+        "pricelist_empty": "❌ Цены не найдены.",
+        "pricelist_b2b_note": "💼 <b>Цены B2B</b> (для агентств)",
+        "pricelist_b2c_note": "👤 <b>Цены B2C</b> (для обычных клиентов)",
     },
     "en": {
         "welcome": "🎉 <b>Welcome!</b>\n\nWelcome to our translation center. Please select your language:",
@@ -282,6 +298,14 @@ TRANSLATIONS = {
         "status_ready": "✅ <b>Your order is ready!</b>\n\n📋 Order #{order_id}\n📦 You can pick up your order.\n\n📞 Phone: {phone}\n📍 Address: {address}",
         "status_completed": "✅ <b>Order completed!</b>\n\n📋 Order #{order_id}\n\n🙏 Thank you for using our services!\n⭐ We look forward to your feedback.",
         "status_cancelled": "❌ <b>Order cancelled</b>\n\n📋 Order #{order_id}\n\n📞 If you have any questions, contact our operators.",
+        # Price list
+        "menu_pricelist": "💰 Price List",
+        "pricelist_title": "💰 <b>Price List</b>\n\n",
+        "pricelist_category": "📂 <b>{category}</b>\n",
+        "pricelist_product": "  • {product}: {price} sum/page\n",
+        "pricelist_empty": "❌ No prices found.",
+        "pricelist_b2b_note": "💼 <b>B2B Prices</b> (for agencies)",
+        "pricelist_b2c_note": "👤 <b>B2C Prices</b> (for regular customers)",
     },
 }
 

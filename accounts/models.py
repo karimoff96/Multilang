@@ -85,6 +85,38 @@ class AdditionalInfo(models.Model):
         help_text=_("Telegram username for support (e.g., @support_bot)")
     )
     
+    # Guide link (Telegram message, YouTube, etc.)
+    guide = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name=_("Guide Link"),
+        help_text=_("URL to a guide (Telegram message, YouTube video, documentation, etc.)")
+    )
+    
+    # Reserved fields for future use
+    reserved_field_1 = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name=_("Reserved Field 1"),
+        help_text=_("Reserved for future use")
+    )
+    reserved_field_2 = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name=_("Reserved Field 2"),
+        help_text=_("Reserved for future use")
+    )
+    reserved_field_3 = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name=_("Reserved Field 3"),
+        help_text=_("Reserved for future use")
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
     

@@ -11,6 +11,7 @@ from .views import (
     reset_password,
     addUser, 
     editUser,
+    deleteUser,
     usersList, 
     userDetail,
     viewProfile,
@@ -29,6 +30,7 @@ urlpatterns = [
     path("", usersList, name="usersList"),
     path("add-user/", addUser, name="addUser"),
     path("edit-user/<int:user_id>/", editUser, name="editUser"),
+    path("delete-user/<int:user_id>/", deleteUser, name="deleteUser"),
     path("user-detail/", userDetail, name="userDetail"),
     
     # Admin profile URLs

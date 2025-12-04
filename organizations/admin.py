@@ -20,8 +20,8 @@ class TranslationCenterAdmin(admin.ModelAdmin):
 
 @admin.register(Branch)
 class BranchAdmin(admin.ModelAdmin):
-    list_display = ['name', 'center', 'region', 'is_main', 'is_active']
-    list_filter = ['center', 'region', 'is_main', 'is_active']
+    list_display = ['name', 'center', 'region', 'is_main', 'show_pricelist', 'is_active']
+    list_filter = ['center', 'region', 'is_main', 'show_pricelist', 'is_active']
     search_fields = ['name', 'center__name', 'region__name']
     ordering = ['center', '-is_main', 'name']
 

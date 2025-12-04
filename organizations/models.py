@@ -130,6 +130,11 @@ class Branch(models.Model):
         null=True,
         help_text=_("Telegram channel ID for B2B (agency/business) orders"),
     )
+    show_pricelist = models.BooleanField(
+        _("Show Price List"),
+        default=False,
+        help_text=_("Show price list button in Telegram bot for this branch"),
+    )
     is_active = models.BooleanField(_("Active"), default=True)
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)

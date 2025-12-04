@@ -217,4 +217,19 @@ class AdditionalInfoAdmin(admin.ModelAdmin):
                 "fields": ("support_phone", "support_telegram"),
             }
         ),
+        (
+            "Guide",
+            {
+                "fields": ("guide",),
+                "description": "Link to a guide resource (Telegram message, YouTube video, documentation, etc.)"
+            }
+        ),
+        (
+            "Reserved Fields",
+            {
+                "fields": ("reserved_field_1", "reserved_field_2", "reserved_field_3"),
+                "classes": ("collapse",),
+                "description": "Reserved fields for future use. Do not use unless instructed."
+            }
+        ),
     )

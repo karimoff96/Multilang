@@ -163,6 +163,9 @@
                     <li>
                         <a href="{% url 'financial_reports' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.financialReports">Financial Reports</span></a>
                     </li>
+                    <li>
+                        <a href="{% url 'unit_economy' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.unitEconomy">Unit Economy</span></a>
+                    </li>
                     {% endif %}
                     {% can_do 'reports.view' as can_order_reports %}
                     {% if can_order_reports %}

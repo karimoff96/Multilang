@@ -204,6 +204,32 @@
         </div>
     </div>
 
+    <!-- Guide Link -->
+    <div class="col-xxl-6 col-lg-6">
+        <div class="card radius-12 h-100">
+            <div class="card-header py-16 px-24 bg-base d-flex align-items-center gap-12">
+                <div class="w-40-px h-40-px bg-purple-100 rounded-8 d-flex justify-content-center align-items-center">
+                    <iconify-icon icon="fluent:book-20-filled" class="text-purple-600 text-xl"></iconify-icon>
+                </div>
+                <h6 class="mb-0 fw-semibold">Guide Link</h6>
+            </div>
+            <div class="card-body p-24">
+                <label class="form-label fw-medium text-secondary-light mb-4">Guide URL</label>
+                <div class="d-flex align-items-center gap-8">
+                    <iconify-icon icon="fluent:link-20-filled" class="text-purple-600 text-xl"></iconify-icon>
+                    {% if info.guide %}
+                    <a href="{{ info.guide }}" target="_blank" class="text-primary-600 text-decoration-underline">
+                        {{ info.guide|truncatechars:50 }}
+                    </a>
+                    {% else %}
+                    <span class="text-neutral-500">Not set</span>
+                    {% endif %}
+                </div>
+                <small class="text-secondary-light d-block mt-8">Link to guide (Telegram, YouTube, docs, etc.)</small>
+            </div>
+        </div>
+    </div>
+
     <!-- Description -->
     <div class="col-12">
         <div class="card radius-12">

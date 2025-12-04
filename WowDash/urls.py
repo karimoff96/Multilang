@@ -70,6 +70,17 @@ urlpatterns = [
         reports_views.my_statistics,
         name="my_statistics",
     ),
+    # Unit Economy Analytics
+    path(
+        "reports/unit-economy",
+        reports_views.unit_economy,
+        name="unit_economy",
+    ),
+    path(
+        "api/unit-economy",
+        reports_views.unit_economy_api,
+        name="unit_economy_api",
+    ),
 ]
 from django.conf import settings
 from django.conf.urls.static import static

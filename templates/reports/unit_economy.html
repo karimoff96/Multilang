@@ -1,0 +1,446 @@
+{% extends 'layout/layout.html' %} 
+{% load number_filters %}
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Report Header with Filters -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-0" data-i18n="unitEconomy.title">{{ title }}</h5>
+                        <p class="text-secondary-light mb-0" data-i18n="unitEconomy.subtitle">Receivables and payment collection analytics</p>
+                    </div>
+                    <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                        {% if user.is_superuser and centers %}
+                        <div>
+                            <label class="form-label text-sm mb-1" data-i18n="common.center">Center</label>
+                            <select name="center" class="form-select" onchange="this.form.submit()">
+                                <option value="" data-i18n="common.allCenters">All Centers</option>
+                                {% for center in centers %}
+                                <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        {% if branches %}
+                        <div>
+                            <label class="form-label text-sm mb-1" data-i18n="common.branch">Branch</label>
+                            <select name="branch" class="form-select">
+                                <option value="" data-i18n="common.allBranches">All Branches</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
+                            <span data-i18n="common.apply">Apply</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-1 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-danger-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:wallet-2-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm" data-i18n="unitEconomy.totalRemaining">Total Remaining</span>
+                        <h4 class="fw-bold mb-0 text-danger-main">{{ total_remaining|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                    </div>
+                </div>
+                <p class="text-sm mb-0 text-secondary-light">
+                    <span class="badge bg-danger-focus text-danger-main">{{ total_orders_with_debt }}</span>
+                    <span data-i18n="unitEconomy.ordersWithDebt">orders with debt</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-2 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-success-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:check-circle-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm" data-i18n="unitEconomy.totalReceived">Total Received</span>
+                        <h4 class="fw-bold mb-0 text-success-main">{{ total_received|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                    </div>
+                </div>
+                <p class="text-sm mb-0 text-secondary-light">
+                    <span class="badge bg-success-focus text-success-main">{{ fully_paid_count }}</span>
+                    <span data-i18n="unitEconomy.fullyPaid">fully paid</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-3 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-primary-600 text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:money-bag-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm" data-i18n="unitEconomy.totalExpected">Total Expected</span>
+                        <h4 class="fw-bold mb-0">{{ total_expected|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-4 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-info-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:chart-2-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm" data-i18n="unitEconomy.collectionRate">Collection Rate</span>
+                        <h4 class="fw-bold mb-0 {% if collection_rate >= 80 %}text-success-main{% elif collection_rate >= 50 %}text-warning-main{% else %}text-danger-main{% endif %}">{{ collection_rate }}%</h4>
+                    </div>
+                </div>
+                <div class="progress bg-neutral-100 h-8-px" style="height: 6px;">
+                    <div class="progress-bar {% if collection_rate >= 80 %}bg-success-main{% elif collection_rate >= 50 %}bg-warning-main{% else %}bg-danger-main{% endif %}" 
+                         role="progressbar" style="width: {{ collection_rate }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Type Breakdown (B2B vs B2C) -->
+    <div class="col-xxl-4">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4" data-i18n="unitEconomy.byClientType">By Client Type</h6>
+                <div id="clientTypeChart" style="min-height: 200px;"></div>
+                <div class="mt-3">
+                    <!-- B2B (Agency) -->
+                    <div class="d-flex align-items-center justify-content-between mb-3 p-12 bg-neutral-50 radius-8">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="w-12-px h-12-px rounded-circle bg-primary-600"></span>
+                            <span class="text-secondary-light text-sm">{{ by_client_type.agency.label }}</span>
+                        </div>
+                        <div class="text-end">
+                            <span class="text-danger-main fw-semibold">{{ by_client_type.agency.remaining|short_number }} UZS</span>
+                            <span class="text-xs text-secondary-light d-block">{{ by_client_type.agency.orders_with_debt }} orders</span>
+                        </div>
+                    </div>
+                    <!-- B2C (Regular) -->
+                    <div class="d-flex align-items-center justify-content-between p-12 bg-neutral-50 radius-8">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="w-12-px h-12-px rounded-circle bg-warning-main"></span>
+                            <span class="text-secondary-light text-sm">{{ by_client_type.regular.label }}</span>
+                        </div>
+                        <div class="text-end">
+                            <span class="text-danger-main fw-semibold">{{ by_client_type.regular.remaining|short_number }} UZS</span>
+                            <span class="text-xs text-secondary-light d-block">{{ by_client_type.regular.orders_with_debt }} orders</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remaining by Branch -->
+    <div class="col-xxl-8">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4" data-i18n="unitEconomy.byBranch">Remaining by Branch</h6>
+                {% if by_branch %}
+                <div id="branchRemainingChart" style="min-height: 280px;"></div>
+                {% else %}
+                <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                    <span class="mb-0 w-64-px h-64-px bg-neutral-100 flex-shrink-0 text-secondary-light d-flex justify-content-center align-items-center rounded-circle mb-3">
+                        <iconify-icon icon="solar:buildings-line-duotone" class="text-xxl"></iconify-icon>
+                    </span>
+                    <h6 class="fw-semibold text-secondary-light mb-1" data-i18n="unitEconomy.noDebt">No outstanding debts</h6>
+                    <p class="text-sm text-secondary-light mb-0" data-i18n="unitEconomy.allPaid">All orders are fully paid</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Center Breakdown (for superuser/owner) -->
+    {% if user.is_superuser or is_owner %}
+    <div class="col-xxl-6">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4" data-i18n="unitEconomy.byCenter">Remaining by Center</h6>
+                {% if by_center %}
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="common.center">Center</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="unitEconomy.remaining">Remaining</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="unitEconomy.ordersWithDebt">Orders</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="unitEconomy.collectionRate">Collection</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in by_center %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }} fw-medium text-secondary-light">{{ item.center_name }}</td>
+                                <td class="{{ row_color }} text-end text-danger-main fw-semibold">{{ item.remaining|short_number }}</td>
+                                <td class="{{ row_color }} text-center text-secondary-light">{{ item.orders_with_debt }}</td>
+                                <td class="{{ row_color }} text-end">
+                                    <span class="badge {% if item.collection_rate >= 80 %}bg-success-focus text-success-main{% elif item.collection_rate >= 50 %}bg-warning-focus text-warning-main{% else %}bg-danger-focus text-danger-main{% endif %}">
+                                        {{ item.collection_rate }}%
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                    <span class="mb-0 w-64-px h-64-px bg-neutral-100 flex-shrink-0 text-secondary-light d-flex justify-content-center align-items-center rounded-circle mb-3">
+                        <iconify-icon icon="solar:buildings-2-line-duotone" class="text-xxl"></iconify-icon>
+                    </span>
+                    <h6 class="fw-semibold text-secondary-light mb-1" data-i18n="unitEconomy.noDebt">No outstanding debts</h6>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Top Debtors -->
+    <div class="col-xxl-{% if user.is_superuser or is_owner %}6{% else %}12{% endif %}">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4" data-i18n="unitEconomy.topDebtors">Top Debtors</h6>
+                {% if top_debtors %}
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="common.customer">Customer</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="unitEconomy.type">Type</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="unitEconomy.remaining">Remaining</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="unitEconomy.ordersWithDebt">Orders</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for debtor in top_debtors %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="w-32-px h-32-px bg-neutral-200 text-secondary-light d-flex justify-content-center align-items-center rounded-circle fw-semibold">
+                                            {{ debtor.customer_name|slice:":1"|upper }}
+                                        </span>
+                                        <div>
+                                            <span class="fw-medium text-secondary-light">{{ debtor.customer_name|truncatechars:20 }}</span>
+                                            {% if debtor.customer_phone %}
+                                            <span class="text-xs text-secondary-light d-block">{{ debtor.customer_phone }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="{{ row_color }} text-center">
+                                    {% if debtor.is_agency %}
+                                    <span class="badge bg-primary-focus text-primary-main px-8 py-4">B2B</span>
+                                    {% else %}
+                                    <span class="badge bg-warning-focus text-warning-main px-8 py-4">B2C</span>
+                                    {% endif %}
+                                </td>
+                                <td class="{{ row_color }} text-end text-danger-main fw-semibold">{{ debtor.remaining|short_number }}</td>
+                                <td class="{{ row_color }} text-center text-secondary-light">{{ debtor.orders_with_debt }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center text-secondary-light bg-base" data-i18n="common.noData">No data</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                    <span class="mb-0 w-64-px h-64-px bg-neutral-100 flex-shrink-0 text-secondary-light d-flex justify-content-center align-items-center rounded-circle mb-3">
+                        <iconify-icon icon="solar:users-group-two-rounded-line-duotone" class="text-xxl"></iconify-icon>
+                    </span>
+                    <h6 class="fw-semibold text-secondary-light mb-1" data-i18n="unitEconomy.noDebtors">No debtors</h6>
+                    <p class="text-sm text-secondary-light mb-0" data-i18n="unitEconomy.allCustomersPaid">All customers have paid in full</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Branch Details Table -->
+    {% if by_branch %}
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4" data-i18n="unitEconomy.branchDetails">Branch Details</h6>
+                <div class="table-responsive">
+                    <table class="table basic-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" data-i18n="common.branch">Branch</th>
+                                <th scope="col" data-i18n="common.center">Center</th>
+                                <th scope="col" class="text-end" data-i18n="unitEconomy.expected">Expected</th>
+                                <th scope="col" class="text-end" data-i18n="unitEconomy.received">Received</th>
+                                <th scope="col" class="text-end" data-i18n="unitEconomy.remaining">Remaining</th>
+                                <th scope="col" class="text-center" data-i18n="unitEconomy.ordersWithDebt">Orders</th>
+                                <th scope="col" class="text-end" data-i18n="unitEconomy.collectionRate">Collection</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in by_branch %}
+                            <tr>
+                                <td class="fw-medium">{{ item.branch_name }}</td>
+                                <td class="text-secondary-light">{{ item.center_name }}</td>
+                                <td class="text-end">{{ item.total_expected|short_number }}</td>
+                                <td class="text-end text-success-main">{{ item.total_received|short_number }}</td>
+                                <td class="text-end text-danger-main fw-semibold">{{ item.remaining|short_number }}</td>
+                                <td class="text-center">{{ item.orders_with_debt }}</td>
+                                <td class="text-end">
+                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                        <div class="progress flex-grow-1 bg-neutral-100" style="height: 6px; max-width: 60px;">
+                                            <div class="progress-bar {% if item.collection_rate >= 80 %}bg-success-main{% elif item.collection_rate >= 50 %}bg-warning-main{% else %}bg-danger-main{% endif %}" 
+                                                 role="progressbar" style="width: {{ item.collection_rate }}%"></div>
+                                        </div>
+                                        <span class="{% if item.collection_rate >= 80 %}text-success-main{% elif item.collection_rate >= 50 %}text-warning-main{% else %}text-danger-main{% endif %} fw-medium">
+                                            {{ item.collection_rate }}%
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+function formatShortNumber(num) {
+    if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B';
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const branchLabels = {{ branch_labels|safe }};
+    const branchRemainingValues = {{ branch_remaining_values|safe }};
+    const clientTypeLabels = {{ client_type_labels|safe }};
+    const clientTypeValues = {{ client_type_values|safe }};
+    
+    // Check if ApexCharts is loaded
+    if (typeof ApexCharts === 'undefined') {
+        console.error('ApexCharts is not loaded!');
+        return;
+    }
+    
+    // Client Type Donut Chart
+    if (clientTypeValues.some(v => v > 0)) {
+        var clientTypeChart = new ApexCharts(document.querySelector("#clientTypeChart"), {
+            series: clientTypeValues,
+            chart: { type: 'donut', height: 200 },
+            labels: clientTypeLabels,
+            colors: ['#487FFF', '#FF9F29'],
+            legend: { show: false },
+            dataLabels: {
+                enabled: true,
+                formatter: function(val) {
+                    return val.toFixed(1) + '%';
+                }
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '70%',
+                        labels: {
+                            show: true,
+                            total: {
+                                show: true,
+                                label: 'Total',
+                                formatter: function(w) {
+                                    var total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                                    return formatShortNumber(total);
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val) {
+                        return formatShortNumber(val) + ' UZS';
+                    }
+                }
+            }
+        });
+        clientTypeChart.render();
+    } else {
+        var el = document.querySelector("#clientTypeChart");
+        if (el) el.innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-4 text-secondary-light"><iconify-icon icon="solar:check-circle-bold" class="text-3xl mb-2 text-success-main"></iconify-icon><span>No outstanding debts</span></div>';
+    }
+    
+    // Branch Remaining Chart
+    var branchEl = document.querySelector("#branchRemainingChart");
+    if (branchLabels && branchLabels.length > 0 && branchEl) {
+        var branchChart = new ApexCharts(branchEl, {
+            series: [{
+                name: 'Remaining',
+                data: branchRemainingValues
+            }],
+            chart: { type: 'bar', height: 280, toolbar: { show: false } },
+            colors: ['#DC3545'],
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 4,
+                    barHeight: '60%'
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function(val) { return formatShortNumber(val); },
+                style: { fontSize: '11px', colors: ['#fff'] }
+            },
+            xaxis: {
+                categories: branchLabels,
+                labels: {
+                    formatter: function(val) { return formatShortNumber(val); },
+                    style: { colors: '#9CA3AF', fontSize: '11px' }
+                }
+            },
+            yaxis: {
+                labels: { style: { colors: '#9CA3AF', fontSize: '11px' } }
+            },
+            grid: { borderColor: '#E4E7EC', strokeDashArray: 3 },
+            tooltip: {
+                y: {
+                    formatter: function(val) { return val.toLocaleString() + ' UZS'; }
+                }
+            }
+        });
+        branchChart.render();
+    }
+});
+</script>
+{% endblock script %}

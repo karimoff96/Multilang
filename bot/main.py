@@ -1688,6 +1688,13 @@ def handle_contact(message):
 def show_main_menu(message, language):
     user_id = message.from_user.id
     update_user_step(user_id, STEP_REGISTERED)
+    
+    # Check if branch has pricelist enabled
+    user = get_bot_user(user_id)
+    should_show_pricelist = False
+    if user and user.branch and user.branch.show_pricelist:
+        should_show_pricelist = True
+    
     markup = types.ReplyKeyboardMarkup(
         resize_keyboard=True, row_width=2, one_time_keyboard=True
     )
@@ -1697,21 +1704,27 @@ def show_main_menu(message, language):
         btn3 = types.KeyboardButton("👤 Profil")
         btn4 = types.KeyboardButton("ℹ️ Biz haqimizda")
         btn5 = types.KeyboardButton("❓ Yordam")
+        btn_pricelist = types.KeyboardButton("💰 Narxlar ro'yxati")
     elif language == "ru":
         btn1 = types.KeyboardButton("🛍️ Воспользоваться услугой")
         btn2 = types.KeyboardButton("📋 Мои заявки")
         btn3 = types.KeyboardButton("👤 Профиль")
         btn4 = types.KeyboardButton("ℹ️ О нас")
         btn5 = types.KeyboardButton("❓ Помощь")
+        btn_pricelist = types.KeyboardButton("💰 Прайс-лист")
     else:  # English
         btn1 = types.KeyboardButton("🛍️ Use Service")
         btn2 = types.KeyboardButton("📋 My Orders")
         btn3 = types.KeyboardButton("👤 Profile")
         btn4 = types.KeyboardButton("ℹ️ About Us")
         btn5 = types.KeyboardButton("❓ Help")
+        btn_pricelist = types.KeyboardButton("💰 Price List")
     markup.add(btn1, btn2)
     markup.add(btn3, btn4)
-    markup.add(btn5)
+    if should_show_pricelist:
+        markup.add(btn5, btn_pricelist)
+    else:
+        markup.add(btn5)
     welcome_text = get_text("main_menu_welcome", language)
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
 
@@ -1734,6 +1747,9 @@ def show_main_menu(message, language):
         "❓ Yordam",
         "❓ Помощь",
         "❓ Help",
+        "💰 Narxlar ro'yxati",
+        "💰 Прайс-лист",
+        "💰 Price List",
     ]
 )
 def handle_main_menu(message):
@@ -1823,6 +1839,100 @@ def handle_main_menu(message):
 
         send_message(message.chat.id, help_text, parse_mode="HTML")
         show_main_menu(message, language)
+
+    elif (
+        "Narxlar ro'yxati" in message.text
+        or "Прайс-лист" in message.text
+        or "Price List" in message.text
+    ):
+        show_pricelist(message, language)
+
+
+def show_pricelist(message, language):
+    """Show price list for the user's branch"""
+    from services.models import Category, Product
+    
+    user_id = message.from_user.id
+    user = get_bot_user(user_id)
+    
+    if not user or not user.branch:
+        send_message(message.chat.id, get_text("pricelist_empty", language), parse_mode="HTML")
+        show_main_menu(message, language)
+        return
+    
+    # Check if branch has price list enabled
+    if not user.branch.show_pricelist:
+        send_message(message.chat.id, get_text("pricelist_empty", language), parse_mode="HTML")
+        show_main_menu(message, language)
+        return
+    
+    # Determine if user is agency (B2B) or regular (B2C)
+    is_agency = user.is_agency if hasattr(user, 'is_agency') else False
+    
+    # Get categories for this branch
+    categories = Category.objects.filter(
+        branch=user.branch,
+        is_active=True
+    ).prefetch_related('product_set').order_by('name')
+    
+    # Build price list text
+    pricelist_text = get_text("pricelist_title", language)
+    
+    # Add B2B/B2C note
+    if is_agency:
+        pricelist_text += get_text("pricelist_b2b_note", language) + "\n\n"
+    else:
+        pricelist_text += get_text("pricelist_b2c_note", language) + "\n\n"
+    
+    has_products = False
+    
+    for category in categories:
+        products = category.product_set.filter(is_active=True).order_by('name')
+        
+        if products.exists():
+            has_products = True
+            # Get category name based on language
+            category_name = category.name
+            if language == 'uz' and hasattr(category, 'name_uz') and category.name_uz:
+                category_name = category.name_uz
+            elif language == 'ru' and hasattr(category, 'name_ru') and category.name_ru:
+                category_name = category.name_ru
+            elif language == 'en' and hasattr(category, 'name_en') and category.name_en:
+                category_name = category.name_en
+            
+            pricelist_text += get_text("pricelist_category", language).format(category=category_name)
+            
+            for product in products:
+                # Get product name based on language
+                product_name = product.name
+                if language == 'uz' and hasattr(product, 'name_uz') and product.name_uz:
+                    product_name = product.name_uz
+                elif language == 'ru' and hasattr(product, 'name_ru') and product.name_ru:
+                    product_name = product.name_ru
+                elif language == 'en' and hasattr(product, 'name_en') and product.name_en:
+                    product_name = product.name_en
+                
+                # Get price based on user type (B2B vs B2C)
+                if is_agency:
+                    price = product.b2b_price if hasattr(product, 'b2b_price') and product.b2b_price else product.price
+                else:
+                    price = product.b2c_price if hasattr(product, 'b2c_price') and product.b2c_price else product.price
+                
+                # Format price with thousands separator
+                price_formatted = "{:,.0f}".format(price).replace(",", " ")
+                
+                pricelist_text += get_text("pricelist_product", language).format(
+                    product=product_name,
+                    price=price_formatted
+                )
+            
+            pricelist_text += "\n"
+    
+    if not has_products:
+        pricelist_text = get_text("pricelist_empty", language)
+    
+    send_message(message.chat.id, pricelist_text, parse_mode="HTML")
+    show_main_menu(message, language)
 
 
 def show_user_orders(message, language):
