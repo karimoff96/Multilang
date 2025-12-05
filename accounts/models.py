@@ -410,3 +410,144 @@ def create_user_notification(sender, instance, created, **kwargs):
         print(f"[ERROR] Failed to create user notification: {e}")
         import traceback
         traceback.print_exc()
+
+
+class BotUserState(models.Model):
+    """
+    Persistent state storage for bot users during multi-step flows.
+    Replaces in-memory user_data and uploaded_files dictionaries for multi-worker support.
+    
+    This model stores temporary data during order creation, file uploads, and payment flows.
+    Data is automatically cleaned up after order completion or timeout.
+    """
+    
+    bot_user = models.OneToOneField(
+        BotUser,
+        on_delete=models.CASCADE,
+        related_name='state',
+        verbose_name=_("Bot User"),
+        primary_key=True,
+    )
+    
+    # Current order in progress (if any)
+    current_order = models.ForeignKey(
+        'orders.Order',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='user_states',
+        verbose_name=_("Current Order"),
+    )
+    
+    # Selected service/product during order creation
+    selected_category_id = models.PositiveIntegerField(null=True, blank=True)
+    selected_product_id = models.PositiveIntegerField(null=True, blank=True)
+    selected_language_id = models.PositiveIntegerField(null=True, blank=True)
+    copy_number = models.PositiveIntegerField(default=0)
+    
+    # File upload tracking
+    uploaded_file_ids = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_("Uploaded File IDs"),
+        help_text=_("List of OrderMedia IDs for files uploaded in current session"),
+    )
+    total_pages = models.PositiveIntegerField(default=0)
+    
+    # Message tracking for cleanup (store message IDs to delete later)
+    message_ids = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_("Message IDs"),
+        help_text=_("List of message IDs to clean up"),
+    )
+    totals_message_id = models.BigIntegerField(null=True, blank=True)
+    last_instruction_message_id = models.BigIntegerField(null=True, blank=True)
+    
+    # Payment tracking
+    pending_payment_order_id = models.PositiveIntegerField(null=True, blank=True)
+    pending_receipt_order_id = models.PositiveIntegerField(null=True, blank=True)
+    
+    # Generic extra data for edge cases (JSON field for flexibility)
+    extra_data = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Extra Data"),
+        help_text=_("Additional temporary data during flows"),
+    )
+    
+    # Timestamps for cleanup
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Bot User State")
+        verbose_name_plural = _("Bot User States")
+        indexes = [
+            models.Index(fields=['updated_at']),
+        ]
+    
+    def __str__(self):
+        return f"State for {self.bot_user}"
+    
+    def clear_order_state(self):
+        """Clear all order-related state after order completion or cancellation"""
+        self.current_order = None
+        self.selected_category_id = None
+        self.selected_product_id = None
+        self.selected_language_id = None
+        self.copy_number = 0
+        self.uploaded_file_ids = []
+        self.total_pages = 0
+        self.message_ids = []
+        self.totals_message_id = None
+        self.last_instruction_message_id = None
+        self.pending_payment_order_id = None
+        self.pending_receipt_order_id = None
+        self.extra_data = {}
+        self.save()
+    
+    def add_message_id(self, message_id):
+        """Add a message ID to the cleanup list"""
+        if message_id and message_id not in self.message_ids:
+            self.message_ids = self.message_ids + [message_id]
+            self.save(update_fields=['message_ids', 'updated_at'])
+    
+    def add_uploaded_file(self, file_id):
+        """Add an uploaded file ID"""
+        if file_id and file_id not in self.uploaded_file_ids:
+            self.uploaded_file_ids = self.uploaded_file_ids + [file_id]
+            self.save(update_fields=['uploaded_file_ids', 'updated_at'])
+    
+    def get_extra(self, key, default=None):
+        """Get a value from extra_data"""
+        return self.extra_data.get(key, default)
+    
+    def set_extra(self, key, value):
+        """Set a value in extra_data"""
+        self.extra_data[key] = value
+        self.save(update_fields=['extra_data', 'updated_at'])
+    
+    @classmethod
+    def get_or_create_for_user(cls, bot_user):
+        """Get or create state for a bot user"""
+        state, created = cls.objects.get_or_create(bot_user=bot_user)
+        return state
+    
+    @classmethod
+    def cleanup_old_states(cls, hours=24):
+        """
+        Clean up states that haven't been updated in the specified hours.
+        Should be called periodically via management command or celery task.
+        """
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        cutoff = timezone.now() - timedelta(hours=hours)
+        old_states = cls.objects.filter(updated_at__lt=cutoff)
+        
+        # Clear state but don't delete (preserve the record)
+        for state in old_states:
+            state.clear_order_state()
+        
+        return old_states.count()

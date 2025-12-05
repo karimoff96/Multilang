@@ -79,7 +79,7 @@
                         <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
                             {% if admin_notifications %}
                                 {% for notification in admin_notifications %}
-                                <a href="{% if notification.notification_type == 'receipt_pending' %}{% url 'orders:orderDetail' notification.get_link_id %}{% elif notification.notification_type == 'order_new' or notification.notification_type == 'order_cancelled' or notification.notification_type == 'order_completed' or notification.notification_type == 'payment_confirmed' %}{% url 'orders:orderDetail' notification.object_id %}{% elif notification.notification_type == 'user_new' or notification.notification_type == 'agency_new' %}{% url 'userList' %}{% else %}javascript:void(0){% endif %}" 
+                                <a href="{% if notification.notification_type == 'receipt_pending' %}{% url 'orders:orderDetail' notification.get_link_id %}{% elif notification.notification_type == 'order_new' or notification.notification_type == 'order_cancelled' or notification.notification_type == 'order_completed' or notification.notification_type == 'payment_confirmed' %}{% url 'orders:orderDetail' notification.object_id %}{% elif notification.notification_type == 'user_new' or notification.notification_type == 'agency_new' %}{% url 'usersList' %}{% else %}javascript:void(0){% endif %}" 
                                    class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between {% cycle '' 'bg-neutral-50' %}"
                                    data-notification-id="{{ notification.id }}"
                                    onclick="markNotificationRead({{ notification.id }})">

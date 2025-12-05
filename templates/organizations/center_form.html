@@ -27,6 +27,36 @@
                                    data-i18n-placeholder="form.enterCenterName" placeholder="Enter center name" required>
                         </div>
                         
+                        <!-- Subdomain Field -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <span data-i18n="form.subdomain">Subdomain</span>
+                                {% if not request.user.is_superuser %}
+                                <span class="text-warning-600 ms-2" data-bs-toggle="tooltip" title="Only superadmin can edit this field">
+                                    <iconify-icon icon="mdi:shield-lock"></iconify-icon>
+                                </span>
+                                {% endif %}
+                            </label>
+                            {% if request.user.is_superuser %}
+                            <div class="input-group">
+                                <input type="text" name="subdomain" class="form-control radius-8" 
+                                       value="{% if center %}{{ center.subdomain|default:'' }}{% endif %}"
+                                       placeholder="e.g., mycompany" pattern="[a-z0-9\-]+" 
+                                       title="Only lowercase letters, numbers and hyphens allowed">
+                                <span class="input-group-text bg-neutral-100">.{{ main_domain }}</span>
+                            </div>
+                            <small class="text-secondary-light">Unique URL for this center (lowercase, no spaces)</small>
+                            {% else %}
+                            <div class="input-group">
+                                <input type="text" class="form-control radius-8 bg-neutral-100" 
+                                       value="{% if center and center.subdomain %}{{ center.subdomain }}{% else %}Not set{% endif %}"
+                                       disabled readonly>
+                                <span class="input-group-text bg-neutral-100">.{{ main_domain }}</span>
+                            </div>
+                            <small class="text-secondary-light">Contact administrator to change subdomain</small>
+                            {% endif %}
+                        </div>
+                        
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.phone">Phone</label>
                             <input type="tel" name="phone" class="form-control radius-8" 

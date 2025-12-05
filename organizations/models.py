@@ -8,6 +8,14 @@ class TranslationCenter(models.Model):
     """Translation center owned by an owner"""
 
     name = models.CharField(_("Name"), max_length=200)
+    subdomain = models.SlugField(
+        _("Subdomain"),
+        max_length=63,
+        unique=True,
+        blank=True,
+        null=True,
+        help_text=_("Unique subdomain for this center (e.g., 'center1' for center1.alltranslation.uz)"),
+    )
     owner = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -215,6 +223,18 @@ class Role(models.Model):
         help_text=_("Can edit branch payment info, help texts, about us, working hours"))
     can_view_branch_settings = models.BooleanField(_("Can view branch settings"), default=False,
         help_text=_("Can view branch settings without editing"))
+    
+    # Permissions - Agency Management
+    can_view_agencies = models.BooleanField(_("Can view agencies"), default=False,
+        help_text=_("Can view list of agency partners"))
+    can_create_agencies = models.BooleanField(_("Can create agencies"), default=False,
+        help_text=_("Can create new agency profiles and generate invite links"))
+    can_edit_agencies = models.BooleanField(_("Can edit agencies"), default=False,
+        help_text=_("Can edit agency details and reset invite links"))
+    can_delete_agencies = models.BooleanField(_("Can delete agencies"), default=False,
+        help_text=_("Can delete agency profiles"))
+    can_manage_agencies = models.BooleanField(_("Can manage agencies (full access)"), default=False,
+        help_text=_("Full agency management - overrides other agency permissions"))
 
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True, null=True)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True, null=True)
@@ -282,6 +302,12 @@ class Role(models.Model):
             # Branch Settings
             "can_manage_branch_settings",
             "can_view_branch_settings",
+            # Agency Management
+            "can_view_agencies",
+            "can_create_agencies",
+            "can_edit_agencies",
+            "can_delete_agencies",
+            "can_manage_agencies",
         ]
 
     @classmethod
@@ -360,6 +386,18 @@ class Role(models.Model):
                     "can_view_branch_settings",
                 ],
             },
+            "agencies": {
+                "title": _("Agency Management"),
+                "icon": "fa-handshake",
+                "color": "indigo",
+                "permissions": [
+                    "can_view_agencies",
+                    "can_create_agencies",
+                    "can_edit_agencies",
+                    "can_delete_agencies",
+                    "can_manage_agencies",
+                ],
+            },
         }
 
     @classmethod
@@ -404,6 +442,12 @@ class Role(models.Model):
             # Branch Settings
             "can_manage_branch_settings": _("Manage Branch Settings"),
             "can_view_branch_settings": _("View Branch Settings"),
+            # Agency Management
+            "can_view_agencies": _("View Agencies"),
+            "can_create_agencies": _("Create Agencies"),
+            "can_edit_agencies": _("Edit Agencies"),
+            "can_delete_agencies": _("Delete Agencies"),
+            "can_manage_agencies": _("Full Agency Management"),
         }
     
     @classmethod
@@ -448,6 +492,12 @@ class Role(models.Model):
             # Branch Settings
             "can_manage_branch_settings": _("Edit branch payment info, help texts, about us, and working hours"),
             "can_view_branch_settings": _("View branch settings without the ability to edit"),
+            # Agency Management
+            "can_view_agencies": _("View list of agency partners and their details"),
+            "can_create_agencies": _("Create new agency profiles and generate invitation links"),
+            "can_edit_agencies": _("Edit agency information and reset invitation links"),
+            "can_delete_agencies": _("Remove agency profiles from the system"),
+            "can_manage_agencies": _("Full control over all agency operations - overrides individual permissions"),
         }
 
     @classmethod
@@ -493,6 +543,12 @@ class Role(models.Model):
                 # Branch Settings
                 "can_manage_branch_settings": True,
                 "can_view_branch_settings": True,
+                # Agencies
+                "can_view_agencies": True,
+                "can_create_agencies": True,
+                "can_edit_agencies": True,
+                "can_delete_agencies": True,
+                "can_manage_agencies": True,
             },
             cls.MANAGER: {
                 # Organization
@@ -533,6 +589,12 @@ class Role(models.Model):
                 # Branch Settings
                 "can_manage_branch_settings": True,
                 "can_view_branch_settings": True,
+                # Agencies
+                "can_view_agencies": True,
+                "can_create_agencies": True,
+                "can_edit_agencies": True,
+                "can_delete_agencies": False,
+                "can_manage_agencies": False,
             },
             cls.STAFF: {
                 # Organization
@@ -573,6 +635,12 @@ class Role(models.Model):
                 # Branch Settings
                 "can_manage_branch_settings": False,
                 "can_view_branch_settings": True,
+                # Agencies
+                "can_view_agencies": False,
+                "can_create_agencies": False,
+                "can_edit_agencies": False,
+                "can_delete_agencies": False,
+                "can_manage_agencies": False,
             },
         }
         return defaults.get(role_name, {})

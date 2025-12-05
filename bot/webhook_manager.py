@@ -4,11 +4,14 @@ Multi-tenant Telegram Bot Webhook Manager
 This module handles webhook setup and management for multiple translation centers,
 each with their own Telegram bot. Uses efficient webhook approach where Telegram
 pushes updates to our server (no polling overhead).
+
+Updated for multi-worker support using Django cache instead of in-memory dict.
 """
 import logging
 import telebot
 from telebot import apihelper
 from django.conf import settings
+from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse, HttpResponse
@@ -20,8 +23,8 @@ from urllib3.poolmanager import PoolManager
 
 logger = logging.getLogger(__name__)
 
-# Bot instances cache - maps center_id -> TeleBot instance
-_bot_instances = {}
+# Cache timeout for bot instances (1 hour)
+BOT_CACHE_TIMEOUT = 3600
 
 # SSL workaround for development
 class NoSSLAdapter(HTTPAdapter):
@@ -37,10 +40,21 @@ def get_ssl_session():
     return session
 
 
+def _create_bot_instance(token):
+    """Create a new TeleBot instance with proper configuration"""
+    apihelper.SESSION = get_ssl_session()
+    return telebot.TeleBot(token, parse_mode="HTML")
+
+
 def get_bot_for_center(center):
     """
     Get or create a TeleBot instance for a specific center.
-    Caches instances to avoid recreating them on every request.
+    
+    Note: In multi-worker environments, bot instances cannot be truly shared
+    across processes. Each worker will create its own instance, but that's OK
+    because TeleBot is stateless - all state is in Telegram's servers.
+    
+    We use cache to store token validation status and reduce database hits.
     
     Args:
         center: TranslationCenter instance with bot_token
@@ -52,20 +66,19 @@ def get_bot_for_center(center):
         return None
     
     center_id = center.id
+    cache_key = f"bot_token_valid:{center_id}"
     
-    # Return cached instance if exists and token hasn't changed
-    if center_id in _bot_instances:
-        cached_bot, cached_token = _bot_instances[center_id]
-        if cached_token == center.bot_token:
-            return cached_bot
-    
-    # Create new bot instance
     try:
-        # Set up SSL workaround
-        apihelper.SESSION = get_ssl_session()
+        # Check if token is still valid (cached check)
+        cached_token = cache.get(cache_key)
         
-        bot = telebot.TeleBot(center.bot_token, parse_mode="HTML")
-        _bot_instances[center_id] = (bot, center.bot_token)
+        if cached_token == center.bot_token:
+            # Token unchanged, create instance
+            return _create_bot_instance(center.bot_token)
+        
+        # Token changed or not cached, create new instance and cache token
+        bot = _create_bot_instance(center.bot_token)
+        cache.set(cache_key, center.bot_token, BOT_CACHE_TIMEOUT)
         
         logger.info(f"Created bot instance for center {center_id}: {center.name}")
         return bot
@@ -77,9 +90,9 @@ def get_bot_for_center(center):
 
 def invalidate_bot_cache(center_id):
     """Remove a bot from cache (call when token changes)"""
-    if center_id in _bot_instances:
-        del _bot_instances[center_id]
-        logger.info(f"Invalidated bot cache for center {center_id}")
+    cache_key = f"bot_token_valid:{center_id}"
+    cache.delete(cache_key)
+    logger.info(f"Invalidated bot cache for center {center_id}")
 
 
 def setup_webhook_for_center(center, base_url=None):

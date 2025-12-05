@@ -454,6 +454,44 @@
                                     <div class="perm-hint text-secondary-light">View delivery statistics</div>
                                 </div>
                             </div>
+                            
+                            <!-- Agency Management -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-card border border-purple-100">
+                                    <h6 class="text-sm fw-semibold text-purple-main permission-section-header">
+                                        <iconify-icon icon="fa-solid:building-user"></iconify-icon>
+                                        <span>Agency Management</span>
+                                    </h6>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_create_agencies" id="can_create_agencies"
+                                               {% if role.can_create_agencies %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_create_agencies">
+                                            Create Agency Profiles
+                                        </label>
+                                    </div>
+                                    <div class="perm-hint text-secondary-light">Create agency accounts via command</div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_view_agencies" id="can_view_agencies"
+                                               {% if role.can_view_agencies %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_view_agencies">
+                                            View Agencies
+                                        </label>
+                                    </div>
+                                    <div class="perm-hint text-secondary-light">View agency list in reports</div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_manage_agencies" id="can_manage_agencies"
+                                               {% if role.can_manage_agencies %}checked{% endif %}>
+                                        <label class="form-check-label text-warning-600" for="can_manage_agencies">
+                                            <iconify-icon icon="lucide:crown" class="me-1"></iconify-icon>
+                                            Full Agency Management
+                                        </label>
+                                    </div>
+                                    <div class="perm-hint text-secondary-light">Full control over agencies</div>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- Quick Permission Templates -->
@@ -571,7 +609,9 @@ const allPermissions = [
     // Products & Customers
     'can_manage_products', 'can_manage_customers', 'can_view_customer_details',
     // Marketing & Broadcasts
-    'can_create_marketing_posts', 'can_send_branch_broadcasts', 'can_send_center_broadcasts', 'can_view_broadcast_stats'
+    'can_create_marketing_posts', 'can_send_branch_broadcasts', 'can_send_center_broadcasts', 'can_view_broadcast_stats',
+    // Agencies
+    'can_view_agencies', 'can_create_agencies', 'can_manage_agencies'
 ];
 
 // Order-related permissions (excluding the master permission)
@@ -592,7 +632,8 @@ const templates = {
         'can_receive_payments': true, 'can_view_financial_reports': true, 'can_apply_discounts': true, 'can_refund_orders': true,
         'can_view_reports': true, 'can_view_analytics': true, 'can_export_data': true,
         'can_manage_products': true, 'can_manage_customers': true, 'can_view_customer_details': true,
-        'can_create_marketing_posts': true, 'can_send_branch_broadcasts': true, 'can_send_center_broadcasts': true, 'can_view_broadcast_stats': true
+        'can_create_marketing_posts': true, 'can_send_branch_broadcasts': true, 'can_send_center_broadcasts': true, 'can_view_broadcast_stats': true,
+        'can_view_agencies': true, 'can_create_agencies': true, 'can_manage_agencies': true
     },
     'manager': {
         'can_manage_center': false, 'can_manage_branches': false,
@@ -603,7 +644,8 @@ const templates = {
         'can_receive_payments': true, 'can_view_financial_reports': true, 'can_apply_discounts': true, 'can_refund_orders': false,
         'can_view_reports': true, 'can_view_analytics': true, 'can_export_data': false,
         'can_manage_products': false, 'can_manage_customers': true, 'can_view_customer_details': true,
-        'can_create_marketing_posts': true, 'can_send_branch_broadcasts': true, 'can_send_center_broadcasts': false, 'can_view_broadcast_stats': true
+        'can_create_marketing_posts': true, 'can_send_branch_broadcasts': true, 'can_send_center_broadcasts': false, 'can_view_broadcast_stats': true,
+        'can_view_agencies': true, 'can_create_agencies': true, 'can_manage_agencies': false
     },
     'staff': {
         'can_manage_center': false, 'can_manage_branches': false,
@@ -614,7 +656,8 @@ const templates = {
         'can_receive_payments': true, 'can_view_financial_reports': false, 'can_apply_discounts': false, 'can_refund_orders': false,
         'can_view_reports': false, 'can_view_analytics': false, 'can_export_data': false,
         'can_manage_products': false, 'can_manage_customers': false, 'can_view_customer_details': true,
-        'can_create_marketing_posts': false, 'can_send_branch_broadcasts': false, 'can_send_center_broadcasts': false, 'can_view_broadcast_stats': false
+        'can_create_marketing_posts': false, 'can_send_branch_broadcasts': false, 'can_send_center_broadcasts': false, 'can_view_broadcast_stats': false,
+        'can_view_agencies': false, 'can_create_agencies': false, 'can_manage_agencies': false
     },
     'none': {}  // All false
 };

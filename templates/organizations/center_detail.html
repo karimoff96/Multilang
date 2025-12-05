@@ -16,6 +16,16 @@
                 {% endif %}
                 <div>
                     <h4 class="text-xl fw-semibold mb-8">{{ center.name }}</h4>
+                    {% if center.subdomain %}
+                    <div class="mb-8">
+                        <a href="https://{{ center.subdomain }}.{{ main_domain }}" target="_blank" 
+                           class="d-inline-flex align-items-center gap-4 text-primary-600 text-decoration-none bg-primary-50 px-12 py-4 radius-4">
+                            <iconify-icon icon="mdi:web" class="text-lg"></iconify-icon>
+                            <span class="text-sm fw-medium">{{ center.subdomain }}.{{ main_domain }}</span>
+                            <iconify-icon icon="mdi:open-in-new" class="text-xs"></iconify-icon>
+                        </a>
+                    </div>
+                    {% endif %}
                     <div class="d-flex flex-wrap gap-16 text-sm text-secondary-light">
                         {% if center.phone %}
                         <span class="d-flex align-items-center gap-4">

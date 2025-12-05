@@ -124,3 +124,16 @@ def rbac_context(request):
         })
     
     return context
+
+
+def site_settings(request):
+    """
+    Add site-wide settings to template context.
+    
+    Available in templates:
+    - main_domain: The main domain (e.g., 'alltranslation.uz')
+    """
+    from django.conf import settings
+    return {
+        'main_domain': getattr(settings, 'MAIN_DOMAIN', 'alltranslation.uz'),
+    }

@@ -20,13 +20,15 @@ from accounts.models import BotUser
 from io import BytesIO
 import zipfile
 
+# Import persistent state (Redis-backed for multi-worker support)
+from .persistent_state import user_data, uploaded_files
+
 logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-# Initialize user_data and uploaded_files dictionaries to store temporary user data
-user_data = {}
-uploaded_files = {}
+# user_data and uploaded_files are now imported from persistent_state.py
+# They use Redis/database-backed storage for multi-worker support
 
 # Disable SSL verification (for development only - not recommended for production)
 import ssl

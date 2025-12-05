@@ -29,7 +29,10 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "93.183.81.223", "alltranslation.uz"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "93.183.81.223", "multilang.uz", ".multilang.uz"]
+    
+# Main domain for subdomain extraction
+MAIN_DOMAIN = os.getenv("MAIN_DOMAIN", "multilang.uz")
 
 
 # Application definition
@@ -59,6 +62,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "organizations.middleware.SubdomainMiddleware",  # Subdomain-based tenant identification
     "organizations.rbac.RBACMiddleware",
 ]
 
@@ -76,6 +80,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "organizations.context_processors.rbac_context",
+                "organizations.context_processors.site_settings",
             ],
         },
     },
@@ -147,6 +152,39 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# =============================================================================
+# CACHE CONFIGURATION (Redis for multi-worker support)
+# =============================================================================
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
+if os.getenv("USE_REDIS", "False").lower() == "true":
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                # hiredis is automatically used when installed (redis>=5.0)
+                "CONNECTION_POOL_KWARGS": {"max_connections": 50},
+                "SOCKET_CONNECT_TIMEOUT": 5,
+                "SOCKET_TIMEOUT": 5,
+            },
+            "KEY_PREFIX": "wowdash",
+        }
+    }
+    # Use Redis for sessions in production
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+else:
+    # Development: use local memory cache
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
+        }
+    }
+    SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
 MODELTRANSLATION_DEFAULT_LANGUAGE = "uz"
 MODELTRANSLATION_LANGUAGES = ("uz", "ru", "en")

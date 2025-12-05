@@ -39,6 +39,14 @@
                         </div>
                         
                         <div class="mb-16">
+                            {% if center.subdomain %}
+                            <div class="d-flex align-items-center gap-8 mb-8">
+                                <iconify-icon icon="mdi:web" class="text-primary-600"></iconify-icon>
+                                <a href="https://{{ center.subdomain }}.{{ main_domain }}" target="_blank" class="text-sm text-primary-600 text-decoration-none" onclick="event.stopPropagation();">
+                                    {{ center.subdomain }}.{{ main_domain }}
+                                </a>
+                            </div>
+                            {% endif %}
                             {% if center.phone %}
                             <div class="d-flex align-items-center gap-8 mb-8">
                                 <iconify-icon icon="solar:phone-bold" class="text-success-600"></iconify-icon>

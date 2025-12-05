@@ -66,6 +66,11 @@ def center_create(request):
         address = request.POST.get("address", "").strip()
         location_url = request.POST.get("location_url", "").strip()
         
+        # Subdomain - only superuser can set
+        subdomain = None
+        if request.user.is_superuser:
+            subdomain = request.POST.get("subdomain", "").strip().lower() or None
+        
         # Bot fields - only superuser can set bot_token
         bot_token = None
         company_orders_channel_id = request.POST.get("company_orders_channel_id", "").strip() or None
@@ -74,25 +79,26 @@ def center_create(request):
 
         if not name:
             messages.error(request, "Center name is required.")
+        elif subdomain and TranslationCenter.objects.filter(subdomain=subdomain).exists():
+            messages.error(request, "This subdomain is already in use by another center.")
+        elif bot_token and TranslationCenter.objects.filter(bot_token=bot_token).exists():
+            messages.error(request, "This bot token is already in use by another center.")
         else:
-            # Check bot_token uniqueness
-            if bot_token and TranslationCenter.objects.filter(bot_token=bot_token).exists():
-                messages.error(request, "This bot token is already in use by another center.")
-            else:
-                center = TranslationCenter.objects.create(
-                    name=name,
-                    owner=request.user,
-                    phone=phone or None,
-                    email=email or None,
-                    address=address or None,
-                    location_url=location_url or None,
-                    bot_token=bot_token,
-                    company_orders_channel_id=company_orders_channel_id,
-                )
-                messages.success(
-                    request, f'Translation center "{name}" created successfully!'
-                )
-                return redirect("center_list")
+            center = TranslationCenter.objects.create(
+                name=name,
+                owner=request.user,
+                subdomain=subdomain,
+                phone=phone or None,
+                email=email or None,
+                address=address or None,
+                location_url=location_url or None,
+                bot_token=bot_token,
+                company_orders_channel_id=company_orders_channel_id,
+            )
+            messages.success(
+                request, f'Translation center "{name}" created successfully!'
+            )
+            return redirect("center_list")
 
     context = {
         "title": "Create Center",
@@ -119,6 +125,12 @@ def center_edit(request, center_id):
         location_url = request.POST.get("location_url", "").strip()
         is_active = request.POST.get("is_active") == "on"
         
+        # Subdomain - only superuser can edit
+        if request.user.is_superuser:
+            subdomain = request.POST.get("subdomain", "").strip().lower() or None
+        else:
+            subdomain = center.subdomain  # Keep existing
+        
         # Bot fields
         company_orders_channel_id = request.POST.get("company_orders_channel_id", "").strip() or None
         # Only superuser can edit bot_token
@@ -129,22 +141,23 @@ def center_edit(request, center_id):
 
         if not name:
             messages.error(request, "Center name is required.")
+        elif subdomain and TranslationCenter.objects.filter(subdomain=subdomain).exclude(pk=center_id).exists():
+            messages.error(request, "This subdomain is already in use by another center.")
+        elif bot_token and TranslationCenter.objects.filter(bot_token=bot_token).exclude(pk=center_id).exists():
+            messages.error(request, "This bot token is already in use by another center.")
         else:
-            # Check bot_token uniqueness (excluding current center)
-            if bot_token and TranslationCenter.objects.filter(bot_token=bot_token).exclude(pk=center_id).exists():
-                messages.error(request, "This bot token is already in use by another center.")
-            else:
-                center.name = name
-                center.phone = phone or None
-                center.email = email or None
-                center.address = address or None
-                center.location_url = location_url or None
-                center.is_active = is_active
-                center.bot_token = bot_token
-                center.company_orders_channel_id = company_orders_channel_id
-                center.save()
-                messages.success(request, f'Center "{name}" updated successfully!')
-                return redirect("center_list")
+            center.name = name
+            center.subdomain = subdomain
+            center.phone = phone or None
+            center.email = email or None
+            center.address = address or None
+            center.location_url = location_url or None
+            center.is_active = is_active
+            center.bot_token = bot_token
+            center.company_orders_channel_id = company_orders_channel_id
+            center.save()
+            messages.success(request, f'Center "{name}" updated successfully!')
+            return redirect("center_list")
 
     context = {
         "title": "Edit Center",
@@ -1377,6 +1390,7 @@ def branch_settings_edit(request, branch_id):
             changes={"branch_settings": f"Updated for {branch.name}"},
             request=request
         )
+        
         
         messages.success(request, f"Settings for '{branch.name}' updated successfully!")
         return redirect('branch_settings', branch_id=branch_id)
