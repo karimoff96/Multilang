@@ -9,12 +9,12 @@
                 <h6 class="text-lg fw-semibold mb-0">
                     <span data-i18n="common.edit">Edit</span> <span data-i18n="sidebar.orders">Order</span> #{{ order.id }}
                 </h6>
-                <a href="{% url 'orderDetail' order.id %}" class="btn btn-outline-secondary btn-sm">
+                <a href="{% url 'orders:orderDetail' order.id %}" class="btn btn-outline-secondary btn-sm">
                     <iconify-icon icon="ep:back" class="me-1"></iconify-icon> <span data-i18n="detail.back">Back</span>
                 </a>
             </div>
             <div class="card-body p-24">
-                <form method="post" action="{% url 'orderEdit' order.id %}" enctype="multipart/form-data">
+                <form method="post" action="{% url 'orders:orderEdit' order.id %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     <!-- Product -->
@@ -187,7 +187,7 @@
                         <button type="submit" class="btn btn-primary px-32">
                             <iconify-icon icon="mdi:content-save" class="me-1"></iconify-icon> <span data-i18n="common.save">Save Changes</span>
                         </button>
-                        <a href="{% url 'orderDetail' order.id %}" class="btn btn-outline-secondary px-32">
+                        <a href="{% url 'orders:orderDetail' order.id %}" class="btn btn-outline-secondary px-32">
                             <span data-i18n="common.cancel">Cancel</span>
                         </a>
                     </div>

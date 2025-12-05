@@ -180,7 +180,54 @@
                             </span>
                         {% endif %}
                     </div>
-                    {% if order.recipt %}
+                    
+                    <!-- Receipts Section -->
+                    {% if order.receipts.exists %}
+                    <div class="mt-16">
+                        <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.receipts">Receipts ({{ order.receipts.count }})</span>
+                        <div class="table-responsive">
+                            <table class="table bordered-table sm-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>File</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for receipt in order.receipts.all %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ receipt.amount|floatformat:0 }} UZS</td>
+                                        <td>
+                                            {% if receipt.status == 'pending' %}
+                                                <span class="badge bg-warning-focus text-warning-600">Pending</span>
+                                            {% elif receipt.status == 'verified' %}
+                                                <span class="badge bg-success-focus text-success-600">Verified</span>
+                                            {% elif receipt.status == 'rejected' %}
+                                                <span class="badge bg-danger-focus text-danger-600">Rejected</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ receipt.created_at|date:"d M Y H:i" }}</td>
+                                        <td>
+                                            {% if receipt.file %}
+                                                <a href="{{ receipt.file.url }}" target="_blank" class="btn btn-outline-primary btn-sm py-4 px-8">
+                                                    <iconify-icon icon="mdi:file-document"></iconify-icon> View
+                                                </a>
+                                            {% else %}
+                                                <span class="text-secondary-light">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% elif order.recipt %}
+                    <!-- Legacy single receipt -->
                     <div class="mt-16">
                         <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.receipt">Receipt</span>
                         <a href="{{ order.recipt.url }}" target="_blank" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center">
@@ -300,7 +347,7 @@
                 {% can_do 'orders.edit' as can_edit_order %}
                 {% if can_edit_order %}
                 <div class="mb-16">
-                    <a href="{% url 'orderEdit' order.id %}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+                    <a href="{% url 'orders:orderEdit' order.id %}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
                         <iconify-icon icon="lucide:edit" class="me-1"></iconify-icon> <span data-i18n="common.edit">Edit Order</span>
                     </a>
                 </div>
@@ -322,14 +369,14 @@
                                 <small class="text-primary-light">{{ order.assigned_to.role.get_display_name }}</small>
                             </div>
                         </div>
-                        <form method="post" action="{% url 'unassignOrder' order.id %}">
+                        <form method="post" action="{% url 'orders:unassignOrder' order.id %}">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-outline-warning btn-sm w-100">
                                 <iconify-icon icon="mdi:account-remove" class="me-1"></iconify-icon> Unassign
                             </button>
                         </form>
                     {% else %}
-                        <form method="post" action="{% url 'assignOrder' order.id %}">
+                        <form method="post" action="{% url 'orders:assignOrder' order.id %}">
                             {% csrf_token %}
                             <select name="staff_id" class="form-select radius-8 mb-12" required>
                                 <option value="">Select staff member...</option>
@@ -367,7 +414,7 @@
                 {% can_do 'orders.complete' as can_complete_order %}
                 {% if can_complete_order and order.status == 'ready' or can_complete_order and order.status == 'in_progress' %}
                 <div class="mb-16">
-                    <form method="post" action="{% url 'completeOrder' order.id %}">
+                    <form method="post" action="{% url 'orders:completeOrder' order.id %}">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-success w-100 d-flex align-items-center justify-content-center">
                             <iconify-icon icon="mdi:check-all" class="me-1"></iconify-icon> Complete Order
@@ -381,7 +428,7 @@
                 {% if can_update_status_permission and allowed_transitions %}
                 <div class="mb-16">
                     <h6 class="text-sm fw-semibold mb-12" data-i18n="detail.updateStatus">Update Status</h6>
-                    <form method="post" action="{% url 'updateOrderStatus' order.id %}">
+                    <form method="post" action="{% url 'orders:updateOrderStatus' order.id %}">
                         {% csrf_token %}
                         <select name="status" class="form-select radius-8 mb-12">
                             {% for status_value in allowed_transitions %}
@@ -401,7 +448,7 @@
                 
                 <hr class="my-16">
                 
-                <a href="{% url 'ordersList' %}" class="btn btn-secondary radius-8 px-20 py-11 w-100 d-flex align-items-center justify-content-center mb-12">
+                <a href="{% url 'orders:ordersList' %}" class="btn btn-secondary radius-8 px-20 py-11 w-100 d-flex align-items-center justify-content-center mb-12">
                     <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
                     <span data-i18n="detail.back">Back to Orders</span>
                 </a>
@@ -430,8 +477,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Cancel</button>
-                <form method="post" action="{% url 'deleteOrder' order.id %}">
-                    {% csrf_token %}
+                <form method="post" action="{% url 'orders:deleteOrder' order.id %}">
+                    {% csrf_token %>
                     <button type="submit" class="btn btn-danger" data-i18n="detail.deleteOrder">Delete Order</button>
                 </form>
             </div>

@@ -10,12 +10,12 @@
                     <iconify-icon icon="solar:add-circle-bold" class="me-2"></iconify-icon>
                     <span data-i18n="orders.createOrder">Create Order</span>
                 </h6>
-                <a href="{% url 'ordersList' %}" class="btn btn-outline-secondary btn-sm">
+                <a href="{% url 'orders:ordersList' %}" class="btn btn-outline-secondary btn-sm">
                     <iconify-icon icon="ep:back" class="me-1"></iconify-icon> <span data-i18n="detail.back">Back</span>
                 </a>
             </div>
             <div class="card-body p-24">
-                <form method="post" action="{% url 'orderCreate' %}" enctype="multipart/form-data">
+                <form method="post" action="{% url 'orders:orderCreate' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     <!-- Customer Selection -->
@@ -134,7 +134,7 @@
                     </div>
                     
                     <div class="d-flex justify-content-between">
-                        <a href="{% url 'ordersList' %}" class="btn btn-outline-secondary px-24">
+                        <a href="{% url 'orders:ordersList' %}" class="btn btn-outline-secondary px-24">
                             <iconify-icon icon="ep:back" class="me-1"></iconify-icon> Cancel
                         </a>
                         <button type="submit" class="btn btn-success px-24">

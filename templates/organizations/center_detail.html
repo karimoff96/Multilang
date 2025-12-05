@@ -366,7 +366,7 @@
             <iconify-icon icon="fluent:document-bullet-list-20-filled" class="me-8 text-cyan-600"></iconify-icon>
             <span data-i18n="common.recentOrders">Recent Orders</span>
         </h6>
-        <a href="{% url 'ordersList' %}?center={{ center.id }}" class="text-primary-600 text-sm" data-i18n="common.viewAll">View All</a>
+        <a href="{% url 'orders:ordersList' %}?center={{ center.id }}" class="text-primary-600 text-sm" data-i18n="common.viewAll">View All</a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -385,7 +385,7 @@
                     {% for order in recent_orders %}
                     <tr>
                         <td class="bg-info-focus">
-                            <a href="{% url 'orderDetail' order.id %}" class="fw-medium text-primary-600">#{{ order.id }}</a>
+                            <a href="{% url 'orders:orderDetail' order.id %}" class="fw-medium text-primary-600">#{{ order.id }}</a>
                         </td>
                         <td class="bg-info-focus">{{ order.bot_user.name|default:order.bot_user.user_id }}</td>
                         <td class="bg-info-focus">

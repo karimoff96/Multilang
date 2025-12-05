@@ -35,6 +35,8 @@ urlpatterns = [
     path("services/", include("services.urls")),
     # Marketing & Broadcasts
     path("marketing/", include("marketing.urls")),
+    # Core utilities (notifications, etc.)
+    path("core/", include("core.urls")),
     # home routes
     path("index", home_views.index, name="index"),
     path("view-details", home_views.viewDetails, name="viewDetails"),

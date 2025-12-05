@@ -8,11 +8,13 @@ Usage:
     python manage.py run_bots              # Run all bots
     python manage.py run_bots --center-id 1  # Run only specific center's bot
     python manage.py run_bots --list         # List all centers
+    python manage.py run_bots --reload       # Auto-reload on file changes
 """
 import threading
 import time
 import signal
 import sys
+import os
 from django.core.management.base import BaseCommand
 from organizations.models import TranslationCenter
 from bot.webhook_manager import get_ssl_session
@@ -21,6 +23,15 @@ from telebot import apihelper
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Try to import watchdog for auto-reload functionality
+try:
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler, PatternMatchingEventHandler
+    WATCHDOG_AVAILABLE = True
+except ImportError:
+    WATCHDOG_AVAILABLE = False
+    logger.warning("watchdog not installed. Auto-reload won't be available. Run: pip install watchdog")
 
 
 def copy_handlers_from_template(template_bot, target_bot):
@@ -83,6 +94,165 @@ class BotThread(threading.Thread):
             self.bot.stop_polling()
         except Exception:
             pass
+
+
+class BotFileWatcher(PatternMatchingEventHandler if WATCHDOG_AVAILABLE else object):
+    """
+    Watches for file changes in the bot directory and triggers reload.
+    """
+    
+    def __init__(self, callback, stdout, patterns=None):
+        if WATCHDOG_AVAILABLE:
+            super().__init__(
+                patterns=patterns or ['*.py'],
+                ignore_patterns=['*__pycache__*', '*.pyc', '*migrations*'],
+                ignore_directories=True,
+                case_sensitive=True
+            )
+        self.callback = callback
+        self.stdout = stdout
+        self.last_reload = 0
+        self.debounce_seconds = 2  # Prevent multiple reloads for same change
+    
+    def on_modified(self, event):
+        self._handle_change(event)
+    
+    def on_created(self, event):
+        self._handle_change(event)
+    
+    def _handle_change(self, event):
+        """Handle file change with debouncing"""
+        current_time = time.time()
+        
+        # Debounce - ignore if we just reloaded
+        if current_time - self.last_reload < self.debounce_seconds:
+            return
+        
+        self.last_reload = current_time
+        
+        # Get relative path for display
+        try:
+            rel_path = os.path.relpath(event.src_path)
+        except ValueError:
+            rel_path = event.src_path
+        
+        self.stdout.write(
+            f'\n  🔄 File changed: {rel_path}\n'
+            f'  ⏳ Reloading bots...\n'
+        )
+        
+        self.callback()
+
+
+class AutoReloadBotRunner:
+    """
+    Runs bots with auto-reload on file changes.
+    Uses subprocess isolation for clean reloads.
+    """
+    
+    def __init__(self, stdout, stderr, watch_paths=None):
+        self.stdout = stdout
+        self.stderr = stderr
+        self.watch_paths = watch_paths or []
+        self.process = None
+        self.running = True
+        self.observer = None
+        self.center_id = None
+    
+    def start_bot_process(self):
+        """Start the bot subprocess"""
+        import subprocess
+        
+        manage_py = os.path.join(os.getcwd(), 'manage.py')
+        
+        cmd = [sys.executable, manage_py, 'run_bots', '--no-reload']
+        if self.center_id:
+            cmd.append(f'--center-id={self.center_id}')
+        
+        self.process = subprocess.Popen(
+            cmd,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+        )
+        
+        return self.process
+    
+    def reload(self):
+        """Reload the bot by restarting the subprocess"""
+        if self.process:
+            self.stdout.write('  🛑 Stopping current bot process...\n')
+            self.process.terminate()
+            try:
+                self.process.wait(timeout=5)
+            except:
+                self.process.kill()
+                self.process.wait()
+        
+        self.stdout.write('  🚀 Starting new bot process...\n')
+        self.start_bot_process()
+        self.stdout.write('  ✅ Bot reloaded successfully!\n\n')
+    
+    def run(self, center_id=None):
+        """Run with file watching"""
+        self.center_id = center_id
+        
+        if not WATCHDOG_AVAILABLE:
+            self.stderr.write(
+                '\n  ❌ watchdog library not installed!\n'
+                '  Run: pip install watchdog\n\n'
+            )
+            return
+        
+        # Start the bot process
+        self.stdout.write('\n  🔍 Starting file watcher for auto-reload...\n')
+        self.start_bot_process()
+        
+        # Set up file watcher
+        self.observer = Observer()
+        handler = BotFileWatcher(self.reload, self.stdout)
+        
+        # Watch the bot directory and related directories
+        for path in self.watch_paths:
+            if os.path.exists(path):
+                self.observer.schedule(handler, path, recursive=True)
+                self.stdout.write(f'  👁️  Watching: {path}\n')
+        
+        self.observer.start()
+        
+        self.stdout.write(
+            f'\n  ✅ Auto-reload enabled! Watching for file changes...\n'
+            f'  📝 Edit any .py file in watched directories to trigger reload.\n'
+            f'  Press Ctrl+C to stop.\n\n'
+        )
+        
+        try:
+            while self.running:
+                if self.process.poll() is not None:
+                    # Process exited unexpectedly
+                    if self.running:
+                        self.stdout.write('  ⚠️  Bot process exited. Restarting in 3 seconds...\n')
+                        time.sleep(3)
+                        self.start_bot_process()
+                time.sleep(1)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            self.shutdown()
+    
+    def shutdown(self):
+        """Shutdown watcher and bot process"""
+        self.running = False
+        
+        if self.observer:
+            self.observer.stop()
+            self.observer.join(timeout=2)
+        
+        if self.process:
+            self.process.terminate()
+            try:
+                self.process.wait(timeout=5)
+            except:
+                self.process.kill()
 
 
 class MultiCenterBotRunner:
@@ -200,6 +370,16 @@ class Command(BaseCommand):
             action='store_true',
             help='List all centers with bot tokens configured'
         )
+        parser.add_argument(
+            '--reload',
+            action='store_true',
+            help='Enable auto-reload on file changes (requires watchdog)'
+        )
+        parser.add_argument(
+            '--no-reload',
+            action='store_true',
+            help='Disable auto-reload (used internally by reload wrapper)'
+        )
     
     def handle(self, *args, **options):
         # Set up signal handlers for graceful shutdown
@@ -211,6 +391,37 @@ class Command(BaseCommand):
             return
         
         center_id = options.get('center_id')
+        use_reload = options.get('reload', False)
+        no_reload = options.get('no_reload', False)
+        
+        # If --reload flag is used, start the auto-reload wrapper
+        if use_reload and not no_reload:
+            self.stdout.write(self.style.SUCCESS(
+                f'\n{"="*60}\n'
+                f'  🔄 Auto-Reload Mode Enabled\n'
+                f'{"="*60}\n'
+            ))
+            
+            # Directories to watch for changes
+            watch_paths = [
+                os.path.join(os.getcwd(), 'bot'),
+                os.path.join(os.getcwd(), 'orders'),
+                os.path.join(os.getcwd(), 'services'),
+                os.path.join(os.getcwd(), 'organizations'),
+                os.path.join(os.getcwd(), 'accounts'),
+                os.path.join(os.getcwd(), 'core'),
+            ]
+            
+            runner = AutoReloadBotRunner(self.stdout, self.stderr, watch_paths)
+            try:
+                runner.run(center_id)
+            except KeyboardInterrupt:
+                pass
+            finally:
+                runner.shutdown()
+            return
+        
+        # Get centers with bot tokens
         
         # Get centers with bot tokens
         if center_id:

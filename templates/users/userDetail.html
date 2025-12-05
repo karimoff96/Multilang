@@ -206,7 +206,7 @@
             <div class="card-header bg-base border-bottom py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="mb-0" data-i18n="detail.recentOrders">Recent Orders</h6>
                 {% if total_orders > 0 %}
-                <a href="{% url 'ordersList' %}?search={{ bot_user.name }}" class="text-primary-600 text-sm fw-medium">
+                <a href="{% url 'orders:ordersList' %}?search={{ bot_user.name }}" class="text-primary-600 text-sm fw-medium">
                     <span data-i18n="detail.viewAll">View All</span> <iconify-icon icon="ep:arrow-right" class="ms-4"></iconify-icon>
                 </a>
                 {% endif %}
@@ -272,7 +272,7 @@
                                 </td>
                                 <td>{{ order.created_at|date:"d M Y" }}</td>
                                 <td class="text-center">
-                                    <a href="{% url 'orderDetail' order.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-36-px h-36-px d-inline-flex justify-content-center align-items-center rounded-circle">
+                                    <a href="{% url 'orders:orderDetail' order.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-36-px h-36-px d-inline-flex justify-content-center align-items-center rounded-circle">
                                         <iconify-icon icon="majesticons:eye-line" class="icon text-lg"></iconify-icon>
                                     </a>
                                 </td>

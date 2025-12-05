@@ -538,12 +538,20 @@ def track_status_change(sender, instance, **kwargs):
         instance._old_status = None
         instance._old_received = None
         instance._old_payment_type = None
+        instance._is_new = True
 
 
 @receiver(post_save, sender=Order)
 def send_status_notification(sender, instance, created, **kwargs):
     """Send notification after status or payment change"""
+    
+    # Handle new order notification (admin panel bell)
     if created:
+        try:
+            from core.models import AdminNotification
+            AdminNotification.create_order_notification(instance)
+        except Exception as e:
+            print(f"[ERROR] Failed to create new order notification: {e}")
         return
         
     # Check for status change
@@ -561,6 +569,17 @@ def send_status_notification(sender, instance, created, **kwargs):
                 print(f"[ERROR] Failed to send status notification: {e}")
                 import traceback
                 traceback.print_exc()
+            
+            # Create admin notifications for important status changes
+            try:
+                from core.models import AdminNotification
+                
+                if new_status == 'cancelled':
+                    AdminNotification.create_cancelled_notification(instance)
+                elif new_status == 'completed':
+                    AdminNotification.create_completed_notification(instance)
+            except Exception as e:
+                print(f"[ERROR] Failed to create status change notification: {e}")
     
     # Check for payment amount change (partial payment received)
     if hasattr(instance, "_old_received"):
@@ -568,13 +587,33 @@ def send_status_notification(sender, instance, created, **kwargs):
         new_received = instance.received or 0
         
         if new_received > old_received and new_received > 0:
-            # Payment received, send notification
+            amount_received = new_received - old_received
+            
+            # Send bot notification to user
             try:
                 from bot.main import send_payment_received_notification
-                
-                amount_received = new_received - old_received
                 send_payment_received_notification(instance, amount_received, new_received)
             except Exception as e:
                 print(f"[ERROR] Failed to send payment notification: {e}")
                 import traceback
                 traceback.print_exc()
+            
+            # Create admin notification for payment
+            try:
+                from core.models import AdminNotification
+                AdminNotification.create_payment_notification(instance, amount_received)
+            except Exception as e:
+                print(f"[ERROR] Failed to create payment notification: {e}")
+
+
+@receiver(post_save, sender=Receipt)
+def create_receipt_notification(sender, instance, created, **kwargs):
+    """Create an admin notification when a new receipt is uploaded"""
+    if created and instance.status == 'pending':
+        try:
+            from core.models import AdminNotification
+            AdminNotification.create_receipt_notification(instance)
+        except Exception as e:
+            print(f"[ERROR] Failed to create receipt notification: {e}")
+            import traceback
+            traceback.print_exc()

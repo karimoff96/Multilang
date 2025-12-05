@@ -10,6 +10,8 @@ from .views import (
     record_order_payment, add_order_extra_fee, get_order_payment_info
 )
 
+app_name = 'orders'
+
 urlpatterns = [
     # Order list and detail
     path("", ordersList, name="ordersList"),

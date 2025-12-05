@@ -18,3 +18,4 @@ Pillow==11.0.0
 python-magic==0.4.27
 psycopg2-binary
 openpyxl==3.1.2
+watchdog==4.0.0

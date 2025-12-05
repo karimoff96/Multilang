@@ -69,10 +69,21 @@ def rbac_context(request):
         'current_center': None,
         'current_branch': None,
         'permissions': all_permissions.copy(),
+        'admin_notifications': [],
+        'unread_notifications_count': 0,
     }
     
     if not request.user.is_authenticated:
         return context
+    
+    # Get admin notifications for authenticated users
+    try:
+        from core.models import AdminNotification
+        notifications = AdminNotification.get_unread_for_user(request.user, limit=10)
+        context['admin_notifications'] = list(notifications)
+        context['unread_notifications_count'] = AdminNotification.count_unread_for_user(request.user)
+    except Exception as e:
+        print(f"[DEBUG] Failed to get notifications: {e}")
     
     # Superuser has all permissions
     if request.user.is_superuser:

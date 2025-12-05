@@ -211,7 +211,7 @@
                         <iconify-icon icon="vscode-icons:file-type-excel" class="icon line-height-1"></iconify-icon>
                         <span data-i18n="common.exportExcel">Export Excel</span>
                     </a>
-                    <a href="{% url 'ordersList' %}?assignment=mine" class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
+                    <a href="{% url 'orders:ordersList' %}?assignment=mine" class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
                         <span data-i18n="common.viewAll">View All</span>
                         <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
                     </a>
@@ -233,7 +233,7 @@
                         <tbody>
                             {% for order in recent_orders %}
                             <tr>
-                                <td><a href="{% url 'orderDetail' order.id %}" class="text-primary-600 fw-medium">#{{ order.id }}</a></td>
+                                <td><a href="{% url 'orders:orderDetail' order.id %}" class="text-primary-600 fw-medium">#{{ order.id }}</a></td>
                                 <td>
                                     <div>
                                         <span class="text-md d-block line-height-1 fw-medium text-primary-light text-truncate-sm">{{ order.bot_user.name|default:order.bot_user.phone }}</span>

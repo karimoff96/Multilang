@@ -64,7 +64,7 @@
         <!-- Create Order Button - only for users with can_create_orders permission -->
         {% can_do 'orders.create' as can_create %}
         {% if can_create or can_create_orders %}
-        <a href="{% url 'orderCreate' %}" class="btn btn-success btn-sm px-16 d-flex align-items-center gap-4">
+        <a href="{% url 'orders:orderCreate' %}" class="btn btn-success btn-sm px-16 d-flex align-items-center gap-4">
             <iconify-icon icon="solar:add-circle-bold" class="text-lg"></iconify-icon>
             <span data-i18n="orders.createOrder">Create Order</span>
         </a>
@@ -139,6 +139,24 @@
                 </div>
             </div>
         </div>
+    </div>
+    {% endif %}
+    <!-- Pending Receipts Card -->
+    {% if pending_receipts_count > 0 or has_pending_receipts == 'true' %}
+    <div class="col-xxl-2 col-lg-4 col-sm-6">
+        <a href="{% if has_pending_receipts == 'true' %}{% url 'orders:ordersList' %}{% else %}{% url 'orders:ordersList' %}?has_pending_receipts=true{% endif %}" class="text-decoration-none">
+            <div class="card px-16 py-12 shadow-none radius-8 border h-100 {% if has_pending_receipts == 'true' %}border-warning{% endif %}">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="w-48-px h-48-px radius-8 bg-warning-100 d-flex justify-content-center align-items-center">
+                        <iconify-icon icon="mdi:receipt-text-pending" class="text-warning-600 text-xl"></iconify-icon>
+                    </div>
+                    <div>
+                        <span class="text-secondary-light text-xs" data-i18n="orders.pendingReceipts">Pending Receipts</span>
+                        <h6 class="mb-0 text-warning-600">{{ pending_receipts_count }}</h6>
+                    </div>
+                </div>
+            </div>
+        </a>
     </div>
     {% endif %}
 </div>
@@ -224,7 +242,7 @@
                 </thead>
                 <tbody>
                     {% for order in orders %}
-                    <tr>
+                    <tr {% if order.receipts.exists %}class="has-pending-receipts"{% endif %}>
                         <!-- Order ID + Date (combined) -->
                         <td>
                             <div class="d-flex align-items-center gap-10">
@@ -233,6 +251,13 @@
                                 </div>
                                 <div>
                                     <span class="fw-semibold text-primary-600">#{{ order.id }}</span>
+                                    {% with pending_count=order.receipts.all|length %}
+                                    {% if pending_count > 0 %}
+                                    <span class="badge bg-warning-focus text-warning-600 ms-4" title="Pending receipts">
+                                        <iconify-icon icon="mdi:receipt-text-pending" class="text-sm"></iconify-icon> {{ pending_count }}
+                                    </span>
+                                    {% endif %}
+                                    {% endwith %}
                                     <br><small class="text-secondary-light">{{ order.created_at|date:"d M, H:i" }}</small>
                                 </div>
                             </div>
@@ -333,12 +358,12 @@
                         <!-- Action -->
                         <td class="text-center col-action">
                             <div class="d-flex align-items-center gap-4 justify-content-center">
-                                <a href="{% url 'orderDetail' order.id %}" class="bg-info-focus text-info-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" data-i18n-title="orders.view" title="View">
+                                <a href="{% url 'orders:orderDetail' order.id %}" class="bg-info-focus text-info-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" data-i18n-title="orders.view" title="View">
                                     <iconify-icon icon="majesticons:eye-line"></iconify-icon>
                                 </a>
                                 {% can_do 'orders.edit' as can_edit_order %}
                                 {% if can_edit_order or is_manager %}
-                                <a href="{% url 'orderEdit' order.id %}" class="bg-success-focus text-success-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" data-i18n-title="orders.edit" title="Edit">
+                                <a href="{% url 'orders:orderEdit' order.id %}" class="bg-success-focus text-success-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" data-i18n-title="orders.edit" title="Edit">
                                     <iconify-icon icon="lucide:edit"></iconify-icon>
                                 </a>
                                 {% endif %}
@@ -364,7 +389,7 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="orders.cancel">Cancel</button>
-                                            <form method="post" action="{% url 'deleteOrder' order.id %}">
+                                            <form method="post" action="{% url 'orders:deleteOrder' order.id %}">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-danger" data-i18n="orders.delete">Delete</button>
                                             </form>

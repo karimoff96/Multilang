@@ -126,7 +126,7 @@ def ordersList(request):
     orders = orders.select_related(
         'bot_user', 'product', 'language', 'branch', 'branch__center',
         'assigned_to', 'assigned_to__user'
-    ).order_by('-created_at')
+    ).prefetch_related('receipts').order_by('-created_at')
     
     # View mode filter (for users who can view all - let them switch to "my orders" view)
     view_mode = request.GET.get('view', 'all' if can_view_all else 'mine')
@@ -171,6 +171,11 @@ def ordersList(request):
             orders = orders.filter(assigned_to__isnull=True)
         elif assignment_filter == 'assigned':
             orders = orders.filter(assigned_to__isnull=False)
+    
+    # Pending receipts filter - show orders with pending receipts
+    has_pending_receipts = request.GET.get('has_pending_receipts', '')
+    if has_pending_receipts == 'true':
+        orders = orders.filter(receipts__status='pending').distinct()
     
     # Pagination
     per_page = request.GET.get('per_page', 10)
@@ -222,14 +227,17 @@ def ordersList(request):
             'completed': my_orders.filter(status='completed').count(),
         }
     
+    # Count orders with pending receipts
+    pending_receipts_count = base_orders.filter(receipts__status='pending').distinct().count()
+    
     # Check if user can create orders
     can_create_orders = request.user.is_superuser
     if not can_create_orders and request.admin_profile:
         can_create_orders = request.admin_profile.has_permission('can_create_orders')
     
     context = {
-        "title": "My Orders" if (can_view_own_only or view_mode == 'mine') else "Orders",
-        "subTitle": "Orders assigned to me" if (can_view_own_only or view_mode == 'mine') else "All Orders",
+        "title": "Orders with Pending Receipts" if has_pending_receipts == 'true' else ("My Orders" if (can_view_own_only or view_mode == 'mine') else "Orders"),
+        "subTitle": "Review uploaded payment receipts" if has_pending_receipts == 'true' else ("Orders assigned to me" if (can_view_own_only or view_mode == 'mine') else "All Orders"),
         "orders": page_obj,
         "paginator": paginator,
         "search_query": search_query,
@@ -238,6 +246,8 @@ def ordersList(request):
         "center_filter": center_filter,
         "branch_filter": branch_filter,
         "assignment_filter": assignment_filter,
+        "has_pending_receipts": has_pending_receipts,
+        "pending_receipts_count": pending_receipts_count,
         "per_page": per_page,
         "total_orders": paginator.count,
         "status_choices": status_choices,
@@ -277,7 +287,7 @@ def orderDetail(request, order_id):
     
     if not can_view:
         messages.error(request, "You don't have permission to view this order.")
-        return redirect('ordersList')
+        return redirect('orders:ordersList')
     
     # Get all order permissions for current user
     order_permissions = get_user_order_permissions(request, order)
@@ -346,7 +356,7 @@ def orderEdit(request, order_id):
     # Check permission using granular permission system
     if not has_order_permission(request, 'can_edit_orders', order):
         messages.error(request, "You don't have permission to edit this order.")
-        return redirect('orderDetail', order_id=order_id)
+        return redirect('orders:orderDetail', order_id=order_id)
     
     # Get available products and languages
     products = Product.objects.filter(is_active=True)
@@ -456,7 +466,7 @@ def orderEdit(request, order_id):
             )
             
             messages.success(request, f'Order #{order_id} updated successfully.')
-            return redirect('orderDetail', order_id=order_id)
+            return redirect('orders:orderDetail', order_id=order_id)
             
         except Exception as e:
             messages.error(request, f'Error updating order: {str(e)}')
@@ -506,17 +516,17 @@ def updateOrderStatus(request, order_id):
     # Check permission
     if not has_order_permission(request, required_permission, order):
         messages.error(request, f"You don't have permission to change order status.")
-        return redirect('orderDetail', order_id=order_id)
+        return redirect('orders:orderDetail', order_id=order_id)
     
     if new_status not in dict(Order.STATUS_CHOICES):
         messages.error(request, 'Invalid status')
-        return redirect('orderDetail', order_id=order_id)
+        return redirect('orders:orderDetail', order_id=order_id)
     
     # Validate status transition
     allowed_transitions = get_allowed_status_transitions(order.status)
     if new_status not in allowed_transitions:
         messages.error(request, f'Cannot change status from {order.get_status_display()} to {dict(Order.STATUS_CHOICES).get(new_status)}')
-        return redirect('orderDetail', order_id=order_id)
+        return redirect('orders:orderDetail', order_id=order_id)
     
     old_status = order.status
     admin_profile = request.admin_profile
@@ -549,7 +559,7 @@ def updateOrderStatus(request, order_id):
             'new_status_display': order.get_status_display(),
         })
     
-    return redirect('orderDetail', order_id=order_id)
+    return redirect('orders:orderDetail', order_id=order_id)
 
 
 @login_required(login_url='admin_login')
@@ -560,7 +570,7 @@ def deleteOrder(request, order_id):
     # Check permission using granular permission system
     if not has_order_permission(request, 'can_delete_orders', order):
         messages.error(request, "You don't have permission to delete orders.")
-        return redirect('ordersList')
+        return redirect('orders:ordersList')
     
     if request.method == 'POST':
         # Audit log before deletion
@@ -574,9 +584,9 @@ def deleteOrder(request, order_id):
         )
         order.delete()
         messages.success(request, f'Order #{order_id} has been deleted')
-        return redirect('ordersList')
+        return redirect('orders:ordersList')
     
-    return redirect('orderDetail', order_id=order_id)
+    return redirect('orders:orderDetail', order_id=order_id)
 
 
 @login_required(login_url='admin_login')
@@ -588,18 +598,18 @@ def assignOrder(request, order_id):
     # Check permission using granular permission system
     if not has_order_permission(request, 'can_assign_orders', order):
         messages.error(request, "You don't have permission to assign orders.")
-        return redirect('orderDetail', order_id=order_id)
+        return redirect('orders:orderDetail', order_id=order_id)
     
     staff_id = request.POST.get('staff_id')
     if not staff_id:
         messages.error(request, "Please select a staff member.")
-        return redirect('orderDetail', order_id=order_id)
+        return redirect('orders:orderDetail', order_id=order_id)
     
     try:
         staff_member = AdminUser.objects.get(pk=staff_id, is_active=True)
     except AdminUser.DoesNotExist:
         messages.error(request, "Invalid staff member selected.")
-        return redirect('orderDetail', order_id=order_id)
+        return redirect('orders:orderDetail', order_id=order_id)
     
     # For superusers, allow any assignment - also set the order's branch if not set
     if request.user.is_superuser:
@@ -610,7 +620,7 @@ def assignOrder(request, order_id):
         # Verify staff is in the same branch as the order (if order has a branch)
         if order.branch and staff_member.branch != order.branch:
             messages.error(request, "Staff member must be in the same branch as the order.")
-            return redirect('orderDetail', order_id=order_id)
+            return redirect('orders:orderDetail', order_id=order_id)
     
     # Assign the order
     assigner = request.admin_profile if request.admin_profile else None
@@ -634,7 +644,7 @@ def assignOrder(request, order_id):
             'assigned_at': order.assigned_at.isoformat() if order.assigned_at else None,
         })
     
-    return redirect('orderDetail', order_id=order_id)
+    return redirect('orders:orderDetail', order_id=order_id)
 
 
 @login_required(login_url='admin_login')
@@ -646,7 +656,7 @@ def unassignOrder(request, order_id):
     # Check permission using granular permission system
     if not has_order_permission(request, 'can_assign_orders', order):
         messages.error(request, "You don't have permission to unassign orders.")
-        return redirect('orderDetail', order_id=order_id)
+        return redirect('orders:orderDetail', order_id=order_id)
     
     # Clear assignment
     previous_assignee = order.assigned_to
@@ -677,7 +687,7 @@ def unassignOrder(request, order_id):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'success': True})
     
-    return redirect('orderDetail', order_id=order_id)
+    return redirect('orders:orderDetail', order_id=order_id)
 
 
 @login_required(login_url='admin_login')
@@ -689,7 +699,7 @@ def receivePayment(request, order_id):
     # Check permission using granular permission system
     if not has_order_permission(request, 'can_receive_payments', order):
         messages.error(request, "You don't have permission to receive payments.")
-        return redirect('orderDetail', order_id=order_id)
+        return redirect('orders:orderDetail', order_id=order_id)
     
     # Mark payment received
     receiver = request.admin_profile if request.admin_profile else None
@@ -705,7 +715,7 @@ def receivePayment(request, order_id):
             'new_status_display': order.get_status_display(),
         })
     
-    return redirect('orderDetail', order_id=order_id)
+    return redirect('orders:orderDetail', order_id=order_id)
 
 
 @login_required(login_url='admin_login')
@@ -717,12 +727,12 @@ def completeOrder(request, order_id):
     # Check permission using granular permission system
     if not has_order_permission(request, 'can_complete_orders', order):
         messages.error(request, "You don't have permission to complete orders.")
-        return redirect('orderDetail', order_id=order_id)
+        return redirect('orders:orderDetail', order_id=order_id)
     
     # Check if order is ready to be completed
     if order.status not in ['ready', 'in_progress']:
         messages.error(request, "Order must be ready or in progress to complete.")
-        return redirect('orderDetail', order_id=order_id)
+        return redirect('orders:orderDetail', order_id=order_id)
     
     # Mark completed
     completer = request.admin_profile if request.admin_profile else None
@@ -738,7 +748,7 @@ def completeOrder(request, order_id):
             'new_status_display': order.get_status_display(),
         })
     
-    return redirect('orderDetail', order_id=order_id)
+    return redirect('orders:orderDetail', order_id=order_id)
 
 
 # ============ API Endpoints ============
@@ -896,7 +906,7 @@ def orderCreate(request):
             # Validate required fields
             if not bot_user_id or not product_id or not branch_id:
                 messages.error(request, _("Please fill in all required fields"))
-                return redirect('orderCreate')
+                return redirect('orders:orderCreate')
             
             # Get related objects
             bot_user = BotUser.objects.get(id=bot_user_id)
@@ -950,11 +960,11 @@ def orderCreate(request):
             )
             
             messages.success(request, _("Order created successfully"))
-            return redirect('orderDetail', order_id=order.id)
+            return redirect('orders:orderDetail', order_id=order.id)
             
         except Exception as e:
             messages.error(request, str(e))
-            return redirect('orderCreate')
+            return redirect('orders:orderCreate')
     
     context = {
         "title": "Create Order",

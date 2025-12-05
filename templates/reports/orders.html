@@ -235,7 +235,7 @@
                             {% for order in recent_orders %}
                             {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
                             <tr>
-                                <td class="{{ row_color }}"><a href="{% url 'orderDetail' order.id %}" class="fw-medium text-primary-main">#{{ order.id }}</a></td>
+                                <td class="{{ row_color }}"><a href="{% url 'orders:orderDetail' order.id %}" class="fw-medium text-primary-main">#{{ order.id }}</a></td>
                                 <td class="{{ row_color }} text-secondary-light">{{ order.bot_user.name|default:"Unknown" }}</td>
                                 <td class="{{ row_color }} text-secondary-light">{{ order.product.name|default:"N/A" }}</td>
                                 <td class="{{ row_color }} text-secondary-light">

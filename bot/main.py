@@ -811,14 +811,7 @@ def get_file_pages_from_content(file_content, file_name):
 
 def generate_totals_message(language, total_files, total_pages):
     """Generate totals message in appropriate language"""
-    if language == "uz":
-        return f"📋 Jami yuklangan fayllar: {total_files}\n📄 Jami sahifalar: {total_pages}"
-    elif language == "ru":
-        return (
-            f"📋 Всего загружено файлов: {total_files}\n📄 Всего страниц: {total_pages}"
-        )
-    else:  # English
-        return f"📋 Total uploaded files: {total_files}\n📄 Total pages: {total_pages}"
+    return f"{get_text('file_summary_uploaded', language)}: {total_files}\n{get_text('file_summary_pages', language)}: {total_pages}"
 
 
 def update_totals_message(user_id, language):
@@ -1139,13 +1132,13 @@ def show_branch_selection(message, language):
     
     center = get_current_center()
     if not center:
-        send_message(message.chat.id, "❌ Configuration error. Please contact support.")
+        send_message(message.chat.id, get_text("error_config", language))
         return
     
     branches = get_center_branches(center)
     
     if not branches:
-        send_message(message.chat.id, "❌ No branches available. Please contact support.")
+        send_message(message.chat.id, get_text("error_no_branches", language))
         return
     
     # If only one branch, auto-select it
@@ -1167,12 +1160,7 @@ def show_branch_selection(message, language):
     markup = types.InlineKeyboardMarkup(row_width=1)
     
     # Build branch selection message
-    if language == "uz":
-        header = "📍 <b>Filialni tanlang</b>\n\nQuyidagi filiallardan birini tanlang:"
-    elif language == "ru":
-        header = "📍 <b>Выберите филиал</b>\n\nВыберите один из филиалов ниже:"
-    else:
-        header = "📍 <b>Select Branch</b>\n\nPlease select one of the branches below:"
+    header = get_text("select_branch_header", language)
     
     for branch in branches:
         # Format branch button text with name and address
@@ -1516,12 +1504,7 @@ def handle_branch_selection(call):
             pass
         
         # Confirm branch selection
-        if language == "uz":
-            confirm_text = f"✅ Siz <b>{branch.name}</b> filialini tanladingiz."
-        elif language == "ru":
-            confirm_text = f"✅ Вы выбрали филиал <b>{branch.name}</b>."
-        else:
-            confirm_text = f"✅ You selected <b>{branch.name}</b> branch."
+        confirm_text = get_text("branch_selected", language).format(branch=branch.name)
         
         send_message(call.message.chat.id, confirm_text)
         
@@ -1539,10 +1522,10 @@ def handle_branch_selection(call):
         show_main_menu(wrapped_message, language)
         
     except Branch.DoesNotExist:
-        bot.answer_callback_query(call.id, "Branch not found")
+        bot.answer_callback_query(call.id, get_text("error_branch_not_found", language))
     except Exception as e:
         print(f"[ERROR] Branch selection error: {e}")
-        bot.answer_callback_query(call.id, "Error occurred")
+        bot.answer_callback_query(call.id, get_text("error_general", language))
 
 
 # Handler for back to language from branch selection
@@ -1614,15 +1597,69 @@ def handle_back_button(message, language):
     current_step = get_user_step(user_id)
 
     if current_step == STEP_PHONE_REQUESTED:
+        # Back from phone request -> ask name again
         update_user_step(user_id, STEP_NAME_REQUESTED)
         ask_name(message, language)
     elif current_step == STEP_NAME_REQUESTED:
+        # Back from name request -> language selection
         show_language_selection(message)
     elif current_step == STEP_REGISTRATION_STARTED:
         show_language_selection(message)
     elif current_step == STEP_LANGUAGE_SELECTED:
         show_language_selection(message)
+    elif current_step == STEP_BRANCH_SELECTION:
+        # Back from branch selection -> language selection
+        show_language_selection(message)
+    elif current_step == STEP_SELECTING_SERVICE:
+        # Back from service selection -> main menu
+        show_main_menu(message, language)
+    elif current_step == STEP_SELECTING_DOCUMENT:
+        # Back from document selection -> services
+        show_categorys(message, language)
+    elif current_step == STEP_SELECTING_COPY_NUMBER:
+        # Back from copy number -> document types
+        user_data = uploaded_files.get(user_id, {})
+        if user_data and "service_id" in user_data:
+            service_id = user_data["service_id"]
+            show_products(message, language, service_id)
+        else:
+            show_categorys(message, language)
+    elif current_step == STEP_UPLOADING_FILES:
+        # Back from file upload -> document types (since copy number leads to upload)
+        user_data = uploaded_files.get(user_id, {})
+        if user_data and "service_id" in user_data:
+            service_id = user_data["service_id"]
+            show_products(message, language, service_id)
+        else:
+            show_categorys(message, language)
+    elif current_step == STEP_PAYMENT_METHOD:
+        # Back from payment method -> file upload
+        handle_back_to_upload_docs_message(message, language)
+    elif current_step in (STEP_AWAITING_PAYMENT, STEP_UPLOADING_RECEIPT, STEP_AWAITING_RECEIPT):
+        # Back from payment/receipt screens -> try to restore payment options
+        user_data = uploaded_files.get(user_id, {})
+        if user_data and "order_id" in user_data:
+            try:
+                from orders.models import Order
+                order = Order.objects.get(id=user_data["order_id"])
+                show_payment_options(message, language, order)
+            except:
+                show_main_menu(message, language)
+        else:
+            show_main_menu(message, language)
+    elif current_step == STEP_EDITING_PROFILE:
+        # Back from profile editing -> main menu
+        show_main_menu(message, language)
+    elif current_step == STEP_EDITING_NAME:
+        # Back from name editing -> profile
+        update_user_step(user_id, STEP_EDITING_PROFILE)
+        show_profile(message, language)
+    elif current_step == STEP_EDITING_PHONE:
+        # Back from phone editing -> profile
+        update_user_step(user_id, STEP_EDITING_PROFILE)
+        show_profile(message, language)
     else:
+        # Default: go to main menu
         show_main_menu(message, language)
 
 
@@ -1689,7 +1726,12 @@ def handle_contact(message):
 
 
 def show_main_menu(message, language):
-    user_id = message.from_user.id
+    # Handle both direct messages and callback messages
+    if hasattr(message, 'from_user') and message.from_user:
+        user_id = message.from_user.id
+    else:
+        user_id = message.chat.id
+    
     update_user_step(user_id, STEP_REGISTERED)
     
     # Check if branch has pricelist enabled
@@ -1785,7 +1827,10 @@ def handle_main_menu(message):
         or "Profile" in message.text
         or "Профиль" in message.text
     ):
-        bot.delete_message(message.chat.id, message.message_id)
+        try:
+            bot.delete_message(message.chat.id, message.message_id)
+        except Exception as e:
+            print(f"[DEBUG] Could not delete profile button message: {e}")
         show_profile(message, language)
     elif (
         "Biz haqimizda" in message.text
@@ -1878,61 +1923,145 @@ def show_pricelist(message, language):
         is_active=True
     ).prefetch_related('product_set').order_by('name')
     
-    # Build price list text
-    pricelist_text = get_text("pricelist_title", language)
-    
-    # Add B2B/B2C note
-    if is_agency:
-        pricelist_text += get_text("pricelist_b2b_note", language) + "\n\n"
+    # Build price list text with creative formatting
+    if language == 'uz':
+        pricelist_text = "╔══════════════════════╗\n"
+        pricelist_text += "   💰 <b>NARXLAR RO'YXATI</b> 💰\n"
+        pricelist_text += "╚══════════════════════╝\n\n"
+        pricelist_text += f"🏢 <b>{user.branch.name}</b>\n"
+        pricelist_text += "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
+    elif language == 'ru':
+        pricelist_text = "╔══════════════════════╗\n"
+        pricelist_text += "     💰 <b>ПРАЙС-ЛИСТ</b> 💰\n"
+        pricelist_text += "╚══════════════════════╝\n\n"
+        pricelist_text += f"🏢 <b>{user.branch.name}</b>\n"
+        pricelist_text += "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
     else:
-        pricelist_text += get_text("pricelist_b2c_note", language) + "\n\n"
+        pricelist_text = "╔══════════════════════╗\n"
+        pricelist_text += "     💰 <b>PRICE LIST</b> 💰\n"
+        pricelist_text += "╚══════════════════════╝\n\n"
+        pricelist_text += f"🏢 <b>{user.branch.name}</b>\n"
+        pricelist_text += "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
+    
+    # Add B2B/B2C note with icons
+    if is_agency:
+        if language == 'uz':
+            pricelist_text += "💼 <i>Agentlik narxlari</i> 🔥\n\n"
+        elif language == 'ru':
+            pricelist_text += "💼 <i>Цены для агентств</i> 🔥\n\n"
+        else:
+            pricelist_text += "💼 <i>Agency prices</i> 🔥\n\n"
+    else:
+        if language == 'uz':
+            pricelist_text += "👤 <i>Mijozlar uchun narxlar</i> ✨\n\n"
+        elif language == 'ru':
+            pricelist_text += "👤 <i>Цены для клиентов</i> ✨\n\n"
+        else:
+            pricelist_text += "👤 <i>Customer prices</i> ✨\n\n"
     
     has_products = False
+    category_icons = ['📁', '📂', '🗂', '📋', '📑', '🗃']
     
-    for category in categories:
+    for idx, category in enumerate(categories):
         products = category.product_set.filter(is_active=True).order_by('name')
         
         if products.exists():
             has_products = True
             # Get category name based on language
-            category_name = category.name
-            if language == 'uz' and hasattr(category, 'name_uz') and category.name_uz:
-                category_name = category.name_uz
-            elif language == 'ru' and hasattr(category, 'name_ru') and category.name_ru:
-                category_name = category.name_ru
-            elif language == 'en' and hasattr(category, 'name_en') and category.name_en:
-                category_name = category.name_en
+            category_name = get_translated_field(category, 'name', language)
             
-            pricelist_text += get_text("pricelist_category", language).format(category=category_name)
+            # Determine charging type for this category
+            is_dynamic = category.charging == 'dynamic'
+            
+            # Use rotating icons for categories
+            cat_icon = category_icons[idx % len(category_icons)]
+            
+            pricelist_text += f"┌{'─' * 20}┐\n"
+            pricelist_text += f"│ {cat_icon} <b>{category_name.upper()}</b>\n"
+            pricelist_text += f"└{'─' * 20}┘\n"
             
             for product in products:
                 # Get product name based on language
-                product_name = product.name
-                if language == 'uz' and hasattr(product, 'name_uz') and product.name_uz:
-                    product_name = product.name_uz
-                elif language == 'ru' and hasattr(product, 'name_ru') and product.name_ru:
-                    product_name = product.name_ru
-                elif language == 'en' and hasattr(product, 'name_en') and product.name_en:
-                    product_name = product.name_en
+                product_name = get_translated_field(product, 'name', language)
                 
-                # Get price based on user type (B2B vs B2C)
+                # Get prices based on user type (agency vs regular)
                 if is_agency:
-                    price = product.b2b_price if hasattr(product, 'b2b_price') and product.b2b_price else product.price
+                    first_price = product.agency_first_page_price
+                    other_price = product.agency_other_page_price
                 else:
-                    price = product.b2c_price if hasattr(product, 'b2c_price') and product.b2c_price else product.price
+                    first_price = product.ordinary_first_page_price
+                    other_price = product.ordinary_other_page_price
                 
-                # Format price with thousands separator
-                price_formatted = "{:,.0f}".format(price).replace(",", " ")
+                # Format prices
+                first_formatted = "{:,.0f}".format(first_price).replace(",", " ")
+                other_formatted = "{:,.0f}".format(other_price).replace(",", " ")
                 
-                pricelist_text += get_text("pricelist_product", language).format(
-                    product=product_name,
-                    price=price_formatted
-                )
+                if is_dynamic:
+                    # Dynamic pricing - show first page and other pages prices
+                    if language == 'uz':
+                        pricelist_text += f"\n  📄 <b>{product_name}</b>\n"
+                        pricelist_text += f"     ├ 1️⃣ sahifa: <code>{first_formatted}</code> so'm\n"
+                        pricelist_text += f"     ├ ➕ keyingi: <code>{other_formatted}</code> so'm\n"
+                        if product.estimated_days:
+                            pricelist_text += f"     └ ⏰ ~{product.estimated_days} kun\n"
+                    elif language == 'ru':
+                        pricelist_text += f"\n  📄 <b>{product_name}</b>\n"
+                        pricelist_text += f"     ├ 1️⃣ стр.: <code>{first_formatted}</code> сум\n"
+                        pricelist_text += f"     ├ ➕ далее: <code>{other_formatted}</code> сум\n"
+                        if product.estimated_days:
+                            pricelist_text += f"     └ ⏰ ~{product.estimated_days} дн.\n"
+                    else:
+                        pricelist_text += f"\n  📄 <b>{product_name}</b>\n"
+                        pricelist_text += f"     ├ 1️⃣ page: <code>{first_formatted}</code> sum\n"
+                        pricelist_text += f"     ├ ➕ next: <code>{other_formatted}</code> sum\n"
+                        if product.estimated_days:
+                            pricelist_text += f"     └ ⏰ ~{product.estimated_days} days\n"
+                else:
+                    # Static pricing - single price per document
+                    if language == 'uz':
+                        pricelist_text += f"\n  📄 {product_name}\n"
+                        pricelist_text += f"     ├ 💵 <code>{first_formatted}</code> so'm"
+                        if product.estimated_days:
+                            pricelist_text += f"\n     └ ⏰ ~{product.estimated_days} kun\n"
+                        else:
+                            pricelist_text += "\n"
+                    elif language == 'ru':
+                        pricelist_text += f"\n  📄 {product_name}\n"
+                        pricelist_text += f"     ├ 💵 <code>{first_formatted}</code> сум"
+                        if product.estimated_days:
+                            pricelist_text += f"\n     └ ⏰ ~{product.estimated_days} дн.\n"
+                        else:
+                            pricelist_text += "\n"
+                    else:
+                        pricelist_text += f"\n  📄 {product_name}\n"
+                        pricelist_text += f"     ├ 💵 <code>{first_formatted}</code> sum"
+                        if product.estimated_days:
+                            pricelist_text += f"\n     └ ⏰ ~{product.estimated_days} days\n"
+                        else:
+                            pricelist_text += "\n"
             
             pricelist_text += "\n"
     
     if not has_products:
         pricelist_text = get_text("pricelist_empty", language)
+    else:
+        # Add creative footer
+        pricelist_text += "═══════════════════════\n"
+        if language == 'uz':
+            pricelist_text += "📞 <b>Savollar bormi?</b>\n"
+            pricelist_text += "💬 Biz bilan bog'laning!\n"
+            pricelist_text += "═══════════════════════\n"
+            pricelist_text += "🚀 <i>Tez • Sifatli • Ishonchli</i>"
+        elif language == 'ru':
+            pricelist_text += "📞 <b>Есть вопросы?</b>\n"
+            pricelist_text += "💬 Свяжитесь с нами!\n"
+            pricelist_text += "═══════════════════════\n"
+            pricelist_text += "🚀 <i>Быстро • Качественно • Надежно</i>"
+        else:
+            pricelist_text += "📞 <b>Have questions?</b>\n"
+            pricelist_text += "💬 Contact us!\n"
+            pricelist_text += "═══════════════════════\n"
+            pricelist_text += "🚀 <i>Fast • Quality • Reliable</i>"
     
     send_message(message.chat.id, pricelist_text, parse_mode="HTML")
     show_main_menu(message, language)
@@ -2139,13 +2268,7 @@ def show_user_orders(message, language):
         import traceback
 
         traceback.print_exc()
-        error_text = "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring."
-        if language == "ru":
-            error_text = "❌ Произошла ошибка. Пожалуйста, попробуйте еще раз."
-        elif language == "en":
-            error_text = "❌ An error occurred. Please try again."
-
-        send_message(message.chat.id, error_text)
+        send_message(message.chat.id, get_text("error_general", language))
         show_main_menu(message, language)
 
 
@@ -2165,7 +2288,7 @@ def handle_pay_order(call):
         
         # Verify this order belongs to this user
         if order.bot_user_id != user.id:
-            bot.answer_callback_query(call.id, "❌ Access denied")
+            bot.answer_callback_query(call.id, get_text("error_general", language))
             return
         
         # Store order in user session for receipt upload
@@ -2183,51 +2306,23 @@ def handle_pay_order(call):
         received = order.received or 0
         remaining = order.remaining
         
-        if language == "uz":
-            text = f"💳 <b>To'lov qilish</b>\n\n"
-            text += f"📋 Buyurtma: #{order.id}\n"
-            text += f"� Umumiy narx: {total_due:,.0f} so'm\n"
-            text += f"✅ To'langan: {received:,.0f} so'm\n"
-            text += f"💰 Qolgan to'lov: <b>{remaining:,.0f} so'm</b>\n\n"
-            if additional_info and additional_info.bank_card:
-                text += f"💳 Karta raqami:\n<code>{additional_info.bank_card}</code>\n"
-                if additional_info.holder_name:
-                    text += f"👤 Karta egasi: {additional_info.holder_name}\n"
-                text += "\n"
-            else:
-                text += "⚠️ Karta ma'lumotlari topilmadi\n\n"
-            text += f"📎 To'lovni amalga oshirib, chekni yuboring.\n"
-            text += f"📷 Rasm yoki hujjat sifatida yuborishingiz mumkin."
-        elif language == "ru":
-            text = f"💳 <b>Оплата</b>\n\n"
-            text += f"📋 Заказ: #{order.id}\n"
-            text += f"� Общая цена: {total_due:,.0f} сум\n"
-            text += f"✅ Оплачено: {received:,.0f} сум\n"
-            text += f"💰 Остаток к оплате: <b>{remaining:,.0f} сум</b>\n\n"
-            if additional_info and additional_info.bank_card:
-                text += f"💳 Номер карты:\n<code>{additional_info.bank_card}</code>\n"
-                if additional_info.holder_name:
-                    text += f"👤 Владелец карты: {additional_info.holder_name}\n"
-                text += "\n"
-            else:
-                text += "⚠️ Данные карты не найдены\n\n"
-            text += f"📎 Произведите оплату и отправьте чек.\n"
-            text += f"📷 Можете отправить как фото или документ."
+        # Build text using translation keys
+        text = get_text("payment_title", language) + "\n\n"
+        text += f"{get_text('payment_order', language)}: #{order.id}\n"
+        text += f"{get_text('payment_total_price', language)}: {total_due:,.0f} so'm\n"
+        text += f"{get_text('payment_paid', language)}: {received:,.0f} so'm\n"
+        text += f"{get_text('payment_remaining', language)}: <b>{remaining:,.0f} so'm</b>\n\n"
+        
+        if additional_info and additional_info.bank_card:
+            text += f"{get_text('payment_card_number', language)}:\n<code>{additional_info.bank_card}</code>\n"
+            if additional_info.holder_name:
+                text += f"{get_text('payment_card_holder', language)}: {additional_info.holder_name}\n"
+            text += "\n"
         else:
-            text = f"💳 <b>Payment</b>\n\n"
-            text += f"📋 Order: #{order.id}\n"
-            text += f"� Total price: {total_due:,.0f} sum\n"
-            text += f"✅ Paid: {received:,.0f} sum\n"
-            text += f"💰 Remaining payment: <b>{remaining:,.0f} sum</b>\n\n"
-            if additional_info and additional_info.bank_card:
-                text += f"💳 Card number:\n<code>{additional_info.bank_card}</code>\n"
-                if additional_info.holder_name:
-                    text += f"👤 Card holder: {additional_info.holder_name}\n"
-                text += "\n"
-            else:
-                text += "⚠️ Card details not found\n\n"
-            text += f"📎 Make the payment and send the receipt.\n"
-            text += f"📷 You can send it as a photo or document."
+            text += get_text("payment_card_not_found", language) + "\n\n"
+        
+        text += get_text("payment_send_receipt", language) + "\n"
+        text += get_text("payment_receipt_format", language)
         
         # Create cancel button
         markup = types.InlineKeyboardMarkup()
@@ -2246,10 +2341,10 @@ def handle_pay_order(call):
         )
         
     except Order.DoesNotExist:
-        bot.answer_callback_query(call.id, "❌ Order not found")
+        bot.answer_callback_query(call.id, get_text("error_order_not_found", language))
     except Exception as e:
         print(f"[ERROR] handle_pay_order: {e}")
-        bot.answer_callback_query(call.id, "❌ Error")
+        bot.answer_callback_query(call.id, get_text("error_general", language))
 
 
 @bot.callback_query_handler(func=lambda call: call.data == "cancel_payment")
@@ -2340,9 +2435,13 @@ def show_profile(message, language):
     try:
         from accounts.models import BotUser
 
+        # Get current center for multi-tenant support
+        center = get_current_center()
+
         # Try to get user, create if doesn't exist
         user, created = BotUser.objects.get_or_create(
             user_id=user_id,
+            center=center,
             defaults={
                 "username": username,
                 "name": name,
@@ -2356,40 +2455,19 @@ def show_profile(message, language):
         if created:
             print(f"[DEBUG] Created new user: {user_id}")
 
-        # Create profile text
+        # Create profile text using translation keys
         branch_name = user.branch.name if user.branch else "—"
+        lang_name = get_text(f"language_name_{user.language}", language)
+        status_text = get_text("status_active", language) if user.is_active else get_text("status_inactive", language)
         
-        if language == "uz":
-            profile_text = "👤 <b>Sizning profilingiz:</b>\n\n"
-            profile_text += f"👤 Ism: {user.name}\n"
-            profile_text += f"📞 Telefon: {user.phone}\n"
-            profile_text += f"🏢 Filial: {branch_name}\n"
-            profile_text += f"""🌍 Til: {"O'zbek" if user.language == 'uz' else 'Русский' if user.language == 'ru' else 'English'}\n"""
-            profile_text += f"📊 Holat: {'Faol' if user.is_active else 'Faol emas'}\n"
-            profile_text += f"📅 Qo'shilgan: {timezone.localtime(user.created_at).strftime('%d.%m.%Y')}\n\n"
-            profile_text += "📝 Ma'lumotlarni o'zgartirish uchun quyidagi tugmalardan birini bosing:"
-        elif language == "ru":
-            profile_text = "👤 <b>Ваш профиль:</b>\n\n"
-            profile_text += f"👤 Имя: {user.name}\n"
-            profile_text += f"📞 Телефон: {user.phone}\n"
-            profile_text += f"🏢 Филиал: {branch_name}\n"
-            profile_text += f"🌍 Язык: {'Узбекский' if user.language == 'uz' else 'Русский' if user.language == 'ru' else 'Английский'}\n"
-            profile_text += (
-                f"📊 Статус: {'Активен' if user.is_active else 'Не активен'}\n"
-            )
-            profile_text += f"📅 Присоединился: {timezone.localtime(user.created_at).strftime('%d.%m.%Y')}\n\n"
-            profile_text += "📝 Для изменения данных нажмите одну из кнопок ниже:"
-        else:  # English
-            profile_text = "👤 <b>Your Profile:</b>\n\n"
-            profile_text += f"👤 Name: {user.name}\n"
-            profile_text += f"📞 Phone: {user.phone}\n"
-            profile_text += f"� Branch: {branch_name}\n"
-            profile_text += f"�🌍 Language: {'Uzbek' if user.language == 'uz' else 'Russian' if user.language == 'ru' else 'English'}\n"
-            profile_text += f"📊 Status: {'Active' if user.is_active else 'Inactive'}\n"
-            profile_text += f"📅 Joined: {timezone.localtime(user.created_at).strftime('%d.%m.%Y')}\n\n"
-            profile_text += (
-                "📝 To edit your information, click one of the buttons below:"
-            )
+        profile_text = get_text("profile_title", language) + "\n\n"
+        profile_text += f"{get_text('profile_name', language)}: {user.name}\n"
+        profile_text += f"{get_text('profile_phone', language)}: {user.phone}\n"
+        profile_text += f"{get_text('profile_branch', language)}: {branch_name}\n"
+        profile_text += f"{get_text('profile_language', language)}: {lang_name}\n"
+        profile_text += f"{get_text('profile_status', language)}: {status_text}\n"
+        profile_text += f"{get_text('profile_joined', language)}: {timezone.localtime(user.created_at).strftime('%d.%m.%Y')}\n\n"
+        profile_text += get_text("profile_edit_hint", language)
 
         # Create inline keyboard with edit options
         markup = types.InlineKeyboardMarkup(row_width=2)
@@ -2400,7 +2478,7 @@ def show_profile(message, language):
             text=get_text("edit_phone", language), callback_data="edit_phone"
         )
         edit_branch_button = types.InlineKeyboardButton(
-            text="🏢 " + ("Filialni o'zgartirish" if language == "uz" else "Сменить филиал" if language == "ru" else "Change Branch"), 
+            text=get_text("change_branch", language), 
             callback_data="edit_branch"
         )
         edit_language_button = types.InlineKeyboardButton(
@@ -2415,7 +2493,7 @@ def show_profile(message, language):
         markup.add(back_button)
 
         send_message(
-            chat_id=message.chat.id,
+            chat_id=chat_id,
             text=profile_text,
             reply_markup=markup,
             parse_mode="HTML",
@@ -2426,17 +2504,12 @@ def show_profile(message, language):
         import traceback
 
         traceback.print_exc()
-        error_text = "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring."
-        if language == "ru":
-            error_text = "❌ Произошла ошибка. Пожалуйста, попробуйте еще раз."
-        elif language == "en":
-            error_text = "❌ An error occurred. Please try again."
-
+        
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
         back_button = types.KeyboardButton(text=get_text("back_to_menu", language))
         markup.add(back_button)
 
-        send_message(message.chat.id, error_text, reply_markup=markup)
+        send_message(chat_id, get_text("error_general", language), reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == "edit_profile")
@@ -2678,6 +2751,21 @@ def handle_edit_language_request(call):
             pass
 
 
+@bot.callback_query_handler(func=lambda call: call.data == "back_to_profile")
+def handle_back_to_profile(call):
+    """Handle back to profile button from inline keyboards"""
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    
+    try:
+        bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+    except:
+        pass
+    
+    update_user_step(user_id, STEP_EDITING_PROFILE)
+    show_profile(call.message, language)
+
+
 @bot.callback_query_handler(
     func=lambda call: call.data.startswith("lang_") and call.data.count("_") >= 2
 )
@@ -2833,7 +2921,12 @@ def handle_profile_language_update(call):
 
 
 def show_categorys(message, language):
-    user_id = message.from_user.id
+    # Handle both direct messages and callback messages
+    if hasattr(message, 'from_user') and message.from_user:
+        user_id = message.from_user.id
+    else:
+        user_id = message.chat.id
+    
     update_user_step(user_id, STEP_SELECTING_SERVICE)
     from services.models import Category
 
@@ -2883,25 +2976,44 @@ def show_categorys(message, language):
             show_main_menu(message, language)
     except Exception as e:
         print(f"[ERROR] show_categorys error: {e}")
-        if language == "uz":
-            error_text = "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring."
-        elif language == "ru":
-            error_text = "❌ Произошла ошибка. Пожалуйста, попробуйте еще раз."
-        else:
-            error_text = "❌ An error occurred. Please try again."
-        send_message(message.chat.id, error_text)
+        send_message(message.chat.id, get_text("error_general", language))
         show_main_menu(message, language)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == ("main_menu"))
-def handle_main_menu(call):
-    bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
-    show_main_menu(call.message, get_user_language(call.message.chat.id))
+def handle_main_menu_callback(call):
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    
+    try:
+        bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+    except:
+        pass
+    
+    # Create wrapper with proper from_user
+    class MessageWrapper:
+        def __init__(self, chat, from_user):
+            self.chat = chat
+            self.from_user = from_user
+    
+    wrapped_message = MessageWrapper(call.message.chat, call.from_user)
+    show_main_menu(wrapped_message, language)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("category_"))
 def handle_service_selection(call):
-    language = get_user_language(call.message.chat.id)
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    
+    # Create wrapper with proper from_user for functions that need it
+    class MessageWrapper:
+        def __init__(self, chat, from_user, message_id=None):
+            self.chat = chat
+            self.from_user = from_user
+            self.message_id = message_id
+    
+    wrapped_message = MessageWrapper(call.message.chat, call.from_user, call.message.message_id)
+    
     try:
         service_id = int(call.data.split("_")[1])
         from services.models import Category
@@ -2918,12 +3030,12 @@ def handle_service_selection(call):
 
         # Check if service has multiple languages
         if category.languages.count() > 1:
-            show_available_langs(call.message, language, service_id)
+            show_available_langs(wrapped_message, language, service_id)
         else:
             # If only one language is available, use it and go directly to document types
             lang = category.languages.first()
             show_products(
-                message=call.message,
+                message=wrapped_message,
                 language=language,
                 service_id=service_id,
                 lang_id=lang.id if lang else None,
@@ -2932,12 +3044,12 @@ def handle_service_selection(call):
     except Category.DoesNotExist:
         error_msg = get_text("service_not_found", language)
         bot.send_message(call.message.chat.id, error_msg)
-        show_categorys(call.message, language)
+        show_categorys(wrapped_message, language)
     except Exception as e:
         error_msg = get_text("error_occurred", language)
         bot.send_message(call.message.chat.id, error_msg)
         print(f"Error in handle_service_selection: {e}")
-        show_main_menu(call.message, language)
+        show_main_menu(wrapped_message, language)
 
 
 def show_available_langs(
@@ -3209,8 +3321,25 @@ def show_products(
 
 @bot.callback_query_handler(func=lambda call: call.data == "back_to_services")
 def handle_back_to_services(call):
-    language = get_user_language(call.message.chat.id)
-    show_categorys(call.message, language)
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    
+    # Create a wrapper message with proper from_user
+    class MessageWrapper:
+        def __init__(self, chat, from_user):
+            self.chat = chat
+            self.from_user = from_user
+            self.message_id = call.message.message_id
+    
+    wrapped_message = MessageWrapper(call.message.chat, call.from_user)
+    
+    # Delete the current message
+    try:
+        bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+    except:
+        pass
+    
+    show_categorys(wrapped_message, language)
 
 
 def show_copy_number_selection(message, language, doc_type, lang_name):
@@ -3320,7 +3449,7 @@ def handle_copy_number_selection(call):
 )
 def handle_back_to_documents_from_copy(call):
     """Handle back button from copy number selection"""
-    user_id = call.message.chat.id
+    user_id = call.from_user.id
     language = get_user_language(user_id)
 
     # Get service info from uploaded_files
@@ -3331,7 +3460,7 @@ def handle_back_to_documents_from_copy(call):
     if service_id:
         # Delete the copy number message
         try:
-            bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
+            bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
         except:
             pass
 
@@ -3343,8 +3472,14 @@ def handle_back_to_documents_from_copy(call):
             lang_id=lang_id,
         )
     else:
-        # Fallback to main services
-        show_categorys(call.message, language)
+        # Fallback to main services - create wrapper with proper from_user
+        class MessageWrapper:
+            def __init__(self, chat, from_user):
+                self.chat = chat
+                self.from_user = from_user
+        
+        wrapped_message = MessageWrapper(call.message.chat, call.from_user)
+        show_categorys(wrapped_message, language)
 
 
 def show_upload_files_interface(message, language, doc_type, lang_name, copy_number):
@@ -3387,12 +3522,6 @@ def show_upload_files_interface(message, language, doc_type, lang_name, copy_num
     update_user_step(user_id, STEP_UPLOADING_FILES)
 
     print(f"[DEBUG] User {user_id} moved to file upload with {copy_number} copies")
-
-
-@bot.callback_query_handler(func=lambda call: call.data == "back_to_services")
-def handle_back_to_services(call):
-    language = get_user_language(call.message.chat.id)
-    show_categorys(call.message, language)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("doc_type_"))
@@ -3629,7 +3758,7 @@ def handle_file_upload(message):
                 if "order_id" not in user_data:
                     bot.send_message(
                         message.chat.id,
-                        "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang.",
+                        get_text("order_not_found_restart", language),
                     )
                     return
 
@@ -3854,7 +3983,7 @@ def handle_file_upload(message):
                 traceback.print_exc()
                 bot.send_message(
                     message.chat.id,
-                    "❌ Chek yuklanmadi. Iltimos, qayta urinib ko'ring.",
+                    get_text("receipt_upload_failed", language),
                 )
                 return
 
@@ -3868,7 +3997,7 @@ def handle_file_upload(message):
                 if not order_id:
                     bot.send_message(
                         message.chat.id,
-                        "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang.",
+                        get_text("order_not_found_restart", language),
                     )
                     return
 
@@ -3953,7 +4082,7 @@ def handle_file_upload(message):
             except Order.DoesNotExist:
                 bot.send_message(
                     message.chat.id,
-                    "❌ Buyurtma topilmadi.",
+                    get_text("error_order_not_found", language),
                 )
                 return
             except Exception as e:
@@ -3963,7 +4092,7 @@ def handle_file_upload(message):
                 traceback.print_exc()
                 bot.send_message(
                     message.chat.id,
-                    "❌ Chek yuklanmadi. Iltimos, qayta urinib ko'ring.",
+                    get_text("receipt_upload_failed", language),
                 )
                 return
 
@@ -3989,25 +4118,7 @@ def handle_file_upload(message):
 
             # Validate file format
             if not is_valid_file_format(file_name):
-                error_text = (
-                    "❌ Fayl formati noto'g'ri!\n\n"
-                    "📎 Ruxsat etilgan formatlar:\n"
-                    "📄 DOC, DOCX, PDF\n"
-                    "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC"
-                    if language == "uz"
-                    else (
-                        "❌ Invalid file format!\n\n"
-                        "📎 Allowed formats:\n"
-                        "📄 DOC, DOCX, PDF\n"
-                        "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC"
-                        if language == "en"
-                        else "❌ Неверный формат файла!\n\n"
-                        "📎 Разрешенные форматы:\n"
-                        "📄 DOC, DOCX, PDF\n"
-                        "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC"
-                    )
-                )
-                bot.send_message(message.chat.id, error_text)
+                bot.send_message(message.chat.id, get_text("invalid_file_format_full", language))
                 return
 
             # Download file
@@ -4114,15 +4225,7 @@ def handle_file_upload(message):
 
             traceback.print_exc()
 
-            error_text = "❌ Fayl yuklanmadi. Iltimos, qayta urinib ko'ring."
-            if language == "ru":
-                error_text = (
-                    "❌ Не удалось загрузить файл. Пожалуйста, попробуйте еще раз."
-                )
-            elif language == "en":
-                error_text = "❌ Failed to upload file. Please try again."
-
-            bot.send_message(message.chat.id, error_text)
+            bot.send_message(message.chat.id, get_text("file_upload_failed", language))
         return
 
     # If not in uploading steps, ignore
@@ -4172,7 +4275,7 @@ def handle_payment_card_selection(call):
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
-            text="❌ Buyurtma topilmadi.",
+            text=get_text("error_order_not_found", language),
         )
 
 
@@ -4224,7 +4327,7 @@ def handle_payment_cash_selection(call):
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
-            text="❌ Buyurtma topilmadi.",
+            text=get_text("error_order_not_found", language),
         )
 
 
@@ -4278,7 +4381,7 @@ def handle_payment_receipt_upload(call):
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
-            text="❌ Buyurtma topilmadi.",
+            text=get_text("error_order_not_found", language),
         )
 
 
@@ -4297,7 +4400,7 @@ def handle_payment_receipt_photo(message):
         # Get order information from uploaded_files
         user_files = get_user_files(user_id)
         if not user_files or "order_id" not in user_files:
-            bot.send_message(message.chat.id, "❌ Buyurtma ma'lumotlari topilmadi.")
+            bot.send_message(message.chat.id, get_text("order_data_not_found", language))
             return
 
         order_id = user_files["order_id"]
@@ -4336,22 +4439,11 @@ def handle_payment_receipt_photo(message):
         order.recipt = file_path
         order.save()
 
-        # Show confirmation
-        confirm_text = "✅ To'lov cheki muvaffaqiyatli yuklandi!\n\n"
-        confirm_text += f"📋 Buyurtma raqami: #{order_id}\n"
-        confirm_text += f"💰 Summa: {order.total_price:,} so'm\n\n"
-        confirm_text += "Admin tomonidan tekshirilgandan keyin sizga xabar beramiz."
-
-        if language == "ru":
-            confirm_text = "✅ Чек об оплате успешно загружен!\n\n"
-            confirm_text += f"📋 Номер заказа: #{order_id}\n"
-            confirm_text += f"💰 Сумма: {order.total_price:,} сум\n\n"
-            confirm_text += "После проверки администратором мы сообщим вам."
-        elif language == "en":
-            confirm_text = "✅ Payment receipt uploaded successfully!\n\n"
-            confirm_text += f"📋 Order number: #{order_id}\n"
-            confirm_text += f"💰 Amount: {order.total_price:,} som\n\n"
-            confirm_text += "We will notify you after admin verification."
+        # Show confirmation using translation keys
+        confirm_text = get_text("receipt_uploaded_title", language) + "\n\n"
+        confirm_text += f"{get_text('receipt_order_number', language)}: #{order_id}\n"
+        confirm_text += f"{get_text('receipt_amount', language)}: {order.total_price:,} so'm\n\n"
+        confirm_text += get_text("receipt_admin_check", language)
 
         # Show done button to complete payment
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
@@ -4366,13 +4458,7 @@ def handle_payment_receipt_photo(message):
         import traceback
 
         traceback.print_exc()
-        error_text = "❌ Chek yuklanmadi. Iltimos, qayta urinib ko'ring."
-        if language == "ru":
-            error_text = "❌ Не удалось загрузить чек. Пожалуйста, попробуйте еще раз."
-        elif language == "en":
-            error_text = "❌ Failed to upload receipt. Please try again."
-
-        bot.send_message(message.chat.id, error_text)
+        bot.send_message(message.chat.id, get_text("error_general", language))
 
 
 @bot.message_handler(func=lambda message: True, content_types=["text"])
@@ -4446,7 +4532,7 @@ def handle_text_messages(message):
             if "order_id" not in user_data:
                 bot.send_message(
                     message.chat.id,
-                    "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang.",
+                    get_text("order_not_found_restart", language),
                 )
                 return
 
@@ -4459,16 +4545,7 @@ def handle_text_messages(message):
 
                 # Check if receipt was uploaded
                 if not order.recipt:
-                    error_text = (
-                        "❌ Iltimos, avval to'lov chekini yuboring!"
-                        if language == "uz"
-                        else (
-                            "❌ Please upload payment receipt first!"
-                            if language == "en"
-                            else "❌ Пожалуйста, сначала загрузите чек об оплате!"
-                        )
-                    )
-                    bot.send_message(message.chat.id, error_text)
+                    bot.send_message(message.chat.id, get_text("upload_receipt_first", language))
                     return
 
                 # Receipt is uploaded - finalize the order
@@ -4568,7 +4645,7 @@ def handle_text_messages(message):
             except Order.DoesNotExist:
                 bot.send_message(
                     message.chat.id,
-                    "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang.",
+                    get_text("order_not_found_restart", language),
                 )
                 clear_user_files(user_id)
                 update_user_step(user_id, STEP_REGISTERED)
@@ -4581,7 +4658,7 @@ def handle_text_messages(message):
                 traceback.print_exc()
                 bot.send_message(
                     message.chat.id,
-                    "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
+                    get_text("error_general", language),
                 )
                 return
 
@@ -4651,10 +4728,7 @@ def handle_text_messages(message):
             bot.send_message(message.chat.id, get_text("phone_updated", language))
             show_profile(message, language)
         else:
-            bot.send_message(
-                message.chat.id,
-                "❌ Iltimos, telefon raqamingizni yuboring yoki kontakt orqali yuboring.",
-            )
+            bot.send_message(message.chat.id, get_text("send_phone_or_contact", language))
         return
 
     # Handle payment options buttons
@@ -4683,7 +4757,7 @@ def handle_card_payment_message(message, language):
     user_data = uploaded_files.get(user_id, {})
     if "order_id" not in user_data:
         bot.send_message(
-            message.chat.id, "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang."
+            message.chat.id, get_text("order_not_found_restart", language)
         )
         return
 
@@ -4696,7 +4770,7 @@ def handle_card_payment_message(message, language):
         order = Order.objects.get(id=order_id)
         user = get_bot_user(user_id)
         if not user:
-            bot.send_message(message.chat.id, "❌ User not found")
+            bot.send_message(message.chat.id, get_text("user_not_found", language))
             return
 
         # Update order payment type to card (but don't mark as active yet)
@@ -4855,7 +4929,7 @@ def handle_card_payment_message(message, language):
     except Order.DoesNotExist:
         print(f"[DEBUG] Order {order_id} not found")
         bot.send_message(
-            message.chat.id, "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang."
+            message.chat.id, get_text("order_not_found_restart", language)
         )
         clear_user_files(user_id)
         update_user_step(user_id, STEP_REGISTERED)
@@ -4866,7 +4940,7 @@ def handle_card_payment_message(message, language):
 
         traceback.print_exc()
         bot.send_message(
-            message.chat.id, "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring."
+            message.chat.id, get_text("error_general", language)
         )
         show_categorys(message, language)
 
@@ -4883,21 +4957,13 @@ def handle_finish_upload_message(message, language):
 
     if not user_data or not user_data.get("files"):
         # No files uploaded, show error message
-        error_text = "❌ Iltimos, avval fayllarni yuklang!"
-        if language == "ru":
-            error_text = "❌ Пожалуйста, сначала загрузите файлы!"
-        elif language == "en":
-            error_text = "❌ Please upload files first!"
-        bot.send_message(message.chat.id, error_text)
+        bot.send_message(message.chat.id, get_text("upload_files_first", language))
         return
 
     # Check if doc_type_id exists
     if "doc_type_id" not in user_data:
         print(f"[DEBUG] doc_type_id not found in user_data: {user_data}")
-        bot.send_message(
-            message.chat.id,
-            "❌ Error: Document type information not found. Please start over.",
-        )
+        bot.send_message(message.chat.id, get_text("doc_type_not_found", language))
         return
 
     print(f"[DEBUG] Found doc_type_id: {user_data['doc_type_id']}")
@@ -4909,7 +4975,7 @@ def handle_finish_upload_message(message, language):
 
         user = get_bot_user(user_id)
         if not user:
-            bot.send_message(message.chat.id, "❌ User not found")
+            bot.send_message(message.chat.id, get_text("user_not_found", language))
             return
         
         doc_type = Product.objects.get(id=user_data["doc_type_id"])
@@ -4980,7 +5046,7 @@ def handle_finish_upload_message(message, language):
 
         traceback.print_exc()
         bot.send_message(
-            message.chat.id, "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring."
+            message.chat.id, get_text("error_general", language)
         )
 
 
@@ -5071,7 +5137,7 @@ def handle_back_to_upload_docs_message(message, language):
         except Exception as e:
             print(f"[ERROR] Failed to restore order: {e}")
             bot.send_message(
-                message.chat.id, "❌ Xatolik yuz berdi. Iltimos, qaytadan boshlang."
+                message.chat.id, get_text("error_general", language)
             )
             show_categorys(message, language)
     else:
@@ -5079,9 +5145,7 @@ def handle_back_to_upload_docs_message(message, language):
         print(f"[DEBUG] No order_id found for user {user_id}")
         clear_user_files(user_id)
         update_user_step(user_id, STEP_REGISTERED)
-        bot.send_message(
-            message.chat.id, "❌ Ma'lumotlar yo'qolgan. Qaytadan boshlang."
-        )
+        bot.send_message(message.chat.id, get_text("data_lost_restart", language))
         show_categorys(message, language)
 
 
@@ -5095,7 +5159,7 @@ def handle_cash_payment_message(message, language):
     user_data = uploaded_files.get(user_id, {})
     if "order_id" not in user_data:
         bot.send_message(
-            message.chat.id, "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang."
+            message.chat.id, get_text("order_not_found_restart", language)
         )
         return
 
@@ -5252,7 +5316,7 @@ def handle_cash_payment_message(message, language):
     except Order.DoesNotExist:
         print(f"[DEBUG] Order {order_id} not found")
         bot.send_message(
-            message.chat.id, "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang."
+            message.chat.id, get_text("order_not_found_restart", language)
         )
         clear_user_files(user_id)
         update_user_step(user_id, STEP_REGISTERED)
@@ -5263,7 +5327,7 @@ def handle_cash_payment_message(message, language):
 
         traceback.print_exc()
         bot.send_message(
-            message.chat.id, "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring."
+            message.chat.id, get_text("error_general", language)
         )
         show_categorys(message, language)
 
@@ -5287,10 +5351,7 @@ def handle_back_to_documents_message(message, language):
         # Clear any incomplete data
         clear_user_files(user_id)
         update_user_step(user_id, STEP_REGISTERED)
-        bot.send_message(
-            message.chat.id,
-            "❌ Ma'lumotlar yo'qolgan. Qaytadan boshlang.\n📋 \"Hizmatdan foydalanish\" ga o'ting.",
-        )
+        bot.send_message(message.chat.id, get_text("data_lost_use_service", language))
         show_categorys(message, language)
 
 
@@ -5369,7 +5430,7 @@ def handle_payment_cash(call):
 
     except Exception as e:
         print(f"[ERROR] Failed to handle cash payment: {e}")
-        bot.answer_callback_query(call.id, "❌ Xatolik yuz berdi")
+        bot.answer_callback_query(call.id, get_text("error_general", language))
 
 
 def handle_main_menu(call):
@@ -5434,6 +5495,8 @@ def handle_edit_phone_request(call):
 @bot.message_handler(commands=["admin"])
 def admin_panel(message):
     user_id = message.from_user.id
+    language = get_user_language(user_id)
+    
     if user_id in ADMINS:
         markup = types.InlineKeyboardMarkup()
         btn1 = types.InlineKeyboardButton("👥 Users", callback_data="admin_users")
@@ -5445,9 +5508,10 @@ def admin_panel(message):
             message.chat.id,
             "🔧 <b>Admin Panel</b>\n\nChoose an option:",
             reply_markup=markup,
+            parse_mode="HTML",
         )
     else:
-        bot.send_message(message.chat.id, "❌ You don't have admin permissions")
+        bot.send_message(message.chat.id, get_text("no_admin_permission", language))
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("admin_"))
@@ -5472,7 +5536,7 @@ def handle_admin_callbacks(call):
             bot.edit_message_text(text, call.message.chat.id, call.message.message_id)
         except:
             bot.edit_message_text(
-                "❌ Error getting user statistics",
+                get_text("error_stats", "en"),
                 call.message.chat.id,
                 call.message.message_id,
             )
@@ -5492,7 +5556,7 @@ def handle_delete_file(call):
         user_data = uploaded_files.get(user_id, {})
         if not user_data or "files" not in user_data:
             print(f"[DEBUG] No user data found for user {user_id}")
-            bot.answer_callback_query(call.id, "❌ No files to delete!")
+            bot.answer_callback_query(call.id, get_text("no_files_to_delete", language))
             return
 
         files = user_data["files"]
@@ -5500,12 +5564,12 @@ def handle_delete_file(call):
 
         if not files:
             print(f"[DEBUG] Files list is empty for user {user_id}")
-            bot.answer_callback_query(call.id, "❌ No files to delete!")
+            bot.answer_callback_query(call.id, get_text("no_files_to_delete", language))
             return
 
         if not (0 <= file_index < len(files)):
             print(f"[DEBUG] Invalid file index {file_index}, files count: {len(files)}")
-            bot.answer_callback_query(call.id, "❌ File not found!")
+            bot.answer_callback_query(call.id, get_text("file_not_found", language))
             return
 
         # Get file info before deletion
@@ -5557,9 +5621,7 @@ def handle_delete_file(call):
         import traceback
 
         traceback.print_exc()
-        bot.answer_callback_query(
-            call.id, "❌ Failed to delete file. Please try again."
-        )
+        bot.answer_callback_query(call.id, get_text("delete_file_failed", language))
 
 
 from django.views.decorators.csrf import csrf_exempt

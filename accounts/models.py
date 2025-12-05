@@ -1,6 +1,8 @@
 import uuid
 import os
 from django.db import models
+from django.db.models.signals import pre_save, post_save
+from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
 
@@ -362,3 +364,49 @@ class BotUser(models.Model):
             print(f"[ERROR] Unexpected error in get_agency_by_token: {e}")
             traceback.print_exc()
             return None
+
+
+# ===== Signals for Admin Notifications =====
+
+@receiver(pre_save, sender=BotUser)
+def track_user_registration(sender, instance, **kwargs):
+    """Track if this is a new user registration or agency status change"""
+    if instance.pk:
+        try:
+            old_instance = BotUser.objects.get(pk=instance.pk)
+            instance._was_active = old_instance.is_active
+            instance._was_agency = old_instance.is_agency
+        except BotUser.DoesNotExist:
+            instance._was_active = False
+            instance._was_agency = False
+    else:
+        instance._was_active = False
+        instance._was_agency = False
+
+
+@receiver(post_save, sender=BotUser)
+def create_user_notification(sender, instance, created, **kwargs):
+    """Create admin notification when a new user completes registration"""
+    try:
+        # Check if user just became active (completed registration)
+        was_active = getattr(instance, '_was_active', False)
+        was_agency = getattr(instance, '_was_agency', False)
+        
+        # New user completed registration
+        if instance.is_active and not was_active:
+            from core.models import AdminNotification
+            
+            if instance.is_agency:
+                AdminNotification.create_agency_notification(instance)
+            else:
+                AdminNotification.create_user_notification(instance)
+        
+        # Existing user became agency
+        elif instance.is_agency and not was_agency and instance.is_active:
+            from core.models import AdminNotification
+            AdminNotification.create_agency_notification(instance)
+            
+    except Exception as e:
+        print(f"[ERROR] Failed to create user notification: {e}")
+        import traceback
+        traceback.print_exc()
