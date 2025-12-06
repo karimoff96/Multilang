@@ -143,13 +143,14 @@ def reset_password(request, uidb64, token):
 from .models import BotUser
 from django.core.paginator import Paginator
 from django.db.models import Q
+from organizations.rbac import get_user_customers
 
 
 @login_required(login_url="admin_login")
 def addUser(request):
     """Add a new BotUser (Telegram user)"""
-    # Get all agencies for the dropdown
-    agencies = BotUser.objects.filter(is_agency=True).order_by("name")
+    # Get agencies from user's accessible branches only
+    agencies = get_user_customers(request.user).filter(is_agency=True).order_by("name")
 
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
@@ -290,8 +291,9 @@ def editUser(request, user_id):
     from django.shortcuts import get_object_or_404
 
     user = get_object_or_404(BotUser, id=user_id)
+    # Get agencies from user's accessible branches only
     agencies = (
-        BotUser.objects.filter(is_agency=True).exclude(id=user_id).order_by("name")
+        get_user_customers(request.user).filter(is_agency=True).exclude(id=user_id).order_by("name")
     )
 
     if request.method == "POST":

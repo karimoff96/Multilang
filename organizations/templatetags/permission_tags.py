@@ -72,18 +72,34 @@ PERMISSION_ACTIONS = {
     # Staff Actions
     'staff.view': ['can_view_staff'],
     'staff.manage': ['can_manage_staff'],
-    'staff.create': ['can_manage_staff'],
-    'staff.edit': ['can_manage_staff'],
-    'staff.delete': ['can_manage_staff'],
+    'staff.create': ['can_manage_staff', 'can_create_staff'],
+    'staff.edit': ['can_manage_staff', 'can_edit_staff'],
+    'staff.delete': ['can_manage_staff', 'can_delete_staff'],
     
     # Organization Actions
-    'center.manage': ['can_manage_center'],
+    'center.manage': ['can_manage_centers'],
+    'center.view': ['can_manage_centers', 'can_view_centers'],
+    'center.create': ['can_manage_centers', 'can_create_centers'],
+    'center.edit': ['can_manage_centers', 'can_edit_centers'],
+    'center.delete': ['can_manage_centers', 'can_delete_centers'],
     'branches.manage': ['can_manage_branches'],
+    'branches.view': ['can_manage_branches', 'can_view_branches'],
+    'branches.create': ['can_manage_branches', 'can_create_branches'],
+    'branches.edit': ['can_manage_branches', 'can_edit_branches'],
+    'branches.delete': ['can_manage_branches', 'can_delete_branches'],
     
-    # Products & Customers
+    # Products
     'products.manage': ['can_manage_products'],
+    'products.view': ['can_manage_products', 'can_view_products'],
+    'products.create': ['can_manage_products', 'can_create_products'],
+    'products.edit': ['can_manage_products', 'can_edit_products'],
+    'products.delete': ['can_manage_products', 'can_delete_products'],
+    
+    # Customers
     'customers.manage': ['can_manage_customers'],
-    'customers.view_details': ['can_view_customer_details'],
+    'customers.view': ['can_manage_customers', 'can_view_customers'],
+    'customers.edit': ['can_manage_customers', 'can_edit_customers'],
+    'customers.delete': ['can_manage_customers', 'can_delete_customers'],
     
     # Reports & Analytics
     'reports.view': ['can_view_reports'],
@@ -145,14 +161,18 @@ def get_user_permissions(context):
     role = admin_profile.role
     result = {}
     permission_fields = [
-        'can_manage_center', 'can_manage_branches', 'can_manage_staff', 'can_view_staff',
+        'can_manage_centers', 'can_view_centers', 'can_create_centers', 'can_edit_centers', 'can_delete_centers',
+        'can_manage_branches', 'can_view_branches', 'can_create_branches', 'can_edit_branches', 'can_delete_branches',
+        'can_manage_staff', 'can_view_staff', 'can_create_staff', 'can_edit_staff', 'can_delete_staff',
         'can_view_all_orders', 'can_view_own_orders', 'can_create_orders', 'can_edit_orders',
         'can_delete_orders', 'can_assign_orders', 'can_update_order_status', 'can_complete_orders',
-        'can_cancel_orders', 'can_manage_orders', 'can_receive_payments', 'can_view_financial_reports',
-        'can_apply_discounts', 'can_refund_orders', 'can_view_reports', 'can_view_analytics',
-        'can_export_data', 'can_manage_products', 'can_manage_customers', 'can_view_customer_details',
-        'can_create_marketing_posts', 'can_send_branch_broadcasts', 'can_send_center_broadcasts',
+        'can_cancel_orders', 'can_manage_orders', 'can_manage_financial', 'can_receive_payments', 'can_view_financial_reports',
+        'can_apply_discounts', 'can_refund_orders', 'can_manage_reports', 'can_view_reports', 'can_view_analytics',
+        'can_export_data', 'can_manage_products', 'can_view_products', 'can_create_products', 'can_edit_products', 'can_delete_products',
+        'can_manage_customers', 'can_view_customers', 'can_edit_customers', 'can_delete_customers',
+        'can_manage_marketing', 'can_create_marketing_posts', 'can_send_branch_broadcasts', 'can_send_center_broadcasts',
         'can_view_broadcast_stats', 'can_manage_branch_settings', 'can_view_branch_settings',
+        'can_manage_agencies', 'can_view_agencies', 'can_create_agencies', 'can_edit_agencies', 'can_delete_agencies',
     ]
     for field in permission_fields:
         result[field] = getattr(role, field, False)

@@ -11,10 +11,12 @@
             <span class="badge bg-primary-focus text-primary-main ms-2">{{ total_centers }} total</span>
             {% endif %}
         </div>
+        {% if request.user.is_superuser %}
         <a href="{% url 'center_create' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
             <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
             <span data-i18n="common.addNewCenter">Add New Center</span>
         </a>
+        {% endif %}
     </div>
     <div class="card-body p-24">
         <div class="row gy-4">
@@ -103,11 +105,15 @@
                 <div class="text-center py-40">
                     <iconify-icon icon="solar:buildings-2-bold-duotone" class="icon text-5xl text-secondary-light mb-16"></iconify-icon>
                     <h6 class="text-lg fw-medium mb-8" data-i18n="common.noCentersFound">No translation centers found</h6>
+                    {% if request.user.is_superuser %}
                     <p class="text-secondary-light mb-16" data-i18n="common.startByCreatingCenter">Get started by creating your first translation center</p>
                     <a href="{% url 'center_create' %}" class="btn btn-primary d-inline-flex align-items-center gap-2">
                         <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
                         <span data-i18n="common.addCenter">Add Center</span>
                     </a>
+                    {% else %}
+                    <p class="text-secondary-light mb-16">Contact a superuser to create translation centers</p>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}

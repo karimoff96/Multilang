@@ -508,7 +508,7 @@ def staff_performance(request):
     elif hasattr(request, "admin_profile") and request.admin_profile:
         if request.admin_profile.is_owner:
             staff_members = AdminUser.objects.filter(
-                branch__center__owner=request.user, is_active=True
+                center=request.admin_profile.center, is_active=True
             )
         elif request.admin_profile.is_manager:
             staff_members = AdminUser.objects.filter(

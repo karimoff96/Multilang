@@ -745,7 +745,7 @@ def export_staff_performance(
     elif hasattr(user, 'admin_profile') and user.admin_profile:
         if user.admin_profile.is_owner:
             staff_members = AdminUser.objects.filter(
-                branch__center__owner=user, is_active=True
+                center=user.admin_profile.center, is_active=True
             )
         elif user.admin_profile.is_manager:
             staff_members = AdminUser.objects.filter(

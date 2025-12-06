@@ -85,7 +85,7 @@
                                 {% for role in roles %}
                                 <option value="{{ role.id }}" 
                                         {% if staff_member and staff_member.role_id == role.id %}selected{% endif %}
-                                        data-permissions='{% for perm in all_permissions %}{% if role|getattr:perm %}"{{ perm }}",{% endif %}{% endfor %}'>
+                                        data-permissions='{% for perm in all_permissions %}{% if role|has_effective_permission:perm %}"{{ perm }}",{% endif %}{% endfor %}'>
                                     {{ role.get_name_display }}
                                 </option>
                                 {% endfor %}
@@ -127,37 +127,53 @@
                                 The selected role grants the following permissions to this user:
                             </p>
                             
-                            <div id="permissions-display" class="row g-3">
-                                {% if staff_member %}
-                                    {% for perm in all_permissions %}
-                                    <div class="col-md-4 col-sm-6 permission-item" data-permission="{{ perm }}">
-                                        {% with has_perm=staff_member.role|getattr:perm %}
-                                        <div class="d-flex align-items-center gap-8 p-12 {% if has_perm %}bg-success-50{% else %}bg-neutral-50{% endif %} radius-8">
-                                            <iconify-icon icon="{% if has_perm %}solar:check-circle-bold{% else %}solar:close-circle-bold{% endif %}" 
-                                                          class="{% if has_perm %}text-success-600{% else %}text-neutral-400{% endif %} text-xl"></iconify-icon>
-                                            <span class="text-sm {% if has_perm %}fw-medium{% else %}text-secondary-light{% endif %}">
-                                                {{ permission_labels|default_if_none:""|get_item:perm|default:perm }}
-                                            </span>
+                            <div id="permissions-display">
+                                <!-- No role selected message -->
+                                <div class="text-center py-24 text-secondary-light {% if staff_member %}d-none{% endif %}" id="no-role-selected">
+                                    <iconify-icon icon="solar:shield-keyhole-bold" class="text-4xl mb-8"></iconify-icon>
+                                    <p data-i18n="form.selectRoleFirst">Select a role to view its permissions</p>
+                                </div>
+                                
+                                <!-- Permission Categories -->
+                                <div id="permission-categories" class="{% if not staff_member %}d-none{% endif %}">
+                                    <div class="row g-4">
+                                        {% for cat_key, category in permission_categories.items %}
+                                        <div class="col-lg-6 col-12 permission-category" data-category="{{ cat_key }}">
+                                            <div class="card border radius-8 h-100">
+                                                <div class="card-header bg-neutral-50 py-12 px-16">
+                                                    <h6 class="text-sm fw-semibold mb-0 d-flex align-items-center gap-8">
+                                                        <iconify-icon icon="{% if category.icon == 'fa-building' %}solar:buildings-2-bold{% elif category.icon == 'fa-code-branch' %}solar:home-smile-bold{% elif category.icon == 'fa-users' %}solar:users-group-rounded-bold{% elif category.icon == 'fa-file-lines' %}solar:document-text-bold{% elif category.icon == 'fa-money-bill-wave' %}solar:wallet-money-bold{% elif category.icon == 'fa-chart-line' %}solar:chart-2-bold{% elif category.icon == 'fa-box' %}solar:box-bold{% elif category.icon == 'fa-user-group' %}solar:user-rounded-bold{% elif category.icon == 'fa-bullhorn' %}solar:volume-loud-bold{% elif category.icon == 'fa-cog' %}solar:settings-bold{% elif category.icon == 'fa-handshake' %}solar:hand-shake-bold{% else %}solar:shield-check-bold{% endif %}" 
+                                                               class="text-{% if category.color == 'primary' %}primary{% elif category.color == 'success' %}success{% elif category.color == 'warning' %}warning{% elif category.color == 'info' %}info{% elif category.color == 'danger' %}danger{% else %}secondary{% endif %}-600 text-lg"></iconify-icon>
+                                                        {{ category.title }}
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body p-12">
+                                                    <div class="d-flex flex-column gap-8">
+                                                        {% for perm in category.permissions %}
+                                                        <div class="permission-item d-flex align-items-center gap-8 p-8 radius-4" data-permission="{{ perm }}">
+                                                            {% if staff_member %}
+                                                                {% with has_perm=staff_member.role|has_effective_permission:perm %}
+                                                                <iconify-icon icon="{% if has_perm %}solar:check-circle-bold{% else %}solar:close-circle-bold{% endif %}" 
+                                                                              class="{% if has_perm %}text-success-600{% else %}text-neutral-400{% endif %} text-lg perm-icon"></iconify-icon>
+                                                                <span class="text-sm {% if has_perm %}fw-medium text-dark{% else %}text-secondary-light{% endif %} perm-label">
+                                                                    {{ permission_labels|default_if_none:""|get_item:perm|default:perm }}
+                                                                </span>
+                                                                {% endwith %}
+                                                            {% else %}
+                                                                <iconify-icon icon="solar:close-circle-bold" class="text-neutral-400 text-lg perm-icon"></iconify-icon>
+                                                                <span class="text-sm text-secondary-light perm-label">
+                                                                    {{ permission_labels|default_if_none:""|get_item:perm|default:perm }}
+                                                                </span>
+                                                            {% endif %}
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        {% endwith %}
+                                        {% endfor %}
                                     </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="col-12 text-center py-24 text-secondary-light" id="no-role-selected">
-                                        <iconify-icon icon="solar:shield-keyhole-bold" class="text-4xl mb-8"></iconify-icon>
-                                        <p data-i18n="form.selectRoleFirst">Select a role to view its permissions</p>
-                                    </div>
-                                    {% for perm in all_permissions %}
-                                    <div class="col-md-4 col-sm-6 permission-item d-none" data-permission="{{ perm }}">
-                                        <div class="d-flex align-items-center gap-8 p-12 bg-neutral-50 radius-8">
-                                            <iconify-icon icon="solar:close-circle-bold" class="text-neutral-400 text-xl perm-icon"></iconify-icon>
-                                            <span class="text-sm text-secondary-light perm-label">
-                                                {{ permission_labels|default_if_none:""|get_item:perm|default:perm }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -188,12 +204,13 @@ function updatePermissionDisplay() {
     const roleSelect = document.getElementById('role-select');
     const selectedOption = roleSelect.options[roleSelect.selectedIndex];
     const noRoleMsg = document.getElementById('no-role-selected');
+    const permCategories = document.getElementById('permission-categories');
     const permItems = document.querySelectorAll('.permission-item');
     
     if (!selectedOption.value) {
         // No role selected
         if (noRoleMsg) noRoleMsg.classList.remove('d-none');
-        permItems.forEach(item => item.classList.add('d-none'));
+        if (permCategories) permCategories.classList.add('d-none');
         return;
     }
     
@@ -207,37 +224,32 @@ function updatePermissionDisplay() {
         rolePerms = [];
     }
     
-    // Hide "no role selected" message
+    // Hide "no role selected" message, show categories
     if (noRoleMsg) noRoleMsg.classList.add('d-none');
+    if (permCategories) permCategories.classList.remove('d-none');
     
     // Update each permission item
     permItems.forEach(item => {
-        item.classList.remove('d-none');
         const perm = item.getAttribute('data-permission');
         const hasPerm = rolePerms.includes(perm);
-        const container = item.querySelector('.d-flex');
-        const icon = item.querySelector('.perm-icon, iconify-icon');
-        const label = item.querySelector('.perm-label, span');
+        const icon = item.querySelector('.perm-icon');
+        const label = item.querySelector('.perm-label');
         
         if (hasPerm) {
-            container.classList.remove('bg-neutral-50');
-            container.classList.add('bg-success-50');
             icon.setAttribute('icon', 'solar:check-circle-bold');
             icon.classList.remove('text-neutral-400');
             icon.classList.add('text-success-600');
             if (label) {
                 label.classList.remove('text-secondary-light');
-                label.classList.add('fw-medium');
+                label.classList.add('fw-medium', 'text-dark');
             }
         } else {
-            container.classList.remove('bg-success-50');
-            container.classList.add('bg-neutral-50');
             icon.setAttribute('icon', 'solar:close-circle-bold');
             icon.classList.remove('text-success-600');
             icon.classList.add('text-neutral-400');
             if (label) {
                 label.classList.add('text-secondary-light');
-                label.classList.remove('fw-medium');
+                label.classList.remove('fw-medium', 'text-dark');
             }
         }
     });

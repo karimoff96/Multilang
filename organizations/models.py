@@ -175,15 +175,45 @@ class Role(models.Model):
         _("System Role"), default=False, help_text=_("System roles cannot be deleted")
     )
 
-    # Permissions - Organization Management
-    can_manage_center = models.BooleanField(_("Can manage center"), default=False)
-    can_manage_branches = models.BooleanField(_("Can manage branches"), default=False)
+    # Permissions - Organization Management (Centers)
+    can_manage_centers = models.BooleanField(_("Can manage centers (full access)"), default=False,
+        help_text=_("Full center management - overrides other center permissions"))
+    can_view_centers = models.BooleanField(_("Can view centers"), default=False,
+        help_text=_("Can view translation center details"))
+    can_create_centers = models.BooleanField(_("Can create centers"), default=False,
+        help_text=_("Can create new translation centers"))
+    can_edit_centers = models.BooleanField(_("Can edit centers"), default=False,
+        help_text=_("Can edit translation center settings"))
+    can_delete_centers = models.BooleanField(_("Can delete centers"), default=False,
+        help_text=_("Can delete translation centers"))
+    
+    # Permissions - Organization Management (Branches)
+    can_manage_branches = models.BooleanField(_("Can manage branches (full access)"), default=False,
+        help_text=_("Full branch management - overrides other branch permissions"))
+    can_view_branches = models.BooleanField(_("Can view branches"), default=False,
+        help_text=_("Can view branch details"))
+    can_create_branches = models.BooleanField(_("Can create branches"), default=False,
+        help_text=_("Can create new branches"))
+    can_edit_branches = models.BooleanField(_("Can edit branches"), default=False,
+        help_text=_("Can edit branch settings"))
+    can_delete_branches = models.BooleanField(_("Can delete branches"), default=False,
+        help_text=_("Can delete branches"))
     
     # Permissions - Staff Management
-    can_manage_staff = models.BooleanField(_("Can manage staff"), default=False)
-    can_view_staff = models.BooleanField(_("Can view staff details"), default=False)
+    can_manage_staff = models.BooleanField(_("Can manage staff (full access)"), default=False,
+        help_text=_("Full staff management - overrides other staff permissions"))
+    can_view_staff = models.BooleanField(_("Can view staff"), default=False,
+        help_text=_("Can view staff details"))
+    can_create_staff = models.BooleanField(_("Can create staff"), default=False,
+        help_text=_("Can create new staff members"))
+    can_edit_staff = models.BooleanField(_("Can edit staff"), default=False,
+        help_text=_("Can edit staff details and roles"))
+    can_delete_staff = models.BooleanField(_("Can delete staff"), default=False,
+        help_text=_("Can delete staff members"))
     
     # Permissions - Order Management (Granular)
+    can_manage_orders = models.BooleanField(_("Can manage orders (full access)"), default=False, 
+        help_text=_("Full order management - overrides other order permissions"))
     can_view_all_orders = models.BooleanField(_("Can view all orders"), default=False)
     can_view_own_orders = models.BooleanField(_("Can view own orders"), default=True)
     can_create_orders = models.BooleanField(_("Can create orders"), default=False)
@@ -193,26 +223,39 @@ class Role(models.Model):
     can_update_order_status = models.BooleanField(_("Can update order status"), default=False)
     can_complete_orders = models.BooleanField(_("Can complete orders"), default=False)
     can_cancel_orders = models.BooleanField(_("Can cancel orders"), default=False)
-    can_manage_orders = models.BooleanField(_("Can manage orders (full access)"), default=False, 
-        help_text=_("Full order management - overrides other order permissions"))
     
     # Permissions - Financial
+    can_manage_financial = models.BooleanField(_("Can manage financial (full access)"), default=False,
+        help_text=_("Full financial management - overrides other financial permissions"))
     can_receive_payments = models.BooleanField(_("Can receive payments"), default=False)
     can_view_financial_reports = models.BooleanField(_("Can view financial reports"), default=False)
     can_apply_discounts = models.BooleanField(_("Can apply discounts"), default=False)
     can_refund_orders = models.BooleanField(_("Can refund orders"), default=False)
     
     # Permissions - Reports & Analytics
+    can_manage_reports = models.BooleanField(_("Can manage reports (full access)"), default=False,
+        help_text=_("Full reports management - overrides other report permissions"))
     can_view_reports = models.BooleanField(_("Can view reports"), default=False)
     can_view_analytics = models.BooleanField(_("Can view analytics"), default=False)
     can_export_data = models.BooleanField(_("Can export data"), default=False)
     
     # Permissions - Products & Customers
-    can_manage_products = models.BooleanField(_("Can manage products"), default=False)
-    can_manage_customers = models.BooleanField(_("Can manage customers"), default=False)
-    can_view_customer_details = models.BooleanField(_("Can view customer details"), default=False)
+    can_manage_products = models.BooleanField(_("Can manage products (full access)"), default=False,
+        help_text=_("Full product management - overrides other product permissions"))
+    can_view_products = models.BooleanField(_("Can view products"), default=False)
+    can_create_products = models.BooleanField(_("Can create products"), default=False)
+    can_edit_products = models.BooleanField(_("Can edit products"), default=False)
+    can_delete_products = models.BooleanField(_("Can delete products"), default=False)
+    
+    can_manage_customers = models.BooleanField(_("Can manage customers (full access)"), default=False,
+        help_text=_("Full customer management - overrides other customer permissions"))
+    can_view_customers = models.BooleanField(_("Can view customers"), default=False)
+    can_edit_customers = models.BooleanField(_("Can edit customers"), default=False)
+    can_delete_customers = models.BooleanField(_("Can delete customers"), default=False)
     
     # Permissions - Marketing & Broadcasts
+    can_manage_marketing = models.BooleanField(_("Can manage marketing (full access)"), default=False,
+        help_text=_("Full marketing management - overrides other marketing permissions"))
     can_create_marketing_posts = models.BooleanField(_("Can create marketing posts"), default=False)
     can_send_branch_broadcasts = models.BooleanField(_("Can send branch broadcasts"), default=False)
     can_send_center_broadcasts = models.BooleanField(_("Can send center-wide broadcasts"), default=False)
@@ -225,6 +268,8 @@ class Role(models.Model):
         help_text=_("Can view branch settings without editing"))
     
     # Permissions - Agency Management
+    can_manage_agencies = models.BooleanField(_("Can manage agencies (full access)"), default=False,
+        help_text=_("Full agency management - overrides other agency permissions"))
     can_view_agencies = models.BooleanField(_("Can view agencies"), default=False,
         help_text=_("Can view list of agency partners"))
     can_create_agencies = models.BooleanField(_("Can create agencies"), default=False,
@@ -233,8 +278,6 @@ class Role(models.Model):
         help_text=_("Can edit agency details and reset invite links"))
     can_delete_agencies = models.BooleanField(_("Can delete agencies"), default=False,
         help_text=_("Can delete agency profiles"))
-    can_manage_agencies = models.BooleanField(_("Can manage agencies (full access)"), default=False,
-        help_text=_("Full agency management - overrides other agency permissions"))
 
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True, null=True)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True, null=True)
@@ -260,17 +303,82 @@ class Role(models.Model):
             self.is_system_role = True
         super().save(*args, **kwargs)
 
+    # Master permissions that grant full access to a category
+    MASTER_PERMISSIONS = [
+        "can_manage_centers",
+        "can_manage_branches", 
+        "can_manage_staff",
+        "can_manage_orders",
+        "can_manage_financial",
+        "can_manage_reports",
+        "can_manage_products",
+        "can_manage_customers",
+        "can_manage_marketing",
+        "can_manage_agencies",
+    ]
+
+    # Superuser-only permissions (should not be displayed for regular staff)
+    SUPERUSER_ONLY_PERMISSIONS = [
+        "can_manage_centers",
+        "can_create_centers",
+        "can_delete_centers",
+    ]
+
+    # Mapping of master permissions to their child permissions
+    MASTER_TO_CHILDREN = {
+        "can_manage_centers": ["can_view_centers", "can_create_centers", "can_edit_centers", "can_delete_centers"],
+        "can_manage_branches": ["can_view_branches", "can_create_branches", "can_edit_branches", "can_delete_branches"],
+        "can_manage_staff": ["can_view_staff", "can_create_staff", "can_edit_staff", "can_delete_staff"],
+        "can_manage_orders": ["can_view_all_orders", "can_view_own_orders", "can_create_orders", "can_edit_orders", 
+                              "can_delete_orders", "can_assign_orders", "can_update_order_status", 
+                              "can_complete_orders", "can_cancel_orders"],
+        "can_manage_financial": ["can_receive_payments", "can_view_financial_reports", "can_apply_discounts", "can_refund_orders"],
+        "can_manage_reports": ["can_view_reports", "can_view_analytics", "can_export_data"],
+        "can_manage_products": ["can_view_products", "can_create_products", "can_edit_products", "can_delete_products"],
+        "can_manage_customers": ["can_view_customers", "can_edit_customers", "can_delete_customers"],
+        "can_manage_marketing": ["can_create_marketing_posts", "can_send_branch_broadcasts", 
+                                  "can_send_center_broadcasts", "can_view_broadcast_stats"],
+        "can_manage_agencies": ["can_view_agencies", "can_create_agencies", "can_edit_agencies", "can_delete_agencies"],
+    }
+
+    def has_effective_permission(self, permission):
+        """Check if role has a permission, considering master permissions.
+        If master permission is enabled, all its child permissions are effectively enabled."""
+        # Direct check first
+        if getattr(self, permission, False):
+            return True
+        
+        # Check if any master permission grants this
+        for master, children in self.MASTER_TO_CHILDREN.items():
+            if permission in children and getattr(self, master, False):
+                return True
+        
+        return False
+
     @classmethod
     def get_all_permissions(cls):
         """Return list of all permission field names grouped by category"""
         return [
-            # Organization Management
-            "can_manage_center",
+            # Organization Management - Centers (master first)
+            "can_manage_centers",
+            "can_view_centers",
+            "can_create_centers",
+            "can_edit_centers",
+            "can_delete_centers",
+            # Organization Management - Branches (master first)
             "can_manage_branches",
-            # Staff Management
+            "can_view_branches",
+            "can_create_branches",
+            "can_edit_branches",
+            "can_delete_branches",
+            # Staff Management (master first)
             "can_manage_staff",
             "can_view_staff",
-            # Order Management
+            "can_create_staff",
+            "can_edit_staff",
+            "can_delete_staff",
+            # Order Management (master first)
+            "can_manage_orders",
             "can_view_all_orders",
             "can_view_own_orders",
             "can_create_orders",
@@ -280,21 +388,30 @@ class Role(models.Model):
             "can_update_order_status",
             "can_complete_orders",
             "can_cancel_orders",
-            "can_manage_orders",
-            # Financial
+            # Financial (master first)
+            "can_manage_financial",
             "can_receive_payments",
             "can_view_financial_reports",
             "can_apply_discounts",
             "can_refund_orders",
-            # Reports & Analytics
+            # Reports & Analytics (master first)
+            "can_manage_reports",
             "can_view_reports",
             "can_view_analytics",
             "can_export_data",
-            # Products & Customers
+            # Products (master first)
             "can_manage_products",
+            "can_view_products",
+            "can_create_products",
+            "can_edit_products",
+            "can_delete_products",
+            # Customers (master first)
             "can_manage_customers",
-            "can_view_customer_details",
-            # Marketing & Broadcasts
+            "can_view_customers",
+            "can_edit_customers",
+            "can_delete_customers",
+            # Marketing & Broadcasts (master first)
+            "can_manage_marketing",
             "can_create_marketing_posts",
             "can_send_branch_broadcasts",
             "can_send_center_broadcasts",
@@ -302,35 +419,88 @@ class Role(models.Model):
             # Branch Settings
             "can_manage_branch_settings",
             "can_view_branch_settings",
-            # Agency Management
+            # Agency Management (master first)
+            "can_manage_agencies",
             "can_view_agencies",
             "can_create_agencies",
             "can_edit_agencies",
             "can_delete_agencies",
-            "can_manage_agencies",
         ]
+
+    @classmethod
+    def get_display_permissions(cls):
+        """Return permissions for display (excludes master and superuser-only permissions).
+        Used on staff edit page to show individual permissions only."""
+        excluded = set(cls.MASTER_PERMISSIONS) | set(cls.SUPERUSER_ONLY_PERMISSIONS)
+        return [p for p in cls.get_all_permissions() if p not in excluded]
+
+    @classmethod
+    def get_display_permission_categories(cls):
+        """Return permissions grouped by category for UI display, 
+        excluding master and superuser-only permissions.
+        Used on staff edit page for organized display."""
+        excluded = set(cls.MASTER_PERMISSIONS) | set(cls.SUPERUSER_ONLY_PERMISSIONS)
+        categories = cls.get_permission_categories()
+        
+        display_categories = {}
+        for key, category in categories.items():
+            # Filter out excluded permissions
+            filtered_perms = [p for p in category["permissions"] if p not in excluded]
+            if filtered_perms:  # Only include categories that have permissions left
+                display_categories[key] = {
+                    "title": category["title"],
+                    "icon": category["icon"],
+                    "color": category["color"],
+                    "permissions": filtered_perms,
+                }
+        return display_categories
 
     @classmethod
     def get_permission_categories(cls):
         """Return permissions grouped by category for UI"""
         return {
-            "organization": {
-                "title": _("Organization Management"),
+            "centers": {
+                "title": _("Center Management"),
                 "icon": "fa-building",
                 "color": "primary",
-                "permissions": ["can_manage_center", "can_manage_branches"],
+                "permissions": [
+                    "can_manage_centers",
+                    "can_view_centers",
+                    "can_create_centers",
+                    "can_edit_centers",
+                    "can_delete_centers",
+                ],
+            },
+            "branches": {
+                "title": _("Branch Management"),
+                "icon": "fa-code-branch",
+                "color": "primary",
+                "permissions": [
+                    "can_manage_branches",
+                    "can_view_branches",
+                    "can_create_branches",
+                    "can_edit_branches",
+                    "can_delete_branches",
+                ],
             },
             "staff": {
                 "title": _("Staff Management"),
                 "icon": "fa-users",
                 "color": "info",
-                "permissions": ["can_manage_staff", "can_view_staff"],
+                "permissions": [
+                    "can_manage_staff",
+                    "can_view_staff",
+                    "can_create_staff",
+                    "can_edit_staff",
+                    "can_delete_staff",
+                ],
             },
             "orders": {
                 "title": _("Order Management"),
                 "icon": "fa-file-lines",
                 "color": "success",
                 "permissions": [
+                    "can_manage_orders",
                     "can_view_all_orders",
                     "can_view_own_orders",
                     "can_create_orders",
@@ -340,7 +510,6 @@ class Role(models.Model):
                     "can_update_order_status",
                     "can_complete_orders",
                     "can_cancel_orders",
-                    "can_manage_orders",
                 ],
             },
             "financial": {
@@ -348,6 +517,7 @@ class Role(models.Model):
                 "icon": "fa-money-bill-wave",
                 "color": "warning",
                 "permissions": [
+                    "can_manage_financial",
                     "can_receive_payments",
                     "can_view_financial_reports",
                     "can_apply_discounts",
@@ -358,19 +528,42 @@ class Role(models.Model):
                 "title": _("Reports & Analytics"),
                 "icon": "fa-chart-line",
                 "color": "purple",
-                "permissions": ["can_view_reports", "can_view_analytics", "can_export_data"],
+                "permissions": [
+                    "can_manage_reports",
+                    "can_view_reports",
+                    "can_view_analytics",
+                    "can_export_data",
+                ],
             },
             "products": {
-                "title": _("Products & Customers"),
+                "title": _("Products"),
                 "icon": "fa-box",
                 "color": "danger",
-                "permissions": ["can_manage_products", "can_manage_customers", "can_view_customer_details"],
+                "permissions": [
+                    "can_manage_products",
+                    "can_view_products",
+                    "can_create_products",
+                    "can_edit_products",
+                    "can_delete_products",
+                ],
+            },
+            "customers": {
+                "title": _("Customers"),
+                "icon": "fa-user-group",
+                "color": "cyan",
+                "permissions": [
+                    "can_manage_customers",
+                    "can_view_customers",
+                    "can_edit_customers",
+                    "can_delete_customers",
+                ],
             },
             "marketing": {
                 "title": _("Marketing & Broadcasts"),
                 "icon": "fa-bullhorn",
                 "color": "secondary",
                 "permissions": [
+                    "can_manage_marketing",
                     "can_create_marketing_posts",
                     "can_send_branch_broadcasts",
                     "can_send_center_broadcasts",
@@ -380,7 +573,7 @@ class Role(models.Model):
             "branch_settings": {
                 "title": _("Branch Settings"),
                 "icon": "fa-cog",
-                "color": "cyan",
+                "color": "teal",
                 "permissions": [
                     "can_manage_branch_settings",
                     "can_view_branch_settings",
@@ -391,11 +584,11 @@ class Role(models.Model):
                 "icon": "fa-handshake",
                 "color": "indigo",
                 "permissions": [
+                    "can_manage_agencies",
                     "can_view_agencies",
                     "can_create_agencies",
                     "can_edit_agencies",
                     "can_delete_agencies",
-                    "can_manage_agencies",
                 ],
             },
         }
@@ -404,63 +597,98 @@ class Role(models.Model):
     def get_permission_labels(cls):
         """Return human-readable labels for all permissions"""
         return {
-            # Organization Management
-            "can_manage_center": _("Manage Translation Centers"),
-            "can_manage_branches": _("Manage Branches"),
+            # Center Management
+            "can_manage_centers": _("Full Center Management"),
+            "can_view_centers": _("View Centers"),
+            "can_create_centers": _("Create Centers"),
+            "can_edit_centers": _("Edit Centers"),
+            "can_delete_centers": _("Delete Centers"),
+            # Branch Management
+            "can_manage_branches": _("Full Branch Management"),
+            "can_view_branches": _("View Branches"),
+            "can_create_branches": _("Create Branches"),
+            "can_edit_branches": _("Edit Branches"),
+            "can_delete_branches": _("Delete Branches"),
             # Staff Management
-            "can_manage_staff": _("Manage Staff Members"),
-            "can_view_staff": _("View Staff Details (Read-Only)"),
+            "can_manage_staff": _("Full Staff Management"),
+            "can_view_staff": _("View Staff"),
+            "can_create_staff": _("Create Staff"),
+            "can_edit_staff": _("Edit Staff"),
+            "can_delete_staff": _("Delete Staff"),
             # Order Management
+            "can_manage_orders": _("Full Order Management"),
             "can_view_all_orders": _("View All Orders"),
             "can_view_own_orders": _("View Own Orders"),
-            "can_create_orders": _("Create New Orders"),
+            "can_create_orders": _("Create Orders"),
             "can_edit_orders": _("Edit Orders"),
             "can_delete_orders": _("Delete Orders"),
-            "can_assign_orders": _("Assign Orders to Staff"),
+            "can_assign_orders": _("Assign Orders"),
             "can_update_order_status": _("Update Order Status"),
             "can_complete_orders": _("Complete Orders"),
             "can_cancel_orders": _("Cancel Orders"),
-            "can_manage_orders": _("Full Order Management"),
             # Financial
+            "can_manage_financial": _("Full Financial Management"),
             "can_receive_payments": _("Receive Payments"),
             "can_view_financial_reports": _("View Financial Reports"),
             "can_apply_discounts": _("Apply Discounts"),
             "can_refund_orders": _("Refund Orders"),
             # Reports & Analytics
+            "can_manage_reports": _("Full Reports Management"),
             "can_view_reports": _("View Reports"),
-            "can_view_analytics": _("View Analytics Dashboard"),
+            "can_view_analytics": _("View Analytics"),
             "can_export_data": _("Export Data"),
-            # Products & Customers
-            "can_manage_products": _("Manage Products & Services"),
-            "can_manage_customers": _("Manage Customers"),
-            "can_view_customer_details": _("View Customer Details"),
+            # Products
+            "can_manage_products": _("Full Product Management"),
+            "can_view_products": _("View Products"),
+            "can_create_products": _("Create Products"),
+            "can_edit_products": _("Edit Products"),
+            "can_delete_products": _("Delete Products"),
+            # Customers
+            "can_manage_customers": _("Full Customer Management"),
+            "can_view_customers": _("View Customers"),
+            "can_edit_customers": _("Edit Customers"),
+            "can_delete_customers": _("Delete Customers"),
             # Marketing & Broadcasts
+            "can_manage_marketing": _("Full Marketing Management"),
             "can_create_marketing_posts": _("Create Marketing Posts"),
             "can_send_branch_broadcasts": _("Send Branch Broadcasts"),
-            "can_send_center_broadcasts": _("Send Center-wide Broadcasts"),
-            "can_view_broadcast_stats": _("View Broadcast Statistics"),
+            "can_send_center_broadcasts": _("Send Center Broadcasts"),
+            "can_view_broadcast_stats": _("View Broadcast Stats"),
             # Branch Settings
             "can_manage_branch_settings": _("Manage Branch Settings"),
             "can_view_branch_settings": _("View Branch Settings"),
             # Agency Management
+            "can_manage_agencies": _("Full Agency Management"),
             "can_view_agencies": _("View Agencies"),
             "can_create_agencies": _("Create Agencies"),
             "can_edit_agencies": _("Edit Agencies"),
             "can_delete_agencies": _("Delete Agencies"),
-            "can_manage_agencies": _("Full Agency Management"),
         }
     
     @classmethod
     def get_permission_descriptions(cls):
         """Return detailed descriptions for all permissions"""
         return {
-            # Organization Management
-            "can_manage_center": _("Create, edit, and delete translation centers"),
-            "can_manage_branches": _("Create, edit, and delete branches within centers"),
+            # Center Management
+            "can_manage_centers": _("Full control over all center operations - overrides individual permissions"),
+            "can_view_centers": _("View translation center details and settings"),
+            "can_create_centers": _("Create new translation centers"),
+            "can_edit_centers": _("Edit translation center settings and configuration"),
+            "can_delete_centers": _("Delete translation centers (requires removing bot token first)"),
+            # Branch Management
+            "can_manage_branches": _("Full control over all branch operations - overrides individual permissions"),
+            "can_view_branches": _("View branch details and settings"),
+            "can_create_branches": _("Create new branches within centers"),
+            "can_edit_branches": _("Edit branch settings and configuration"),
+            "can_delete_branches": _("Delete branches from the system"),
             # Staff Management
-            "can_manage_staff": _("Add, edit, remove staff members and change their roles"),
-            "can_view_staff": _("View staff profiles and details without editing"),
+            "can_manage_staff": _("Full control over all staff operations - overrides individual permissions"),
+            "can_view_staff": _("View staff profiles and details"),
+            "can_create_staff": _("Create new staff members and assign roles"),
+            "can_edit_staff": _("Edit staff details and change their roles"),
+            "can_delete_staff": _("Remove staff members from the system"),
             # Order Management
+            "can_manage_orders": _("Full control over all order operations - overrides individual permissions"),
             "can_view_all_orders": _("View all orders in the center/branch, not just assigned ones"),
             "can_view_own_orders": _("View orders assigned to this user"),
             "can_create_orders": _("Create new translation orders"),
@@ -470,21 +698,30 @@ class Role(models.Model):
             "can_update_order_status": _("Change order status (pending, in progress, etc.)"),
             "can_complete_orders": _("Mark orders as completed/delivered"),
             "can_cancel_orders": _("Cancel active orders"),
-            "can_manage_orders": _("Full control over all order operations - overrides individual permissions"),
             # Financial
+            "can_manage_financial": _("Full control over all financial operations - overrides individual permissions"),
             "can_receive_payments": _("Accept and record customer payments"),
             "can_view_financial_reports": _("Access financial reports and revenue data"),
             "can_apply_discounts": _("Apply discounts to orders"),
             "can_refund_orders": _("Process refunds for completed or cancelled orders"),
             # Reports & Analytics
+            "can_manage_reports": _("Full control over all report operations - overrides individual permissions"),
             "can_view_reports": _("Access performance and activity reports"),
             "can_view_analytics": _("View analytics dashboard with charts and metrics"),
             "can_export_data": _("Export data to Excel, PDF, or other formats"),
-            # Products & Customers
-            "can_manage_products": _("Add, edit, and remove services and products"),
-            "can_manage_customers": _("Add, edit customer records and contact information"),
-            "can_view_customer_details": _("View customer information and history"),
+            # Products
+            "can_manage_products": _("Full control over all product operations - overrides individual permissions"),
+            "can_view_products": _("View product and service listings"),
+            "can_create_products": _("Add new services and products"),
+            "can_edit_products": _("Edit existing services and products"),
+            "can_delete_products": _("Remove services and products from the system"),
+            # Customers
+            "can_manage_customers": _("Full control over all customer operations - overrides individual permissions"),
+            "can_view_customers": _("View customer information and history"),
+            "can_edit_customers": _("Edit customer records and contact information"),
+            "can_delete_customers": _("Remove customer records from the system"),
             # Marketing & Broadcasts
+            "can_manage_marketing": _("Full control over all marketing operations - overrides individual permissions"),
             "can_create_marketing_posts": _("Create and edit marketing posts and announcements"),
             "can_send_branch_broadcasts": _("Send broadcast messages to all customers in their branch"),
             "can_send_center_broadcasts": _("Send broadcast messages to all customers across the entire center"),
@@ -493,11 +730,11 @@ class Role(models.Model):
             "can_manage_branch_settings": _("Edit branch payment info, help texts, about us, and working hours"),
             "can_view_branch_settings": _("View branch settings without the ability to edit"),
             # Agency Management
+            "can_manage_agencies": _("Full control over all agency operations - overrides individual permissions"),
             "can_view_agencies": _("View list of agency partners and their details"),
             "can_create_agencies": _("Create new agency profiles and generate invitation links"),
             "can_edit_agencies": _("Edit agency information and reset invitation links"),
             "can_delete_agencies": _("Remove agency profiles from the system"),
-            "can_manage_agencies": _("Full control over all agency operations - overrides individual permissions"),
         }
 
     @classmethod
@@ -505,13 +742,26 @@ class Role(models.Model):
         """Return default permissions for system roles"""
         defaults = {
             cls.OWNER: {
-                # Organization
-                "can_manage_center": True,
+                # Centers
+                "can_manage_centers": True,
+                "can_view_centers": True,
+                "can_create_centers": True,
+                "can_edit_centers": True,
+                "can_delete_centers": True,
+                # Branches
                 "can_manage_branches": True,
+                "can_view_branches": True,
+                "can_create_branches": True,
+                "can_edit_branches": True,
+                "can_delete_branches": True,
                 # Staff
                 "can_manage_staff": True,
                 "can_view_staff": True,
+                "can_create_staff": True,
+                "can_edit_staff": True,
+                "can_delete_staff": True,
                 # Orders (all)
+                "can_manage_orders": True,
                 "can_view_all_orders": True,
                 "can_view_own_orders": True,
                 "can_create_orders": True,
@@ -521,21 +771,30 @@ class Role(models.Model):
                 "can_update_order_status": True,
                 "can_complete_orders": True,
                 "can_cancel_orders": True,
-                "can_manage_orders": True,
                 # Financial
+                "can_manage_financial": True,
                 "can_receive_payments": True,
                 "can_view_financial_reports": True,
                 "can_apply_discounts": True,
                 "can_refund_orders": True,
                 # Reports
+                "can_manage_reports": True,
                 "can_view_reports": True,
                 "can_view_analytics": True,
                 "can_export_data": True,
-                # Products & Customers
+                # Products
                 "can_manage_products": True,
+                "can_view_products": True,
+                "can_create_products": True,
+                "can_edit_products": True,
+                "can_delete_products": True,
+                # Customers
                 "can_manage_customers": True,
-                "can_view_customer_details": True,
+                "can_view_customers": True,
+                "can_edit_customers": True,
+                "can_delete_customers": True,
                 # Marketing & Broadcasts
+                "can_manage_marketing": True,
                 "can_create_marketing_posts": True,
                 "can_send_branch_broadcasts": True,
                 "can_send_center_broadcasts": True,
@@ -544,20 +803,24 @@ class Role(models.Model):
                 "can_manage_branch_settings": True,
                 "can_view_branch_settings": True,
                 # Agencies
+                "can_manage_agencies": True,
                 "can_view_agencies": True,
                 "can_create_agencies": True,
                 "can_edit_agencies": True,
                 "can_delete_agencies": True,
-                "can_manage_agencies": True,
             },
             cls.MANAGER: {
-                # Organization
-                "can_manage_center": False,
+                # Centers (view only)
+                "can_manage_centers": False,
+                "can_view_centers": True,
+                # Branches (view only)
                 "can_manage_branches": False,
-                # Staff
+                "can_view_branches": True,
+                # Staff (view only)
                 "can_manage_staff": False,
                 "can_view_staff": True,
                 # Orders
+                "can_manage_orders": True,
                 "can_view_all_orders": True,
                 "can_view_own_orders": True,
                 "can_create_orders": True,
@@ -567,21 +830,26 @@ class Role(models.Model):
                 "can_update_order_status": True,
                 "can_complete_orders": True,
                 "can_cancel_orders": True,
-                "can_manage_orders": True,
                 # Financial
+                "can_manage_financial": False,
                 "can_receive_payments": True,
                 "can_view_financial_reports": True,
                 "can_apply_discounts": True,
                 "can_refund_orders": False,
                 # Reports
+                "can_manage_reports": False,
                 "can_view_reports": True,
                 "can_view_analytics": True,
                 "can_export_data": False,
-                # Products & Customers
+                # Products (view only)
                 "can_manage_products": False,
-                "can_manage_customers": True,
-                "can_view_customer_details": True,
+                "can_view_products": True,
+                # Customers
+                "can_manage_customers": False,
+                "can_view_customers": True,
+                "can_edit_customers": True,
                 # Marketing & Broadcasts
+                "can_manage_marketing": False,
                 "can_create_marketing_posts": True,
                 "can_send_branch_broadcasts": True,
                 "can_send_center_broadcasts": False,
@@ -590,20 +858,21 @@ class Role(models.Model):
                 "can_manage_branch_settings": True,
                 "can_view_branch_settings": True,
                 # Agencies
+                "can_manage_agencies": False,
                 "can_view_agencies": True,
                 "can_create_agencies": True,
                 "can_edit_agencies": True,
                 "can_delete_agencies": False,
-                "can_manage_agencies": False,
             },
             cls.STAFF: {
-                # Organization
-                "can_manage_center": False,
+                # Centers (no access)
+                "can_manage_centers": False,
+                # Branches (no access)
                 "can_manage_branches": False,
-                # Staff
+                # Staff (no access)
                 "can_manage_staff": False,
-                "can_view_staff": False,
                 # Orders (limited)
+                "can_manage_orders": False,
                 "can_view_all_orders": False,
                 "can_view_own_orders": True,
                 "can_create_orders": False,
@@ -613,21 +882,25 @@ class Role(models.Model):
                 "can_update_order_status": True,
                 "can_complete_orders": True,
                 "can_cancel_orders": False,
-                "can_manage_orders": False,
                 # Financial
+                "can_manage_financial": False,
                 "can_receive_payments": True,
                 "can_view_financial_reports": False,
                 "can_apply_discounts": False,
                 "can_refund_orders": False,
                 # Reports
+                "can_manage_reports": False,
                 "can_view_reports": False,
                 "can_view_analytics": False,
                 "can_export_data": False,
-                # Products & Customers
+                # Products (view only)
                 "can_manage_products": False,
+                "can_view_products": True,
+                # Customers (view only)
                 "can_manage_customers": False,
-                "can_view_customer_details": True,
+                "can_view_customers": True,
                 # Marketing & Broadcasts
+                "can_manage_marketing": False,
                 "can_create_marketing_posts": False,
                 "can_send_branch_broadcasts": False,
                 "can_send_center_broadcasts": False,
@@ -636,11 +909,11 @@ class Role(models.Model):
                 "can_manage_branch_settings": False,
                 "can_view_branch_settings": True,
                 # Agencies
+                "can_manage_agencies": False,
                 "can_view_agencies": False,
                 "can_create_agencies": False,
                 "can_edit_agencies": False,
                 "can_delete_agencies": False,
-                "can_manage_agencies": False,
             },
         }
         return defaults.get(role_name, {})
@@ -702,28 +975,21 @@ class AdminUser(models.Model):
         return f"{self.user.get_full_name() or self.user.username} ({role_name})"
 
     def clean(self):
-        """Validate model data - enforce single owner per center"""
+        """Validate model data"""
         super().clean()
         
-        # Check for single owner per center
-        if self.role and self.role.name == Role.OWNER and self.center:
-            existing_owner = AdminUser.objects.filter(
-                role__name=Role.OWNER,
-                center=self.center,
-                is_active=True
-            ).exclude(pk=self.pk).first()
-            
-            if existing_owner:
-                raise ValidationError({
-                    'role': _(
-                        f'This center already has an owner: {existing_owner.user.get_full_name()}. '
-                        'Each center can only have one owner.'
-                    )
-                })
+        # Owner replacement is handled in save(), not blocked here
+        # This allows superusers to assign a new owner, which will unlink the previous one
 
     def save(self, *args, **kwargs):
-        """Override save to run validation"""
+        """Override save to run validation and handle owner replacement"""
         self.full_clean()
+        
+        # Handle owner replacement if assigning owner role to a center
+        if self.role and self.role.name == Role.OWNER and self.center:
+            # Unlink any existing owner before saving
+            AdminUser.handle_owner_replacement(self.center, new_owner_pk=self.pk)
+        
         super().save(*args, **kwargs)
 
     @classmethod
@@ -731,19 +997,13 @@ class AdminUser(models.Model):
         """
         Check if the requesting user can assign the owner role.
         Only superusers can assign the owner role.
+        When a new owner is assigned, the previous owner will be unlinked.
         """
         if not requesting_user.is_superuser:
             return False
         
-        # If center specified, check if it already has an active owner
-        if center:
-            existing_owner = cls.objects.filter(
-                role__name=Role.OWNER,
-                center=center,
-                is_active=True
-            ).exists()
-            return not existing_owner
-        
+        # Superusers can always assign owner role
+        # Previous owner will be automatically unlinked
         return True
 
     @classmethod
@@ -757,24 +1017,40 @@ class AdminUser(models.Model):
             if not requesting_user.is_superuser:
                 return False, _("Only superusers can create or assign the Owner role.")
             
-            # Check if center already has an owner
-            if center:
-                query = cls.objects.filter(
-                    role__name=Role.OWNER,
-                    center=center,
-                    is_active=True
-                )
-                if exclude_pk:
-                    query = query.exclude(pk=exclude_pk)
-                
-                if query.exists():
-                    existing = query.first()
-                    return False, _(
-                        f"This center already has an owner: {existing.user.get_full_name()}. "
-                        "Each center can only have one owner."
-                    )
+            # Owner role can be assigned - previous owner will be unlinked
+            # No blocking error, just validation that superuser can do it
         
         return True, None
+
+    @classmethod
+    def handle_owner_replacement(cls, center, new_owner_pk=None):
+        """
+        Handle owner replacement for a center.
+        Unlinks (removes branch/center association and deactivates) the previous owner.
+        Returns the previous owner if one existed.
+        """
+        query = cls.objects.filter(
+            role__name=Role.OWNER,
+            center=center,
+            is_active=True
+        )
+        if new_owner_pk:
+            query = query.exclude(pk=new_owner_pk)
+        
+        previous_owner = query.first()
+        if previous_owner:
+            # Unlink the previous owner from the center/branch
+            previous_owner.branch = None
+            previous_owner.center = None
+            previous_owner.is_active = False
+            # Use update to bypass clean validation
+            cls.objects.filter(pk=previous_owner.pk).update(
+                branch=None,
+                center=None,
+                is_active=False
+            )
+        
+        return previous_owner
 
     @property
     def is_owner(self):
@@ -795,20 +1071,17 @@ class AdminUser(models.Model):
         return getattr(self.role, permission, False)
 
     def get_accessible_branches(self):
-        """Get branches this user can access"""
-        if self.is_owner:
-            # Owners can access all branches of their centers
-            return Branch.objects.filter(center__owner=self.user)
-        elif self.is_manager:
-            # Managers can access their assigned branch
-            if self.branch:
-                return Branch.objects.filter(pk=self.branch.pk)
-            return Branch.objects.none()
-        else:
-            # Staff can only access their branch
-            if self.branch:
-                return Branch.objects.filter(pk=self.branch.pk)
-            return Branch.objects.none()
+        """Get branches this user can access based on their role permissions"""
+        # If user has can_view_centers permission, they can see all branches in their center
+        if self.center and self.has_permission('can_view_centers'):
+            return Branch.objects.filter(center=self.center)
+        # If user has can_view_branches permission, they can see branches in their center
+        elif self.center and self.has_permission('can_view_branches'):
+            return Branch.objects.filter(center=self.center)
+        elif self.branch:
+            # Default: user can only access their assigned branch
+            return Branch.objects.filter(pk=self.branch.pk)
+        return Branch.objects.none()
 
     def can_access_branch(self, branch):
         """Check if user can access a specific branch"""

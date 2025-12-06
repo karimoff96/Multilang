@@ -26,6 +26,20 @@ def getattr_alias(obj, attr):
     return getattr_filter(obj, attr)
 
 
+@register.filter(name='has_effective_permission')
+def has_effective_permission(role, permission):
+    """
+    Check if a role has effective permission (considering master permissions).
+    Usage: {{ role|has_effective_permission:"can_view_centers" }}
+    """
+    try:
+        if hasattr(role, 'has_effective_permission'):
+            return role.has_effective_permission(permission)
+        return getattr(role, permission, False)
+    except (TypeError, AttributeError):
+        return False
+
+
 @register.filter
 def get_item(dictionary, key):
     """

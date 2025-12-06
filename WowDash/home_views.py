@@ -169,17 +169,13 @@ def index(request):
     elif hasattr(request, "admin_profile") and request.admin_profile:
         profile = request.admin_profile
 
-        if profile.is_owner:
-            # Owner sees their centers and all branches
+        if profile.is_owner and profile.center:
+            # Owner sees their center and all branches in their center
             from organizations.models import TranslationCenter, Branch
 
-            centers = TranslationCenter.objects.filter(
-                owner=request.user, is_active=True
-            )
-            branches = Branch.objects.filter(center__owner=request.user, is_active=True)
-            staff = AdminUser.objects.filter(
-                branch__center__owner=request.user, is_active=True
-            )
+            center = profile.center
+            branches = Branch.objects.filter(center=center, is_active=True)
+            staff = AdminUser.objects.filter(center=center, is_active=True)
 
             # Branch performance data
             branch_performance = []
@@ -199,7 +195,7 @@ def index(request):
                 )
 
             role_context = {
-                "total_centers": centers.count(),
+                "total_centers": 1,  # Owner sees their own center
                 "total_branches": branches.count(),
                 "total_staff": staff.count(),
                 "branch_performance": branch_performance,
@@ -343,8 +339,8 @@ def sales(request):
     month_start = today_start.replace(day=1)
     year_start = today_start.replace(month=1, day=1)
 
-    # Get orders for different time periods
-    all_orders = Order.objects.all()
+    # Get RBAC-filtered orders
+    all_orders = get_user_orders(request.user)
 
     # ============ ORDER STATUS DATA FOR DONUT CHART ============
     # Status choices from model
@@ -757,7 +753,8 @@ def finance(request):
     month_start = today_start.replace(day=1)
     year_start = today_start.replace(month=1, day=1)
 
-    all_orders = Order.objects.all()
+    # Get RBAC-filtered orders
+    all_orders = get_user_orders(request.user)
 
     # ============ REVENUE OVERVIEW ============
     def get_revenue_stats(orders_queryset):

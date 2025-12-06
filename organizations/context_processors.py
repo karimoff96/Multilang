@@ -22,12 +22,24 @@ def rbac_context(request):
     """
     # Define all available permissions
     all_permissions = {
-        # Organization Management
-        'can_manage_center': False,
+        # Organization Management - Centers
+        'can_manage_centers': False,
+        'can_view_centers': False,
+        'can_create_centers': False,
+        'can_edit_centers': False,
+        'can_delete_centers': False,
+        # Organization Management - Branches
         'can_manage_branches': False,
+        'can_view_branches': False,
+        'can_create_branches': False,
+        'can_edit_branches': False,
+        'can_delete_branches': False,
         # Staff Management
         'can_manage_staff': False,
         'can_view_staff': False,
+        'can_create_staff': False,
+        'can_edit_staff': False,
+        'can_delete_staff': False,
         # Order Management (Granular)
         'can_view_all_orders': False,
         'can_view_own_orders': False,
@@ -40,23 +52,42 @@ def rbac_context(request):
         'can_cancel_orders': False,
         'can_manage_orders': False,
         # Financial
+        'can_manage_financial': False,
         'can_receive_payments': False,
         'can_view_financial_reports': False,
         'can_apply_discounts': False,
         'can_refund_orders': False,
         # Reports & Analytics
+        'can_manage_reports': False,
         'can_view_reports': False,
         'can_view_analytics': False,
         'can_export_data': False,
-        # Products & Customers
+        # Products
         'can_manage_products': False,
+        'can_view_products': False,
+        'can_create_products': False,
+        'can_edit_products': False,
+        'can_delete_products': False,
+        # Customers
         'can_manage_customers': False,
-        'can_view_customer_details': False,
+        'can_view_customers': False,
+        'can_edit_customers': False,
+        'can_delete_customers': False,
         # Marketing & Broadcasts
+        'can_manage_marketing': False,
         'can_create_marketing_posts': False,
         'can_send_branch_broadcasts': False,
         'can_send_center_broadcasts': False,
         'can_view_broadcast_stats': False,
+        # Branch Settings
+        'can_manage_branch_settings': False,
+        'can_view_branch_settings': False,
+        # Agencies
+        'can_manage_agencies': False,
+        'can_view_agencies': False,
+        'can_create_agencies': False,
+        'can_edit_agencies': False,
+        'can_delete_agencies': False,
     }
     
     context = {

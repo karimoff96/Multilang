@@ -873,6 +873,7 @@ def orderCreate(request):
     """Create a new order - requires can_create_orders permission"""
     from services.models import Product, Language
     from accounts.models import BotUser
+    from organizations.rbac import get_user_customers
     
     # Get accessible centers and branches
     centers = None
@@ -884,12 +885,15 @@ def orderCreate(request):
     else:
         branches = Branch.objects.none()
     
-    # Get products and languages
-    products = Product.objects.filter(is_active=True)
+    # Get products and languages - filter by accessible branches
+    if request.user.is_superuser:
+        products = Product.objects.filter(is_active=True)
+    else:
+        products = Product.objects.filter(is_active=True, category__branch__in=branches).distinct()
     languages = Language.objects.all()  # Language model doesn't have is_active field
     
-    # Get bot users for selection (recent 100)
-    bot_users = BotUser.objects.all().order_by('-created_at')[:100]
+    # Get bot users for selection (filtered by accessible branches)
+    bot_users = get_user_customers(request.user).order_by('-created_at')[:100]
     
     if request.method == 'POST':
         try:

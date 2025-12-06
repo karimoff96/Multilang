@@ -159,20 +159,34 @@
                         <h6 class="text-lg fw-semibold mb-0" data-i18n="staff.permissions">Role Permissions</h6>
                     </div>
                     <div class="card-body p-24">
+                        {% if permission_categories %}
                         <div class="row g-3">
-                            {% for perm in role_permissions %}
-                            <div class="col-md-4 col-sm-6">
-                                <div class="d-flex align-items-center gap-8 p-12 bg-success-50 radius-8">
-                                    <iconify-icon icon="solar:check-circle-bold" class="text-success-600 text-xl"></iconify-icon>
-                                    <span class="text-sm fw-medium">{{ perm.label }}</span>
+                            {% for key, category in permission_categories.items %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-category-card p-16 radius-8 border border-{{ category.color }}-100 bg-{{ category.color }}-50 h-100">
+                                    <h6 class="text-sm fw-semibold text-{{ category.color }}-600 mb-12 d-flex align-items-center gap-8">
+                                        <iconify-icon icon="fa6-solid:{{ category.icon }}" class="text-lg"></iconify-icon>
+                                        {{ category.title }}
+                                    </h6>
+                                    <div class="d-flex flex-column gap-8">
+                                        {% for perm in category.permissions %}
+                                        <div class="d-flex align-items-center gap-8 {% if perm.is_master %}fw-semibold{% endif %}">
+                                            <iconify-icon icon="{% if perm.is_master %}solar:crown-bold{% else %}solar:check-circle-bold{% endif %}" 
+                                                          class="{% if perm.is_master %}text-warning-600{% else %}text-success-600{% endif %} text-lg"></iconify-icon>
+                                            <span class="text-sm {% if perm.is_master %}text-warning-600{% endif %}">
+                                                {{ perm.label }}
+                                                {% if perm.is_master %}<span class="badge bg-warning-100 text-warning-600 text-xs ms-4">Master</span>{% endif %}
+                                            </span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
                                 </div>
-                            </div>
-                            {% empty %}
-                            <div class="col-12">
-                                <p class="text-secondary-light text-center py-16" data-i18n="staff.noPermissions">No specific permissions assigned.</p>
                             </div>
                             {% endfor %}
                         </div>
+                        {% else %}
+                        <p class="text-secondary-light text-center py-16" data-i18n="staff.noPermissions">No specific permissions assigned.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>

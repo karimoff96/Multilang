@@ -102,8 +102,10 @@ ALLOWED_EXTENSIONS = {
     ".gif",
     ".bmp",
     ".tiff",
+    ".tif",
     ".webp",
     ".heic",
+    ".heif",
 }
 STEP_LANGUAGE_SELECTED = 1
 STEP_BRANCH_SELECTION = 2  # NEW: After language, before registration
@@ -3514,7 +3516,7 @@ def show_upload_files_interface(message, language, doc_type, lang_name, copy_num
     message_text += get_text("upload_files", language)
     message_text += "\n\n📎 <b>" + get_text("allowed_formats", language) + "</b>\n"
     message_text += "📄 DOC, DOCX, PDF\n"
-    message_text += "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC"
+    message_text += "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC, HEIF"
 
     # Create reply keyboard
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
@@ -4914,7 +4916,7 @@ def handle_card_payment_message(message, language):
             summary_text += f"👤 Karta egasi: {card_holder}\n\n"
             summary_text += "📤 <b>Iltimos, to'lov chekini yuboring</b>\n"
             summary_text += (
-                "📎 Ruxsat etilgan formatlar: JPG, PNG, PDF, DOC, DOCX, HEIC"
+                "📎 Ruxsat etilgan formatlar: JPG, PNG, PDF, DOC, DOCX, HEIC, HEIF"
             )
         elif language == "ru":
             summary_text = "📋 <b>Сводка заказа</b>\n\n"
@@ -4946,7 +4948,7 @@ def handle_card_payment_message(message, language):
             summary_text += f"💳 Номер карты: <code>{card_number}</code>\n"
             summary_text += f"👤 Владелец карты: {card_holder}\n\n"
             summary_text += "📤 <b>Пожалуйста, загрузите чек об оплате</b>\n"
-            summary_text += "📎 Разрешенные форматы: JPG, PNG, PDF, DOC, DOCX, HEIC"
+            summary_text += "📎 Разрешенные форматы: JPG, PNG, PDF, DOC, DOCX, HEIC, HEIF"
         else:  # English
             summary_text = "📋 <b>Order Summary</b>\n\n"
             summary_text += f"📄 Order number: #{order.id}\n"
@@ -4975,7 +4977,7 @@ def handle_card_payment_message(message, language):
             summary_text += f"💳 Card number: <code>{card_number}</code>\n"
             summary_text += f"👤 Card holder: {card_holder}\n\n"
             summary_text += "📤 <b>Please upload your payment receipt</b>\n"
-            summary_text += "📎 Allowed formats: JPG, PNG, PDF, DOC, DOCX, HEIC"
+            summary_text += "📎 Allowed formats: JPG, PNG, PDF, DOC, DOCX, HEIC, HEIF"
 
         # Create markup with send receipt and back buttons
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
@@ -5199,7 +5201,7 @@ def handle_back_to_upload_docs_message(message, language):
             upload_text = get_text("upload_files", language)
             upload_text += "\n\n📎 <b>Ruxsat etilgan formatlar:</b>\n"
             upload_text += "📄 DOC, DOCX, PDF\n"
-            upload_text += "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC"
+            upload_text += "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC, HEIF"
 
             bot.send_message(
                 chat_id=message.chat.id,

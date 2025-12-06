@@ -50,8 +50,8 @@
                                 <td class="{{ row_color }} hide-tablet">
                                     <div class="d-flex flex-wrap gap-1">
                                         <!-- Organization -->
-                                        {% if role.can_manage_center %}
-                                        <span class="badge bg-primary-100 text-primary-600 px-6 py-2 radius-4 text-xs" title="Manage Centers">🏢 Centers</span>
+                                        {% if role.can_manage_centers %}
+                                        <span class="badge bg-primary-100 text-primary-600 px-6 py-2 radius-4 text-xs" title="Full Center Management">🏢 Centers</span>
                                         {% endif %}
                                         {% if role.can_manage_branches %}
                                         <span class="badge bg-primary-100 text-primary-600 px-6 py-2 radius-4 text-xs" title="Manage Branches">🏪 Branches</span>

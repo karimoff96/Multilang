@@ -88,12 +88,20 @@ def admin_profile_required(view_func):
 
 def role_required(*allowed_roles):
     """
-    Decorator that requires user to have one of the specified roles.
-    Superusers are always allowed.
+    DEPRECATED: Use @permission_required('can_...') instead.
     
-    Usage:
+    Role names can be arbitrary (e.g., "Director", "Admin", "Viewer").
+    Access control should be based on permissions, not role names.
+    
+    This decorator is kept for backward compatibility only.
+    
+    Usage (deprecated):
         @role_required('owner')
         @role_required('owner', 'manager')
+    
+    Preferred approach:
+        @permission_required('can_view_centers')
+        @permission_required('can_edit_staff', 'can_delete_staff')
     """
     def decorator(view_func):
         @wraps(view_func)
@@ -174,12 +182,22 @@ def any_permission_required(*permissions):
 
 
 def owner_required(view_func):
-    """Shortcut decorator for owner-only views."""
+    """
+    DEPRECATED: Use @permission_required('can_...') instead.
+    
+    Role names can be anything, permissions are what define functionality.
+    This decorator is kept for backward compatibility only.
+    """
     return role_required('owner')(view_func)
 
 
 def manager_or_owner_required(view_func):
-    """Shortcut decorator for manager or owner views."""
+    """
+    DEPRECATED: Use @permission_required('can_...') instead.
+    
+    Role names can be anything, permissions are what define functionality.
+    This decorator is kept for backward compatibility only.
+    """
     return role_required('owner', 'manager')(view_func)
 
 
@@ -265,6 +283,9 @@ def validate_owner_creation(requesting_user, center=None):
     """
     Validate that the requesting user can create an owner.
     Returns (is_valid, error_message)
+    
+    Note: Superusers can always create/assign owners. 
+    If a center already has an owner, the previous owner will be unlinked.
     """
     from organizations.models import AdminUser, Role
     
@@ -272,17 +293,7 @@ def validate_owner_creation(requesting_user, center=None):
     if not requesting_user.is_superuser:
         return False, "Only superusers can create the Owner role."
     
-    # Check if center already has an owner
-    if center:
-        existing_owner = AdminUser.objects.filter(
-            role__name=Role.OWNER,
-            center=center,
-            is_active=True
-        ).exists()
-        
-        if existing_owner:
-            return False, "This center already has an active owner. Each center can only have one owner."
-    
+    # Superusers can always assign - previous owner will be replaced
     return True, None
 
 
@@ -421,17 +432,16 @@ def get_user_staff(user):
     if not admin_profile:
         return AdminUser.objects.none()
     
-    if admin_profile.is_owner:
-        # Owners can see all staff in their centers
+    if admin_profile.is_owner and admin_profile.center:
+        # Owners can see all staff in their center
         return AdminUser.objects.filter(
-            branch__center__owner=user
+            center=admin_profile.center
         ).exclude(pk=admin_profile.pk)
-    elif admin_profile.is_manager:
-        # Managers can see staff in their branch
+    elif admin_profile.is_manager and admin_profile.branch:
+        # Managers can see staff in their branch (excluding owners)
         return AdminUser.objects.filter(
-            branch=admin_profile.branch,
-            role__name='staff'
-        )
+            branch=admin_profile.branch
+        ).exclude(pk=admin_profile.pk).exclude(role__name='owner')
     
     return AdminUser.objects.none()
 

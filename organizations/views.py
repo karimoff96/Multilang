@@ -8,6 +8,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 from .models import TranslationCenter, Branch, Role, AdminUser
 from .rbac import (
@@ -28,13 +30,17 @@ from core.audit import log_create, log_update, log_delete
 
 
 @login_required(login_url="admin_login")
-@owner_required
+@permission_required('can_view_centers')
 def center_list(request):
-    """List translation centers owned by the current owner"""
+    """List translation centers visible to the user based on permissions"""
     if request.user.is_superuser:
         centers = TranslationCenter.objects.all()
     else:
-        centers = TranslationCenter.objects.filter(owner=request.user)
+        profile = getattr(request.user, 'admin_profile', None)
+        if profile and profile.center:
+            centers = TranslationCenter.objects.filter(pk=profile.center_id)
+        else:
+            centers = TranslationCenter.objects.none()
 
     centers = centers.annotate(
         branch_count=Count("branches"),
@@ -56,9 +62,14 @@ def center_list(request):
 
 
 @login_required(login_url="admin_login")
-@owner_required
+@permission_required('can_create_centers')
 def center_create(request):
-    """Create a new translation center"""
+    """Create a new translation center - Superuser only"""
+    # Get available owners for superuser selection
+    available_owners = None
+    if request.user.is_superuser:
+        available_owners = User.objects.filter(is_active=True).order_by('username')
+    
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
         phone = request.POST.get("phone", "").strip()
@@ -70,6 +81,17 @@ def center_create(request):
         subdomain = None
         if request.user.is_superuser:
             subdomain = request.POST.get("subdomain", "").strip().lower() or None
+        
+        # Owner selection - only superuser can set
+        owner = request.user
+        if request.user.is_superuser:
+            owner_id = request.POST.get("owner_id", "").strip()
+            if owner_id:
+                try:
+                    owner = User.objects.get(pk=owner_id, is_active=True)
+                except User.DoesNotExist:
+                    messages.error(request, "Selected owner not found.")
+                    return redirect("center_create")
         
         # Bot fields - only superuser can set bot_token
         bot_token = None
@@ -86,7 +108,7 @@ def center_create(request):
         else:
             center = TranslationCenter.objects.create(
                 name=name,
-                owner=request.user,
+                owner=owner,
                 subdomain=subdomain,
                 phone=phone or None,
                 email=email or None,
@@ -104,18 +126,29 @@ def center_create(request):
         "title": "Create Center",
         "subTitle": "Add New Translation Center",
         "is_superuser": request.user.is_superuser,
+        "available_owners": available_owners,
     }
     return render(request, "organizations/center_form.html", context)
 
 
 @login_required(login_url="admin_login")
-@owner_required
+@permission_required('can_edit_centers')
 def center_edit(request, center_id):
     """Edit an existing translation center"""
     if request.user.is_superuser:
         center = get_object_or_404(TranslationCenter, pk=center_id)
     else:
-        center = get_object_or_404(TranslationCenter, pk=center_id, owner=request.user)
+        # Check if user belongs to this center via their AdminUser profile
+        profile = getattr(request.user, 'admin_profile', None)
+        if not profile or profile.center_id != center_id:
+            from django.http import HttpResponseForbidden
+            return HttpResponseForbidden("You don't have access to this center.")
+        center = get_object_or_404(TranslationCenter, pk=center_id)
+
+    # Get available owners for superuser selection
+    available_owners = None
+    if request.user.is_superuser:
+        available_owners = User.objects.filter(is_active=True).order_by('username')
 
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
@@ -130,6 +163,17 @@ def center_edit(request, center_id):
             subdomain = request.POST.get("subdomain", "").strip().lower() or None
         else:
             subdomain = center.subdomain  # Keep existing
+        
+        # Owner - only superuser can change
+        if request.user.is_superuser:
+            owner_id = request.POST.get("owner_id", "").strip()
+            if owner_id:
+                try:
+                    new_owner = User.objects.get(pk=owner_id, is_active=True)
+                    center.owner = new_owner
+                except User.DoesNotExist:
+                    messages.error(request, "Selected owner not found.")
+                    return redirect("center_edit", center_id=center_id)
         
         # Bot fields
         company_orders_channel_id = request.POST.get("company_orders_channel_id", "").strip() or None
@@ -164,12 +208,13 @@ def center_edit(request, center_id):
         "subTitle": f"Edit {center.name}",
         "center": center,
         "is_superuser": request.user.is_superuser,
+        "available_owners": available_owners,
     }
     return render(request, "organizations/center_form.html", context)
 
 
 @login_required(login_url="admin_login")
-@owner_required
+@permission_required('can_view_centers')
 def center_detail(request, center_id):
     """View translation center details with branches, staff, categories, products"""
     from services.models import Category, Product
@@ -179,7 +224,12 @@ def center_detail(request, center_id):
     if request.user.is_superuser:
         center = get_object_or_404(TranslationCenter, pk=center_id)
     else:
-        center = get_object_or_404(TranslationCenter, pk=center_id, owner=request.user)
+        # Check if user belongs to this center via their AdminUser profile
+        profile = getattr(request.user, 'admin_profile', None)
+        if not profile or profile.center_id != center_id:
+            from django.http import HttpResponseForbidden
+            return HttpResponseForbidden("You don't have access to this center.")
+        center = get_object_or_404(TranslationCenter, pk=center_id)
 
     # Get branches for this center
     branches = (
@@ -280,7 +330,11 @@ def branch_list(request):
     if request.user.is_superuser:
         centers = TranslationCenter.objects.filter(is_active=True)
     else:
-        centers = TranslationCenter.objects.filter(owner=request.user, is_active=True)
+        profile = getattr(request.user, 'admin_profile', None)
+        if profile and profile.center:
+            centers = TranslationCenter.objects.filter(pk=profile.center_id, is_active=True)
+        else:
+            centers = TranslationCenter.objects.none()
 
     context = {
         "title": "Branches",
@@ -304,7 +358,11 @@ def branch_create(request, center_id=None):
     if request.user.is_superuser:
         centers = TranslationCenter.objects.filter(is_active=True)
     else:
-        centers = TranslationCenter.objects.filter(owner=request.user, is_active=True)
+        profile = getattr(request.user, 'admin_profile', None)
+        if profile and profile.center:
+            centers = TranslationCenter.objects.filter(pk=profile.center_id, is_active=True)
+        else:
+            centers = TranslationCenter.objects.none()
 
     if center_id:
         center = get_object_or_404(centers, pk=center_id)
@@ -428,9 +486,10 @@ def branch_edit(request, branch_id):
 
     branch = get_object_or_404(Branch, pk=branch_id)
 
-    # Check access
+    # Check access - user must belong to this center
     if not request.user.is_superuser:
-        if branch.center.owner != request.user:
+        profile = getattr(request.user, 'admin_profile', None)
+        if not profile or profile.center_id != branch.center_id:
             messages.error(request, "You don't have permission to edit this branch.")
             return redirect("branch_list")
 
@@ -642,6 +701,15 @@ def staff_create(request):
             role = get_object_or_404(roles, pk=role_id)
             branch = get_object_or_404(accessible_branches, pk=branch_id)
 
+            # Check if this will replace an existing owner
+            previous_owner = None
+            if role.name == Role.OWNER:
+                previous_owner = AdminUser.objects.filter(
+                    role__name=Role.OWNER,
+                    center=branch.center,
+                    is_active=True
+                ).first()
+
             # Create admin profile
             try:
                 admin_profile = AdminUser.objects.create(
@@ -652,6 +720,13 @@ def staff_create(request):
                     phone=phone or None,
                     created_by=request.user,
                 )
+
+                # Notify about previous owner replacement
+                if previous_owner:
+                    messages.info(
+                        request,
+                        f'Previous owner "{previous_owner.user.get_full_name()}" has been unlinked from this center.'
+                    )
 
                 # Audit log the creation
                 log_create(
@@ -671,9 +746,10 @@ def staff_create(request):
                 user.delete()
                 messages.error(request, f"Failed to create staff member: {str(e)}")
 
-    # Get all permissions for display in form
-    all_permissions = Role.get_all_permissions()
+    # Get display permissions organized by category
+    all_permissions = Role.get_display_permissions()
     permission_labels = Role.get_permission_labels()
+    permission_categories = Role.get_display_permission_categories()
 
     context = {
         "title": "Add Staff",
@@ -682,6 +758,7 @@ def staff_create(request):
         "roles": roles,
         "all_permissions": all_permissions,
         "permission_labels": permission_labels,
+        "permission_categories": permission_categories,
     }
     return render(request, "organizations/staff_form.html", context)
 
@@ -757,6 +834,17 @@ def staff_edit(request, staff_id):
                 user.set_password(password)
             user.save()
 
+            # Check if this will replace an existing owner (when changing TO owner role)
+            previous_owner = None
+            new_role = Role.objects.get(pk=role_id)
+            new_branch = Branch.objects.get(pk=branch_id)
+            if new_role.name == Role.OWNER:
+                previous_owner = AdminUser.objects.filter(
+                    role__name=Role.OWNER,
+                    center=new_branch.center,
+                    is_active=True
+                ).exclude(pk=staff_member.pk).first()
+
             # Update profile
             try:
                 old_role = staff_member.role
@@ -768,6 +856,13 @@ def staff_edit(request, staff_id):
                 staff_member.phone = phone or None
                 staff_member.is_active = is_active
                 staff_member.save()
+
+                # Notify about previous owner replacement
+                if previous_owner:
+                    messages.info(
+                        request,
+                        f'Previous owner "{previous_owner.user.get_full_name()}" has been unlinked from this center.'
+                    )
 
                 # Log the update
                 log_update(
@@ -785,9 +880,10 @@ def staff_edit(request, staff_id):
             except Exception as e:
                 messages.error(request, f"Failed to update staff member: {str(e)}")
 
-    # Get all permissions for display in form
-    all_permissions = Role.get_all_permissions()
+    # Get display permissions organized by category
+    all_permissions = Role.get_display_permissions()
     permission_labels = Role.get_permission_labels()
+    permission_categories = Role.get_display_permission_categories()
 
     context = {
         "title": "Edit Staff",
@@ -797,6 +893,7 @@ def staff_edit(request, staff_id):
         "roles": roles,
         "all_permissions": all_permissions,
         "permission_labels": permission_labels,
+        "permission_categories": permission_categories,
     }
     return render(request, "organizations/staff_form.html", context)
 
@@ -898,12 +995,29 @@ def staff_detail(request, staff_id):
         ).count(),
     }
 
-    # Get role permissions for display
-    role_permissions = []
-    for perm in Role.get_all_permissions():
-        if getattr(staff_member.role, perm, False):
-            label = Role.get_permission_labels().get(perm, perm.replace("_", " ").title())
-            role_permissions.append({"name": perm, "label": label})
+    # Get role permissions organized by category for display
+    permission_categories = Role.get_permission_categories()
+    permission_labels = Role.get_permission_labels()
+    
+    role_permission_categories = {}
+    for key, category in permission_categories.items():
+        enabled_perms = []
+        for perm in category["permissions"]:
+            if getattr(staff_member.role, perm, False):
+                label = permission_labels.get(perm, perm.replace("_", " ").title())
+                is_master = perm in Role.MASTER_PERMISSIONS
+                enabled_perms.append({
+                    "name": perm,
+                    "label": label,
+                    "is_master": is_master,
+                })
+        if enabled_perms:  # Only include categories that have enabled permissions
+            role_permission_categories[key] = {
+                "title": category["title"],
+                "icon": category["icon"],
+                "color": category["color"],
+                "permissions": enabled_perms,
+            }
 
     context = {
         "title": staff_member.user.get_full_name() or staff_member.user.username,
@@ -913,7 +1027,7 @@ def staff_detail(request, staff_id):
         "completed_orders": completed_orders,
         "payments_received": payments_received,
         "stats": stats,
-        "role_permissions": role_permissions,
+        "permission_categories": role_permission_categories,
         "can_edit": user_can_edit,
         "is_read_only": not user_can_edit,
     }
@@ -1029,6 +1143,66 @@ def create_district(request):
         return JsonResponse({
             "success": True,
             "district": {"id": district.id, "name": district.name, "code": district.code, "region_id": region.id}
+        })
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@login_required(login_url="admin_login")
+@require_POST
+def api_create_user(request):
+    """API endpoint to create a new user (superuser only)"""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "Permission denied"}, status=403)
+    
+    import json
+    
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON data"}, status=400)
+    
+    username = data.get("username", "").strip()
+    email = data.get("email", "").strip()
+    first_name = data.get("first_name", "").strip()
+    last_name = data.get("last_name", "").strip()
+    password = data.get("password", "")
+    
+    # Validation
+    if not username:
+        return JsonResponse({"success": False, "error": "Username is required"})
+    if not first_name:
+        return JsonResponse({"success": False, "error": "First name is required"})
+    if not password or len(password) < 6:
+        return JsonResponse({"success": False, "error": "Password must be at least 6 characters"})
+    
+    # Check for duplicate username
+    if User.objects.filter(username=username).exists():
+        return JsonResponse({"success": False, "error": f"Username '{username}' is already taken"})
+    
+    # Check for duplicate email if provided
+    if email and User.objects.filter(email=email).exists():
+        return JsonResponse({"success": False, "error": f"Email '{email}' is already in use"})
+    
+    try:
+        user = User.objects.create_user(
+            username=username,
+            email=email or None,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            is_staff=True,  # Allow admin access
+            is_active=True
+        )
+        
+        return JsonResponse({
+            "success": True,
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email or "",
+                "full_name": user.get_full_name() or user.username
+            }
         })
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)})

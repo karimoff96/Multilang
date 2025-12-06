@@ -122,30 +122,111 @@
                         </label>
                         
                         <div class="row g-3">
-                            <!-- Organization Management -->
+                            <!-- Center Management -->
                             <div class="col-md-6 col-lg-4">
                                 <div class="permission-card border border-primary-100">
                                     <h6 class="text-sm fw-semibold text-primary-main permission-section-header">
                                         <iconify-icon icon="lucide:building-2"></iconify-icon>
-                                        <span>Organization</span>
+                                        <span>Center Management</span>
                                     </h6>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_manage_center" id="can_manage_center"
-                                               {% if role.can_manage_center %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_manage_center">
-                                            Manage Centers
-                                        </label>
+                                    
+                                    <!-- Master Permission -->
+                                    <div class="master-permission">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="can_manage_centers" id="can_manage_centers"
+                                                   {% if role.can_manage_centers %}checked{% endif %}>
+                                            <label class="form-check-label" for="can_manage_centers">
+                                                Full Center Management
+                                            </label>
+                                        </div>
+                                        <div class="perm-hint text-secondary-light">Overrides all center permissions</div>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Create, edit, delete centers</div>
                                     
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_manage_branches" id="can_manage_branches"
-                                               {% if role.can_manage_branches %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_manage_branches">
-                                            Manage Branches
+                                        <input class="form-check-input" type="checkbox" name="can_view_centers" id="can_view_centers"
+                                               {% if role.can_view_centers %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_view_centers">
+                                            View Centers
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Create, edit branches</div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_create_centers" id="can_create_centers"
+                                               {% if role.can_create_centers %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_create_centers">
+                                            Create Centers
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_edit_centers" id="can_edit_centers"
+                                               {% if role.can_edit_centers %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_edit_centers">
+                                            Edit Centers
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_delete_centers" id="can_delete_centers"
+                                               {% if role.can_delete_centers %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_delete_centers">
+                                            Delete Centers
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Branch Management -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-card border border-primary-100">
+                                    <h6 class="text-sm fw-semibold text-primary-main permission-section-header">
+                                        <iconify-icon icon="lucide:git-branch"></iconify-icon>
+                                        <span>Branch Management</span>
+                                    </h6>
+                                    
+                                    <!-- Master Permission -->
+                                    <div class="master-permission">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="can_manage_branches" id="can_manage_branches"
+                                                   {% if role.can_manage_branches %}checked{% endif %}>
+                                            <label class="form-check-label" for="can_manage_branches">
+                                                Full Branch Management
+                                            </label>
+                                        </div>
+                                        <div class="perm-hint text-secondary-light">Overrides all branch permissions</div>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_view_branches" id="can_view_branches"
+                                               {% if role.can_view_branches %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_view_branches">
+                                            View Branches
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_create_branches" id="can_create_branches"
+                                               {% if role.can_create_branches %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_create_branches">
+                                            Create Branches
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_edit_branches" id="can_edit_branches"
+                                               {% if role.can_edit_branches %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_edit_branches">
+                                            Edit Branches
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_delete_branches" id="can_delete_branches"
+                                               {% if role.can_delete_branches %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_delete_branches">
+                                            Delete Branches
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -156,23 +237,50 @@
                                         <iconify-icon icon="lucide:users"></iconify-icon>
                                         <span>Staff Management</span>
                                     </h6>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_manage_staff" id="can_manage_staff"
-                                               {% if role.can_manage_staff %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_manage_staff">
-                                            Manage Staff
-                                        </label>
+                                    
+                                    <!-- Master Permission -->
+                                    <div class="master-permission">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="can_manage_staff" id="can_manage_staff"
+                                                   {% if role.can_manage_staff %}checked{% endif %}>
+                                            <label class="form-check-label" for="can_manage_staff">
+                                                Full Staff Management
+                                            </label>
+                                        </div>
+                                        <div class="perm-hint text-secondary-light">Overrides all staff permissions</div>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Add, edit, remove staff members</div>
                                     
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_view_staff" id="can_view_staff"
                                                {% if role.can_view_staff %}checked{% endif %}>
                                         <label class="form-check-label" for="can_view_staff">
-                                            View Staff (Read-Only)
+                                            View Staff
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">View staff profiles</div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_create_staff" id="can_create_staff"
+                                               {% if role.can_create_staff %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_create_staff">
+                                            Add Staff
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_edit_staff" id="can_edit_staff"
+                                               {% if role.can_edit_staff %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_edit_staff">
+                                            Edit Staff
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_delete_staff" id="can_delete_staff"
+                                               {% if role.can_delete_staff %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_delete_staff">
+                                            Remove Staff
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -299,6 +407,19 @@
                                         <iconify-icon icon="lucide:banknote"></iconify-icon>
                                         <span>Financial</span>
                                     </h6>
+                                    
+                                    <!-- Master Permission -->
+                                    <div class="master-permission">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="can_manage_financial" id="can_manage_financial"
+                                                   {% if role.can_manage_financial %}checked{% endif %}>
+                                            <label class="form-check-label" for="can_manage_financial">
+                                                Full Financial Management
+                                            </label>
+                                        </div>
+                                        <div class="perm-hint text-secondary-light">Overrides all financial permissions</div>
+                                    </div>
+                                    
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_receive_payments" id="can_receive_payments"
                                                {% if role.can_receive_payments %}checked{% endif %}>
@@ -306,7 +427,6 @@
                                             Receive Payments
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Record customer payments</div>
                                     
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_view_financial_reports" id="can_view_financial_reports"
@@ -315,7 +435,6 @@
                                             View Financial Reports
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Access revenue data</div>
                                     
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_apply_discounts" id="can_apply_discounts"
@@ -324,7 +443,6 @@
                                             Apply Discounts
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Give discounts to orders</div>
                                     
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_refund_orders" id="can_refund_orders"
@@ -333,7 +451,6 @@
                                             Refund Orders
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Process refunds</div>
                                 </div>
                             </div>
                             
@@ -344,6 +461,19 @@
                                         <iconify-icon icon="lucide:bar-chart-3"></iconify-icon>
                                         <span>Reports & Analytics</span>
                                     </h6>
+                                    
+                                    <!-- Master Permission -->
+                                    <div class="master-permission">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="can_manage_reports" id="can_manage_reports"
+                                                   {% if role.can_manage_reports %}checked{% endif %}>
+                                            <label class="form-check-label" for="can_manage_reports">
+                                                Full Reports Access
+                                            </label>
+                                        </div>
+                                        <div class="perm-hint text-secondary-light">Overrides all report permissions</div>
+                                    </div>
+                                    
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_view_reports" id="can_view_reports"
                                                {% if role.can_view_reports %}checked{% endif %}>
@@ -351,7 +481,6 @@
                                             View Reports
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Access performance reports</div>
                                     
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_view_analytics" id="can_view_analytics"
@@ -360,7 +489,6 @@
                                             View Analytics
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Dashboard with charts</div>
                                     
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_export_data" id="can_export_data"
@@ -369,43 +497,106 @@
                                             Export Data
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Download Excel/CSV files</div>
                                 </div>
                             </div>
                             
-                            <!-- Products & Customers -->
+                            <!-- Products -->
                             <div class="col-md-6 col-lg-4">
                                 <div class="permission-card border border-danger-100">
                                     <h6 class="text-sm fw-semibold text-danger-main permission-section-header">
                                         <iconify-icon icon="lucide:box"></iconify-icon>
-                                        <span>Products & Customers</span>
+                                        <span>Products</span>
                                     </h6>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_manage_products" id="can_manage_products"
-                                               {% if role.can_manage_products %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_manage_products">
-                                            Manage Products
-                                        </label>
+                                    
+                                    <!-- Master Permission -->
+                                    <div class="master-permission">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="can_manage_products" id="can_manage_products"
+                                                   {% if role.can_manage_products %}checked{% endif %}>
+                                            <label class="form-check-label" for="can_manage_products">
+                                                Full Product Management
+                                            </label>
+                                        </div>
+                                        <div class="perm-hint text-secondary-light">Overrides all product permissions</div>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Add, edit services & pricing</div>
                                     
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_manage_customers" id="can_manage_customers"
-                                               {% if role.can_manage_customers %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_manage_customers">
-                                            Manage Customers
+                                        <input class="form-check-input" type="checkbox" name="can_view_products" id="can_view_products"
+                                               {% if role.can_view_products %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_view_products">
+                                            View Products
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Edit customer records</div>
                                     
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_view_customer_details" id="can_view_customer_details"
-                                               {% if role.can_view_customer_details %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_view_customer_details">
-                                            View Customers (Read-Only)
+                                        <input class="form-check-input" type="checkbox" name="can_create_products" id="can_create_products"
+                                               {% if role.can_create_products %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_create_products">
+                                            Create Products
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">View customer info</div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_edit_products" id="can_edit_products"
+                                               {% if role.can_edit_products %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_edit_products">
+                                            Edit Products
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_delete_products" id="can_delete_products"
+                                               {% if role.can_delete_products %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_delete_products">
+                                            Delete Products
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Customers -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-card border border-danger-100">
+                                    <h6 class="text-sm fw-semibold text-danger-main permission-section-header">
+                                        <iconify-icon icon="lucide:users-round"></iconify-icon>
+                                        <span>Customers</span>
+                                    </h6>
+                                    
+                                    <!-- Master Permission -->
+                                    <div class="master-permission">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="can_manage_customers" id="can_manage_customers"
+                                                   {% if role.can_manage_customers %}checked{% endif %}>
+                                            <label class="form-check-label" for="can_manage_customers">
+                                                Full Customer Management
+                                            </label>
+                                        </div>
+                                        <div class="perm-hint text-secondary-light">Overrides all customer permissions</div>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_view_customers" id="can_view_customers"
+                                               {% if role.can_view_customers %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_view_customers">
+                                            View Customers
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_edit_customers" id="can_edit_customers"
+                                               {% if role.can_edit_customers %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_edit_customers">
+                                            Edit Customers
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_delete_customers" id="can_delete_customers"
+                                               {% if role.can_delete_customers %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_delete_customers">
+                                            Delete Customers
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -416,6 +607,19 @@
                                         <iconify-icon icon="mdi:bullhorn"></iconify-icon>
                                         <span>Marketing & Broadcasts</span>
                                     </h6>
+                                    
+                                    <!-- Master Permission -->
+                                    <div class="master-permission">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="can_manage_marketing" id="can_manage_marketing"
+                                                   {% if role.can_manage_marketing %}checked{% endif %}>
+                                            <label class="form-check-label" for="can_manage_marketing">
+                                                Full Marketing Access
+                                            </label>
+                                        </div>
+                                        <div class="perm-hint text-secondary-light">Overrides all marketing permissions</div>
+                                    </div>
+                                    
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_create_marketing_posts" id="can_create_marketing_posts"
                                                {% if role.can_create_marketing_posts %}checked{% endif %}>
@@ -423,7 +627,6 @@
                                             Create Marketing Posts
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Create and edit broadcast posts</div>
                                     
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_send_branch_broadcasts" id="can_send_branch_broadcasts"
@@ -432,7 +635,6 @@
                                             Send Branch Broadcasts
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Send to own branch customers</div>
                                     
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_send_center_broadcasts" id="can_send_center_broadcasts"
@@ -442,7 +644,6 @@
                                             Send Center-wide Broadcasts
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Send to ALL branches in center</div>
                                     
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_view_broadcast_stats" id="can_view_broadcast_stats"
@@ -451,7 +652,6 @@
                                             View Broadcast Stats
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">View delivery statistics</div>
                                 </div>
                             </div>
                             
@@ -463,14 +663,17 @@
                                         <span>Agency Management</span>
                                     </h6>
                                     
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_create_agencies" id="can_create_agencies"
-                                               {% if role.can_create_agencies %}checked{% endif %}>
-                                        <label class="form-check-label" for="can_create_agencies">
-                                            Create Agency Profiles
-                                        </label>
+                                    <!-- Master Permission -->
+                                    <div class="master-permission">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="can_manage_agencies" id="can_manage_agencies"
+                                                   {% if role.can_manage_agencies %}checked{% endif %}>
+                                            <label class="form-check-label" for="can_manage_agencies">
+                                                Full Agency Management
+                                            </label>
+                                        </div>
+                                        <div class="perm-hint text-secondary-light">Overrides all agency permissions</div>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Create agency accounts via command</div>
                                     
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="can_view_agencies" id="can_view_agencies"
@@ -479,17 +682,60 @@
                                             View Agencies
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">View agency list in reports</div>
                                     
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_manage_agencies" id="can_manage_agencies"
-                                               {% if role.can_manage_agencies %}checked{% endif %}>
-                                        <label class="form-check-label text-warning-600" for="can_manage_agencies">
-                                            <iconify-icon icon="lucide:crown" class="me-1"></iconify-icon>
-                                            Full Agency Management
+                                        <input class="form-check-input" type="checkbox" name="can_create_agencies" id="can_create_agencies"
+                                               {% if role.can_create_agencies %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_create_agencies">
+                                            Create Agencies
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-secondary-light">Full control over agencies</div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_edit_agencies" id="can_edit_agencies"
+                                               {% if role.can_edit_agencies %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_edit_agencies">
+                                            Edit Agencies
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_delete_agencies" id="can_delete_agencies"
+                                               {% if role.can_delete_agencies %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_delete_agencies">
+                                            Delete Agencies
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Branch Settings -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-card border border-info-100">
+                                    <h6 class="text-sm fw-semibold text-info-main permission-section-header">
+                                        <iconify-icon icon="lucide:settings"></iconify-icon>
+                                        <span>Branch Settings</span>
+                                    </h6>
+                                    
+                                    <!-- Master Permission -->
+                                    <div class="master-permission">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="can_manage_branch_settings" id="can_manage_branch_settings"
+                                                   {% if role.can_manage_branch_settings %}checked{% endif %}>
+                                            <label class="form-check-label" for="can_manage_branch_settings">
+                                                Full Branch Settings Management
+                                            </label>
+                                        </div>
+                                        <div class="perm-hint text-secondary-light">Overrides all branch settings permissions</div>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_view_branch_settings" id="can_view_branch_settings"
+                                               {% if role.can_view_branch_settings %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_view_branch_settings">
+                                            View Branch Settings
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -594,70 +840,93 @@
 <script>
 // All permission checkboxes IDs
 const allPermissions = [
-    // Organization
-    'can_manage_center', 'can_manage_branches',
+    // Centers
+    'can_manage_centers', 'can_view_centers', 'can_create_centers', 'can_edit_centers', 'can_delete_centers',
+    // Branches
+    'can_manage_branches', 'can_view_branches', 'can_create_branches', 'can_edit_branches', 'can_delete_branches',
     // Staff
-    'can_manage_staff', 'can_view_staff',
+    'can_manage_staff', 'can_view_staff', 'can_create_staff', 'can_edit_staff', 'can_delete_staff',
     // Orders
-    'can_view_all_orders', 'can_view_own_orders', 'can_create_orders', 'can_edit_orders',
-    'can_delete_orders', 'can_assign_orders', 'can_update_order_status', 'can_complete_orders',
-    'can_cancel_orders', 'can_manage_orders',
+    'can_manage_orders', 'can_view_all_orders', 'can_view_own_orders', 'can_create_orders', 'can_edit_orders',
+    'can_delete_orders', 'can_assign_orders', 'can_update_order_status', 'can_complete_orders', 'can_cancel_orders',
     // Financial
-    'can_receive_payments', 'can_view_financial_reports', 'can_apply_discounts', 'can_refund_orders',
+    'can_manage_financial', 'can_receive_payments', 'can_view_financial_reports', 'can_apply_discounts', 'can_refund_orders',
     // Reports
-    'can_view_reports', 'can_view_analytics', 'can_export_data',
-    // Products & Customers
-    'can_manage_products', 'can_manage_customers', 'can_view_customer_details',
-    // Marketing & Broadcasts
-    'can_create_marketing_posts', 'can_send_branch_broadcasts', 'can_send_center_broadcasts', 'can_view_broadcast_stats',
+    'can_manage_reports', 'can_view_reports', 'can_view_analytics', 'can_export_data',
+    // Products
+    'can_manage_products', 'can_view_products', 'can_create_products', 'can_edit_products', 'can_delete_products',
+    // Customers
+    'can_manage_customers', 'can_view_customers', 'can_edit_customers', 'can_delete_customers',
+    // Marketing
+    'can_manage_marketing', 'can_create_marketing_posts', 'can_send_branch_broadcasts', 'can_send_center_broadcasts', 'can_view_broadcast_stats',
+    // Branch Settings
+    'can_manage_branch_settings', 'can_view_branch_settings',
     // Agencies
-    'can_view_agencies', 'can_create_agencies', 'can_manage_agencies'
+    'can_manage_agencies', 'can_view_agencies', 'can_create_agencies', 'can_edit_agencies', 'can_delete_agencies'
 ];
 
-// Order-related permissions (excluding the master permission)
-const orderPermissions = [
-    'can_view_all_orders', 'can_view_own_orders', 'can_create_orders', 'can_edit_orders',
-    'can_delete_orders', 'can_assign_orders', 'can_update_order_status', 'can_complete_orders',
-    'can_cancel_orders'
-];
+// Define child permissions for each master permission
+const masterPermissions = {
+    'can_manage_centers': ['can_view_centers', 'can_create_centers', 'can_edit_centers', 'can_delete_centers'],
+    'can_manage_branches': ['can_view_branches', 'can_create_branches', 'can_edit_branches', 'can_delete_branches'],
+    'can_manage_staff': ['can_view_staff', 'can_create_staff', 'can_edit_staff', 'can_delete_staff'],
+    'can_manage_orders': ['can_view_all_orders', 'can_view_own_orders', 'can_create_orders', 'can_edit_orders', 'can_delete_orders', 'can_assign_orders', 'can_update_order_status', 'can_complete_orders', 'can_cancel_orders'],
+    'can_manage_financial': ['can_receive_payments', 'can_view_financial_reports', 'can_apply_discounts', 'can_refund_orders'],
+    'can_manage_reports': ['can_view_reports', 'can_view_analytics', 'can_export_data'],
+    'can_manage_products': ['can_view_products', 'can_create_products', 'can_edit_products', 'can_delete_products'],
+    'can_manage_customers': ['can_view_customers', 'can_edit_customers', 'can_delete_customers'],
+    'can_manage_marketing': ['can_create_marketing_posts', 'can_send_branch_broadcasts', 'can_send_center_broadcasts', 'can_view_broadcast_stats'],
+    'can_manage_branch_settings': ['can_view_branch_settings'],
+    'can_manage_agencies': ['can_view_agencies', 'can_create_agencies', 'can_edit_agencies', 'can_delete_agencies']
+};
 
 // Templates
 const templates = {
     'owner': {
-        'can_manage_center': true, 'can_manage_branches': true,
-        'can_manage_staff': true, 'can_view_staff': true,
+        // All master permissions
+        'can_manage_centers': true, 'can_manage_branches': true, 'can_manage_staff': true,
+        'can_manage_orders': true, 'can_manage_financial': true, 'can_manage_reports': true,
+        'can_manage_products': true, 'can_manage_customers': true, 'can_manage_marketing': true,
+        'can_manage_agencies': true, 'can_manage_branch_settings': true,
+        // All granular permissions
+        'can_view_centers': true, 'can_create_centers': true, 'can_edit_centers': true, 'can_delete_centers': true,
+        'can_view_branches': true, 'can_create_branches': true, 'can_edit_branches': true, 'can_delete_branches': true,
+        'can_view_staff': true, 'can_create_staff': true, 'can_edit_staff': true, 'can_delete_staff': true,
         'can_view_all_orders': true, 'can_view_own_orders': true, 'can_create_orders': true, 'can_edit_orders': true,
         'can_delete_orders': true, 'can_assign_orders': true, 'can_update_order_status': true, 'can_complete_orders': true,
-        'can_cancel_orders': true, 'can_manage_orders': true,
+        'can_cancel_orders': true,
         'can_receive_payments': true, 'can_view_financial_reports': true, 'can_apply_discounts': true, 'can_refund_orders': true,
         'can_view_reports': true, 'can_view_analytics': true, 'can_export_data': true,
-        'can_manage_products': true, 'can_manage_customers': true, 'can_view_customer_details': true,
+        'can_view_products': true, 'can_create_products': true, 'can_edit_products': true, 'can_delete_products': true,
+        'can_view_customers': true, 'can_edit_customers': true, 'can_delete_customers': true,
         'can_create_marketing_posts': true, 'can_send_branch_broadcasts': true, 'can_send_center_broadcasts': true, 'can_view_broadcast_stats': true,
-        'can_view_agencies': true, 'can_create_agencies': true, 'can_manage_agencies': true
+        'can_manage_branch_settings': true, 'can_view_branch_settings': true,
+        'can_view_agencies': true, 'can_create_agencies': true, 'can_edit_agencies': true, 'can_delete_agencies': true
     },
     'manager': {
-        'can_manage_center': false, 'can_manage_branches': false,
-        'can_manage_staff': false, 'can_view_staff': true,
+        'can_manage_centers': false, 'can_manage_branches': false, 'can_manage_staff': false,
+        'can_manage_orders': true, 'can_manage_financial': false, 'can_manage_reports': false,
+        'can_manage_products': false, 'can_manage_customers': false, 'can_manage_marketing': false,
+        'can_manage_agencies': false,
+        'can_view_centers': true, 'can_view_branches': true, 'can_view_staff': true,
         'can_view_all_orders': true, 'can_view_own_orders': true, 'can_create_orders': true, 'can_edit_orders': true,
         'can_delete_orders': false, 'can_assign_orders': true, 'can_update_order_status': true, 'can_complete_orders': true,
-        'can_cancel_orders': true, 'can_manage_orders': true,
+        'can_cancel_orders': true,
         'can_receive_payments': true, 'can_view_financial_reports': true, 'can_apply_discounts': true, 'can_refund_orders': false,
         'can_view_reports': true, 'can_view_analytics': true, 'can_export_data': false,
-        'can_manage_products': false, 'can_manage_customers': true, 'can_view_customer_details': true,
+        'can_view_products': true, 'can_view_customers': true, 'can_edit_customers': true,
         'can_create_marketing_posts': true, 'can_send_branch_broadcasts': true, 'can_send_center_broadcasts': false, 'can_view_broadcast_stats': true,
-        'can_view_agencies': true, 'can_create_agencies': true, 'can_manage_agencies': false
+        'can_view_branch_settings': true,
+        'can_view_agencies': true, 'can_create_agencies': true
     },
     'staff': {
-        'can_manage_center': false, 'can_manage_branches': false,
-        'can_manage_staff': false, 'can_view_staff': false,
-        'can_view_all_orders': false, 'can_view_own_orders': true, 'can_create_orders': false, 'can_edit_orders': false,
-        'can_delete_orders': false, 'can_assign_orders': false, 'can_update_order_status': true, 'can_complete_orders': true,
-        'can_cancel_orders': false, 'can_manage_orders': false,
-        'can_receive_payments': true, 'can_view_financial_reports': false, 'can_apply_discounts': false, 'can_refund_orders': false,
-        'can_view_reports': false, 'can_view_analytics': false, 'can_export_data': false,
-        'can_manage_products': false, 'can_manage_customers': false, 'can_view_customer_details': true,
-        'can_create_marketing_posts': false, 'can_send_branch_broadcasts': false, 'can_send_center_broadcasts': false, 'can_view_broadcast_stats': false,
-        'can_view_agencies': false, 'can_create_agencies': false, 'can_manage_agencies': false
+        'can_manage_centers': false, 'can_manage_branches': false, 'can_manage_staff': false,
+        'can_manage_orders': false, 'can_manage_financial': false, 'can_manage_reports': false,
+        'can_manage_products': false, 'can_manage_customers': false, 'can_manage_marketing': false,
+        'can_manage_agencies': false,
+        'can_view_own_orders': true, 'can_update_order_status': true, 'can_complete_orders': true,
+        'can_receive_payments': true,
+        'can_view_customers': true, 'can_view_products': true
     },
     'none': {}  // All false
 };
@@ -670,7 +939,10 @@ function applyTemplate(template) {
             checkbox.checked = selectedTemplate[perm] || false;
         }
     });
-    updateOrderPermissionsState();
+    // Update all master permission states
+    Object.keys(masterPermissions).forEach(master => {
+        updateMasterPermissionState(master);
+    });
     updatePermissionCount();
 }
 
@@ -685,11 +957,12 @@ function updatePermissionCount() {
     document.getElementById('permission-count').textContent = count;
 }
 
-function updateOrderPermissionsState() {
-    const masterCheckbox = document.getElementById('can_manage_orders');
+function updateMasterPermissionState(masterId) {
+    const masterCheckbox = document.getElementById(masterId);
+    const childPermissions = masterPermissions[masterId] || [];
     const isFullManagement = masterCheckbox && masterCheckbox.checked;
     
-    orderPermissions.forEach(perm => {
+    childPermissions.forEach(perm => {
         const checkbox = document.getElementById(perm);
         if (checkbox) {
             if (isFullManagement) {
@@ -709,13 +982,15 @@ function updateOrderPermissionsState() {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Set up master permission toggle
-    const masterCheckbox = document.getElementById('can_manage_orders');
-    if (masterCheckbox) {
-        masterCheckbox.addEventListener('change', updateOrderPermissionsState);
-        // Apply initial state
-        updateOrderPermissionsState();
-    }
+    // Set up master permission toggles
+    Object.keys(masterPermissions).forEach(masterId => {
+        const masterCheckbox = document.getElementById(masterId);
+        if (masterCheckbox) {
+            masterCheckbox.addEventListener('change', () => updateMasterPermissionState(masterId));
+            // Apply initial state
+            updateMasterPermissionState(masterId);
+        }
+    });
     
     // Set up permission count updates
     allPermissions.forEach(perm => {
