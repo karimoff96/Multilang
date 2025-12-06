@@ -13,6 +13,8 @@ Order Routing Rules:
 import logging
 import telebot
 import os
+import tempfile
+import zipfile
 from telebot.apihelper import ApiTelegramException
 from functools import lru_cache
 from django.conf import settings
@@ -55,21 +57,49 @@ def clear_bot_cache(bot_token=None):
 def create_order_zip(order):
     """Create a ZIP file containing all order files."""
     try:
+        # Check if order has files
+        if not order.files.exists():
+            logger.warning(f"Order {order.id} has no files to zip")
+            return None
+        
         # Create temporary directory for ZIP
         temp_dir = tempfile.mkdtemp()
         zip_filename = f"order_{order.id}_{order.bot_user.name.replace(' ', '_')}.zip"
         zip_path = os.path.join(temp_dir, zip_filename)
         
+        files_added = 0
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for order_file in order.files.all():
-                if order_file.file and os.path.exists(order_file.file.path):
-                    # Get just the filename without path
-                    file_name = os.path.basename(order_file.file.name)
-                    zipf.write(order_file.file.path, file_name)
+                if order_file.file:
+                    try:
+                        # Get the full path to the file
+                        full_path = order_file.file.path
+                        if os.path.exists(full_path):
+                            # Get just the filename without path
+                            file_name = os.path.basename(order_file.file.name)
+                            zipf.write(full_path, file_name)
+                            files_added += 1
+                            logger.debug(f"Added file to zip: {file_name}")
+                        else:
+                            logger.warning(f"File does not exist: {full_path}")
+                    except Exception as e:
+                        logger.error(f"Failed to add file to zip: {e}")
         
+        # If no files were added, delete the empty zip and return None
+        if files_added == 0:
+            logger.warning(f"No files could be added to zip for order {order.id}")
+            if os.path.exists(zip_path):
+                os.remove(zip_path)
+            if os.path.exists(temp_dir):
+                os.rmdir(temp_dir)
+            return None
+        
+        logger.info(f"Created zip for order {order.id} with {files_added} files")
         return zip_path
     except Exception as e:
         logger.error(f"Failed to create ZIP for order {order.id}: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 

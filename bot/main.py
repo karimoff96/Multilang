@@ -870,6 +870,25 @@ def get_user_language(user_id):
         return "uz"
 
 
+def update_user_username(message):
+    """Update user's Telegram username if it has changed.
+    Call this function when processing messages to keep username in sync."""
+    try:
+        if not message or not message.from_user:
+            return
+        
+        user_id = message.from_user.id
+        telegram_username = message.from_user.username or ""
+        
+        user = get_bot_user(user_id)
+        if user and user.username != telegram_username:
+            user.username = telegram_username
+            user.save(update_fields=['username'])
+            logger.debug(f"Updated username for user {user_id}: {telegram_username}")
+    except Exception as e:
+        logger.debug(f"Error updating username for user: {e}")
+
+
 def send_message(chat_id, text, reply_markup=None, parse_mode="HTML"):
     """Helper function to send messages with proper language handling"""
     try:
@@ -1283,6 +1302,9 @@ def start(message):
     user_id = message.from_user.id
     username = message.from_user.username
     first_name = message.from_user.first_name or ""
+    
+    # Update username in case it changed
+    update_user_username(message)
 
     # Default language (will be updated if user exists)
     language = "uz"
@@ -3756,6 +3778,9 @@ def handle_file_upload(message):
     user_id = message.from_user.id
     language = get_user_language(user_id)
     current_step = get_user_step(user_id)
+    
+    # Update username in case it changed on Telegram
+    update_user_username(message)
 
     logger.debug(f" ====== FILE UPLOAD START ======")
     logger.debug(f" File upload from user {user_id}, step: {current_step}")
