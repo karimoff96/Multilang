@@ -1126,8 +1126,8 @@ def get_center_branches(center=None):
 
 def show_branch_selection(message, language):
     """
-    Show branch selection after language selection.
-    User must select a branch before registration.
+    Show branch selection after phone number is received.
+    User must select a branch before registration completes.
     """
     user_id = message.from_user.id
     update_user_step(user_id, STEP_BRANCH_SELECTION)
@@ -1143,19 +1143,27 @@ def show_branch_selection(message, language):
         send_message(message.chat.id, get_text("error_no_branches", language))
         return
     
-    # If only one branch, auto-select it
+    # If only one branch, auto-select it and complete registration
     if len(branches) == 1:
         branch = branches[0]
-        # Save branch to user
+        # Save branch to user and complete registration
         user = get_bot_user(user_id, center)
         if user:
             user.branch = branch
+            user.is_active = True
+            user.step = STEP_REGISTERED
             user.save()
         else:
-            create_or_update_user(user_id=user_id, branch=branch, center=center)
+            user = create_or_update_user(user_id=user_id, branch=branch, center=center)
+            if user:
+                user.is_active = True
+                user.step = STEP_REGISTERED
+                user.save()
         
-        # Skip branch selection, go to registration
-        start_registration(message, language)
+        # Show registration complete and main menu
+        complete_text = get_text("registration_complete", language)
+        send_message(message.chat.id, complete_text)
+        show_main_menu(message, language)
         return
     
     # Multiple branches - show selection
@@ -1398,17 +1406,21 @@ def start(message):
         send_message(message.chat.id, error_msg)
 
         # Continue with normal registration
+        center = get_current_center()
         user = create_or_update_user(
             user_id=user_id,
             username=username,
             language=language,
+            center=center,
         )
     else:
         # Normal user registration
+        center = get_current_center()
         user = create_or_update_user(
             user_id=user_id,
             username=username,
             language=language,
+            center=center,
         )
 
     if user is None:
@@ -2866,9 +2878,13 @@ def handle_profile_language_update(call):
         # Update the user's profile language
         try:
             from accounts.models import BotUser
+            
+            # Get current center for multi-tenant support
+            center = get_current_center()
 
             user, created = BotUser.objects.get_or_create(
                 user_id=user_id,
+                center=center,
                 defaults={
                     "username": call.from_user.username,
                     "language": language,
@@ -2887,8 +2903,9 @@ def handle_profile_language_update(call):
             print(f"[ERROR] Error updating user {user_id} language: {e}")
             try:
                 # Try to create the user if update failed
+                center = get_current_center()
                 create_or_update_user(
-                    user_id=user_id, username=call.from_user.username, language=language
+                    user_id=user_id, username=call.from_user.username, language=language, center=center
                 )
             except Exception as inner_e:
                 print(f"[CRITICAL] Failed to create user {user_id}: {inner_e}")
@@ -3750,14 +3767,24 @@ def handle_file_upload(message):
     language = get_user_language(user_id)
     current_step = get_user_step(user_id)
 
+    print(f"[DEBUG] ====== FILE UPLOAD START ======")
     print(f"[DEBUG] File upload from user {user_id}, step: {current_step}")
+    print(f"[DEBUG] STEP_UPLOADING_RECEIPT = {STEP_UPLOADING_RECEIPT}")
+    print(f"[DEBUG] STEP_UPLOADING_FILES = {STEP_UPLOADING_FILES}")
+    print(f"[DEBUG] Has document: {message.document is not None}")
+    print(f"[DEBUG] Has photo: {message.photo is not None}")
 
     # Handle payment receipt uploads
     if current_step == STEP_UPLOADING_RECEIPT:
+        print(f"[DEBUG] Entering STEP_UPLOADING_RECEIPT handler")
         if message.document or message.photo:
             try:
+                print(f"[DEBUG] Getting user_data from uploaded_files...")
                 user_data = uploaded_files.get(user_id, {})
+                print(f"[DEBUG] user_data = {user_data}")
+                
                 if "order_id" not in user_data:
+                    print(f"[ERROR] order_id not found in user_data!")
                     bot.send_message(
                         message.chat.id,
                         get_text("order_not_found_restart", language),
@@ -3765,9 +3792,11 @@ def handle_file_upload(message):
                     return
 
                 order_id = user_data["order_id"]
+                print(f"[DEBUG] order_id = {order_id}")
+                
                 from orders.models import Order
-
                 order = Order.objects.get(id=order_id)
+                print(f"[DEBUG] Order found: {order}")
 
                 # Save receipt file
                 from django.core.files.base import ContentFile
@@ -3775,51 +3804,77 @@ def handle_file_upload(message):
                 from orders.models import Receipt
                 import time
 
+                print(f"[DEBUG] Downloading file from Telegram...")
                 if message.document:
                     file_info = bot.get_file(message.document.file_id)
                     downloaded_file = bot.download_file(file_info.file_path)
-                    file_name = f"receipt_{order_id}_{int(time.time())}_{message.document.file_name}"
+                    # Truncate original filename if too long to keep total path under 100 chars
+                    original_name = message.document.file_name or "doc"
+                    if len(original_name) > 30:
+                        name_parts = original_name.rsplit('.', 1)
+                        ext = f".{name_parts[1]}" if len(name_parts) > 1 else ""
+                        original_name = name_parts[0][:25] + ext
+                    file_name = f"rcpt_{order_id}_{int(time.time())}_{original_name}"
                     telegram_file_id = message.document.file_id
                 else:  # message.photo
                     file_info = bot.get_file(message.photo[-1].file_id)
                     downloaded_file = bot.download_file(file_info.file_path)
-                    file_name = f"receipt_{order_id}_{int(time.time())}_{message.photo[-1].file_id}.jpg"
+                    # Use short unique ID instead of full Telegram file ID
+                    file_name = f"rcpt_{order_id}_{int(time.time())}.jpg"
                     telegram_file_id = message.photo[-1].file_id
+                
+                print(f"[DEBUG] File downloaded, size: {len(downloaded_file)} bytes")
+                print(f"[DEBUG] File name: {file_name}")
 
                 # Save receipt to storage
+                print(f"[DEBUG] Saving file to storage...")
                 file_content = ContentFile(downloaded_file, name=file_name)
                 receipt_path = default_storage.save(
                     f"receipts/{file_name}", file_content
                 )
+                print(f"[DEBUG] File saved to: {receipt_path}")
 
                 # Get user for Receipt record
                 user = get_bot_user(user_id)
+                print(f"[DEBUG] Bot user: {user}")
 
-                # Create Receipt record instead of updating order.recipt
-                Receipt.objects.create(
-                    order=order,
-                    file=receipt_path,
-                    telegram_file_id=telegram_file_id,
-                    amount=order.total_due,  # Initial payment - full amount
-                    source='bot',
-                    status='pending',
-                    uploaded_by_user=user,
-                )
+                # Create Receipt record
+                print(f"[DEBUG] Creating Receipt record...")
+                try:
+                    receipt = Receipt.objects.create(
+                        order=order,
+                        telegram_file_id=telegram_file_id,
+                        amount=order.total_due,
+                        source='bot',
+                        status='pending',
+                        uploaded_by_user=user,
+                    )
+                    receipt.file.name = receipt_path
+                    receipt.save()
+                    print(f"[DEBUG] Receipt created: {receipt.id}")
+                except Exception as receipt_error:
+                    print(f"[ERROR] Failed to create Receipt record: {receipt_error}")
+                    import traceback
+                    traceback.print_exc()
 
-                # Keep legacy field for backward compatibility (optional)
+                # Keep legacy field for backward compatibility
+                print(f"[DEBUG] Updating order...")
                 order.recipt = receipt_path
                 order.payment_type = "card"
                 order.status = "payment_received"
                 order.is_active = True
                 order.save()
+                print(f"[DEBUG] Order updated successfully")
 
                 # Forward order to channel
+                print(f"[DEBUG] Forwarding order to channel...")
                 forward_success = forward_order_to_channel(order, language)
 
                 if not forward_success:
                     print(f"[WARNING] Failed to forward order {order.id} to channel")
 
                 # Clear uploaded files data
+                print(f"[DEBUG] Clearing user files...")
                 clear_user_files(user_id)
                 update_user_step(user_id, STEP_REGISTERED)
 
@@ -3964,6 +4019,7 @@ def handle_file_upload(message):
                     )
 
                 # Send completion message
+                print(f"[DEBUG] Sending completion message...")
                 bot.send_message(
                     chat_id=message.chat.id,
                     text=completion_text,
@@ -3975,19 +4031,27 @@ def handle_file_upload(message):
                     send_branch_location(message.chat.id, order.branch, language)
 
                 # Return user to main menu
+                print(f"[DEBUG] ====== FILE UPLOAD SUCCESS ======")
                 show_main_menu(message, language)
                 return
 
             except Exception as e:
-                print(f"[ERROR] Failed to handle receipt upload: {e}")
+                print(f"[ERROR] ====== FILE UPLOAD FAILED ======")
+                print(f"[ERROR] Exception type: {type(e).__name__}")
+                print(f"[ERROR] Exception message: {e}")
                 import traceback
-
                 traceback.print_exc()
+                
+                # Send detailed error to user (in development)
+                error_detail = f"Debug: {type(e).__name__}: {str(e)[:100]}"
                 bot.send_message(
                     message.chat.id,
-                    get_text("receipt_upload_failed", language),
+                    f"{get_text('receipt_upload_failed', language)}\n\n<code>{error_detail}</code>",
+                    parse_mode="HTML",
                 )
                 return
+        else:
+            print(f"[DEBUG] No document or photo in message for STEP_UPLOADING_RECEIPT")
 
     # Handle additional receipt uploads for existing orders
     if current_step == STEP_AWAITING_RECEIPT:
@@ -4035,16 +4099,22 @@ def handle_file_upload(message):
                 elif message.photo:
                     telegram_file_id = message.photo[-1].file_id
 
-                # Create Receipt record
-                receipt = Receipt.objects.create(
-                    order=order,
-                    file=receipt_path,
-                    telegram_file_id=telegram_file_id,
-                    amount=order.remaining,  # Default to remaining amount
-                    source='bot',
-                    status='pending',
-                    uploaded_by_user=user,
-                )
+                # Create Receipt record - avoid passing path directly to FileField
+                try:
+                    receipt = Receipt.objects.create(
+                        order=order,
+                        telegram_file_id=telegram_file_id,
+                        amount=order.remaining,  # Default to remaining amount
+                        source='bot',
+                        status='pending',
+                        uploaded_by_user=user,
+                    )
+                    # Set file path directly
+                    receipt.file.name = receipt_path
+                    receipt.save()
+                except Exception as receipt_error:
+                    print(f"[ERROR] Failed to create Receipt record: {receipt_error}")
+                    # Continue without Receipt record
 
                 # Clear user state
                 if user_id in uploaded_files:
@@ -4147,22 +4217,28 @@ def handle_file_upload(message):
             # Store file information with unique ID
             import time
 
-            if user_id not in uploaded_files:
-                uploaded_files[user_id] = {"files": {}}
-
-            # Ensure 'files' key exists (in case dict was partially initialized)
-            if "files" not in uploaded_files[user_id]:
-                uploaded_files[user_id]["files"] = {}
+            # Get current user data or initialize
+            current_data = uploaded_files.get(user_id) or {}
+            if not isinstance(current_data, dict):
+                current_data = dict(current_data) if current_data else {}
+            
+            # Ensure 'files' key exists
+            if "files" not in current_data:
+                current_data["files"] = {}
 
             # Generate unique file ID using timestamp and file_id
             file_uid = f"{int(time.time() * 1000)}_{file_id[:8]}"
 
-            uploaded_files[user_id]["files"][file_uid] = {
+            # Add new file to files dict
+            current_data["files"][file_uid] = {
                 "file_path": file_path,
                 "file_name": file_name,
                 "pages": pages,
                 "file_size": file_size,
             }
+            
+            # Reassign to trigger save to persistent storage
+            uploaded_files[user_id] = current_data
 
             print(
                 f"[DEBUG] Total files for user: {len(uploaded_files[user_id]['files'])}"
@@ -4193,22 +4269,20 @@ def handle_file_upload(message):
                 confirm_text += f"📊 Pages: {pages}\n"
                 confirm_text += f"💾 Size: {size_display}\n"
 
-            # Add delete button with correct index
+            # Add delete button with file_uid for precise deletion
             markup = types.InlineKeyboardMarkup()
-            # Get the current index of the just-added file
-            current_file_index = len(uploaded_files[user_id]["files"]) - 1
             delete_button = types.InlineKeyboardButton(
                 text=(
                     "🗑️ O'chirish"
                     if language == "uz"
                     else "🗑️ Delete" if language == "en" else "🗑️ Удалить"
                 ),
-                callback_data=f"delete_file_{current_file_index}_{user_id}",
+                callback_data=f"delete_file_{file_uid}",
             )
             markup.add(delete_button)
 
             print(
-                f"[DEBUG] Created delete button with index {current_file_index} for user {user_id}"
+                f"[DEBUG] Created delete button with file_uid {file_uid} for user {user_id}"
             )
 
             bot.send_message(
@@ -4994,6 +5068,7 @@ def handle_finish_upload_message(message, language):
         order_data = {
             "bot_user": user,
             "product": doc_type,
+            "branch": user.branch,  # Set branch from user's branch
             "language": None,  # Will be set below if lang_id exists
             "total_pages": 0,  # Will be calculated from files
             "copy_number": copy_number,  # Add copy number
@@ -5079,8 +5154,8 @@ def handle_back_to_upload_docs_message(message, language):
 
             order = Order.objects.get(id=order_id)
 
-            # Restore complete user data including language
-            uploaded_files[user_id] = {
+            # Build complete user data including language
+            restored_data = {
                 "doc_type_id": order.product.id,
                 "service_id": order.product.category.id,
                 "lang_id": order.language.id if order.language else None,
@@ -5092,7 +5167,7 @@ def handle_back_to_upload_docs_message(message, language):
 
             for idx, order_file in enumerate(order.files.all()):
                 file_uid = f"{int(time.time() * 1000)}_{idx}"
-                uploaded_files[user_id]["files"][file_uid] = {
+                restored_data["files"][file_uid] = {
                     "file_path": order_file.file.name,
                     "file_name": order_file.file.name.split("/")[-1],
                     "pages": order_file.pages,
@@ -5100,6 +5175,9 @@ def handle_back_to_upload_docs_message(message, language):
                         order_file.file.size if hasattr(order_file.file, "size") else 0
                     ),
                 }
+
+            # Assign all at once to trigger save to persistent storage
+            uploaded_files[user_id] = restored_data
 
             print(
                 f"[DEBUG] Restored {len(uploaded_files[user_id]['files'])} files from order"
@@ -5550,32 +5628,38 @@ def handle_delete_file(call):
     language = get_user_language(user_id)
 
     try:
-        # Extract file index from callback data
-        file_index = int(call.data.split("_")[2])
-        print(f"[DEBUG] Delete request for file index: {file_index}")
+        # Extract file_uid from callback data (format: delete_file_{file_uid})
+        file_uid = call.data.replace("delete_file_", "")
+        print(f"[DEBUG] Delete request for file_uid: {file_uid}")
 
         # Get user's uploaded files
-        user_data = uploaded_files.get(user_id, {})
-        if not user_data or "files" not in user_data:
+        current_data = uploaded_files.get(user_id)
+        if not current_data:
+            current_data = {}
+        else:
+            # Convert to regular dict for modification
+            current_data = dict(current_data)
+            
+        if not current_data or "files" not in current_data:
             print(f"[DEBUG] No user data found for user {user_id}")
             bot.answer_callback_query(call.id, get_text("no_files_to_delete", language))
             return
 
-        files = user_data["files"]
+        files = current_data["files"]
         print(f"[DEBUG] User has {len(files)} files")
 
         if not files:
-            print(f"[DEBUG] Files list is empty for user {user_id}")
+            print(f"[DEBUG] Files dict is empty for user {user_id}")
             bot.answer_callback_query(call.id, get_text("no_files_to_delete", language))
             return
 
-        if not (0 <= file_index < len(files)):
-            print(f"[DEBUG] Invalid file index {file_index}, files count: {len(files)}")
+        if file_uid not in files:
+            print(f"[DEBUG] File UID {file_uid} not found in files: {list(files.keys())}")
             bot.answer_callback_query(call.id, get_text("file_not_found", language))
             return
 
         # Get file info before deletion
-        file_info = files[file_index]
+        file_info = files[file_uid]
         file_path = file_info["file_path"]
         file_name = file_info["file_name"]
 
@@ -5590,8 +5674,11 @@ def handle_delete_file(call):
         else:
             print(f"[DEBUG] File not found in storage: {file_path}")
 
-        # Remove file from uploaded_files
-        deleted_file = files.pop(file_index)
+        # Remove file from the dict
+        del files[file_uid]
+        
+        # Reassign to trigger save to persistent storage
+        uploaded_files[user_id] = current_data
         print(f"[DEBUG] Successfully removed file from uploaded_files: {file_name}")
 
         # Send confirmation message first (before deleting the original message)

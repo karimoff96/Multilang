@@ -145,21 +145,10 @@ def register_all_handlers(bot, center=None):
         from .main import handle_contact as main_handle
         main_handle(message)
     
-    @bot.message_handler(func=lambda m: get_user_step(m.from_user.id) in [
-        STEP_NAME_REQUESTED, STEP_EDITING_NAME
-    ])
-    def handle_name_input(message):
-        """Handle name input"""
-        from .main import handle_name_input as main_handle
-        main_handle(message)
-    
-    @bot.message_handler(func=lambda m: get_user_step(m.from_user.id) in [
-        STEP_PHONE_REQUESTED, STEP_EDITING_PHONE
-    ])
-    def handle_phone_input(message):
-        """Handle phone input"""
-        from .main import handle_phone_input as main_handle
-        main_handle(message)
+    # NOTE: Name and phone input are handled by the general text handler in main.py
+    # (handle_text_messages function) which checks for STEP_NAME_REQUESTED, 
+    # STEP_EDITING_NAME, STEP_PHONE_REQUESTED, and STEP_EDITING_PHONE.
+    # Do NOT register separate handlers here as it causes duplicate message handling.
     
     # =========================================================================
     # Callback Query Handlers
@@ -236,7 +225,7 @@ def register_all_handlers(bot, center=None):
     
     @bot.message_handler(content_types=["document", "photo"])
     def handle_file_upload(message):
-        from .main import handle_file as main_handle
+        from .main import handle_file_upload as main_handle
         main_handle(message)
     
     logger.info(f"Registered all handlers for bot")

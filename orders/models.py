@@ -85,7 +85,8 @@ class Order(models.Model):
         verbose_name=_("Payment Type"),
     )
     recipt = models.FileField(
-        upload_to="recipts/", blank=True, null=True, verbose_name=_("Receipt")
+        upload_to="recipts/", blank=True, null=True, verbose_name=_("Receipt"),
+        max_length=255,
     )
     total_price = models.DecimalField(
         max_digits=10, decimal_places=2, verbose_name=_("Total Price")
@@ -409,6 +410,7 @@ class Receipt(models.Model):
         upload_to="receipts/%Y/%m/",
         blank=True,
         null=True,
+        max_length=255,
         verbose_name=_("Receipt File"),
         help_text=_("Receipt image or document"),
     )
