@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from accounts.models import TelegramUser
+from accounts.models import BotUser
 
 
 class Command(BaseCommand):
@@ -39,7 +39,7 @@ class Command(BaseCommand):
         if name and phone:
             # Create new agency profile
             try:
-                agency = TelegramUser.objects.create(
+                agency = BotUser.objects.create(
                     name=name,
                     phone=phone,
                     language=language,
@@ -71,7 +71,7 @@ class Command(BaseCommand):
         elif agency_id:
             # Get existing agency
             try:
-                agency = TelegramUser.objects.get(id=agency_id, is_agency=True)
+                agency = BotUser.objects.get(id=agency_id, is_agency=True)
 
                 if agency.is_used:
                     self.stdout.write(
@@ -108,7 +108,7 @@ class Command(BaseCommand):
                         self.style.WARNING("⚠️  This link can only be used once!")
                     )
 
-            except TelegramUser.DoesNotExist:
+            except BotUser.DoesNotExist:
                 self.stdout.write(
                     self.style.ERROR(
                         f"❌ Agency with ID {agency_id} not found or is not an agency profile."

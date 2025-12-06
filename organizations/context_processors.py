@@ -3,7 +3,10 @@ Context processors for the translation center management system.
 Provides role and permission info to all templates.
 """
 
+import logging
 from organizations.rbac import get_admin_profile
+
+logger = logging.getLogger(__name__)
 
 
 def rbac_context(request):
@@ -114,7 +117,7 @@ def rbac_context(request):
         context['admin_notifications'] = list(notifications)
         context['unread_notifications_count'] = AdminNotification.count_unread_for_user(request.user)
     except Exception as e:
-        print(f"[DEBUG] Failed to get notifications: {e}")
+        logger.debug(f" Failed to get notifications: {e}")
     
     # Superuser has all permissions
     if request.user.is_superuser:

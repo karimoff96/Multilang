@@ -6,13 +6,10 @@ with proper rate limiting, batching, retry logic, and error handling.
 """
 import time
 import logging
-from decimal import Decimal
-from datetime import timedelta
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
 
 from django.db import transaction
-from django.db.models import Q
 from django.utils import timezone
 from django.conf import settings
 

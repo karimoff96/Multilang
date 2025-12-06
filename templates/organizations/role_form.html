@@ -738,6 +738,56 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Audit Logs -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-card border border-secondary-100">
+                                    <h6 class="text-sm fw-semibold text-secondary-main permission-section-header">
+                                        <iconify-icon icon="lucide:scroll-text"></iconify-icon>
+                                        <span>Audit Logs</span>
+                                    </h6>
+                                    
+                                    <!-- Master Permission -->
+                                    <div class="master-permission">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="can_manage_audit_logs" id="can_manage_audit_logs"
+                                                   {% if role.can_manage_audit_logs %}checked{% endif %}>
+                                            <label class="form-check-label" for="can_manage_audit_logs">
+                                                Full Audit Log Access
+                                            </label>
+                                        </div>
+                                        <div class="perm-hint text-secondary-light">Overrides all audit log permissions</div>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_view_audit_logs" id="can_view_audit_logs"
+                                               {% if role.can_view_audit_logs %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_view_audit_logs">
+                                            View Audit Logs
+                                        </label>
+                                    </div>
+                                    <div class="perm-hint text-secondary-light">View system activity and changes history</div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_export_audit_logs" id="can_export_audit_logs"
+                                               {% if role.can_export_audit_logs %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_export_audit_logs">
+                                            Export Audit Logs
+                                        </label>
+                                    </div>
+                                    <div class="perm-hint text-secondary-light">Export logs to CSV/Excel</div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_grant_audit_permissions" id="can_grant_audit_permissions"
+                                               {% if role.can_grant_audit_permissions %}checked{% endif %}>
+                                        <label class="form-check-label text-warning-600" for="can_grant_audit_permissions">
+                                            <iconify-icon icon="lucide:shield-check" class="me-1"></iconify-icon>
+                                            Grant Audit Permissions
+                                        </label>
+                                    </div>
+                                    <div class="perm-hint text-secondary-light">Can assign audit permissions to other users</div>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- Quick Permission Templates -->
@@ -862,7 +912,9 @@ const allPermissions = [
     // Branch Settings
     'can_manage_branch_settings', 'can_view_branch_settings',
     // Agencies
-    'can_manage_agencies', 'can_view_agencies', 'can_create_agencies', 'can_edit_agencies', 'can_delete_agencies'
+    'can_manage_agencies', 'can_view_agencies', 'can_create_agencies', 'can_edit_agencies', 'can_delete_agencies',
+    // Audit Logs
+    'can_manage_audit_logs', 'can_view_audit_logs', 'can_export_audit_logs', 'can_grant_audit_permissions'
 ];
 
 // Define child permissions for each master permission
@@ -877,7 +929,8 @@ const masterPermissions = {
     'can_manage_customers': ['can_view_customers', 'can_edit_customers', 'can_delete_customers'],
     'can_manage_marketing': ['can_create_marketing_posts', 'can_send_branch_broadcasts', 'can_send_center_broadcasts', 'can_view_broadcast_stats'],
     'can_manage_branch_settings': ['can_view_branch_settings'],
-    'can_manage_agencies': ['can_view_agencies', 'can_create_agencies', 'can_edit_agencies', 'can_delete_agencies']
+    'can_manage_agencies': ['can_view_agencies', 'can_create_agencies', 'can_edit_agencies', 'can_delete_agencies'],
+    'can_manage_audit_logs': ['can_view_audit_logs', 'can_export_audit_logs', 'can_grant_audit_permissions']
 };
 
 // Templates
@@ -887,7 +940,7 @@ const templates = {
         'can_manage_centers': true, 'can_manage_branches': true, 'can_manage_staff': true,
         'can_manage_orders': true, 'can_manage_financial': true, 'can_manage_reports': true,
         'can_manage_products': true, 'can_manage_customers': true, 'can_manage_marketing': true,
-        'can_manage_agencies': true, 'can_manage_branch_settings': true,
+        'can_manage_agencies': true, 'can_manage_branch_settings': true, 'can_manage_audit_logs': true,
         // All granular permissions
         'can_view_centers': true, 'can_create_centers': true, 'can_edit_centers': true, 'can_delete_centers': true,
         'can_view_branches': true, 'can_create_branches': true, 'can_edit_branches': true, 'can_delete_branches': true,
@@ -901,13 +954,14 @@ const templates = {
         'can_view_customers': true, 'can_edit_customers': true, 'can_delete_customers': true,
         'can_create_marketing_posts': true, 'can_send_branch_broadcasts': true, 'can_send_center_broadcasts': true, 'can_view_broadcast_stats': true,
         'can_manage_branch_settings': true, 'can_view_branch_settings': true,
-        'can_view_agencies': true, 'can_create_agencies': true, 'can_edit_agencies': true, 'can_delete_agencies': true
+        'can_view_agencies': true, 'can_create_agencies': true, 'can_edit_agencies': true, 'can_delete_agencies': true,
+        'can_view_audit_logs': true, 'can_export_audit_logs': true, 'can_grant_audit_permissions': true
     },
     'manager': {
         'can_manage_centers': false, 'can_manage_branches': false, 'can_manage_staff': false,
         'can_manage_orders': true, 'can_manage_financial': false, 'can_manage_reports': false,
         'can_manage_products': false, 'can_manage_customers': false, 'can_manage_marketing': false,
-        'can_manage_agencies': false,
+        'can_manage_agencies': false, 'can_manage_audit_logs': false,
         'can_view_centers': true, 'can_view_branches': true, 'can_view_staff': true,
         'can_view_all_orders': true, 'can_view_own_orders': true, 'can_create_orders': true, 'can_edit_orders': true,
         'can_delete_orders': false, 'can_assign_orders': true, 'can_update_order_status': true, 'can_complete_orders': true,
@@ -917,16 +971,18 @@ const templates = {
         'can_view_products': true, 'can_view_customers': true, 'can_edit_customers': true,
         'can_create_marketing_posts': true, 'can_send_branch_broadcasts': true, 'can_send_center_broadcasts': false, 'can_view_broadcast_stats': true,
         'can_view_branch_settings': true,
-        'can_view_agencies': true, 'can_create_agencies': true
+        'can_view_agencies': true, 'can_create_agencies': true,
+        'can_view_audit_logs': true, 'can_export_audit_logs': false, 'can_grant_audit_permissions': false
     },
     'staff': {
         'can_manage_centers': false, 'can_manage_branches': false, 'can_manage_staff': false,
         'can_manage_orders': false, 'can_manage_financial': false, 'can_manage_reports': false,
         'can_manage_products': false, 'can_manage_customers': false, 'can_manage_marketing': false,
-        'can_manage_agencies': false,
+        'can_manage_agencies': false, 'can_manage_audit_logs': false,
         'can_view_own_orders': true, 'can_update_order_status': true, 'can_complete_orders': true,
         'can_receive_payments': true,
-        'can_view_customers': true, 'can_view_products': true
+        'can_view_customers': true, 'can_view_products': true,
+        'can_view_audit_logs': false, 'can_export_audit_logs': false, 'can_grant_audit_permissions': false
     },
     'none': {}  // All false
 };

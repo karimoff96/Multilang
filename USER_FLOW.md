@@ -1,4 +1,4 @@
-# Bot User Flow - Copy Number Feature
+# Bot User Flow - Complete Journey
 
 ## Complete User Journey
 
@@ -11,23 +11,22 @@
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                  LANGUAGE SELECTION                             │
-│           [🇺🇿 O'zbek] [🇷🇺 Русский] [🇬🇧 English]              │
+│           [🇺🇿 O'zbek] [🇷🇺 Русский] [��🇧 English]              │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                  Choose proper branch                           │
-│           here bot has to show all this center related branches 
-│ in an ethical way that for user it should be easy and understandable
-what branch is where located, you can create a button of branches or something creative, 
-branch, name and brach address/location
+│                  BRANCH SELECTION                               │
+│    Select your preferred branch location:                       │
+│    - Branch name + address displayed                            │
+│    - Location URL if available                                  │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                   REGISTRATION                                  │
-│              - Enter name                                       │
-│              - Share phone number                               │
+│              - Enter full name                                  │
+│              - Share phone number (contact button)              │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
@@ -39,7 +38,7 @@ branch, name and brach address/location
                              │ User clicks "Use Service"
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                  SELECT SERVICE                                 │
+│                  SELECT SERVICE CATEGORY                        │
 │              [📋 Translation]                                   │
 │              [✅ Apostille]                                      │
 │              [🔙 Back]                                          │
@@ -47,8 +46,8 @@ branch, name and brach address/location
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│               SELECT LANGUAGE (if multiple)                     │
-│           [English] [Русский] [O'zbek]                          │
+│           SELECT TRANSLATION LANGUAGE (if multiple)             │
+│           [English] [Русский] [O'zbek] [Deutsch]                │
 │           [🔙 Back to Services]                                 │
 └────────────────────────────┬────────────────────────────────────┘
                              │
@@ -62,35 +61,28 @@ branch, name and brach address/location
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│           ⭐ NEW STEP: SELECT NUMBER OF COPIES ⭐               │
+│              SELECT NUMBER OF COPIES                            │
 │                                                                 │
-│  📋 Number of Copies                                            │
-│                                                                 │
-│  How many additional copies do you need?                        │
+│  📋 How many additional copies do you need?                     │
 │                                                                 │
 │  💡 Note:                                                       │
 │  • 0 = Original document only                                  │
 │  • 1 = Original + 1 copy                                       │
 │  • 2 = Original + 2 copies                                     │
 │                                                                 │
-│  📊 Additional charge will be calculated based on copies        │
-│                                                                 │
-│  🔢 Select number of copies or enter the amount (0-99):         │
-│                                                                 │
 │           [0️⃣] [1️⃣] [2️⃣]                                       │
 │           [3️⃣] [4️⃣] [5️⃣]                                       │
 │                                                                 │
 │        [🔙 Back to Document Types]                              │
 └────────────────────────────┬────────────────────────────────────┘
-                             │ User selects copy number
-                             │ (e.g., clicks 2️⃣ or types "2")
+                             │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    UPLOAD FILES                                 │
 │                                                                 │
-│  📄 Passport Translation                                        │
-│  🌍 Selected language: English                                  │
-│  📋 Number of Copies: 2  ⬅️ NEW INFO SHOWN                     │
+│  📄 Selected: Passport Translation                              │
+│  🌍 Language: English                                           │
+│  📋 Copies: 2                                                   │
 │                                                                 │
 │  Please upload your files...                                    │
 │                                                                 │
@@ -98,49 +90,99 @@ branch, name and brach address/location
 │  📄 DOC, DOCX, PDF                                              │
 │  🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC                       │
 │                                                                 │
-│        [Finish Upload] [🔙 Back to Copies]  ⬅️ NEW BACK        │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ User uploads files
-                             │ (e.g., 2 files, 5 pages total)
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│              ORDER SUMMARY & PAYMENT                            │
-│                                                                 │
-│  📋 Order Summary                                               │
-│                                                                 │
-│  📄 Order number: #123                                        │
-│  📎 Total files: 2                                              │
-│  📄 Total pages: 5                                              │
-│  🏢 User type: Regular User                                     │
-│  💰 1st page price: 50,000 sum                                  │
-│  💰 Other pages: 40,000 sum                                     │
-│  💵 Base price: 210,000 sum                                     │
-│                                                                 │
-│  📋 Number of copies: 2  ⬅️ NEW INFO                           │
-│  💳 Copy charges (100%): 420,000 sum  ⬅️ NEW CALCULATION       │
-│                                                                 │
-│  💵 Total amount: 630,000 sum  ⬅️ UPDATED TOTAL                │
-│  ⏱️ Estimated time: 3 days                                      │
-│                                                                 │
-│  💳 Choose payment method:                                      │
-│       [Pay by Card] [Pay with Cash]                             │
-│       [🔙 Back to Upload]                                       │
+│        [✅ Finish Upload] [🔙 Back]                              │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    PAYMENT COMPLETED                            │
-│  ✅ Order successfully placed!                                  │
+│              ORDER SUMMARY & PRICING                            │
 │                                                                 │
-│  Order #123                                                     │
+│  📋 Order Summary                                               │
+│                                                                 │
+│  📄 Order number: #123                                          │
+│  📎 Total files: 2                                              │
+│  📄 Total pages: 5                                              │
+│  🏢 User type: Regular / Agency                                 │
+│  💰 First page: 50,000 sum                                      │
+│  💰 Other pages: 40,000 sum × 4                                 │
+│  💵 Base price: 210,000 sum                                     │
+│  📋 Copies: 2 (100% per copy)                                   │
+│  💳 Copy charges: 420,000 sum                                   │
+│  ⏱️ Estimated time: 3 days                                      │
+│                                                                 │
+│  💵 TOTAL: 630,000 sum                                          │
+│                                                                 │
+│  💳 Choose payment method:                                      │
+│       [💳 Pay by Card] [💵 Pay with Cash]                       │
+│       [🔙 Back]                                                 │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                    ┌────────┴────────┐
+                    │                 │
+                    ▼                 ▼
+┌───────────────────────┐   ┌────────────────────────────────────┐
+│     CASH PAYMENT      │   │         CARD PAYMENT               │
+│                       │   │                                    │
+│  Please pay at the    │   │  💳 Bank Card: 8600 XXXX XXXX XXXX│
+│  branch location      │   │  👤 Holder: John Doe               │
+│                       │   │                                    │
+│  Order confirmed!     │   │  Please transfer 630,000 sum       │
+│                       │   │  and upload receipt photo          │
+└───────────────────────┘   └────────────────┬───────────────────┘
+                                             │
+                                             ▼
+                            ┌────────────────────────────────────┐
+                            │       UPLOAD RECEIPT               │
+                            │                                    │
+                            │  📸 Please upload a photo of       │
+                            │     your payment receipt           │
+                            │                                    │
+                            │  [🔙 Back]                         │
+                            └────────────────┬───────────────────┘
+                                             │
+                                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    ORDER CONFIRMED                              │
+│                                                                 │
+│  ✅ Order #123 successfully placed!                             │
+│                                                                 │
 │  Total: 630,000 sum                                             │
-│  Including: 2 copies                                            │
+│  Copies: 2                                                      │
+│  Status: Payment Received                                       │
 │                                                                 │
-│  Our operators will contact you shortly.                        │
+│  Our operators will verify payment and start processing.       │
+│  You will receive notifications about status updates.          │
 │                                                                 │
 │           [🏠 Back to Main Menu]                                │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Order Status Flow
+
+```
+┌──────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│ Pending  │───▶│ Payment Pending │───▶│Payment Received │───▶│Payment Confirmed│
+└──────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
+                                                                       │
+                                                                       ▼
+                                                              ┌─────────────────┐
+                                                              │  In Progress    │
+                                                              └────────┬────────┘
+                                                                       │
+                                           ┌───────────────────────────┼───────┐
+                                           ▼                           ▼       │
+                                    ┌──────────┐                ┌──────────┐   │
+                                    │  Ready   │───────────────▶│Completed │   │
+                                    └──────────┘                └──────────┘   │
+                                                                               │
+                                                                     ┌─────────┴─┐
+                                                                     │ Cancelled │
+                                                                     └───────────┘
+```
+
+---
 
 ## Price Calculation Example
 
@@ -148,95 +190,95 @@ branch, name and brach address/location
 - Document type: Passport Translation
 - Pages: 5
 - User: Regular (not agency)
-- Copy number: 2
+- Copies: 2
 - Pricing settings:
   - First page: 50,000 sum
   - Other pages: 40,000 sum each
-  - User copy percentage: 100%
+  - Copy percentage: 100%
 
-### Step-by-Step Calculation:
+### Calculation:
 
 ```
-1️⃣ Calculate Base Price:
-   Base = First page + (Other pages × (Total pages - 1))
-   Base = 50,000 + (40,000 × 4)
-   Base = 50,000 + 160,000
-   Base = 210,000 sum
+1️⃣ Base Price:
+   First page: 50,000
+   Other pages: 40,000 × 4 = 160,000
+   Base = 50,000 + 160,000 = 210,000 sum
 
-2️⃣ Calculate Copy Charge:
-   Copy charge = (Base × Copy percentage × Copy number) / 100
-   Copy charge = (210,000 × 100 × 2) / 100
-   Copy charge = 420,000 sum
+2️⃣ Copy Charge:
+   Copy charge = Base × (Copy% / 100) × Number of Copies
+   Copy charge = 210,000 × 1.0 × 2 = 420,000 sum
 
-3️⃣ Calculate Total:
-   Total = Base + Copy charge
-   Total = 210,000 + 420,000
-   Total = 630,000 sum ✅
+3️⃣ Total:
+   Total = Base + Copy Charge
+   Total = 210,000 + 420,000 = 630,000 sum
 ```
 
-### What User Receives:
+### What Customer Receives:
 - ✅ Original translated document (5 pages)
-- ✅ Copy #1 of translated document (5 pages)
-- ✅ Copy #2 of translated document (5 pages)
+- ✅ Copy #1 (5 pages)
+- ✅ Copy #2 (5 pages)
 - **Total: 15 pages of translated documents**
 
-## Admin Configuration Impact
+---
 
-### Example 1: Discounted Copies (50%)
-```
-Settings:
-- user_copy_price_percentage = 50%
+## Agency Pricing
 
-Calculation:
-- Base: 210,000 sum
-- Copy charge: (210,000 × 50 × 2) / 100 = 210,000 sum
-- Total: 420,000 sum (cheaper!)
-```
+Agencies get special discounted rates:
 
-### Example 2: Premium Copies (150%)
-```
-Settings:
-- user_copy_price_percentage = 150%
+| Item | Regular Price | Agency Price |
+|------|---------------|--------------|
+| First page | 50,000 | 40,000 |
+| Other pages | 40,000 | 30,000 |
+| Copy % | 100% | 50% |
 
-Calculation:
-- Base: 210,000 sum
-- Copy charge: (210,000 × 150 × 2) / 100 = 630,000 sum
-- Total: 840,000 sum (more expensive!)
-```
+---
 
-### Example 3: Free Copies (0%)
-```
-Settings:
-- user_copy_price_percentage = 0%
-
-Calculation:
-- Base: 210,000 sum
-- Copy charge: (210,000 × 0 × 2) / 100 = 0 sum
-- Total: 210,000 sum (no extra charge!)
-```
-
-## Navigation Options
-
-### User Can Go Back At Any Point:
+## Admin Actions on Orders
 
 ```
-Copy Selection Screen:
-  [🔙 Back to Document Types] ──► Shows document list again
-
-File Upload Screen:
-  [🔙 Back to Copies] ──► Returns to copy selection
-                           (keeps service/document/language info)
-
-Payment Screen:
-  [🔙 Back to Upload] ──► Returns to file upload
-                           (restores previously uploaded files)
+┌─────────────────────────────────────────────────────────────────┐
+│                    ADMIN ORDER MANAGEMENT                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  📋 Order #123 - Passport Translation                           │
+│  👤 Customer: John Doe | 📞 +998901234567                       │
+│  💰 Total: 630,000 sum | 📋 Copies: 2                           │
+│                                                                 │
+│  ─────────────────────────────────────────────────────────────  │
+│                                                                 │
+│  [✅ Confirm Payment]  - Mark payment as verified              │
+│  [👤 Assign Staff]     - Assign to translator                  │
+│  [🔄 Update Status]    - Change order status                   │
+│  [💰 Add Extra Fee]    - Add rush/special charges              │
+│  [📝 Add Note]         - Add internal notes                    │
+│  [🔔 Notify Customer]  - Send status update                    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-## Key Features:
+---
 
-✅ **Intuitive**: Quick buttons for common choices (0-5)
-✅ **Flexible**: Can type custom numbers (6-99)
-✅ **Clear**: Shows exactly what user will receive
-✅ **Transparent**: Displays all pricing breakdown
-✅ **Reversible**: Can go back and change copy number
-✅ **Multi-language**: Full support for UZ/RU/EN
+## Key Features
+
+✅ **Multi-language Support** - UZ/RU/EN throughout  
+✅ **Branch Selection** - Customer chooses preferred location  
+✅ **Copy Number** - Flexible copy pricing  
+✅ **File Upload** - Multiple formats supported  
+✅ **Auto Page Count** - PDF/DOCX page detection  
+✅ **Payment Options** - Cash or card  
+✅ **Receipt Upload** - Card payment verification  
+✅ **Real-time Notifications** - Status updates via bot  
+✅ **Order Tracking** - View order history and status  
+
+---
+
+## Navigation Shortcuts
+
+| Command | Action |
+|---------|--------|
+| `/start` | Restart bot / Main menu |
+| `/help` | Show help information |
+| `/orders` | View my orders |
+| `/profile` | View/edit profile |
+| `/language` | Change language |
+

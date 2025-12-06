@@ -1,8 +1,9 @@
+import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils.translation import gettext_lazy as _
@@ -10,12 +11,14 @@ from decimal import Decimal, InvalidOperation
 from .models import Order, OrderMedia
 from organizations.rbac import (
     get_user_orders, get_user_staff, get_user_branches,
-    admin_profile_required, role_required, manager_or_owner_required,
     permission_required
 )
-from organizations.models import AdminUser, Branch, TranslationCenter
+from organizations.models import AdminUser, Branch
 from core.audit import log_action, log_order_assign, log_status_change
 from bot.notification_service import send_order_notification
+
+logger = logging.getLogger(__name__)
+audit_logger = logging.getLogger('audit')
 
 
 def has_order_permission(request, permission_name, order=None):
@@ -569,6 +572,7 @@ def deleteOrder(request, order_id):
     
     # Check permission using granular permission system
     if not has_order_permission(request, 'can_delete_orders', order):
+        logger.warning(f"Permission denied: User {request.user.username} attempted to delete order #{order_id}")
         messages.error(request, "You don't have permission to delete orders.")
         return redirect('orders:ordersList')
     
@@ -582,6 +586,7 @@ def deleteOrder(request, order_id):
             changes={'order_id': order.id, 'status': order.status},
             request=request
         )
+        logger.info(f"Order #{order_id} deleted by {request.user.username}")
         order.delete()
         messages.success(request, f'Order #{order_id} has been deleted')
         return redirect('orders:ordersList')
@@ -698,6 +703,7 @@ def receivePayment(request, order_id):
     
     # Check permission using granular permission system
     if not has_order_permission(request, 'can_receive_payments', order):
+        logger.warning(f"Permission denied: User {request.user.username} attempted to receive payment for order #{order_id}")
         messages.error(request, "You don't have permission to receive payments.")
         return redirect('orders:orderDetail', order_id=order_id)
     
@@ -705,6 +711,7 @@ def receivePayment(request, order_id):
     receiver = request.admin_profile if request.admin_profile else None
     order.mark_payment_received(receiver)
     
+    logger.info(f"Payment received for Order #{order_id} by {request.user.username}")
     messages.success(request, f'Payment received for Order #{order_id}')
     
     # Return JSON for AJAX requests
@@ -726,11 +733,13 @@ def completeOrder(request, order_id):
     
     # Check permission using granular permission system
     if not has_order_permission(request, 'can_complete_orders', order):
+        logger.warning(f"Permission denied: User {request.user.username} attempted to complete order #{order_id}")
         messages.error(request, "You don't have permission to complete orders.")
         return redirect('orders:orderDetail', order_id=order_id)
     
     # Check if order is ready to be completed
     if order.status not in ['ready', 'in_progress']:
+        logger.warning(f"Invalid status change: Order #{order_id} status is {order.status}, cannot complete")
         messages.error(request, "Order must be ready or in progress to complete.")
         return redirect('orders:orderDetail', order_id=order_id)
     
@@ -738,6 +747,7 @@ def completeOrder(request, order_id):
     completer = request.admin_profile if request.admin_profile else None
     order.mark_completed(completer)
     
+    logger.info(f"Order #{order_id} completed by {request.user.username}")
     messages.success(request, f'Order #{order_id} marked as completed')
     
     # Return JSON for AJAX requests
@@ -1051,6 +1061,7 @@ def record_order_payment(request, order_id):
         return JsonResponse(result)
         
     except PaymentError as e:
+        logger.warning(f"Payment error for order #{order_id}: {e}")
         return JsonResponse({
             'success': False,
             'error': str(e)
@@ -1058,6 +1069,7 @@ def record_order_payment(request, order_id):
     except Exception as e:
         import traceback
         traceback.print_exc()
+        logger.error(f"Unexpected payment error for order #{order_id}: {e}", exc_info=True)
         return JsonResponse({
             'success': False,
             'error': f'An error occurred: {str(e)}'

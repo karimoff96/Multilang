@@ -6,7 +6,10 @@ This module provides:
 - Utility to detect model changes
 """
 
+import logging
 from django.contrib.contenttypes.models import ContentType
+
+logger = logging.getLogger('core.audit')
 
 
 def get_audit_log_model():
@@ -61,6 +64,15 @@ def log_action(user, action, target=None, details=None, changes=None, request=No
         log_entry.user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]
     
     log_entry.save()
+    
+    # Also log to file for monitoring/alerting
+    log_msg = f"AUDIT [{action}] User: {user} | Target: {log_entry.target_repr or 'N/A'} | Details: {details}"
+    if center:
+        log_msg += f" | Center: {center}"
+    if branch:
+        log_msg += f" | Branch: {branch}"
+    logger.info(log_msg)
+    
     return log_entry
 
 
@@ -123,6 +135,10 @@ def log_delete(user, target, request=None, details=None):
         log_entry.user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]
     
     log_entry.save()
+    
+    # Log to file for monitoring
+    logger.info(f"AUDIT [DELETE] User: {user} | Target: {target_type} - {target_repr} | Center: {log_entry.center or 'N/A'}")
+    
     return log_entry
 
 

@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -9,6 +10,9 @@ from decimal import Decimal, InvalidOperation
 from .models import Category, Product, Language, Expense
 from organizations.rbac import get_user_categories, get_user_products, get_user_branches, get_user_expenses
 from organizations.models import TranslationCenter
+
+logger = logging.getLogger(__name__)
+audit_logger = logging.getLogger('audit')
 
 
 # ============ Category Views ============

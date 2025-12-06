@@ -1,3 +1,4 @@
+import logging
 from django.db import models
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
@@ -6,6 +7,8 @@ from django.utils import timezone
 from accounts.models import BotUser
 from organizations.models import Branch, AdminUser
 from services.models import Language, Product
+
+logger = logging.getLogger(__name__)
 
 # Create your models here.
 
@@ -553,7 +556,7 @@ def send_status_notification(sender, instance, created, **kwargs):
             from core.models import AdminNotification
             AdminNotification.create_order_notification(instance)
         except Exception as e:
-            print(f"[ERROR] Failed to create new order notification: {e}")
+            logger.error(f" Failed to create new order notification: {e}")
         return
         
     # Check for status change
@@ -568,7 +571,7 @@ def send_status_notification(sender, instance, created, **kwargs):
 
                 send_order_status_notification(instance, old_status, new_status)
             except Exception as e:
-                print(f"[ERROR] Failed to send status notification: {e}")
+                logger.error(f" Failed to send status notification: {e}")
                 import traceback
                 traceback.print_exc()
             
@@ -581,7 +584,7 @@ def send_status_notification(sender, instance, created, **kwargs):
                 elif new_status == 'completed':
                     AdminNotification.create_completed_notification(instance)
             except Exception as e:
-                print(f"[ERROR] Failed to create status change notification: {e}")
+                logger.error(f" Failed to create status change notification: {e}")
     
     # Check for payment amount change (partial payment received)
     if hasattr(instance, "_old_received"):
@@ -596,7 +599,7 @@ def send_status_notification(sender, instance, created, **kwargs):
                 from bot.main import send_payment_received_notification
                 send_payment_received_notification(instance, amount_received, new_received)
             except Exception as e:
-                print(f"[ERROR] Failed to send payment notification: {e}")
+                logger.error(f" Failed to send payment notification: {e}")
                 import traceback
                 traceback.print_exc()
             
@@ -605,7 +608,7 @@ def send_status_notification(sender, instance, created, **kwargs):
                 from core.models import AdminNotification
                 AdminNotification.create_payment_notification(instance, amount_received)
             except Exception as e:
-                print(f"[ERROR] Failed to create payment notification: {e}")
+                logger.error(f" Failed to create payment notification: {e}")
 
 
 @receiver(post_save, sender=Receipt)
@@ -616,6 +619,6 @@ def create_receipt_notification(sender, instance, created, **kwargs):
             from core.models import AdminNotification
             AdminNotification.create_receipt_notification(instance)
         except Exception as e:
-            print(f"[ERROR] Failed to create receipt notification: {e}")
+            logger.error(f" Failed to create receipt notification: {e}")
             import traceback
             traceback.print_exc()

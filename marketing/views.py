@@ -3,6 +3,7 @@ Marketing Views for Dashboard
 
 Handles CRUD operations for marketing posts and broadcast management.
 """
+import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -10,14 +11,16 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
 from django.db.models import Q
 
-from organizations.models import TranslationCenter, Branch, AdminUser
+from organizations.models import TranslationCenter, Branch
 from organizations.rbac import get_user_branches
 from core.audit import log_action
 from .models import MarketingPost, BroadcastRecipient
-from .broadcast_service import BroadcastService, send_broadcast, get_recipient_count
+from .broadcast_service import send_broadcast, get_recipient_count
+
+logger = logging.getLogger(__name__)
+audit_logger = logging.getLogger('audit')
 
 
 def get_user_scope_permissions(request):
@@ -296,10 +299,21 @@ def marketing_detail(request, post_id):
     # Get recipient stats
     recipient_stats = {
         'pending': BroadcastRecipient.objects.filter(post=post, status='pending').count(),
+        'sent': BroadcastRecipient.objects.filter(post=post, status='sent').count(),
         'delivered': BroadcastRecipient.objects.filter(post=post, status='delivered').count(),
         'failed': BroadcastRecipient.objects.filter(post=post, status='failed').count(),
         'blocked': BroadcastRecipient.objects.filter(post=post, status='blocked').count(),
+        'skipped': BroadcastRecipient.objects.filter(post=post, status='skipped').count(),
     }
+    # Total from actual recipients for accuracy
+    recipient_stats['total'] = sum([
+        recipient_stats['pending'],
+        recipient_stats['sent'],
+        recipient_stats['delivered'],
+        recipient_stats['failed'],
+        recipient_stats['blocked'],
+        recipient_stats['skipped'],
+    ])
     
     # Get recent recipients (for display)
     recent_recipients = BroadcastRecipient.objects.filter(

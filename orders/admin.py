@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import reverse
-from .models import BotUser, Order, OrderMedia, Receipt
+from .models import Order, OrderMedia, Receipt
 from django.utils.html import format_html
 
 

@@ -37,8 +37,8 @@
                         <th data-i18n="marketing.title">Title</th>
                         <th data-i18n="marketing.scope">Scope</th>
                         <th data-i18n="marketing.status">Status</th>
-                        <th data-i18n="marketing.recipients">Recipients</th>
-                        <th data-i18n="marketing.delivery">Delivery</th>
+                        <th class="text-center" data-i18n="marketing.totalUsers">Total Users</th>
+                        <th data-i18n="marketing.deliveryResults" style="min-width: 180px;">Delivery Results</th>
                         <th data-i18n="marketing.created">Created</th>
                         <th class="text-center" data-i18n="marketing.actions">Actions</th>
                     </tr>
@@ -90,60 +90,46 @@
                             <span class="badge bg-secondary-focus text-secondary-main" data-i18n="marketing.cancelled">Cancelled</span>
                             {% endif %}
                         </td>
-                        <td>
-                            <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <!-- Total -->
-                                <span class="badge bg-neutral-200 text-neutral-600 px-8 py-4" 
-                                      data-bs-toggle="tooltip" 
-                                      data-bs-placement="top"
-                                      data-i18n-title="marketing.totalRecipients"
-                                      title="Total Recipients">
-                                    {{ post.total_recipients }}
-                                </span>
-                                {% if post.sent_count > 0 %}
-                                <!-- Delivered -->
-                                {% if post.delivered_count > 0 %}
-                                <span class="badge bg-success-focus text-success-600 px-8 py-4" 
-                                      data-bs-toggle="tooltip" 
-                                      data-bs-placement="top"
-                                      data-i18n-title="marketing.delivered"
-                                      title="Delivered">
-                                    {{ post.delivered_count }}
-                                </span>
-                                {% endif %}
-                                <!-- Failed -->
-                                {% if post.failed_count > 0 %}
-                                <span class="badge bg-danger-focus text-danger-600 px-8 py-4" 
-                                      data-bs-toggle="tooltip" 
-                                      data-bs-placement="top"
-                                      data-i18n-title="marketing.failed"
-                                      title="Failed">
-                                    {{ post.failed_count }}
-                                </span>
-                                {% endif %}
-                                <!-- Pending -->
-                                {% if post.pending_count > 0 %}
-                                <span class="badge bg-warning-focus text-warning-600 px-8 py-4" 
-                                      data-bs-toggle="tooltip" 
-                                      data-bs-placement="top"
-                                      data-i18n-title="marketing.pending"
-                                      title="Pending">
-                                    {{ post.pending_count }}
-                                </span>
-                                {% endif %}
-                                {% endif %}
-                            </div>
+                        <td class="text-center">
+                            <span class="fw-semibold text-lg">{{ post.total_recipients }}</span>
                         </td>
                         <td>
-                            {% if post.sent_count > 0 %}
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="progress w-80-px" style="height: 6px;">
-                                    <div class="progress-bar bg-success" style="width: {{ post.delivery_percentage }}%"></div>
+                            {% if post.delivered_count > 0 or post.failed_count > 0 %}
+                            {% with total=post.delivered_count|add:post.failed_count %}
+                            {% if total > 0 %}
+                            <div class="delivery-bar-container">
+                                <div class="delivery-bar">
+                                    {% if post.delivered_count > 0 %}
+                                    <div class="delivery-segment success" 
+                                         style="width: {% widthratio post.delivered_count total 100 %}%;"
+                                         data-bs-toggle="tooltip" 
+                                         data-bs-html="true"
+                                         data-bs-placement="top"
+                                         title="<span class='tooltip-title'>✓ Delivered</span><br><span class='tooltip-count'>{{ post.delivered_count }} users</span>">
+                                        <span class="segment-percent">{% widthratio post.delivered_count total 100 %}%</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if post.failed_count > 0 %}
+                                    <div class="delivery-segment failed" 
+                                         style="width: {% widthratio post.failed_count total 100 %}%;"
+                                         data-bs-toggle="tooltip" 
+                                         data-bs-html="true"
+                                         data-bs-placement="top"
+                                         title="<span class='tooltip-title'>✗ Failed</span><br><span class='tooltip-count'>{{ post.failed_count }} users</span>">
+                                        <span class="segment-percent">{% widthratio post.failed_count total 100 %}%</span>
+                                    </div>
+                                    {% endif %}
                                 </div>
-                                <span class="text-sm text-secondary-light">{{ post.delivery_percentage }}%</span>
                             </div>
+                            {% endif %}
+                            {% endwith %}
+                            {% elif post.status == 'draft' or post.status == 'scheduled' %}
+                            <span class="text-secondary-light text-sm">
+                                <iconify-icon icon="mdi:clock-outline" class="me-1"></iconify-icon>
+                                Not sent yet
+                            </span>
                             {% else %}
-                            <span class="text-secondary-light">-</span>
+                            <span class="text-secondary-light">—</span>
                             {% endif %}
                         </td>
                         <td>
@@ -234,5 +220,102 @@ function applyFilters() {
     
     window.location.href = url.toString();
 }
+
+// Initialize Bootstrap tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
 </script>
+
+<style>
+.delivery-bar-container {
+    min-width: 120px;
+    max-width: 160px;
+}
+
+.delivery-bar {
+    display: flex;
+    height: 10px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.08);
+}
+
+.delivery-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.delivery-segment.success {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+.delivery-segment.failed {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.delivery-segment:hover {
+    transform: scaleY(1.3);
+    filter: brightness(1.1);
+    z-index: 1;
+}
+
+.segment-percent {
+    font-size: 8px;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.delivery-segment:hover .segment-percent {
+    opacity: 1;
+}
+
+/* Hide percent if segment is too narrow */
+.delivery-segment[style*="width: 0%"] .segment-percent,
+.delivery-segment[style*="width: 1%"] .segment-percent,
+.delivery-segment[style*="width: 2%"] .segment-percent,
+.delivery-segment[style*="width: 3%"] .segment-percent,
+.delivery-segment[style*="width: 4%"] .segment-percent,
+.delivery-segment[style*="width: 5%"] .segment-percent,
+.delivery-segment[style*="width: 6%"] .segment-percent,
+.delivery-segment[style*="width: 7%"] .segment-percent,
+.delivery-segment[style*="width: 8%"] .segment-percent,
+.delivery-segment[style*="width: 9%"] .segment-percent,
+.delivery-segment[style*="width: 10%"] .segment-percent,
+.delivery-segment[style*="width: 11%"] .segment-percent,
+.delivery-segment[style*="width: 12%"] .segment-percent,
+.delivery-segment[style*="width: 13%"] .segment-percent,
+.delivery-segment[style*="width: 14%"] .segment-percent,
+.delivery-segment[style*="width: 15%"] .segment-percent {
+    display: none;
+}
+
+/* Tooltip styling */
+.tooltip-inner {
+    text-align: center;
+    padding: 8px 12px;
+}
+
+.tooltip-title {
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.tooltip-count {
+    font-size: 14px;
+    font-weight: 700;
+}
+</style>
 {% endblock content %}

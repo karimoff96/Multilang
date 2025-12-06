@@ -9,16 +9,12 @@ import logging
 from .translations import get_text, create_or_update_user
 from .notification_service import send_order_notification
 from django.core.files.base import ContentFile
-import tempfile
 from django.utils import timezone
 import mimetypes
-import zipfile
 from io import BytesIO
 from django.core.files.storage import default_storage
 import uuid
 from accounts.models import BotUser
-from io import BytesIO
-import zipfile
 
 # Import persistent state (Redis-backed for multi-worker support)
 from .persistent_state import user_data, uploaded_files
@@ -173,10 +169,7 @@ def create_order_zip(order):
         return temp_zip.name
 
     except Exception as e:
-        print(f"[ERROR] Failed to create ZIP file: {e}")
-        import traceback
-
-        traceback.print_exc()
+        logger.error(f"Failed to create ZIP file: {e}", exc_info=True)
         return None
 
 
@@ -204,7 +197,7 @@ def send_order_status_notification(order, old_status, new_status):
     try:
         user = order.bot_user
         if not user or not user.user_id:
-            print(f"[WARNING] No user or user_id for order {order.id}")
+            logger.warning(f"No user or user_id for order {order.id}")
             return
             
         language = user.language or "uz"
@@ -396,7 +389,7 @@ def send_order_status_notification(order, old_status, new_status):
             # Generic fallback
             notification_text = get_text(f"status_{new_status}", language)
             if not notification_text or "Missing translation" in notification_text:
-                print(f"[WARNING] No notification text found for status: {new_status}")
+                logger.warning(f"No notification text found for status: {new_status}")
                 return
             notification_text = notification_text.format(
                 order_id=order.id,
@@ -425,15 +418,12 @@ def send_order_status_notification(order, old_status, new_status):
                 chat_id=user.user_id, text=notification_text, parse_mode="HTML"
             )
 
-        print(
-            f"[INFO] Sent status notification to user {user.user_id} for order {order.id}: {old_status} → {new_status}"
+        logger.info(
+            f"Sent status notification to user {user.user_id} for order {order.id}: {old_status} → {new_status}"
         )
 
     except Exception as e:
-        print(f"[ERROR] Failed to send status notification: {e}")
-        import traceback
-
-        traceback.print_exc()
+        logger.error(f"Failed to send status notification: {e}", exc_info=True)
 
 
 def send_payment_received_notification(order, amount_received, total_received):
@@ -443,7 +433,7 @@ def send_payment_received_notification(order, amount_received, total_received):
     try:
         user = order.bot_user
         if not user or not user.user_id:
-            print(f"[WARNING] No user or user_id for order {order.id}")
+            logger.warning(f"No user or user_id for order {order.id} during payment notification")
             return
             
         language = user.language or "uz"
@@ -528,14 +518,12 @@ def send_payment_received_notification(order, amount_received, total_received):
                 chat_id=user.user_id, text=notification_text, parse_mode="HTML"
             )
 
-        print(
-            f"[INFO] Sent payment notification to user {user.user_id} for order {order.id}: received {amount_received}, total {total_received}"
+        logger.info(
+            f"Sent payment notification to user {user.user_id} for order {order.id}: received {amount_received}, total {total_received}"
         )
 
     except Exception as e:
-        print(f"[ERROR] Failed to send payment notification: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Failed to send payment notification: {e}", exc_info=True)
 
 
 def generate_order_summary_caption(order, language):
@@ -712,13 +700,13 @@ def forward_order_to_channel(order, language):
             logger.warning(f"No channel configured for order {order.id}")
             return False
 
-        print(f"[DEBUG] Forwarding order {order.id} to channel {channel_id}")
+        logger.debug(f"Forwarding order {order.id} to channel {channel_id}")
 
         # Create ZIP file with all order files
         zip_path = create_order_zip(order)
 
         if not zip_path:
-            print(f"[ERROR] Failed to create ZIP file for order {order.id}")
+            logger.error(f"Failed to create ZIP file for order {order.id}")
             return False
 
         # Generate caption
@@ -738,8 +726,8 @@ def forward_order_to_channel(order, language):
                     visible_file_name=zip_filename,
                 )
 
-            print(
-                f"[DEBUG] Successfully forwarded order {order.id} to channel {channel_id}"
+            logger.debug(
+                f"Successfully forwarded order {order.id} to channel {channel_id}"
             )
 
             # Clean up temporary ZIP file
@@ -751,10 +739,7 @@ def forward_order_to_channel(order, language):
             return True
 
         except Exception as e:
-            print(f"[ERROR] Failed to send ZIP to channel: {e}")
-            import traceback
-
-            traceback.print_exc()
+            logger.error(f"Failed to send ZIP to channel: {e}", exc_info=True)
 
             # Clean up temporary ZIP file
             try:
@@ -765,10 +750,7 @@ def forward_order_to_channel(order, language):
             return False
 
     except Exception as e:
-        print(f"[ERROR] Failed to forward order to channel: {e}")
-        import traceback
-
-        traceback.print_exc()
+        logger.error(f"Failed to forward order to channel: {e}", exc_info=True)
         return False
 
 
@@ -800,7 +782,7 @@ def get_file_pages_from_content(file_content, file_name):
             page_count = len(pdf_reader.pages)
             return max(1, page_count)
         except Exception as e:
-            print(f"[WARNING] Failed to read PDF pages: {e}")
+            logger.warning(f"Failed to read PDF pages: {e}")
             # Fallback to word count estimation if PDF parsing fails
             try:
                 text = file_content.decode("utf-8", errors="ignore")
@@ -884,7 +866,7 @@ def get_user_language(user_id):
             return user.language
         return "uz"
     except Exception as e:
-        print(f"[DEBUG] Error getting user language for {user_id}: {e}")
+        logger.debug(f"Error getting user language for {user_id}: {e}")
         return "uz"
 
 
@@ -902,7 +884,7 @@ def send_message(chat_id, text, reply_markup=None, parse_mode="HTML"):
             chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode=parse_mode
         )
     except Exception as e:
-        print(f"[ERROR] Failed to send message to {chat_id}: {e}")
+        logger.error(f"Failed to send message to {chat_id}: {e}")
         # Fallback to direct message sending if our custom function fails
         return bot.send_message(
             chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode=parse_mode
@@ -961,7 +943,7 @@ def send_branch_location(chat_id, branch, language):
                         longitude=coords['lng']
                     )
                 except Exception as e:
-                    print(f"[WARNING] Failed to send location coordinates: {e}")
+                    logger.warning(f"Failed to send location coordinates: {e}")
                     # Send URL as fallback
                     bot.send_message(chat_id=chat_id, text=f"🗺️ {branch.location_url}")
             else:
@@ -970,7 +952,7 @@ def send_branch_location(chat_id, branch, language):
         
         return True
     except Exception as e:
-        print(f"[ERROR] Failed to send branch location: {e}")
+        logger.error(f"Failed to send branch location: {e}")
         return False
 
 
@@ -1036,7 +1018,7 @@ def extract_coordinates_from_url(url):
         
         return None
     except Exception as e:
-        print(f"[WARNING] Failed to extract coordinates from URL: {e}")
+        logger.warning(f"Failed to extract coordinates from URL: {e}")
         return None
 
 
@@ -1050,7 +1032,7 @@ def get_current_center():
         center = TranslationCenter.objects.filter(bot_token=bot.token).first()
         return center
     except Exception as e:
-        print(f"[ERROR] Failed to get current center: {e}")
+        logger.error(f"Failed to get current center: {e}")
         return None
 
 
@@ -1072,7 +1054,7 @@ def get_bot_user(user_id, center=None):
     try:
         return BotUser.objects.filter(user_id=user_id, center=center).first()
     except Exception as e:
-        print(f"[ERROR] Failed to get bot user: {e}")
+        logger.error(f"Failed to get bot user: {e}")
         return None
 
 
@@ -1103,7 +1085,7 @@ def get_or_create_bot_user(user_id, center=None, defaults=None):
             defaults=defaults
         )
     except Exception as e:
-        print(f"[ERROR] Failed to get or create bot user: {e}")
+        logger.error(f"Failed to get or create bot user: {e}")
         return None, False
 
 
@@ -1122,7 +1104,7 @@ def get_center_branches(center=None):
         from organizations.models import Branch
         return list(Branch.objects.filter(center=center, is_active=True))
     except Exception as e:
-        print(f"[ERROR] Failed to get branches: {e}")
+        logger.error(f"Failed to get branches: {e}")
         return []
 
 
@@ -1227,11 +1209,11 @@ def ensure_additional_info_exists():
                 about_us_ru="📞 Если у вас есть вопросы, свяжитесь с администратором\n🌐 Информация о нашей компании будет добавлена в ближайшее время!",
                 about_us_en="📞 If you have questions, contact administrator\n🌐 Information about our company will be added soon!",
             )
-            print("[INFO] Created default AdditionalInfo record")
+            logger.info("Created default AdditionalInfo record")
         else:
-            print("[INFO] AdditionalInfo record already exists - using existing record")
+            logger.info("AdditionalInfo record already exists - using existing record")
     except Exception as e:
-        print(f"[ERROR] Failed to check AdditionalInfo: {e}")
+        logger.error(f"Failed to check AdditionalInfo: {e}")
 
 
 def update_user_step(user_id, step):
@@ -1313,32 +1295,32 @@ def start(message):
     # Check for deep link parameter (e.g., /start agency_1234-5678-...)
     if len(message.text.split()) > 1:
         param = message.text.split()[1]
-        print(f"[DEBUG] Start parameter received: {param}")
+        logger.debug(f"Start parameter received: {param}")
 
         if param.startswith("agency_"):
             try:
                 agency_token = param[7:]  # Remove "agency_" prefix
-                print(f"[DEBUG] Extracted token: {agency_token}")
+                logger.debug(f"Extracted token: {agency_token}")
 
                 # Validate it's a valid UUID
                 uuid_obj = uuid_module.UUID(agency_token)
-                print(f"[DEBUG] Token is valid UUID: {uuid_obj}")
+                logger.debug(f"Token is valid UUID: {uuid_obj}")
 
                 # Try to get the agency by token
                 agency = BotUser.get_agency_by_token(agency_token)
                 if agency:
                     is_agency_invite = True
-                    print(
-                        f"[INFO] ✅ Valid agency token found for agency: {agency.name} (ID: {agency.id})"
+                    logger.info(
+                        f"Valid agency token found for agency: {agency.name} (ID: {agency.id})"
                     )
                 else:
-                    print(
-                        f"[WARNING] ❌ Invalid or already used agency token: {agency_token}"
+                    logger.warning(
+                        f"Invalid or already used agency token: {agency_token}"
                     )
             except (ValueError, IndexError) as e:
-                print(f"[ERROR] ❌ Invalid agency token format: {e}")
+                logger.error(f"Invalid agency token format: {e}")
             except Exception as e:
-                print(f"[ERROR] ❌ Unexpected error processing agency token: {e}")
+                logger.error(f"Unexpected error processing agency token: {e}")
 
     # Check if user already exists for this center
     center = get_current_center()
@@ -1368,7 +1350,7 @@ def start(message):
                     agency.name
                 )
                 send_message(message.chat.id, success_msg)
-                print(f"[INFO] Linked existing user {user_id} to agency {agency.name}")
+                logger.info(f" Linked existing user {user_id} to agency {agency.name}")
         elif is_agency_invite and not agency:
             # Invalid token
             error_msg = get_text("invalid_agency_invite", language)
@@ -1540,7 +1522,7 @@ def handle_branch_selection(call):
     except Branch.DoesNotExist:
         bot.answer_callback_query(call.id, get_text("error_branch_not_found", language))
     except Exception as e:
-        print(f"[ERROR] Branch selection error: {e}")
+        logger.error(f" Branch selection error: {e}")
         bot.answer_callback_query(call.id, get_text("error_general", language))
 
 
@@ -1846,7 +1828,7 @@ def handle_main_menu(message):
         try:
             bot.delete_message(message.chat.id, message.message_id)
         except Exception as e:
-            print(f"[DEBUG] Could not delete profile button message: {e}")
+            logger.debug(f" Could not delete profile button message: {e}")
         show_profile(message, language)
     elif (
         "Biz haqimizda" in message.text
@@ -2280,7 +2262,7 @@ def show_user_orders(message, language):
         show_main_menu(message, language)
 
     except Exception as e:
-        print(f"[ERROR] Failed to show user orders: {e}")
+        logger.error(f" Failed to show user orders: {e}")
         import traceback
 
         traceback.print_exc()
@@ -2359,7 +2341,7 @@ def handle_pay_order(call):
     except Order.DoesNotExist:
         bot.answer_callback_query(call.id, get_text("error_order_not_found", language))
     except Exception as e:
-        print(f"[ERROR] handle_pay_order: {e}")
+        logger.error(f" handle_pay_order: {e}")
         bot.answer_callback_query(call.id, get_text("error_general", language))
 
 
@@ -2417,7 +2399,7 @@ def show_profile(message, language):
 
     # If we still don't have a chat_id, we can't proceed
     if chat_id is None:
-        print("[ERROR] Could not determine chat_id in show_profile")
+        logger.error("Could not determine chat_id in show_profile")
         return
 
     # Get user info with fallbacks
@@ -2434,7 +2416,7 @@ def show_profile(message, language):
     # If we still don't have a user_id, use the chat_id as user_id
     if user_id is None:
         user_id = chat_id
-        print(f"[WARNING] Using chat_id as user_id: {user_id}")
+        logger.warning(f" Using chat_id as user_id: {user_id}")
 
     # Get username and name with fallbacks
     username = ""
@@ -2469,7 +2451,7 @@ def show_profile(message, language):
         )
 
         if created:
-            print(f"[DEBUG] Created new user: {user_id}")
+            logger.debug(f" Created new user: {user_id}")
 
         # Create profile text using translation keys
         branch_name = user.branch.name if user.branch else "—"
@@ -2516,7 +2498,7 @@ def show_profile(message, language):
         )
 
     except Exception as e:
-        print(f"[ERROR] Failed to show profile: {e}")
+        logger.error(f" Failed to show profile: {e}")
         import traceback
 
         traceback.print_exc()
@@ -2708,7 +2690,7 @@ def handle_change_branch(call):
     except BotUser.DoesNotExist:
         bot.answer_callback_query(call.id, "User not found")
     except Exception as e:
-        print(f"[ERROR] Change branch error: {e}")
+        logger.error(f" Change branch error: {e}")
         bot.answer_callback_query(call.id, "Error occurred")
 
 
@@ -2747,7 +2729,7 @@ def handle_edit_language_request(call):
                 parse_mode="HTML",
             )
         except Exception as e:
-            print(f"[ERROR] Error editing message: {e}")
+            logger.error(f" Error editing message: {e}")
             # If editing fails, send a new message
             send_message(
                 chat_id=user_id,
@@ -2755,7 +2737,7 @@ def handle_edit_language_request(call):
                 reply_markup=markup,
             )
     except Exception as e:
-        print(f"[ERROR] Error in handle_edit_language_request: {e}")
+        logger.error(f" Error in handle_edit_language_request: {e}")
         try:
             send_message(
                 call.message.chat.id,
@@ -2799,7 +2781,7 @@ def handle_service_language_selection(call):
         # Extract language ID and service ID from callback data
         parts = call.data.split("_")
         if len(parts) < 3:
-            print(f"[ERROR] Invalid service language selection format: {call.data}")
+            logger.error(f" Invalid service language selection format: {call.data}")
             send_message(user_id, get_text("error_occurred", language))
             show_categorys(call.message, language)
             return
@@ -2809,7 +2791,7 @@ def handle_service_language_selection(call):
             service_id = int(parts[2])
             doc_type_id = int(parts[3]) if len(parts) > 3 else None
         except (ValueError, IndexError) as e:
-            print(f"[ERROR] Error parsing callback data {call.data}: {e}")
+            logger.error(f" Error parsing callback data {call.data}: {e}")
             send_message(user_id, get_text("error_occurred", language))
             show_categorys(call.message, language)
             return
@@ -2828,13 +2810,13 @@ def handle_service_language_selection(call):
             if lang_obj:
                 uploaded_files[user_id]["lang_name"] = lang_obj.name
         except Exception as ex:
-            print(f"[WARNING] Could not get language name: {ex}")
+            logger.warning(f" Could not get language name: {ex}")
 
         # Delete the language selection message
         try:
             bot.delete_message(chat_id=user_id, message_id=message.message_id)
         except Exception as e:
-            print(f"[ERROR] Error deleting message: {e}")
+            logger.error(f" Error deleting message: {e}")
 
         # Show document types for the selected language and service
         show_products(
@@ -2846,7 +2828,7 @@ def handle_service_language_selection(call):
         )
 
     except Exception as e:
-        print(f"[ERROR] Error in handle_service_language_selection: {e}")
+        logger.error(f" Error in handle_service_language_selection: {e}")
         # Get user language again in case of error
         user_id = call.message.chat.id
         language = get_user_language(user_id)
@@ -2855,7 +2837,7 @@ def handle_service_language_selection(call):
             send_message(user_id, get_text("error_occurred", language))
             show_categorys(call.message, language)
         except Exception as inner_e:
-            print(f"[ERROR] Failed to handle error: {inner_e}")
+            logger.error(f" Failed to handle error: {inner_e}")
             # If we can't handle the error, just log it
             pass
         print(f"Unexpected error in handle_service_language_selection: {e}")
@@ -2874,7 +2856,7 @@ def handle_profile_language_update(call):
             if language not in ["uz", "ru", "en"]:
                 raise ValueError(f"Invalid language code: {language}")
         except (IndexError, ValueError) as e:
-            print(f"[ERROR] Invalid language selection: {e}")
+            logger.error(f" Invalid language selection: {e}")
             language = "uz"  # Default to Uzbek if language is invalid
 
         # Update the user's profile language
@@ -2899,10 +2881,10 @@ def handle_profile_language_update(call):
                 user.language = language
                 user.save()
 
-            print(f"[DEBUG] Updated profile language for user {user_id} to {language}")
+            logger.debug(f" Updated profile language for user {user_id} to {language}")
 
         except Exception as e:
-            print(f"[ERROR] Error updating user {user_id} language: {e}")
+            logger.error(f" Error updating user {user_id} language: {e}")
             try:
                 # Try to create the user if update failed
                 center = get_current_center()
@@ -2910,7 +2892,7 @@ def handle_profile_language_update(call):
                     user_id=user_id, username=call.from_user.username, language=language, center=center
                 )
             except Exception as inner_e:
-                print(f"[CRITICAL] Failed to create user {user_id}: {inner_e}")
+                logger.critical(f" Failed to create user {user_id}: {inner_e}")
                 language = "uz"  # Default to Uzbek as fallback
 
         # Delete the old message
@@ -2919,20 +2901,20 @@ def handle_profile_language_update(call):
                 chat_id=call.message.chat.id, message_id=call.message.message_id
             )
         except Exception as e:
-            print(f"[WARNING] Error deleting message: {e}")
+            logger.warning(f" Error deleting message: {e}")
 
         # Show profile with updated language
         try:
             show_profile(call.message, language)
         except Exception as e:
-            print(f"[ERROR] Failed to show profile after language update: {e}")
+            logger.error(f" Failed to show profile after language update: {e}")
             # If showing profile fails, at least send a confirmation message
             confirmation_msg = get_text("language_updated", language)
             send_message(user_id, confirmation_msg)
             show_main_menu(call.message, language)
 
     except Exception as e:
-        print(f"[CRITICAL] Unhandled error in handle_profile_language_update: {e}")
+        logger.critical(f" Unhandled error in handle_profile_language_update: {e}")
         # Try to recover by showing main menu in default language
         try:
             send_message(call.from_user.id, get_text("error_occurred", "uz"))
@@ -2996,7 +2978,7 @@ def show_categorys(message, language):
             send_message(message.chat.id, no_services_text)
             show_main_menu(message, language)
     except Exception as e:
-        print(f"[ERROR] show_categorys error: {e}")
+        logger.error(f" show_categorys error: {e}")
         send_message(message.chat.id, get_text("error_general", language))
         show_main_menu(message, language)
 
@@ -3428,7 +3410,7 @@ def handle_copy_number_selection(call):
             uploaded_files[user_id] = {}
         uploaded_files[user_id]["copy_number"] = copy_number
 
-        print(f"[DEBUG] User {user_id} selected {copy_number} copies")
+        logger.debug(f" User {user_id} selected {copy_number} copies")
 
         # Delete the copy number message
         try:
@@ -3458,7 +3440,7 @@ def handle_copy_number_selection(call):
         )
 
     except Exception as e:
-        print(f"[ERROR] Failed to handle copy number selection: {e}")
+        logger.error(f" Failed to handle copy number selection: {e}")
         import traceback
 
         traceback.print_exc()
@@ -3542,7 +3524,7 @@ def show_upload_files_interface(message, language, doc_type, lang_name, copy_num
     # Update user step
     update_user_step(user_id, STEP_UPLOADING_FILES)
 
-    print(f"[DEBUG] User {user_id} moved to file upload with {copy_number} copies")
+    logger.debug(f" User {user_id} moved to file upload with {copy_number} copies")
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("doc_type_"))
@@ -3607,7 +3589,7 @@ def handle_document_selection(call):
         print(f"Unexpected error in handle_document_selection: {e}")
         show_main_menu(call.message, language)
 
-    print(f"[DEBUG] Updated uploaded_files: {uploaded_files.get(user_id, {})}")
+    logger.debug(f" Updated uploaded_files: {uploaded_files.get(user_id, {})}")
 
     update_user_step(user_id, STEP_UPLOADING_FILES)
 
@@ -3615,7 +3597,7 @@ def handle_document_selection(call):
     bot.answer_callback_query(call.id)
 
     # Message is already sent above, just log the action
-    print(f"[DEBUG] File upload message sent to user {user_id}")
+    logger.debug(f" File upload message sent to user {user_id}")
 
 
 def show_payment_options(message, language, order):
@@ -3769,24 +3751,24 @@ def handle_file_upload(message):
     language = get_user_language(user_id)
     current_step = get_user_step(user_id)
 
-    print(f"[DEBUG] ====== FILE UPLOAD START ======")
-    print(f"[DEBUG] File upload from user {user_id}, step: {current_step}")
-    print(f"[DEBUG] STEP_UPLOADING_RECEIPT = {STEP_UPLOADING_RECEIPT}")
-    print(f"[DEBUG] STEP_UPLOADING_FILES = {STEP_UPLOADING_FILES}")
-    print(f"[DEBUG] Has document: {message.document is not None}")
-    print(f"[DEBUG] Has photo: {message.photo is not None}")
+    logger.debug(f" ====== FILE UPLOAD START ======")
+    logger.debug(f" File upload from user {user_id}, step: {current_step}")
+    logger.debug(f" STEP_UPLOADING_RECEIPT = {STEP_UPLOADING_RECEIPT}")
+    logger.debug(f" STEP_UPLOADING_FILES = {STEP_UPLOADING_FILES}")
+    logger.debug(f" Has document: {message.document is not None}")
+    logger.debug(f" Has photo: {message.photo is not None}")
 
     # Handle payment receipt uploads
     if current_step == STEP_UPLOADING_RECEIPT:
-        print(f"[DEBUG] Entering STEP_UPLOADING_RECEIPT handler")
+        logger.debug(f" Entering STEP_UPLOADING_RECEIPT handler")
         if message.document or message.photo:
             try:
-                print(f"[DEBUG] Getting user_data from uploaded_files...")
+                logger.debug(f" Getting user_data from uploaded_files...")
                 user_data = uploaded_files.get(user_id, {})
-                print(f"[DEBUG] user_data = {user_data}")
+                logger.debug(f" user_data = {user_data}")
                 
                 if "order_id" not in user_data:
-                    print(f"[ERROR] order_id not found in user_data!")
+                    logger.error(f" order_id not found in user_data!")
                     bot.send_message(
                         message.chat.id,
                         get_text("order_not_found_restart", language),
@@ -3794,11 +3776,11 @@ def handle_file_upload(message):
                     return
 
                 order_id = user_data["order_id"]
-                print(f"[DEBUG] order_id = {order_id}")
+                logger.debug(f" order_id = {order_id}")
                 
                 from orders.models import Order
                 order = Order.objects.get(id=order_id)
-                print(f"[DEBUG] Order found: {order}")
+                logger.debug(f" Order found: {order}")
 
                 # Save receipt file
                 from django.core.files.base import ContentFile
@@ -3806,7 +3788,7 @@ def handle_file_upload(message):
                 from orders.models import Receipt
                 import time
 
-                print(f"[DEBUG] Downloading file from Telegram...")
+                logger.debug(f" Downloading file from Telegram...")
                 if message.document:
                     file_info = bot.get_file(message.document.file_id)
                     downloaded_file = bot.download_file(file_info.file_path)
@@ -3825,23 +3807,23 @@ def handle_file_upload(message):
                     file_name = f"rcpt_{order_id}_{int(time.time())}.jpg"
                     telegram_file_id = message.photo[-1].file_id
                 
-                print(f"[DEBUG] File downloaded, size: {len(downloaded_file)} bytes")
-                print(f"[DEBUG] File name: {file_name}")
+                logger.debug(f" File downloaded, size: {len(downloaded_file)} bytes")
+                logger.debug(f" File name: {file_name}")
 
                 # Save receipt to storage
-                print(f"[DEBUG] Saving file to storage...")
+                logger.debug(f" Saving file to storage...")
                 file_content = ContentFile(downloaded_file, name=file_name)
                 receipt_path = default_storage.save(
                     f"receipts/{file_name}", file_content
                 )
-                print(f"[DEBUG] File saved to: {receipt_path}")
+                logger.debug(f" File saved to: {receipt_path}")
 
                 # Get user for Receipt record
                 user = get_bot_user(user_id)
-                print(f"[DEBUG] Bot user: {user}")
+                logger.debug(f" Bot user: {user}")
 
                 # Create Receipt record
-                print(f"[DEBUG] Creating Receipt record...")
+                logger.debug(f" Creating Receipt record...")
                 try:
                     receipt = Receipt.objects.create(
                         order=order,
@@ -3853,37 +3835,37 @@ def handle_file_upload(message):
                     )
                     receipt.file.name = receipt_path
                     receipt.save()
-                    print(f"[DEBUG] Receipt created: {receipt.id}")
+                    logger.debug(f" Receipt created: {receipt.id}")
                 except Exception as receipt_error:
-                    print(f"[ERROR] Failed to create Receipt record: {receipt_error}")
+                    logger.error(f" Failed to create Receipt record: {receipt_error}")
                     import traceback
                     traceback.print_exc()
 
                 # Keep legacy field for backward compatibility
-                print(f"[DEBUG] Updating order...")
+                logger.debug(f" Updating order...")
                 order.recipt = receipt_path
                 order.payment_type = "card"
                 order.status = "payment_received"
                 order.is_active = True
                 order.save()
-                print(f"[DEBUG] Order updated successfully")
+                logger.debug(f" Order updated successfully")
 
                 # Forward order to channel
-                print(f"[DEBUG] Forwarding order to channel...")
+                logger.debug(f" Forwarding order to channel...")
                 forward_success = forward_order_to_channel(order, language)
 
                 if not forward_success:
-                    print(f"[WARNING] Failed to forward order {order.id} to channel")
+                    logger.warning(f" Failed to forward order {order.id} to channel")
 
                 # Clear uploaded files data
-                print(f"[DEBUG] Clearing user files...")
+                logger.debug(f" Clearing user files...")
                 clear_user_files(user_id)
                 update_user_step(user_id, STEP_REGISTERED)
 
                 # Send completion confirmation
                 user = get_bot_user(user_id)
                 if not user:
-                    print(f"[ERROR] User not found for order completion: {user_id}")
+                    logger.error(f" User not found for order completion: {user_id}")
                     return
 
                 # Calculate pricing with copy charges
@@ -4021,7 +4003,7 @@ def handle_file_upload(message):
                     )
 
                 # Send completion message
-                print(f"[DEBUG] Sending completion message...")
+                logger.debug(f" Sending completion message...")
                 bot.send_message(
                     chat_id=message.chat.id,
                     text=completion_text,
@@ -4033,14 +4015,14 @@ def handle_file_upload(message):
                     send_branch_location(message.chat.id, order.branch, language)
 
                 # Return user to main menu
-                print(f"[DEBUG] ====== FILE UPLOAD SUCCESS ======")
+                logger.debug(f" ====== FILE UPLOAD SUCCESS ======")
                 show_main_menu(message, language)
                 return
 
             except Exception as e:
-                print(f"[ERROR] ====== FILE UPLOAD FAILED ======")
-                print(f"[ERROR] Exception type: {type(e).__name__}")
-                print(f"[ERROR] Exception message: {e}")
+                logger.error(f" ====== FILE UPLOAD FAILED ======")
+                logger.error(f" Exception type: {type(e).__name__}")
+                logger.error(f" Exception message: {e}")
                 import traceback
                 traceback.print_exc()
                 
@@ -4053,7 +4035,7 @@ def handle_file_upload(message):
                 )
                 return
         else:
-            print(f"[DEBUG] No document or photo in message for STEP_UPLOADING_RECEIPT")
+            logger.debug(f" No document or photo in message for STEP_UPLOADING_RECEIPT")
 
     # Handle additional receipt uploads for existing orders
     if current_step == STEP_AWAITING_RECEIPT:
@@ -4115,7 +4097,7 @@ def handle_file_upload(message):
                     receipt.file.name = receipt_path
                     receipt.save()
                 except Exception as receipt_error:
-                    print(f"[ERROR] Failed to create Receipt record: {receipt_error}")
+                    logger.error(f" Failed to create Receipt record: {receipt_error}")
                     # Continue without Receipt record
 
                 # Clear user state
@@ -4160,7 +4142,7 @@ def handle_file_upload(message):
                 )
                 return
             except Exception as e:
-                print(f"[ERROR] Failed to handle additional receipt upload: {e}")
+                logger.error(f" Failed to handle additional receipt upload: {e}")
                 import traceback
 
                 traceback.print_exc()
@@ -4170,9 +4152,138 @@ def handle_file_upload(message):
                 )
                 return
 
+    # Handle payment receipt uploads when user is awaiting payment (after card selection)
+    if current_step == STEP_AWAITING_PAYMENT:
+        if message.document or message.photo:
+            try:
+                logger.debug(f" Processing payment receipt for STEP_AWAITING_PAYMENT")
+                user_data = uploaded_files.get(user_id, {})
+                order_id = user_data.get("order_id")
+                
+                if not order_id:
+                    bot.send_message(
+                        message.chat.id,
+                        get_text("order_not_found_restart", language),
+                    )
+                    return
+
+                from orders.models import Order, Receipt
+                from django.core.files.base import ContentFile
+                from django.core.files.storage import default_storage
+                import time
+
+                order = Order.objects.get(id=order_id)
+                user = get_bot_user(user_id)
+
+                # Download and save receipt file - accept ANY file format
+                if message.document:
+                    file_info = bot.get_file(message.document.file_id)
+                    downloaded_file = bot.download_file(file_info.file_path)
+                    original_name = message.document.file_name or "receipt"
+                    # Truncate if too long
+                    if len(original_name) > 30:
+                        name_parts = original_name.rsplit('.', 1)
+                        ext = f".{name_parts[1]}" if len(name_parts) > 1 else ""
+                        original_name = name_parts[0][:25] + ext
+                    file_name = f"rcpt_{order_id}_{int(time.time())}_{original_name}"
+                    telegram_file_id = message.document.file_id
+                else:  # message.photo
+                    file_info = bot.get_file(message.photo[-1].file_id)
+                    downloaded_file = bot.download_file(file_info.file_path)
+                    file_name = f"rcpt_{order_id}_{int(time.time())}.jpg"
+                    telegram_file_id = message.photo[-1].file_id
+
+                logger.debug(f" Receipt file: {file_name}, size: {len(downloaded_file)} bytes")
+
+                # Save receipt to storage
+                file_content = ContentFile(downloaded_file, name=file_name)
+                receipt_path = default_storage.save(f"receipts/{file_name}", file_content)
+
+                # Create Receipt record
+                try:
+                    receipt = Receipt.objects.create(
+                        order=order,
+                        telegram_file_id=telegram_file_id,
+                        amount=order.total_due,
+                        source='bot',
+                        status='pending',
+                        uploaded_by_user=user,
+                    )
+                    receipt.file.name = receipt_path
+                    receipt.save()
+                    logger.debug(f" Receipt created: {receipt.id}")
+                except Exception as receipt_error:
+                    logger.error(f" Failed to create Receipt record: {receipt_error}")
+
+                # Update order
+                order.recipt = receipt_path
+                order.payment_type = "card"
+                order.status = "payment_received"
+                order.is_active = True
+                order.save()
+
+                # Forward order to channel
+                forward_success = forward_order_to_channel(order, language)
+                if not forward_success:
+                    logger.warning(f" Failed to forward order {order.id} to channel")
+
+                # Clear user data and update step
+                clear_user_files(user_id)
+                update_user_step(user_id, STEP_REGISTERED)
+
+                # Send confirmation message
+                if language == "uz":
+                    confirm_text = "✅ <b>To'lov cheki qabul qilindi!</b>\n\n"
+                    confirm_text += f"📋 Buyurtma #{order.id}\n"
+                    confirm_text += f"💰 Summa: {order.total_price:,} so'm\n\n"
+                    confirm_text += "⏳ To'lov tekshiruvga yuborildi.\n"
+                    confirm_text += "📞 Tasdiqlanganidan keyin sizga xabar beramiz."
+                elif language == "ru":
+                    confirm_text = "✅ <b>Чек об оплате получен!</b>\n\n"
+                    confirm_text += f"📋 Заказ #{order.id}\n"
+                    confirm_text += f"💰 Сумма: {order.total_price:,} сум\n\n"
+                    confirm_text += "⏳ Оплата отправлена на проверку.\n"
+                    confirm_text += "📞 Мы уведомим вас после подтверждения."
+                else:
+                    confirm_text = "✅ <b>Payment receipt received!</b>\n\n"
+                    confirm_text += f"📋 Order #{order.id}\n"
+                    confirm_text += f"💰 Amount: {order.total_price:,} sum\n\n"
+                    confirm_text += "⏳ Payment sent for verification.\n"
+                    confirm_text += "📞 We will notify you after confirmation."
+
+                bot.send_message(
+                    chat_id=message.chat.id,
+                    text=confirm_text,
+                    parse_mode="HTML",
+                )
+
+                # Send branch location for pickup
+                if order.branch:
+                    send_branch_location(message.chat.id, order.branch, language)
+
+                # Return to main menu
+                show_main_menu(message, language)
+                return
+
+            except Order.DoesNotExist:
+                bot.send_message(
+                    message.chat.id,
+                    get_text("error_order_not_found", language),
+                )
+                return
+            except Exception as e:
+                logger.error(f" Failed to handle payment receipt upload: {e}")
+                import traceback
+                traceback.print_exc()
+                bot.send_message(
+                    message.chat.id,
+                    get_text("receipt_upload_failed", language),
+                )
+                return
+
     # Handle regular file uploads for orders
     if current_step == STEP_UPLOADING_FILES:
-        print(f"[DEBUG] Processing file upload for user {user_id}")
+        logger.debug(f" Processing file upload for user {user_id}")
 
         try:
             # Get file information
@@ -4188,7 +4299,7 @@ def handle_file_upload(message):
             else:
                 return
 
-            print(f"[DEBUG] File info: {file_name}, size: {file_size}")
+            logger.debug(f" File info: {file_name}, size: {file_size}")
 
             # Validate file format
             if not is_valid_file_format(file_name):
@@ -4199,11 +4310,11 @@ def handle_file_upload(message):
             file_info = bot.get_file(file_id)
             downloaded_file = bot.download_file(file_info.file_path)
 
-            print(f"[DEBUG] File downloaded, size: {len(downloaded_file)} bytes")
+            logger.debug(f" File downloaded, size: {len(downloaded_file)} bytes")
 
             # Get page count
             pages = get_file_pages_from_content(downloaded_file, file_name)
-            print(f"[DEBUG] Detected pages: {pages}")
+            logger.debug(f" Detected pages: {pages}")
 
             # Save file to storage
             from django.core.files.base import ContentFile
@@ -4214,7 +4325,7 @@ def handle_file_upload(message):
                 f"order_files/{user_id}_{file_name}", file_content
             )
 
-            print(f"[DEBUG] File saved to: {file_path}")
+            logger.debug(f" File saved to: {file_path}")
 
             # Store file information with unique ID
             import time
@@ -4298,7 +4409,7 @@ def handle_file_upload(message):
             update_totals_message(user_id, language)
 
         except Exception as e:
-            print(f"[ERROR] Failed to process file upload: {e}")
+            logger.error(f" Failed to process file upload: {e}")
             import traceback
 
             traceback.print_exc()
@@ -4307,7 +4418,7 @@ def handle_file_upload(message):
         return
 
     # If not in uploading steps, ignore
-    print(f"[DEBUG] User not in uploading step, ignoring file")
+    logger.debug(f" User not in uploading step, ignoring file")
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("payment_card_"))
@@ -4465,78 +4576,14 @@ def handle_payment_receipt_upload(call):
 
 @bot.message_handler(content_types=["photo"])
 def handle_payment_receipt_photo(message):
-    """Handle payment receipt photo uploads"""
-    user_id = message.from_user.id
-    language = get_user_language(user_id)
-
-    # Check if user is in payment receipt step
-    current_step = get_user_step(user_id)
-    if current_step != STEP_AWAITING_PAYMENT:
-        return
-
-    try:
-        # Get order information from uploaded_files
-        user_files = get_user_files(user_id)
-        if not user_files or "order_id" not in user_files:
-            bot.send_message(message.chat.id, get_text("order_data_not_found", language))
-            return
-
-        order_id = user_files["order_id"]
-
-        # Save receipt photo
-        from orders.models import Order, Receipt
-        from django.core.files.base import ContentFile
-        import time
-
-        order = Order.objects.get(id=order_id)
-        user = get_bot_user(user_id)
-
-        # Download and save receipt photo
-        photo_file = bot.get_file(message.photo[-1].file_id)
-        downloaded_file = bot.download_file(photo_file.file_path)
-        file_name = f"receipt_{order_id}_{int(time.time())}_{message.photo[-1].file_id}.jpg"
-        file_content = ContentFile(downloaded_file, name=file_name)
-
-        # Save to media directory
-        from django.core.files.storage import default_storage
-
-        file_path = default_storage.save(f"receipts/{file_name}", file_content)
-
-        # Create Receipt record instead of updating order.recipt
-        Receipt.objects.create(
-            order=order,
-            file=file_path,
-            telegram_file_id=message.photo[-1].file_id,
-            amount=order.total_due,
-            source='bot',
-            status='pending',
-            uploaded_by_user=user,
-        )
-
-        # Update legacy field for backward compatibility
-        order.recipt = file_path
-        order.save()
-
-        # Show confirmation using translation keys
-        confirm_text = get_text("receipt_uploaded_title", language) + "\n\n"
-        confirm_text += f"{get_text('receipt_order_number', language)}: #{order_id}\n"
-        confirm_text += f"{get_text('receipt_amount', language)}: {order.total_price:,} so'm\n\n"
-        confirm_text += get_text("receipt_admin_check", language)
-
-        # Show done button to complete payment
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
-        done_button = types.KeyboardButton(get_text("payment_done_button", language))
-
-        markup.add(done_button)
-
-        bot.send_message(message.chat.id, confirm_text, reply_markup=markup)
-
-    except Exception as e:
-        print(f"[ERROR] Failed to handle payment receipt: {e}")
-        import traceback
-
-        traceback.print_exc()
-        bot.send_message(message.chat.id, get_text("error_general", language))
+    """
+    Legacy handler for photo uploads - now handled by main file handler.
+    This handler is kept for backward compatibility but the main document/photo
+    handler now processes all receipt uploads including photos.
+    """
+    # All photo handling for receipts is now done in handle_file_upload
+    # This handler is no longer needed for STEP_AWAITING_PAYMENT
+    pass
 
 
 @bot.message_handler(func=lambda message: True, content_types=["text"])
@@ -4635,7 +4682,7 @@ def handle_text_messages(message):
                 forward_success = forward_order_to_channel(order, language)
 
                 if not forward_success:
-                    print(f"[WARNING] Failed to forward order {order.id} to channel")
+                    logger.warning(f" Failed to forward order {order.id} to channel")
 
                 # Clear uploaded files data
                 clear_user_files(user_id)
@@ -4644,7 +4691,7 @@ def handle_text_messages(message):
                 # Get user for display
                 user = get_bot_user(user_id)
                 if not user:
-                    print(f"[ERROR] User not found for completion: {user_id}")
+                    logger.error(f" User not found for completion: {user_id}")
                     return
 
                 # Format user display with username if available
@@ -4730,7 +4777,7 @@ def handle_text_messages(message):
                 show_categorys(message, language)
                 return
             except Exception as e:
-                print(f"[ERROR] Failed to finalize order: {e}")
+                logger.error(f" Failed to finalize order: {e}")
                 import traceback
 
                 traceback.print_exc()
@@ -4829,7 +4876,7 @@ def handle_card_payment_message(message, language):
     """Handle card payment button press from keyboard"""
     user_id = message.from_user.id
 
-    print(f"[DEBUG] Card payment request from user {user_id}")
+    logger.debug(f" Card payment request from user {user_id}")
 
     # Get order_id from uploaded_files
     user_data = uploaded_files.get(user_id, {})
@@ -5005,7 +5052,7 @@ def handle_card_payment_message(message, language):
         update_user_step(user_id, STEP_UPLOADING_RECEIPT)
 
     except Order.DoesNotExist:
-        print(f"[DEBUG] Order {order_id} not found")
+        logger.debug(f" Order {order_id} not found")
         bot.send_message(
             message.chat.id, get_text("order_not_found_restart", language)
         )
@@ -5013,7 +5060,7 @@ def handle_card_payment_message(message, language):
         update_user_step(user_id, STEP_REGISTERED)
         show_categorys(message, language)
     except Exception as e:
-        print(f"[ERROR] Failed to handle card payment: {e}")
+        logger.error(f" Failed to handle card payment: {e}")
         import traceback
 
         traceback.print_exc()
@@ -5030,8 +5077,8 @@ def handle_finish_upload_message(message, language):
     # Check if user has uploaded files - access uploaded_files directly
     user_data = uploaded_files.get(user_id, {})
 
-    print(f"[DEBUG] Finish upload request from user {user_id}")
-    print(f"[DEBUG] User data: {user_data}")
+    logger.debug(f" Finish upload request from user {user_id}")
+    logger.debug(f" User data: {user_data}")
 
     if not user_data or not user_data.get("files"):
         # No files uploaded, show error message
@@ -5040,11 +5087,11 @@ def handle_finish_upload_message(message, language):
 
     # Check if doc_type_id exists
     if "doc_type_id" not in user_data:
-        print(f"[DEBUG] doc_type_id not found in user_data: {user_data}")
+        logger.debug(f" doc_type_id not found in user_data: {user_data}")
         bot.send_message(message.chat.id, get_text("doc_type_not_found", language))
         return
 
-    print(f"[DEBUG] Found doc_type_id: {user_data['doc_type_id']}")
+    logger.debug(f" Found doc_type_id: {user_data['doc_type_id']}")
 
     try:
         # Create order with uploaded files
@@ -5058,7 +5105,7 @@ def handle_finish_upload_message(message, language):
         
         doc_type = Product.objects.get(id=user_data["doc_type_id"])
 
-        print(f"[DEBUG] Creating order for user {user_id} with doc_type {doc_type.id}")
+        logger.debug(f" Creating order for user {user_id} with doc_type {doc_type.id}")
 
         # Get language ID from user data if available
         lang_id = user_data.get("lang_id")
@@ -5088,7 +5135,7 @@ def handle_finish_upload_message(message, language):
                 service_lang = Language.objects.get(id=lang_id)
                 order_data["language"] = service_lang
             except Language.DoesNotExist:
-                print(f"[WARNING] Language with ID {lang_id} not found")
+                logger.warning(f" Language with ID {lang_id} not found")
 
         order = Order.objects.create(**order_data)
 
@@ -5108,7 +5155,7 @@ def handle_finish_upload_message(message, language):
         order.total_price = order.calculated_price
         order.save()
 
-        print(f"[DEBUG] Order created successfully: {order.id}")
+        logger.debug(f" Order created successfully: {order.id}")
 
         # Clear uploaded files for this user first
         clear_user_files(user_id)
@@ -5120,7 +5167,7 @@ def handle_finish_upload_message(message, language):
         show_payment_options(message, language, order)
 
     except Exception as e:
-        print(f"[ERROR] Failed to create order: {e}")
+        logger.error(f" Failed to create order: {e}")
         import traceback
 
         traceback.print_exc()
@@ -5133,14 +5180,14 @@ def handle_back_to_upload_docs_message(message, language):
     """Handle back to upload docs button press from keyboard"""
     user_id = message.from_user.id
 
-    print(f"[DEBUG] Back to upload docs request from user {user_id}")
+    logger.debug(f" Back to upload docs request from user {user_id}")
 
     # Check if user has uploaded files and document type info
     user_data = uploaded_files.get(user_id, {})
 
     # If no data exists, start fresh
     if not user_data:
-        print(f"[DEBUG] No user data found, starting fresh")
+        logger.debug(f" No user data found, starting fresh")
         clear_user_files(user_id)
         update_user_step(user_id, STEP_REGISTERED)
         show_categorys(message, language)
@@ -5148,7 +5195,7 @@ def handle_back_to_upload_docs_message(message, language):
 
     if "order_id" in user_data:
         order_id = user_data["order_id"]
-        print(f"[DEBUG] Found order_id: {order_id}")
+        logger.debug(f" Found order_id: {order_id}")
 
         try:
             # Get the order and restore files
@@ -5211,20 +5258,20 @@ def handle_back_to_upload_docs_message(message, language):
             )
 
         except Order.DoesNotExist:
-            print(f"[DEBUG] Order {order_id} not found, starting fresh")
+            logger.debug(f" Order {order_id} not found, starting fresh")
             # Order doesn't exist, start fresh
             clear_user_files(user_id)
             update_user_step(user_id, STEP_REGISTERED)
             show_categorys(message, language)
         except Exception as e:
-            print(f"[ERROR] Failed to restore order: {e}")
+            logger.error(f" Failed to restore order: {e}")
             bot.send_message(
                 message.chat.id, get_text("error_general", language)
             )
             show_categorys(message, language)
     else:
         # No order found, start fresh
-        print(f"[DEBUG] No order_id found for user {user_id}")
+        logger.debug(f" No order_id found for user {user_id}")
         clear_user_files(user_id)
         update_user_step(user_id, STEP_REGISTERED)
         bot.send_message(message.chat.id, get_text("data_lost_restart", language))
@@ -5235,7 +5282,7 @@ def handle_cash_payment_message(message, language):
     """Handle cash payment button press from keyboard"""
     user_id = message.from_user.id
 
-    print(f"[DEBUG] Cash payment request from user {user_id}")
+    logger.debug(f" Cash payment request from user {user_id}")
 
     # Get order_id from uploaded_files
     user_data = uploaded_files.get(user_id, {})
@@ -5263,7 +5310,7 @@ def handle_cash_payment_message(message, language):
         forward_success = forward_order_to_channel(order, language)
 
         if not forward_success:
-            print(f"[WARNING] Failed to forward order {order.id} to channel")
+            logger.warning(f" Failed to forward order {order.id} to channel")
 
         # Clear uploaded files data
         clear_user_files(user_id)
@@ -5272,7 +5319,7 @@ def handle_cash_payment_message(message, language):
         # Generate order summary with cash payment status
         user = get_bot_user(user_id)
         if not user:
-            print(f"[ERROR] User not found for cash payment: {user_id}")
+            logger.error(f" User not found for cash payment: {user_id}")
             return
 
         # Calculate pricing with copy charges
@@ -5396,7 +5443,7 @@ def handle_cash_payment_message(message, language):
         show_main_menu(message, language)
 
     except Order.DoesNotExist:
-        print(f"[DEBUG] Order {order_id} not found")
+        logger.debug(f" Order {order_id} not found")
         bot.send_message(
             message.chat.id, get_text("order_not_found_restart", language)
         )
@@ -5404,7 +5451,7 @@ def handle_cash_payment_message(message, language):
         update_user_step(user_id, STEP_REGISTERED)
         show_categorys(message, language)
     except Exception as e:
-        print(f"[ERROR] Failed to handle cash payment: {e}")
+        logger.error(f" Failed to handle cash payment: {e}")
         import traceback
 
         traceback.print_exc()
@@ -5423,7 +5470,7 @@ def handle_back_to_documents_message(message, language):
 
     if user_data and "service_id" in user_data:
         service_id = user_data["service_id"]
-        print(f"[DEBUG] Going back to documents for service_id: {service_id}")
+        logger.debug(f" Going back to documents for service_id: {service_id}")
         show_products(message, language, service_id)
     else:
         # Fallback if service_id not found - reset and go to main services
@@ -5467,7 +5514,7 @@ def handle_back_to_copy_number_message(message, language):
             show_copy_number_selection(message, language, doc_type, lang_name)
 
         except Exception as e:
-            print(f"[ERROR] Failed to go back to copy number: {e}")
+            logger.error(f" Failed to go back to copy number: {e}")
             bot.send_message(message.chat.id, get_text("error_occurred", language))
             show_categorys(message, language)
     else:
@@ -5511,7 +5558,7 @@ def handle_payment_cash(call):
         order.save()
 
     except Exception as e:
-        print(f"[ERROR] Failed to handle cash payment: {e}")
+        logger.error(f" Failed to handle cash payment: {e}")
         bot.answer_callback_query(call.id, get_text("error_general", language))
 
 
@@ -5632,7 +5679,7 @@ def handle_delete_file(call):
     try:
         # Extract file_uid from callback data (format: delete_file_{file_uid})
         file_uid = call.data.replace("delete_file_", "")
-        print(f"[DEBUG] Delete request for file_uid: {file_uid}")
+        logger.debug(f" Delete request for file_uid: {file_uid}")
 
         # Get user's uploaded files
         current_data = uploaded_files.get(user_id)
@@ -5643,20 +5690,20 @@ def handle_delete_file(call):
             current_data = dict(current_data)
             
         if not current_data or "files" not in current_data:
-            print(f"[DEBUG] No user data found for user {user_id}")
+            logger.debug(f" No user data found for user {user_id}")
             bot.answer_callback_query(call.id, get_text("no_files_to_delete", language))
             return
 
         files = current_data["files"]
-        print(f"[DEBUG] User has {len(files)} files")
+        logger.debug(f" User has {len(files)} files")
 
         if not files:
-            print(f"[DEBUG] Files dict is empty for user {user_id}")
+            logger.debug(f" Files dict is empty for user {user_id}")
             bot.answer_callback_query(call.id, get_text("no_files_to_delete", language))
             return
 
         if file_uid not in files:
-            print(f"[DEBUG] File UID {file_uid} not found in files: {list(files.keys())}")
+            logger.debug(f" File UID {file_uid} not found in files: {list(files.keys())}")
             bot.answer_callback_query(call.id, get_text("file_not_found", language))
             return
 
@@ -5665,23 +5712,23 @@ def handle_delete_file(call):
         file_path = file_info["file_path"]
         file_name = file_info["file_name"]
 
-        print(f"[DEBUG] Deleting file: {file_name} at path: {file_path}")
+        logger.debug(f" Deleting file: {file_name} at path: {file_path}")
 
         # Delete file from storage if it exists
         from django.core.files.storage import default_storage
 
         if default_storage.exists(file_path):
             default_storage.delete(file_path)
-            print(f"[DEBUG] Successfully deleted file from storage: {file_path}")
+            logger.debug(f" Successfully deleted file from storage: {file_path}")
         else:
-            print(f"[DEBUG] File not found in storage: {file_path}")
+            logger.debug(f" File not found in storage: {file_path}")
 
         # Remove file from the dict
         del files[file_uid]
         
         # Reassign to trigger save to persistent storage
         uploaded_files[user_id] = current_data
-        print(f"[DEBUG] Successfully removed file from uploaded_files: {file_name}")
+        logger.debug(f" Successfully removed file from uploaded_files: {file_name}")
 
         # Send confirmation message first (before deleting the original message)
         if language == "uz":
@@ -5692,23 +5739,23 @@ def handle_delete_file(call):
             confirm_text = f"✅ File successfully deleted!\n📄 {file_name}"
 
         confirmation = bot.send_message(call.message.chat.id, confirm_text)
-        print(f"[DEBUG] Sent confirmation message {confirmation.message_id}")
+        logger.debug(f" Sent confirmation message {confirmation.message_id}")
 
         # Try to delete the message with the file (might fail if already deleted)
         try:
             bot.delete_message(
                 chat_id=call.message.chat.id, message_id=call.message.message_id
             )
-            print(f"[DEBUG] Successfully deleted message {call.message.message_id}")
+            logger.debug(f" Successfully deleted message {call.message.message_id}")
         except Exception as e:
-            print(f"[DEBUG] Failed to delete message {call.message.message_id}: {e}")
+            logger.debug(f" Failed to delete message {call.message.message_id}: {e}")
             # Don't fail the whole operation if message deletion fails
 
         # Update totals message
         update_totals_message(user_id, language)
 
     except Exception as e:
-        print(f"[ERROR] Failed to delete file: {e}")
+        logger.error(f" Failed to delete file: {e}")
         import traceback
 
         traceback.print_exc()
@@ -5738,15 +5785,15 @@ def index(request):
         # Check if update is from a bot and ignore it
         if "message" in update_dict:
             if update_dict["message"].get("from", {}).get("is_bot", False):
-                print("[DEBUG] Ignoring message from bot")
+                logger.debug("Ignoring message from bot")
                 return JsonResponse({"ok": True}, status=200)
 
         if "callback_query" in update_dict:
             if update_dict["callback_query"].get("from", {}).get("is_bot", False):
-                print("[DEBUG] Ignoring callback from bot")
+                logger.debug("Ignoring callback from bot")
                 return JsonResponse({"ok": True}, status=200)
 
-        print(f"Received update: {update_data[:100]}...")  # Debug
+        logger.debug(f"Received update: {update_data[:100]}...")  # Debug
 
         bot.process_new_updates([telebot.types.Update.de_json(update_data)])
 

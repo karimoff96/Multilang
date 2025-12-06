@@ -4,7 +4,6 @@ Bot Handlers Registration Module
 This module provides functions to register all bot handlers to any TeleBot instance.
 This enables multi-tenant bot support where each Translation Center has its own bot.
 """
-import os
 import logging
 from telebot import types
 from telebot.apihelper import ApiTelegramException

@@ -13,8 +13,6 @@ Order Routing Rules:
 import logging
 import telebot
 import os
-import zipfile
-import tempfile
 from telebot.apihelper import ApiTelegramException
 from functools import lru_cache
 from django.conf import settings

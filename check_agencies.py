@@ -8,10 +8,10 @@ import django
 
 # Setup Django
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "WowDash.settings")
 django.setup()
 
-from accounts.models import TelegramUser
+from accounts.models import BotUser
 
 
 def main():
@@ -36,7 +36,7 @@ def main():
     print()
 
     # List all agencies
-    agencies = TelegramUser.objects.filter(is_agency=True)
+    agencies = BotUser.objects.filter(is_agency=True)
     print(f"📊 Total Agency Profiles: {agencies.count()}\n")
 
     if not agencies.exists():
@@ -92,7 +92,7 @@ def main():
     print(f"   Total agencies: {agencies.count()}")
 
     # Show users linked to agencies
-    agency_users = TelegramUser.objects.filter(agency__isnull=False)
+    agency_users = BotUser.objects.filter(agency__isnull=False)
     print(f"\n👥 Users linked to agencies: {agency_users.count()}")
 
     if agency_users.exists():

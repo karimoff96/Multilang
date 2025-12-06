@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.db.models import Sum, Count
@@ -6,9 +6,8 @@ from datetime import timedelta
 from orders.models import Order
 from organizations.rbac import (
     get_user_orders,
-    get_user_customers,
     get_user_branches,
-    get_user_staff,
+    get_user_customers,
     any_permission_required,
 )
 from organizations.models import AdminUser
@@ -21,6 +20,13 @@ def email(request):
         "subTitle": "Components / Email",
     }
     return render(request, "email.html", context)
+
+
+@login_required(login_url="admin_login")
+def audit_logs_redirect(request):
+    """Redirect to core audit logs view"""
+    from core.views import audit_logs
+    return audit_logs(request)
 
 
 @login_required(login_url="admin_login")

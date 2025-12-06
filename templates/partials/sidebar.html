@@ -188,6 +188,12 @@
                         <a href="{% url 'customer_analytics' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.customerAnalytics">Customer Analytics</span></a>
                     </li>
                     {% endif %}
+                    {% has_any_perm 'can_view_audit_logs' as can_audit_logs %}
+                    {% if can_audit_logs or is_owner or user.is_superuser %}
+                    <li>
+                        <a href="{% url 'audit_logs' %}"><i class="ri-circle-fill circle-icon text-secondary-main w-auto"></i> <span data-i18n="sidebar.auditLogs">Audit Logs</span></a>
+                    </li>
+                    {% endif %}
                 </ul>
             </li>
             {% endif %}

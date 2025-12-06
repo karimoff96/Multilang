@@ -1,9 +1,12 @@
+import logging
 import uuid
 import os
 from django.db import models
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+
+logger = logging.getLogger(__name__)
 
 
 class AdditionalInfo(models.Model):
@@ -318,23 +321,22 @@ class BotUser(models.Model):
         Marks the token as used if found.
         """
         from django.db import transaction
-        import traceback
 
         try:
-            print(f"[DEBUG] Looking for agency with token: {token}")
+            logger.debug(f"Looking for agency with token: {token}")
 
             # First, let's check if the agency exists at all (regardless of is_used)
             all_agencies = cls.objects.filter(agency_token=token, is_agency=True)
-            print(f"[DEBUG] Found {all_agencies.count()} agency(ies) with this token")
+            logger.debug(f"Found {all_agencies.count()} agency(ies) with this token")
 
             if all_agencies.exists():
                 first_agency = all_agencies.first()
-                print(
-                    f"[DEBUG] Agency found: {first_agency.name}, is_used={first_agency.is_used}"
+                logger.debug(
+                    f"Agency found: {first_agency.name}, is_used={first_agency.is_used}"
                 )
 
                 if first_agency.is_used:
-                    print(f"[WARNING] Agency token already used!")
+                    logger.warning("Agency token already used!")
                     return None
 
             with transaction.atomic():
@@ -344,25 +346,24 @@ class BotUser(models.Model):
                     is_agency=True,
                     is_used=False,  # Only get unused tokens
                 )
-                print(
-                    f"[DEBUG] Successfully retrieved unused agency: {agency.name} (ID: {agency.id})"
+                logger.debug(
+                    f"Successfully retrieved unused agency: {agency.name} (ID: {agency.id})"
                 )
 
                 # Mark as used
                 agency.is_used = True
                 agency.save(update_fields=["is_used", "updated_at"])
-                print(f"[DEBUG] Marked agency {agency.name} as used")
+                logger.debug(f"Marked agency {agency.name} as used")
 
                 return agency
         except cls.DoesNotExist:
-            print(f"[WARNING] No unused agency found with token: {token}")
+            logger.warning(f"No unused agency found with token: {token}")
             return None
         except ValueError as e:
-            print(f"[ERROR] ValueError in get_agency_by_token: {e}")
+            logger.error(f"ValueError in get_agency_by_token: {e}")
             return None
         except Exception as e:
-            print(f"[ERROR] Unexpected error in get_agency_by_token: {e}")
-            traceback.print_exc()
+            logger.error(f"Unexpected error in get_agency_by_token: {e}", exc_info=True)
             return None
 
 
@@ -407,9 +408,7 @@ def create_user_notification(sender, instance, created, **kwargs):
             AdminNotification.create_agency_notification(instance)
             
     except Exception as e:
-        print(f"[ERROR] Failed to create user notification: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Failed to create user notification: {e}", exc_info=True)
 
 
 class BotUserState(models.Model):

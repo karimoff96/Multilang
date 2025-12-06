@@ -1,14 +1,17 @@
+import logging
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib import messages
-from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
+audit_logger = logging.getLogger('audit')
 
 
 # ============ Admin Authentication Views ============
@@ -23,17 +26,24 @@ def admin_login(request):
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
+        ip_address = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', 'unknown'))
 
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
             if user.is_staff or user.is_superuser:
                 login(request, user)
+                audit_logger.info(f"LOGIN_SUCCESS user={username} ip={ip_address}")
+                logger.info(f"User {username} logged in successfully from {ip_address}")
                 next_url = request.GET.get("next", "index")
                 return redirect(next_url)
             else:
+                audit_logger.warning(f"LOGIN_DENIED user={username} reason=not_staff ip={ip_address}")
+                logger.warning(f"Login denied for {username} - not a staff member")
                 messages.error(request, "You do not have admin access.")
         else:
+            audit_logger.warning(f"LOGIN_FAILED user={username} reason=invalid_credentials ip={ip_address}")
+            logger.warning(f"Failed login attempt for username: {username} from {ip_address}")
             messages.error(request, "Invalid username or password.")
 
     return render(request, "authentication/signin.html")
@@ -41,6 +51,10 @@ def admin_login(request):
 
 def admin_logout(request):
     """Admin logout view"""
+    username = request.user.username if request.user.is_authenticated else 'anonymous'
+    ip_address = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', 'unknown'))
+    audit_logger.info(f"LOGOUT user={username} ip={ip_address}")
+    logger.info(f"User {username} logged out")
     logout(request)
     messages.success(request, "You have been logged out successfully.")
     return redirect("admin_login")
@@ -50,6 +64,7 @@ def forgot_password(request):
     """Forgot password view - sends reset email"""
     if request.method == "POST":
         email = request.POST.get("email")
+        client_ip = request.META.get('REMOTE_ADDR')
 
         try:
             user = User.objects.get(email=email)
@@ -89,14 +104,17 @@ def forgot_password(request):
                     [email],
                     fail_silently=False,
                 )
+                logger.info(f"Password reset email sent to {email} from {client_ip}")
                 messages.success(
                     request, "Password reset link has been sent to your email."
                 )
             except Exception as e:
+                logger.error(f"Failed to send password reset email to {email}: {e}")
                 messages.error(request, "Failed to send email. Please try again later.")
 
         except User.DoesNotExist:
             # Don't reveal that user doesn't exist for security
+            logger.info(f"Password reset requested for non-existent email: {email} from {client_ip}")
             messages.success(
                 request,
                 "If an account with this email exists, a password reset link has been sent.",
@@ -107,11 +125,13 @@ def forgot_password(request):
 
 def reset_password(request, uidb64, token):
     """Reset password view - handles the reset link"""
+    client_ip = request.META.get('REMOTE_ADDR')
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
+        logger.warning(f"Invalid password reset attempt with uid: {uidb64} from {client_ip}")
 
     if user is not None and default_token_generator.check_token(user, token):
         if request.method == "POST":
@@ -119,12 +139,15 @@ def reset_password(request, uidb64, token):
             confirm_password = request.POST.get("confirm_password")
 
             if password != confirm_password:
+                logger.warning(f"Password reset failed for user {user.username}: passwords don't match from {client_ip}")
                 messages.error(request, "Passwords do not match.")
             elif len(password) < 8:
+                logger.warning(f"Password reset failed for user {user.username}: password too short from {client_ip}")
                 messages.error(request, "Password must be at least 8 characters long.")
             else:
                 user.set_password(password)
                 user.save()
+                logger.info(f"Password reset successful for user {user.username} from {client_ip}")
                 messages.success(
                     request, "Your password has been reset successfully. Please login."
                 )
@@ -134,6 +157,7 @@ def reset_password(request, uidb64, token):
             request, "authentication/resetPassword.html", {"valid_link": True}
         )
     else:
+        logger.warning(f"Expired/invalid password reset token used from {client_ip}")
         messages.error(request, "The password reset link is invalid or has expired.")
         return redirect("forgot_password")
 

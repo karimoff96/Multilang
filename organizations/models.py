@@ -278,6 +278,16 @@ class Role(models.Model):
         help_text=_("Can edit agency details and reset invite links"))
     can_delete_agencies = models.BooleanField(_("Can delete agencies"), default=False,
         help_text=_("Can delete agency profiles"))
+    
+    # Permissions - Audit Logs
+    can_manage_audit_logs = models.BooleanField(_("Can manage audit logs (full access)"), default=False,
+        help_text=_("Full audit log access - overrides other audit log permissions"))
+    can_view_audit_logs = models.BooleanField(_("Can view audit logs"), default=False,
+        help_text=_("Can view system audit logs and activity history"))
+    can_export_audit_logs = models.BooleanField(_("Can export audit logs"), default=False,
+        help_text=_("Can export audit log data to CSV/Excel"))
+    can_grant_audit_permissions = models.BooleanField(_("Can grant audit permissions"), default=False,
+        help_text=_("Can assign audit log permissions to lower-level users"))
 
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True, null=True)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True, null=True)
@@ -315,6 +325,7 @@ class Role(models.Model):
         "can_manage_customers",
         "can_manage_marketing",
         "can_manage_agencies",
+        "can_manage_audit_logs",
     ]
 
     # Superuser-only permissions (should not be displayed for regular staff)
@@ -339,6 +350,7 @@ class Role(models.Model):
         "can_manage_marketing": ["can_create_marketing_posts", "can_send_branch_broadcasts", 
                                   "can_send_center_broadcasts", "can_view_broadcast_stats"],
         "can_manage_agencies": ["can_view_agencies", "can_create_agencies", "can_edit_agencies", "can_delete_agencies"],
+        "can_manage_audit_logs": ["can_view_audit_logs", "can_export_audit_logs", "can_grant_audit_permissions"],
     }
 
     def has_effective_permission(self, permission):
@@ -425,6 +437,11 @@ class Role(models.Model):
             "can_create_agencies",
             "can_edit_agencies",
             "can_delete_agencies",
+            # Audit Logs (master first)
+            "can_manage_audit_logs",
+            "can_view_audit_logs",
+            "can_export_audit_logs",
+            "can_grant_audit_permissions",
         ]
 
     @classmethod

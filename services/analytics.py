@@ -7,7 +7,6 @@ Supports multi-tenant data separation through RBAC.
 from decimal import Decimal
 from django.db.models import Sum, Count, Case, When, F, Q, DecimalField
 from django.db.models.functions import Coalesce
-from orders.models import Order
 from organizations.rbac import get_user_orders
 
 

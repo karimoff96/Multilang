@@ -1,0 +1,2392 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-06 22:40+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: accounts/models.py:25 accounts/models.py:217 core/models.py:52
+#: core/models.py:143 core/models.py:224 orders/models.py:52
+#: organizations/models.py:151 organizations/models.py:955
+#: services/models.py:39 services/models.py:172
+#: templates/reports/audit_logs.html:111
+msgid "Branch"
+msgstr ""
+
+#: accounts/models.py:28
+msgid "Leave empty for global/default settings"
+msgstr ""
+
+#: accounts/models.py:36
+msgid "Bank Card Number"
+msgstr ""
+
+#: accounts/models.py:37
+msgid "Card number for receiving payments (e.g., 8600 1234 5678 9012)"
+msgstr ""
+
+#: accounts/models.py:43
+msgid "Card Holder Name"
+msgstr ""
+
+#: accounts/models.py:44
+msgid "Name of the card holder"
+msgstr ""
+
+#: accounts/models.py:51
+msgid "Help Text"
+msgstr ""
+
+#: accounts/models.py:52
+msgid "Help text shown in bot"
+msgstr ""
+
+#: accounts/models.py:58 orders/models.py:73 organizations/models.py:172
+#: services/models.py:45 services/models.py:176 services/models.py:245
+msgid "Description"
+msgstr ""
+
+#: accounts/models.py:59
+msgid "Description of the branch/center"
+msgstr ""
+
+#: accounts/models.py:65
+msgid "About Us"
+msgstr ""
+
+#: accounts/models.py:66
+msgid "About us information"
+msgstr ""
+
+#: accounts/models.py:73
+msgid "Working Hours"
+msgstr ""
+
+#: accounts/models.py:74
+msgid "e.g., Mon-Fri: 9:00-18:00, Sat: 10:00-15:00"
+msgstr ""
+
+#: accounts/models.py:82
+msgid "Support Phone"
+msgstr ""
+
+#: accounts/models.py:83
+msgid "Phone number for customer support"
+msgstr ""
+
+#: accounts/models.py:89
+msgid "Support Telegram"
+msgstr ""
+
+#: accounts/models.py:90
+msgid "Telegram username for support (e.g., @support_bot)"
+msgstr ""
+
+#: accounts/models.py:98
+msgid "Guide Link"
+msgstr ""
+
+#: accounts/models.py:99
+msgid "URL to a guide (Telegram message, YouTube video, documentation, etc.)"
+msgstr ""
+
+#: accounts/models.py:107
+msgid "Reserved Field 1"
+msgstr ""
+
+#: accounts/models.py:108 accounts/models.py:115 accounts/models.py:122
+msgid "Reserved for future use"
+msgstr ""
+
+#: accounts/models.py:114
+msgid "Reserved Field 2"
+msgstr ""
+
+#: accounts/models.py:121
+msgid "Reserved Field 3"
+msgstr ""
+
+#: accounts/models.py:125 accounts/models.py:260 core/models.py:155
+#: core/models.py:248 marketing/models.py:169 orders/models.py:19
+#: orders/models.py:64 orders/models.py:475 services/models.py:48
+#: services/models.py:150 services/models.py:177 services/models.py:246
+msgid "Created At"
+msgstr ""
+
+#: accounts/models.py:126 accounts/models.py:261 marketing/models.py:170
+#: orders/models.py:20 orders/models.py:65 orders/models.py:476
+#: services/models.py:49 services/models.py:151 services/models.py:178
+#: services/models.py:247
+msgid "Updated At"
+msgstr ""
+
+#: accounts/models.py:129 accounts/models.py:130 core/models.py:63
+#: core/models.py:64
+msgid "Additional Info"
+msgstr ""
+
+#: accounts/models.py:206 core/models.py:151 core/models.py:232
+#: organizations/models.py:58 organizations/models.py:98
+#: organizations/models.py:944
+msgid "Translation Center"
+msgstr ""
+
+#: accounts/models.py:207
+msgid ""
+"The center this user belongs to. Same Telegram user can have separate "
+"accounts per center."
+msgstr ""
+
+#: accounts/models.py:222
+msgid "Telegram User ID"
+msgstr ""
+
+#: accounts/models.py:225
+msgid "Username"
+msgstr ""
+
+#: accounts/models.py:227
+msgid "Full Name"
+msgstr ""
+
+#: accounts/models.py:228
+msgid "Phone Number"
+msgstr ""
+
+#: accounts/models.py:232 services/models.py:157
+msgid "Language"
+msgstr ""
+
+#: accounts/models.py:234
+msgid "Registration Step"
+msgstr ""
+
+#: accounts/models.py:240
+msgid "Agency Token"
+msgstr ""
+
+#: accounts/models.py:243
+msgid "Agency Link"
+msgstr ""
+
+#: accounts/models.py:247
+msgid "Is Used"
+msgstr ""
+
+#: accounts/models.py:248
+msgid "Whether this invitation link has been used"
+msgstr ""
+
+#: accounts/models.py:250 orders/models.py:72 services/models.py:47
+#: services/models.py:179 services/models.py:248
+msgid "Is Active"
+msgstr ""
+
+#: accounts/models.py:251
+msgid "Is Agency"
+msgstr ""
+
+#: accounts/models.py:258
+msgid "Agency"
+msgstr ""
+
+#: accounts/models.py:283 orders/models.py:58
+msgid "Telegram User"
+msgstr ""
+
+#: accounts/models.py:284
+msgid "Telegram Users"
+msgstr ""
+
+#: accounts/models.py:427
+msgid "Bot User"
+msgstr ""
+
+#: accounts/models.py:438
+msgid "Current Order"
+msgstr ""
+
+#: accounts/models.py:451
+msgid "Uploaded File IDs"
+msgstr ""
+
+#: accounts/models.py:452
+msgid "List of OrderMedia IDs for files uploaded in current session"
+msgstr ""
+
+#: accounts/models.py:460
+msgid "Message IDs"
+msgstr ""
+
+#: accounts/models.py:461
+msgid "List of message IDs to clean up"
+msgstr ""
+
+#: accounts/models.py:474
+msgid "Extra Data"
+msgstr ""
+
+#: accounts/models.py:475
+msgid "Additional temporary data during flows"
+msgstr ""
+
+#: accounts/models.py:483
+msgid "Bot User State"
+msgstr ""
+
+#: accounts/models.py:484
+msgid "Bot User States"
+msgstr ""
+
+#: core/models.py:7 core/models.py:28 organizations/models.py:10
+#: organizations/models.py:116 organizations/models.py:170
+msgid "Name"
+msgstr ""
+
+#: core/models.py:8 core/models.py:29
+msgid "Code"
+msgstr ""
+
+#: core/models.py:9 core/models.py:30 organizations/models.py:53
+#: organizations/models.py:146 organizations/models.py:173
+#: organizations/models.py:960
+msgid "Active"
+msgstr ""
+
+#: core/models.py:12 core/models.py:26 organizations/models.py:106
+msgid "Region"
+msgstr ""
+
+#: core/models.py:13
+msgid "Regions"
+msgstr ""
+
+#: core/models.py:33 organizations/models.py:114
+msgid "District"
+msgstr ""
+
+#: core/models.py:34
+msgid "Districts"
+msgstr ""
+
+#: core/models.py:56 core/models.py:214 marketing/models.py:67
+msgid "Title"
+msgstr ""
+
+#: core/models.py:57
+msgid "Body"
+msgstr ""
+
+#: core/models.py:58 orders/models.py:17
+msgid "File"
+msgstr ""
+
+#: core/models.py:59 organizations/models.py:54 organizations/models.py:147
+#: organizations/models.py:286 organizations/models.py:969
+msgid "Created at"
+msgstr ""
+
+#: core/models.py:60 organizations/models.py:55 organizations/models.py:148
+#: organizations/models.py:287 organizations/models.py:970
+msgid "Updated at"
+msgstr ""
+
+#: core/models.py:86
+msgid "Create"
+msgstr ""
+
+#: core/models.py:87
+msgid "Update"
+msgstr ""
+
+#: core/models.py:88
+msgid "Delete"
+msgstr ""
+
+#: core/models.py:89
+msgid "View"
+msgstr ""
+
+#: core/models.py:90
+msgid "Login"
+msgstr ""
+
+#: core/models.py:91
+msgid "Logout"
+msgstr ""
+
+#: core/models.py:92
+msgid "Assign"
+msgstr ""
+
+#: core/models.py:93
+msgid "Status Change"
+msgstr ""
+
+#: core/models.py:94 templates/reports/audit_logs.html:239
+msgid "Payment"
+msgstr ""
+
+#: core/models.py:95 core/models.py:194
+msgid "Other"
+msgstr ""
+
+#: core/models.py:105 marketing/models.py:312 organizations/models.py:933
+#: templates/reports/audit_logs.html:78
+msgid "User"
+msgstr ""
+
+#: core/models.py:110
+msgid "Action"
+msgstr ""
+
+#: core/models.py:121 core/models.py:209 marketing/models.py:76
+msgid "Content Type"
+msgstr ""
+
+#: core/models.py:123 core/models.py:211
+msgid "Object ID"
+msgstr ""
+
+#: core/models.py:126
+msgid "Target"
+msgstr ""
+
+#: core/models.py:129
+msgid "Details"
+msgstr ""
+
+#: core/models.py:130
+msgid "Changes"
+msgstr ""
+
+#: core/models.py:133
+msgid "IP Address"
+msgstr ""
+
+#: core/models.py:134
+msgid "User Agent"
+msgstr ""
+
+#: core/models.py:158
+msgid "Audit Log"
+msgstr ""
+
+#: core/models.py:159 core/views.py:219
+msgid "Audit Logs"
+msgstr ""
+
+#: core/models.py:187
+msgid "Receipt Pending Verification"
+msgstr ""
+
+#: core/models.py:188
+msgid "New Order"
+msgstr ""
+
+#: core/models.py:189
+msgid "Order Cancelled"
+msgstr ""
+
+#: core/models.py:190
+msgid "Order Completed"
+msgstr ""
+
+#: core/models.py:191 orders/models.py:35
+msgid "Payment Confirmed"
+msgstr ""
+
+#: core/models.py:192
+msgid "New User Registered"
+msgstr ""
+
+#: core/models.py:193
+msgid "New Agency Registered"
+msgstr ""
+
+#: core/models.py:199
+msgid "Type"
+msgstr ""
+
+#: core/models.py:215
+msgid "Message"
+msgstr ""
+
+#: core/models.py:236
+msgid "Is Read"
+msgstr ""
+
+#: core/models.py:243
+msgid "Read By"
+msgstr ""
+
+#: core/models.py:245
+msgid "Read At"
+msgstr ""
+
+#: core/models.py:251
+msgid "Admin Notification"
+msgstr ""
+
+#: core/models.py:252
+msgid "Admin Notifications"
+msgstr ""
+
+#: core/views.py:88
+msgid "Today"
+msgstr ""
+
+#: core/views.py:89
+msgid "Yesterday"
+msgstr ""
+
+#: core/views.py:90
+msgid "This Week"
+msgstr ""
+
+#: core/views.py:91
+msgid "This Month"
+msgstr ""
+
+#: core/views.py:92
+msgid "Custom Range"
+msgstr ""
+
+#: core/views.py:220
+msgid "System activity and audit trail"
+msgstr ""
+
+#: marketing/admin.py:25
+msgid "Content"
+msgstr ""
+
+#: marketing/admin.py:28
+msgid "Targeting"
+msgstr ""
+
+#: marketing/admin.py:34
+msgid "Scheduling"
+msgstr ""
+
+#: marketing/admin.py:37
+msgid "Statistics"
+msgstr ""
+
+#: marketing/admin.py:44
+msgid "Errors"
+msgstr ""
+
+#: marketing/admin.py:61
+msgid "Delivered/Failed/Total"
+msgstr ""
+
+#: marketing/models.py:27
+msgid "All Users (Platform-wide)"
+msgstr ""
+
+#: marketing/models.py:28 marketing/views.py:267 marketing/views.py:460
+msgid "Center Users"
+msgstr ""
+
+#: marketing/models.py:29 marketing/views.py:261 marketing/views.py:458
+msgid "Branch Users"
+msgstr ""
+
+#: marketing/models.py:30
+msgid "Custom Segment"
+msgstr ""
+
+#: marketing/models.py:43
+msgid "Draft"
+msgstr ""
+
+#: marketing/models.py:44
+msgid "Scheduled"
+msgstr ""
+
+#: marketing/models.py:45
+msgid "Sending"
+msgstr ""
+
+#: marketing/models.py:46 marketing/models.py:244
+msgid "Sent"
+msgstr ""
+
+#: marketing/models.py:47
+msgid "Paused"
+msgstr ""
+
+#: marketing/models.py:48 marketing/models.py:246
+msgid "Failed"
+msgstr ""
+
+#: marketing/models.py:49 orders/models.py:39
+msgid "Cancelled"
+msgstr ""
+
+#: marketing/models.py:59
+msgid "Text Only"
+msgstr ""
+
+#: marketing/models.py:60
+msgid "Photo with Caption"
+msgstr ""
+
+#: marketing/models.py:61
+msgid "Video with Caption"
+msgstr ""
+
+#: marketing/models.py:62
+msgid "Document with Caption"
+msgstr ""
+
+#: marketing/models.py:69
+msgid "Internal title for identification"
+msgstr ""
+
+#: marketing/models.py:72
+msgid "Message Content"
+msgstr ""
+
+#: marketing/models.py:73
+msgid "Message text (supports HTML: <b>, <i>, <a>, <code>)"
+msgstr ""
+
+#: marketing/models.py:82
+msgid "Media File"
+msgstr ""
+
+#: marketing/models.py:86
+msgid "Image, video, or document to send with message"
+msgstr ""
+
+#: marketing/models.py:91
+msgid "Target Scope"
+msgstr ""
+
+#: marketing/models.py:102
+msgid "Target Center"
+msgstr ""
+
+#: marketing/models.py:103
+msgid "Required for center/branch scope"
+msgstr ""
+
+#: marketing/models.py:111
+msgid "Target Branch"
+msgstr ""
+
+#: marketing/models.py:112
+msgid "Required for branch scope"
+msgstr ""
+
+#: marketing/models.py:117
+msgid "Include B2C Customers"
+msgstr ""
+
+#: marketing/models.py:119
+msgid "Send to individual customers"
+msgstr ""
+
+#: marketing/models.py:122
+msgid "Include B2B Customers"
+msgstr ""
+
+#: marketing/models.py:124
+msgid "Send to agency customers"
+msgstr ""
+
+#: marketing/models.py:129
+msgid "Scheduled Time"
+msgstr ""
+
+#: marketing/models.py:132
+msgid "Leave empty to send immediately"
+msgstr ""
+
+#: marketing/models.py:137 marketing/models.py:264 orders/models.py:70
+#: orders/models.py:451
+msgid "Status"
+msgstr ""
+
+#: marketing/models.py:145
+msgid "Total Recipients"
+msgstr ""
+
+#: marketing/models.py:149
+msgid "Sent Count"
+msgstr ""
+
+#: marketing/models.py:153
+msgid "Delivered Count"
+msgstr ""
+
+#: marketing/models.py:157
+msgid "Failed Count"
+msgstr ""
+
+#: marketing/models.py:167
+msgid "Created By"
+msgstr ""
+
+#: marketing/models.py:171 marketing/models.py:284
+msgid "Sent At"
+msgstr ""
+
+#: marketing/models.py:172 orders/models.py:178
+msgid "Completed At"
+msgstr ""
+
+#: marketing/models.py:176
+msgid "Last Error"
+msgstr ""
+
+#: marketing/models.py:182 marketing/models.py:255
+msgid "Marketing Post"
+msgstr ""
+
+#: marketing/models.py:183 marketing/views.py:135
+msgid "Marketing Posts"
+msgstr ""
+
+#: marketing/models.py:221 marketing/views.py:269 marketing/views.py:462
+msgid "All Platform Users"
+msgstr ""
+
+#: marketing/models.py:243 orders/models.py:32
+msgid "Pending"
+msgstr ""
+
+#: marketing/models.py:245
+msgid "Delivered"
+msgstr ""
+
+#: marketing/models.py:247
+msgid "Blocked by User"
+msgstr ""
+
+#: marketing/models.py:248
+msgid "Skipped (Opted Out)"
+msgstr ""
+
+#: marketing/models.py:261
+msgid "Recipient"
+msgstr ""
+
+#: marketing/models.py:270
+msgid "Telegram Message ID"
+msgstr ""
+
+#: marketing/models.py:275
+msgid "Error Message"
+msgstr ""
+
+#: marketing/models.py:280
+msgid "Retry Count"
+msgstr ""
+
+#: marketing/models.py:290
+msgid "Broadcast Recipient"
+msgstr ""
+
+#: marketing/models.py:291
+msgid "Broadcast Recipients"
+msgstr ""
+
+#: marketing/models.py:315
+msgid "Receive Marketing Messages"
+msgstr ""
+
+#: marketing/models.py:317
+msgid "User can opt out of marketing messages"
+msgstr ""
+
+#: marketing/models.py:320
+msgid "Receive Promotions"
+msgstr ""
+
+#: marketing/models.py:324
+msgid "Receive Updates"
+msgstr ""
+
+#: marketing/models.py:328
+msgid "Last Broadcast Received"
+msgstr ""
+
+#: marketing/models.py:336
+msgid "User Broadcast Preference"
+msgstr ""
+
+#: marketing/models.py:337
+msgid "User Broadcast Preferences"
+msgstr ""
+
+#: marketing/models.py:353 templates/reports/audit_logs.html:95
+msgid "Center"
+msgstr ""
+
+#: marketing/models.py:358
+msgid "Messages Per Second"
+msgstr ""
+
+#: marketing/models.py:361
+msgid "Max messages per second (Telegram limit: 30)"
+msgstr ""
+
+#: marketing/models.py:366
+msgid "Daily Limit Per User"
+msgstr ""
+
+#: marketing/models.py:369
+msgid "Max broadcasts per user per day"
+msgstr ""
+
+#: marketing/models.py:374
+msgid "Batch Size"
+msgstr ""
+
+#: marketing/models.py:381
+msgid "Batch Delay (seconds)"
+msgstr ""
+
+#: marketing/models.py:390
+msgid "Broadcast Rate Limit"
+msgstr ""
+
+#: marketing/models.py:391
+msgid "Broadcast Rate Limits"
+msgstr ""
+
+#: marketing/views.py:136
+msgid "Broadcast & Promotions"
+msgstr ""
+
+#: marketing/views.py:155
+msgid "You don't have permission to create marketing posts."
+msgstr ""
+
+#: marketing/views.py:160
+msgid "You don't have permission to send broadcasts to any scope."
+msgstr ""
+
+#: marketing/views.py:179
+msgid "Title is required"
+msgstr ""
+
+#: marketing/views.py:181
+msgid "Content is required"
+msgstr ""
+
+#: marketing/views.py:185
+msgid "You don't have permission for platform-wide broadcasts"
+msgstr ""
+
+#: marketing/views.py:187
+msgid "You don't have permission for center-wide broadcasts"
+msgstr ""
+
+#: marketing/views.py:197
+msgid "You don't have access to this center"
+msgstr ""
+
+#: marketing/views.py:199
+msgid "Invalid center selected"
+msgstr ""
+
+#: marketing/views.py:205
+msgid "You don't have access to this branch"
+msgstr ""
+
+#: marketing/views.py:207
+msgid "Invalid branch selected"
+msgstr ""
+
+#: marketing/views.py:252
+msgid "Marketing post created successfully."
+msgstr ""
+
+#: marketing/views.py:256
+msgid "Create Marketing Post"
+msgstr ""
+
+#: marketing/views.py:257
+msgid "New Broadcast"
+msgstr ""
+
+#: marketing/views.py:284 marketing/views.py:287
+msgid "You don't have access to this post."
+msgstr ""
+
+#: marketing/views.py:314
+msgid "Marketing Post Details"
+msgstr ""
+
+#: marketing/views.py:333
+msgid "You don't have permission to edit marketing posts."
+msgstr ""
+
+#: marketing/views.py:338
+msgid "Cannot edit post that has been sent or is currently sending."
+msgstr ""
+
+#: marketing/views.py:343
+msgid "You can only edit your own posts."
+msgstr ""
+
+#: marketing/views.py:385
+msgid "You don't have permission for platform-wide scope."
+msgstr ""
+
+#: marketing/views.py:388
+msgid "You don't have permission for center-wide scope."
+msgstr ""
+
+#: marketing/views.py:404
+msgid "You don't have access to this center."
+msgstr ""
+
+#: marketing/views.py:424
+msgid "You don't have access to this branch."
+msgstr ""
+
+#: marketing/views.py:454
+msgid "Marketing post updated successfully."
+msgstr ""
+
+#: marketing/views.py:465
+msgid "Edit Marketing Post"
+msgstr ""
+
+#: marketing/views.py:487
+msgid "You can only delete your own posts."
+msgstr ""
+
+#: marketing/views.py:501
+msgid "Marketing post deleted."
+msgstr ""
+
+#: marketing/views.py:524
+msgid "Preview Broadcast"
+msgstr ""
+
+#: marketing/views.py:548
+msgid "You don't have permission to send platform-wide broadcasts."
+msgstr ""
+
+#: marketing/views.py:551
+msgid "You don't have permission to send center-wide broadcasts."
+msgstr ""
+
+#: marketing/views.py:554
+msgid "You don't have permission to send branch broadcasts."
+msgstr ""
+
+#: marketing/views.py:558
+msgid "This post cannot be sent."
+msgstr ""
+
+#: marketing/views.py:567
+msgid "No recipients found for this broadcast."
+msgstr ""
+
+#: marketing/views.py:576
+msgid "Broadcast completed: {} sent, {} failed in {} seconds."
+msgstr ""
+
+#: marketing/views.py:583
+msgid "Broadcast completed with issues: {} sent, {} failed."
+msgstr ""
+
+#: marketing/views.py:609
+msgid "Can only pause active broadcasts."
+msgstr ""
+
+#: marketing/views.py:615
+msgid "Broadcast paused."
+msgstr ""
+
+#: marketing/views.py:626
+msgid "Cannot cancel this broadcast."
+msgstr ""
+
+#: marketing/views.py:632
+msgid "Broadcast cancelled."
+msgstr ""
+
+#: orders/models.py:18
+msgid "Pages"
+msgstr ""
+
+#: orders/models.py:26
+msgid "Order file"
+msgstr ""
+
+#: orders/models.py:27
+msgid "Order media"
+msgstr ""
+
+#: orders/models.py:33
+msgid "Payment Pending"
+msgstr ""
+
+#: orders/models.py:34
+msgid "Payment Received"
+msgstr ""
+
+#: orders/models.py:36
+msgid "In Progress"
+msgstr ""
+
+#: orders/models.py:37
+msgid "Ready"
+msgstr ""
+
+#: orders/models.py:38
+msgid "Completed"
+msgstr ""
+
+#: orders/models.py:43
+msgid "Cash"
+msgstr ""
+
+#: orders/models.py:44
+msgid "Card"
+msgstr ""
+
+#: orders/models.py:61 services/models.py:201 services/models.py:382
+msgid "Document Type"
+msgstr ""
+
+#: orders/models.py:63
+msgid "Total Pages"
+msgstr ""
+
+#: orders/models.py:79
+msgid "Translation Language"
+msgstr ""
+
+#: orders/models.py:81
+msgid ""
+"The target language selected by user from category's available languages"
+msgstr ""
+
+#: orders/models.py:88
+msgid "Payment Type"
+msgstr ""
+
+#: orders/models.py:91 orders/models.py:524
+msgid "Receipt"
+msgstr ""
+
+#: orders/models.py:95
+msgid "Total Price"
+msgstr ""
+
+#: orders/models.py:99
+msgid "Number of Copies"
+msgstr ""
+
+#: orders/models.py:100
+msgid "Additional copies needed (0 means only original)"
+msgstr ""
+
+#: orders/models.py:102
+msgid "Files"
+msgstr ""
+
+#: orders/models.py:111
+msgid "Assigned To"
+msgstr ""
+
+#: orders/models.py:120
+msgid "Assigned By"
+msgstr ""
+
+#: orders/models.py:124
+msgid "Assigned At"
+msgstr ""
+
+#: orders/models.py:134
+msgid "Payment Received By"
+msgstr ""
+
+#: orders/models.py:137
+msgid "Payment Received At"
+msgstr ""
+
+#: orders/models.py:145
+msgid "Amount Received"
+msgstr ""
+
+#: orders/models.py:146
+msgid "Total amount received so far"
+msgstr ""
+
+#: orders/models.py:152
+msgid "Extra Fee"
+msgstr ""
+
+#: orders/models.py:153
+msgid "Additional charges (rush fee, special handling, etc.)"
+msgstr ""
+
+#: orders/models.py:159
+msgid "Extra Fee Description"
+msgstr ""
+
+#: orders/models.py:160
+msgid "Reason for the extra fee"
+msgstr ""
+
+#: orders/models.py:164
+msgid "Payment Accepted Fully"
+msgstr ""
+
+#: orders/models.py:165
+msgid "Mark as True to consider payment complete regardless of received amount"
+msgstr ""
+
+#: orders/models.py:175
+msgid "Completed By"
+msgstr ""
+
+#: orders/models.py:368
+msgid "Selected language is not available for this product's category."
+msgstr ""
+
+#: orders/models.py:384 orders/models.py:410
+msgid "Order"
+msgstr ""
+
+#: orders/models.py:385
+msgid "Orders"
+msgstr ""
+
+#: orders/models.py:395
+msgid "Bot (User Upload)"
+msgstr ""
+
+#: orders/models.py:396
+msgid "Admin Upload"
+msgstr ""
+
+#: orders/models.py:397
+msgid "Phone Confirmation"
+msgstr ""
+
+#: orders/models.py:401
+msgid "Pending Verification"
+msgstr ""
+
+#: orders/models.py:402
+msgid "Verified"
+msgstr ""
+
+#: orders/models.py:403
+msgid "Rejected"
+msgstr ""
+
+#: orders/models.py:417
+msgid "Receipt File"
+msgstr ""
+
+#: orders/models.py:418
+msgid "Receipt image or document"
+msgstr ""
+
+#: orders/models.py:424
+msgid "Telegram File ID"
+msgstr ""
+
+#: orders/models.py:425
+msgid "File ID from Telegram for quick access"
+msgstr ""
+
+#: orders/models.py:431
+msgid "Amount"
+msgstr ""
+
+#: orders/models.py:432
+msgid "Amount claimed in this receipt"
+msgstr ""
+
+#: orders/models.py:438
+msgid "Verified Amount"
+msgstr ""
+
+#: orders/models.py:439
+msgid "Amount verified by admin"
+msgstr ""
+
+#: orders/models.py:445
+msgid "Source"
+msgstr ""
+
+#: orders/models.py:456
+msgid "Comment"
+msgstr ""
+
+#: orders/models.py:457
+msgid "Admin notes or rejection reason"
+msgstr ""
+
+#: orders/models.py:465
+msgid "Uploaded By (User)"
+msgstr ""
+
+#: orders/models.py:473
+msgid "Verified By"
+msgstr ""
+
+#: orders/models.py:480
+msgid "Verified At"
+msgstr ""
+
+#: orders/models.py:525
+msgid "Receipts"
+msgstr ""
+
+#: orders/views.py:922
+msgid "Please fill in all required fields"
+msgstr ""
+
+#: orders/views.py:976
+msgid "Order created successfully"
+msgstr ""
+
+#: organizations/models.py:12
+msgid "Subdomain"
+msgstr ""
+
+#: organizations/models.py:17
+msgid ""
+"Unique subdomain for this center (e.g., 'center1' for center1.alltranslation."
+"uz)"
+msgstr ""
+
+#: organizations/models.py:23
+msgid "Owner"
+msgstr ""
+
+#: organizations/models.py:26
+msgid "Logo"
+msgstr ""
+
+#: organizations/models.py:28 organizations/models.py:117
+msgid "Address"
+msgstr ""
+
+#: organizations/models.py:29 organizations/models.py:118
+#: organizations/models.py:958
+msgid "Phone"
+msgstr ""
+
+#: organizations/models.py:30
+msgid "Email"
+msgstr ""
+
+#: organizations/models.py:32 organizations/models.py:120
+msgid "Location URL"
+msgstr ""
+
+#: organizations/models.py:35 organizations/models.py:123
+msgid "Google Maps or Yandex Maps URL"
+msgstr ""
+
+#: organizations/models.py:39
+msgid "Bot Token"
+msgstr ""
+
+#: organizations/models.py:44
+msgid "Telegram Bot Token for this center (unique, superuser only)"
+msgstr ""
+
+#: organizations/models.py:47
+msgid "Company Orders Channel ID"
+msgstr ""
+
+#: organizations/models.py:51
+msgid "Telegram channel ID for all company orders"
+msgstr ""
+
+#: organizations/models.py:59
+msgid "Translation Centers"
+msgstr ""
+
+#: organizations/models.py:77
+msgid "Cannot delete center with active bot token. Remove the bot token first."
+msgstr ""
+
+#: organizations/models.py:125
+msgid "Main Branch"
+msgstr ""
+
+#: organizations/models.py:128
+msgid "B2C Orders Channel ID"
+msgstr ""
+
+#: organizations/models.py:132
+msgid "Telegram channel ID for B2C (individual customer) orders"
+msgstr ""
+
+#: organizations/models.py:135
+msgid "B2B Orders Channel ID"
+msgstr ""
+
+#: organizations/models.py:139
+msgid "Telegram channel ID for B2B (agency/business) orders"
+msgstr ""
+
+#: organizations/models.py:142
+msgid "Show Price List"
+msgstr ""
+
+#: organizations/models.py:144
+msgid "Show price list button in Telegram bot for this branch"
+msgstr ""
+
+#: organizations/models.py:152
+msgid "Branches"
+msgstr ""
+
+#: organizations/models.py:171
+msgid "Display Name"
+msgstr ""
+
+#: organizations/models.py:175
+msgid "System Role"
+msgstr ""
+
+#: organizations/models.py:175
+msgid "System roles cannot be deleted"
+msgstr ""
+
+#: organizations/models.py:179
+msgid "Can manage centers (full access)"
+msgstr ""
+
+#: organizations/models.py:180
+msgid "Full center management - overrides other center permissions"
+msgstr ""
+
+#: organizations/models.py:181
+msgid "Can view centers"
+msgstr ""
+
+#: organizations/models.py:182
+msgid "Can view translation center details"
+msgstr ""
+
+#: organizations/models.py:183
+msgid "Can create centers"
+msgstr ""
+
+#: organizations/models.py:184
+msgid "Can create new translation centers"
+msgstr ""
+
+#: organizations/models.py:185
+msgid "Can edit centers"
+msgstr ""
+
+#: organizations/models.py:186
+msgid "Can edit translation center settings"
+msgstr ""
+
+#: organizations/models.py:187
+msgid "Can delete centers"
+msgstr ""
+
+#: organizations/models.py:188
+msgid "Can delete translation centers"
+msgstr ""
+
+#: organizations/models.py:191
+msgid "Can manage branches (full access)"
+msgstr ""
+
+#: organizations/models.py:192
+msgid "Full branch management - overrides other branch permissions"
+msgstr ""
+
+#: organizations/models.py:193
+msgid "Can view branches"
+msgstr ""
+
+#: organizations/models.py:194
+msgid "Can view branch details"
+msgstr ""
+
+#: organizations/models.py:195
+msgid "Can create branches"
+msgstr ""
+
+#: organizations/models.py:196
+msgid "Can create new branches"
+msgstr ""
+
+#: organizations/models.py:197
+msgid "Can edit branches"
+msgstr ""
+
+#: organizations/models.py:198
+msgid "Can edit branch settings"
+msgstr ""
+
+#: organizations/models.py:199 organizations/models.py:200
+msgid "Can delete branches"
+msgstr ""
+
+#: organizations/models.py:203
+msgid "Can manage staff (full access)"
+msgstr ""
+
+#: organizations/models.py:204
+msgid "Full staff management - overrides other staff permissions"
+msgstr ""
+
+#: organizations/models.py:205
+msgid "Can view staff"
+msgstr ""
+
+#: organizations/models.py:206
+msgid "Can view staff details"
+msgstr ""
+
+#: organizations/models.py:207
+msgid "Can create staff"
+msgstr ""
+
+#: organizations/models.py:208
+msgid "Can create new staff members"
+msgstr ""
+
+#: organizations/models.py:209
+msgid "Can edit staff"
+msgstr ""
+
+#: organizations/models.py:210
+msgid "Can edit staff details and roles"
+msgstr ""
+
+#: organizations/models.py:211
+msgid "Can delete staff"
+msgstr ""
+
+#: organizations/models.py:212
+msgid "Can delete staff members"
+msgstr ""
+
+#: organizations/models.py:215
+msgid "Can manage orders (full access)"
+msgstr ""
+
+#: organizations/models.py:216
+msgid "Full order management - overrides other order permissions"
+msgstr ""
+
+#: organizations/models.py:217
+msgid "Can view all orders"
+msgstr ""
+
+#: organizations/models.py:218
+msgid "Can view own orders"
+msgstr ""
+
+#: organizations/models.py:219
+msgid "Can create orders"
+msgstr ""
+
+#: organizations/models.py:220
+msgid "Can edit orders"
+msgstr ""
+
+#: organizations/models.py:221
+msgid "Can delete orders"
+msgstr ""
+
+#: organizations/models.py:222
+msgid "Can assign orders"
+msgstr ""
+
+#: organizations/models.py:223
+msgid "Can update order status"
+msgstr ""
+
+#: organizations/models.py:224
+msgid "Can complete orders"
+msgstr ""
+
+#: organizations/models.py:225
+msgid "Can cancel orders"
+msgstr ""
+
+#: organizations/models.py:228
+msgid "Can manage financial (full access)"
+msgstr ""
+
+#: organizations/models.py:229
+msgid "Full financial management - overrides other financial permissions"
+msgstr ""
+
+#: organizations/models.py:230
+msgid "Can receive payments"
+msgstr ""
+
+#: organizations/models.py:231
+msgid "Can view financial reports"
+msgstr ""
+
+#: organizations/models.py:232
+msgid "Can apply discounts"
+msgstr ""
+
+#: organizations/models.py:233
+msgid "Can refund orders"
+msgstr ""
+
+#: organizations/models.py:236
+msgid "Can manage reports (full access)"
+msgstr ""
+
+#: organizations/models.py:237
+msgid "Full reports management - overrides other report permissions"
+msgstr ""
+
+#: organizations/models.py:238
+msgid "Can view reports"
+msgstr ""
+
+#: organizations/models.py:239
+msgid "Can view analytics"
+msgstr ""
+
+#: organizations/models.py:240
+msgid "Can export data"
+msgstr ""
+
+#: organizations/models.py:243
+msgid "Can manage products (full access)"
+msgstr ""
+
+#: organizations/models.py:244
+msgid "Full product management - overrides other product permissions"
+msgstr ""
+
+#: organizations/models.py:245
+msgid "Can view products"
+msgstr ""
+
+#: organizations/models.py:246
+msgid "Can create products"
+msgstr ""
+
+#: organizations/models.py:247
+msgid "Can edit products"
+msgstr ""
+
+#: organizations/models.py:248
+msgid "Can delete products"
+msgstr ""
+
+#: organizations/models.py:250
+msgid "Can manage customers (full access)"
+msgstr ""
+
+#: organizations/models.py:251
+msgid "Full customer management - overrides other customer permissions"
+msgstr ""
+
+#: organizations/models.py:252
+msgid "Can view customers"
+msgstr ""
+
+#: organizations/models.py:253
+msgid "Can edit customers"
+msgstr ""
+
+#: organizations/models.py:254
+msgid "Can delete customers"
+msgstr ""
+
+#: organizations/models.py:257
+msgid "Can manage marketing (full access)"
+msgstr ""
+
+#: organizations/models.py:258
+msgid "Full marketing management - overrides other marketing permissions"
+msgstr ""
+
+#: organizations/models.py:259
+msgid "Can create marketing posts"
+msgstr ""
+
+#: organizations/models.py:260
+msgid "Can send branch broadcasts"
+msgstr ""
+
+#: organizations/models.py:261
+msgid "Can send center-wide broadcasts"
+msgstr ""
+
+#: organizations/models.py:262
+msgid "Can view broadcast statistics"
+msgstr ""
+
+#: organizations/models.py:265
+msgid "Can manage branch settings"
+msgstr ""
+
+#: organizations/models.py:266
+msgid "Can edit branch payment info, help texts, about us, working hours"
+msgstr ""
+
+#: organizations/models.py:267
+msgid "Can view branch settings"
+msgstr ""
+
+#: organizations/models.py:268
+msgid "Can view branch settings without editing"
+msgstr ""
+
+#: organizations/models.py:271
+msgid "Can manage agencies (full access)"
+msgstr ""
+
+#: organizations/models.py:272
+msgid "Full agency management - overrides other agency permissions"
+msgstr ""
+
+#: organizations/models.py:273
+msgid "Can view agencies"
+msgstr ""
+
+#: organizations/models.py:274
+msgid "Can view list of agency partners"
+msgstr ""
+
+#: organizations/models.py:275
+msgid "Can create agencies"
+msgstr ""
+
+#: organizations/models.py:276
+msgid "Can create new agency profiles and generate invite links"
+msgstr ""
+
+#: organizations/models.py:277
+msgid "Can edit agencies"
+msgstr ""
+
+#: organizations/models.py:278
+msgid "Can edit agency details and reset invite links"
+msgstr ""
+
+#: organizations/models.py:279
+msgid "Can delete agencies"
+msgstr ""
+
+#: organizations/models.py:280
+msgid "Can delete agency profiles"
+msgstr ""
+
+#: organizations/models.py:283
+msgid "Can view audit logs"
+msgstr ""
+
+#: organizations/models.py:284
+msgid "Can view system audit logs and activity history"
+msgstr ""
+
+#: organizations/models.py:290 organizations/models.py:936
+msgid "Role"
+msgstr ""
+
+#: organizations/models.py:291
+msgid "Roles"
+msgstr ""
+
+#: organizations/models.py:467
+msgid "Center Management"
+msgstr ""
+
+#: organizations/models.py:479
+msgid "Branch Management"
+msgstr ""
+
+#: organizations/models.py:491
+msgid "Staff Management"
+msgstr ""
+
+#: organizations/models.py:503
+msgid "Order Management"
+msgstr ""
+
+#: organizations/models.py:520
+msgid "Financial"
+msgstr ""
+
+#: organizations/models.py:532
+msgid "Reports & Analytics"
+msgstr ""
+
+#: organizations/models.py:543
+msgid "Products"
+msgstr ""
+
+#: organizations/models.py:555
+msgid "Customers"
+msgstr ""
+
+#: organizations/models.py:566
+msgid "Marketing & Broadcasts"
+msgstr ""
+
+#: organizations/models.py:578
+msgid "Branch Settings"
+msgstr ""
+
+#: organizations/models.py:587
+msgid "Agency Management"
+msgstr ""
+
+#: organizations/models.py:605
+msgid "Full Center Management"
+msgstr ""
+
+#: organizations/models.py:606
+msgid "View Centers"
+msgstr ""
+
+#: organizations/models.py:607
+msgid "Create Centers"
+msgstr ""
+
+#: organizations/models.py:608
+msgid "Edit Centers"
+msgstr ""
+
+#: organizations/models.py:609
+msgid "Delete Centers"
+msgstr ""
+
+#: organizations/models.py:611
+msgid "Full Branch Management"
+msgstr ""
+
+#: organizations/models.py:612
+msgid "View Branches"
+msgstr ""
+
+#: organizations/models.py:613
+msgid "Create Branches"
+msgstr ""
+
+#: organizations/models.py:614
+msgid "Edit Branches"
+msgstr ""
+
+#: organizations/models.py:615
+msgid "Delete Branches"
+msgstr ""
+
+#: organizations/models.py:617
+msgid "Full Staff Management"
+msgstr ""
+
+#: organizations/models.py:618
+msgid "View Staff"
+msgstr ""
+
+#: organizations/models.py:619
+msgid "Create Staff"
+msgstr ""
+
+#: organizations/models.py:620
+msgid "Edit Staff"
+msgstr ""
+
+#: organizations/models.py:621
+msgid "Delete Staff"
+msgstr ""
+
+#: organizations/models.py:623
+msgid "Full Order Management"
+msgstr ""
+
+#: organizations/models.py:624
+msgid "View All Orders"
+msgstr ""
+
+#: organizations/models.py:625
+msgid "View Own Orders"
+msgstr ""
+
+#: organizations/models.py:626
+msgid "Create Orders"
+msgstr ""
+
+#: organizations/models.py:627
+msgid "Edit Orders"
+msgstr ""
+
+#: organizations/models.py:628
+msgid "Delete Orders"
+msgstr ""
+
+#: organizations/models.py:629
+msgid "Assign Orders"
+msgstr ""
+
+#: organizations/models.py:630
+msgid "Update Order Status"
+msgstr ""
+
+#: organizations/models.py:631
+msgid "Complete Orders"
+msgstr ""
+
+#: organizations/models.py:632
+msgid "Cancel Orders"
+msgstr ""
+
+#: organizations/models.py:634
+msgid "Full Financial Management"
+msgstr ""
+
+#: organizations/models.py:635
+msgid "Receive Payments"
+msgstr ""
+
+#: organizations/models.py:636
+msgid "View Financial Reports"
+msgstr ""
+
+#: organizations/models.py:637
+msgid "Apply Discounts"
+msgstr ""
+
+#: organizations/models.py:638
+msgid "Refund Orders"
+msgstr ""
+
+#: organizations/models.py:640
+msgid "Full Reports Management"
+msgstr ""
+
+#: organizations/models.py:641
+msgid "View Reports"
+msgstr ""
+
+#: organizations/models.py:642
+msgid "View Analytics"
+msgstr ""
+
+#: organizations/models.py:643
+msgid "Export Data"
+msgstr ""
+
+#: organizations/models.py:645
+msgid "Full Product Management"
+msgstr ""
+
+#: organizations/models.py:646
+msgid "View Products"
+msgstr ""
+
+#: organizations/models.py:647
+msgid "Create Products"
+msgstr ""
+
+#: organizations/models.py:648
+msgid "Edit Products"
+msgstr ""
+
+#: organizations/models.py:649
+msgid "Delete Products"
+msgstr ""
+
+#: organizations/models.py:651
+msgid "Full Customer Management"
+msgstr ""
+
+#: organizations/models.py:652
+msgid "View Customers"
+msgstr ""
+
+#: organizations/models.py:653
+msgid "Edit Customers"
+msgstr ""
+
+#: organizations/models.py:654
+msgid "Delete Customers"
+msgstr ""
+
+#: organizations/models.py:656
+msgid "Full Marketing Management"
+msgstr ""
+
+#: organizations/models.py:657
+msgid "Create Marketing Posts"
+msgstr ""
+
+#: organizations/models.py:658
+msgid "Send Branch Broadcasts"
+msgstr ""
+
+#: organizations/models.py:659
+msgid "Send Center Broadcasts"
+msgstr ""
+
+#: organizations/models.py:660
+msgid "View Broadcast Stats"
+msgstr ""
+
+#: organizations/models.py:662
+msgid "Manage Branch Settings"
+msgstr ""
+
+#: organizations/models.py:663
+msgid "View Branch Settings"
+msgstr ""
+
+#: organizations/models.py:665
+msgid "Full Agency Management"
+msgstr ""
+
+#: organizations/models.py:666
+msgid "View Agencies"
+msgstr ""
+
+#: organizations/models.py:667
+msgid "Create Agencies"
+msgstr ""
+
+#: organizations/models.py:668
+msgid "Edit Agencies"
+msgstr ""
+
+#: organizations/models.py:669
+msgid "Delete Agencies"
+msgstr ""
+
+#: organizations/models.py:677
+msgid ""
+"Full control over all center operations - overrides individual permissions"
+msgstr ""
+
+#: organizations/models.py:678
+msgid "View translation center details and settings"
+msgstr ""
+
+#: organizations/models.py:679
+msgid "Create new translation centers"
+msgstr ""
+
+#: organizations/models.py:680
+msgid "Edit translation center settings and configuration"
+msgstr ""
+
+#: organizations/models.py:681
+msgid "Delete translation centers (requires removing bot token first)"
+msgstr ""
+
+#: organizations/models.py:683
+msgid ""
+"Full control over all branch operations - overrides individual permissions"
+msgstr ""
+
+#: organizations/models.py:684
+msgid "View branch details and settings"
+msgstr ""
+
+#: organizations/models.py:685
+msgid "Create new branches within centers"
+msgstr ""
+
+#: organizations/models.py:686
+msgid "Edit branch settings and configuration"
+msgstr ""
+
+#: organizations/models.py:687
+msgid "Delete branches from the system"
+msgstr ""
+
+#: organizations/models.py:689
+msgid ""
+"Full control over all staff operations - overrides individual permissions"
+msgstr ""
+
+#: organizations/models.py:690
+msgid "View staff profiles and details"
+msgstr ""
+
+#: organizations/models.py:691
+msgid "Create new staff members and assign roles"
+msgstr ""
+
+#: organizations/models.py:692
+msgid "Edit staff details and change their roles"
+msgstr ""
+
+#: organizations/models.py:693
+msgid "Remove staff members from the system"
+msgstr ""
+
+#: organizations/models.py:695
+msgid ""
+"Full control over all order operations - overrides individual permissions"
+msgstr ""
+
+#: organizations/models.py:696
+msgid "View all orders in the center/branch, not just assigned ones"
+msgstr ""
+
+#: organizations/models.py:697
+msgid "View orders assigned to this user"
+msgstr ""
+
+#: organizations/models.py:698
+msgid "Create new translation orders"
+msgstr ""
+
+#: organizations/models.py:699
+msgid "Modify existing order details, files, and settings"
+msgstr ""
+
+#: organizations/models.py:700
+msgid "Permanently remove orders from the system"
+msgstr ""
+
+#: organizations/models.py:701
+msgid "Assign orders to other staff members"
+msgstr ""
+
+#: organizations/models.py:702
+msgid "Change order status (pending, in progress, etc.)"
+msgstr ""
+
+#: organizations/models.py:703
+msgid "Mark orders as completed/delivered"
+msgstr ""
+
+#: organizations/models.py:704
+msgid "Cancel active orders"
+msgstr ""
+
+#: organizations/models.py:706
+msgid ""
+"Full control over all financial operations - overrides individual permissions"
+msgstr ""
+
+#: organizations/models.py:707
+msgid "Accept and record customer payments"
+msgstr ""
+
+#: organizations/models.py:708
+msgid "Access financial reports and revenue data"
+msgstr ""
+
+#: organizations/models.py:709
+msgid "Apply discounts to orders"
+msgstr ""
+
+#: organizations/models.py:710
+msgid "Process refunds for completed or cancelled orders"
+msgstr ""
+
+#: organizations/models.py:712
+msgid ""
+"Full control over all report operations - overrides individual permissions"
+msgstr ""
+
+#: organizations/models.py:713
+msgid "Access performance and activity reports"
+msgstr ""
+
+#: organizations/models.py:714
+msgid "View analytics dashboard with charts and metrics"
+msgstr ""
+
+#: organizations/models.py:715
+msgid "Export data to Excel, PDF, or other formats"
+msgstr ""
+
+#: organizations/models.py:717
+msgid ""
+"Full control over all product operations - overrides individual permissions"
+msgstr ""
+
+#: organizations/models.py:718
+msgid "View product and service listings"
+msgstr ""
+
+#: organizations/models.py:719
+msgid "Add new services and products"
+msgstr ""
+
+#: organizations/models.py:720
+msgid "Edit existing services and products"
+msgstr ""
+
+#: organizations/models.py:721
+msgid "Remove services and products from the system"
+msgstr ""
+
+#: organizations/models.py:723
+msgid ""
+"Full control over all customer operations - overrides individual permissions"
+msgstr ""
+
+#: organizations/models.py:724
+msgid "View customer information and history"
+msgstr ""
+
+#: organizations/models.py:725
+msgid "Edit customer records and contact information"
+msgstr ""
+
+#: organizations/models.py:726
+msgid "Remove customer records from the system"
+msgstr ""
+
+#: organizations/models.py:728
+msgid ""
+"Full control over all marketing operations - overrides individual permissions"
+msgstr ""
+
+#: organizations/models.py:729
+msgid "Create and edit marketing posts and announcements"
+msgstr ""
+
+#: organizations/models.py:730
+msgid "Send broadcast messages to all customers in their branch"
+msgstr ""
+
+#: organizations/models.py:731
+msgid "Send broadcast messages to all customers across the entire center"
+msgstr ""
+
+#: organizations/models.py:732
+msgid "View broadcast delivery statistics and analytics"
+msgstr ""
+
+#: organizations/models.py:734
+msgid "Edit branch payment info, help texts, about us, and working hours"
+msgstr ""
+
+#: organizations/models.py:735
+msgid "View branch settings without the ability to edit"
+msgstr ""
+
+#: organizations/models.py:737
+msgid ""
+"Full control over all agency operations - overrides individual permissions"
+msgstr ""
+
+#: organizations/models.py:738
+msgid "View list of agency partners and their details"
+msgstr ""
+
+#: organizations/models.py:739
+msgid "Create new agency profiles and generate invitation links"
+msgstr ""
+
+#: organizations/models.py:740
+msgid "Edit agency information and reset invitation links"
+msgstr ""
+
+#: organizations/models.py:741
+msgid "Remove agency profiles from the system"
+msgstr ""
+
+#: organizations/models.py:938
+msgid "Role is optional for superusers"
+msgstr ""
+
+#: organizations/models.py:947
+msgid "For owners, this is their primary center"
+msgstr ""
+
+#: organizations/models.py:956
+msgid "Specific branch assignment for managers/staff"
+msgstr ""
+
+#: organizations/models.py:959
+msgid "Avatar"
+msgstr ""
+
+#: organizations/models.py:967
+msgid "Created by"
+msgstr ""
+
+#: organizations/models.py:973
+msgid "Admin User"
+msgstr ""
+
+#: organizations/models.py:974
+msgid "Admin Users"
+msgstr ""
+
+#: organizations/models.py:1022
+msgid "Only superusers can create or assign the Owner role."
+msgstr ""
+
+#: services/models.py:16
+msgid "B2B (Agency/Business)"
+msgstr ""
+
+#: services/models.py:17
+msgid "B2C (Individual Customer)"
+msgstr ""
+
+#: services/models.py:18
+msgid "Both B2B & B2C"
+msgstr ""
+
+#: services/models.py:21
+msgid "Expense Name"
+msgstr ""
+
+#: services/models.py:25
+msgid "Price"
+msgstr ""
+
+#: services/models.py:26
+msgid "Cost of this expense"
+msgstr ""
+
+#: services/models.py:32
+msgid "Expense Type"
+msgstr ""
+
+#: services/models.py:33
+msgid "Whether this expense applies to B2B, B2C, or both"
+msgstr ""
+
+#: services/models.py:40
+msgid "Branch this expense belongs to"
+msgstr ""
+
+#: services/models.py:52
+msgid "Expense"
+msgstr ""
+
+#: services/models.py:53 services/models.py:255
+msgid "Expenses"
+msgstr ""
+
+#: services/models.py:145
+msgid "Language Name"
+msgstr ""
+
+#: services/models.py:148
+msgid "Short Name"
+msgstr ""
+
+#: services/models.py:158 services/models.py:180
+msgid "Languages"
+msgstr ""
+
+#: services/models.py:165
+msgid "Bir xil narx"
+msgstr ""
+
+#: services/models.py:166
+msgid "Page soniga qarab narx"
+msgstr ""
+
+#: services/models.py:173
+msgid "Branch this category belongs to"
+msgstr ""
+
+#: services/models.py:175
+msgid "Service Name"
+msgstr ""
+
+#: services/models.py:182
+msgid "Charging Type"
+msgstr ""
+
+#: services/models.py:193 services/models.py:203
+msgid "Main Service"
+msgstr ""
+
+#: services/models.py:194
+msgid "Main Services"
+msgstr ""
+
+#: services/models.py:209
+msgid "First Page Price for Regular Users"
+msgstr ""
+
+#: services/models.py:215
+msgid "Other Pages Price for Regular Users"
+msgstr ""
+
+#: services/models.py:221
+msgid "First Page Price for Agencies"
+msgstr ""
+
+#: services/models.py:227
+msgid "Other Pages Price for Agencies"
+msgstr ""
+
+#: services/models.py:241
+msgid "Minimum Pages"
+msgstr ""
+
+#: services/models.py:243
+msgid "Estimated Days"
+msgstr ""
+
+#: services/models.py:256
+msgid "Expenses associated with this product"
+msgstr ""
+
+#: services/models.py:383
+msgid "Document Types"
+msgstr ""
+
+#: templates/reports/audit_logs.html:25
+msgid "Total Logs"
+msgstr ""
+
+#: templates/reports/audit_logs.html:37
+msgid "Period"
+msgstr ""
+
+#: templates/reports/audit_logs.html:50
+msgid "From"
+msgstr ""
+
+#: templates/reports/audit_logs.html:54
+msgid "To"
+msgstr ""
+
+#: templates/reports/audit_logs.html:64
+msgid "Action Type"
+msgstr ""
+
+#: templates/reports/audit_logs.html:67
+msgid "All Actions"
+msgstr ""
+
+#: templates/reports/audit_logs.html:81
+msgid "All Users"
+msgstr ""
+
+#: templates/reports/audit_logs.html:98
+msgid "All Centers"
+msgstr ""
+
+#: templates/reports/audit_logs.html:114
+msgid "All Branches"
+msgstr ""
+
+#: templates/reports/audit_logs.html:126
+msgid "Search"
+msgstr ""
+
+#: templates/reports/audit_logs.html:129
+msgid "Search logs..."
+msgstr ""
+
+#: templates/reports/audit_logs.html:136
+msgid "Apply Filters"
+msgstr ""
+
+#: templates/reports/audit_logs.html:140
+msgid "Reset"
+msgstr ""
+
+#: templates/reports/audit_logs.html:154
+msgid "Activity Timeline"
+msgstr ""
+
+#: templates/reports/audit_logs.html:157 templates/reports/audit_logs.html:339
+msgid "of"
+msgstr ""
+
+#: templates/reports/audit_logs.html:223
+msgid "System"
+msgstr ""
+
+#: templates/reports/audit_logs.html:229
+msgid "Created"
+msgstr ""
+
+#: templates/reports/audit_logs.html:231 templates/reports/audit_logs.html:299
+msgid "Updated"
+msgstr ""
+
+#: templates/reports/audit_logs.html:233
+msgid "Deleted"
+msgstr ""
+
+#: templates/reports/audit_logs.html:235
+msgid "Logged In"
+msgstr ""
+
+#: templates/reports/audit_logs.html:237
+msgid "Logged Out"
+msgstr ""
+
+#: templates/reports/audit_logs.html:241
+msgid "Status Changed"
+msgstr ""
+
+#: templates/reports/audit_logs.html:243
+msgid "Assigned"
+msgstr ""
+
+#: templates/reports/audit_logs.html:265
+msgid "at"
+msgstr ""
+
+#: templates/reports/audit_logs.html:289
+msgid "View Changes"
+msgstr ""
+
+#: templates/reports/audit_logs.html:297
+msgid "Field"
+msgstr ""
+
+#: templates/reports/audit_logs.html:298
+msgid "Previous"
+msgstr ""
+
+#: templates/reports/audit_logs.html:338
+msgid "Showing"
+msgstr ""
+
+#: templates/reports/audit_logs.html:338
+msgid "to"
+msgstr ""
+
+#: templates/reports/audit_logs.html:340
+msgid "entries"
+msgstr ""
+
+#: templates/reports/audit_logs.html:385
+msgid "No Audit Logs Found"
+msgstr ""
+
+#: templates/reports/audit_logs.html:386
+msgid "No activity matches your current filters."
+msgstr ""
+
+#: templates/reports/audit_logs.html:389
+msgid "Reset Filters"
+msgstr ""

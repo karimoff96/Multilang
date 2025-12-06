@@ -4,8 +4,8 @@ Financial/order reports per branch/center with date filtering
 """
 
 from django.shortcuts import render
-from django.db.models import Sum, Count, Avg, Q
-from django.db.models.functions import TruncDate, TruncMonth, TruncWeek, TruncYear
+from django.db.models import Sum, Count, Avg
+from django.db.models.functions import TruncDate, TruncMonth, TruncWeek
 from django.utils import timezone
 from django.core.paginator import Paginator
 from datetime import timedelta
@@ -14,8 +14,8 @@ from django.contrib.auth.decorators import login_required
 import json
 
 from orders.models import Order
-from accounts.models import BotUser
 from services.models import Product
+from accounts.models import BotUser
 from organizations.models import Branch, TranslationCenter, AdminUser
 from organizations.rbac import (
     get_user_orders,

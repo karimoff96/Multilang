@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.db.models import Sum, Q
+from django.db.models import Sum
 from decimal import Decimal
 from organizations.models import Branch
 

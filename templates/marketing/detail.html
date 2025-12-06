@@ -281,35 +281,41 @@
                     <span class="fw-bold text-lg">{{ post.total_recipients }}</span>
                 </div>
                 
-                <!-- Progress Bar -->
-                {% if post.sent_count > 0 %}
+                <!-- Progress Bar - using model's cached counts for consistency with list page -->
+                {% if post.delivered_count > 0 or post.failed_count > 0 %}
+                {% with total=post.delivered_count|add:post.failed_count %}
                 <div class="mb-16">
                     <div class="d-flex justify-content-between text-sm mb-8">
                         <span>Delivery Progress</span>
-                        <span>{{ post.delivery_percentage }}%</span>
+                        <span>{{ post.delivered_count|add:post.failed_count }} / {{ post.total_recipients }}</span>
                     </div>
                     <div class="progress" style="height: 8px;">
-                        <div class="progress-bar bg-success" style="width: {{ post.delivery_percentage }}%"></div>
+                        {% if total > 0 %}
+                        <div class="progress-bar bg-success" style="width: {% widthratio post.delivered_count total 100 %}%" title="Delivered: {{ post.delivered_count }}"></div>
+                        <div class="progress-bar bg-danger" style="width: {% widthratio post.failed_count total 100 %}%" title="Failed: {{ post.failed_count }}"></div>
+                        {% endif %}
                     </div>
                 </div>
+                {% endwith %}
                 {% endif %}
                 
-                <!-- Stats Grid -->
+                <!-- Stats Grid - using model's cached counts -->
                 <div class="row g-3 mt-16">
                     <div class="col-6">
                         <div class="bg-success-50 radius-8 p-12 text-center">
                             <iconify-icon icon="mdi:check-circle" class="text-success-600 text-xl mb-4"></iconify-icon>
-                            <h5 class="fw-bold text-success-600 mb-0">{{ recipient_stats.delivered }}</h5>
+                            <h5 class="fw-bold text-success-600 mb-0">{{ post.delivered_count }}</h5>
                             <small class="text-secondary-light">Delivered</small>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="bg-danger-50 radius-8 p-12 text-center">
                             <iconify-icon icon="mdi:alert-circle" class="text-danger-600 text-xl mb-4"></iconify-icon>
-                            <h5 class="fw-bold text-danger-600 mb-0">{{ recipient_stats.failed }}</h5>
+                            <h5 class="fw-bold text-danger-600 mb-0">{{ post.failed_count }}</h5>
                             <small class="text-secondary-light">Failed</small>
                         </div>
                     </div>
+                    {% if recipient_stats.blocked > 0 %}
                     <div class="col-6">
                         <div class="bg-warning-50 radius-8 p-12 text-center">
                             <iconify-icon icon="mdi:account-off" class="text-warning-600 text-xl mb-4"></iconify-icon>
@@ -317,6 +323,8 @@
                             <small class="text-secondary-light">Blocked</small>
                         </div>
                     </div>
+                    {% endif %}
+                    {% if recipient_stats.pending > 0 %}
                     <div class="col-6">
                         <div class="bg-secondary-50 radius-8 p-12 text-center">
                             <iconify-icon icon="mdi:clock-outline" class="text-secondary-600 text-xl mb-4"></iconify-icon>
@@ -324,6 +332,7 @@
                             <small class="text-secondary-light">Pending</small>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

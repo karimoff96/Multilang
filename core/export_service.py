@@ -18,8 +18,8 @@ from decimal import Decimal
 from typing import List, Dict, Any, Optional, Union
 from dataclasses import dataclass
 
-from django.db.models import Sum, Count, Avg, F, Q, DecimalField
-from django.db.models.functions import Coalesce, TruncDate
+from django.db.models import Sum, Count, Avg, F, DecimalField
+from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.utils import timezone
 
