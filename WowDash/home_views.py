@@ -194,6 +194,7 @@ def index(request):
                 )
                 branch_performance.append(
                     {
+                        "id": branch.id,
                         "name": branch.name,
                         "orders": branch_orders.count(),
                         "revenue": branch_revenue,

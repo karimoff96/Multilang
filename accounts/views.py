@@ -32,6 +32,16 @@ def admin_login(request):
 
         if user is not None:
             if user.is_staff or user.is_superuser:
+                # Check if user belongs to the center matching the subdomain
+                if not user.is_superuser and hasattr(request, 'center') and request.center:
+                    # Get user's admin profile
+                    admin_profile = getattr(user, 'admin_profile', None)
+                    if admin_profile and admin_profile.center_id != request.center.id:
+                        audit_logger.warning(f"LOGIN_DENIED user={username} reason=wrong_center subdomain={request.center.subdomain} ip={ip_address}")
+                        logger.warning(f"Login denied for {username} - belongs to different center")
+                        messages.error(request, "You don't have access to this center.")
+                        return render(request, "authentication/signin.html")
+                
                 login(request, user)
                 audit_logger.info(f"LOGIN_SUCCESS user={username} ip={ip_address}")
                 logger.info(f"User {username} logged in successfully from {ip_address}")
