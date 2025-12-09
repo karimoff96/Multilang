@@ -221,6 +221,7 @@ def center_edit(request, center_id):
 @permission_required('can_view_centers')
 def center_detail(request, center_id):
     """View translation center details with branches, staff, categories, products"""
+    from django.db.models import Q as DQ
     from services.models import Category, Product
     from orders.models import Order
     from accounts.models import BotUser
@@ -240,9 +241,9 @@ def center_detail(request, center_id):
         Branch.objects.filter(center=center)
         .select_related("region", "district")
         .annotate(
-            staff_count=Count("staff"),
-            customer_count=Count("customers"),
-            order_count=Count("orders"),
+            staff_count=Count("staff", distinct=True),
+            customer_count=Count("customers", distinct=True),
+            order_count=Count("orders", distinct=True),
         )
         .order_by("-is_main", "name")
     )
@@ -315,8 +316,8 @@ def branch_list(request):
         get_user_branches(request.user)
         .select_related("center", "region", "district")
         .annotate(
-            staff_count=Count("staff"),
-            customer_count=Count("customers"),
+            staff_count=Count("staff", distinct=True),
+            customer_count=Count("customers", distinct=True),
         )
         .order_by("center", "name")
     )

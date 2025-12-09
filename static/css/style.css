@@ -14801,6 +14801,18 @@ td.fc-header-center {
   display: inline-block;
 }
 
+.sidebar.active:hover .sidebar-logo img.dark-logo {
+  display: none;
+}
+
+.sidebar.active:hover .sidebar-logo img.light-icon {
+  display: none;
+}
+
+.sidebar.active:hover .sidebar-logo img.dark-icon {
+  display: none;
+}
+
 .sidebar.active:hover .sidebar-logo img.logo-icon {
   display: none;
 }
@@ -14827,6 +14839,14 @@ td.fc-header-center {
 
 .sidebar.active .sidebar-logo img.light-logo, .sidebar.active .sidebar-logo img.dark-logo {
   display: none;
+}
+
+.sidebar.active .sidebar-logo img.light-icon {
+  display: none;
+}
+
+.sidebar.active .sidebar-logo img.dark-icon {
+  display: inline-block;
 }
 
 .sidebar.active .sidebar-logo img.logo-icon {
@@ -14871,6 +14891,14 @@ td.fc-header-center {
   display: none;
 }
 
+.sidebar-logo img.light-icon {
+  display: none;
+}
+
+.sidebar-logo img.dark-icon {
+  display: none;
+}
+
 .sidebar-logo img.logo-icon {
   display: none;
 }
@@ -14903,7 +14931,27 @@ td.fc-header-center {
   display: inline-block;
 }
 
+[data-theme=dark] .sidebar.active:hover .sidebar-logo img.light-icon {
+  display: none;
+}
+
+[data-theme=dark] .sidebar.active:hover .sidebar-logo img.dark-icon {
+  display: none;
+}
+
 [data-theme=dark] .sidebar.active .sidebar-logo img.light-logo {
+  display: none;
+}
+
+[data-theme=dark] .sidebar.active .sidebar-logo img.dark-logo {
+  display: none;
+}
+
+[data-theme=dark] .sidebar.active .sidebar-logo img.light-icon {
+  display: inline-block;
+}
+
+[data-theme=dark] .sidebar.active .sidebar-logo img.dark-icon {
   display: none;
 }
 
@@ -14911,8 +14959,16 @@ td.fc-header-center {
   display: none;
 }
 
+[data-theme=dark] .sidebar-logo img.light-icon {
+  display: none;
+}
+
 [data-theme=dark] .sidebar-logo img.dark-logo {
   display: inline-block;
+}
+
+[data-theme=dark] .sidebar-logo img.dark-icon {
+  display: none;
 }
 
 .sidebar-menu li.dropdown > a {
@@ -15112,3 +15168,35 @@ button iconify-icon {
   flex-shrink: 0;
 }
 /* === Icon alignment fix end === */
+
+/* === Dark/Light Theme Icon Colors === */
+/* Light theme - icons use default/darker colors */
+.sidebar-menu li a .menu-icon {
+  color: var(--neutral-600);
+  transition: color 0.3s ease;
+}
+
+.sidebar-menu li a:hover .menu-icon,
+.sidebar-menu li.active a .menu-icon {
+  color: var(--brand);
+}
+
+/* Dark theme - icons use lighter colors for better visibility */
+[data-theme=dark] .sidebar-menu li a .menu-icon {
+  color: var(--neutral-200);
+}
+
+[data-theme=dark] .sidebar-menu li a:hover .menu-icon,
+[data-theme=dark] .sidebar-menu li.active a .menu-icon {
+  color: var(--brand);
+}
+
+/* Submenu circle icons */
+.sidebar-menu .sidebar-submenu .circle-icon {
+  opacity: 0.7;
+}
+
+[data-theme=dark] .sidebar-menu .sidebar-submenu .circle-icon {
+  opacity: 0.6;
+}
+/* === Dark/Light Theme Icon Colors End === */

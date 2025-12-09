@@ -540,14 +540,25 @@ def editProduct(request, product_id):
                 product.description_uz = description_uz or None
                 product.description_ru = description_ru or None
                 product.description_en = description_en or None
-                product.ordinary_first_page_price = ordinary_first_page_price or 0
-                product.ordinary_other_page_price = ordinary_other_page_price or 0
-                product.agency_first_page_price = agency_first_page_price or 0
-                product.agency_other_page_price = agency_other_page_price or 0
-                product.user_copy_price_percentage = user_copy_price_percentage or 100
-                product.agency_copy_price_percentage = agency_copy_price_percentage or 100
-                product.min_pages = min_pages or 1
-                product.estimated_days = estimated_days or 1
+                
+                # Update prices only if provided (don't overwrite with 0 if empty)
+                if ordinary_first_page_price:
+                    product.ordinary_first_page_price = ordinary_first_page_price
+                if ordinary_other_page_price:
+                    product.ordinary_other_page_price = ordinary_other_page_price
+                if agency_first_page_price:
+                    product.agency_first_page_price = agency_first_page_price
+                if agency_other_page_price:
+                    product.agency_other_page_price = agency_other_page_price
+                if user_copy_price_percentage:
+                    product.user_copy_price_percentage = user_copy_price_percentage
+                if agency_copy_price_percentage:
+                    product.agency_copy_price_percentage = agency_copy_price_percentage
+                if min_pages:
+                    product.min_pages = min_pages
+                if estimated_days:
+                    product.estimated_days = estimated_days
+                    
                 product.is_active = is_active
                 product.save()
                 
