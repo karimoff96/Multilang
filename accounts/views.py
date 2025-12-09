@@ -9,6 +9,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
+from organizations.rbac import permission_required, any_permission_required, get_user_customers
 
 logger = logging.getLogger(__name__)
 audit_logger = logging.getLogger('audit')
@@ -181,6 +182,7 @@ from organizations.rbac import get_user_customers
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_create_customers')
 def addUser(request):
     """Add a new BotUser (Telegram user)"""
     from organizations.models import TranslationCenter, Branch
@@ -279,6 +281,7 @@ def addUser(request):
 
 
 @login_required(login_url="admin_login")
+@any_permission_required('can_view_customers', 'can_manage_customers')
 def usersList(request):
     """List all BotUsers with search and filter - RBAC filtered"""
     from organizations.rbac import get_user_customers
@@ -402,6 +405,7 @@ def usersList(request):
 
 
 @login_required(login_url="admin_login")
+@any_permission_required('can_edit_customers', 'can_manage_customers')
 def editUser(request, user_id):
     """Edit an existing BotUser"""
     from django.shortcuts import get_object_or_404
@@ -509,6 +513,7 @@ def editUser(request, user_id):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_delete_customers')
 def deleteUser(request, user_id):
     """Delete a BotUser"""
     from django.shortcuts import get_object_or_404
@@ -555,6 +560,7 @@ def deleteUser(request, user_id):
 
 
 @login_required(login_url="admin_login")
+@any_permission_required('can_view_customers', 'can_manage_customers')
 def userDetail(request):
     """View BotUser (Telegram user) profile details"""
     from orders.models import Order

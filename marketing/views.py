@@ -14,10 +14,10 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 
 from organizations.models import TranslationCenter, Branch
-from organizations.rbac import get_user_branches
+from organizations.rbac import get_user_branches, permission_required
 from core.audit import log_action
 from .models import MarketingPost, BroadcastRecipient
-from .broadcast_service import send_broadcast, get_recipient_count
+from .broadcast_service import send_broadcast, get_recipient_count, BroadcastService
 
 logger = logging.getLogger(__name__)
 audit_logger = logging.getLogger('audit')
@@ -96,6 +96,7 @@ def get_user_scope_permissions(request):
 
 
 @login_required
+@permission_required('can_manage_marketing')
 def marketing_list(request):
     """List marketing posts based on user permissions"""
     permissions = get_user_scope_permissions(request)
@@ -146,6 +147,7 @@ def marketing_list(request):
 
 
 @login_required
+@permission_required('can_manage_marketing')
 def marketing_create(request):
     """Create a new marketing post"""
     permissions = get_user_scope_permissions(request)
@@ -272,6 +274,7 @@ def marketing_create(request):
 
 
 @login_required
+@permission_required('can_manage_marketing')
 def marketing_detail(request, post_id):
     """View marketing post details"""
     post = get_object_or_404(MarketingPost, id=post_id)
@@ -334,6 +337,7 @@ def marketing_detail(request, post_id):
 
 
 @login_required
+@permission_required('can_manage_marketing')
 def marketing_edit(request, post_id):
     """Edit a marketing post (draft or scheduled status)"""
     post = get_object_or_404(MarketingPost, id=post_id)
@@ -488,6 +492,7 @@ def marketing_edit(request, post_id):
 
 
 @login_required
+@permission_required('can_manage_marketing')
 @require_POST
 def marketing_delete(request, post_id):
     """Delete a marketing post"""
@@ -514,6 +519,7 @@ def marketing_delete(request, post_id):
 
 
 @login_required
+@permission_required('can_manage_marketing')
 def marketing_preview(request, post_id):
     """Preview broadcast before sending"""
     post = get_object_or_404(MarketingPost, id=post_id)
@@ -548,6 +554,7 @@ def marketing_preview(request, post_id):
 
 
 @login_required
+@permission_required('can_manage_marketing')
 @require_POST
 def marketing_send(request, post_id):
     """Start sending a broadcast"""
@@ -611,6 +618,7 @@ def marketing_send(request, post_id):
 
 
 @login_required
+@permission_required('can_manage_marketing')
 @require_POST
 def marketing_pause(request, post_id):
     """Pause an ongoing broadcast"""
@@ -628,6 +636,7 @@ def marketing_pause(request, post_id):
 
 
 @login_required
+@permission_required('can_manage_marketing')
 @require_POST
 def marketing_cancel(request, post_id):
     """Cancel a broadcast"""
@@ -645,6 +654,7 @@ def marketing_cancel(request, post_id):
 
 
 @login_required
+@permission_required('can_manage_marketing')
 @require_GET
 def api_recipient_count(request):
     """API to get recipient count for given scope"""
@@ -681,6 +691,7 @@ def api_recipient_count(request):
 
 
 @login_required
+@permission_required('can_manage_marketing')
 @require_GET
 def api_center_branches(request, center_id):
     """API to get branches for a center"""

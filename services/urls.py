@@ -24,4 +24,7 @@ urlpatterns = [
     path("expenses/<int:expense_id>/delete/", views.deleteExpense, name="deleteExpense"),
     path("expenses/analytics/", views.expenseAnalytics, name="expenseAnalytics"),
     path("expenses/create-inline/", views.createExpenseInline, name="createExpenseInline"),
+    
+    # AJAX Endpoints
+    path("api/create-language/", views.createLanguageInline, name="createLanguageInline"),
 ]

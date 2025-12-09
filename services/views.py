@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from decimal import Decimal, InvalidOperation
 from .models import Category, Product, Language, Expense
-from organizations.rbac import get_user_categories, get_user_products, get_user_branches, get_user_expenses
+from organizations.rbac import get_user_categories, get_user_products, get_user_branches, get_user_expenses, permission_required, any_permission_required
 from organizations.models import TranslationCenter
 
 logger = logging.getLogger(__name__)
@@ -18,6 +18,7 @@ audit_logger = logging.getLogger('audit')
 # ============ Category Views ============
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_view_products', 'can_manage_products')
 def categoryList(request):
     """List all categories with search and filter"""
     # Use RBAC-filtered categories
@@ -93,6 +94,7 @@ def categoryList(request):
 
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_view_products', 'can_manage_products')
 def categoryDetail(request, category_id):
     """View category details with its products"""
     # Get category with RBAC check
@@ -111,6 +113,7 @@ def categoryDetail(request, category_id):
 
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_create_products', 'can_manage_products')
 def addCategory(request):
     """Add a new category"""
     languages = Language.objects.all()
@@ -176,6 +179,7 @@ def addCategory(request):
 
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_edit_products', 'can_manage_products')
 def editCategory(request, category_id):
     """Edit an existing category"""
     # Get category with RBAC check
@@ -244,6 +248,7 @@ def editCategory(request, category_id):
 
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_delete_products', 'can_manage_products')
 def deleteCategory(request, category_id):
     """Delete a category"""
     # Get category with RBAC check
@@ -261,6 +266,7 @@ def deleteCategory(request, category_id):
 # ============ Product Views ============
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_view_products', 'can_manage_products')
 def productList(request):
     """List all products with search and filter"""
     # Use RBAC-filtered products
@@ -345,6 +351,7 @@ def productList(request):
 
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_view_products', 'can_manage_products')
 def productDetail(request, product_id):
     """View product details"""
     # Get product with RBAC check
@@ -363,6 +370,7 @@ def productDetail(request, product_id):
 
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_create_products', 'can_manage_products')
 def addProduct(request):
     """Add a new product"""
     # Get RBAC-filtered categories
@@ -464,6 +472,7 @@ def addProduct(request):
 
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_edit_products', 'can_manage_products')
 def editProduct(request, product_id):
     """Edit an existing product"""
     # Get product with RBAC check
@@ -574,6 +583,7 @@ def editProduct(request, product_id):
 
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_delete_products', 'can_manage_products')
 def deleteProduct(request, product_id):
     """Delete a product"""
     # Get product with RBAC check
@@ -591,6 +601,7 @@ def deleteProduct(request, product_id):
 # ============ Expense Views ============
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_view_financial_reports', 'can_manage_financial')
 def expenseList(request):
     """List all expenses with search and filter"""
     # Use RBAC-filtered expenses
@@ -677,6 +688,7 @@ def expenseList(request):
 
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_view_financial_reports', 'can_manage_financial')
 def expenseDetail(request, expense_id):
     """View expense details with linked products"""
     # Get expense with RBAC check
@@ -696,6 +708,7 @@ def expenseDetail(request, expense_id):
 
 
 @login_required(login_url='admin_login')
+@permission_required('can_manage_financial')
 def addExpense(request):
     """Add a new expense"""
     # Get RBAC-filtered branches
@@ -758,6 +771,7 @@ def addExpense(request):
 
 
 @login_required(login_url='admin_login')
+@permission_required('can_manage_financial')
 def editExpense(request, expense_id):
     """Edit an existing expense"""
     # Get expense with RBAC check
@@ -821,6 +835,7 @@ def editExpense(request, expense_id):
 
 
 @login_required(login_url='admin_login')
+@permission_required('can_manage_financial')
 def deleteExpense(request, expense_id):
     """Delete an expense"""
     # Get expense with RBAC check
@@ -838,6 +853,7 @@ def deleteExpense(request, expense_id):
 # ============ Expense Analytics API ============
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_view_financial_reports', 'can_manage_financial')
 def expenseAnalytics(request):
     """Get expense analytics by B2B/B2C for center/branch level"""
     branch_id = request.GET.get('branch')
@@ -888,6 +904,7 @@ def expenseAnalytics(request):
 # ============ Inline Expense Creation (AJAX) ============
 
 @login_required(login_url='admin_login')
+@permission_required('can_manage_financial')
 @require_POST
 def createExpenseInline(request):
     """Create an expense inline via AJAX from the product add/edit page"""
@@ -938,6 +955,62 @@ def createExpenseInline(request):
                 'expense_type': expense.expense_type,
                 'expense_type_display': expense.get_expense_type_display(),
                 'branch_name': branch.name,
+            }
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data.'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+# ============ Inline Language Creation (AJAX) ============
+
+@login_required(login_url='admin_login')
+@require_POST
+def createLanguageInline(request):
+    """Create a language inline via AJAX - Superuser only"""
+    import json
+    
+    # Only superusers can create languages
+    if not request.user.is_superuser:
+        return JsonResponse({'success': False, 'error': 'Only superusers can create languages.'}, status=403)
+    
+    try:
+        # Check if JSON or form data
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+        else:
+            data = request.POST
+        
+        name = data.get('name', '').strip()
+        short_name = data.get('short_name', '').strip()
+        
+        if not name:
+            return JsonResponse({'success': False, 'error': 'Language name is required.'}, status=400)
+        
+        if not short_name:
+            return JsonResponse({'success': False, 'error': 'Short name is required.'}, status=400)
+        
+        # Check if language already exists
+        if Language.objects.filter(name__iexact=name).exists():
+            return JsonResponse({'success': False, 'error': f'Language "{name}" already exists.'}, status=400)
+        
+        if Language.objects.filter(short_name__iexact=short_name).exists():
+            return JsonResponse({'success': False, 'error': f'Short name "{short_name}" already exists.'}, status=400)
+        
+        # Create the language
+        language = Language.objects.create(
+            name=name,
+            short_name=short_name.upper(),
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'language': {
+                'id': language.id,
+                'name': language.name,
+                'short_name': language.short_name,
             }
         })
         

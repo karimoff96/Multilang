@@ -108,7 +108,16 @@
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.languages">
                             Languages
                         </label>
-                        <div class="d-flex flex-wrap gap-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <small class="text-secondary-light">Select languages this category can be translated to</small>
+                            {% if user.is_superuser %}
+                            <button type="button" class="btn btn-sm btn-outline-primary radius-8 px-12 py-6" data-bs-toggle="modal" data-bs-target="#addLanguageModal">
+                                <iconify-icon icon="mdi:plus" class="text-lg"></iconify-icon>
+                                <span class="text-sm">Add New Language</span>
+                            </button>
+                            {% endif %}
+                        </div>
+                        <div id="languageCheckboxes" class="d-flex flex-wrap gap-3">
                             {% for lang in languages %}
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="languages" value="{{ lang.id }}" id="lang{{ lang.id }}"
@@ -151,4 +160,131 @@
         </div>
     </div>
 </div>
+
+<!-- Add Language Modal -->
+{% if user.is_superuser %}
+<div class="modal fade" id="addLanguageModal" tabindex="-1" aria-labelledby="addLanguageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addLanguageModalLabel">Add New Language</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addLanguageForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="languageName" class="form-label">Language Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="languageName" required placeholder="e.g., English, French, Spanish">
+                    </div>
+                    <div class="mb-3">
+                        <label for="languageShortName" class="form-label">Short Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="languageShortName" required placeholder="e.g., EN, FR, ES" maxlength="10">
+                        <small class="text-secondary-light">2-3 letter code (will be auto-capitalized)</small>
+                    </div>
+                    <div id="languageError" class="alert alert-danger d-none"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveLanguageBtn">
+                    <iconify-icon icon="mdi:content-save" class="me-1"></iconify-icon>
+                    Create Language
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const saveLanguageBtn = document.getElementById('saveLanguageBtn');
+    const languageNameInput = document.getElementById('languageName');
+    const languageShortNameInput = document.getElementById('languageShortName');
+    const languageError = document.getElementById('languageError');
+    const addLanguageModal = new bootstrap.Modal(document.getElementById('addLanguageModal'));
+    
+    // Auto-capitalize short name
+    languageShortNameInput.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+    });
+    
+    saveLanguageBtn.addEventListener('click', function() {
+        const name = languageNameInput.value.trim();
+        const shortName = languageShortNameInput.value.trim().toUpperCase();
+        
+        if (!name || !shortName) {
+            languageError.textContent = 'Both fields are required.';
+            languageError.classList.remove('d-none');
+            return;
+        }
+        
+        // Disable button and show loading
+        saveLanguageBtn.disabled = true;
+        saveLanguageBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Creating...';
+        languageError.classList.add('d-none');
+        
+        // Send AJAX request
+        fetch('{% url "createLanguageInline" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                name: name,
+                short_name: shortName
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Add new checkbox to the list
+                const checkboxContainer = document.getElementById('languageCheckboxes');
+                const emptyMessage = checkboxContainer.querySelector('p');
+                if (emptyMessage) {
+                    emptyMessage.remove();
+                }
+                
+                const newCheckbox = document.createElement('div');
+                newCheckbox.className = 'form-check';
+                newCheckbox.innerHTML = `
+                    <input class="form-check-input" type="checkbox" name="languages" value="${data.language.id}" id="lang${data.language.id}" checked>
+                    <label class="form-check-label" for="lang${data.language.id}">
+                        ${data.language.name} (${data.language.short_name})
+                    </label>
+                `;
+                checkboxContainer.appendChild(newCheckbox);
+                
+                // Reset form and close modal
+                languageNameInput.value = '';
+                languageShortNameInput.value = '';
+                addLanguageModal.hide();
+                
+                // Show success message
+                alert('Language created successfully!');
+            } else {
+                languageError.textContent = data.error;
+                languageError.classList.remove('d-none');
+            }
+        })
+        .catch(error => {
+            languageError.textContent = 'An error occurred. Please try again.';
+            languageError.classList.remove('d-none');
+        })
+        .finally(() => {
+            saveLanguageBtn.disabled = false;
+            saveLanguageBtn.innerHTML = '<iconify-icon icon="mdi:content-save" class="me-1"></iconify-icon> Create Language';
+        });
+    });
+    
+    // Reset form when modal is hidden
+    document.getElementById('addLanguageModal').addEventListener('hidden.bs.modal', function() {
+        languageNameInput.value = '';
+        languageShortNameInput.value = '';
+        languageError.classList.add('d-none');
+    });
+});
+</script>
+{% endif %}
 {% endblock content %}

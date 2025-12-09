@@ -14,6 +14,7 @@ from django.views.decorators.http import require_POST
 from .models import TranslationCenter, Branch, Role, AdminUser
 from .rbac import (
     permission_required,
+    any_permission_required,
     owner_required,
     get_user_branches,
     get_user_staff,
@@ -307,6 +308,7 @@ def center_detail(request, center_id):
 
 
 @login_required(login_url="admin_login")
+@any_permission_required('can_view_branches', 'can_manage_branches')
 def branch_list(request):
     """List branches accessible by the current user"""
     branches = (
@@ -420,6 +422,7 @@ def branch_create(request, center_id=None):
 
 
 @login_required(login_url="admin_login")
+@any_permission_required('can_view_branches', 'can_manage_branches')
 def branch_detail(request, branch_id):
     """View branch details with staff, categories, products, orders"""
     from services.models import Category, Product
@@ -1043,6 +1046,7 @@ from django.http import JsonResponse
 
 
 @login_required(login_url="admin_login")
+@any_permission_required('can_view_branches', 'can_manage_branches')
 def get_districts(request, region_id):
     """AJAX endpoint to get districts for a region"""
     from core.models import District
@@ -1054,6 +1058,7 @@ def get_districts(request, region_id):
 
 
 @login_required(login_url="admin_login")
+@any_permission_required('can_view_staff', 'can_manage_staff')
 def get_branch_staff(request, branch_id):
     """AJAX endpoint to get staff for a branch"""
     branch = get_object_or_404(Branch, pk=branch_id)
@@ -1083,6 +1088,7 @@ def get_branch_staff(request, branch_id):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_manage_system_settings')
 def create_region(request):
     """API endpoint to create a new region (superuser only)"""
     if not request.user.is_superuser:
@@ -1114,6 +1120,7 @@ def create_region(request):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_manage_system_settings')
 def create_district(request):
     """API endpoint to create a new district (superuser only)"""
     if not request.user.is_superuser:
@@ -1152,6 +1159,7 @@ def create_district(request):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_manage_staff')
 @require_POST
 def api_create_user(request):
     """API endpoint to create a new user (superuser only)"""
@@ -1215,6 +1223,7 @@ def api_create_user(request):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_manage_system_settings')
 def role_list(request):
     """List all roles - superuser only"""
     if not request.user.is_superuser:
@@ -1235,6 +1244,7 @@ def role_list(request):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_manage_system_settings')
 def role_create(request):
     """Create a new role - superuser only"""
     if not request.user.is_superuser:
@@ -1282,6 +1292,7 @@ def role_create(request):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_manage_system_settings')
 def role_edit(request, role_id):
     """Edit a role - superuser only"""
     if not request.user.is_superuser:
@@ -1335,6 +1346,7 @@ def role_edit(request, role_id):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_manage_system_settings')
 def role_delete(request, role_id):
     """Delete a role - superuser only, cannot delete system roles"""
     if not request.user.is_superuser:
@@ -1371,6 +1383,7 @@ from django.views.decorators.http import require_POST
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_edit_centers')
 @require_POST
 def setup_center_webhook(request, center_id):
     """Set up Telegram webhook for a center - superuser only"""
@@ -1400,6 +1413,7 @@ def setup_center_webhook(request, center_id):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_edit_centers')
 @require_POST
 def remove_center_webhook(request, center_id):
     """Remove Telegram webhook for a center - superuser only"""
@@ -1423,6 +1437,7 @@ def remove_center_webhook(request, center_id):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_view_centers')
 def get_center_webhook_info(request, center_id):
     """Get webhook info for a center - superuser only"""
     if not request.user.is_superuser:
@@ -1440,6 +1455,7 @@ def get_center_webhook_info(request, center_id):
 
 
 @login_required(login_url="admin_login")
+@any_permission_required('can_view_branches', 'can_manage_branches')
 def branch_settings(request, branch_id):
     """
     View branch settings (Additional Info).

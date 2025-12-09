@@ -9,9 +9,10 @@ from django.views.decorators.http import require_POST
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal, InvalidOperation
 from .models import Order, OrderMedia
+from organizations.models import TranslationCenter
 from organizations.rbac import (
     get_user_orders, get_user_staff, get_user_branches,
-    permission_required
+    permission_required, any_permission_required
 )
 from organizations.models import AdminUser, Branch
 from core.audit import log_action, log_order_assign, log_status_change
@@ -97,6 +98,7 @@ def get_user_order_permissions(request, order=None):
 
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_view_all_orders', 'can_view_own_orders')
 def ordersList(request):
     """List orders with search and filter - Permission-based access"""
     from django.utils import timezone
@@ -310,6 +312,7 @@ def ordersList(request):
 
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_view_all_orders', 'can_view_own_orders')
 def orderDetail(request, order_id):
     """View order details with permission-based access control"""
     order = get_object_or_404(
@@ -389,6 +392,7 @@ def orderDetail(request, order_id):
 
 
 @login_required(login_url='admin_login')
+@permission_required('can_edit_orders')
 def orderEdit(request, order_id):
     """Edit an order - permission-based access control"""
     from services.models import Product, Language
@@ -544,6 +548,7 @@ def get_allowed_status_transitions(current_status):
 
 @login_required(login_url='admin_login')
 @require_POST
+@permission_required('can_update_order_status')
 def updateOrderStatus(request, order_id):
     """Update order status with permission-based access control"""
     order = get_object_or_404(Order, id=order_id)
@@ -608,6 +613,7 @@ def updateOrderStatus(request, order_id):
 
 
 @login_required(login_url='admin_login')
+@permission_required('can_delete_orders')
 def deleteOrder(request, order_id):
     """Delete an order - permission-based access control"""
     order = get_object_or_404(Order, id=order_id)
@@ -638,6 +644,7 @@ def deleteOrder(request, order_id):
 
 @login_required(login_url='admin_login')
 @require_POST
+@permission_required('can_assign_orders')
 def assignOrder(request, order_id):
     """Assign an order to a staff member - permission-based access control"""
     order = get_object_or_404(Order, id=order_id)
@@ -696,6 +703,7 @@ def assignOrder(request, order_id):
 
 @login_required(login_url='admin_login')
 @require_POST
+@permission_required('can_assign_orders')
 def unassignOrder(request, order_id):
     """Unassign an order from a staff member - owners/managers only"""
     order = get_object_or_404(Order, id=order_id)
@@ -739,6 +747,7 @@ def unassignOrder(request, order_id):
 
 @login_required(login_url='admin_login')
 @require_POST
+@permission_required('can_receive_payments')
 def receivePayment(request, order_id):
     """Mark payment as received - permission-based access control"""
     order = get_object_or_404(Order, id=order_id)
@@ -769,6 +778,7 @@ def receivePayment(request, order_id):
 
 @login_required(login_url='admin_login')
 @require_POST
+@permission_required('can_complete_orders')
 def completeOrder(request, order_id):
     """Mark order as completed - permission-based access control"""
     order = get_object_or_404(Order, id=order_id)
@@ -1044,6 +1054,7 @@ from orders.payment_service import PaymentService, PaymentError
 
 @login_required(login_url="admin_login")
 @require_POST
+@permission_required('can_receive_payments')
 def record_order_payment(request, order_id):
     """
     Record a payment for an order.
@@ -1120,6 +1131,7 @@ def record_order_payment(request, order_id):
 
 @login_required(login_url="admin_login")
 @require_POST
+@permission_required('can_edit_orders')
 def add_order_extra_fee(request, order_id):
     """
     Add an extra fee to an order.
