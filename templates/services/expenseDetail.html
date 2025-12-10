@@ -1,6 +1,7 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
 {% load number_filters %}
+{% load permission_tags %}
 
 {% block content %}
 <div class="row gy-4">
@@ -14,10 +15,13 @@
                         <span>{{ expense.name }}</span>
                     </h6>
                     <div class="d-flex align-items-center gap-2">
+                        {% can_do 'expenses.edit' as can_edit_expense %}
+                        {% if can_edit_expense %}
                         <a href="{% url 'editExpense' expense.id %}" class="btn btn-success-600 radius-8 px-16 py-9 d-flex align-items-center gap-2">
                             <iconify-icon icon="lucide:edit" class="text-lg"></iconify-icon>
                             <span>Edit</span>
                         </a>
+                        {% endif %}
                         <a href="{% url 'expenseList' %}" class="btn btn-outline-secondary-600 radius-8 px-16 py-9 d-flex align-items-center gap-2">
                             <iconify-icon icon="ep:back"></iconify-icon>
                             <span>Back</span>

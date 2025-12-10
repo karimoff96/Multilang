@@ -32,7 +32,28 @@
             <div class="card-body p-24">
                 <!-- Order Details -->
                 <div class="row gy-3">
-                    <div class="col-sm-6">
+                    <div class="col-sm-4">
+                        <div class="p-16 bg-neutral-50 radius-8">
+                            <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.category">Category</span>
+                            <h6 class="text-lg fw-semibold mb-0">
+                                {% if order.category %}
+                                    {{ order.category.name }}
+                                {% else %}
+                                    <span class="text-secondary-light">N/A</span>
+                                {% endif %}
+                            </h6>
+                            {% if order.category.charging %}
+                            <small class="text-primary-light">
+                                {% if order.category.charging == 'static' %}
+                                    <span data-i18n="category.staticPrice">Fixed Price</span>
+                                {% elif order.category.charging == 'dynamic' %}
+                                    <span data-i18n="category.dynamicPrice">Per Page</span>
+                                {% endif %}
+                            </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
                         <div class="p-16 bg-neutral-50 radius-8">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.productService">Product / Service</span>
                             <h6 class="text-lg fw-semibold mb-0">{{ order.product.name }}</h6>
@@ -41,7 +62,7 @@
                             {% endif %}
                         </div>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-4">
                         <div class="p-16 bg-neutral-50 radius-8">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.orderDate">Order Date</span>
                             <h6 class="text-lg fw-semibold mb-0">{{ order.created_at|date:"d M Y" }}</h6>

@@ -5,10 +5,10 @@
     </button>
     <div>
         <a href="{% url 'index' %}" class="sidebar-logo">
-            <img src="/static/images/logo-dark.png" alt="site logo" class="light-logo">
-            <img src="/static/images/logo-light.png" alt="site logo" class="dark-logo">
-            <img src="/static/images/dark-icon.png" alt="site logo" class="dark-icon">
-            <img src="/static/images/light-icon.png" alt="site logo" class="light-icon">
+            <img src="/static/images/logo-dark.png" alt="site logo" class="light-logo sidebar-open-element">
+            <img src="/static/images/logo-light.png" alt="site logo" class="dark-logo sidebar-open-element">
+            <img src="/static/images/dark-icon.png" alt="site logo" class="dark-icon sidebar-close-element" style="display: none;">
+            <img src="/static/images/light-icon.png" alt="site logo" class="light-icon sidebar-close-element" style="display: none;">
         </a>
     </div>
     <div class="sidebar-menu-area">
@@ -90,23 +90,29 @@
                 </a>
             </li>
             
-            {% can_do 'products.manage' as can_products %}
-            {% if can_products %}
+            {% has_any_perm 'can_view_products,can_manage_products,can_view_expenses,can_manage_expenses' as can_services %}
+            {% if can_services %}
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="solar:star-bold" class="menu-icon"></iconify-icon>
                     <span data-i18n="sidebar.services">Services</span>
                 </a>
                 <ul class="sidebar-submenu">
+                    {% can_do 'products.view' as can_view_products %}
+                    {% if can_view_products %}
                     <li>
                         <a href="{% url 'categoryList' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> <span data-i18n="sidebar.categories">Categories</span></a>
                     </li>
                     <li>
                         <a href="{% url 'productList' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.products">Products</span></a>
                     </li>
+                    {% endif %}
+                    {% can_do 'expenses.view' as can_view_expenses %}
+                    {% if can_view_expenses %}
                     <li>
                         <a href="{% url 'expenseList' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span>Expenses</span></a>
                     </li>
+                    {% endif %}
                 </ul>
             </li>
             {% endif %}

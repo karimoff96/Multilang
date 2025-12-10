@@ -95,6 +95,13 @@ PERMISSION_ACTIONS = {
     'products.edit': ['can_manage_products', 'can_edit_products'],
     'products.delete': ['can_manage_products', 'can_delete_products'],
     
+    # Expenses
+    'expenses.manage': ['can_manage_expenses'],
+    'expenses.view': ['can_manage_expenses', 'can_view_expenses'],
+    'expenses.create': ['can_manage_expenses', 'can_create_expenses'],
+    'expenses.edit': ['can_manage_expenses', 'can_edit_expenses'],
+    'expenses.delete': ['can_manage_expenses', 'can_delete_expenses'],
+    
     # Customers
     'customers.manage': ['can_manage_customers'],
     'customers.view': ['can_manage_customers', 'can_view_customers'],
@@ -114,9 +121,9 @@ PERMISSION_ACTIONS = {
     'marketing.view_stats': ['can_view_broadcast_stats'],
     
     # Branch Settings
-    'branch_settings.view': ['can_view_branch_settings'],
-    'branch_settings.manage': ['can_manage_branch_settings'],
-    'branch_settings.edit': ['can_manage_branch_settings'],
+    'branch_settings.view': ['can_view_branch_settings', 'can_manage_branch_settings', 'can_manage_branches'],
+    'branch_settings.manage': ['can_manage_branch_settings', 'can_manage_branches'],
+    'branch_settings.edit': ['can_manage_branch_settings', 'can_manage_branches'],
 }
 
 # Actions that require ALL listed permissions (default is ANY)
@@ -170,6 +177,7 @@ def get_user_permissions(context):
         'can_cancel_orders', 'can_manage_orders', 'can_manage_financial', 'can_receive_payments', 'can_view_financial_reports',
         'can_apply_discounts', 'can_refund_orders', 'can_manage_reports', 'can_view_reports', 'can_view_analytics',
         'can_export_data', 'can_manage_products', 'can_view_products', 'can_create_products', 'can_edit_products', 'can_delete_products',
+        'can_manage_expenses', 'can_view_expenses', 'can_create_expenses', 'can_edit_expenses', 'can_delete_expenses',
         'can_manage_customers', 'can_view_customers', 'can_create_customers', 'can_edit_customers', 'can_delete_customers',
         'can_manage_marketing', 'can_create_marketing_posts', 'can_send_branch_broadcasts', 'can_send_center_broadcasts',
         'can_view_broadcast_stats', 'can_manage_branch_settings', 'can_view_branch_settings',

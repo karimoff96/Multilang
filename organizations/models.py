@@ -254,6 +254,14 @@ class Role(models.Model):
     can_edit_products = models.BooleanField(_("Can edit products"), default=False)
     can_delete_products = models.BooleanField(_("Can delete products"), default=False)
     
+    # Permissions - Expenses
+    can_manage_expenses = models.BooleanField(_("Can manage expenses (full access)"), default=False,
+        help_text=_("Full expense management - overrides other expense permissions"))
+    can_view_expenses = models.BooleanField(_("Can view expenses"), default=False)
+    can_create_expenses = models.BooleanField(_("Can create expenses"), default=False)
+    can_edit_expenses = models.BooleanField(_("Can edit expenses"), default=False)
+    can_delete_expenses = models.BooleanField(_("Can delete expenses"), default=False)
+    
     can_manage_customers = models.BooleanField(_("Can manage customers (full access)"), default=False,
         help_text=_("Full customer management - overrides other customer permissions"))
     can_view_customers = models.BooleanField(_("Can view customers"), default=False)
@@ -331,8 +339,10 @@ class Role(models.Model):
         "can_manage_financial",
         "can_manage_reports",
         "can_manage_products",
+        "can_manage_expenses",
         "can_manage_customers",
         "can_manage_marketing",
+        "can_manage_branch_settings",
         "can_manage_agencies",
         "can_manage_audit_logs",
     ]
@@ -355,9 +365,11 @@ class Role(models.Model):
         "can_manage_financial": ["can_receive_payments", "can_view_financial_reports", "can_apply_discounts", "can_refund_orders"],
         "can_manage_reports": ["can_view_reports", "can_view_analytics", "can_export_data"],
         "can_manage_products": ["can_view_products", "can_create_products", "can_edit_products", "can_delete_products"],
+        "can_manage_expenses": ["can_view_expenses", "can_create_expenses", "can_edit_expenses", "can_delete_expenses"],
         "can_manage_customers": ["can_view_customers", "can_edit_customers", "can_delete_customers"],
         "can_manage_marketing": ["can_create_marketing_posts", "can_send_branch_broadcasts", 
                                   "can_send_center_broadcasts", "can_view_broadcast_stats"],
+        "can_manage_branch_settings": ["can_view_branch_settings"],
         "can_manage_agencies": ["can_view_agencies", "can_create_agencies", "can_edit_agencies", "can_delete_agencies"],
         "can_manage_audit_logs": ["can_view_audit_logs", "can_export_audit_logs", "can_grant_audit_permissions"],
     }
@@ -426,6 +438,12 @@ class Role(models.Model):
             "can_create_products",
             "can_edit_products",
             "can_delete_products",
+            # Expenses (master first)
+            "can_manage_expenses",
+            "can_view_expenses",
+            "can_create_expenses",
+            "can_edit_expenses",
+            "can_delete_expenses",
             # Customers (master first)
             "can_manage_customers",
             "can_view_customers",
@@ -573,6 +591,18 @@ class Role(models.Model):
                     "can_delete_products",
                 ],
             },
+            "expenses": {
+                "title": _("Expenses"),
+                "icon": "fa-receipt",
+                "color": "warning",
+                "permissions": [
+                    "can_manage_expenses",
+                    "can_view_expenses",
+                    "can_create_expenses",
+                    "can_edit_expenses",
+                    "can_delete_expenses",
+                ],
+            },
             "customers": {
                 "title": _("Customers"),
                 "icon": "fa-user-group",
@@ -669,6 +699,12 @@ class Role(models.Model):
             "can_create_products": _("Create Products"),
             "can_edit_products": _("Edit Products"),
             "can_delete_products": _("Delete Products"),
+            # Expenses
+            "can_manage_expenses": _("Full Expense Management"),
+            "can_view_expenses": _("View Expenses"),
+            "can_create_expenses": _("Create Expenses"),
+            "can_edit_expenses": _("Edit Expenses"),
+            "can_delete_expenses": _("Delete Expenses"),
             # Customers
             "can_manage_customers": _("Full Customer Management"),
             "can_view_customers": _("View Customers"),
@@ -741,6 +777,12 @@ class Role(models.Model):
             "can_create_products": _("Add new services and products"),
             "can_edit_products": _("Edit existing services and products"),
             "can_delete_products": _("Remove services and products from the system"),
+            # Expenses
+            "can_manage_expenses": _("Full control over all expense operations - overrides individual permissions"),
+            "can_view_expenses": _("View expense records and reports"),
+            "can_create_expenses": _("Add new expense entries"),
+            "can_edit_expenses": _("Edit existing expense records"),
+            "can_delete_expenses": _("Remove expense records from the system"),
             # Customers
             "can_manage_customers": _("Full control over all customer operations - overrides individual permissions"),
             "can_view_customers": _("View customer information and history"),
@@ -1124,6 +1166,10 @@ class AdminUser(models.Model):
             'can_create_products': ['can_manage_products'],
             'can_edit_products': ['can_manage_products'],
             'can_delete_products': ['can_manage_products'],
+            'can_view_expenses': ['can_manage_expenses'],
+            'can_create_expenses': ['can_manage_expenses'],
+            'can_edit_expenses': ['can_manage_expenses'],
+            'can_delete_expenses': ['can_manage_expenses'],
             'can_view_staff': ['can_manage_staff'],
             'can_create_staff': ['can_manage_staff'],
             'can_edit_staff': ['can_manage_staff'],
@@ -1132,6 +1178,7 @@ class AdminUser(models.Model):
             'can_create_branches': ['can_manage_branches'],
             'can_edit_branches': ['can_manage_branches'],
             'can_view_financial_reports': ['can_manage_financial'],
+            'can_view_branch_settings': ['can_manage_branch_settings'],
         }
         
         # Check if any master permission grants this permission

@@ -1,6 +1,7 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
 {% load number_filters %}
+{% load permission_tags %}
 
 {% block content %}
 <div class="card h-100 p-0 radius-12">
@@ -46,10 +47,13 @@
                 </select>
             </form>
         </div>
+        {% can_do 'expenses.create' as can_create_expense %}
+        {% if can_create_expense %}
         <a href="{% url 'addExpense' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
             <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
             <span>Add Expense</span>
         </a>
+        {% endif %}
     </div>
     
     <!-- Summary Cards -->
@@ -142,16 +146,25 @@
                         </td>
                         <td class="text-center col-action">
                             <div class="d-flex align-items-center gap-4 justify-content-center">
+                                {% can_do 'expenses.view' as can_view_expense %}
+                                {% if can_view_expense %}
                                 <a href="{% url 'expenseDetail' expense.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="View">
                                     <iconify-icon icon="majesticons:eye-line"></iconify-icon>
                                 </a>
+                                {% endif %}
+                                {% can_do 'expenses.edit' as can_edit_expense %}
+                                {% if can_edit_expense %}
                                 <a href="{% url 'editExpense' expense.id %}" class="bg-success-focus text-success-600 bg-hover-success-200 fw-medium action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="Edit">
                                     <iconify-icon icon="lucide:edit"></iconify-icon>
                                 </a>
+                                {% endif %}
+                                {% can_do 'expenses.delete' as can_delete_expense %}
+                                {% if can_delete_expense %}
                                 <button type="button" class="bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium action-btn-sm d-flex justify-content-center align-items-center rounded-circle" 
                                         data-bs-toggle="modal" data-bs-target="#deleteModal{{ expense.id }}" title="Delete">
                                     <iconify-icon icon="fluent:delete-24-regular"></iconify-icon>
                                 </button>
+                                {% endif %}
                             </div>
                             
                             <!-- Delete Modal -->

@@ -486,7 +486,7 @@ def branch_detail(request, branch_id):
 
 
 @login_required(login_url="admin_login")
-@permission_required("can_manage_branches")
+@any_permission_required("can_edit_branches", "can_manage_branches")
 def branch_edit(request, branch_id):
     """Edit an existing branch"""
     from core.models import Region, District
@@ -631,7 +631,7 @@ def staff_list(request):
 
 
 @login_required(login_url="admin_login")
-@permission_required("can_manage_staff")
+@any_permission_required("can_create_staff", "can_manage_staff")
 def staff_create(request):
     """Create a new staff member"""
     accessible_branches = get_user_branches(request.user)
@@ -771,7 +771,7 @@ def staff_create(request):
 
 
 @login_required(login_url="admin_login")
-@permission_required("can_manage_staff")
+@any_permission_required("can_edit_staff", "can_manage_staff")
 def staff_edit(request, staff_id):
     """Edit an existing staff member"""
     staff_member = get_object_or_404(AdminUser, pk=staff_id)
@@ -1456,7 +1456,7 @@ def get_center_webhook_info(request, center_id):
 
 
 @login_required(login_url="admin_login")
-@any_permission_required('can_view_branches', 'can_manage_branches')
+@any_permission_required('can_view_branch_settings', 'can_manage_branch_settings', 'can_manage_branches')
 def branch_settings(request, branch_id):
     """
     View branch settings (Additional Info).
@@ -1472,11 +1472,12 @@ def branch_settings(request, branch_id):
             messages.error(request, "You need an admin profile to access this page.")
             return redirect('index')
         
-        # Check if user has permission
+        # Check if user has permission (branch settings OR branch management)
         has_view_perm = request.admin_profile.has_permission('can_view_branch_settings')
         has_manage_perm = request.admin_profile.has_permission('can_manage_branch_settings')
+        has_branch_manage = request.admin_profile.has_permission('can_manage_branches')
         
-        if not (has_view_perm or has_manage_perm):
+        if not (has_view_perm or has_manage_perm or has_branch_manage):
             messages.error(request, "You don't have permission to view branch settings.")
             return redirect('branch_detail', branch_id=branch_id)
         
@@ -1490,10 +1491,12 @@ def branch_settings(request, branch_id):
     # Get or create additional info for this branch
     additional_info, created = AdditionalInfo.objects.get_or_create(branch=branch)
     
-    # Check if user can edit
+    # Check if user can edit (either manage_branch_settings OR manage_branches)
     can_edit = request.user.is_superuser or (
-        request.admin_profile and 
-        request.admin_profile.has_permission('can_manage_branch_settings')
+        request.admin_profile and (
+            request.admin_profile.has_permission('can_manage_branch_settings') or
+            request.admin_profile.has_permission('can_manage_branches')
+        )
     )
     
     context = {
@@ -1507,6 +1510,7 @@ def branch_settings(request, branch_id):
 
 
 @login_required(login_url="admin_login")
+@any_permission_required('can_manage_branch_settings', 'can_manage_branches')
 def branch_settings_edit(request, branch_id):
     """
     Edit branch settings (Additional Info).
@@ -1522,8 +1526,11 @@ def branch_settings_edit(request, branch_id):
             messages.error(request, "You need an admin profile to access this page.")
             return redirect('index')
         
-        # Check if user has permission
-        has_manage_perm = request.admin_profile.has_permission('can_manage_branch_settings')
+        # Check if user has permission (can_manage_branch_settings OR can_manage_branches)
+        has_manage_perm = (
+            request.admin_profile.has_permission('can_manage_branch_settings') or
+            request.admin_profile.has_permission('can_manage_branches')
+        )
         
         if not has_manage_perm:
             messages.error(request, "You don't have permission to edit branch settings.")

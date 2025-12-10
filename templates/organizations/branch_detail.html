@@ -47,7 +47,7 @@
                     Bot Settings
                 </a>
                 {% endif %}
-                {% can_do 'branches.manage' as can_edit_branch %}
+                {% can_do 'branches.edit' as can_edit_branch %}
                 {% if can_edit_branch %}
                 <a href="{% url 'branch_edit' branch.id %}" class="btn btn-outline-primary-600 btn-sm px-16 py-8 radius-8 d-inline-flex align-items-center">
                     <iconify-icon icon="fluent:edit-20-filled" class="me-4"></iconify-icon>

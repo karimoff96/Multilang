@@ -612,7 +612,7 @@ def deleteProduct(request, product_id):
 # ============ Expense Views ============
 
 @login_required(login_url='admin_login')
-@any_permission_required('can_view_financial_reports', 'can_manage_financial')
+@any_permission_required('can_view_expenses', 'can_manage_expenses', 'can_view_financial_reports', 'can_manage_financial')
 def expenseList(request):
     """List all expenses with search and filter"""
     # Use RBAC-filtered expenses
@@ -699,7 +699,7 @@ def expenseList(request):
 
 
 @login_required(login_url='admin_login')
-@any_permission_required('can_view_financial_reports', 'can_manage_financial')
+@any_permission_required('can_view_expenses', 'can_manage_expenses', 'can_view_financial_reports', 'can_manage_financial')
 def expenseDetail(request, expense_id):
     """View expense details with linked products"""
     # Get expense with RBAC check
@@ -719,7 +719,7 @@ def expenseDetail(request, expense_id):
 
 
 @login_required(login_url='admin_login')
-@permission_required('can_manage_financial')
+@any_permission_required('can_create_expenses', 'can_manage_expenses', 'can_manage_financial')
 def addExpense(request):
     """Add a new expense"""
     # Get RBAC-filtered branches
@@ -782,7 +782,7 @@ def addExpense(request):
 
 
 @login_required(login_url='admin_login')
-@permission_required('can_manage_financial')
+@any_permission_required('can_edit_expenses', 'can_manage_expenses', 'can_manage_financial')
 def editExpense(request, expense_id):
     """Edit an existing expense"""
     # Get expense with RBAC check
@@ -846,7 +846,7 @@ def editExpense(request, expense_id):
 
 
 @login_required(login_url='admin_login')
-@permission_required('can_manage_financial')
+@any_permission_required('can_delete_expenses', 'can_manage_expenses', 'can_manage_financial')
 def deleteExpense(request, expense_id):
     """Delete an expense"""
     # Get expense with RBAC check
@@ -864,7 +864,7 @@ def deleteExpense(request, expense_id):
 # ============ Expense Analytics API ============
 
 @login_required(login_url='admin_login')
-@any_permission_required('can_view_financial_reports', 'can_manage_financial')
+@any_permission_required('can_view_expenses', 'can_manage_expenses', 'can_view_financial_reports', 'can_manage_financial')
 def expenseAnalytics(request):
     """Get expense analytics by B2B/B2C for center/branch level"""
     branch_id = request.GET.get('branch')
