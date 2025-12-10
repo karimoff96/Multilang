@@ -257,6 +257,8 @@ class Role(models.Model):
     can_manage_customers = models.BooleanField(_("Can manage customers (full access)"), default=False,
         help_text=_("Full customer management - overrides other customer permissions"))
     can_view_customers = models.BooleanField(_("Can view customers"), default=False)
+    can_create_customers = models.BooleanField(_("Can create customers"), default=False,
+        help_text=_("Can create new customer profiles"))
     can_edit_customers = models.BooleanField(_("Can edit customers"), default=False)
     can_delete_customers = models.BooleanField(_("Can delete customers"), default=False)
     
@@ -1089,22 +1091,71 @@ class AdminUser(models.Model):
         return self.role and self.role.name == Role.STAFF
 
     def has_permission(self, permission):
-        """Check if user has a specific permission"""
+        """Check if user has a specific permission with alias support"""
         if not self.role:
             return False
-        return getattr(self.role, permission, False)
+        
+        # Permission aliases for backward compatibility
+        PERMISSION_ALIASES = {
+            'can_view_orders': 'can_view_all_orders',  # Alias to actual field
+        }
+        
+        # Check if permission is an alias
+        actual_permission = PERMISSION_ALIASES.get(permission, permission)
+        
+        # Check direct permission
+        if getattr(self.role, actual_permission, False):
+            return True
+        
+        # Check master permissions that grant this permission
+        # Example: can_manage_orders grants all order permissions
+        MASTER_PERMISSION_MAP = {
+            'can_view_all_orders': ['can_manage_orders'],
+            'can_view_own_orders': ['can_manage_orders'],
+            'can_create_orders': ['can_manage_orders'],
+            'can_edit_orders': ['can_manage_orders'],
+            'can_delete_orders': ['can_manage_orders'],
+            'can_assign_orders': ['can_manage_orders'],
+            'can_view_customers': ['can_manage_customers'],
+            'can_create_customers': ['can_manage_customers'],
+            'can_edit_customers': ['can_manage_customers'],
+            'can_delete_customers': ['can_manage_customers'],
+            'can_view_products': ['can_manage_products'],
+            'can_create_products': ['can_manage_products'],
+            'can_edit_products': ['can_manage_products'],
+            'can_delete_products': ['can_manage_products'],
+            'can_view_staff': ['can_manage_staff'],
+            'can_create_staff': ['can_manage_staff'],
+            'can_edit_staff': ['can_manage_staff'],
+            'can_delete_staff': ['can_manage_staff'],
+            'can_view_branches': ['can_manage_branches'],
+            'can_create_branches': ['can_manage_branches'],
+            'can_edit_branches': ['can_manage_branches'],
+            'can_view_financial_reports': ['can_manage_financial'],
+        }
+        
+        # Check if any master permission grants this permission
+        master_permissions = MASTER_PERMISSION_MAP.get(actual_permission, [])
+        for master_perm in master_permissions:
+            if getattr(self.role, master_perm, False):
+                return True
+        
+        return False
 
     def get_accessible_branches(self):
         """Get branches this user can access based on their role permissions"""
-        # If user has can_view_centers permission, they can see all branches in their center
-        if self.center and self.has_permission('can_view_centers'):
-            return Branch.objects.filter(center=self.center)
+        # Users with order-viewing or management permissions should see branches
+        # This is necessary for order lists and other data access
+        if self.center and (self.has_permission('can_view_all_orders') or 
+                           self.has_permission('can_view_centers') or
+                           self.has_permission('can_manage_orders')):
+            return Branch.objects.filter(center=self.center, is_active=True)
         # If user has can_view_branches permission, they can see branches in their center
         elif self.center and self.has_permission('can_view_branches'):
-            return Branch.objects.filter(center=self.center)
+            return Branch.objects.filter(center=self.center, is_active=True)
         elif self.branch:
             # Default: user can only access their assigned branch
-            return Branch.objects.filter(pk=self.branch.pk)
+            return Branch.objects.filter(pk=self.branch.pk, is_active=True)
         return Branch.objects.none()
 
     def can_access_branch(self, branch):

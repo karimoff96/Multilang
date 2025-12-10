@@ -154,11 +154,12 @@ def get_user_permissions(context):
     
     # Get admin profile
     admin_profile = get_admin_profile(user)
-    if not admin_profile or not admin_profile.role:
+    if not admin_profile:
         return {}
     
-    # Build permissions from role
-    role = admin_profile.role
+    # Build permissions from role using AdminUser.has_permission method
+    # This ensures consistency with backend permission checks and supports
+    # permission aliases and master permission inheritance
     result = {}
     permission_fields = [
         'can_manage_centers', 'can_view_centers', 'can_create_centers', 'can_edit_centers', 'can_delete_centers',
@@ -169,13 +170,14 @@ def get_user_permissions(context):
         'can_cancel_orders', 'can_manage_orders', 'can_manage_financial', 'can_receive_payments', 'can_view_financial_reports',
         'can_apply_discounts', 'can_refund_orders', 'can_manage_reports', 'can_view_reports', 'can_view_analytics',
         'can_export_data', 'can_manage_products', 'can_view_products', 'can_create_products', 'can_edit_products', 'can_delete_products',
-        'can_manage_customers', 'can_view_customers', 'can_edit_customers', 'can_delete_customers',
+        'can_manage_customers', 'can_view_customers', 'can_create_customers', 'can_edit_customers', 'can_delete_customers',
         'can_manage_marketing', 'can_create_marketing_posts', 'can_send_branch_broadcasts', 'can_send_center_broadcasts',
         'can_view_broadcast_stats', 'can_manage_branch_settings', 'can_view_branch_settings',
         'can_manage_agencies', 'can_view_agencies', 'can_create_agencies', 'can_edit_agencies', 'can_delete_agencies',
     ]
     for field in permission_fields:
-        result[field] = getattr(role, field, False)
+        # Use AdminUser.has_permission for consistency and to support aliases/master permissions
+        result[field] = admin_profile.has_permission(field)
     
     return result
 

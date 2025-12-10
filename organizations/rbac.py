@@ -393,6 +393,16 @@ def get_user_orders(user):
     if not admin_profile:
         return Order.objects.none()
     
+    # Check if user is center owner (either by role or by ownership)
+    is_center_owner = (admin_profile.is_owner or 
+                       (admin_profile.center and 
+                        admin_profile.center.owner_id == user.id))
+    
+    # If center owner or has view_all_orders, get all center orders
+    if is_center_owner or admin_profile.has_permission('can_view_all_orders'):
+        if admin_profile.center:
+            return Order.objects.filter(branch__center=admin_profile.center)
+    
     accessible_branches = admin_profile.get_accessible_branches()
     
     if admin_profile.is_staff_role:
@@ -402,7 +412,7 @@ def get_user_orders(user):
             assigned_to=admin_profile
         )
     else:
-        # Owners and managers see all orders in their branches
+        # Managers see all orders in their branches
         return Order.objects.filter(branch__in=accessible_branches)
 
 
@@ -432,8 +442,18 @@ def get_user_staff(user):
     if not admin_profile:
         return AdminUser.objects.none()
     
-    if admin_profile.is_owner and admin_profile.center:
+    # Check if user is center owner (either by role or by ownership)
+    is_center_owner = (admin_profile.is_owner or 
+                       (admin_profile.center and 
+                        admin_profile.center.owner_id == user.id))
+    
+    if is_center_owner and admin_profile.center:
         # Owners can see all staff in their center
+        return AdminUser.objects.filter(
+            center=admin_profile.center
+        ).exclude(pk=admin_profile.pk)
+    elif admin_profile.has_permission('can_manage_staff') and admin_profile.center:
+        # Users with manage_staff permission can see all staff in their center
         return AdminUser.objects.filter(
             center=admin_profile.center
         ).exclude(pk=admin_profile.pk)
