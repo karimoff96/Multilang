@@ -85,6 +85,12 @@ urlpatterns = [
     ),
     # Audit Logs (also accessible via core/audit-logs/)
     path("reports/audit-logs", home_views.audit_logs_redirect, name="audit_logs"),
+    # Expense Analytics Report
+    path(
+        "reports/expense-analytics",
+        reports_views.expense_analytics_report,
+        name="expense_analytics_report",
+    ),
 ]
 from django.conf import settings
 from django.conf.urls.static import static

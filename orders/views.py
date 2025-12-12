@@ -350,6 +350,7 @@ def orderDetail(request, order_id):
 def orderEdit(request, order_id):
     """Edit an order - permission-based access control"""
     from services.models import Product, Language
+    from accounts.models import BotUser
     
     order = get_object_or_404(
         Order.objects.select_related('bot_user', 'product', 'language', 'branch'),
@@ -365,8 +366,35 @@ def orderEdit(request, order_id):
     products = Product.objects.filter(is_active=True)
     languages = Language.objects.all()  # Language model doesn't have is_active field
     
+    # Get bot users based on user's role and permissions
+    if request.user.is_superuser:
+        # Superuser sees all customers
+        bot_users = BotUser.objects.all().order_by('-created_at')
+    elif request.admin_profile:
+        # Get accessible branches for this user
+        accessible_branches = request.admin_profile.get_accessible_branches()
+        
+        # Check if user can access center-level customers
+        if request.admin_profile.role.can_view_all_centers or request.admin_profile.role.can_manage_centers:
+            # Center owner/manager - get all customers from their center
+            center = request.admin_profile.center
+            if center:
+                bot_users = BotUser.objects.filter(center=center).order_by('-created_at')
+            else:
+                bot_users = BotUser.objects.none()
+        else:
+            # Branch-level staff - get customers from accessible branches
+            bot_users = BotUser.objects.filter(branch__in=accessible_branches).order_by('-created_at')
+    else:
+        # No admin profile - no access to customers
+        bot_users = BotUser.objects.none()
+    
     if request.method == 'POST':
         # Get form data
+        bot_user_id = request.POST.get('bot_user')
+        manual_first_name = request.POST.get('manual_first_name', '').strip()
+        manual_last_name = request.POST.get('manual_last_name', '').strip()
+        manual_phone = request.POST.get('manual_phone', '').strip()
         product_id = request.POST.get('product')
         language_id = request.POST.get('language')
         total_pages = request.POST.get('total_pages')
@@ -378,6 +406,10 @@ def orderEdit(request, order_id):
         
         # Store old values for audit
         old_values = {
+            'bot_user': str(order.bot_user) if order.bot_user else None,
+            'manual_first_name': order.manual_first_name,
+            'manual_last_name': order.manual_last_name,
+            'manual_phone': order.manual_phone,
             'product': str(order.product),
             'language': str(order.language) if order.language else None,
             'total_pages': order.total_pages,
@@ -391,6 +423,36 @@ def orderEdit(request, order_id):
         }
         
         try:
+            # Update customer information
+            # Determine if this is a manual order or bot user order
+            is_manual_order = bool(manual_first_name and manual_phone)
+            
+            if is_manual_order:
+                # Manual order - update manual fields
+                order.manual_first_name = manual_first_name
+                order.manual_last_name = manual_last_name
+                order.manual_phone = manual_phone
+                # Try to get or create bot_user with this phone (for consistency)
+                if manual_phone:
+                    bot_user, created = BotUser.objects.get_or_create(
+                        phone=manual_phone,
+                        defaults={
+                            'name': f"{manual_first_name} {manual_last_name}".strip(),
+                            'user_id': None,
+                            'username': None,
+                            'branch': order.branch,
+                            'center': order.branch.center if order.branch else None,
+                        }
+                    )
+                    order.bot_user = bot_user
+            elif bot_user_id:
+                # Bot user order - update bot_user reference
+                order.bot_user = BotUser.objects.get(pk=bot_user_id)
+                # Clear manual fields
+                order.manual_first_name = None
+                order.manual_last_name = None
+                order.manual_phone = None
+            
             # Update order
             if product_id:
                 order.product = Product.objects.get(pk=product_id)
@@ -447,6 +509,10 @@ def orderEdit(request, order_id):
             
             # Audit log the edit
             new_values = {
+                'bot_user': str(order.bot_user) if order.bot_user else None,
+                'manual_first_name': order.manual_first_name,
+                'manual_last_name': order.manual_last_name,
+                'manual_phone': order.manual_phone,
                 'product': str(order.product),
                 'language': str(order.language) if order.language else None,
                 'total_pages': order.total_pages,
@@ -480,6 +546,7 @@ def orderEdit(request, order_id):
         "order": order,
         "products": products,
         "languages": languages,
+        "bot_users": bot_users,
         "payment_choices": Order.PAYMENT_TYPE,
     }
     return render(request, "orders/orderEdit.html", context)

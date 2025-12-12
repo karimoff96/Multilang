@@ -104,7 +104,7 @@ def create_order_zip(order):
 
 
 def format_order_message(order, include_details=True):
-    """Format detailed order message for Telegram notification with rich styling."""
+    """Format clean order message for Telegram notification with emojis."""
     from orders.models import Order
     from django.utils import timezone
     
@@ -114,13 +114,13 @@ def format_order_message(order, include_details=True):
     
     # Customer type indicator
     if is_manual:
-        customer_type = "📝 <b>РУЧНОЙ ЗАКАЗ</b> (Manual Order)"
+        customer_type = "📝 РУЧНОЙ ЗАКАЗ"
     elif is_b2b:
-        customer_type = "🏢 <b>B2B</b> │ Агентство"
+        customer_type = "🏢 B2B Агентство"
     else:
-        customer_type = "👤 <b>B2C</b> │ Физ. лицо"
+        customer_type = "👤 B2C Клиент"
     
-    # Status emoji mapping with more details
+    # Status emoji mapping
     status_emoji = {
         'pending': '🟡',
         'payment_pending': '💳',
@@ -146,168 +146,104 @@ def format_order_message(order, include_details=True):
     
     # Payment type with icons
     payment_emoji = "💵" if order.payment_type == "cash" else "💳"
-    payment_text = "Наличные" if order.payment_type == "cash" else "Банковская карта"
+    payment_text = "Наличные" if order.payment_type == "cash" else "Карта"
     
     # Calculate file count
     file_count = order.files.count()
     
     # Format timestamps
     local_time = timezone.localtime(order.created_at)
-    created_str = local_time.strftime('%d.%m.%Y в %H:%M')
+    created_str = local_time.strftime('%d.%m.%Y %H:%M')
     
-    # ═══════════════════════════════════════
-    # HEADER SECTION
-    # ═══════════════════════════════════════
-    message = f"""
-╔═══════════════════════════════════╗
-║  🎯 <b>НОВЫЙ ЗАКАЗ #{order.id}</b>
-╚═══════════════════════════════════╝
-
-{customer_type}
-{status_icon} <b>Статус:</b> {status_name}
-
-"""
+    # Build message
+    message = f"🎯 <b>НОВЫЙ ЗАКАЗ #{order.id}</b>\n"
+    message += f"{customer_type} • {status_icon} {status_name}\n\n"
     
-    # ═══════════════════════════════════════
-    # CUSTOMER INFO SECTION
-    # ═══════════════════════════════════════
-    message += "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
-    message += "┃  👤 <b>ИНФОРМАЦИЯ О КЛИЕНТЕ</b>\n"
-    message += "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n"
-    
+    # Customer info
     if is_manual:
-        # Manual order customer info
         customer_name = order.get_customer_display_name()
         customer_phone = order.get_customer_phone() or 'N/A'
-        message += f"👤 <b>Имя:</b> {customer_name}\n"
-        message += f"📞 <b>Телефон:</b> {customer_phone}\n"
-        message += f"💬 <b>Telegram:</b> <i>Не указан</i>\n"
+        message += f"👤 {customer_name}\n"
+        message += f"📞 {customer_phone}\n"
     else:
-        # Bot user customer info
-        message += f"👤 <b>Имя:</b> {order.bot_user.display_name}\n"
-        message += f"📞 <b>Телефон:</b> {order.bot_user.phone if order.bot_user.phone else 'N/A'}\n"
-        message += f"💬 <b>Telegram:</b> @{order.bot_user.username if order.bot_user.username else 'N/A'}\n"
-        message += f"🆔 <b>User ID:</b> <code>{order.bot_user.user_id}</code>\n"
+        message += f"👤 {order.bot_user.display_name}\n"
+        message += f"📞 {order.bot_user.phone if order.bot_user.phone else 'N/A'}\n"
+        if order.bot_user.username:
+            message += f"💬 @{order.bot_user.username}\n"
         
         # Agency info for B2B
-        if is_b2b and order.bot_user.agency:
-            message += f"\n🏢 <b>Агентство:</b> {order.bot_user.agency.name}\n"
-            if order.bot_user.agency.phone:
-                message += f"📞 <b>Тел. агентства:</b> {order.bot_user.agency.phone}\n"
+        if is_b2b and hasattr(order.bot_user, 'agency') and order.bot_user.agency:
+            message += f"🏢 {order.bot_user.agency.name}\n"
     
-    # ═══════════════════════════════════════
-    # BRANCH INFO SECTION
-    # ═══════════════════════════════════════
-    message += f"\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
-    message += f"┃  🏢 <b>ФИЛИАЛ</b>\n"
-    message += f"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n"
-    message += f"🏢 <b>Название:</b> {order.branch.name if order.branch else 'N/A'}\n"
-    if order.branch and order.branch.address:
-        message += f"📍 <b>Адрес:</b> {order.branch.address}\n"
-    if order.branch and hasattr(order.branch, 'phone') and order.branch.phone:
-        message += f"📞 <b>Телефон:</b> {order.branch.phone}\n"
+    # Branch info
+    message += f"\n🏢 {order.branch.name if order.branch else 'N/A'}"
+    if order.branch and order.branch.center:
+        message += f" ({order.branch.center.name})"
+    message += "\n"
     
     if include_details:
-        # ═══════════════════════════════════════
-        # ORDER DETAILS SECTION
-        # ═══════════════════════════════════════
-        message += f"\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
-        message += f"┃  📄 <b>ДЕТАЛИ ЗАКАЗА</b>\n"
-        message += f"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n"
+        # Order details
+        message += f"\n📋 <b>Детали заказа:</b>\n"
         
         # Service/Category
         if order.product and order.product.category:
-            message += f"📁 <b>Услуга:</b> {order.product.category.name}\n"
+            message += f"📁 {order.product.category.name}"
         
         # Product/Document type
         if order.product:
-            message += f"📝 <b>Тип документа:</b> {order.product.name}\n"
+            message += f" • {order.product.name}\n"
         
         # Language
         if order.language:
-            message += f"🌍 <b>Язык перевода:</b> {order.language.name}\n"
+            message += f"🌍 {order.language.name}\n"
         
         # File statistics
-        message += f"\n📊 <b>Объем работы:</b>\n"
-        message += f"   • 📎 Файлов: <b>{file_count}</b>\n"
-        message += f"   • 📄 Страниц: <b>{order.total_pages}</b>\n"
-        message += f"   • 📋 Копий: <b>{order.copy_number}</b>\n"
+        message += f"📎 Файлов: {file_count} • 📄 Страниц: {order.total_pages}"
+        if order.copy_number > 0:
+            message += f" • 📋 Копий: {order.copy_number}"
+        message += "\n"
         
-        # ═══════════════════════════════════════
-        # PAYMENT SECTION
-        # ═══════════════════════════════════════
-        message += f"\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
-        message += f"┃  💰 <b>ИНФОРМАЦИЯ ОБ ОПЛАТЕ</b>\n"
-        message += f"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n"
-        message += f"{payment_emoji} <b>Способ оплаты:</b> {payment_text}\n"
+        # Payment info
+        message += f"\n💰 <b>Оплата:</b>\n"
+        message += f"{payment_emoji} {payment_text}\n"
         
         # Price breakdown
         total_price = float(order.total_price)
-        message += f"💵 <b>Сумма заказа:</b> <b>{total_price:,.0f} UZS</b>\n"
+        message += f"💵 Сумма: <b>{total_price:,.0f} UZS</b>\n"
         
         # Extra fee if exists
         if order.extra_fee and float(order.extra_fee) > 0:
             extra_fee = float(order.extra_fee)
-            message += f"➕ <b>Доп. услуги:</b> {extra_fee:,.0f} UZS\n"
+            message += f"➕ Доп. услуги: {extra_fee:,.0f} UZS\n"
             total_with_fee = total_price + extra_fee
-            message += f"💰 <b>Итого к оплате:</b> <b>{total_with_fee:,.0f} UZS</b>\n"
+            message += f"💰 Итого: <b>{total_with_fee:,.0f} UZS</b>\n"
         
         # Payment tracking
         if order.received and float(order.received) > 0:
             received = float(order.received)
             remaining = total_price - received
-            message += f"\n💰 <b>Получено:</b> {received:,.0f} UZS\n"
+            message += f"✅ Получено: {received:,.0f} UZS\n"
             if remaining > 0:
-                message += f"⏳ <b>Остаток:</b> {remaining:,.0f} UZS\n"
-            else:
-                message += f"✅ <b>Оплачено полностью</b>\n"
+                message += f"⏳ Остаток: {remaining:,.0f} UZS\n"
         
         # Receipt info
         if order.recipt:
-            message += f"🧾 <b>Чек:</b> Прикреплен\n"
+            message += f"🧾 Чек прикреплен\n"
         
-        # Payment tracking timestamps
-        if order.payment_received_at:
-            payment_time = timezone.localtime(order.payment_received_at)
-            payment_str = payment_time.strftime('%d.%m.%Y в %H:%M')
-            message += f"🕐 <b>Оплата получена:</b> {payment_str}\n"
-            if order.payment_received_by:
-                message += f"👤 <b>Принял:</b> {order.payment_received_by.full_name}\n"
-        
-        # ═══════════════════════════════════════
-        # ASSIGNMENT SECTION
-        # ═══════════════════════════════════════
+        # Assignment info
         if order.assigned_to:
-            message += f"\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
-            message += f"┃  👥 <b>НАЗНАЧЕНИЕ</b>\n"
-            message += f"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n"
-            message += f"👤 <b>Исполнитель:</b> {order.assigned_to.full_name}\n"
+            message += f"\n👤 Исполнитель: {order.assigned_to.full_name}\n"
             if order.assigned_by:
-                message += f"👤 <b>Назначил:</b> {order.assigned_by.full_name}\n"
-            if order.assigned_at:
-                assigned_time = timezone.localtime(order.assigned_at)
-                assigned_str = assigned_time.strftime('%d.%m.%Y в %H:%M')
-                message += f"🕐 <b>Дата назначения:</b> {assigned_str}\n"
+                message += f"📌 Назначил: {order.assigned_by.full_name}\n"
         
-        # ═══════════════════════════════════════
-        # NOTES SECTION
-        # ═══════════════════════════════════════
+        # Notes
         if order.description:
-            message += f"\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
-            message += f"┃  📝 <b>ПРИМЕЧАНИЯ</b>\n"
-            message += f"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n"
-            # Limit description to 400 chars
-            desc = order.description[:400]
-            if len(order.description) > 400:
+            desc = order.description[:200]
+            if len(order.description) > 200:
                 desc += "..."
-            message += f"{desc}\n"
+            message += f"\n📝 {desc}\n"
     
-    # ═══════════════════════════════════════
-    # FOOTER SECTION
-    # ═══════════════════════════════════════
-    message += f"\n╔═══════════════════════════════════╗\n"
-    message += f"║  🕐 <b>Создан:</b> {created_str}\n"
-    message += f"╚═══════════════════════════════════╝\n"
+    message += f"\n🕐 {created_str}"
     
     return message
 
@@ -518,8 +454,7 @@ def send_order_notification(order_id):
 
 def send_order_status_update(order_id, old_status=None):
     """
-    Send order status update notification with rich formatting.
-    Includes payment tracking and progress indicators.
+    Send order status update notification with clean formatting.
     """
     from orders.models import Order
     from django.utils import timezone
@@ -562,50 +497,22 @@ def send_order_status_update(order_id, old_status=None):
         'cancelled': 'Отменен',
     }
     
-    # Progress indicator based on status
-    progress_bar = ""
-    if order.status == 'pending':
-        progress_bar = "▱▱▱▱▱▱▱ 0%"
-    elif order.status in ['payment_pending', 'payment_received']:
-        progress_bar = "▰▱▱▱▱▱▱ 15%"
-    elif order.status == 'payment_confirmed':
-        progress_bar = "▰▰▱▱▱▱▱ 30%"
-    elif order.status == 'in_progress':
-        progress_bar = "▰▰▰▰▱▱▱ 60%"
-    elif order.status == 'ready':
-        progress_bar = "▰▰▰▰▰▰▱ 85%"
-    elif order.status == 'completed':
-        progress_bar = "▰▰▰▰▰▰▰ 100%"
-    elif order.status == 'cancelled':
-        progress_bar = "✖✖✖✖✖✖✖ ОТМЕНЕН"
-    
     current_icon = status_emoji.get(order.status, '⚪')
     current_name = status_names.get(order.status, order.get_status_display())
     
     # Build message
-    message = f"""
-╔═══════════════════════════════════╗
-║  🔄 <b>ОБНОВЛЕНИЕ СТАТУСА</b>
-╚═══════════════════════════════════╝
-
-🆔 <b>Заказ:</b> #{order.id}
-"""
+    message = f"🔄 <b>ОБНОВЛЕНИЕ СТАТУСА</b>\n"
+    message += f"🆔 Заказ #{order.id}\n\n"
     
     # Show status change
     if old_status:
         old_icon = status_emoji.get(old_status, '⚪')
         old_name = status_names.get(old_status, old_status)
-        message += f"\n{old_icon} <s>{old_name}</s>\n"
-        message += f"           ⬇️\n"
+        message += f"{old_icon} {old_name} → "
     
     message += f"{current_icon} <b>{current_name}</b>\n\n"
-    message += f"📊 <b>Прогресс:</b> {progress_bar}\n"
     
     # Customer info
-    message += f"\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
-    message += f"┃  👤 <b>КЛИЕНТ</b>\n"
-    message += f"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n"
-    
     if order.bot_user:
         message += f"👤 {order.bot_user.display_name}\n"
         message += f"📞 {order.bot_user.phone if order.bot_user.phone else 'N/A'}\n"
@@ -615,50 +522,35 @@ def send_order_status_update(order_id, old_status=None):
         message += f"👤 {customer_name}\n"
         message += f"📞 {customer_phone}\n"
     
-    message += f"🏢 <b>Филиал:</b> {branch.name}\n"
+    message += f"🏢 {branch.name}\n"
     
     # Payment info for payment-related statuses
     if order.status in ['payment_pending', 'payment_received', 'payment_confirmed']:
-        message += f"\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
-        message += f"┃  💰 <b>ОПЛАТА</b>\n"
-        message += f"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n"
-        
         total_price = float(order.total_price)
-        message += f"💵 <b>Сумма:</b> {total_price:,.0f} UZS\n"
+        message += f"\n💰 Сумма: {total_price:,.0f} UZS\n"
         
         if order.received and float(order.received) > 0:
             received = float(order.received)
             remaining = total_price - received
-            payment_pct = (received / total_price * 100) if total_price > 0 else 0
-            message += f"💰 <b>Получено:</b> {received:,.0f} UZS ({payment_pct:.0f}%)\n"
+            message += f"✅ Получено: {received:,.0f} UZS\n"
             if remaining > 0:
-                message += f"⏳ <b>Остаток:</b> {remaining:,.0f} UZS\n"
+                message += f"⏳ Остаток: {remaining:,.0f} UZS\n"
         
         if order.recipt:
-            message += f"🧾 <b>Чек:</b> Прикреплен ✅\n"
-        
-        if order.payment_received_at:
-            payment_time = timezone.localtime(order.payment_received_at)
-            payment_str = payment_time.strftime('%d.%m.%Y в %H:%M')
-            message += f"🕐 {payment_str}\n"
+            message += f"🧾 Чек прикреплен\n"
     
     # Assignment info for in-progress orders
     if order.status in ['in_progress', 'ready'] and order.assigned_to:
-        message += f"\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
-        message += f"┃  👥 <b>ИСПОЛНИТЕЛЬ</b>\n"
-        message += f"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n"
-        message += f"👤 {order.assigned_to.full_name}\n"
+        message += f"\n👤 Исполнитель: {order.assigned_to.full_name}\n"
     
     # Product info
     if order.product:
-        message += f"\n📝 <b>Услуга:</b> {order.product.name}\n"
+        message += f"\n📝 {order.product.name}\n"
     
     # Timestamp
     update_time = timezone.localtime(timezone.now())
-    update_str = update_time.strftime('%d.%m.%Y в %H:%M')
-    message += f"\n╔═══════════════════════════════════╗\n"
-    message += f"║  🕐 <b>Обновлено:</b> {update_str}\n"
-    message += f"╚═══════════════════════════════════╝\n"
+    update_str = update_time.strftime('%d.%m.%Y %H:%M')
+    message += f"\n🕐 {update_str}"
     
     # Send only to company channel for status updates
     if center.company_orders_channel_id:

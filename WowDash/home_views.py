@@ -137,23 +137,10 @@ def index(request):
             ).count()
             hourly_orders.append(count)
 
-    # Recent orders (last 5)
-    recent_orders = all_orders.select_related("bot_user", "product").order_by(
-        "-created_at"
-    )[:5]
-    recent_orders_data = []
-    for order in recent_orders:
-        recent_orders_data.append(
-            {
-                "id": order.id,
-                "customer": order.bot_user.name if order.bot_user else "Unknown",
-                "product": order.product.name if order.product else "Unknown",
-                "total_price": float(order.total_price or 0),
-                "status": order.status,
-                "status_display": order.get_status_display(),
-                "created_at": order.created_at.strftime("%H:%M"),
-            }
-        )
+    # Recent orders (last 10)
+    recent_orders = all_orders.select_related(
+        "bot_user", "product", "branch", "branch__center", "assigned_to", "assigned_to__user"
+    ).order_by("-created_at")[:10]
 
     # Total revenue all time
     total_revenue = float(all_orders.aggregate(total=Sum("total_price"))["total"] or 0)
@@ -286,7 +273,7 @@ def index(request):
         "weekly_chart_labels": json.dumps(weekly_chart_labels),
         "hourly_orders": json.dumps(hourly_orders),
         # Recent orders
-        "recent_orders": recent_orders_data,
+        "recent_orders": recent_orders,
         # Totals
         "total_revenue": total_revenue,
         "total_orders": total_orders,

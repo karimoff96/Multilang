@@ -4,7 +4,8 @@ Financial/order reports per branch/center with date filtering
 """
 
 from django.shortcuts import render
-from django.db.models import Sum, Count, Avg
+from django.db import models
+from django.db.models import Sum, Count, Avg, Q
 from django.db.models.functions import TruncDate, TruncMonth, TruncWeek
 from django.utils import timezone
 from django.core.paginator import Paginator
@@ -1186,3 +1187,237 @@ def unit_economy_api(request):
     
     data = get_unit_economy_analytics(request.user)
     return JsonResponse(data)
+
+
+@login_required(login_url="admin_login")
+@any_permission_required(['can_view_expenses', 'can_manage_expenses', 'can_view_financial_reports'])
+def expense_analytics_report(request):
+    """
+    Detailed expense analytics report with hierarchical breakdown:
+    - Superuser: See all centers with their branches
+    - Center-level: See own center's branches
+    - Branch-level: See own branch details
+    """
+    from services.models import Expense
+    from organizations.rbac import get_user_expenses
+    from decimal import Decimal
+    
+    # Get date filter
+    period = request.GET.get("period", "month")
+    custom_from = request.GET.get("date_from")
+    custom_to = request.GET.get("date_to")
+    period_data = get_period_dates(period, custom_from, custom_to)
+    
+    # Get filter parameters
+    expense_type_filter = request.GET.get('expense_type', '')  # 'b2b', 'b2c', or ''
+    center_id = request.GET.get('center')
+    branch_id = request.GET.get('branch')
+    
+    # Base queryset with permission filtering
+    expenses = get_user_expenses(request.user).filter(
+        created_at__gte=period_data['date_from'],
+        created_at__lte=period_data['date_to']
+    ).select_related('branch', 'branch__center')
+    
+    # Apply expense type filter
+    if expense_type_filter in ['b2b', 'b2c']:
+        expenses = expenses.filter(expense_type__in=[expense_type_filter, 'both'])
+    
+    # Determine user's access level
+    user_profile = getattr(request.user, 'admin_profile', None)
+    is_superuser = request.user.is_superuser
+    
+    # Get accessible centers and branches
+    accessible_centers = []
+    accessible_branches = get_user_branches(request.user)
+    
+    if is_superuser:
+        accessible_centers = TranslationCenter.objects.filter(is_active=True)
+        # Apply center filter if provided
+        if center_id:
+            accessible_centers = accessible_centers.filter(id=center_id)
+            expenses = expenses.filter(branch__center_id=center_id)
+    elif user_profile and user_profile.center:
+        # Center-level user
+        accessible_centers = [user_profile.center]
+        expenses = expenses.filter(branch__center=user_profile.center)
+    
+    # Apply branch filter if provided
+    if branch_id:
+        expenses = expenses.filter(branch_id=branch_id)
+        accessible_branches = accessible_branches.filter(id=branch_id)
+    
+    # Calculate totals
+    total_expenses = expenses.aggregate(
+        total=Sum('price'),
+        count=Count('id')
+    )
+    
+    # B2B/B2C breakdown
+    b2b_expenses = expenses.filter(expense_type='b2b').aggregate(
+        total=Sum('price'),
+        count=Count('id')
+    )
+    b2c_expenses = expenses.filter(expense_type='b2c').aggregate(
+        total=Sum('price'),
+        count=Count('id')
+    )
+    both_expenses = expenses.filter(expense_type='both').aggregate(
+        total=Sum('price'),
+        count=Count('id')
+    )
+    
+    # Analytics by center (for superuser)
+    by_center = []
+    if is_superuser:
+        for center in accessible_centers:
+            center_expenses = expenses.filter(branch__center=center)
+            center_total = center_expenses.aggregate(total=Sum('price'))['total'] or Decimal('0')
+            center_count = center_expenses.count()
+            
+            # Get branch breakdown for this center
+            center_branches = center_expenses.values(
+                'branch__id',
+                'branch__name'
+            ).annotate(
+                total=Sum('price'),
+                count=Count('id'),
+                b2b_total=Sum('price', filter=Q(expense_type='b2b')),
+                b2c_total=Sum('price', filter=Q(expense_type='b2c')),
+                both_total=Sum('price', filter=Q(expense_type='both'))
+            ).order_by('-total')
+            
+            by_center.append({
+                'center': center,
+                'total': center_total,
+                'count': center_count,
+                'branches': list(center_branches)
+            })
+    
+    # Analytics by branch (for center-level and branch-level users)
+    by_branch = expenses.values(
+        'branch__id',
+        'branch__name',
+        'branch__center__name'
+    ).annotate(
+        total=Sum('price'),
+        count=Count('id'),
+        b2b_total=Sum('price', filter=Q(expense_type='b2b')),
+        b2c_total=Sum('price', filter=Q(expense_type='b2c')),
+        both_total=Sum('price', filter=Q(expense_type='both')),
+        avg_expense=Avg('price')
+    ).order_by('-total')
+    
+    # Top expenses by amount
+    top_expenses = expenses.order_by('-price')[:10]
+    
+    # Expense type distribution
+    type_distribution = expenses.values('expense_type').annotate(
+        total=Sum('price'),
+        count=Count('id')
+    ).order_by('-total')
+    
+    # Additional statistics
+    expense_stats = expenses.aggregate(
+        max_price=models.Max('price'),
+        min_price=models.Min('price'),
+        avg_price=Avg('price')
+    )
+    
+    # Calculate median (approximate using SQL)
+    expense_count = expenses.count()
+    median_expense = Decimal('0')
+    if expense_count > 0:
+        middle_index = expense_count // 2
+        median_qs = expenses.order_by('price')[middle_index:middle_index + 1]
+        if median_qs.exists():
+            median_expense = median_qs.first().price
+    
+    # Monthly trend (if period is long enough)
+    monthly_trend = []
+    monthly_trend_labels = []
+    monthly_trend_values = []
+    if (period_data['date_to'] - period_data['date_from']).days > 31:
+        monthly_trend = expenses.annotate(
+            month=TruncMonth('created_at')
+        ).values('month').annotate(
+            total=Sum('price'),
+            count=Count('id')
+        ).order_by('month')
+        
+        # Prepare monthly trend data for chart
+        for item in monthly_trend:
+            month_date = item['month']
+            monthly_trend_labels.append(month_date.strftime('%b %Y') if month_date else 'N/A')
+            monthly_trend_values.append(float(item['total'] or 0))
+    
+    # Prepare chart data
+    branch_labels = [item['branch__name'] for item in by_branch[:10]]
+    branch_totals = [float(item['total'] or 0) for item in by_branch[:10]]
+    branch_b2b = [float(item['b2b_total'] or 0) for item in by_branch[:10]]
+    branch_b2c = [float(item['b2c_total'] or 0) for item in by_branch[:10]]
+    branch_both = [float(item['both_total'] or 0) for item in by_branch[:10]]
+    
+    type_labels = []
+    type_values = []
+    for item in type_distribution:
+        if item['expense_type'] == 'b2b':
+            type_labels.append('B2B (Agency/Business)')
+        elif item['expense_type'] == 'b2c':
+            type_labels.append('B2C (Individual Customer)')
+        else:
+            type_labels.append('Both B2B & B2C')
+        type_values.append(float(item['total'] or 0))
+    
+    context = {
+        "title": "Expense Analytics Report",
+        "subTitle": "Detailed expense analysis by center, branch, and type",
+        # Date filter
+        "period": period,
+        "period_choices": PERIOD_CHOICES,
+        "date_from": period_data['date_from_str'],
+        "date_to": period_data['date_to_str'],
+        "period_label": period_data['label'],
+        # Filters
+        "expense_type_filter": expense_type_filter,
+        "centers": accessible_centers if is_superuser else [],
+        "branches": accessible_branches,
+        "selected_center": center_id,
+        "selected_branch": branch_id,
+        # User role
+        "is_superuser": is_superuser,
+        "is_center_level": user_profile and user_profile.center and not is_superuser,
+        "is_branch_level": user_profile and not user_profile.center and not is_superuser,
+        # Summary
+        "total_expenses": total_expenses['total'] or Decimal('0'),
+        "total_count": total_expenses['count'],
+        "b2b_total": b2b_expenses['total'] or Decimal('0'),
+        "b2b_count": b2b_expenses['count'],
+        "b2c_total": b2c_expenses['total'] or Decimal('0'),
+        "b2c_count": b2c_expenses['count'],
+        "both_total": both_expenses['total'] or Decimal('0'),
+        "both_count": both_expenses['count'],
+        # Statistics
+        "highest_expense": expense_stats['max_price'] or Decimal('0'),
+        "lowest_expense": expense_stats['min_price'] or Decimal('0'),
+        "avg_expense": expense_stats['avg_price'] or Decimal('0'),
+        "median_expense": median_expense,
+        # Breakdowns
+        "by_center": by_center,
+        "by_branch": by_branch,
+        "top_expenses": top_expenses,
+        "type_distribution": type_distribution,
+        "monthly_trend": monthly_trend,
+        # Chart data
+        "branch_labels": json.dumps(branch_labels),
+        "branch_totals": json.dumps(branch_totals),
+        "branch_b2b": json.dumps(branch_b2b),
+        "branch_b2c": json.dumps(branch_b2c),
+        "branch_both": json.dumps(branch_both),
+        "type_labels": json.dumps(type_labels),
+        "type_values": json.dumps(type_values),
+        "monthly_trend_labels": json.dumps(monthly_trend_labels),
+        "monthly_trend_values": json.dumps(monthly_trend_values),
+    }
+    
+    return render(request, "reports/expense_analytics.html", context)

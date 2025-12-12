@@ -32,14 +32,10 @@ from telebot import apihelper
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.poolmanager import PoolManager
-
-
 class NoSSLAdapter(HTTPAdapter):
     def init_poolmanager(self, *args, **kwargs):
         kwargs["ssl_context"] = ssl._create_unverified_context()
         return super().init_poolmanager(*args, **kwargs)
-
-
 # Create custom session with SSL verification disabled
 session = requests.Session()
 session.mount("https://", NoSSLAdapter())
@@ -54,8 +50,6 @@ bot = telebot.TeleBot(_TEMPLATE_TOKEN, parse_mode="HTML", threaded=False)
 
 # Admin user IDs (add your admin user IDs here)
 ADMINS = []  # Example: [123456789, 987654321]
-
-
 def get_translated_field(obj, field_name, language):
     """
     Get translated field value based on user's language.
@@ -81,8 +75,6 @@ def get_translated_field(obj, field_name, language):
         value = getattr(obj, field_name, "")
 
     return value
-
-
 # Channel IDs for order forwarding
 B2C_CHANNEL_ID = os.getenv("B2C_CHANNEL_ID")  # For regular users
 B2B_CHANNEL_ID = os.getenv("B2B_CHANNEL_ID")  # For agency users
@@ -120,16 +112,12 @@ STEP_PAYMENT_METHOD = 14
 STEP_AWAITING_PAYMENT = 15
 STEP_UPLOADING_RECEIPT = 16
 STEP_AWAITING_RECEIPT = 17  # For additional payment receipts on existing orders
-
-
 def is_valid_file_format(file_name):
     """Check if file has allowed extension"""
     if not file_name:
         return False
     _, ext = os.path.splitext(file_name.lower())
     return ext in ALLOWED_EXTENSIONS
-
-
 def create_order_zip(order):
     """
     Create a ZIP file containing all order files and receipt (if exists)
@@ -171,8 +159,6 @@ def create_order_zip(order):
     except Exception as e:
         logger.error(f"Failed to create ZIP file: {e}", exc_info=True)
         return None
-
-
 def send_order_status_notification(order, old_status, new_status):
     """
     Send notification to user when order status changes.
@@ -212,9 +198,7 @@ def send_order_status_notification(order, old_status, new_status):
         if new_status == "payment_pending":
             if language == "uz":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  💳 <b>TO'LOV KUTILMOQDA</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"💳 <b>TO'LOV KUTILMOQDA</b>\n"
                     f"📋 <b>Buyurtma:</b> #{order.id}\n"
                     f"💰 <b>To'lov summasi:</b> {order.total_price:,.0f} so'm\n\n"
                     f"📱 To'lov chekini yuborishingizni kutmoqdamiz.\n"
@@ -222,9 +206,7 @@ def send_order_status_notification(order, old_status, new_status):
                 )
             elif language == "ru":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  💳 <b>ОЖИДАНИЕ ОПЛАТЫ</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"💳 <b>ОЖИДАНИЕ ОПЛАТЫ</b>\n"
                     f"📋 <b>Заказ:</b> #{order.id}\n"
                     f"💰 <b>Сумма к оплате:</b> {order.total_price:,.0f} сум\n\n"
                     f"📱 Ожидаем квитанцию об оплате.\n"
@@ -232,9 +214,7 @@ def send_order_status_notification(order, old_status, new_status):
                 )
             else:
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  💳 <b>PAYMENT PENDING</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"💳 <b>PAYMENT PENDING</b>\n"
                     f"📋 <b>Order:</b> #{order.id}\n"
                     f"💰 <b>Amount:</b> {order.total_price:,.0f} sum\n\n"
                     f"📱 Waiting for your payment receipt.\n"
@@ -244,9 +224,7 @@ def send_order_status_notification(order, old_status, new_status):
         elif new_status == "payment_received":
             if language == "uz":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  📨 <b>CHEK QABUL QILINDI</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"📨 <b>CHEK QABUL QILINDI</b>\n"
                     f"📋 <b>Buyurtma:</b> #{order.id}\n"
                     f"💰 <b>Summa:</b> {order.total_price:,.0f} so'm\n"
                     f"🧾 <b>Status:</b> Chek tekshirilmoqda ✅\n\n"
@@ -255,9 +233,7 @@ def send_order_status_notification(order, old_status, new_status):
                 )
             elif language == "ru":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  📨 <b>ЧЕК ПОЛУЧЕН</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"📨 <b>ЧЕК ПОЛУЧЕН</b>\n"
                     f"📋 <b>Заказ:</b> #{order.id}\n"
                     f"💰 <b>Сумма:</b> {order.total_price:,.0f} сум\n"
                     f"🧾 <b>Статус:</b> Чек проверяется ✅\n\n"
@@ -266,9 +242,7 @@ def send_order_status_notification(order, old_status, new_status):
                 )
             else:
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  📨 <b>RECEIPT RECEIVED</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"📨 <b>RECEIPT RECEIVED</b>\n"
                     f"📋 <b>Order:</b> #{order.id}\n"
                     f"💰 <b>Amount:</b> {order.total_price:,.0f} sum\n"
                     f"🧾 <b>Status:</b> Receipt being verified ✅\n\n"
@@ -279,9 +253,7 @@ def send_order_status_notification(order, old_status, new_status):
         elif new_status == "payment_confirmed":
             if language == "uz":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  ✅ <b>TO'LOV TASDIQLANDI!</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"✅ <b>TO'LOV TASDIQLANDI!</b>\n"
                     f"📋 <b>Buyurtma:</b> #{order.id}\n"
                     f"💰 <b>Summa:</b> {order.total_price:,.0f} so'm ✅\n"
                     f"📊 <b>Progress:</b> ▰▰▱▱▱▱▱ 30%\n\n"
@@ -290,9 +262,7 @@ def send_order_status_notification(order, old_status, new_status):
                 )
             elif language == "ru":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  ✅ <b>ОПЛАТА ПОДТВЕРЖДЕНА!</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"✅ <b>ОПЛАТА ПОДТВЕРЖДЕНА!</b>\n"
                     f"📋 <b>Заказ:</b> #{order.id}\n"
                     f"💰 <b>Сумма:</b> {order.total_price:,.0f} сум ✅\n"
                     f"📊 <b>Прогресс:</b> ▰▰▱▱▱▱▱ 30%\n\n"
@@ -301,9 +271,7 @@ def send_order_status_notification(order, old_status, new_status):
                 )
             else:
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  ✅ <b>PAYMENT CONFIRMED!</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"✅ <b>PAYMENT CONFIRMED!</b>\n"
                     f"📋 <b>Order:</b> #{order.id}\n"
                     f"💰 <b>Amount:</b> {order.total_price:,.0f} sum ✅\n"
                     f"📊 <b>Progress:</b> ▰▰▱▱▱▱▱ 30%\n\n"
@@ -315,9 +283,7 @@ def send_order_status_notification(order, old_status, new_status):
             estimated_days = order.product.estimated_days if order.product else "N/A"
             if language == "uz":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  🔄 <b>BUYURTMA JARAYONDA!</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"🔄 <b>BUYURTMA JARAYONDA!</b>\n"
                     f"📋 <b>Buyurtma:</b> #{order.id}\n"
                     f"⏱️ <b>Taxminiy muddat:</b> {estimated_days} kun\n"
                     f"📊 <b>Progress:</b> ▰▰▰▰▱▱▱ 60%\n\n"
@@ -326,9 +292,7 @@ def send_order_status_notification(order, old_status, new_status):
                 )
             elif language == "ru":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  🔄 <b>ЗАКАЗ В ПРОЦЕССЕ!</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"🔄 <b>ЗАКАЗ В ПРОЦЕССЕ!</b>\n"
                     f"📋 <b>Заказ:</b> #{order.id}\n"
                     f"⏱️ <b>Примерный срок:</b> {estimated_days} дней\n"
                     f"📊 <b>Прогресс:</b> ▰▰▰▰▱▱▱ 60%\n\n"
@@ -337,9 +301,7 @@ def send_order_status_notification(order, old_status, new_status):
                 )
             else:
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  🔄 <b>ORDER IN PROGRESS!</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"🔄 <b>ORDER IN PROGRESS!</b>\n"
                     f"📋 <b>Order:</b> #{order.id}\n"
                     f"⏱️ <b>Estimated time:</b> {estimated_days} days\n"
                     f"📊 <b>Progress:</b> ▰▰▰▰▱▱▱ 60%\n\n"
@@ -350,9 +312,7 @@ def send_order_status_notification(order, old_status, new_status):
         elif new_status == "ready":
             if language == "uz":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  ✅ <b>BUYURTMA TAYYOR!</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"✅ <b>BUYURTMA TAYYOR!</b>\n"
                     f"📋 <b>Buyurtma:</b> #{order.id}\n"
                     f"📦 <b>Status:</b> Olib ketishingiz mumkin!\n"
                     f"📊 <b>Progress:</b> ▰▰▰▰▰▰▱ 85%\n\n"
@@ -365,9 +325,7 @@ def send_order_status_notification(order, old_status, new_status):
                 notification_text += f"\n⏰ Ish vaqti: 9:00 - 18:00"
             elif language == "ru":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  ✅ <b>ЗАКАЗ ГОТОВ!</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"✅ <b>ЗАКАЗ ГОТОВ!</b>\n"
                     f"📋 <b>Заказ:</b> #{order.id}\n"
                     f"📦 <b>Статус:</b> Можно забрать!\n"
                     f"📊 <b>Прогресс:</b> ▰▰▰▰▰▰▱ 85%\n\n"
@@ -380,9 +338,7 @@ def send_order_status_notification(order, old_status, new_status):
                 notification_text += f"\n⏰ Время работы: 9:00 - 18:00"
             else:
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  ✅ <b>ORDER READY!</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"✅ <b>ORDER READY!</b>\n"
                     f"📋 <b>Order:</b> #{order.id}\n"
                     f"📦 <b>Status:</b> Ready for pickup!\n"
                     f"📊 <b>Progress:</b> ▰▰▰▰▰▰▱ 85%\n\n"
@@ -397,9 +353,7 @@ def send_order_status_notification(order, old_status, new_status):
         elif new_status == "completed":
             if language == "uz":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  🎉 <b>BUYURTMA YAKUNLANDI!</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"🎉 <b>BUYURTMA YAKUNLANDI!</b>\n"
                     f"📋 <b>Buyurtma:</b> #{order.id}\n"
                     f"📊 <b>Progress:</b> ▰▰▰▰▰▰▰ 100% ✅\n\n"
                     f"🙏 Xizmatlarimizdan foydalanganingiz uchun rahmat!\n"
@@ -409,9 +363,7 @@ def send_order_status_notification(order, old_status, new_status):
                 )
             elif language == "ru":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  🎉 <b>ЗАКАЗ ЗАВЕРШЕН!</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"🎉 <b>ЗАКАЗ ЗАВЕРШЕН!</b>\n"
                     f"📋 <b>Заказ:</b> #{order.id}\n"
                     f"📊 <b>Прогресс:</b> ▰▰▰▰▰▰▰ 100% ✅\n\n"
                     f"🙏 Спасибо за использование наших услуг!\n"
@@ -421,9 +373,7 @@ def send_order_status_notification(order, old_status, new_status):
                 )
             else:
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  🎉 <b>ORDER COMPLETED!</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"🎉 <b>ORDER COMPLETED!</b>\n"
                     f"📋 <b>Order:</b> #{order.id}\n"
                     f"📊 <b>Progress:</b> ▰▰▰▰▰▰▰ 100% ✅\n\n"
                     f"🙏 Thank you for using our services!\n"
@@ -435,9 +385,7 @@ def send_order_status_notification(order, old_status, new_status):
         elif new_status == "cancelled":
             if language == "uz":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  ❌ <b>BUYURTMA BEKOR QILINDI</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"❌ <b>BUYURTMA BEKOR QILINDI</b>\n"
                     f"📋 <b>Buyurtma:</b> #{order.id}\n"
                     f"📊 <b>Status:</b> Bekor qilingan\n\n"
                     f"📞 Savollaringiz bo'lsa, biz bilan bog'laning.\n"
@@ -447,9 +395,7 @@ def send_order_status_notification(order, old_status, new_status):
                 notification_text += f"\n🔄 Yangi buyurtma berish: /start"
             elif language == "ru":
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  ❌ <b>ЗАКАЗ ОТМЕНЕН</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"❌ <b>ЗАКАЗ ОТМЕНЕН</b>\n"
                     f"📋 <b>Заказ:</b> #{order.id}\n"
                     f"📊 <b>Статус:</b> Отменен\n\n"
                     f"📞 Если есть вопросы, свяжитесь с нами.\n"
@@ -459,9 +405,7 @@ def send_order_status_notification(order, old_status, new_status):
                 notification_text += f"\n🔄 Новый заказ: /start"
             else:
                 notification_text = (
-                    f"╔═══════════════════════════════════╗\n"
-                    f"║  ❌ <b>ORDER CANCELLED</b>\n"
-                    f"╚═══════════════════════════════════╝\n\n"
+                    f"❌ <b>ORDER CANCELLED</b>\n"
                     f"📋 <b>Order:</b> #{order.id}\n"
                     f"📊 <b>Status:</b> Cancelled\n\n"
                     f"📞 Contact us if you have questions.\n"
@@ -508,8 +452,6 @@ def send_order_status_notification(order, old_status, new_status):
 
     except Exception as e:
         logger.error(f"Failed to send status notification: {e}", exc_info=True)
-
-
 def send_payment_received_notification(order, amount_received, total_received):
     """
     Send notification to user when a payment amount is received (partial payment support).
@@ -608,8 +550,6 @@ def send_payment_received_notification(order, amount_received, total_received):
 
     except Exception as e:
         logger.error(f"Failed to send payment notification: {e}", exc_info=True)
-
-
 def generate_order_summary_caption(order, language):
     """
     Generate order summary caption for channel forwarding
@@ -756,8 +696,6 @@ def generate_order_summary_caption(order, language):
         caption += f"📅 Order date: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
 
     return caption
-
-
 def forward_order_to_channel(order, language):
     """
     Forward order with all files to appropriate channel(s).
@@ -836,8 +774,6 @@ def forward_order_to_channel(order, language):
     except Exception as e:
         logger.error(f"Failed to forward order to channel: {e}", exc_info=True)
         return False
-
-
 def truncate_filename(filename, max_length=50):
     """Truncate filename to prevent database field overflow while preserving extension"""
     if not filename or len(filename) <= max_length:
@@ -853,8 +789,6 @@ def truncate_filename(filename, max_length=50):
         return hashlib.md5(filename.encode()).hexdigest()[:max_length]
     
     return f"{name[:max_name_length]}...{ext}"
-
-
 def get_file_pages_from_content(file_content, file_name):
     """Get accurate page count using the most precise methods available"""
     _, ext = os.path.splitext(file_name.lower())
@@ -894,13 +828,9 @@ def get_file_pages_from_content(file_content, file_name):
     else:
         # Unknown file type, default to 1 page
         return 1
-
-
 def generate_totals_message(language, total_files, total_pages):
     """Generate totals message in appropriate language"""
     return f"{get_text('file_summary_uploaded', language)}: {total_files}\n{get_text('file_summary_pages', language)}: {total_pages}"
-
-
 def update_totals_message(user_id, language):
     """Update the totals message for a user"""
     if user_id in uploaded_files and uploaded_files[user_id].get("files"):
@@ -934,8 +864,6 @@ def update_totals_message(user_id, language):
             except:
                 pass
             del uploaded_files[user_id]["totals_message_id"]
-
-
 def clear_user_files(user_id):
     """Clear uploaded files for a user"""
     if user_id in uploaded_files:
@@ -949,16 +877,12 @@ def clear_user_files(user_id):
             except:
                 pass  # Message might already be deleted
         del uploaded_files[user_id]
-
-
 def get_user_files(user_id):
     """Get uploaded files for a user"""
     user_data = uploaded_files.get(user_id)
     if user_data and isinstance(user_data, dict) and "files" in user_data:
         return user_data["files"]
     return {}
-
-
 def get_user_language(user_id):
     """Get user's preferred language"""
     try:
@@ -969,8 +893,6 @@ def get_user_language(user_id):
     except Exception as e:
         logger.debug(f"Error getting user language for {user_id}: {e}")
         return "uz"
-
-
 def update_user_username(message):
     """Update user's Telegram username if it has changed.
     Call this function when processing messages to keep username in sync."""
@@ -988,8 +910,6 @@ def update_user_username(message):
             logger.debug(f"Updated username for user {user_id}: {telegram_username}")
     except Exception as e:
         logger.debug(f"Error updating username for user: {e}")
-
-
 def send_message(chat_id, text, reply_markup=None, parse_mode="HTML"):
     """Helper function to send messages with proper language handling"""
     try:
@@ -1009,8 +929,6 @@ def send_message(chat_id, text, reply_markup=None, parse_mode="HTML"):
         return bot.send_message(
             chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode=parse_mode
         )
-
-
 def send_branch_location(chat_id, branch, language):
     """
     Send branch location to user with pickup information.
@@ -1074,8 +992,6 @@ def send_branch_location(chat_id, branch, language):
     except Exception as e:
         logger.error(f"Failed to send branch location: {e}")
         return False
-
-
 def extract_coordinates_from_url(url):
     """
     Extract latitude and longitude from Google Maps or Yandex Maps URL.
@@ -1140,8 +1056,6 @@ def extract_coordinates_from_url(url):
     except Exception as e:
         logger.warning(f"Failed to extract coordinates from URL: {e}")
         return None
-
-
 def get_current_center():
     """
     Get the TranslationCenter associated with the current bot token.
@@ -1154,8 +1068,6 @@ def get_current_center():
     except Exception as e:
         logger.error(f"Failed to get current center: {e}")
         return None
-
-
 def get_bot_user(user_id, center=None):
     """
     Get BotUser for the given user_id and center.
@@ -1176,8 +1088,6 @@ def get_bot_user(user_id, center=None):
     except Exception as e:
         logger.error(f"Failed to get bot user: {e}")
         return None
-
-
 def get_or_create_bot_user(user_id, center=None, defaults=None):
     """
     Get or create BotUser for the given user_id and center.
@@ -1207,8 +1117,6 @@ def get_or_create_bot_user(user_id, center=None, defaults=None):
     except Exception as e:
         logger.error(f"Failed to get or create bot user: {e}")
         return None, False
-
-
 def get_center_branches(center=None):
     """
     Get all active branches for a center.
@@ -1226,8 +1134,6 @@ def get_center_branches(center=None):
     except Exception as e:
         logger.error(f"Failed to get branches: {e}")
         return []
-
-
 def show_branch_selection(message, language):
     """
     Show branch selection after phone number is received.
@@ -1306,8 +1212,6 @@ def show_branch_selection(message, language):
         branch_info += "\n"
     
     send_message(message.chat.id, branch_info, reply_markup=markup)
-
-
 def ensure_additional_info_exists():
     """Check if AdditionalInfo record exists in database - only create if missing"""
     try:
@@ -1334,8 +1238,6 @@ def ensure_additional_info_exists():
             logger.info("AdditionalInfo record already exists - using existing record")
     except Exception as e:
         logger.error(f"Failed to check AdditionalInfo: {e}")
-
-
 def update_user_step(user_id, step):
     """Update user's current step"""
     try:
@@ -1345,8 +1247,6 @@ def update_user_step(user_id, step):
             user.save()
     except:
         pass
-
-
 def get_user_step(user_id):
     """Get user's current step"""
     try:
@@ -1356,8 +1256,6 @@ def get_user_step(user_id):
         return 0
     except:
         return 0
-
-
 def calculate_order_pricing(order, user):
     """
     Calculate order pricing with copy charges
@@ -1393,8 +1291,6 @@ def calculate_order_pricing(order, user):
     total_price = base_price + copy_charge
 
     return base_price, copy_charge, total_price, copy_percentage
-
-
 @bot.message_handler(commands=["start"])
 def start(message):
     import uuid as uuid_module
@@ -1560,8 +1456,6 @@ def start(message):
 
         send_message(message.chat.id, welcome_text, reply_markup=markup)
         update_user_step(user_id, 0)
-
-
 @bot.message_handler(
     func=lambda message: message.text in ["🇺🇿 O'zbek", "🇷🇺 Русский", "🇬🇧 English"]
 )
@@ -1588,8 +1482,6 @@ def handle_language_selection(message):
 
     # Go directly to registration (ask name first)
     start_registration(message, language)
-
-
 # Handler for branch selection callback
 @bot.callback_query_handler(func=lambda call: call.data.startswith("select_branch_"))
 def handle_branch_selection(call):
@@ -1647,8 +1539,6 @@ def handle_branch_selection(call):
     except Exception as e:
         logger.error(f" Branch selection error: {e}")
         bot.answer_callback_query(call.id, get_text("error_general", language))
-
-
 # Handler for back to language from branch selection
 @bot.callback_query_handler(func=lambda call: call.data == "back_to_language")
 def handle_back_to_language(call):
@@ -1665,8 +1555,6 @@ def handle_back_to_language(call):
     
     wrapped_message = MessageWrapper(call.message.chat, call.from_user)
     show_language_selection(wrapped_message)
-
-
 def ask_name(message, language):
     user_id = message.from_user.id
     update_user_step(user_id, STEP_NAME_REQUESTED)
@@ -1677,14 +1565,10 @@ def ask_name(message, language):
 
     ask_name_text = get_text("ask_name", language)
     send_message(message.chat.id, ask_name_text, reply_markup=markup)
-
-
 def start_registration(message, language):
     user_id = message.from_user.id
     update_user_step(user_id, STEP_REGISTRATION_STARTED)
     ask_name(message, language)
-
-
 def ask_contact(message, language):
     user_id = message.from_user.id
     update_user_step(user_id, STEP_PHONE_REQUESTED)
@@ -1698,8 +1582,6 @@ def ask_contact(message, language):
 
     ask_contact_text = get_text("ask_contact", language)
     send_message(message.chat.id, ask_contact_text, reply_markup=markup)
-
-
 def show_language_selection(message):
     user_id = message.from_user.id
     language = get_user_language(user_id)
@@ -1711,8 +1593,6 @@ def show_language_selection(message):
     markup.add(btn1, btn2, btn3)
     welcome_text = get_text("welcome", language)
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
-
-
 def handle_back_button(message, language):
     user_id = message.from_user.id
     current_step = get_user_step(user_id)
@@ -1782,8 +1662,6 @@ def handle_back_button(message, language):
     else:
         # Default: go to main menu
         show_main_menu(message, language)
-
-
 @bot.message_handler(content_types=["contact"])
 def handle_contact(message):
     user_id = message.from_user.id
@@ -1844,8 +1722,6 @@ def handle_contact(message):
                 message.chat.id,
                 "translation:error_processing_contact",
             )
-
-
 def show_main_menu(message, language):
     # Handle both direct messages and callback messages
     if hasattr(message, 'from_user') and message.from_user:
@@ -1893,8 +1769,6 @@ def show_main_menu(message, language):
         markup.add(btn5)
     welcome_text = get_text("main_menu_welcome", language)
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
-
-
 @bot.message_handler(
     func=lambda message: message.text
     in [
@@ -2015,8 +1889,6 @@ def handle_main_menu(message):
         or "Price List" in message.text
     ):
         show_pricelist(message, language)
-
-
 def show_pricelist(message, language):
     """Show price list for the user's branch"""
     from services.models import Category, Product
@@ -2186,8 +2058,6 @@ def show_pricelist(message, language):
     
     send_message(message.chat.id, pricelist_text, parse_mode="HTML")
     show_main_menu(message, language)
-
-
 def show_user_orders(message, language):
     """Show all orders for the current user"""
     user_id = message.from_user.id
@@ -2391,8 +2261,6 @@ def show_user_orders(message, language):
         traceback.print_exc()
         send_message(message.chat.id, get_text("error_general", language))
         show_main_menu(message, language)
-
-
 # Payment callback handler
 @bot.callback_query_handler(func=lambda call: call.data.startswith("pay_order_"))
 def handle_pay_order(call):
@@ -2466,8 +2334,6 @@ def handle_pay_order(call):
     except Exception as e:
         logger.error(f" handle_pay_order: {e}")
         bot.answer_callback_query(call.id, get_text("error_general", language))
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "cancel_payment")
 def handle_cancel_payment(call):
     """Cancel payment and return to orders"""
@@ -2488,8 +2354,6 @@ def handle_cancel_payment(call):
         pass
     
     show_main_menu(call.message, language)
-
-
 def show_profile(message, language):
     """Show user profile with edit options
 
@@ -2637,13 +2501,9 @@ def show_profile(message, language):
         markup.add(back_button)
 
         send_message(chat_id, get_text("error_general", language), reply_markup=markup)
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "edit_profile")
 def handle_profile_actions(call):
     show_edit_profile_menu(call.message)
-
-
 def show_edit_profile_menu(message):
     user_id = message.chat.id
     language = get_user_language(user_id)
@@ -2669,16 +2529,12 @@ def show_edit_profile_menu(message):
 
     edit_text = get_text("edit_profile_menu", language)
     send_message(message.chat.id, edit_text, reply_markup=markup)
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "edit_name")
 def handle_edit_name_request(call):
     user_id = call.message.chat.id
     language = get_user_language(user_id)
     update_user_step(user_id, STEP_EDITING_NAME)
     bot.send_message(call.message.chat.id, get_text("enter_new_name", language))
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "edit_phone")
 def handle_edit_phone_request(call):
     user_id = call.message.chat.id
@@ -2694,8 +2550,6 @@ def handle_edit_phone_request(call):
     bot.send_message(
         call.message.chat.id, get_text("enter_new_phone", language), reply_markup=markup
     )
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "edit_branch")
 def handle_edit_branch_request(call):
     """Show branch selection for changing preferred branch"""
@@ -2766,8 +2620,6 @@ def handle_edit_branch_request(call):
         )
     except:
         send_message(call.message.chat.id, branch_info, reply_markup=markup)
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("change_branch_"))
 def handle_change_branch(call):
     """Handle branch change from profile"""
@@ -2821,8 +2673,6 @@ def handle_change_branch(call):
     except Exception as e:
         logger.error(f" Change branch error: {e}")
         bot.answer_callback_query(call.id, "Error occurred")
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "edit_language")
 def handle_edit_language_request(call):
     try:
@@ -2876,8 +2726,6 @@ def handle_edit_language_request(call):
             )
         except:
             pass
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "back_to_profile")
 def handle_back_to_profile(call):
     """Handle back to profile button from inline keyboards"""
@@ -2891,8 +2739,6 @@ def handle_back_to_profile(call):
     
     update_user_step(user_id, STEP_EDITING_PROFILE)
     show_profile(call.message, language)
-
-
 @bot.callback_query_handler(
     func=lambda call: call.data.startswith("lang_") and call.data.count("_") >= 2
 )
@@ -2970,8 +2816,6 @@ def handle_service_language_selection(call):
             # If we can't handle the error, just log it
             pass
         print(f"Unexpected error in handle_service_language_selection: {e}")
-
-
 # Add a new handler for profile language updates
 @bot.callback_query_handler(func=lambda call: call.data.startswith("profile_lang_"))
 def handle_profile_language_update(call):
@@ -3050,8 +2894,6 @@ def handle_profile_language_update(call):
             show_main_menu(call.message, "uz")
         except:
             pass  # If even this fails, there's nothing more we can do
-
-
 def show_categorys(message, language):
     # Handle both direct messages and callback messages
     if hasattr(message, 'from_user') and message.from_user:
@@ -3122,8 +2964,6 @@ def show_categorys(message, language):
         logger.error(f" Unexpected error in show_categorys: {e}", exc_info=True)
         send_message(message.chat.id, get_text("error_general", language))
         show_main_menu(message, language)
-
-
 @bot.callback_query_handler(func=lambda call: call.data == ("main_menu"))
 def handle_main_menu_callback(call):
     user_id = call.from_user.id
@@ -3142,8 +2982,6 @@ def handle_main_menu_callback(call):
     
     wrapped_message = MessageWrapper(call.message.chat, call.from_user)
     show_main_menu(wrapped_message, language)
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("category_"))
 def handle_service_selection(call):
     user_id = call.from_user.id
@@ -3194,8 +3032,6 @@ def handle_service_selection(call):
         bot.send_message(call.message.chat.id, error_msg)
         print(f"Error in handle_service_selection: {e}")
         show_main_menu(wrapped_message, language)
-
-
 def show_available_langs(
     message,
     language,
@@ -3310,8 +3146,6 @@ def show_available_langs(
             bot.send_message(chat_id, error_msg)
         print(f"Error in show_available_langs: {e}")
         show_main_menu(message, language)
-
-
 def show_products(
     message,
     language,
@@ -3461,8 +3295,6 @@ def show_products(
             bot.send_message(chat_id, error_msg)
         print(f"Error in show_products: {e}")
         show_main_menu(message, language)
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "back_to_services")
 def handle_back_to_services(call):
     user_id = call.from_user.id
@@ -3484,8 +3316,6 @@ def handle_back_to_services(call):
         pass
     
     show_categorys(wrapped_message, language)
-
-
 def show_copy_number_selection(message, language, doc_type, lang_name):
     """Show copy number selection step"""
     user_id = message.chat.id
@@ -3527,8 +3357,6 @@ def show_copy_number_selection(message, language, doc_type, lang_name):
     bot.send_message(
         chat_id=user_id, text=message_text, reply_markup=markup, parse_mode="HTML"
     )
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("copy_num_"))
 def handle_copy_number_selection(call):
     """Handle copy number selection from inline buttons"""
@@ -3586,8 +3414,6 @@ def handle_copy_number_selection(call):
 
         traceback.print_exc()
         bot.answer_callback_query(call.id, get_text("error_occurred", language))
-
-
 @bot.callback_query_handler(
     func=lambda call: call.data == "back_to_documents_from_copy"
 )
@@ -3624,8 +3450,6 @@ def handle_back_to_documents_from_copy(call):
         
         wrapped_message = MessageWrapper(call.message.chat, call.from_user)
         show_categorys(wrapped_message, language)
-
-
 def show_upload_files_interface(message, language, doc_type, lang_name, copy_number):
     """Show file upload interface after copy number is selected"""
     user_id = message.chat.id
@@ -3666,8 +3490,6 @@ def show_upload_files_interface(message, language, doc_type, lang_name, copy_num
     update_user_step(user_id, STEP_UPLOADING_FILES)
 
     logger.debug(f" User {user_id} moved to file upload with {copy_number} copies")
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("doc_type_"))
 def handle_document_selection(call):
     language = get_user_language(call.message.chat.id)
@@ -3739,8 +3561,6 @@ def handle_document_selection(call):
 
     # Message is already sent above, just log the action
     logger.debug(f" File upload message sent to user {user_id}")
-
-
 def show_payment_options(message, language, order):
     """Show payment options for the order"""
     user_id = message.chat.id
@@ -3884,8 +3704,6 @@ def show_payment_options(message, language, order):
         reply_markup=markup,
         parse_mode="HTML",
     )
-
-
 @bot.message_handler(content_types=["document", "photo"])
 def handle_file_upload(message):
     user_id = message.from_user.id
@@ -4562,8 +4380,6 @@ def handle_file_upload(message):
 
     # If not in uploading steps, ignore
     logger.debug(f" User not in uploading step, ignoring file")
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("payment_card_"))
 def handle_payment_card_selection(call):
     """Handle card payment selection"""
@@ -4609,8 +4425,6 @@ def handle_payment_card_selection(call):
             message_id=call.message.message_id,
             text=get_text("error_order_not_found", language),
         )
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("payment_cash_"))
 def handle_payment_cash_selection(call):
     """Handle cash payment selection"""
@@ -4661,8 +4475,6 @@ def handle_payment_cash_selection(call):
             message_id=call.message.message_id,
             text=get_text("error_order_not_found", language),
         )
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("payment_receipt_"))
 def handle_payment_receipt_upload(call):
     """Handle payment receipt upload confirmation"""
@@ -4715,8 +4527,6 @@ def handle_payment_receipt_upload(call):
             message_id=call.message.message_id,
             text=get_text("error_order_not_found", language),
         )
-
-
 @bot.message_handler(content_types=["photo"])
 def handle_payment_receipt_photo(message):
     """
@@ -4727,8 +4537,6 @@ def handle_payment_receipt_photo(message):
     # All photo handling for receipts is now done in handle_file_upload
     # This handler is no longer needed for STEP_AWAITING_PAYMENT
     pass
-
-
 @bot.message_handler(func=lambda message: True, content_types=["text"])
 def handle_text_messages(message):
     user_id = message.from_user.id
@@ -5013,8 +4821,6 @@ def handle_text_messages(message):
     # Default: show main menu for registered users
     elif current_step >= STEP_REGISTERED:
         show_main_menu(message, language)
-
-
 def handle_card_payment_message(message, language):
     """Handle card payment button press from keyboard"""
     user_id = message.from_user.id
@@ -5211,8 +5017,6 @@ def handle_card_payment_message(message, language):
             message.chat.id, get_text("error_general", language)
         )
         show_categorys(message, language)
-
-
 def handle_finish_upload_message(message, language):
     """Handle finish upload button press from keyboard"""
     user_id = message.from_user.id
@@ -5343,8 +5147,6 @@ def handle_finish_upload_message(message, language):
         bot.send_message(message.chat.id, get_text("error_general", language))
         clear_user_files(user_id)
         show_main_menu(message, language)
-
-
 def handle_back_to_upload_docs_message(message, language):
     """Handle back to upload docs button press from keyboard"""
     user_id = message.from_user.id
@@ -5445,8 +5247,6 @@ def handle_back_to_upload_docs_message(message, language):
         update_user_step(user_id, STEP_REGISTERED)
         bot.send_message(message.chat.id, get_text("data_lost_restart", language))
         show_categorys(message, language)
-
-
 def handle_cash_payment_message(message, language):
     """Handle cash payment button press from keyboard"""
     user_id = message.from_user.id
@@ -5628,8 +5428,6 @@ def handle_cash_payment_message(message, language):
             message.chat.id, get_text("error_general", language)
         )
         show_categorys(message, language)
-
-
 def handle_back_to_documents_message(message, language):
     """Handle back to documents button press from keyboard"""
     user_id = message.from_user.id
@@ -5651,8 +5449,6 @@ def handle_back_to_documents_message(message, language):
         update_user_step(user_id, STEP_REGISTERED)
         bot.send_message(message.chat.id, get_text("data_lost_use_service", language))
         show_categorys(message, language)
-
-
 def handle_back_to_copy_number_message(message, language):
     """Handle back to copy number button press from keyboard"""
     user_id = message.from_user.id
@@ -5692,8 +5488,6 @@ def handle_back_to_copy_number_message(message, language):
         update_user_step(user_id, STEP_REGISTERED)
         bot.send_message(message.chat.id, get_text("error_occurred", language))
         show_categorys(message, language)
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("payment_cash_"))
 def handle_payment_cash(call):
     """Handle cash payment selection"""
@@ -5729,18 +5523,12 @@ def handle_payment_cash(call):
     except Exception as e:
         logger.error(f" Failed to handle cash payment: {e}")
         bot.answer_callback_query(call.id, get_text("error_general", language))
-
-
 def handle_main_menu(call):
     bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
     show_main_menu(call.message, get_user_language(call.message.chat.id))
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "edit_profile")
 def handle_profile_actions(call):
     show_edit_profile_menu(call.message)
-
-
 def show_edit_profile_menu(message):
     user_id = message.chat.id
     language = get_user_language(user_id)
@@ -5763,16 +5551,12 @@ def show_edit_profile_menu(message):
     markup.add(edit_name_button, edit_phone_button)
     markup.add(edit_language_button)
     markup.add(back_button)
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "edit_name")
 def handle_edit_name_request(call):
     user_id = call.message.chat.id
     language = get_user_language(user_id)
     update_user_step(user_id, STEP_EDITING_NAME)
     bot.send_message(call.message.chat.id, get_text("enter_new_name", language))
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "edit_phone")
 def handle_edit_phone_request(call):
     user_id = call.message.chat.id
@@ -5788,8 +5572,6 @@ def handle_edit_phone_request(call):
     bot.send_message(
         call.message.chat.id, get_text("enter_new_phone", language), reply_markup=markup
     )
-
-
 @bot.message_handler(commands=["admin"])
 def admin_panel(message):
     user_id = message.from_user.id
@@ -5810,8 +5592,6 @@ def admin_panel(message):
         )
     else:
         bot.send_message(message.chat.id, get_text("no_admin_permission", language))
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("admin_"))
 def handle_admin_callbacks(call):
     if call.from_user.id not in ADMINS:
@@ -5838,8 +5618,6 @@ def handle_admin_callbacks(call):
                 call.message.chat.id,
                 call.message.message_id,
             )
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("delete_file_"))
 def handle_delete_file(call):
     user_id = call.message.chat.id
@@ -5929,13 +5707,9 @@ def handle_delete_file(call):
 
         traceback.print_exc()
         bot.answer_callback_query(call.id, get_text("delete_file_failed", language))
-
-
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-
-
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def index(request):

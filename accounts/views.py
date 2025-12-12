@@ -145,13 +145,32 @@ def reset_password(request, uidb64, token):
 from .models import BotUser
 from django.core.paginator import Paginator
 from django.db.models import Q
+from organizations.rbac import permission_required
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_manage_users')
 def addUser(request):
-    """Add a new BotUser (Telegram user)"""
+    """Add a new BotUser (Telegram user) - requires can_manage_users permission"""
+    from organizations.models import TranslationCenter, Branch
+    
     # Get all agencies for the dropdown
     agencies = BotUser.objects.filter(is_agency=True).order_by("name")
+    
+    # Get centers and branches based on user permissions
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True).order_by('name')
+        branches = Branch.objects.filter(is_active=True).select_related('center').order_by('center__name', 'name')
+    elif request.admin_profile:
+        # Get accessible centers and branches for this user
+        accessible_branches = request.admin_profile.get_accessible_branches()
+        branches = accessible_branches.select_related('center')
+        # Get unique centers from accessible branches
+        center_ids = branches.values_list('center_id', flat=True).distinct()
+        centers = TranslationCenter.objects.filter(id__in=center_ids, is_active=True).order_by('name')
+    else:
+        centers = TranslationCenter.objects.none()
+        branches = Branch.objects.none()
 
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
@@ -162,6 +181,22 @@ def addUser(request):
         is_active = request.POST.get("is_active") == "on"
         is_agency = request.POST.get("is_agency") == "on"
         agency_id = request.POST.get("agency", "")
+        center_id = request.POST.get("center", "")
+        branch_id = request.POST.get("branch", "")
+        
+        # Check permission for creating agencies
+        if is_agency and not (request.user.is_superuser or 
+                             (request.admin_profile and (request.admin_profile.role.can_manage_agencies or request.admin_profile.role.can_create_agencies))):
+            messages.error(request, "You don't have permission to create agencies.")
+            context = {
+                "title": "Add User",
+                "subTitle": "Add User",
+                "agencies": agencies,
+                "centers": centers,
+                "branches": branches,
+                "languages": BotUser.LANGUAGES,
+            }
+            return render(request, "users/addUser.html", context)
 
         # Validation
         if not name:
@@ -180,6 +215,25 @@ def addUser(request):
                     is_active=is_active,
                     is_agency=is_agency,
                 )
+                
+                # Set center if selected
+                if center_id:
+                    try:
+                        center = TranslationCenter.objects.get(id=center_id)
+                        bot_user.center = center
+                    except TranslationCenter.DoesNotExist:
+                        pass
+                
+                # Set branch if selected
+                if branch_id:
+                    try:
+                        branch = Branch.objects.get(id=branch_id)
+                        bot_user.branch = branch
+                        # Also set center from branch if not already set
+                        if not bot_user.center and branch.center:
+                            bot_user.center = branch.center
+                    except Branch.DoesNotExist:
+                        pass
 
                 # Set agency if selected and not an agency itself
                 if agency_id and not is_agency:
@@ -202,6 +256,8 @@ def addUser(request):
         "title": "Add User",
         "subTitle": "Add User",
         "agencies": agencies,
+        "centers": centers,
+        "branches": branches,
         "languages": BotUser.LANGUAGES,
     }
     return render(request, "users/addUser.html", context)
@@ -287,14 +343,31 @@ def usersList(request):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_manage_users')
 def editUser(request, user_id):
-    """Edit an existing BotUser"""
+    """Edit an existing BotUser - requires can_manage_users permission"""
     from django.shortcuts import get_object_or_404
+    from organizations.models import TranslationCenter, Branch
 
     user = get_object_or_404(BotUser, id=user_id)
     agencies = (
         BotUser.objects.filter(is_agency=True).exclude(id=user_id).order_by("name")
     )
+    
+    # Get centers and branches based on user permissions
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True).order_by('name')
+        branches = Branch.objects.filter(is_active=True).select_related('center').order_by('center__name', 'name')
+    elif request.admin_profile:
+        # Get accessible centers and branches for this user
+        accessible_branches = request.admin_profile.get_accessible_branches()
+        branches = accessible_branches.select_related('center')
+        # Get unique centers from accessible branches
+        center_ids = branches.values_list('center_id', flat=True).distinct()
+        centers = TranslationCenter.objects.filter(id__in=center_ids, is_active=True).order_by('name')
+    else:
+        centers = TranslationCenter.objects.none()
+        branches = Branch.objects.none()
 
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
@@ -305,6 +378,37 @@ def editUser(request, user_id):
         is_active = request.POST.get("is_active") == "on"
         is_agency = request.POST.get("is_agency") == "on"
         agency_id = request.POST.get("agency", "")
+        center_id = request.POST.get("center", "")
+        branch_id = request.POST.get("branch", "")
+        
+        # Check permission for creating/modifying agencies
+        if is_agency != user.is_agency:  # Agency status is being changed
+            if is_agency and not (request.user.is_superuser or 
+                                 (request.admin_profile and (request.admin_profile.role.can_manage_agencies or request.admin_profile.role.can_create_agencies))):
+                messages.error(request, "You don't have permission to create agencies.")
+                context = {
+                    "title": "Edit User",
+                    "subTitle": "Edit User",
+                    "user": user,
+                    "agencies": agencies,
+                    "centers": centers,
+                    "branches": branches,
+                    "languages": BotUser.LANGUAGES,
+                }
+                return render(request, "users/editUser.html", context)
+            elif not is_agency and not (request.user.is_superuser or 
+                                       (request.admin_profile and (request.admin_profile.role.can_manage_agencies or request.admin_profile.role.can_edit_agencies))):
+                messages.error(request, "You don't have permission to modify agency status.")
+                context = {
+                    "title": "Edit User",
+                    "subTitle": "Edit User",
+                    "user": user,
+                    "agencies": agencies,
+                    "centers": centers,
+                    "branches": branches,
+                    "languages": BotUser.LANGUAGES,
+                }
+                return render(request, "users/editUser.html", context)
 
         # Validation
         if not name:
@@ -321,6 +425,29 @@ def editUser(request, user_id):
                 user.language = language
                 user.is_active = is_active
                 user.is_agency = is_agency
+                
+                # Set center if selected
+                if center_id:
+                    try:
+                        center = TranslationCenter.objects.get(id=center_id)
+                        user.center = center
+                    except TranslationCenter.DoesNotExist:
+                        user.center = None
+                else:
+                    user.center = None
+                
+                # Set branch if selected
+                if branch_id:
+                    try:
+                        branch = Branch.objects.get(id=branch_id)
+                        user.branch = branch
+                        # Also set center from branch if not already set
+                        if not user.center and branch.center:
+                            user.center = branch.center
+                    except Branch.DoesNotExist:
+                        user.branch = None
+                else:
+                    user.branch = None
 
                 # Set agency if selected and not an agency itself
                 if agency_id and not is_agency:
@@ -346,6 +473,8 @@ def editUser(request, user_id):
         "subTitle": "Edit User",
         "user": user,
         "agencies": agencies,
+        "centers": centers,
+        "branches": branches,
         "languages": BotUser.LANGUAGES,
     }
     return render(request, "users/editUser.html", context)

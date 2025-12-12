@@ -38,7 +38,7 @@
                             <option value="">-- Select Customer --</option>
                             {% for user in bot_users %}
                             <option value="{{ user.id }}" {% if order.bot_user and order.bot_user.id == user.id %}selected{% endif %}>
-                                {{ user.display_name }} {% if user.phone_number %}({{ user.phone_number }}){% endif %}
+                                {{ user.display_name }} {% if user.phone %}({{ user.phone }}){% endif %}
                             </option>
                             {% endfor %}
                         </select>
