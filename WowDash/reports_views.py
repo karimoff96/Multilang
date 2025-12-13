@@ -1411,6 +1411,12 @@ def expense_analytics_report(request):
     accessible_centers = []
     accessible_branches = get_user_branches(request.user)
     
+    # Determine if user is center owner or just has permissions
+    is_center_owner = False
+    if user_profile:
+        is_center_owner = (user_profile.is_owner or 
+                          (user_profile.center and user_profile.center.owner_id == request.user.id))
+    
     # Filter orders by user access level and date range
     orders_base = Order.objects.filter(
         created_at__gte=period_data['date_from'],
@@ -1423,16 +1429,22 @@ def expense_analytics_report(request):
         if center_id:
             accessible_centers = accessible_centers.filter(id=center_id)
             orders_base = orders_base.filter(branch__center_id=center_id)
-    elif user_profile and user_profile.center:
-        # Center-level user
+    elif is_center_owner and user_profile.center:
+        # Center owner sees their own center
         accessible_centers = [user_profile.center]
         orders_base = orders_base.filter(branch__center=user_profile.center)
-    elif user_profile and user_profile.branch:
-        # Branch-level user
+        # Lock to their center only - ignore center filter
+        center_id = None
+        branch_id = None
+    else:
+        # Staff member with permissions - only their branch(es)
         orders_base = orders_base.filter(branch__in=accessible_branches)
+        # Lock to their branches only - ignore filters
+        center_id = None
+        branch_id = None
     
-    # Apply branch filter if provided
-    if branch_id:
+    # Apply branch filter if provided (only for superuser)
+    if is_superuser and branch_id:
         orders_base = orders_base.filter(branch_id=branch_id)
         accessible_branches = accessible_branches.filter(id=branch_id)
     
@@ -1442,12 +1454,13 @@ def expense_analytics_report(request):
     # Apply same filters to expenses
     if is_superuser and center_id:
         expenses = expenses.filter(branch__center_id=center_id)
-    elif user_profile and user_profile.center:
+    elif is_center_owner and user_profile.center:
         expenses = expenses.filter(branch__center=user_profile.center)
-    elif user_profile and user_profile.branch:
+    else:
+        # Staff - only their branches
         expenses = expenses.filter(branch__in=accessible_branches)
     
-    if branch_id:
+    if is_superuser and branch_id:
         expenses = expenses.filter(branch_id=branch_id)
     
     # Apply expense type filter
@@ -1733,8 +1746,8 @@ def expense_analytics_report(request):
         "selected_branch": branch_id,
         # User role
         "is_superuser": is_superuser,
-        "is_center_level": user_profile and user_profile.center and not is_superuser,
-        "is_branch_level": user_profile and not user_profile.center and not is_superuser,
+        "is_center_level": is_center_owner and not is_superuser,
+        "is_branch_level": not is_center_owner and not is_superuser,
         # Summary
         "total_expenses": total_expenses['total'] or Decimal('0'),
         "total_count": total_expenses['count'],

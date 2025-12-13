@@ -336,15 +336,37 @@ document.addEventListener('DOMContentLoaded', function() {
     const periodSelect = document.getElementById('periodSelect');
     const customDateRange = document.getElementById('customDateRange');
     const customDateRangeTo = document.getElementById('customDateRangeTo');
+    const form = document.getElementById('filtersForm');
     
     if (periodSelect) {
         periodSelect.addEventListener('change', function() {
             if (this.value === 'custom') {
                 customDateRange.style.display = 'block';
                 customDateRangeTo.style.display = 'block';
+                // Don't auto-submit for custom - wait for user to select dates
             } else {
                 customDateRange.style.display = 'none';
                 customDateRangeTo.style.display = 'none';
+                // Auto-submit for predefined periods
+                form.submit();
+            }
+        });
+    }
+    
+    // Auto-submit when custom date range is selected
+    const dateFromInput = form.querySelector('input[name="date_from"]');
+    const dateToInput = form.querySelector('input[name="date_to"]');
+    
+    if (dateFromInput && dateToInput) {
+        dateFromInput.addEventListener('change', function() {
+            if (dateToInput.value) {
+                form.submit();
+            }
+        });
+        
+        dateToInput.addEventListener('change', function() {
+            if (dateFromInput.value) {
+                form.submit();
             }
         });
     }
@@ -378,15 +400,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Auto-submit on filter change (optional)
-    const form = document.getElementById('filtersForm');
-    const autoSubmitFilters = form.querySelectorAll('select:not(#periodSelect)');
+    // Auto-submit on filter change
+    const autoSubmitSelects = form.querySelectorAll('select:not(#periodSelect)');
+    const searchInput = form.querySelector('input[name="search"]');
     
-    autoSubmitFilters.forEach(filter => {
+    autoSubmitSelects.forEach(filter => {
         filter.addEventListener('change', function() {
             form.submit();
         });
     });
+    
+    // Auto-submit on search with debounce
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                form.submit();
+            }, 500); // Wait 500ms after user stops typing
+        });
+    }
 });
 
 function exportToExcel() {
