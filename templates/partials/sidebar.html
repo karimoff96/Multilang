@@ -110,7 +110,7 @@
                     {% can_do 'expenses.view' as can_view_expenses %}
                     {% if can_view_expenses %}
                     <li>
-                        <a href="{% url 'expenseList' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span>Expenses</span></a>
+                        <a href="{% url 'expenseList' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.expenses">Expenses</span></a>
                     </li>
                     {% endif %}
                 </ul>

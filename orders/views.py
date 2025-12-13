@@ -41,19 +41,8 @@ def has_order_permission(request, permission_name, order=None):
     if not request.admin_profile:
         return False
     
-    role = request.admin_profile.role
-    
-    # Check if user has full order management (overrides individual permissions)
-    if role.can_manage_orders:
-        # Still need to check branch access
-        if order and order.branch:
-            accessible_branches = request.admin_profile.get_accessible_branches()
-            if order.branch not in accessible_branches:
-                return False
-        return True
-    
-    # Check specific permission on role
-    if not getattr(role, permission_name, False):
+    # Use has_permission method which handles master permissions properly
+    if not request.admin_profile.has_permission(permission_name):
         return False
     
     # If order specified, check branch access
@@ -63,12 +52,23 @@ def has_order_permission(request, permission_name, order=None):
             return False
     
     # For staff-level users, check if they can only work on their own orders
-    if not request.is_owner and not request.is_manager:
-        # Staff can only work on orders assigned to them
-        if order and order.assigned_to != request.admin_profile:
-            # Except for view permissions
-            if permission_name not in ['can_view_own_orders', 'can_view_all_orders']:
-                return False
+    if not request.user.is_superuser:
+        role = request.admin_profile.role
+        # If user only has can_view_own_orders, they can only see assigned orders
+        if permission_name in ['can_view_own_orders', 'can_view_all_orders']:
+            # If they don't have can_view_all_orders, check ownership
+            if not role.can_view_all_orders and not role.can_manage_orders:
+                if order and order.assigned_to != request.admin_profile:
+                    return False
+        # For edit/delete/status updates, check if order is assigned to them
+        elif permission_name in ['can_edit_orders', 'can_delete_orders', 'can_update_order_status', 
+                                 'can_complete_orders', 'can_cancel_orders']:
+            # Managers and owners can work on any order in their branches
+            if not (role.can_manage_orders or role.can_assign_orders or 
+                   request.admin_profile.is_owner_role or request.admin_profile.is_manager_role):
+                # Regular staff can only work on their assigned orders
+                if order and order.assigned_to != request.admin_profile:
+                    return False
     
     return True
 
@@ -166,6 +166,26 @@ def ordersList(request):
     branch_filter = request.GET.get('branch', '')
     if branch_filter:
         orders = orders.filter(branch_id=branch_filter)
+    
+    # Staff filter - assigned_to
+    assigned_to_filter = request.GET.get('assigned_to', '')
+    exclude_completed = request.GET.get('exclude_completed', '')
+    if assigned_to_filter:
+        orders = orders.filter(assigned_to_id=assigned_to_filter)
+        if exclude_completed == '1':
+            orders = orders.exclude(status='completed')
+    
+    # Staff filter - completed orders (completed_by OR assigned+completed)
+    staff_completed_filter = request.GET.get('staff_completed', '')
+    if staff_completed_filter:
+        orders = orders.filter(
+            Q(completed_by_id=staff_completed_filter) | Q(assigned_to_id=staff_completed_filter, status='completed')
+        )
+    
+    # Staff filter - completed_by (legacy, keeping for backward compatibility)
+    completed_by_filter = request.GET.get('completed_by', '')
+    if completed_by_filter and not staff_completed_filter:
+        orders = orders.filter(completed_by_id=completed_by_filter)
     
     # Assignment filter (only show for users who can view all)
     assignment_filter = request.GET.get('assignment', '')
@@ -375,7 +395,7 @@ def orderEdit(request, order_id):
         accessible_branches = request.admin_profile.get_accessible_branches()
         
         # Check if user can access center-level customers
-        if request.admin_profile.role.can_view_all_centers or request.admin_profile.role.can_manage_centers:
+        if request.admin_profile.has_permission('can_view_centers') or request.admin_profile.has_permission('can_manage_centers'):
             # Center owner/manager - get all customers from their center
             center = request.admin_profile.center
             if center:
@@ -493,10 +513,8 @@ def orderEdit(request, order_id):
                 )
                 order.files.add(order_media)
             
-            # Recalculate price
-            base_price = order.product.price * order.total_pages
-            copy_price = order.product.copy_price * order.copy_number * order.total_pages if order.copy_number > 0 else 0
-            order.total_price = base_price + copy_price
+            # Recalculate price using the order's calculated_price property
+            order.total_price = order.calculated_price
             
             # Update extra fee
             try:
@@ -633,6 +651,7 @@ def updateOrderStatus(request, order_id):
 
 
 @login_required(login_url='admin_login')
+@require_POST
 def deleteOrder(request, order_id):
     """Delete an order - permission-based access control"""
     order = get_object_or_404(Order, id=order_id)
@@ -642,21 +661,18 @@ def deleteOrder(request, order_id):
         messages.error(request, "You don't have permission to delete orders.")
         return redirect('orders:ordersList')
     
-    if request.method == 'POST':
-        # Audit log before deletion
-        log_action(
-            user=request.user,
-            action='delete',
-            target=order,
-            details=f'Order #{order.id} deleted',
-            changes={'order_id': order.id, 'status': order.status},
-            request=request
-        )
-        order.delete()
-        messages.success(request, f'Order #{order_id} has been deleted')
-        return redirect('orders:ordersList')
-    
-    return redirect('orders:orderDetail', order_id=order_id)
+    # Audit log before deletion
+    log_action(
+        user=request.user,
+        action='delete',
+        target=order,
+        details=f'Order #{order.id} deleted',
+        changes={'order_id': order.id, 'status': order.status},
+        request=request
+    )
+    order.delete()
+    messages.success(request, f'Order #{order_id} has been deleted')
+    return redirect('orders:ordersList')
 
 
 @login_required(login_url='admin_login')

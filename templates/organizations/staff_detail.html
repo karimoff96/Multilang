@@ -135,7 +135,11 @@
                             <iconify-icon icon="solar:check-circle-bold" class="text-success-600 text-2xl"></iconify-icon>
                         </div>
                         <h4 class="mb-4 fw-bold text-success-600">{{ stats.total_completed }}</h4>
-                        <span class="text-secondary-light text-sm" data-i18n="stats.totalCompleted">Total Completed</span>
+                        <span class="text-secondary-light text-sm" data-i18n="stats.totalCompleted">Orders Completed</span>
+                        <div class="mt-8 pt-8 border-top">
+                            <small class="text-success-600 fw-semibold">{{ stats.completed_payments_sum|floatformat:0|intcomma }} UZS</small>
+                            <small class="d-block text-secondary-light">Revenue Generated</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -143,11 +147,15 @@
             <div class="col-md-4">
                 <div class="card radius-12 h-100">
                     <div class="card-body p-16 text-center">
-                        <div class="w-48-px h-48-px rounded-circle bg-info-100 d-flex justify-content-center align-items-center mx-auto mb-12">
-                            <iconify-icon icon="solar:wallet-money-bold" class="text-info-600 text-2xl"></iconify-icon>
+                        <div class="w-48-px h-48-px rounded-circle bg-warning-100 d-flex justify-content-center align-items-center mx-auto mb-12">
+                            <iconify-icon icon="solar:wallet-money-bold" class="text-warning-600 text-2xl"></iconify-icon>
                         </div>
-                        <h4 class="mb-4 fw-bold text-info-600">{{ stats.total_revenue_received|floatformat:0|intcomma }}</h4>
-                        <span class="text-secondary-light text-sm" data-i18n="stats.paymentsReceived">Payments Received</span>
+                        <h4 class="mb-4 fw-bold text-warning-600">{{ stats.total_payments_received }}</h4>
+                        <span class="text-secondary-light text-sm" data-i18n="stats.paymentsCollected">Payments Collected (Cashier)</span>
+                        <div class="mt-8 pt-8 border-top">
+                            <small class="text-warning-600 fw-semibold">{{ stats.total_revenue_received|floatformat:0|intcomma }} UZS</small>
+                            <small class="d-block text-secondary-light">Amount Collected</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -196,9 +204,14 @@
                 <div class="card radius-12">
                     <div class="card-header border-bottom bg-base py-16 px-24 d-flex justify-content-between align-items-center">
                         <h6 class="text-lg fw-semibold mb-0" data-i18n="staff.assignedOrders">Assigned Orders</h6>
-                        <span class="bg-primary-100 text-primary-600 px-12 py-4 radius-4 fw-medium text-sm">
-                            {{ stats.active_orders }} <span data-i18n="common.active">active</span>
-                        </span>
+                        <div class="d-flex align-items-center gap-12">
+                            <span class="bg-primary-100 text-primary-600 px-12 py-4 radius-4 fw-medium text-sm">
+                                {{ stats.active_orders }} <span data-i18n="common.active">active</span>
+                            </span>
+                            <a href="{% url 'orders:ordersList' %}?assigned_to={{ staff_member.id }}&exclude_completed=1" class="btn btn-outline-primary btn-sm">
+                                <iconify-icon icon="solar:eye-bold" class="me-1"></iconify-icon> View All
+                            </a>
+                        </div>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -214,7 +227,7 @@
                                 </thead>
                                 <tbody>
                                     {% for order in assigned_orders %}
-                                    <tr>
+                                    <tr style="cursor: pointer;" onclick="window.location.href='{% url 'orders:orderDetail' order.id %}'">
                                         <td>
                                             <span class="fw-medium">#{{ order.id }}</span>
                                         </td>
@@ -250,11 +263,18 @@
             <!-- Completed Orders -->
             <div class="col-12">
                 <div class="card radius-12">
-                    <div class="card-header border-bottom bg-base py-16 px-24 d-flex justify-content-between align-items-center">
-                        <h6 class="text-lg fw-semibold mb-0" data-i18n="staff.completedOrders">Recently Completed</h6>
-                        <span class="bg-success-100 text-success-600 px-12 py-4 radius-4 fw-medium text-sm">
-                            {{ stats.completed_this_month }} <span data-i18n="common.thisMonth">this month</span>
-                        </span>
+                    <div class="card-header border-bottom bg-base py-16 px-24">
+                        <div class="d-flex justify-content-between align-items-center mb-16">
+                            <h6 class="text-lg fw-semibold mb-0" data-i18n="staff.completedOrders">Recently Completed</h6>
+                            <a href="{% url 'orders:ordersList' %}?staff_completed={{ staff_member.id }}&status=completed" class="btn btn-outline-success btn-sm">
+                                <iconify-icon icon="solar:eye-bold" class="me-1"></iconify-icon> View All
+                            </a>
+                        </div>
+                        <div class="d-flex gap-16">
+                            <span class="bg-success-100 text-success-600 px-12 py-4 radius-4 fw-medium text-sm">
+                                {{ stats.completed_this_month }} <span data-i18n="common.thisMonth">this month</span>
+                            </span>
+                        </div>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -270,7 +290,7 @@
                                 </thead>
                                 <tbody>
                                     {% for order in completed_orders %}
-                                    <tr>
+                                    <tr style="cursor: pointer;" onclick="window.location.href='{% url 'orders:orderDetail' order.id %}'">
                                         <td>
                                             <span class="fw-medium">#{{ order.id }}</span>
                                         </td>
@@ -306,4 +326,11 @@
     </div>
 </div>
 {% endif %}
+
+<style>
+    tbody tr[style*="cursor: pointer"]:hover {
+        background-color: rgba(99, 102, 241, 0.05);
+        transition: background-color 0.2s ease;
+    }
+</style>
 {% endblock %}

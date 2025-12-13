@@ -398,22 +398,32 @@ def get_user_orders(user):
                        (admin_profile.center and 
                         admin_profile.center.owner_id == user.id))
     
-    # If center owner or has view_all_orders, get all center orders
-    if is_center_owner or admin_profile.has_permission('can_view_all_orders'):
-        if admin_profile.center:
-            return Order.objects.filter(branch__center=admin_profile.center)
+    # If center owner, get all center orders
+    if is_center_owner and admin_profile.center:
+        return Order.objects.filter(branch__center=admin_profile.center)
     
+    # Get accessible branches
     accessible_branches = admin_profile.get_accessible_branches()
     
+    # If user has view_all_orders permission, show all orders in their branches
+    if admin_profile.has_permission('can_view_all_orders'):
+        return Order.objects.filter(branch__in=accessible_branches)
+    
+    # If user has reporting/financial permissions, show all branch orders (not just assigned)
+    if (admin_profile.has_permission('can_view_financial_reports') or
+        admin_profile.has_permission('can_view_reports') or
+        admin_profile.has_permission('can_view_analytics')):
+        return Order.objects.filter(branch__in=accessible_branches)
+    
+    # If staff role without special permissions, only show orders assigned to them
     if admin_profile.is_staff_role:
-        # Staff can only see orders assigned to them
         return Order.objects.filter(
             branch__in=accessible_branches,
             assigned_to=admin_profile
         )
-    else:
-        # Managers see all orders in their branches
-        return Order.objects.filter(branch__in=accessible_branches)
+    
+    # For managers/other roles, show all orders in their branches
+    return Order.objects.filter(branch__in=accessible_branches)
 
 
 def get_user_customers(user):

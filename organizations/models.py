@@ -1152,37 +1152,67 @@ class AdminUser(models.Model):
         # Check master permissions that grant this permission
         # Example: can_manage_orders grants all order permissions
         MASTER_PERMISSION_MAP = {
+            # Order Management
             'can_view_all_orders': ['can_manage_orders'],
             'can_view_own_orders': ['can_manage_orders'],
             'can_create_orders': ['can_manage_orders'],
             'can_edit_orders': ['can_manage_orders'],
             'can_delete_orders': ['can_manage_orders'],
             'can_assign_orders': ['can_manage_orders'],
+            'can_update_order_status': ['can_manage_orders'],
+            'can_complete_orders': ['can_manage_orders'],
+            'can_cancel_orders': ['can_manage_orders'],
+            # Customer Management
             'can_view_customers': ['can_manage_customers'],
             'can_create_customers': ['can_manage_customers'],
             'can_edit_customers': ['can_manage_customers'],
             'can_delete_customers': ['can_manage_customers'],
+            # Product Management
             'can_view_products': ['can_manage_products'],
             'can_create_products': ['can_manage_products'],
             'can_edit_products': ['can_manage_products'],
             'can_delete_products': ['can_manage_products'],
+            # Expense Management
             'can_view_expenses': ['can_manage_expenses'],
             'can_create_expenses': ['can_manage_expenses'],
             'can_edit_expenses': ['can_manage_expenses'],
             'can_delete_expenses': ['can_manage_expenses'],
+            # Staff Management
             'can_view_staff': ['can_manage_staff'],
             'can_create_staff': ['can_manage_staff'],
             'can_edit_staff': ['can_manage_staff'],
             'can_delete_staff': ['can_manage_staff'],
+            # Branch Management
             'can_view_branches': ['can_manage_branches'],
             'can_create_branches': ['can_manage_branches'],
             'can_edit_branches': ['can_manage_branches'],
+            'can_delete_branches': ['can_manage_branches'],
+            # Center Management
+            'can_view_centers': ['can_manage_centers'],
+            'can_create_centers': ['can_manage_centers'],
+            'can_edit_centers': ['can_manage_centers'],
+            'can_delete_centers': ['can_manage_centers'],
+            # Financial Management
+            'can_receive_payments': ['can_manage_financial', 'can_manage_orders'],
             'can_view_financial_reports': ['can_manage_financial'],
+            'can_apply_discounts': ['can_manage_financial'],
+            'can_refund_orders': ['can_manage_financial'],
+            # Reports & Analytics
+            'can_view_reports': ['can_manage_reports'],
+            'can_view_analytics': ['can_manage_reports'],
+            'can_export_data': ['can_manage_reports'],
+            # Branch Settings
             'can_view_branch_settings': ['can_manage_branch_settings'],
+            # Marketing
             'can_create_marketing_posts': ['can_manage_marketing'],
             'can_send_branch_broadcasts': ['can_manage_marketing'],
             'can_send_center_broadcasts': ['can_manage_marketing'],
             'can_view_broadcast_stats': ['can_manage_marketing'],
+            # Agency Management
+            'can_view_agencies': ['can_manage_agencies'],
+            'can_create_agencies': ['can_manage_agencies'],
+            'can_edit_agencies': ['can_manage_agencies'],
+            'can_delete_agencies': ['can_manage_agencies'],
         }
         
         # Check if any master permission grants this permission

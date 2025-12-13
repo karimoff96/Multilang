@@ -471,27 +471,31 @@
                                 <th>Expense Name</th>
                                 <th>Type</th>
                                 <th>Branch</th>
-                                <th class="text-end">Amount</th>
-                                <th>Date</th>
+                                <th class="text-end">Unit Price</th>
+                                <th class="text-end">Orders</th>
+                                <th class="text-end">Total Cost</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for expense in top_expenses %}
+                            {% for item in top_expenses %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
-                                <td class="fw-medium">{{ expense.name }}</td>
+                                <td class="fw-medium">{{ item.expense.name }}</td>
                                 <td>
-                                    {% if expense.expense_type == 'b2b' %}
+                                    {% if item.expense.expense_type == 'b2b' %}
                                     <span class="badge bg-info-100 text-info-600">B2B</span>
-                                    {% elif expense.expense_type == 'b2c' %}
+                                    {% elif item.expense.expense_type == 'b2c' %}
                                     <span class="badge bg-success-100 text-success-600">B2C</span>
                                     {% else %}
                                     <span class="badge bg-warning-100 text-warning-600">Both</span>
                                     {% endif %}
                                 </td>
-                                <td class="text-secondary-light">{{ expense.branch.name }}</td>
-                                <td class="text-end fw-bold text-primary-600">{{ expense.price|format_number }}</td>
-                                <td class="text-secondary-light">{{ expense.created_at|date:"M d, Y" }}</td>
+                                <td class="text-secondary-light">{{ item.expense.branch.name }}</td>
+                                <td class="text-end text-secondary-light">{{ item.expense.price|format_number }}</td>
+                                <td class="text-end">
+                                    <span class="badge bg-primary-100 text-primary-600">{{ item.order_count }}</span>
+                                </td>
+                                <td class="text-end fw-bold text-primary-600">{{ item.total_cost|format_number }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -523,6 +527,33 @@ document.getElementById('periodSelect').addEventListener('change', function() {
         this.closest('form').submit();
     }
 });
+
+// Auto-submit on filter changes
+const filterForm = document.querySelector('form[method="GET"]');
+
+// Expense Type filter
+const expenseTypeSelect = document.querySelector('select[name="expense_type"]');
+if (expenseTypeSelect) {
+    expenseTypeSelect.addEventListener('change', function() {
+        filterForm.submit();
+    });
+}
+
+// Center filter
+const centerSelect = document.querySelector('select[name="center"]');
+if (centerSelect) {
+    centerSelect.addEventListener('change', function() {
+        filterForm.submit();
+    });
+}
+
+// Branch filter
+const branchSelect = document.querySelector('select[name="branch"]');
+if (branchSelect) {
+    branchSelect.addEventListener('change', function() {
+        filterForm.submit();
+    });
+}
 
 // Chart.js for visualizations
 {% if type_distribution %}

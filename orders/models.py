@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class OrderMedia(models.Model):
-    file = models.FileField(upload_to="order_media/", verbose_name=_("File"))
+    file = models.FileField(upload_to="order_media/", max_length=500, verbose_name=_("File"))
     pages = models.PositiveIntegerField(default=1, verbose_name=_("Pages"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
@@ -386,9 +386,14 @@ class Order(models.Model):
         self.completed_by = completed_by
         self.completed_at = timezone.now()
         self.status = "completed"
-        self.save(
-            update_fields=["completed_by", "completed_at", "status", "updated_at"]
-        )
+        
+        # Auto-assign to completer if not already assigned
+        update_fields = ["completed_by", "completed_at", "status", "updated_at"]
+        if not self.assigned_to and completed_by:
+            self.assigned_to = completed_by
+            update_fields.append("assigned_to")
+        
+        self.save(update_fields=update_fields)
 
     def save(self, *args, **kwargs):
         # Get update_fields to check if this is a partial update

@@ -315,7 +315,11 @@ def get_top_debtors(user, limit=10, date_from=None, date_to=None):
         total_expected=Coalesce(Sum(F('total_price') + F('extra_fee')), Decimal('0'))
     ).filter(
         remaining__gt=0
-    ).order_by('-remaining')[:limit]
+    ).order_by('-remaining')
+    
+    # Apply limit if specified
+    if limit is not None:
+        customer_data = customer_data[:limit]
     
     result = []
     for item in customer_data:
@@ -323,12 +327,24 @@ def get_top_debtors(user, limit=10, date_from=None, date_to=None):
         if item['total_expected'] and item['total_expected'] > 0:
             collection_rate = round((float(item['total_received']) / float(item['total_expected'])) * 100, 1)
         
+        # Get center and branch from the customer's orders
+        customer_orders = orders.filter(bot_user__id=item['bot_user__id'])
+        first_order = customer_orders.first()
+        center_name = first_order.branch.center.name if first_order and first_order.branch else 'N/A'
+        branch_name = first_order.branch.name if first_order and first_order.branch else 'N/A'
+        center_id = first_order.branch.center.id if first_order and first_order.branch else None
+        branch_id = first_order.branch.id if first_order and first_order.branch else None
+        
         result.append({
             'customer_id': item['bot_user__id'],
             'customer_name': item['bot_user__name'] or 'Unknown',
             'customer_phone': item['bot_user__phone'] or '',
             'is_agency': item['bot_user__is_agency'],
             'client_type': 'B2B' if item['bot_user__is_agency'] else 'B2C',
+            'center_name': center_name,
+            'branch_name': branch_name,
+            'center_id': center_id,
+            'branch_id': branch_id,
             'remaining': float(item['remaining'] or 0),
             'total_orders': item['total_orders'],
             'orders_with_debt': item['orders_with_debt'],

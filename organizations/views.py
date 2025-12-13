@@ -966,40 +966,53 @@ def staff_detail(request, staff_id):
     # Determine if user can edit this staff member
     user_can_edit = can_edit_staff(request.user, staff_member)
 
-    # Get assigned orders for this staff member
+    # Get assigned orders for this staff member (exclude completed)
     assigned_orders = Order.objects.filter(
         assigned_to=staff_member
+    ).exclude(
+        status='completed'
     ).select_related("bot_user", "product", "branch").order_by("-created_at")[:10]
 
-    # Get orders completed by this staff member
+    # Get orders completed by this staff member (either completed_by is set OR assigned and status=completed)
     completed_orders = Order.objects.filter(
-        completed_by=staff_member
+        Q(completed_by=staff_member) | Q(assigned_to=staff_member, status='completed')
+    ).filter(
+        status='completed'
     ).select_related("bot_user", "product", "branch").order_by("-completed_at")[:10]
 
-    # Get orders where payment was received by this staff member
-    payments_received = Order.objects.filter(
-        payment_received_by=staff_member
-    ).select_related("bot_user", "product", "branch").order_by("-payment_received_at")[:10]
+    # Calculate total received payments from completed orders
+    completed_payments_sum = Order.objects.filter(
+        Q(completed_by=staff_member) | Q(assigned_to=staff_member, status='completed')
+    ).filter(
+        status='completed'
+    ).aggregate(total=Sum("received"))["total"] or 0
 
     # Statistics
     today = timezone.now().date()
     last_30_days = today - timedelta(days=30)
 
+    # Calculate total payment received correctly
+    payment_orders = Order.objects.filter(payment_received_by=staff_member)
+    total_revenue_received = payment_orders.aggregate(total=Sum("received"))["total"] or 0
+
     stats = {
         "total_assigned": Order.objects.filter(assigned_to=staff_member).count(),
-        "total_completed": Order.objects.filter(completed_by=staff_member).count(),
-        "total_payments_received": Order.objects.filter(payment_received_by=staff_member).count(),
+        "total_completed": Order.objects.filter(
+            Q(completed_by=staff_member) | Q(assigned_to=staff_member, status='completed')
+        ).filter(status='completed').count(),
+        "total_payments_received": payment_orders.count(),
         "completed_this_month": Order.objects.filter(
-            completed_by=staff_member,
+            Q(completed_by=staff_member) | Q(assigned_to=staff_member, status='completed')
+        ).filter(
+            status='completed',
             completed_at__date__gte=last_30_days
         ).count(),
-        "total_revenue_received": Order.objects.filter(
-            payment_received_by=staff_member
-        ).aggregate(total=Sum("total_price"))["total"] or 0,
+        "total_revenue_received": total_revenue_received,
         "active_orders": Order.objects.filter(
             assigned_to=staff_member,
             status__in=["pending", "in_progress", "payment_pending", "payment_received"]
         ).count(),
+        "completed_payments_sum": completed_payments_sum,
     }
 
     # Get role permissions organized by category for display
@@ -1032,7 +1045,6 @@ def staff_detail(request, staff_id):
         "staff_member": staff_member,
         "assigned_orders": assigned_orders,
         "completed_orders": completed_orders,
-        "payments_received": payments_received,
         "stats": stats,
         "permission_categories": role_permission_categories,
         "can_edit": user_can_edit,

@@ -83,6 +83,12 @@ urlpatterns = [
         reports_views.unit_economy_api,
         name="unit_economy_api",
     ),
+    # Debtors Management Page
+    path(
+        "reports/debtors",
+        reports_views.debtors_report,
+        name="debtors_report",
+    ),
     # Audit Logs (also accessible via core/audit-logs/)
     path("reports/audit-logs", home_views.audit_logs_redirect, name="audit_logs"),
     # Expense Analytics Report

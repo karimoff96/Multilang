@@ -229,8 +229,14 @@ def index(request):
             }
 
         else:
-            # Staff sees their assigned orders
-            my_orders = all_orders.filter(assigned_to=profile)
+            # Staff sees their assigned orders (regardless of permission level)
+            # Get orders from all accessible branches where this user is assigned
+            from orders.models import Order
+            accessible_branches = profile.get_accessible_branches()
+            my_orders = Order.objects.filter(
+                branch__in=accessible_branches,
+                assigned_to=profile
+            )
             my_pending = my_orders.filter(status__in=["in_progress", "ready"]).count()
             my_completed_today = my_orders.filter(
                 status="completed", updated_at__gte=today_start

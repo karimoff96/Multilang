@@ -103,6 +103,11 @@ const translations = {
         ru: 'Категории',
         en: 'Categories'
     },
+    'sidebar.expenses': {
+        uz: 'Chiqimlar',
+        ru: 'Расходы',
+        en: 'Expenses'
+    },
     'sidebar.services': {
         uz: 'Xizmatlar',
         ru: 'Услуги',
@@ -212,6 +217,11 @@ const translations = {
         uz: 'Filial ma\'lumotlari',
         ru: 'Информация о филиале',
         en: 'Branch Info'
+    },
+    'sidebar.branchSettings': {
+        uz: 'Bot sozlamalari',
+        ru: 'Настройки бота',
+        en: 'Bot setting'
     },
     'sidebar.myOrders': {
         uz: 'Mening buyurtmalarim',
@@ -1920,7 +1930,7 @@ const translations = {
     'branch.botSettings': {
         uz: 'Bot sozlamalari',
         ru: 'Настройки бота',
-        en: 'Bot Settings'
+        en: 'Bot setting'
     },
     'branch.manageBranches': {
         uz: 'Filiallarni boshqarish',
@@ -4006,9 +4016,9 @@ const translations = {
         en: 'Remaining by Center'
     },
     'unitEconomy.topDebtors': {
-        uz: 'Eng katta qarzdorlar',
-        ru: 'Топ должников',
-        en: 'Top Debtors'
+        uz: 'Qarzdorlar analitikasi',
+        ru: 'Аналитика должников',
+        en: 'Debtor analytics'
     },
     'unitEconomy.remaining': {
         uz: 'Qoldiq',
@@ -5019,6 +5029,11 @@ const translations = {
         ru: 'Отчеты',
         en: 'Reports'
     },
+    'reports.expenseAnalytics': {
+        uz: 'Chiqimlar analitikasi',
+        ru: 'Аналитика расходов',
+        en: 'Expense analytics'
+    },
     'reports.financialReport': {
         uz: 'Moliyaviy hisobot',
         ru: 'Финансовый отчет',
@@ -5080,9 +5095,9 @@ const translations = {
         en: 'Total Revenue'
     },
     'reports.totalExpenses': {
-        uz: 'Jami xarajatlar',
-        ru: 'Всего расходов',
-        en: 'Total Expenses'
+        uz: 'Chiqimlar analitikasi',
+        ru: 'Аналитика расходов',
+        en: 'Expense analytics'
     },
     'reports.netProfit': {
         uz: 'Sof foyda',

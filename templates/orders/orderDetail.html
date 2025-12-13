@@ -511,8 +511,7 @@
                     <span data-i18n="detail.back">Back to Orders</span>
                 </a>
                 
-                {% can_do 'orders.delete' as can_delete_order %}
-                {% if can_delete_order %}
+                {% if can_delete %}
                 <button type="button" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#deleteOrderModal">
                     <iconify-icon icon="mdi:delete" class="me-1"></iconify-icon> <span data-i18n="detail.deleteOrder">Delete Order</span>
                 </button>

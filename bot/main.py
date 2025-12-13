@@ -4283,7 +4283,7 @@ def handle_file_upload(message):
 
             file_content = ContentFile(downloaded_file, name=file_name)
             file_path = default_storage.save(
-                f"order_files/{user_id}_{file_name}", file_content
+                f"order_media/{user_id}_{file_name}", file_content
             )
 
             logger.debug(f" File saved to: {file_path}")
