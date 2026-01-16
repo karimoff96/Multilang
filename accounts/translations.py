@@ -1,9 +1,10 @@
 from modeltranslation.translator import translator, TranslationOptions
-from .models import AdditionalInfo
+from accounts.models import AdditionalInfo
 
 
 class AdditionalInfoTranslationOptions(TranslationOptions):
-    fields = ("help_text", "about_us")
+    """Translation options for AdditionalInfo model"""
+    fields = ('help_text', 'description', 'about_us', 'working_hours')
 
 
 translator.register(AdditionalInfo, AdditionalInfoTranslationOptions)

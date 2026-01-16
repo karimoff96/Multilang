@@ -1,0 +1,336 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+{% load number_filters %}
+{% load permission_tags %}
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Staff Profile Card -->
+    <div class="col-lg-4">
+        <div class="card h-100 p-0 radius-12">
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex justify-content-between align-items-center">
+                <h6 class="text-lg fw-semibold mb-0" data-i18n="staff.profile">Staff Profile</h6>
+                {% can_do 'staff.manage' as can_edit_staff %}
+                {% if can_edit_staff %}
+                <a href="{% url 'staff_edit' staff_member.id %}" class="btn btn-sm btn-primary-600 radius-8">
+                    <iconify-icon icon="lucide:edit" class="icon text-lg"></iconify-icon>
+                    <span data-i18n="common.edit">Edit</span>
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body p-24">
+                <!-- Profile Avatar -->
+                <div class="text-center mb-24">
+                    {% if staff_member.avatar %}
+                    <img src="{{ staff_member.avatar.url }}" alt="{{ staff_member.user.get_full_name }}" 
+                         class="w-120-px h-120-px rounded-circle object-fit-cover border border-3 border-primary-100">
+                    {% else %}
+                    <div class="w-120-px h-120-px rounded-circle bg-primary-100 d-flex justify-content-center align-items-center mx-auto">
+                        <span class="text-primary-600 fw-bold text-4xl">
+                            {{ staff_member.user.first_name|slice:":1" }}{{ staff_member.user.last_name|slice:":1" }}
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    <h5 class="mt-16 mb-4 fw-semibold">{{ staff_member.user.get_full_name }}</h5>
+                    <p class="text-secondary-light mb-8">@{{ staff_member.user.username }}</p>
+                    
+                    <!-- Status Badge -->
+                    {% if staff_member.is_active %}
+                    <span class="bg-success-100 text-success-600 px-16 py-6 radius-4 fw-medium text-sm">
+                        <iconify-icon icon="lucide:check-circle" class="icon me-4"></iconify-icon>
+                        <span data-i18n="common.active">Active</span>
+                    </span>
+                    {% else %}
+                    <span class="bg-danger-100 text-danger-600 px-16 py-6 radius-4 fw-medium text-sm">
+                        <iconify-icon icon="lucide:x-circle" class="icon me-4"></iconify-icon>
+                        <span data-i18n="common.inactive">Inactive</span>
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <!-- Profile Details -->
+                <div class="border-top pt-16">
+                    <div class="d-flex justify-content-between align-items-center py-8">
+                        <span class="text-secondary-light text-sm" data-i18n="staff.role">Role</span>
+                        {% if staff_member.role.name == 'owner' %}
+                        <span class="bg-primary-50 text-primary-600 px-12 py-4 radius-4 fw-medium text-sm">
+                            <iconify-icon icon="solar:crown-bold" class="me-4"></iconify-icon>{{ staff_member.role.get_name_display }}
+                        </span>
+                        {% elif staff_member.role.name == 'manager' %}
+                        <span class="bg-info-50 text-info-600 px-12 py-4 radius-4 fw-medium text-sm">
+                            <iconify-icon icon="solar:user-check-bold" class="me-4"></iconify-icon>{{ staff_member.role.get_name_display }}
+                        </span>
+                        {% else %}
+                        <span class="bg-secondary-50 text-secondary-600 px-12 py-4 radius-4 fw-medium text-sm">
+                            <iconify-icon icon="solar:user-bold" class="me-4"></iconify-icon>{{ staff_member.role.get_name_display }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center py-8">
+                        <span class="text-secondary-light text-sm" data-i18n="staff.email">Email</span>
+                        <span class="text-sm fw-medium">{{ staff_member.user.email|default:"-" }}</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center py-8">
+                        <span class="text-secondary-light text-sm" data-i18n="staff.phone">Phone</span>
+                        <span class="text-sm fw-medium">{{ staff_member.phone|default:"-" }}</span>
+                    </div>
+                    
+                    {% if staff_member.branch %}
+                    <div class="d-flex justify-content-between align-items-center py-8">
+                        <span class="text-secondary-light text-sm" data-i18n="staff.branch">Branch</span>
+                        <a href="{% url 'branch_detail' staff_member.branch.id %}" class="text-sm fw-medium text-primary-600">
+                            {{ staff_member.branch.name }}
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if staff_member.center %}
+                    <div class="d-flex justify-content-between align-items-center py-8">
+                        <span class="text-secondary-light text-sm" data-i18n="staff.center">Center</span>
+                        <a href="{% url 'center_detail' staff_member.center.id %}" class="text-sm fw-medium text-primary-600">
+                            {{ staff_member.center.name }}
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between align-items-center py-8">
+                        <span class="text-secondary-light text-sm" data-i18n="staff.joinedAt">Joined</span>
+                        <span class="text-sm fw-medium">{{ staff_member.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    
+                    {% if staff_member.created_by %}
+                    <div class="d-flex justify-content-between align-items-center py-8">
+                        <span class="text-secondary-light text-sm" data-i18n="staff.createdBy">Created By</span>
+                        <span class="text-sm fw-medium">{{ staff_member.created_by.get_full_name|default:staff_member.created_by.username }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats & Permissions -->
+    <div class="col-lg-8">
+        <div class="row gy-4">
+            <!-- Stats Cards -->
+            <div class="col-md-4">
+                <div class="card radius-12 h-100">
+                    <div class="card-body p-16 text-center">
+                        <div class="w-48-px h-48-px rounded-circle bg-primary-100 d-flex justify-content-center align-items-center mx-auto mb-12">
+                            <iconify-icon icon="solar:clipboard-list-bold" class="text-primary-600 text-2xl"></iconify-icon>
+                        </div>
+                        <h4 class="mb-4 fw-bold text-primary-600">{{ stats.total_assigned }}</h4>
+                        <span class="text-secondary-light text-sm" data-i18n="stats.totalAssigned">Total Assigned</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card radius-12 h-100">
+                    <div class="card-body p-16 text-center">
+                        <div class="w-48-px h-48-px rounded-circle bg-success-100 d-flex justify-content-center align-items-center mx-auto mb-12">
+                            <iconify-icon icon="solar:check-circle-bold" class="text-success-600 text-2xl"></iconify-icon>
+                        </div>
+                        <h4 class="mb-4 fw-bold text-success-600">{{ stats.total_completed }}</h4>
+                        <span class="text-secondary-light text-sm" data-i18n="stats.totalCompleted">Orders Completed</span>
+                        <div class="mt-8 pt-8 border-top">
+                            <small class="text-success-600 fw-semibold">{{ stats.completed_payments_sum|floatformat:0|intcomma }} UZS</small>
+                            <small class="d-block text-secondary-light">Revenue Generated</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card radius-12 h-100">
+                    <div class="card-body p-16 text-center">
+                        <div class="w-48-px h-48-px rounded-circle bg-warning-100 d-flex justify-content-center align-items-center mx-auto mb-12">
+                            <iconify-icon icon="solar:wallet-money-bold" class="text-warning-600 text-2xl"></iconify-icon>
+                        </div>
+                        <h4 class="mb-4 fw-bold text-warning-600">{{ stats.total_payments_received }}</h4>
+                        <span class="text-secondary-light text-sm" data-i18n="stats.paymentsCollected">Payments Collected (Cashier)</span>
+                        <div class="mt-8 pt-8 border-top">
+                            <small class="text-warning-600 fw-semibold">{{ stats.total_revenue_received|floatformat:0|intcomma }} UZS</small>
+                            <small class="d-block text-secondary-light">Amount Collected</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Permissions Card -->
+            <div class="col-12">
+                <div class="card radius-12">
+                    <div class="card-header border-bottom bg-base py-16 px-24">
+                        <h6 class="text-lg fw-semibold mb-0" data-i18n="staff.permissions">Role Permissions</h6>
+                    </div>
+                    <div class="card-body p-24">
+                        {% if permission_categories %}
+                        <div class="row g-3">
+                            {% for key, category in permission_categories.items %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-category-card p-16 radius-8 border border-{{ category.color }}-100 bg-{{ category.color }}-50 h-100">
+                                    <h6 class="text-sm fw-semibold text-{{ category.color }}-600 mb-12 d-flex align-items-center gap-8">
+                                        <iconify-icon icon="fa6-solid:{{ category.icon }}" class="text-lg"></iconify-icon>
+                                        {{ category.title }}
+                                    </h6>
+                                    <div class="d-flex flex-column gap-8">
+                                        {% for perm in category.permissions %}
+                                        <div class="d-flex align-items-center gap-8 {% if perm.is_master %}fw-semibold{% endif %}">
+                                            <iconify-icon icon="{% if perm.is_master %}solar:crown-bold{% else %}solar:check-circle-bold{% endif %}" 
+                                                          class="{% if perm.is_master %}text-warning-600{% else %}text-success-600{% endif %} text-lg"></iconify-icon>
+                                            <span class="text-sm {% if perm.is_master %}text-warning-600{% endif %}">
+                                                {{ perm.label }}
+                                                {% if perm.is_master %}<span class="badge bg-warning-100 text-warning-600 text-xs ms-4">Master</span>{% endif %}
+                                            </span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-secondary-light text-center py-16" data-i18n="staff.noPermissions">No specific permissions assigned.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Active Orders -->
+            <div class="col-12">
+                <div class="card radius-12">
+                    <div class="card-header border-bottom bg-base py-16 px-24 d-flex justify-content-between align-items-center">
+                        <h6 class="text-lg fw-semibold mb-0" data-i18n="staff.assignedOrders">Assigned Orders</h6>
+                        <div class="d-flex align-items-center gap-12">
+                            <span class="bg-primary-100 text-primary-600 px-12 py-4 radius-4 fw-medium text-sm">
+                                {{ stats.active_orders }} <span data-i18n="common.active">active</span>
+                            </span>
+                            <a href="{% url 'orders:ordersList' %}?assigned_to={{ staff_member.id }}&exclude_completed=1" class="btn btn-outline-primary btn-sm">
+                                <iconify-icon icon="solar:eye-bold" class="me-1"></iconify-icon> View All
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table bordered-table sm-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="table.orderId">Order ID</th>
+                                        <th data-i18n="table.customer">Customer</th>
+                                        <th data-i18n="table.product">Product</th>
+                                        <th data-i18n="table.status">Status</th>
+                                        <th data-i18n="table.amount">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in assigned_orders %}
+                                    <tr style="cursor: pointer;" onclick="window.location.href='{% url 'orders:orderDetail' order.id %}'">
+                                        <td>
+                                            <span class="fw-medium">#{{ order.id }}</span>
+                                        </td>
+                                        <td>{{ order.bot_user.display_name|truncatechars:20 }}</td>
+                                        <td>{{ order.product.name|truncatechars:20 }}</td>
+                                        <td>
+                                            {% if order.status == 'pending' %}
+                                            <span class="bg-warning-100 text-warning-600 px-8 py-4 radius-4 text-xs">Pending</span>
+                                            {% elif order.status == 'in_progress' %}
+                                            <span class="bg-info-100 text-info-600 px-8 py-4 radius-4 text-xs">In Progress</span>
+                                            {% elif order.status == 'completed' %}
+                                            <span class="bg-success-100 text-success-600 px-8 py-4 radius-4 text-xs">Completed</span>
+                                            {% else %}
+                                            <span class="bg-secondary-100 text-secondary-600 px-8 py-4 radius-4 text-xs">{{ order.get_status_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ order.total_price|floatformat:0|intcomma }} UZS</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-secondary-light py-16" data-i18n="common.noOrders">
+                                            No orders assigned yet
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Completed Orders -->
+            <div class="col-12">
+                <div class="card radius-12">
+                    <div class="card-header border-bottom bg-base py-16 px-24">
+                        <div class="d-flex justify-content-between align-items-center mb-16">
+                            <h6 class="text-lg fw-semibold mb-0" data-i18n="staff.completedOrders">Recently Completed</h6>
+                            <a href="{% url 'orders:ordersList' %}?staff_completed={{ staff_member.id }}&status=completed" class="btn btn-outline-success btn-sm">
+                                <iconify-icon icon="solar:eye-bold" class="me-1"></iconify-icon> View All
+                            </a>
+                        </div>
+                        <div class="d-flex gap-16">
+                            <span class="bg-success-100 text-success-600 px-12 py-4 radius-4 fw-medium text-sm">
+                                {{ stats.completed_this_month }} <span data-i18n="common.thisMonth">this month</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table bordered-table sm-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="table.orderId">Order ID</th>
+                                        <th data-i18n="table.customer">Customer</th>
+                                        <th data-i18n="table.product">Product</th>
+                                        <th data-i18n="table.completedAt">Completed At</th>
+                                        <th data-i18n="table.amount">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in completed_orders %}
+                                    <tr style="cursor: pointer;" onclick="window.location.href='{% url 'orders:orderDetail' order.id %}'">
+                                        <td>
+                                            <span class="fw-medium">#{{ order.id }}</span>
+                                        </td>
+                                        <td>{{ order.bot_user.display_name|truncatechars:20 }}</td>
+                                        <td>{{ order.product.name|truncatechars:20 }}</td>
+                                        <td>{{ order.completed_at|date:"M d, Y H:i"|default:"-" }}</td>
+                                        <td>{{ order.total_price|floatformat:0|intcomma }} UZS</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-secondary-light py-16" data-i18n="common.noCompletedOrders">
+                                            No completed orders yet
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if is_read_only %}
+<!-- Read-only Mode Notice -->
+<div class="alert alert-info radius-8 mt-24 d-flex align-items-center gap-12">
+    <iconify-icon icon="solar:info-circle-bold" class="text-2xl"></iconify-icon>
+    <div>
+        <strong data-i18n="common.readOnlyMode">Read-Only Mode</strong>
+        <p class="mb-0 text-sm" data-i18n="staff.readOnlyMessage">You are viewing this profile in read-only mode. Contact your administrator for edit access.</p>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    tbody tr[style*="cursor: pointer"]:hover {
+        background-color: rgba(99, 102, 241, 0.05);
+        transition: background-color 0.2s ease;
+    }
+</style>
+{% endblock %}

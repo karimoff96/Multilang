@@ -1,0 +1,433 @@
+{% extends 'layout/layout.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Report Header with Filters -->
+    <div class="col-12">
+        <div class="card radius-8 border-0 shadow-sm">
+            <div class="card-body p-24">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                            <span class="w-40-px h-40-px bg-primary-100 text-primary-600 d-flex justify-content-center align-items-center rounded-circle">
+                                <iconify-icon icon="solar:shield-check-bold" class="text-xl"></iconify-icon>
+                            </span>
+                            {{ title }}
+                        </h5>
+                        <p class="text-secondary-light mb-0 ms-5 ps-3">{{ subTitle }}</p>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="d-flex gap-3">
+                        <div class="text-center px-3 py-2 bg-success-50 radius-8">
+                            <span class="d-block text-success-600 fw-bold text-lg">{{ logs.paginator.count|default:0 }}</span>
+                            <span class="text-xs text-secondary-light">{% trans "Total Logs" %}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filters Form -->
+                <form method="GET" class="mt-4">
+                    <div class="row g-3 align-items-end">
+                        <!-- Period Filter -->
+                        <div class="col-lg-2 col-md-3 col-sm-6">
+                            <label class="form-label text-sm fw-medium mb-2">
+                                <iconify-icon icon="solar:calendar-bold" class="me-1 text-primary-600"></iconify-icon>
+                                {% trans "Period" %}
+                            </label>
+                            <select name="period" id="periodSelect" class="form-select">
+                                {% for value, label in period_choices %}
+                                <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Custom Date Range -->
+                        <div id="customDateRange" class="col-lg-3 col-md-4 col-sm-6 {% if period != 'custom' %}d-none{% endif %}">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label text-sm fw-medium mb-2">{% trans "From" %}</label>
+                                    <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-sm fw-medium mb-2">{% trans "To" %}</label>
+                                    <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Filter -->
+                        <div class="col-lg-2 col-md-3 col-sm-6">
+                            <label class="form-label text-sm fw-medium mb-2">
+                                <iconify-icon icon="solar:cursor-bold" class="me-1 text-warning-600"></iconify-icon>
+                                {% trans "Action Type" %}
+                            </label>
+                            <select name="action" class="form-select">
+                                <option value="">{% trans "All Actions" %}</option>
+                                {% for value, label in action_choices %}
+                                <option value="{{ value }}" {% if action_filter == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- User Filter -->
+                        <div class="col-lg-2 col-md-3 col-sm-6">
+                            <label class="form-label text-sm fw-medium mb-2">
+                                <iconify-icon icon="solar:user-bold" class="me-1 text-info-600"></iconify-icon>
+                                {% trans "User" %}
+                            </label>
+                            <select name="user" class="form-select">
+                                <option value="">{% trans "All Users" %}</option>
+                                {% for u in users %}
+                                <option value="{{ u.id }}" {% if user_filter == u.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ u.get_full_name|default:u.username }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        {% if user.is_superuser and centers %}
+                        <!-- Center Filter (Superuser only) -->
+                        <div class="col-lg-2 col-md-3 col-sm-6">
+                            <label class="form-label text-sm fw-medium mb-2">
+                                <iconify-icon icon="solar:buildings-bold" class="me-1 text-danger-600"></iconify-icon>
+                                {% trans "Center" %}
+                            </label>
+                            <select name="center" class="form-select">
+                                <option value="">{% trans "All Centers" %}</option>
+                                {% for c in centers %}
+                                <option value="{{ c.id }}" {% if center_filter == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        
+                        {% if branches %}
+                        <!-- Branch Filter -->
+                        <div class="col-lg-2 col-md-3 col-sm-6">
+                            <label class="form-label text-sm fw-medium mb-2">
+                                <iconify-icon icon="solar:map-point-bold" class="me-1 text-success-600"></iconify-icon>
+                                {% trans "Branch" %}
+                            </label>
+                            <select name="branch" class="form-select">
+                                <option value="">{% trans "All Branches" %}</option>
+                                {% for b in branches %}
+                                <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Search -->
+                        <div class="col-lg-2 col-md-3 col-sm-6">
+                            <label class="form-label text-sm fw-medium mb-2">
+                                <iconify-icon icon="solar:magnifer-bold" class="me-1 text-secondary-600"></iconify-icon>
+                                {% trans "Search" %}
+                            </label>
+                            <input type="text" name="q" class="form-control" 
+                                   placeholder="{% trans 'Search logs...' %}" value="{{ search_query }}">
+                        </div>
+                        
+                        <!-- Filter Buttons -->
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                                <iconify-icon icon="solar:filter-bold" class="icon text-lg"></iconify-icon>
+                                {% trans "Apply Filters" %}
+                            </button>
+                            <a href="{% url 'audit_logs' %}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+                                <iconify-icon icon="solar:refresh-bold" class="icon"></iconify-icon>
+                                {% trans "Reset" %}
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit Logs Timeline -->
+    <div class="col-12">
+        <div class="card radius-8 border-0 shadow-sm">
+            <div class="card-header bg-transparent border-bottom-0 pt-20 px-24">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h6 class="fw-bold mb-0">{% trans "Activity Timeline" %}</h6>
+                    {% if page_obj.paginator.count %}
+                    <span class="badge bg-neutral-200 text-neutral-600 px-12 py-6 radius-4 text-sm">
+                        {{ page_obj.start_index }}-{{ page_obj.end_index }} {% trans "of" %} {{ page_obj.paginator.count }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body p-24 pt-0">
+                {% if logs %}
+                <div class="audit-timeline">
+                    {% for log in logs %}
+                    <div class="audit-item d-flex gap-3 py-16 {% if not forloop.last %}border-bottom{% endif %}">
+                        <!-- Action Icon -->
+                        <div class="flex-shrink-0">
+                            {% if log.action == 'create' %}
+                            <div class="w-44-px h-44-px rounded-circle bg-success-100 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="solar:add-circle-bold" class="text-success-600 text-xl"></iconify-icon>
+                            </div>
+                            {% elif log.action == 'update' %}
+                            <div class="w-44-px h-44-px rounded-circle bg-warning-100 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="solar:pen-2-bold" class="text-warning-600 text-xl"></iconify-icon>
+                            </div>
+                            {% elif log.action == 'delete' %}
+                            <div class="w-44-px h-44-px rounded-circle bg-danger-100 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="solar:trash-bin-trash-bold" class="text-danger-600 text-xl"></iconify-icon>
+                            </div>
+                            {% elif log.action == 'login' %}
+                            <div class="w-44-px h-44-px rounded-circle bg-info-100 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="solar:login-2-bold" class="text-info-600 text-xl"></iconify-icon>
+                            </div>
+                            {% elif log.action == 'logout' %}
+                            <div class="w-44-px h-44-px rounded-circle bg-neutral-200 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="solar:logout-2-bold" class="text-neutral-600 text-xl"></iconify-icon>
+                            </div>
+                            {% elif log.action == 'payment' %}
+                            <div class="w-44-px h-44-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="solar:wallet-money-bold" class="text-primary-600 text-xl"></iconify-icon>
+                            </div>
+                            {% elif log.action == 'status_change' %}
+                            <div class="w-44-px h-44-px rounded-circle bg-purple-100 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="solar:refresh-circle-bold" class="text-purple-600 text-xl"></iconify-icon>
+                            </div>
+                            {% elif log.action == 'assign' %}
+                            <div class="w-44-px h-44-px rounded-circle bg-cyan-100 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="solar:user-plus-bold" class="text-cyan-600 text-xl"></iconify-icon>
+                            </div>
+                            {% elif log.action == 'view' %}
+                            <div class="w-44-px h-44-px rounded-circle bg-indigo-100 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="solar:eye-bold" class="text-indigo-600 text-xl"></iconify-icon>
+                            </div>
+                            {% else %}
+                            <div class="w-44-px h-44-px rounded-circle bg-neutral-100 d-flex align-items-center justify-content-center">
+                                <iconify-icon icon="solar:document-bold" class="text-neutral-600 text-xl"></iconify-icon>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="flex-grow-1">
+                            <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-1">
+                                <!-- Main Info -->
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <!-- User -->
+                                        <span class="fw-semibold text-primary-600">
+                                            {% if log.user %}
+                                                {{ log.user.get_full_name|default:log.user.username }}
+                                            {% else %}
+                                                {% trans "System" %}
+                                            {% endif %}
+                                        </span>
+                                        
+                                        <!-- Action Badge -->
+                                        {% if log.action == 'create' %}
+                                        <span class="badge bg-success-100 text-success-600 px-10 py-4 radius-4 text-xs fw-medium">{% trans "Created" %}</span>
+                                        {% elif log.action == 'update' %}
+                                        <span class="badge bg-warning-100 text-warning-600 px-10 py-4 radius-4 text-xs fw-medium">{% trans "Updated" %}</span>
+                                        {% elif log.action == 'delete' %}
+                                        <span class="badge bg-danger-100 text-danger-600 px-10 py-4 radius-4 text-xs fw-medium">{% trans "Deleted" %}</span>
+                                        {% elif log.action == 'login' %}
+                                        <span class="badge bg-info-100 text-info-600 px-10 py-4 radius-4 text-xs fw-medium">{% trans "Logged In" %}</span>
+                                        {% elif log.action == 'logout' %}
+                                        <span class="badge bg-neutral-200 text-neutral-600 px-10 py-4 radius-4 text-xs fw-medium">{% trans "Logged Out" %}</span>
+                                        {% elif log.action == 'payment' %}
+                                        <span class="badge bg-primary-100 text-primary-600 px-10 py-4 radius-4 text-xs fw-medium">{% trans "Payment" %}</span>
+                                        {% elif log.action == 'status_change' %}
+                                        <span class="badge bg-purple-100 text-purple-600 px-10 py-4 radius-4 text-xs fw-medium">{% trans "Status Changed" %}</span>
+                                        {% elif log.action == 'assign' %}
+                                        <span class="badge bg-cyan-100 text-cyan-600 px-10 py-4 radius-4 text-xs fw-medium">{% trans "Assigned" %}</span>
+                                        {% else %}
+                                        <span class="badge bg-neutral-100 text-neutral-600 px-10 py-4 radius-4 text-xs fw-medium">{{ log.get_action_display }}</span>
+                                        {% endif %}
+                                        
+                                        <!-- Target -->
+                                        {% if log.target_repr %}
+                                        <span class="text-secondary-light">→</span>
+                                        <span class="fw-medium text-secondary-light">{{ log.target_repr|truncatewords:6 }}</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Details -->
+                                    {% if log.details %}
+                                    <p class="text-secondary-light text-sm mb-0 mt-1">{{ log.details|truncatewords:20 }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Timestamp & Meta -->
+                                <div class="text-end">
+                                    <div class="text-sm text-secondary-light">
+                                        <iconify-icon icon="solar:clock-circle-linear" class="me-1"></iconify-icon>
+                                        {{ log.created_at|date:"M d, Y" }} {% trans "at" %} {{ log.created_at|time:"H:i" }}
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-end gap-2 mt-1">
+                                        {% if log.branch %}
+                                        <span class="badge bg-secondary text-secondary-light px-8 py-4 radius-4 text-xs">
+                                            <iconify-icon icon="solar:map-point-linear" class="me-1"></iconify-icon>
+                                            {{ log.branch.name|truncatewords:2 }}
+                                        </span>
+                                        {% endif %}
+                                        {% if log.ip_address %}
+                                        <span class="badge bg-secondary text-secondary-light px-8 py-4 radius-4 text-xs font-monospace">
+                                            {{ log.ip_address }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Changes (if any) -->
+                            {% if log.changes %}
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 py-4 px-12" 
+                                        data-bs-toggle="collapse" data-bs-target="#changes{{ log.id }}">
+                                    <iconify-icon icon="solar:eye-bold"></iconify-icon>
+                                    {% trans "View Changes" %}
+                                </button>
+                                <div class="collapse mt-2" id="changes{{ log.id }}">
+                                    <div class="bg-neutral-50 radius-8 p-12">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-borderless mb-0">
+                                                <thead>
+                                                    <tr class="text-secondary-light text-xs">
+                                                        <th style="width: 30%">{% trans "Field" %}</th>
+                                                        <th style="width: 35%">{% trans "Previous" %}</th>
+                                                        <th style="width: 35%">{% trans "Updated" %}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="text-sm">
+                                                    {% for field, values in log.changes.items %}
+                                                    <tr>
+                                                        <td class="fw-medium text-dark">{{ field|title }}</td>
+                                                        <td>
+                                                            {% if values.old %}
+                                                            <span class="text-danger-600 bg-danger-50 px-8 py-2 radius-4">{{ values.old }}</span>
+                                                            {% else %}
+                                                            <span class="text-secondary-light">—</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            {% if values.new %}
+                                                            <span class="text-success-600 bg-success-50 px-8 py-2 radius-4">{{ values.new }}</span>
+                                                            {% else %}
+                                                            <span class="text-secondary-light">—</span>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-24 pt-20 border-top">
+                    <div class="text-secondary-light text-sm">
+                        {% trans "Showing" %} <span class="fw-semibold text-dark">{{ page_obj.start_index }}</span> {% trans "to" %} 
+                        <span class="fw-semibold text-dark">{{ page_obj.end_index }}</span> {% trans "of" %} 
+                        <span class="fw-semibold text-dark">{{ page_obj.paginator.count }}</span> {% trans "entries" %}
+                    </div>
+                    <nav>
+                        <ul class="pagination mb-0">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link bg-neutral-100 text-secondary-light" 
+                                   href="?page={{ page_obj.previous_page_number }}&period={{ period }}&action={{ action_filter }}&user={{ user_filter }}&q={{ search_query }}&branch={{ branch_filter }}&center={{ center_filter }}">
+                                    <iconify-icon icon="solar:alt-arrow-left-linear"></iconify-icon>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if num == page_obj.number %}
+                                <li class="page-item active">
+                                    <span class="page-link bg-primary-600 border-primary-600">{{ num }}</span>
+                                </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link text-secondary-light" 
+                                       href="?page={{ num }}&period={{ period }}&action={{ action_filter }}&user={{ user_filter }}&q={{ search_query }}&branch={{ branch_filter }}&center={{ center_filter }}">{{ num }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link bg-neutral-100 text-secondary-light" 
+                                   href="?page={{ page_obj.next_page_number }}&period={{ period }}&action={{ action_filter }}&user={{ user_filter }}&q={{ search_query }}&branch={{ branch_filter }}&center={{ center_filter }}">
+                                    <iconify-icon icon="solar:alt-arrow-right-linear"></iconify-icon>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+                
+                {% else %}
+                <!-- Empty State -->
+                <div class="text-center py-60">
+                    <div class="w-80-px h-80-px bg-neutral-100 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-16">
+                        <iconify-icon icon="solar:shield-check-bold" class="text-neutral-400 text-3xl"></iconify-icon>
+                    </div>
+                    <h5 class="fw-semibold mb-2">{% trans "No Audit Logs Found" %}</h5>
+                    <p class="text-secondary-light mb-16">{% trans "No activity matches your current filters." %}</p>
+                    <a href="{% url 'audit_logs' %}" class="btn btn-primary-600 d-inline-flex align-items-center gap-2">
+                        <iconify-icon icon="solar:refresh-bold"></iconify-icon>
+                        {% trans "Reset Filters" %}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .audit-timeline .audit-item:hover {
+        background-color: var(--bs-gray-50);
+        margin-left: -12px;
+        margin-right: -12px;
+        padding-left: 12px;
+        padding-right: 12px;
+        border-radius: 8px;
+    }
+    
+    .bg-purple-100 { background-color: rgba(139, 92, 246, 0.1) !important; }
+    .text-purple-600 { color: #8b5cf6 !important; }
+    .bg-cyan-100 { background-color: rgba(6, 182, 212, 0.1) !important; }
+    .text-cyan-600 { color: #06b6d4 !important; }
+    .bg-indigo-100 { background-color: rgba(99, 102, 241, 0.1) !important; }
+    .text-indigo-600 { color: #6366f1 !important; }
+    
+    .badge { font-weight: 500; }
+    
+    .font-monospace { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+</style>
+{% endblock %}
+
+{% block js %}
+<script>
+    // Toggle custom date range visibility
+    document.getElementById('periodSelect').addEventListener('change', function() {
+        const customRange = document.getElementById('customDateRange');
+        if (this.value === 'custom') {
+            customRange.classList.remove('d-none');
+        } else {
+            customRange.classList.add('d-none');
+        }
+    });
+</script>
+{% endblock %}

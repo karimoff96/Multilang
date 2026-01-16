@@ -1,5 +1,7 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
+{% load translation_filters %}
+{% load permission_tags %}
 
 {% block content %}
 <div class="card h-100 p-0 radius-12">
@@ -16,10 +18,26 @@
                     <input type="text" class="bg-base h-40-px w-auto" name="search" data-i18n-placeholder="common.search" placeholder="Search" value="{{ search_query }}">
                     <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
                 </div>
+                {% if user.is_superuser and centers %}
+                <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="" data-i18n="common.allCenters">All Centers</option>
+                    {% for center in centers %}
+                    <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+                {% if branches %}
+                <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="" data-i18n="common.allBranches">All Branches</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.center.name }} - {{ branch.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
                 <select name="category" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
                     <option value="" data-i18n="common.allCategories">All Categories</option>
                     {% for cat in categories %}
-                    <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:'s' %}selected{% endif %}>{{ cat.name }}</option>
+                    <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:'s' %}selected{% endif %}>{{ cat.branch.center.name }} - {{ cat.name }}</option>
                     {% endfor %}
                 </select>
                 <select name="status" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
@@ -29,22 +47,26 @@
                 </select>
             </form>
         </div>
-        <a href="{% url 'addProduct' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
+        {% can_do 'products.manage' as can_manage_products %}
+        {% if can_manage_products %}
+        <a href="{% url 'addProduct' %}" class="btn btn-primary text-sm text-secondary-light btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
             <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
             <span data-i18n="common.addProduct">Add Product</span>
         </a>
+        {% endif %}
     </div>
     <div class="card-body p-24">
-        <div class="table-responsive scroll-sm">
+        <div class="table-responsive">
             <table class="table bordered-table sm-table mb-0">
                 <thead>
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col" data-i18n="table.product">Product</th>
-                        <th scope="col" data-i18n="table.category">Category</th>
-                        <th scope="col" data-i18n="table.regularPrice">Regular Price</th>
-                        <th scope="col" data-i18n="table.agencyPrice">Agency Price</th>
-                        <th scope="col" data-i18n="table.estDays">Est. Days</th>
+                        {% if user.is_superuser or is_owner %}
+                        <th scope="col" class="hide-mobile" data-i18n="table.location">Office</th>
+                        {% endif %}
+                        <th scope="col" class="hide-mobile" data-i18n="table.category">Category</th>
+                        <th scope="col" data-i18n="table.price">Price</th>
                         <th scope="col" class="text-center" data-i18n="table.status">Status</th>
                         <th scope="col" class="text-center" data-i18n="table.action">Action</th>
                     </tr>
@@ -54,86 +76,87 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>
-                            <div class="d-flex align-items-center">
-                                <div class="w-40-px h-40-px rounded-circle bg-warning-100 d-flex align-items-center justify-content-center flex-shrink-0 me-12">
-                                    <iconify-icon icon="solar:box-linear" class="text-warning-600 text-xl"></iconify-icon>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <span class="text-md fw-medium text-primary-light">{{ product.name }}</span>
-                                    {% if product.description %}
-                                    <p class="text-sm text-secondary-light mb-0">{{ product.description|truncatechars:30 }}</p>
-                                    {% endif %}
-                                </div>
+                            <a href="{% url 'productDetail' product.id %}" class="fw-medium text-primary-600">{{ product.name|truncatechars:25 }}</a>
+                        </td>
+                        {% if user.is_superuser or is_owner %}
+                        <td class="hide-mobile">
+                            {% if product.category and product.category.branch %}
+                                {% if user.is_superuser and product.category.branch.center %}
+                                <span class="text-info-600 d-block text-sm">{{ product.category.branch.center.name|truncatechars:12 }}</span>
+                                {% endif %}
+                                <span class="text-secondary-light text-xs">{{ product.category.branch.name|truncatechars:15 }}</span>
+                            {% else %}
+                                <span class="text-secondary-light">-</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                        <td class="hide-mobile">
+                            {% if product.category %}
+                            <a href="{% url 'categoryDetail' product.category.id %}" class="text-primary-600 text-sm">{{ product.category.name|truncatechars:15 }}</a>
+                            {% else %}
+                            <span class="text-secondary-light">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="text-sm">
+                                <span class="text-secondary-light">Reg:</span> <span class="fw-medium">{{ product.ordinary_first_page_price|floatformat:0 }}</span><br>
+                                <span class="text-info-600">Agn:</span> <span class="fw-medium">{{ product.agency_first_page_price|floatformat:0 }}</span>
                             </div>
-                        </td>
-                        <td>
-                            <a href="{% url 'categoryDetail' product.category.id %}" class="text-primary-600">{{ product.category.name }}</a>
-                        </td>
-                        <td>
-                            <span class="text-sm">{{ product.ordinary_first_page_price|floatformat:0 }} UZS</span>
-                            {% if product.category.charging == 'dynamic' %}
-                            <small class="d-block text-secondary-light">+{{ product.ordinary_other_page_price|floatformat:0 }}/page</small>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="text-sm">{{ product.agency_first_page_price|floatformat:0 }} UZS</span>
-                            {% if product.category.charging == 'dynamic' %}
-                            <small class="d-block text-secondary-light">+{{ product.agency_other_page_price|floatformat:0 }}/page</small>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="badge bg-info-focus text-info-600">{{ product.estimated_days }} days</span>
                         </td>
                         <td class="text-center">
                             {% if product.is_active %}
-                                <span class="bg-success-focus text-success-600 border border-success-main px-24 py-4 radius-4 fw-medium text-sm">Active</span>
+                                <span class="bg-success-focus text-success-600 px-8 py-2 radius-4 fw-medium text-xs">Active</span>
                             {% else %}
-                                <span class="bg-neutral-200 text-neutral-600 border border-neutral-400 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
+                                <span class="bg-neutral-200 text-neutral-600 px-8 py-2 radius-4 fw-medium text-xs">Inactive</span>
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            <div class="d-flex align-items-center gap-10 justify-content-center">
-                                <a href="{% url 'productDetail' product.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                    <iconify-icon icon="majesticons:eye-line" class="icon text-xl"></iconify-icon>
+                            <div class="d-flex align-items-center gap-6 justify-content-center">
+                                <a href="{% url 'productDetail' product.id %}" class="bg-info-focus text-info-600 w-28-px h-28-px d-flex justify-content-center align-items-center rounded-circle" title="View">
+                                    <iconify-icon icon="majesticons:eye-line" class="text-sm"></iconify-icon>
                                 </a>
-                                <a href="{% url 'editProduct' product.id %}" class="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                    <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
+                                {% if can_manage_products %}
+                                <a href="{% url 'editProduct' product.id %}" class="bg-success-focus text-success-600 w-28-px h-28-px d-flex justify-content-center align-items-center rounded-circle" title="Edit">
+                                    <iconify-icon icon="lucide:edit" class="text-sm"></iconify-icon>
                                 </a>
-                                <button type="button" class="bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" 
-                                        data-bs-toggle="modal" data-bs-target="#deleteModal{{ product.id }}">
-                                    <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                                <button type="button" class="bg-danger-focus text-danger-600 w-28-px h-28-px d-flex justify-content-center align-items-center rounded-circle border-0" 
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal{{ product.id }}" title="Delete">
+                                    <iconify-icon icon="fluent:delete-24-regular" class="text-sm"></iconify-icon>
                                 </button>
+                                {% endif %}
                             </div>
                             
+                            {% if can_manage_products %}
                             <!-- Delete Modal -->
                             <div class="modal fade" id="deleteModal{{ product.id }}" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title">Delete Product</h5>
+                                            <h5 class="modal-title" data-i18n="common.deleteProduct">Delete Product</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <p>Are you sure you want to delete <strong>{{ product.name }}</strong>?</p>
+                                            <p><span data-i18n="common.confirmDelete">Are you sure you want to delete</span> <strong>{{ product|trans_name }}</strong>?</p>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Cancel</button>
                                             <form action="{% url 'deleteProduct' product.id %}" method="POST" class="d-inline">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                                <button type="submit" class="btn btn-danger" data-i18n="common.delete">Delete</button>
                                             </form>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center py-4">
+                        <td colspan="{% if user.is_superuser or is_owner %}7{% else %}6{% endif %}" class="text-center py-4">
                             <div class="text-secondary-light">
                                 <iconify-icon icon="solar:box-linear" class="text-4xl mb-2"></iconify-icon>
-                                <p class="mb-0">No products found</p>
+                                <p class="mb-0" data-i18n="common.noProductsFound">No products found</p>
                             </div>
                         </td>
                     </tr>
@@ -149,7 +172,7 @@
                 {% if products.has_previous %}
                 <li class="page-item">
                     <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" 
-                       href="?page={{ products.previous_page_number }}&search={{ search_query }}&category={{ category_filter }}&status={{ status_filter }}&per_page={{ per_page }}">
+                       href="?page={{ products.previous_page_number }}&search={{ search_query }}&category={{ category_filter }}&status={{ status_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:arrow-left"></iconify-icon>
                     </a>
                 </li>
@@ -163,7 +186,7 @@
                     {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
                     <li class="page-item">
                         <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" 
-                           href="?page={{ num }}&search={{ search_query }}&category={{ category_filter }}&status={{ status_filter }}&per_page={{ per_page }}">{{ num }}</a>
+                           href="?page={{ num }}&search={{ search_query }}&category={{ category_filter }}&status={{ status_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">{{ num }}</a>
                     </li>
                     {% endif %}
                 {% endfor %}
@@ -171,7 +194,7 @@
                 {% if products.has_next %}
                 <li class="page-item">
                     <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" 
-                       href="?page={{ products.next_page_number }}&search={{ search_query }}&category={{ category_filter }}&status={{ status_filter }}&per_page={{ per_page }}">
+                       href="?page={{ products.next_page_number }}&search={{ search_query }}&category={{ category_filter }}&status={{ status_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:arrow-right"></iconify-icon>
                     </a>
                 </li>

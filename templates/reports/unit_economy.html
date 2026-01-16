@@ -1,0 +1,1093 @@
+{% extends 'layout/layout.html' %} 
+{% load number_filters %}
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Report Header with Filters -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-0" data-i18n="unitEconomy.title">{{ title }}</h5>
+                        <p class="text-secondary-light mb-0" data-i18n="unitEconomy.subtitle">Receivables and payment collection analytics</p>
+                    </div>
+                    <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                        <!-- Period Filter -->
+                        <div>
+                            <label class="form-label text-sm mb-1" data-i18n="filter.period">Period</label>
+                            <select name="period" id="periodSelect" class="form-select" style="min-width: 140px;">
+                                {% for value, label in period_choices %}
+                                <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Custom Date Range -->
+                        <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                            <div>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.from">From</label>
+                                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                            </div>
+                            <div>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.to">To</label>
+                                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                            </div>
+                        </div>
+                        {% if user.is_superuser and centers %}
+                        <div>
+                            <label class="form-label text-sm mb-1" data-i18n="common.center">Center</label>
+                            <select name="center" class="form-select" onchange="this.form.submit()">
+                                <option value="" data-i18n="common.allCenters">All Centers</option>
+                                {% for center in centers %}
+                                <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        {% if branches %}
+                        <div>
+                            <label class="form-label text-sm mb-1" data-i18n="common.branch">Branch</label>
+                            <select name="branch" class="form-select">
+                                <option value="" data-i18n="common.allBranches">All Branches</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.center.name }} - {{ branch.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
+                            <span data-i18n="common.apply">Apply</span>
+                        </button>
+                        <a href="{% url 'export_report' 'unit_economy' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="vscode-icons:file-type-excel" class="icon line-height-1"></iconify-icon>
+                            <span data-i18n="common.exportExcel">Export Excel</span>
+                        </a>
+                    </form>
+                </div>
+                {% if period_label %}
+                <div class="mt-3">
+                    <span class="badge bg-primary-light text-primary-main px-12 py-6">
+                        <iconify-icon icon="solar:calendar-bold" class="me-1"></iconify-icon>
+                        {{ period_label }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-1 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-danger-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:wallet-2-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm" data-i18n="unitEconomy.totalRemaining">Total Remaining</span>
+                        <h4 class="fw-bold mb-0 text-danger-main">{{ total_remaining|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                    </div>
+                </div>
+                <p class="text-sm mb-0 text-secondary-light">
+                    <span class="badge bg-danger-focus text-danger-main">{{ total_orders_with_debt }}</span>
+                    <span data-i18n="unitEconomy.ordersWithDebt">orders with debt</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-2 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-success-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:check-circle-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm" data-i18n="unitEconomy.totalReceived">Total Received</span>
+                        <h4 class="fw-bold mb-0 text-success-main">{{ total_received|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                    </div>
+                </div>
+                <p class="text-sm mb-0 text-secondary-light">
+                    <span class="badge bg-success-focus text-success-main">{{ fully_paid_count }}</span>
+                    <span data-i18n="unitEconomy.fullyPaid">fully paid</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-3 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-primary-600 text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:money-bag-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm" data-i18n="unitEconomy.totalExpected">Total Expected</span>
+                        <h4 class="fw-bold mb-0">{{ total_expected|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-4 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-info-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:chart-2-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm" data-i18n="unitEconomy.collectionRate">Collection Rate</span>
+                        <h4 class="fw-bold mb-0 {% if collection_rate >= 80 %}text-success-main{% elif collection_rate >= 50 %}text-warning-main{% else %}text-danger-main{% endif %}">{{ collection_rate }}%</h4>
+                    </div>
+                </div>
+                <div class="progress bg-neutral-100 h-8-px" style="height: 6px;">
+                    <div class="progress-bar {% if collection_rate >= 80 %}bg-success-main{% elif collection_rate >= 50 %}bg-warning-main{% else %}bg-danger-main{% endif %}" 
+                         role="progressbar" style="width: {{ collection_rate }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Type Breakdown (B2B vs B2C) -->
+    <div class="col-xxl-4">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4" data-i18n="unitEconomy.byClientType">By Client Type</h6>
+                <div id="clientTypeChart" style="min-height: 200px;"></div>
+                <div class="mt-3">
+                    <!-- B2B (Agency) -->
+                    <div class="d-flex align-items-center justify-content-between mb-3 p-12 bg-neutral-50 radius-8">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="w-12-px h-12-px rounded-circle bg-primary-600"></span>
+                            <span class="text-secondary-light text-sm">{{ by_client_type.agency.label }}</span>
+                        </div>
+                        <div class="text-end">
+                            <span class="text-danger-main fw-semibold">{{ by_client_type.agency.remaining|short_number }} UZS</span>
+                            <span class="text-xs text-secondary-light d-block">{{ by_client_type.agency.orders_with_debt }} orders</span>
+                        </div>
+                    </div>
+                    <!-- B2C (Regular) -->
+                    <div class="d-flex align-items-center justify-content-between p-12 bg-neutral-50 radius-8">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="w-12-px h-12-px rounded-circle bg-warning-main"></span>
+                            <span class="text-secondary-light text-sm">{{ by_client_type.regular.label }}</span>
+                        </div>
+                        <div class="text-end">
+                            <span class="text-danger-main fw-semibold">{{ by_client_type.regular.remaining|short_number }} UZS</span>
+                            <span class="text-xs text-secondary-light d-block">{{ by_client_type.regular.orders_with_debt }} orders</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remaining by Branch -->
+    <div class="col-xxl-8">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4" data-i18n="unitEconomy.byBranch">Remaining by Branch</h6>
+                {% if by_branch %}
+                <div id="branchRemainingChart" style="min-height: 280px;"></div>
+                {% else %}
+                <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                    <span class="mb-0 w-64-px h-64-px bg-neutral-100 flex-shrink-0 text-secondary-light d-flex justify-content-center align-items-center rounded-circle mb-3">
+                        <iconify-icon icon="solar:buildings-line-duotone" class="text-xxl"></iconify-icon>
+                    </span>
+                    <h6 class="fw-semibold text-secondary-light mb-1" data-i18n="unitEconomy.noDebt">No outstanding debts</h6>
+                    <p class="text-sm text-secondary-light mb-0" data-i18n="unitEconomy.allPaid">All orders are fully paid</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Center Breakdown (for superuser/owner) -->
+    {% if user.is_superuser or is_owner %}
+    <div class="col-xxl-6">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4" data-i18n="unitEconomy.byCenter">Remaining by Center</h6>
+                {% if by_center %}
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="common.center">Center</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="unitEconomy.remaining">Remaining</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="unitEconomy.ordersWithDebt">Orders</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="unitEconomy.collectionRate">Collection</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in by_center %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }} fw-medium text-secondary-light">{{ item.center_name }}</td>
+                                <td class="{{ row_color }} text-end text-danger-main fw-semibold">{{ item.remaining|short_number }}</td>
+                                <td class="{{ row_color }} text-center text-secondary-light">{{ item.orders_with_debt }}</td>
+                                <td class="{{ row_color }} text-end">
+                                    <span class="badge {% if item.collection_rate >= 80 %}bg-success-focus text-success-main{% elif item.collection_rate >= 50 %}bg-warning-focus text-warning-main{% else %}bg-danger-focus text-danger-main{% endif %}">
+                                        {{ item.collection_rate }}%
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                    <span class="mb-0 w-64-px h-64-px bg-neutral-100 flex-shrink-0 text-secondary-light d-flex justify-content-center align-items-center rounded-circle mb-3">
+                        <iconify-icon icon="solar:buildings-2-line-duotone" class="text-xxl"></iconify-icon>
+                    </span>
+                    <h6 class="fw-semibold text-secondary-light mb-1" data-i18n="unitEconomy.noDebt">No outstanding debts</h6>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Top Debtors -->
+    <div class="col-xxl-{% if user.is_superuser or is_owner %}6{% else %}12{% endif %}">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="fw-bold text-lg mb-0" data-i18n="unitEconomy.topDebtors">Top Debtors</h6>
+                    {% if top_debtors %}
+                    <a href="{% url 'debtors_report' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_center %}&center={{ selected_center }}{% endif %}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}" class="btn btn-outline-primary btn-sm">
+                        <iconify-icon icon="solar:eye-bold" class="me-1"></iconify-icon>
+                        View All Debtors
+                    </a>
+                    {% endif %}
+                </div>
+                {% if top_debtors %}
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="common.customer">Customer</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="unitEconomy.type">Type</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="unitEconomy.remaining">Remaining</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="unitEconomy.ordersWithDebt">Orders</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for debtor in top_debtors %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="w-32-px h-32-px bg-neutral-200 text-secondary-light d-flex justify-content-center align-items-center rounded-circle fw-semibold">
+                                            {{ debtor.customer_name|slice:":1"|upper }}
+                                        </span>
+                                        <div>
+                                            <span class="fw-medium text-secondary-light">{{ debtor.customer_name|truncatechars:20 }}</span>
+                                            {% if debtor.customer_phone %}
+                                            <span class="text-xs text-secondary-light d-block">{{ debtor.customer_phone }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="{{ row_color }} text-center">
+                                    {% if debtor.is_agency %}
+                                    <span class="badge bg-primary-focus text-primary-main px-8 py-4">B2B</span>
+                                    {% else %}
+                                    <span class="badge bg-warning-focus text-warning-main px-8 py-4">B2C</span>
+                                    {% endif %}
+                                </td>
+                                <td class="{{ row_color }} text-end text-danger-main fw-semibold">{{ debtor.remaining|short_number }}</td>
+                                <td class="{{ row_color }} text-center text-secondary-light">{{ debtor.orders_with_debt }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center text-secondary-light bg-base" data-i18n="common.noData">No data</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                    <span class="mb-0 w-64-px h-64-px bg-neutral-100 flex-shrink-0 text-secondary-light d-flex justify-content-center align-items-center rounded-circle mb-3">
+                        <iconify-icon icon="solar:users-group-two-rounded-line-duotone" class="text-xxl"></iconify-icon>
+                    </span>
+                    <h6 class="fw-semibold text-secondary-light mb-1" data-i18n="unitEconomy.noDebtors">No debtors</h6>
+                    <p class="text-sm text-secondary-light mb-0" data-i18n="unitEconomy.allCustomersPaid">All customers have paid in full</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Branch Details Table -->
+    {% if by_branch %}
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4" data-i18n="unitEconomy.branchDetails">Branch Details</h6>
+                <div class="table-responsive">
+                    <table class="table basic-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" data-i18n="common.branch">Branch</th>
+                                <th scope="col" data-i18n="common.center">Center</th>
+                                <th scope="col" class="text-end" data-i18n="unitEconomy.expected">Expected</th>
+                                <th scope="col" class="text-end" data-i18n="unitEconomy.received">Received</th>
+                                <th scope="col" class="text-end" data-i18n="unitEconomy.remaining">Remaining</th>
+                                <th scope="col" class="text-center" data-i18n="unitEconomy.ordersWithDebt">Orders</th>
+                                <th scope="col" class="text-end" data-i18n="unitEconomy.collectionRate">Collection</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in by_branch %}
+                            <tr>
+                                <td class="fw-medium">{{ item.branch_name }}</td>
+                                <td class="text-secondary-light">{{ item.center_name }}</td>
+                                <td class="text-end">{{ item.total_expected|short_number }}</td>
+                                <td class="text-end text-success-main">{{ item.total_received|short_number }}</td>
+                                <td class="text-end text-danger-main fw-semibold">{{ item.remaining|short_number }}</td>
+                                <td class="text-center">{{ item.orders_with_debt }}</td>
+                                <td class="text-end">
+                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                        <div class="progress flex-grow-1 bg-neutral-100" style="height: 6px; max-width: 60px;">
+                                            <div class="progress-bar {% if item.collection_rate >= 80 %}bg-success-main{% elif item.collection_rate >= 50 %}bg-warning-main{% else %}bg-danger-main{% endif %}" 
+                                                 role="progressbar" style="width: {{ item.collection_rate }}%"></div>
+                                        </div>
+                                        <span class="{% if item.collection_rate >= 80 %}text-success-main{% elif item.collection_rate >= 50 %}text-warning-main{% else %}text-danger-main{% endif %} fw-medium">
+                                            {{ item.collection_rate }}%
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+function formatShortNumber(num) {
+    if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B';
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Period selection toggle for custom date range
+    const periodSelect = document.getElementById('periodSelect');
+    const customDateRange = document.getElementById('customDateRange');
+    
+    if (periodSelect && customDateRange) {
+        periodSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customDateRange.style.display = 'flex';
+            } else {
+                customDateRange.style.display = 'none';
+                // Auto-submit when not custom
+                this.form.submit();
+            }
+        });
+    }
+    
+    const branchLabels = {{ branch_labels|safe }};
+    const branchRemainingValues = {{ branch_remaining_values|safe }};
+    const clientTypeLabels = {{ client_type_labels|safe }};
+    const clientTypeValues = {{ client_type_values|safe }};
+    
+    // Check if ApexCharts is loaded
+    if (typeof ApexCharts === 'undefined') {
+        console.error('ApexCharts is not loaded!');
+        return;
+    }
+    
+    // Client Type Donut Chart
+    if (clientTypeValues.some(v => v > 0)) {
+        var clientTypeChart = new ApexCharts(document.querySelector("#clientTypeChart"), {
+            series: clientTypeValues,
+            chart: { type: 'donut', height: 200 },
+            labels: clientTypeLabels,
+            colors: ['#487FFF', '#FF9F29'],
+            legend: { show: false },
+            dataLabels: {
+                enabled: true,
+                formatter: function(val) {
+                    return val.toFixed(1) + '%';
+                }
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '70%',
+                        labels: {
+                            show: true,
+                            total: {
+                                show: true,
+                                label: 'Total',
+                                formatter: function(w) {
+                                    var total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                                    return formatShortNumber(total);
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val) {
+                        return formatShortNumber(val) + ' UZS';
+                    }
+                }
+            }
+        });
+        clientTypeChart.render();
+    } else {
+        var el = document.querySelector("#clientTypeChart");
+        if (el) el.innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-4 text-secondary-light"><iconify-icon icon="solar:check-circle-bold" class="text-3xl mb-2 text-success-main"></iconify-icon><span>No outstanding debts</span></div>';
+    }
+    
+    // Branch Remaining Chart
+    var branchEl = document.querySelector("#branchRemainingChart");
+    if (branchLabels && branchLabels.length > 0 && branchEl) {
+        var branchChart = new ApexCharts(branchEl, {
+            series: [{
+                name: 'Remaining',
+                data: branchRemainingValues
+            }],
+            chart: { type: 'bar', height: 280, toolbar: { show: false } },
+            colors: ['#DC3545'],
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 4,
+                    barHeight: '60%'
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function(val) { return formatShortNumber(val); },
+                style: { fontSize: '11px', colors: ['#fff'] }
+            },
+            xaxis: {
+                categories: branchLabels,
+                labels: {
+                    formatter: function(val) { return formatShortNumber(val); },
+                    style: { colors: '#9CA3AF', fontSize: '11px' }
+                }
+            },
+            yaxis: {
+                labels: { style: { colors: '#9CA3AF', fontSize: '11px' } }
+            },
+            grid: { borderColor: '#E4E7EC', strokeDashArray: 3 },
+            tooltip: {
+                y: {
+                    formatter: function(val) { return val.toLocaleString() + ' UZS'; }
+                }
+            }
+        });
+        branchChart.render();
+    }
+});
+
+// All Debtors Modal functionality
+let currentClientTypeFilter = '';
+let allDebtorsData = [];
+let apiData = {};
+let filtersAttached = false;
+
+const allDebtorsModal = document.getElementById('allDebtorsModal');
+if (allDebtorsModal) {
+    allDebtorsModal.addEventListener('show.bs.modal', function () {
+        loadAllDebtors();
+    });
+}
+
+function attachFilterListeners() {
+    if (filtersAttached) return; // Prevent duplicate listeners
+    
+    // Filter event listeners
+    const debtorSearchInput = document.getElementById('debtorSearchInput');
+    const clientTypeFilter = document.getElementById('clientTypeFilter');
+    const debtRangeFilter = document.getElementById('debtRangeFilter');
+    const collectionRateFilter = document.getElementById('collectionRateFilter');
+    const ordersCountFilter = document.getElementById('ordersCountFilter');
+    const sortByFilter = document.getElementById('sortByFilter');
+    const centerFilter = document.getElementById('centerFilter');
+    const branchFilter = document.getElementById('branchFilter');
+    
+    if (debtorSearchInput) debtorSearchInput.addEventListener('input', filterDebtors);
+    if (clientTypeFilter) clientTypeFilter.addEventListener('change', filterDebtors);
+    if (debtRangeFilter) debtRangeFilter.addEventListener('change', filterDebtors);
+    if (collectionRateFilter) collectionRateFilter.addEventListener('change', filterDebtors);
+    if (ordersCountFilter) ordersCountFilter.addEventListener('change', filterDebtors);
+    if (sortByFilter) sortByFilter.addEventListener('change', filterDebtors);
+    if (centerFilter) {
+        centerFilter.addEventListener('change', function() {
+            updateBranchFilter();
+            filterDebtors();
+        });
+    }
+    if (branchFilter) branchFilter.addEventListener('change', filterDebtors);
+    
+    filtersAttached = true;
+}
+
+function updateBranchFilter() {
+    const centerFilter = document.getElementById('centerFilter');
+    const branchFilter = document.getElementById('branchFilter');
+    const selectedCenter = centerFilter?.value;
+    
+    if (!branchFilter || !apiData.branches) return;
+    
+    branchFilter.innerHTML = '<option value="">All Branches</option>';
+    
+    const branches = selectedCenter ? 
+        apiData.branches.filter(b => b.center_id == selectedCenter) : 
+        apiData.branches;
+    
+    branches.forEach(branch => {
+        branchFilter.innerHTML += `<option value="${branch.id}">${branch.name}</option>`;
+    });
+}
+
+function filterDebtors() {
+    if (!allDebtorsData.length) return;
+    
+    const searchTerm = document.getElementById('debtorSearchInput')?.value.toLowerCase() || '';
+    const clientType = document.getElementById('clientTypeFilter')?.value || '';
+    const centerId = document.getElementById('centerFilter')?.value || '';
+    const branchId = document.getElementById('branchFilter')?.value || '';
+    const debtRange = document.getElementById('debtRangeFilter')?.value || '';
+    const collectionRate = document.getElementById('collectionRateFilter')?.value || '';
+    const ordersCount = document.getElementById('ordersCountFilter')?.value || '';
+    const sortBy = document.getElementById('sortByFilter')?.value || 'remaining-desc';
+    
+    let filtered = allDebtorsData.filter(debtor => {
+        // Search filter
+        const matchesSearch = !searchTerm || 
+            debtor.customer_name.toLowerCase().includes(searchTerm) ||
+            (debtor.customer_phone && debtor.customer_phone.toLowerCase().includes(searchTerm));
+        
+        // Client type filter
+        const matchesType = !clientType || 
+            (clientType === 'b2b' && debtor.is_agency) ||
+            (clientType === 'b2c' && !debtor.is_agency);
+        
+        // Center filter
+        const matchesCenter = !centerId || debtor.center_id == centerId;
+        
+        // Branch filter
+        const matchesBranch = !branchId || debtor.branch_id == branchId;
+        
+        // Debt range filter
+        let matchesDebtRange = true;
+        if (debtRange) {
+            const [min, max] = debtRange.split('-').map(Number);
+            matchesDebtRange = debtor.remaining >= min && debtor.remaining <= max;
+        }
+        
+        // Collection rate filter
+        let matchesCollectionRate = true;
+        if (collectionRate) {
+            const [min, max] = collectionRate.split('-').map(Number);
+            matchesCollectionRate = debtor.collection_rate >= min && debtor.collection_rate <= max;
+        }
+        
+        // Orders count filter
+        let matchesOrdersCount = true;
+        if (ordersCount) {
+            const [min, max] = ordersCount.split('-').map(Number);
+            matchesOrdersCount = debtor.orders_with_debt >= min && debtor.orders_with_debt <= max;
+        }
+        
+        return matchesSearch && matchesType && matchesCenter && matchesBranch && 
+               matchesDebtRange && matchesCollectionRate && matchesOrdersCount;
+    });
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+        switch(sortBy) {
+            case 'remaining-desc': return b.remaining - a.remaining;
+            case 'remaining-asc': return a.remaining - b.remaining;
+            case 'orders-desc': return b.orders_with_debt - a.orders_with_debt;
+            case 'orders-asc': return a.orders_with_debt - b.orders_with_debt;
+            case 'rate-desc': return b.collection_rate - a.collection_rate;
+            case 'rate-asc': return a.collection_rate - b.collection_rate;
+            case 'name-asc': return a.customer_name.localeCompare(b.customer_name);
+            case 'name-desc': return b.customer_name.localeCompare(a.customer_name);
+            default: return b.remaining - a.remaining;
+        }
+    });
+    
+    // Update quick stats
+    updateQuickStats(filtered);
+    
+    renderDebtorsTable(filtered);
+}
+
+function updateQuickStats(debtors) {
+    const totalDebt = debtors.reduce((sum, d) => sum + d.remaining, 0);
+    const avgRate = debtors.length > 0 ? 
+        debtors.reduce((sum, d) => sum + d.collection_rate, 0) / debtors.length : 0;
+    
+    document.getElementById('filteredCount').textContent = `${debtors.length} customers`;
+    document.getElementById('filteredDebt').textContent = `${formatShortNumber(totalDebt)} UZS debt`;
+    document.getElementById('filteredRate').textContent = `${avgRate.toFixed(1)}% avg rate`;
+}
+
+function loadAllDebtors() {
+    const tbody = document.getElementById('allDebtorsTableBody');
+    const loader = document.getElementById('allDebtorsLoader');
+    const errorDiv = document.getElementById('allDebtorsError');
+    const countBadge = document.getElementById('debtorsCount');
+    
+    // Show loader
+    tbody.innerHTML = '';
+    loader.style.display = 'block';
+    errorDiv.style.display = 'none';
+    
+    // Get current filters from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams();
+    if (urlParams.has('period')) params.append('period', urlParams.get('period'));
+    if (urlParams.has('date_from')) params.append('date_from', urlParams.get('date_from'));
+    if (urlParams.has('date_to')) params.append('date_to', urlParams.get('date_to'));
+    if (urlParams.has('branch')) params.append('branch', urlParams.get('branch'));
+    if (urlParams.has('center')) params.append('center', urlParams.get('center'));
+    
+    fetch(`/api/unit-economy?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            loader.style.display = 'none';
+            
+            // Store data globally
+            allDebtorsData = data.all_debtors || [];
+            apiData = data;
+            
+            // Update count badge
+            if (countBadge) {
+                countBadge.textContent = allDebtorsData.length;
+            }
+            
+            // Show/hide columns based on user role
+            const showCenter = data.show_center;
+            const showBranch = data.show_branch;
+            
+            document.getElementById('centerColumnHeader').style.display = showCenter ? '' : 'none';
+            document.getElementById('branchColumnHeader').style.display = showBranch ? '' : 'none';
+            
+            // Update colspan for totals row (# + Customer + Phone + Type = 4, then add center/branch if shown)
+            let colspan = 4;
+            if (showCenter) colspan++;
+            if (showBranch) colspan++;
+            document.getElementById('totalColspan').setAttribute('colspan', colspan);
+            
+            // Populate center filter if superuser
+            if (showCenter && data.centers) {
+                document.getElementById('centerFilterContainer').style.display = 'block';
+                const centerFilter = document.getElementById('centerFilter');
+                centerFilter.innerHTML = '<option value="">All Centers</option>';
+                data.centers.forEach(center => {
+                    centerFilter.innerHTML += `<option value="${center.id}">${center.name}</option>`;
+                });
+            }
+            
+            // Populate branch filter
+            if (data.branches && data.branches.length > 0) {
+                document.getElementById('branchFilterContainer').style.display = 'block';
+                updateBranchFilter();
+            }
+            
+            // Attach filter event listeners
+            attachFilterListeners();
+            
+            // Render table
+            renderDebtorsTable(allDebtorsData);
+        })
+        .catch(error => {
+            console.error('Error loading debtors:', error);
+            loader.style.display = 'none';
+            errorDiv.style.display = 'block';
+        });
+}
+
+function renderDebtorsTable(debtors) {
+    const tbody = document.getElementById('allDebtorsTableBody');
+    const showCenter = document.getElementById('centerColumnHeader').style.display !== 'none';
+    const showBranch = document.getElementById('branchColumnHeader').style.display !== 'none';
+    
+    // Calculate totals
+    let totalRemaining = 0;
+    let totalOrdersWithDebt = 0;
+    let totalExpected = 0;
+    let totalReceived = 0;
+    let sumCollectionRate = 0;
+    
+    tbody.innerHTML = '';
+    
+    if (debtors && debtors.length > 0) {
+        debtors.forEach((debtor, index) => {
+            // Accumulate totals
+            totalRemaining += parseFloat(debtor.remaining || 0);
+            totalOrdersWithDebt += parseInt(debtor.orders_with_debt || 0);
+            totalExpected += parseFloat(debtor.total_expected || 0);
+            totalReceived += parseFloat(debtor.total_received || 0);
+            sumCollectionRate += parseFloat(debtor.collection_rate || 0);
+            
+            const row = document.createElement('tr');
+            
+            let centerCell = '';
+            if (showCenter) {
+                centerCell = `<td class="text-center"><span class="badge bg-info-focus text-info-main px-2 py-1">${debtor.center_name || 'N/A'}</span></td>`;
+            }
+            
+            let branchCell = '';
+            if (showBranch) {
+                branchCell = `<td class="text-center"><span class="badge bg-purple-focus text-purple-main px-2 py-1">${debtor.branch_name || 'N/A'}</span></td>`;
+            }
+            
+            row.innerHTML = `
+                <td class="text-center text-secondary-light">${index + 1}</td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="w-32-px h-32-px bg-neutral-200 text-secondary-light d-flex justify-content-center align-items-center rounded-circle fw-semibold">
+                            ${debtor.customer_name.charAt(0).toUpperCase()}
+                        </span>
+                        <span class="fw-medium">${debtor.customer_name}</span>
+                    </div>
+                </td>
+                <td class="text-center text-secondary-light">
+                    ${debtor.customer_phone ? `<small>${debtor.customer_phone}</small>` : '<small class="text-muted">—</small>'}
+                </td>
+                <td class="text-center">
+                    ${debtor.is_agency ? 
+                        '<span class="badge bg-primary-focus text-primary-main px-8 py-4">B2B</span>' : 
+                        '<span class="badge bg-warning-focus text-warning-main px-8 py-4">B2C</span>'}
+                </td>
+                ${centerCell}
+                ${branchCell}
+                <td class="text-end text-danger-main fw-semibold">${formatNumber(debtor.remaining)}</td>
+                <td class="text-center">
+                    <span class="badge bg-neutral-200 text-dark px-2 py-1">${debtor.orders_with_debt}</span>
+                </td>
+                <td class="text-end">${formatNumber(debtor.total_expected)}</td>
+                <td class="text-end text-success-600 fw-semibold">${formatNumber(debtor.total_received)}</td>
+                <td class="text-center">
+                    <div class="d-flex align-items-center justify-content-center gap-2">
+                        <div class="progress" style="width: 70px; height: 10px;">
+                            <div class="progress-bar ${debtor.collection_rate >= 70 ? 'bg-success-600' : debtor.collection_rate >= 40 ? 'bg-warning-600' : 'bg-danger-600'}" 
+                                 style="width: ${debtor.collection_rate}%"></div>
+                        </div>
+                        <span class="fw-semibold ${debtor.collection_rate >= 70 ? 'text-success-600' : debtor.collection_rate >= 40 ? 'text-warning-600' : 'text-danger-600'}">${debtor.collection_rate}%</span>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        // Update footer totals
+        const avgCollectionRate = debtors.length > 0 ? 
+            (sumCollectionRate / debtors.length).toFixed(1) : 0;
+        
+        document.getElementById('totalRemaining').textContent = formatNumber(totalRemaining);
+        document.getElementById('totalOrdersWithDebt').textContent = totalOrdersWithDebt;
+        document.getElementById('totalExpected').textContent = formatNumber(totalExpected);
+        document.getElementById('totalReceived').textContent = formatNumber(totalReceived);
+        document.getElementById('avgCollectionRate').textContent = avgCollectionRate + '%';
+    } else {
+        let colspan = 4; // # + Customer + Phone + Type
+        if (showCenter) colspan++;
+        if (showBranch) colspan++;
+        colspan += 5; // remaining columns
+        
+        tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center text-secondary-light py-4">
+            <iconify-icon icon="solar:user-cross-rounded-line-duotone" class="text-3xl mb-2"></iconify-icon>
+            <div>No debtors found matching your filters</div>
+        </td></tr>`;
+        
+        // Reset footer totals
+        document.getElementById('totalRemaining').textContent = '0';
+        document.getElementById('totalOrdersWithDebt').textContent = '0';
+        document.getElementById('totalExpected').textContent = '0';
+        document.getElementById('totalReceived').textContent = '0';
+        document.getElementById('avgCollectionRate').textContent = '0%';
+    }
+    
+    // Update count badge
+    document.getElementById('debtorsCount').textContent = debtors.length;
+}
+
+function formatNumber(num) {
+    return parseFloat(num).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+}
+
+function exportDebtorsToExcel() {
+    if (!allDebtorsData || allDebtorsData.length === 0) {
+        alert('No data to export');
+        return;
+    }
+    
+    // Get current filtered data
+    const searchTerm = document.getElementById('debtorSearchInput')?.value.toLowerCase() || '';
+    const clientType = document.getElementById('clientTypeFilter')?.value || '';
+    const centerId = document.getElementById('centerFilter')?.value || '';
+    const branchId = document.getElementById('branchFilter')?.value || '';
+    const debtRange = document.getElementById('debtRangeFilter')?.value || '';
+    const collectionRate = document.getElementById('collectionRateFilter')?.value || '';
+    const ordersCount = document.getElementById('ordersCountFilter')?.value || '';
+    
+    let dataToExport = allDebtorsData.filter(debtor => {
+        const matchesSearch = !searchTerm || 
+            debtor.customer_name.toLowerCase().includes(searchTerm) ||
+            (debtor.customer_phone && debtor.customer_phone.toLowerCase().includes(searchTerm));
+        const matchesType = !clientType || 
+            (clientType === 'b2b' && debtor.is_agency) ||
+            (clientType === 'b2c' && !debtor.is_agency);
+        const matchesCenter = !centerId || debtor.center_id == centerId;
+        const matchesBranch = !branchId || debtor.branch_id == branchId;
+        
+        let matchesDebtRange = true;
+        if (debtRange) {
+            const [min, max] = debtRange.split('-').map(Number);
+            matchesDebtRange = debtor.remaining >= min && debtor.remaining <= max;
+        }
+        
+        let matchesCollectionRate = true;
+        if (collectionRate) {
+            const [min, max] = collectionRate.split('-').map(Number);
+            matchesCollectionRate = debtor.collection_rate >= min && debtor.collection_rate <= max;
+        }
+        
+        let matchesOrdersCount = true;
+        if (ordersCount) {
+            const [min, max] = ordersCount.split('-').map(Number);
+            matchesOrdersCount = debtor.orders_with_debt >= min && debtor.orders_with_debt <= max;
+        }
+        
+        return matchesSearch && matchesType && matchesCenter && matchesBranch && 
+               matchesDebtRange && matchesCollectionRate && matchesOrdersCount;
+    });
+    
+    const showCenter = document.getElementById('centerColumnHeader').style.display !== 'none';
+    const showBranch = document.getElementById('branchColumnHeader').style.display !== 'none';
+    
+    // Create CSV content
+    let csv = '';
+    
+    // Header row
+    let headers = ['#', 'Customer Name', 'Phone', 'Type'];
+    if (showCenter) headers.push('Center');
+    if (showBranch) headers.push('Branch');
+    headers.push('Remaining Debt', 'Orders w/ Debt', 'Total Expected', 'Total Received', 'Collection Rate (%)');
+    csv += headers.join(',') + '\\n';
+    
+    // Data rows
+    dataToExport.forEach((debtor, index) => {
+        let row = [
+            index + 1,
+            `"${debtor.customer_name}"`,
+            debtor.customer_phone || '',
+            debtor.is_agency ? 'B2B' : 'B2C'
+        ];
+        if (showCenter) row.push(`"${debtor.center_name || 'N/A'}"`);
+        if (showBranch) row.push(`"${debtor.branch_name || 'N/A'}"`);
+        row.push(
+            debtor.remaining,
+            debtor.orders_with_debt,
+            debtor.total_expected,
+            debtor.total_received,
+            debtor.collection_rate
+        );
+        csv += row.join(',') + '\\n';
+    });
+    
+    // Add totals row
+    let totalsRow = ['', 'TOTALS', '', ''];
+    if (showCenter) totalsRow.push('');
+    if (showBranch) totalsRow.push('');
+    const totalDebt = dataToExport.reduce((sum, d) => sum + d.remaining, 0);
+    const totalOrders = dataToExport.reduce((sum, d) => sum + d.orders_with_debt, 0);
+    const totalExpected = dataToExport.reduce((sum, d) => sum + d.total_expected, 0);
+    const totalReceived = dataToExport.reduce((sum, d) => sum + d.total_received, 0);
+    const avgRate = dataToExport.length > 0 ? 
+        dataToExport.reduce((sum, d) => sum + d.collection_rate, 0) / dataToExport.length : 0;
+    totalsRow.push(totalDebt, totalOrders, totalExpected, totalReceived, avgRate.toFixed(1));
+    csv += totalsRow.join(',') + '\\n';
+    
+    // Create download link
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `debtors_report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+</script>
+
+<!-- All Debtors Modal -->
+<div class="modal fade" id="allDebtorsModal" tabindex="-1" aria-labelledby="allDebtorsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content" style="background-color: #1e2329; color: #e3e6e9;">
+            <div class="modal-header" style="background-color: #252b33; border-bottom: 1px solid #3a4149;">
+                <div class="w-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="modal-title mb-0" id="allDebtorsModalLabel">
+                                <iconify-icon icon="solar:users-group-two-rounded-bold" class="me-2 text-primary-600"></iconify-icon>
+                                All Debtors
+                                <span class="badge bg-primary-100 text-primary-600 ms-2" id="debtorsCount">0</span>
+                            </h5>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <!-- Filters Row 1 -->
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm text-light mb-1">Search Customer</label>
+                            <input type="text" class="form-control form-control-sm" id="debtorSearchInput" placeholder="Name or phone...">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label form-label-sm text-light mb-1">Client Type</label>
+                            <select class="form-select form-select-sm" id="clientTypeFilter">
+                                <option value="">All Types</option>
+                                <option value="b2b">B2B Only</option>
+                                <option value="b2c">B2C Only</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2" id="centerFilterContainer" style="display: none;">
+                            <label class="form-label form-label-sm text-light mb-1">Center</label>
+                            <select class="form-select form-select-sm" id="centerFilter">
+                                <option value="">All Centers</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2" id="branchFilterContainer" style="display: none;">
+                            <label class="form-label form-label-sm text-light mb-1">Branch</label>
+                            <select class="form-select form-select-sm" id="branchFilter">
+                                <option value="">All Branches</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label form-label-sm text-light mb-1">Debt Range</label>
+                            <select class="form-select form-select-sm" id="debtRangeFilter">
+                                <option value="">All Amounts</option>
+                                <option value="0-1000000">< 1M</option>
+                                <option value="1000000-5000000">1M - 5M</option>
+                                <option value="5000000-10000000">5M - 10M</option>
+                                <option value="10000000-999999999">> 10M</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label form-label-sm text-light mb-1">&nbsp;</label>
+                            <button type="button" class="btn btn-success btn-sm w-100 d-block" onclick="exportDebtorsToExcel()" title="Export to Excel">
+                                <iconify-icon icon="vscode-icons:file-type-excel"></iconify-icon>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Filters Row 2 -->
+                    <div class="row g-2">
+                        <div class="col-md-2">
+                            <label class="form-label form-label-sm text-light mb-1">Collection Rate</label>
+                            <select class="form-select form-select-sm" id="collectionRateFilter">
+                                <option value="">All Rates</option>
+                                <option value="0-30">Low (0-30%)</option>
+                                <option value="30-70">Medium (30-70%)</option>
+                                <option value="70-100">High (70-100%)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label form-label-sm text-light mb-1">Orders Count</label>
+                            <select class="form-select form-select-sm" id="ordersCountFilter">
+                                <option value="">All Orders</option>
+                                <option value="1-5">1-5 orders</option>
+                                <option value="6-10">6-10 orders</option>
+                                <option value="11-999">11+ orders</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label form-label-sm text-light mb-1">Sort By</label>
+                            <select class="form-select form-select-sm" id="sortByFilter">
+                                <option value="remaining-desc">Debt: High to Low</option>
+                                <option value="remaining-asc">Debt: Low to High</option>
+                                <option value="orders-desc">Orders: High to Low</option>
+                                <option value="rate-asc">Collection: Low to High</option>
+                                <option value="rate-desc">Collection: High to Low</option>
+                                <option value="name-asc">Name: A to Z</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label form-label-sm text-light mb-1">Quick Stats</label>
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="badge bg-danger-focus text-danger-main px-2 py-1" id="filteredCount">0 customers</span>
+                                <span class="badge bg-warning-focus text-warning-main px-2 py-1" id="filteredDebt">0 UZS debt</span>
+                                <span class="badge bg-info-focus text-info-main px-2 py-1" id="filteredRate">0% avg rate</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body" style="background-color: #1e2329;">
+                <div id="allDebtorsLoader" class="text-center py-5" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-secondary-light mt-2">Loading debtors...</p>
+                </div>
+                <div id="allDebtorsError" class="alert alert-danger" style="display: none;">
+                    Failed to load debtors. Please try again.
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0" id="debtorsTable">
+                        <thead style="background-color: #454d55; color: #fff;">
+                            <tr>
+                                <th class="text-center" style="width: 40px;">#</th>
+                                <th style="min-width: 150px;">Customer</th>
+                                <th class="text-center" style="width: 120px;">Phone</th>
+                                <th class="text-center" style="width: 70px;">Type</th>
+                                <th class="text-center" id="centerColumnHeader" style="display: none; min-width: 100px;">Center</th>
+                                <th class="text-center" id="branchColumnHeader" style="display: none; min-width: 100px;">Branch</th>
+                                <th class="text-end" style="min-width: 110px;">Remaining Debt</th>
+                                <th class="text-center" style="width: 90px;">Orders w/ Debt</th>
+                                <th class="text-end" style="min-width: 110px;">Total Expected</th>
+                                <th class="text-end" style="min-width: 110px;">Total Received</th>
+                                <th class="text-center" style="min-width: 140px;">Collection Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allDebtorsTableBody" style="background-color: #2d3238; color: #e3e6e9;">
+                            <!-- Data will be loaded via AJAX -->
+                        </tbody>
+                        <tfoot id="allDebtorsTableFooter" class="fw-bold" style="background-color: #3a4149; color: #fff;">
+                            <tr>
+                                <td colspan="4" class="text-end" id="totalColspan">Totals:</td>
+                                <td class="text-end text-danger-main" id="totalRemaining">0</td>
+                                <td class="text-center" id="totalOrdersWithDebt">0</td>
+                                <td class="text-end" id="totalExpected">0</td>
+                                <td class="text-end text-success-600" id="totalReceived">0</td>
+                                <td class="text-center" id="avgCollectionRate">0%</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer" style="background-color: #252b33; border-top: 1px solid #3a4149;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock script %}

@@ -1,0 +1,202 @@
+{% extends 'layout/layout.html' %}
+
+{% block content %}
+<div class="row gy-4">
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3 py-16 px-24 border-bottom bg-base">
+                <div>
+                    <h6 class="mb-0 fw-bold text-lg">{{ title }}</h6>
+                    <span class="text-sm text-secondary-light" data-i18n="common.manageRoles">Manage roles and permissions for your platform</span>
+                </div>
+                <a href="{% url 'role_create' %}" class="btn btn-primary text-sm btn-sm px-12 py-6 radius-4 d-flex align-items-center gap-2">
+                    <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+                    <span data-i18n="common.createNewRole">Create New Role</span>
+                </a>
+            </div>
+            <div class="card-body p-24 compact-table">
+                <div class="table-responsive scroll-sm">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.roleName">Role Name</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.description">Description</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.users">Users</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.permissions">Key Permissions</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for role in roles %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        {% if role.is_system_role %}
+                                        <span class="badge bg-primary-100 text-primary-600 px-8 py-4 radius-4 text-xs" data-i18n="common.system">System</span>
+                                        {% endif %}
+                                        {% if not role.is_active %}
+                                        <span class="badge bg-danger-100 text-danger-600 px-8 py-4 radius-4 text-xs">Inactive</span>
+                                        {% endif %}
+                                        <span class="fw-semibold text-secondary-light">{{ role.display_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="{{ row_color }} hide-mobile">
+                                    <span class="text-secondary-light">{{ role.description|default:"-"|truncatechars:50 }}</span>
+                                </td>
+                                <td class="{{ row_color }} text-center">
+                                    <span class="badge bg-info-100 text-info-600 px-8 py-4 radius-4">{{ role.user_count }}</span>
+                                </td>
+                                <td class="{{ row_color }} hide-tablet">
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <!-- Organization -->
+                                        {% if role.can_manage_centers %}
+                                        <span class="badge bg-primary-100 text-primary-600 px-6 py-2 radius-4 text-xs" title="Full Center Management">🏢 Centers</span>
+                                        {% endif %}
+                                        {% if role.can_manage_branches %}
+                                        <span class="badge bg-primary-100 text-primary-600 px-6 py-2 radius-4 text-xs" title="Manage Branches">🏪 Branches</span>
+                                        {% endif %}
+                                        {% if role.can_manage_staff %}
+                                        <span class="badge bg-info-100 text-info-600 px-6 py-2 radius-4 text-xs" title="Manage Staff">👥 Staff</span>
+                                        {% endif %}
+                                        
+                                        <!-- Orders (prioritize master permission) -->
+                                        {% if role.can_manage_orders %}
+                                        <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs" title="Full Order Management">📦 Full Orders</span>
+                                        {% else %}
+                                            {% if role.can_edit_orders %}
+                                            <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs" title="Edit Orders">✏️ Edit</span>
+                                            {% endif %}
+                                            {% if role.can_delete_orders %}
+                                            <span class="badge bg-danger-100 text-danger-600 px-6 py-2 radius-4 text-xs" title="Delete Orders">🗑️ Delete</span>
+                                            {% endif %}
+                                            {% if role.can_assign_orders %}
+                                            <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs" title="Assign Orders">📋 Assign</span>
+                                            {% endif %}
+                                            {% if role.can_update_order_status %}
+                                            <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs" title="Update Status">🔄 Status</span>
+                                            {% endif %}
+                                            {% if role.can_complete_orders %}
+                                            <span class="badge bg-success-100 text-success-600 px-6 py-2 radius-4 text-xs" title="Complete Orders">✅ Complete</span>
+                                            {% endif %}
+                                        {% endif %}
+                                        
+                                        <!-- Financial -->
+                                        {% if role.can_receive_payments %}
+                                        <span class="badge bg-warning-100 text-warning-600 px-6 py-2 radius-4 text-xs" title="Receive Payments">💰 Payments</span>
+                                        {% endif %}
+                                        {% if role.can_apply_discounts %}
+                                        <span class="badge bg-warning-100 text-warning-600 px-6 py-2 radius-4 text-xs" title="Apply Discounts">🏷️ Discounts</span>
+                                        {% endif %}
+                                        {% if role.can_refund_orders %}
+                                        <span class="badge bg-danger-100 text-danger-600 px-6 py-2 radius-4 text-xs" title="Refund Orders">↩️ Refunds</span>
+                                        {% endif %}
+                                        
+                                        <!-- Reports -->
+                                        {% if role.can_view_reports or role.can_view_analytics %}
+                                        <span class="badge bg-purple-100 text-purple-600 px-6 py-2 radius-4 text-xs" title="View Reports/Analytics">📊 Reports</span>
+                                        {% endif %}
+                                        {% if role.can_export_data %}
+                                        <span class="badge bg-purple-100 text-purple-600 px-6 py-2 radius-4 text-xs" title="Export Data">📥 Export</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="{{ row_color }} text-center col-action">
+                                    <div class="d-flex align-items-center justify-content-center gap-2">
+                                        <a href="{% url 'role_edit' role.id %}" class="btn btn-sm btn-icon btn-outline-primary radius-4" title="Edit">
+                                            <iconify-icon icon="lucide:edit" class="icon"></iconify-icon>
+                                        </a>
+                                        {% if role.is_system_role %}
+                                        <button type="button" class="btn btn-sm btn-icon btn-outline-secondary radius-4" disabled title="System roles cannot be deleted">
+                                            <iconify-icon icon="lucide:trash-2" class="icon"></iconify-icon>
+                                        </button>
+                                        {% elif role.user_count > 0 %}
+                                        <button type="button" class="btn btn-sm btn-icon btn-outline-secondary radius-4" disabled title="Cannot delete - {{ role.user_count }} user(s) assigned. Reassign users first.">
+                                            <iconify-icon icon="lucide:trash-2" class="icon"></iconify-icon>
+                                        </button>
+                                        {% else %}
+                                        <form method="POST" action="{% url 'role_delete' role.id %}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this role?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-icon btn-outline-danger radius-4" title="Delete">
+                                                <iconify-icon icon="lucide:trash-2" class="icon"></iconify-icon>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-secondary-light py-4 bg-base" data-i18n="common.noRolesFound">
+                                    No roles found. Create your first role!
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Permission Categories Legend -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-header py-16 px-24 border-bottom bg-base">
+                <h6 class="mb-0 fw-semibold d-flex align-items-center gap-2">
+                    <iconify-icon icon="lucide:info"></iconify-icon>
+                    <span data-i18n="common.permissionReference">Permission Categories</span>
+                </h6>
+            </div>
+            <div class="card-body p-24">
+                <div class="row g-4">
+                    <div class="col-md-4 col-sm-6">
+                        <h6 class="text-sm fw-semibold text-primary-main mb-2">🏢 Organization</h6>
+                        <ul class="list-unstyled text-sm text-secondary-light mb-0">
+                            <li>• Manage Centers</li>
+                            <li>• Manage Branches</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <h6 class="text-sm fw-semibold text-info-main mb-2">👥 Staff</h6>
+                        <ul class="list-unstyled text-sm text-secondary-light mb-0">
+                            <li>• Manage Staff</li>
+                            <li>• View Staff (Read-Only)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <h6 class="text-sm fw-semibold text-success-main mb-2">📦 Orders</h6>
+                        <ul class="list-unstyled text-sm text-secondary-light mb-0">
+                            <li>• Full Order Management (master)</li>
+                            <li>• View/Create/Edit/Delete</li>
+                            <li>• Assign/Status/Complete/Cancel</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <h6 class="text-sm fw-semibold text-warning-main mb-2">💰 Financial</h6>
+                        <ul class="list-unstyled text-sm text-secondary-light mb-0">
+                            <li>• Receive Payments</li>
+                            <li>• Apply Discounts</li>
+                            <li>• Refund Orders</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <h6 class="text-sm fw-semibold text-purple-main mb-2">📊 Reports</h6>
+                        <ul class="list-unstyled text-sm text-secondary-light mb-0">
+                            <li>• View Reports & Analytics</li>
+                            <li>• Export Data (Excel/CSV)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <h6 class="text-sm fw-semibold text-danger-main mb-2">📦 Products & Customers</h6>
+                        <ul class="list-unstyled text-sm text-secondary-light mb-0">
+                            <li>• Manage Products</li>
+                            <li>• Manage Customers</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

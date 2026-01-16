@@ -1,0 +1,558 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    /* Select2 styling to exactly match native .form-select elements */
+    .select2-container {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Ensure all nested wrappers are full width */
+    .select2-container .selection,
+    .select2-container .select2-selection {
+        width: 100% !important;
+        display: block !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Main select box - match .form-select exactly */
+    .select2-container .select2-selection--single {
+        height: 46px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 14px !important;
+        line-height: 1.5 !important;
+        color: inherit !important;
+        background-color: transparent !important;
+        background-clip: padding-box !important;
+        border: 1px solid var(--border-neutral-300, #d5d5d5) !important;
+        border-radius: 8px !important;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+        box-shadow: none !important;
+        display: block !important;
+    }
+    
+    /* Selected text styling */
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        display: block !important;
+        padding-left: 16px !important;
+        padding-right: 40px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        line-height: 44px !important;
+        font-size: 14px !important;
+        color: var(--text-primary, inherit) !important;
+        margin: 0 !important;
+    }
+    
+    /* Placeholder text */
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: var(--text-tertiary, #9ca3af) !important;
+        opacity: 0.7 !important;
+    }
+    
+    /* Dropdown arrow */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 46px !important;
+        position: absolute !important;
+        top: 0 !important;
+        right: 10px !important;
+        width: 20px !important;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border-color: var(--text-secondary, #6c757d) transparent transparent transparent !important;
+        border-style: solid !important;
+        border-width: 5px 4px 0 4px !important;
+        height: 0 !important;
+        left: 50% !important;
+        margin-left: -4px !important;
+        margin-top: -2px !important;
+        position: absolute !important;
+        top: 50% !important;
+        width: 0 !important;
+    }
+    
+    /* Focus and open states */
+    .select2-container--default.select2-container--focus .select2-selection--single,
+    .select2-container--default.select2-container--open .select2-selection--single {
+        border-color: #487fff !important;
+        outline: 0 !important;
+        box-shadow: 0 0 0 0.2rem rgba(72, 127, 255, 0.15) !important;
+    }
+    
+    /* Disabled state */
+    .select2-container--default.select2-container--disabled .select2-selection--single {
+        background-color: var(--bg-neutral-100, #f5f5f5) !important;
+        cursor: not-allowed !important;
+        opacity: 0.6 !important;
+    }
+    
+    /* Dropdown container - solid background */
+    .select2-dropdown {
+        background-color: #2e3650 !important;
+        border: 1px solid var(--border-neutral-300, #d5d5d5) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        margin-top: 4px !important;
+        z-index: 9999 !important;
+    }
+    
+    /* Dropdown results container */
+    .select2-results {
+        background-color: #2e3650 !important;
+    }
+    
+    /* Dropdown options */
+    .select2-container--default .select2-results__option {
+        padding: 10px 16px !important;
+        font-size: 14px !important;
+        color: inherit !important;
+        background-color: #2e3650 !important;
+        cursor: pointer !important;
+    }
+    
+    /* Highlighted option */
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #487fff !important;
+        color: #ffffff !important;
+    }
+    
+    /* Selected option */
+    .select2-container--default .select2-results__option[aria-selected=true] {
+        background-color: var(--bg-neutral-100, rgba(0, 0, 0, 0.05)) !important;
+        color: var(--text-primary, inherit) !important;
+    }
+    
+    /* Search box in dropdown */
+    .select2-search--dropdown {
+        padding: 8px !important;
+        background-color: #2e3650 !important;
+    }
+    
+    .select2-search--dropdown .select2-search__field {
+        padding: 8px 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        border: 1px solid var(--border-neutral-300, #d5d5d5) !important;
+        border-radius: 6px !important;
+        background-color: #3d4563 !important;
+        color: inherit !important;
+        font-size: 14px !important;
+    }
+    
+    .select2-search--dropdown .select2-search__field:focus {
+        border-color: #487fff !important;
+        outline: 0 !important;
+        box-shadow: 0 0 0 0.15rem rgba(72, 127, 255, 0.1) !important;
+    }
+    
+    /* No results message */
+    .select2-container--default .select2-results__message {
+        color: var(--text-secondary, #6c757d) !important;
+        padding: 10px 16px !important;
+    }
+</style>
+
+<div class="row gy-4">
+    <div class="col-lg-8">
+        <div class="card h-100 p-0 radius-12">
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
+                <h6 class="text-lg fw-semibold mb-0">
+                    <iconify-icon icon="solar:add-circle-bold" class="me-2"></iconify-icon>
+                    <span data-i18n="orders.createOrder">Create Order</span>
+                </h6>
+                <a href="{% url 'orders:ordersList' %}" class="btn btn-outline-secondary btn-sm">
+                    <iconify-icon icon="ep:back" class="me-1"></iconify-icon> <span data-i18n="detail.back">Back</span>
+                </a>
+            </div>
+            <div class="card-body p-24">
+                <form method="post" action="{% url 'orders:orderCreate' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Manual Order Toggle -->
+                    <div class="mb-20 p-16 bg-warning-50 radius-8 border border-warning-200">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="manualOrderToggle">
+                            <label class="form-check-label fw-semibold" for="manualOrderToggle">
+                                <iconify-icon icon="solar:phone-calling-bold" class="me-2 text-warning-600"></iconify-icon>
+                                Create Manual Order (Phone/Walk-in)
+                            </label>
+                        </div>
+                        <small class="text-secondary-light d-block mt-8">
+                            Enable this to create an order for customers who contacted via phone or walk-in (without Telegram registration)
+                        </small>
+                    </div>
+                    
+                    <!-- Customer Selection (Bot User) -->
+                    <div class="row">
+                    <div class="col-md-6 mb-20" id="botUserSection">
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="orders.customer">Customer *</label>
+                        <select name="bot_user" class="form-select radius-8" id="customerSelect">
+                            <option value="">-- Select Customer --</option>
+                            {% for user in bot_users %}
+                            <option value="{{ user.id }}">{{ user.display_name }} {% if user.phone_number %}({{ user.phone_number }}){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-primary-light">Select from existing customers (registered via Telegram bot)</small>
+                    </div>
+                    </div>
+                    
+                    <!-- Manual Customer Info (Hidden by default) -->
+                    <div id="manualCustomerSection" style="display: none;">
+                        <div class="mb-16 p-12 bg-info-50 radius-8 border border-info-200">
+                            <iconify-icon icon="solar:info-circle-bold" class="text-info-600 me-2"></iconify-icon>
+                            <span class="text-sm text-info-600 fw-medium">Enter customer details manually</span>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-20">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">First Name *</label>
+                                <input type="text" name="manual_first_name" id="manualFirstName" class="form-control radius-8" placeholder="Customer's first name">
+                            </div>
+                            <div class="col-md-6 mb-20">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">Last Name</label>
+                                <input type="text" name="manual_last_name" id="manualLastName" class="form-control radius-8" placeholder="Customer's last name">
+                            </div>
+                        <div class="mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Phone Number *</label>
+                            <input type="tel" name="manual_phone" id="manualPhone" class="form-control radius-8" placeholder="+998 XX XXX XX XX">
+                            <small class="text-primary-light">Customer's contact number</small>
+                        </div>
+                        </div>
+                    </div>
+                    
+                    {% if is_superuser and centers %}
+                    <!-- Center and Branch Selection (Superuser only) -->
+                    <div class="row">
+                        <div class="col-md-6 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.center">Center *</label>
+                            <select name="center" class="form-select radius-8" required id="centerSelect">
+                                <option value="">-- Select Center --</option>
+                                {% for center in centers %}
+                                <option value="{{ center.id }}">{{ center.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.branch">Branch *</label>
+                            <select name="branch" class="form-select radius-8" required id="branchSelect">
+                                <option value="">-- Select Center First --</option>
+                            </select>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- Branch (non-superuser) -->
+                    <div class="mb-20">
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.branch">Branch *</label>
+                        <select name="branch" class="form-select radius-8" required id="branchSelect">
+                            <option value="">-- Select Branch --</option>
+                            {% for branch in branches %}
+                            <option value="{{ branch.id }}">{{ branch.name }}{% if branch.center %} ({{ branch.center.name }}){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Product and Language -->
+                    <div class="row">
+                        <div class="col-md-8 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.productService">Product / Service *</label>
+                            <select name="product" class="form-select radius-8" required id="productSelect">
+                                <option value="">-- Select Product --</option>
+                                {% for product in products %}
+                                <option value="{{ product.id }}" data-price="{{ product.price|default:'0' }}">
+                                    {{ product.category.branch.center.name }} - {{ product.category.name }} | {{ product.name }} ({{ product.price|floatformat:0 }} UZS/page)
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.language">Language</label>
+                            <select name="language" class="form-select radius-8">
+                                <option value="">-- Optional --</option>
+                                {% for language in languages %}
+                                <option value="{{ language.id }}">{{ language.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Pages and Copies -->
+                    <div class="row">
+                        <div class="col-md-4 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.totalPages">Total Pages *</label>
+                            <input type="number" name="total_pages" id="totalPages" class="form-control radius-8" value="1" min="1" required>
+                        </div>
+                        <div class="col-md-4 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.copies">Copies</label>
+                            <input type="number" name="copy_number" id="copyNumber" class="form-control radius-8" value="0" min="0">
+                            <small class="text-primary-light d-block mt-4">0 = original only</small>
+                        </div>
+                        <div class="col-md-4 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="table.payment">Payment Type *</label>
+                            <select name="payment_type" class="form-select radius-8" required>
+                                {% for value, label in payment_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-20">
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.description">Description</label>
+                        <textarea name="description" class="form-control radius-8" rows="3" placeholder="Optional notes or special instructions..."></textarea>
+                    </div>
+                    
+                    <!-- File Upload -->
+                    <div class="mb-20">
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.attachedFiles">Files (Optional)</label>
+                        <input type="file" name="files" class="form-control radius-8" multiple accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png">
+                        <small class="text-primary-light">Upload documents to be translated/processed</small>
+                    </div>
+                    
+                    <!-- Estimated Price Display -->
+                    <div class="mb-24 p-16 bg-muted radius-8 border">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold text-secondary-light">Estimated Total:</span>
+                            <span class="fw-bold text-primary-600 text-xl" id="estimatedPrice">0 UZS</span>
+                        </div>
+                        <small class="text-primary-light">* Final price may vary based on actual document pages</small>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'orders:ordersList' %}" class="btn btn-outline-secondary px-24">
+                            <iconify-icon icon="ep:back" class="me-1"></iconify-icon> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success px-24">
+                            <iconify-icon icon="solar:add-circle-bold" class="me-2"></iconify-icon> Create Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar Info -->
+    <div class="col-lg-4">
+        <div class="card radius-12">
+            <div class="card-header border-bottom bg-base py-16 px-24">
+                <h6 class="text-lg fw-semibold mb-0">
+                    <iconify-icon icon="solar:info-circle-bold" class="me-2 text-info-600"></iconify-icon>
+                    Order Guidelines
+                </h6>
+            </div>
+            <div class="card-body p-24">
+                <div class="mb-16">
+                    <h6 class="text-sm fw-semibold mb-8">Required Fields:</h6>
+                    <ul class="list-unstyled text-sm text-secondary-light">
+                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> Customer (bot user OR manual info)</li>
+                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> Branch</li>
+                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> Product/Service</li>
+                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> Total Pages</li>
+                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> Payment Type</li>
+                    </ul>
+                </div>
+                
+                <div class="mb-16">
+                    <h6 class="text-sm fw-semibold mb-8">Manual Orders:</h6>
+                    <p class="text-sm text-secondary-light mb-0">
+                        Enable "Manual Order" to create orders for walk-in customers or phone orders. You'll need to enter their name and phone number manually.
+                    </p>
+                </div>
+                
+                <div class="mb-16">
+                    <h6 class="text-sm fw-semibold mb-8">Note:</h6>
+                    <p class="text-sm text-secondary-light mb-0">
+                        Orders created manually will be in "Pending" status. You can assign staff and update status after creation.
+                    </p>
+                </div>
+                
+                <div class="alert alert-warning-100 text-warning-600 p-12 radius-8">
+                    <iconify-icon icon="solar:info-circle-bold" class="me-2"></iconify-icon>
+                    <span class="text-sm">For bot users: Customers must first register through the Telegram bot before appearing in the dropdown.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- Branch data as JSON for reliable JavaScript access -->
+<script id="branchesJson" type="application/json">
+{% if is_superuser and centers and branches %}
+[{% for branch in branches %}{"id": {{ branch.id }}, "center_id": {{ branch.center_id }}, "name": "{{ branch.name }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+{% else %}
+[]
+{% endif %}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Select2 for customer search
+    $('#customerSelect').select2({
+        ajax: {
+            url: "{% url 'orders:search_customers' %}",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term // search term
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.results
+                };
+            },
+            cache: true
+        },
+        placeholder: '-- Select Customer --',
+        allowClear: true,
+        minimumInputLength: 0,
+        width: '100%'
+    });
+    
+    // Manual Order Toggle
+    const manualOrderToggle = document.getElementById('manualOrderToggle');
+    const botUserSection = document.getElementById('botUserSection');
+    const manualCustomerSection = document.getElementById('manualCustomerSection');
+    const customerSelect = document.getElementById('customerSelect');
+    const manualFirstName = document.getElementById('manualFirstName');
+    const manualPhone = document.getElementById('manualPhone');
+    
+    if (manualOrderToggle) {
+        manualOrderToggle.addEventListener('change', function() {
+            if (this.checked) {
+                // Show manual fields, hide bot user selection
+                botUserSection.style.display = 'none';
+                manualCustomerSection.style.display = 'block';
+                
+                // Update field requirements
+                customerSelect.removeAttribute('required');
+                customerSelect.value = '';
+                manualFirstName.setAttribute('required', 'required');
+                manualPhone.setAttribute('required', 'required');
+            } else {
+                // Show bot user selection, hide manual fields
+                botUserSection.style.display = 'block';
+                manualCustomerSection.style.display = 'none';
+                
+                // Update field requirements
+                customerSelect.setAttribute('required', 'required');
+                manualFirstName.removeAttribute('required');
+                manualPhone.removeAttribute('required');
+                
+                // Clear manual fields
+                manualFirstName.value = '';
+                document.getElementById('manualLastName').value = '';
+                manualPhone.value = '';
+            }
+        });
+    }
+    
+    // Center-Branch filtering (for superusers)
+    const centerSelect = document.getElementById('centerSelect');
+    const branchSelect = document.getElementById('branchSelect');
+    
+    if (centerSelect && branchSelect) {
+        // Get branch data from JSON
+        let branchesData = [];
+        try {
+            const jsonScript = document.getElementById('branchesJson');
+            if (jsonScript) {
+                const jsonText = jsonScript.textContent.trim();
+                console.log('Raw JSON text:', jsonText);
+                branchesData = JSON.parse(jsonText);
+            }
+        } catch(e) {
+            console.error('Error parsing branches JSON:', e);
+        }
+        
+        console.log('Branches data loaded:', branchesData.length, branchesData);
+        
+        centerSelect.addEventListener('change', function() {
+            const selectedCenter = this.value;
+            console.log('Selected center:', selectedCenter, 'type:', typeof selectedCenter);
+            
+            // Reset branch selection
+            branchSelect.innerHTML = '';
+            
+            if (selectedCenter) {
+                // Add placeholder
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = '-- Select Branch --';
+                branchSelect.appendChild(placeholder);
+                
+                // Filter and add matching branches
+                let matchCount = 0;
+                const selectedCenterId = parseInt(selectedCenter);
+                branchesData.forEach(branch => {
+                    console.log('Checking branch:', branch.id, 'center:', branch.center_id, '===', selectedCenterId, '?', branch.center_id === selectedCenterId);
+                    if (branch.center_id === selectedCenterId) {
+                        const option = document.createElement('option');
+                        option.value = branch.id;
+                        option.textContent = branch.name;
+                        branchSelect.appendChild(option);
+                        matchCount++;
+                        console.log('Added branch:', branch.name);
+                    }
+                });
+                console.log('Total matches:', matchCount);
+                
+                // If no branches found, show message
+                if (matchCount === 0) {
+                    branchSelect.innerHTML = '<option value="">-- No branches for this center --</option>';
+                }
+            } else {
+                // Add placeholder for no center selected
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = '-- Select Center First --';
+                branchSelect.appendChild(placeholder);
+            }
+        });
+    } else {
+        console.log('Center/Branch selects not found (non-superuser view)');
+    }
+    
+    // Price calculation
+    function calculatePrice() {
+        const productSelect = document.getElementById('productSelect');
+        const totalPages = parseInt(document.getElementById('totalPages').value) || 1;
+        const copyNumber = parseInt(document.getElementById('copyNumber').value) || 0;
+        
+        const selectedOption = productSelect.options[productSelect.selectedIndex];
+        const pricePerPage = parseFloat(selectedOption?.dataset?.price) || 0;
+        
+        const totalCopies = copyNumber + 1; // Original + copies
+        const estimatedTotal = pricePerPage * totalPages * totalCopies;
+        
+        document.getElementById('estimatedPrice').textContent = 
+            estimatedTotal.toLocaleString('en-US') + ' UZS';
+    }
+    
+    // Attach event listeners
+    document.getElementById('productSelect')?.addEventListener('change', calculatePrice);
+    document.getElementById('totalPages')?.addEventListener('input', calculatePrice);
+    document.getElementById('copyNumber')?.addEventListener('input', calculatePrice);
+    
+    // Initial calculation
+    calculatePrice();
+});  // End DOMContentLoaded
+</script>
+{% endblock script %}

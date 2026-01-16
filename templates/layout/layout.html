@@ -8,13 +8,65 @@
     <main class="dashboard-main">
       {% include "../partials/navbar.html" %}
         <div class="dashboard-main-body">
-            {% include "../partials/breadcrumb.html" with title=title subTitle=subTitle %} 
+            {% include "../partials/breadcrumb.html" with title=title subTitle=subTitle %}
+            
+            <!-- Messages Display - Fixed position toast-style -->
+            {% if messages %}
+            <div class="messages-container" style="position: fixed; top: 80px; right: 20px; z-index: 9999; min-width: 320px; max-width: 400px;">
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-lg" role="alert" style="margin-bottom: 10px;">
+                    <div class="d-flex align-items-center gap-2">
+                        {% if message.tags == 'success' %}
+                        <iconify-icon icon="mdi:check-circle" class="text-xl"></iconify-icon>
+                        {% elif message.tags == 'error' or message.tags == 'danger' %}
+                        <iconify-icon icon="mdi:alert-circle" class="text-xl"></iconify-icon>
+                        {% elif message.tags == 'warning' %}
+                        <iconify-icon icon="mdi:alert" class="text-xl"></iconify-icon>
+                        {% else %}
+                        <iconify-icon icon="mdi:information" class="text-xl"></iconify-icon>
+                        {% endif %}
+                        <span>{{ message }}</span>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
                 {% block content %} 
                 {% endblock %}
         </div>
 
       {% include "../partials/footer.html" %}
     </main>
-    {% include "../partials/scripts.html" %} {% block script %} {% endblock %}
+    {% include "../partials/scripts.html" %}
+    
+    <!-- Auto-dismiss messages after 4 seconds -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var alerts = document.querySelectorAll('.messages-container .alert');
+        alerts.forEach(function(alert, index) {
+            // Stagger the auto-dismiss for multiple messages
+            setTimeout(function() {
+                alert.style.transition = 'opacity 0.5s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(function() {
+                    if (alert.parentNode) {
+                        var bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, 500);
+            }, 4000 + (index * 500)); // 4 seconds + 0.5s delay per message
+        });
+        
+        // Initialize Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+    </script>
+    
+    {% block script %} {% endblock %}
   </body>
 </html>

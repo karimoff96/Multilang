@@ -24,111 +24,233 @@
                     <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %} data-i18n="common.inactive">Inactive</option>
                     <option value="agency" {% if status_filter == 'agency' %}selected{% endif %} data-i18n="common.agencies">Agencies</option>
                 </select>
+                {% if user.is_superuser and centers %}
+                <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="" data-i18n="common.allCenters">All Centers</option>
+                    {% for center in centers %}
+                    <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+                {% if branches %}
+                <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="" data-i18n="common.allBranches">All Branches</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.center.name }} - {{ branch.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
             </form>
         </div>
         <a href="{% url 'addUser' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
             <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
             <span data-i18n="common.addUser">Add New User</span>
         </a>
+        
+        <!-- Actions Dropdown -->
+        <div class="d-flex align-items-center gap-2" style="margin-left: 10px;">
+            <select id="bulkActionSelect" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px">
+                <option value="" data-i18n="common.actions">Actions</option>
+                <option value="delete" data-i18n="common.deleteSelected">Delete selected</option>
+            </select>
+            <button id="applyBulkAction" class="btn btn-primary btn-sm px-16 h-40-px" disabled>
+                <span data-i18n="common.apply">Apply</span>
+            </button>
+        </div>
     </div>
+    
+    <!-- Bulk Delete Confirmation Modal -->
+    <div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger-focus">
+                    <h5 class="modal-title text-danger-main" id="bulkDeleteModalLabel">
+                        <iconify-icon icon="solar:trash-bin-minimalistic-bold" class="text-xl"></iconify-icon>
+                        <span data-i18n="common.confirmDeletion">Confirm Deletion</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-16">
+                        <iconify-icon icon="solar:danger-triangle-bold" class="text-warning-main text-xl"></iconify-icon>
+                        <span data-i18n="users.bulkDeleteWarning">Are you sure you want to delete the selected users?</span>
+                    </p>
+                    <p class="mb-0 fw-semibold">
+                        <span data-i18n="users.itemsToDelete">Users to be deleted:</span> 
+                        <span id="deleteCount" class="text-danger-main">0</span>
+                    </p>
+                    <p class="text-secondary-light text-sm mt-8" data-i18n="common.cannotUndo">
+                        This action cannot be undone.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmBulkDelete">
+                        <iconify-icon icon="solar:trash-bin-minimalistic-bold"></iconify-icon>
+                        <span data-i18n="common.delete">Delete</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="card-body p-24">
-        <div class="table-responsive scroll-sm">
+        <div class="table-responsive">
             <table class="table bordered-table sm-table mb-0">
                 <thead>
                     <tr>
-                        <th scope="col">
+                        <th scope="col" class="col-id">
                             <div class="d-flex align-items-center gap-10">
                                 <div class="form-check style-check d-flex align-items-center">
-                                    <input class="form-check-input radius-4 border input-form-dark" type="checkbox" name="checkbox" id="selectAll">
+                                    <input class="form-check-input radius-4 border input-form-dark" type="checkbox" name="checkbox" id="selectAllUsers">
                                 </div>
-                                #
+                                <span data-i18n="table.userDate">#</span>
                             </div>
                         </th>
-                        <th scope="col" data-i18n="table.joinDate">Join Date</th>
-                        <th scope="col" data-i18n="table.name">Name</th>
-                        <th scope="col" data-i18n="table.username">Username</th>
-                        <th scope="col" data-i18n="table.phone">Phone</th>
-                        <th scope="col" data-i18n="table.language">Language</th>
-                        <th scope="col" data-i18n="table.agency">Agency</th>
-                        <th scope="col" class="text-center" data-i18n="table.status">Status</th>
-                        <th scope="col" class="text-center" data-i18n="table.action">Action</th>
+                        {% if user.is_superuser or is_owner %}
+                        <th scope="col" class="hide-mobile" data-i18n="table.location">Location</th>
+                        {% endif %}
+                        <th scope="col" data-i18n="table.customer">Customer</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.contact">Contact</th>
+                        <th scope="col" class="col-id" data-i18n="table.orders">#</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.details">Details</th>
+                        <th scope="col" class="text-center col-status" data-i18n="table.status">Status</th>
+                        <th scope="col" class="text-center col-action" data-i18n="table.action">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for user in users %}
+                    {% for bot_user in users %}
                     <tr>
-                        <td>
+                        <!-- # -->
+                        <td class="col-id">
                             <div class="d-flex align-items-center gap-10">
                                 <div class="form-check style-check d-flex align-items-center">
-                                    <input class="form-check-input radius-4 border border-neutral-400" type="checkbox" name="checkbox">
+                                    <input class="form-check-input radius-4 border border-neutral-400 user-checkbox" type="checkbox" name="user_ids" value="{{ bot_user.id }}">
                                 </div>
-                                {{ forloop.counter }}
+                                <span class="fw-semibold text-secondary-light">{{ forloop.counter }}</span>
                             </div>
                         </td>
-                        <td>{{ user.created_at|date:"d M Y" }}</td>
+                        <!-- Location: Center + Branch (combined) -->
+                        {% if user.is_superuser or is_owner %}
+                        <td class="hide-mobile">
+                            {% if bot_user.branch %}
+                            <div class="cell-merged-info">
+                                {% if user.is_superuser and bot_user.branch.center %}
+                                <a href="{% url 'center_detail' bot_user.branch.center.id %}" class="cell-primary text-primary-600">{{ bot_user.branch.center.name|truncatechars:12 }}</a>
+                                {% endif %}
+                                <a href="{% url 'branch_detail' bot_user.branch.id %}" class="cell-secondary text-info-600">{{ bot_user.branch.name|truncatechars:12 }}</a>
+                            </div>
+                            {% else %}
+                            <span class="text-secondary-light">-</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                        <!-- Customer: Name + Avatar -->
                         <td>
                             <div class="d-flex align-items-center">
-                                <div class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden bg-primary-100 d-flex align-items-center justify-content-center">
-                                    <span class="text-primary-600 fw-semibold">{{ user.name|slice:":1"|upper }}</span>
+                                <div class="w-32-px h-32-px rounded-circle flex-shrink-0 me-8 overflow-hidden bg-primary-100 d-flex align-items-center justify-content-center">
+                                    <span class="text-primary-600 fw-semibold text-xs">{{ bot_user.name|slice:":1"|upper }}</span>
                                 </div>
-                                <div class="flex-grow-1">
-                                    <span class="text-md mb-0 fw-medium text-secondary-light">{{ user.name }}</span>
+                                <div>
+                                    <span class="text-sm fw-medium text-secondary-light d-block truncate-120">{{ bot_user.name|truncatechars:15 }}</span>
+                                    {% if bot_user.username %}<small class="text-secondary-light text-xs">@{{ bot_user.username|truncatechars:10 }}</small>{% endif %}
                                 </div>
                             </div>
                         </td>
-                        <td>
-                            <span class="text-md mb-0 fw-normal text-secondary-light">
-                                {% if user.username %}@{{ user.username }}{% else %}<span class="text-muted">-</span>{% endif %}
-                            </span>
+                        <!-- Contact: Phone -->
+                        <td class="hide-mobile">
+                            <span class="text-secondary-light text-sm nowrap">{{ bot_user.phone }}</span>
                         </td>
-                        <td>{{ user.phone }}</td>
-                        <td>
-                            {% if user.language == 'uz' %}
-                                <span class="badge bg-info-focus text-info-600">🇺🇿 Uzbek</span>
-                            {% elif user.language == 'ru' %}
-                                <span class="badge bg-danger-focus text-danger-600">🇷🇺 Russian</span>
-                            {% elif user.language == 'en' %}
-                                <span class="badge bg-success-focus text-success-600">🇬🇧 English</span>
+                        <!-- Orders: Count + Last Order -->
+                        <td class="col-id">
+                            <div class="d-flex flex-column">
+                                <span class="badge bg-primary-focus text-primary-600 badge-compact">{{ bot_user.order_count }}</span>
+                                {% if bot_user.last_order_date %}
+                                <small class="text-secondary-light text-xs mt-1">{{ bot_user.last_order_date|date:"d/m" }}</small>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <!-- Details: Language + Agency (combined) -->
+                        <td class="hide-mobile">
+                            <div class="d-flex flex-wrap gap-1">
+                                {% if bot_user.language == 'uz' %}
+                                    <span class="badge bg-info-focus text-info-600 badge-compact">🇺🇿</span>
+                                {% elif bot_user.language == 'ru' %}
+                                    <span class="badge bg-danger-focus text-danger-600 badge-compact">🇷🇺</span>
+                                {% elif bot_user.language == 'en' %}
+                                    <span class="badge bg-success-focus text-success-600 badge-compact">🇬🇧</span>
+                                {% else %}
+                                    <span class="badge bg-neutral-200 text-neutral-600 badge-compact">{{ bot_user.language|upper }}</span>
+                                {% endif %}
+                                {% if bot_user.is_agency %}
+                                    <span class="badge bg-warning-focus text-warning-600 badge-compact">Agn</span>
+                                {% elif bot_user.agency %}
+                                    <span class="badge bg-neutral-200 text-neutral-600 badge-compact">{{ bot_user.agency.name|slice:":5" }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <!-- Status -->
+                        <td class="text-center col-status">
+                            {% if bot_user.is_active %}
+                                <span class="bg-success-focus text-success-600 status-badge-sm radius-4 fw-medium">Active</span>
                             {% else %}
-                                <span class="badge bg-neutral-200 text-neutral-600">{{ user.language }}</span>
+                                <span class="bg-neutral-200 text-neutral-600 status-badge-sm radius-4 fw-medium">Off</span>
                             {% endif %}
                         </td>
-                        <td>
-                            {% if user.is_agency %}
-                                <span class="badge bg-warning-focus text-warning-600">Agency</span>
-                            {% elif user.agency %}
-                                <span class="text-sm text-secondary-light">{{ user.agency.name|truncatechars:15 }}</span>
-                            {% else %}
-                                <span class="bg-danger-200 text-danger-600 border border-danger-400 px-24 py-4 radius-4 fw-medium text-sm">No</span>
-                            {% endif %}
-                        </td>
-                        <td class="text-center">
-                            {% if user.is_active %}
-                                <span class="bg-success-focus text-success-600 border border-success-main px-24 py-4 radius-4 fw-medium text-sm">Active</span>
-                            {% else %}
-                                <span class="bg-neutral-200 text-neutral-600 border border-neutral-400 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
-                            {% endif %}
-                        </td>
-                        <td class="text-center">
-                            <div class="d-flex align-items-center gap-10 justify-content-center">
-                                <a href="{% url 'userDetail' %}?id={{ user.id }}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                    <iconify-icon icon="majesticons:eye-line" class="icon text-xl"></iconify-icon>
+                        <!-- Action -->
+                        <td class="text-center col-action">
+                            <div class="d-flex align-items-center gap-4 justify-content-center">
+                                <a href="{% url 'userDetail' %}?id={{ bot_user.id }}" class="bg-info-focus text-info-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="View">
+                                    <iconify-icon icon="majesticons:eye-line"></iconify-icon>
                                 </a>
-                                <a href="{% url 'editUser' user.id %}" class="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle">
-                                    <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
+                                <a href="{% url 'editUser' bot_user.id %}" class="bg-success-focus text-success-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="Edit">
+                                    <iconify-icon icon="lucide:edit"></iconify-icon>
                                 </a>
-                                <button type="button" class="remove-item-btn bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle" data-user-id="{{ user.id }}">
-                                    <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                                {% if user.is_superuser or is_owner %}
+                                <button type="button" class="bg-danger-focus text-danger-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle border-0" 
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal{{ bot_user.id }}" title="Delete">
+                                    <iconify-icon icon="fluent:delete-24-regular"></iconify-icon>
                                 </button>
+                                {% endif %}
                             </div>
+                            
+                            {% if user.is_superuser or is_owner %}
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal{{ bot_user.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" data-i18n="common.deleteUser">Delete User</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p><span data-i18n="common.confirmDeleteUser">Are you sure you want to delete</span> <strong>{{ bot_user.name|default:bot_user.username|default:"this user" }}</strong>?</p>
+                                            {% if bot_user.order_count > 0 %}
+                                            <div class="alert alert-warning py-8 px-12">
+                                                <iconify-icon icon="mdi:warning" class="me-8"></iconify-icon>
+                                                This user has {{ bot_user.order_count }} order(s). Orders will remain but will be unlinked.
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Cancel</button>
+                                            <form action="{% url 'deleteUser' bot_user.id %}" method="POST" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger" data-i18n="common.delete">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="9" class="text-center py-4">
+                        <td colspan="{% if user.is_superuser or is_owner %}8{% else %}7{% endif %}" class="text-center py-4">
                             <div class="text-secondary-light">
                                 <iconify-icon icon="mdi:account-off-outline" class="text-4xl mb-2"></iconify-icon>
-                                <p class="mb-0">No users found</p>
+                                <p class="mb-0" data-i18n="common.noUsersFound">No users found</p>
                             </div>
                         </td>
                     </tr>
@@ -143,12 +265,12 @@
             <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                 {% if users.has_previous %}
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page=1&search={{ search_query }}&status={{ status_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page=1&search={{ search_query }}&status={{ status_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:d-arrow-left"></iconify-icon>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ users.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ users.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:arrow-left"></iconify-icon>
                     </a>
                 </li>
@@ -161,19 +283,19 @@
                     </li>
                     {% elif num > users.number|add:'-3' and num < users.number|add:'3' %}
                     <li class="page-item">
-                        <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" href="?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&per_page={{ per_page }}">{{ num }}</a>
+                        <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" href="?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">{{ num }}</a>
                     </li>
                     {% endif %}
                 {% endfor %}
                 
                 {% if users.has_next %}
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ users.next_page_number }}&search={{ search_query }}&status={{ status_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ users.next_page_number }}&search={{ search_query }}&status={{ status_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:arrow-right"></iconify-icon>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ users.paginator.num_pages }}&search={{ search_query }}&status={{ status_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ users.paginator.num_pages }}&search={{ search_query }}&status={{ status_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:d-arrow-right"></iconify-icon>
                     </a>
                 </li>
@@ -187,18 +309,121 @@
 
 {% block script %}
 <script>
-    // Select all checkbox
-    $('#selectAll').on('change', function() {
-        $('tbody input[type="checkbox"]').prop('checked', $(this).prop('checked'));
+$(document).ready(function() {
+    console.log('Bulk delete script loaded');
+    
+    // Select all checkbox functionality
+    $('#selectAllUsers').on('change', function() {
+        console.log('Select all clicked:', this.checked);
+        $('.user-checkbox').prop('checked', this.checked);
+        updateActionButton();
     });
     
-    // Remove item (you can enhance this to make AJAX call)
-    $('.remove-item-btn').on('click', function() {
-        if (confirm('Are you sure you want to delete this user?')) {
-            $(this).closest('tr').addClass('d-none');
-            // TODO: Add AJAX call to delete user
-            // var userId = $(this).data('user-id');
+    // Individual checkbox change - using event delegation
+    $(document).on('change', '.user-checkbox', function() {
+        updateActionButton();
+        // Update "select all" checkbox state
+        const allChecked = $('.user-checkbox').length > 0 && $('.user-checkbox:checked').length === $('.user-checkbox').length;
+        $('#selectAllUsers').prop('checked', allChecked);
+    });
+    
+    // Action dropdown change
+    $('#bulkActionSelect').on('change', function() {
+        updateActionButton();
+    });
+    
+    // Update action button state
+    function updateActionButton() {
+        const selectedCount = $('.user-checkbox:checked').length;
+        const actionSelected = $('#bulkActionSelect').val();
+        const shouldEnable = selectedCount > 0 && actionSelected;
+        console.log('Update button - Selected:', selectedCount, 'Action:', actionSelected, 'Enable:', shouldEnable);
+        $('#applyBulkAction').prop('disabled', !shouldEnable);
+    }
+    
+    // Initialize button state on page load
+    updateActionButton();
+    
+    // Apply bulk action
+    $('#applyBulkAction').on('click', function(e) {
+        e.preventDefault();
+        const action = $('#bulkActionSelect').val();
+        const selectedCount = $('.user-checkbox:checked').length;
+        
+        console.log('Apply clicked. Action:', action, 'Selected:', selectedCount);
+        
+        if (!action) {
+            alert('Please select an action');
+            return;
+        }
+        
+        if (selectedCount === 0) {
+            alert('Please select at least one user');
+            return;
+        }
+        
+        if (action === 'delete') {
+            // Show modal with count
+            $('#deleteCount').text(selectedCount);
+            $('#bulkDeleteModal').modal('show');
         }
     });
+    
+    // Confirm bulk delete
+    $('#confirmBulkDelete').on('click', function(e) {
+        e.preventDefault();
+        const selectedIds = $('.user-checkbox:checked').map(function() {
+            return $(this).val();
+        }).get();
+        
+        console.log('Deleting users:', selectedIds);
+        
+        if (selectedIds.length === 0) {
+            alert('No users selected');
+            return;
+        }
+        
+        // Disable button and show loading
+        const $btn = $(this);
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Deleting...');
+        
+        // Prepare form data
+        const formData = new FormData();
+        selectedIds.forEach(id => {
+            formData.append('user_ids', id);
+        });
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        
+        $.ajax({
+            url: '{% url "bulk_delete_users" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                console.log('Delete response:', response);
+                if (response.success) {
+                    // Hide modal
+                    $('#bulkDeleteModal').modal('hide');
+                    // Show success message
+                    alert(response.message);
+                    // Reload page
+                    location.reload();
+                } else {
+                    alert('Error: ' + response.message);
+                    $btn.prop('disabled', false).html('<iconify-icon icon="solar:trash-bin-minimalistic-bold"></iconify-icon> <span data-i18n="common.delete">Delete</span>');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Delete error:', xhr, status, error);
+                console.error('Response:', xhr.responseText);
+                const response = xhr.responseJSON;
+                const errorMsg = response ? response.message : (xhr.responseText || 'Failed to delete users');
+                alert('Error: ' + errorMsg);
+                $btn.prop('disabled', false).html('<iconify-icon icon="solar:trash-bin-minimalistic-bold"></iconify-icon> <span data-i18n="common.delete">Delete</span>');
+            }
+        });
+    });
+});
 </script>
 {% endblock %}

@@ -1,0 +1,294 @@
+{% extends 'layout/layout.html' %} 
+{% load number_filters %}
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Report Header with Filters -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-0" data-i18n="report.customerAnalytics">{{ title }}</h5>
+                        <p class="text-secondary-light mb-0" data-i18n="report.customerAnalyticsDesc">Customer acquisition and behavior analytics</p>
+                    </div>
+                    <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                        <!-- Period Filter -->
+                        <div>
+                            <label class="form-label text-sm mb-1" data-i18n="filter.period">Period</label>
+                            <select name="period" id="periodSelect" class="form-select" style="min-width: 140px;">
+                                {% for value, label in period_choices %}
+                                <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Custom Date Range -->
+                        <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                            <div>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.from">From</label>
+                                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                            </div>
+                            <div>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.to">To</label>
+                                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                            </div>
+                        </div>
+                        {% if user.is_superuser and centers %}
+                        <div>
+                            <label class="form-label text-sm mb-1" data-i18n="common.center">Center</label>
+                            <select name="center" class="form-select" onchange="this.form.submit()">
+                                <option value="" data-i18n="common.allCenters">All Centers</option>
+                                {% for center in centers %}
+                                <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        {% if branches %}
+                        <div>
+                            <label class="form-label text-sm mb-1" data-i18n="common.branch">Branch</label>
+                            <select name="branch" class="form-select">
+                                <option value="" data-i18n="common.allBranches">All Branches</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
+                            <span data-i18n="common.apply">Apply</span>
+                        </button>
+                        <a href="{% url 'export_report' 'customers' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="vscode-icons:file-type-excel" class="icon line-height-1"></iconify-icon>
+                            <span data-i18n="common.exportExcel">Export Excel</span>
+                        </a>
+                    </form>
+                </div>
+                {% if period_label %}
+                <div class="mt-3">
+                    <span class="badge bg-primary-light text-primary-main px-12 py-6">
+                        <iconify-icon icon="solar:calendar-bold" class="me-1"></iconify-icon>
+                        {{ period_label }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-1 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="w-48-px h-48-px bg-primary-600 text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:users-group-rounded-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm" data-i18n="report.totalCustomers">Total Customers</span>
+                        <h4 class="fw-bold mb-0">{{ total_customers }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-2 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="w-48-px h-48-px bg-success-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:check-circle-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm" data-i18n="report.activeCustomers">Active Customers</span>
+                        <h4 class="fw-bold mb-0">{{ active_customers }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-3 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="w-48-px h-48-px bg-info-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:user-plus-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm" data-i18n="report.newPeriod">New (Period)</span>
+                        <h4 class="fw-bold mb-0">{{ new_customers }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-4 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="w-48-px h-48-px bg-warning-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:buildings-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm" data-i18n="sidebar.agencies">Agencies</span>
+                        <h4 class="fw-bold mb-0">{{ agencies }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Acquisition Chart -->
+    <div class="col-xxl-8">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.customerAcquisitionTrend">Customer Acquisition Trend</h6>
+                <div id="acquisitionChart" style="min-height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Type Breakdown -->
+    <div class="col-xxl-4">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.customerTypes">Customer Types</h6>
+                <div class="d-flex flex-column gap-3">
+                    {% for type in type_breakdown %}
+                    <div class="p-3 rounded-3 bg-{% if type.type == 'Agencies' %}primary{% else %}secondary{% endif %}-50">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-medium">{{ type.type }}</span>
+                            <span class="fw-bold text-lg">{{ type.count }}</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-{% if type.type == 'Agencies' %}primary{% else %}secondary{% endif %}" 
+                                 style="width: {% widthratio type.count total_customers 100 %}%;"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Customers Table -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.topCustomersByRevenue">Top Customers by Revenue</h6>
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-secondary-light">#</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.customer">Customer</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.type">Type</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.orders">Orders</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="report.totalSpent">Total Spent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for customer in top_customers %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }}">
+                                    {% if forloop.counter <= 3 %}
+                                    <span class="w-28-px h-28-px rounded-circle bg-{% if forloop.counter == 1 %}warning{% elif forloop.counter == 2 %}secondary{% else %}info{% endif %}-100 d-inline-flex justify-content-center align-items-center">
+                                        <iconify-icon icon="solar:cup-star-bold" class="text-{% if forloop.counter == 1 %}warning{% elif forloop.counter == 2 %}secondary{% else %}info{% endif %}-main"></iconify-icon>
+                                    </span>
+                                    {% else %}
+                                    <span class="fw-medium text-secondary-light">{{ forloop.counter }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="{{ row_color }}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="w-36-px h-36-px rounded-circle bg-{% if customer.is_agency %}primary{% else %}success{% endif %}-100 text-{% if customer.is_agency %}primary{% else %}success{% endif %}-600 d-flex justify-content-center align-items-center">
+                                            <iconify-icon icon="{% if customer.is_agency %}solar:buildings-bold{% else %}solar:user-bold{% endif %}"></iconify-icon>
+                                        </div>
+                                        <span class="fw-medium text-secondary-light">{{ customer.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="{{ row_color }}">
+                                    {% if customer.is_agency %}
+                                    <span class="badge bg-primary-focus text-primary-main" data-i18n="common.agency">Agency</span>
+                                    {% else %}
+                                    <span class="badge bg-success-focus text-success-main" data-i18n="table.customer">Customer</span>
+                                    {% endif %}
+                                </td>
+                                <td class="{{ row_color }} text-center text-secondary-light">{{ customer.order_count }}</td>
+                                <td class="{{ row_color }} text-end">
+                                    <span class="fw-bold text-success-main">{{ customer.total_spent|short_number }}</span>
+                                    <small class="text-secondary-light">UZS</small>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-secondary-light py-4 bg-base" data-i18n="report.noCustomerData">
+                                    No customer data available
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Period selection toggle for custom date range
+    const periodSelect = document.getElementById('periodSelect');
+    const customDateRange = document.getElementById('customDateRange');
+    
+    if (periodSelect && customDateRange) {
+        periodSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customDateRange.style.display = 'flex';
+            } else {
+                customDateRange.style.display = 'none';
+                // Auto-submit when not custom
+                this.form.submit();
+            }
+        });
+    }
+
+    const acquisitionLabels = {{ acquisition_labels|safe }};
+    const acquisitionValues = {{ acquisition_values|safe }};
+    
+    console.log('Customer data:', { acquisitionLabels, acquisitionValues });
+    
+    if (acquisitionLabels && acquisitionLabels.length > 0 && acquisitionValues.some(v => v > 0)) {
+        new ApexCharts(document.querySelector("#acquisitionChart"), {
+            series: [{ name: (typeof LanguageManager !== 'undefined' && LanguageManager.translate('report.newCustomers')) || 'New Customers', data: acquisitionValues }],
+            chart: { type: 'area', height: 300, toolbar: { show: false } },
+            colors: ['#487FFF'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.4,
+                    opacityTo: 0.1,
+                }
+            },
+            dataLabels: { enabled: false },
+            stroke: { curve: 'smooth', width: 2 },
+            xaxis: {
+                categories: acquisitionLabels,
+                labels: { style: { colors: '#9CA3AF', fontSize: '11px' } }
+            },
+            yaxis: {
+                labels: { style: { colors: '#9CA3AF', fontSize: '12px' } }
+            },
+            grid: { borderColor: '#E4E7EC', strokeDashArray: 3 }
+        }).render();
+    } else {
+        document.querySelector("#acquisitionChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:users-group-rounded-line-duotone" class="text-4xl mb-2"></iconify-icon><span>No new customers in this period</span></div>';
+    }
+});
+</script>
+{% endblock script %}

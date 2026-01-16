@@ -1,0 +1,312 @@
+{% extends 'layout/layout.html' %} 
+{% load number_filters %}
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Report Header with Filters -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-0" data-i18n="report.staffPerformance">{{ title }}</h5>
+                        <p class="text-secondary-light mb-0" data-i18n="report.staffPerformanceDesc">Track and analyze staff performance metrics</p>
+                    </div>
+                    <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                        <!-- Period Filter -->
+                        <div>
+                            <label class="form-label text-sm mb-1" data-i18n="filter.period">Period</label>
+                            <select name="period" id="periodSelect" class="form-select" style="min-width: 140px;">
+                                {% for value, label in period_choices %}
+                                <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Custom Date Range -->
+                        <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                            <div>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.from">From</label>
+                                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                            </div>
+                            <div>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.to">To</label>
+                                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                            </div>
+                        </div>
+                        {% if user.is_superuser and centers %}
+                        <div>
+                            <label class="form-label text-sm mb-1" data-i18n="common.center">Center</label>
+                            <select name="center" class="form-select" onchange="this.form.submit()">
+                                <option value="" data-i18n="common.allCenters">All Centers</option>
+                                {% for center in centers %}
+                                <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        {% if branches %}
+                        <div>
+                            <label class="form-label text-sm mb-1" data-i18n="common.branch">Branch</label>
+                            <select name="branch" class="form-select">
+                                <option value="" data-i18n="common.allBranches">All Branches</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.center.name }} - {{ branch.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
+                            <span data-i18n="common.apply">Apply</span>
+                        </button>
+                        <a href="{% url 'export_report' 'staff_performance' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="vscode-icons:file-type-excel" class="icon line-height-1"></iconify-icon>
+                            <span data-i18n="common.exportExcel">Export Excel</span>
+                        </a>
+                    </form>
+                </div>
+                {% if period_label %}
+                <div class="mt-3">
+                    <span class="badge bg-primary-light text-primary-main px-12 py-6">
+                        <iconify-icon icon="solar:calendar-bold" class="me-1"></iconify-icon>
+                        {{ period_label }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Performers Chart -->
+    <div class="col-xxl-8">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between mb-4">
+                    <h6 class="fw-bold text-lg mb-0" data-i18n="report.topPerformersCompleted">Top Performers - Completed Orders</h6>
+                    {% if top_performers %}
+                    <span class="bg-success-focus text-success-main text-sm px-12 py-4 rounded-pill">{{ top_performers|length }} staff</span>
+                    {% endif %}
+                </div>
+                {% if top_performers %}
+                <div id="performanceChart" style="min-height: 300px;"></div>
+                {% else %}
+                <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                    <span class="mb-0 w-64-px h-64-px bg-neutral-100 flex-shrink-0 text-secondary-light d-flex justify-content-center align-items-center rounded-circle mb-3">
+                        <iconify-icon icon="solar:chart-2-line-duotone" class="text-xxl"></iconify-icon>
+                    </span>
+                    <h6 class="fw-semibold text-secondary-light mb-1" data-i18n="report.noPerformanceData">No performance data available</h6>
+                    <p class="text-sm text-secondary-light mb-0" data-i18n="report.noPerformanceDataDesc">No staff members have completed orders in the selected period</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top 5 Performers Card -->
+    <div class="col-xxl-4">
+        <div class="card radius-8 border-0 h-100">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4">
+                    <iconify-icon icon="solar:cup-star-bold" class="text-warning-main me-1"></iconify-icon>
+                    <span data-i18n="report.topPerformers">Top Performers</span>
+                </h6>
+                {% for staff in top_performers %}
+                <div class="d-flex align-items-center gap-3 mb-3 {% if not forloop.last %}pb-3 border-bottom{% endif %}">
+                    <div class="w-40-px h-40-px rounded-circle bg-{% if forloop.counter == 1 %}warning{% elif forloop.counter == 2 %}secondary{% elif forloop.counter == 3 %}info{% else %}primary{% endif %}-100 d-flex justify-content-center align-items-center flex-shrink-0">
+                        <span class="fw-bold text-{% if forloop.counter == 1 %}warning{% elif forloop.counter == 2 %}secondary{% elif forloop.counter == 3 %}info{% else %}primary{% endif %}-main">{{ forloop.counter }}</span>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="fw-semibold text-md mb-0">{{ staff.name }}</h6>
+                        <small class="text-secondary-light">{{ staff.branch }}</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="fw-bold text-success-main d-block">{{ staff.completed }}</span>
+                        <small class="text-secondary-light" data-i18n="status.completed">completed</small>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-primary-light py-4">
+                    <iconify-icon icon="solar:users-group-rounded-line-duotone" class="text-xxl mb-2"></iconify-icon>
+                    <p class="text-center text-secondary-light py-4 bg-base" data-i18n="report.noPerformanceData">No performance data yet</p> 
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Performance Table -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.allStaffPerformance">All Staff Performance</h6>
+                <div class="table-responsive">
+                    <table class="table colored-row-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.staffMember">Staff Member</th>
+                                {% if user.is_superuser %}
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="common.center">Center</th>
+                                {% endif %}
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="common.branch">Branch</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.role">Role</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.assigned">Assigned</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="status.completed">Completed</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="report.completionRate">Completion Rate</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="report.revenueGenerated">Revenue Generated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for staff in staff_data %}
+                            {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
+                            <tr>
+                                <td class="{{ row_color }}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="w-36-px h-36-px rounded-circle bg-primary-100 text-primary-600 d-flex justify-content-center align-items-center">
+                                            <iconify-icon icon="solar:user-bold"></iconify-icon>
+                                        </div>
+                                        <span class="fw-medium text-secondary-light">{{ staff.name }}</span>
+                                    </div>
+                                </td>
+                                {% if user.is_superuser %}
+                                <td class="{{ row_color }}"><span class="fw-medium text-primary-light">{{ staff.center }}</span></td>
+                                {% endif %}
+                                <td class="{{ row_color }} text-secondary-light">{{ staff.branch }}</td>
+                                <td class="{{ row_color }}"><span class="badge bg-light text-dark">{{ staff.role }}</span></td>
+                                <td class="{{ row_color }} text-center text-secondary-light">{{ staff.total_assigned }}</td>
+                                <td class="{{ row_color }} text-center">
+                                    <span class="text-success-main fw-semibold">{{ staff.completed }}</span>
+                                </td>
+                                <td class="{{ row_color }} text-center">
+                                    <div class="d-flex align-items-center gap-2 justify-content-center">
+                                        <div class="progress w-60-px" style="height: 6px;">
+                                            <div class="progress-bar bg-{% if staff.completion_rate >= 80 %}success{% elif staff.completion_rate >= 50 %}warning{% else %}danger{% endif %}" 
+                                                 style="width: {{ staff.completion_rate }}%;"></div>
+                                        </div>
+                                        <span class="text-sm text-secondary-light">{{ staff.completion_rate }}%</span>
+                                    </div>
+                                </td>
+                                <td class="{{ row_color }} text-end">
+                                    <span class="fw-semibold text-secondary-light">{{ staff.revenue|short_number }}</span>
+                                    <small class="text-secondary-light">UZS</small>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="{% if user.is_superuser %}8{% else %}7{% endif %}" class="text-center text-secondary-light py-4 bg-base" data-i18n="report.noStaffData">
+                                    No staff data available
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                {% if staff_page.has_other_pages %}
+                <nav class="d-flex justify-content-center mt-4">
+                    <ul class="pagination mb-0">
+                        {% if staff_page.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ staff_page.previous_page_number }}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}">
+                                <iconify-icon icon="solar:alt-arrow-left-linear"></iconify-icon>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in staff_page.paginator.page_range %}
+                            {% if staff_page.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num > staff_page.number|add:'-3' and num < staff_page.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if staff_page.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ staff_page.next_page_number }}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}">
+                                <iconify-icon icon="solar:alt-arrow-right-linear"></iconify-icon>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                <p class="text-center text-secondary-light text-sm mt-2">
+                    Showing {{ staff_page.start_index }}-{{ staff_page.end_index }} of {{ staff_page.paginator.count }} staff members
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+function getThemeColors() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    return {
+        textColor: isDark ? '#9CA3AF' : '#6C757D',
+        gridColor: isDark ? '#374151' : '#E4E7EC',
+        bgColor: isDark ? '#1F2937' : '#ffffff'
+    };
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Period selection toggle for custom date range
+    const periodSelect = document.getElementById('periodSelect');
+    const customDateRange = document.getElementById('customDateRange');
+    
+    if (periodSelect && customDateRange) {
+        periodSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customDateRange.style.display = 'flex';
+            } else {
+                customDateRange.style.display = 'none';
+                // Auto-submit when not custom
+                this.form.submit();
+            }
+        });
+    }
+
+    const colors = getThemeColors();
+    const staffLabels = {{ staff_labels|safe }};
+    const staffCompleted = {{ staff_completed|safe }};
+    
+    if (staffLabels.length > 0 && document.querySelector("#performanceChart")) {
+        new ApexCharts(document.querySelector("#performanceChart"), {
+            series: [{
+                name: 'Completed Orders',
+                data: staffCompleted
+            }],
+            chart: { type: 'bar', height: 280, toolbar: { show: false } },
+            colors: ['#45B369'],
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 4,
+                    barHeight: '60%'
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function(val) { return val; },
+                style: { fontSize: '12px', colors: ['#fff'] }
+            },
+            xaxis: {
+                categories: staffLabels,
+                labels: { style: { colors: colors.textColor, fontSize: '11px' } },
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                labels: { style: { colors: colors.textColor, fontSize: '12px' } }
+            },
+            grid: { borderColor: colors.gridColor, strokeDashArray: 3 },
+            tooltip: { y: { formatter: function(val) { return val + ' orders'; } } }
+        }).render();
+    }
+});
+</script>
+{% endblock script %}

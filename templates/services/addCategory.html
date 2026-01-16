@@ -22,19 +22,74 @@
                     {% csrf_token %}
                     
                     <div class="mb-20">
-                        <label for="name" class="form-label fw-semibold text-primary-light text-sm mb-8">
+                        <label for="branch" class="form-label fw-semibold text-primary-light text-sm mb-8">
+                            <span data-i18n="form.branch">Branch</span> <span class="text-danger-600">*</span>
+                        </label>
+                        <select class="form-control radius-8 form-select" id="branch" name="branch" required>
+                            <option value="" data-i18n="common.selectBranch">Select Branch</option>
+                            {% for branch in branches %}
+                            <option value="{{ branch.id }}">{{ branch.center.name }} - {{ branch.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Translatable Fields -->
+                    <div class="mb-20">
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                             <span data-i18n="form.categoryName">Category Name</span> <span class="text-danger-600">*</span>
                         </label>
-                        <input type="text" class="form-control radius-8" id="name" name="name" 
-                               data-i18n-placeholder="form.enterCategoryName" placeholder="Enter category name" required>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light-100 border-end-0 text-sm px-12">🇺🇿 UZ</span>
+                                    <input type="text" class="form-control radius-8 border-start-0" id="name_uz" name="name_uz" 
+                                           placeholder="O'zbek tilida" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light-100 border-end-0 text-sm px-12">🇷🇺 RU</span>
+                                    <input type="text" class="form-control radius-8 border-start-0" id="name_ru" name="name_ru" 
+                                           placeholder="На русском">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light-100 border-end-0 text-sm px-12">🇬🇧 EN</span>
+                                    <input type="text" class="form-control radius-8 border-start-0" id="name_en" name="name_en" 
+                                           placeholder="In English">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-20">
-                        <label for="description" class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.description">
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.description">
                             Description
                         </label>
-                        <textarea class="form-control radius-8" id="description" name="description" 
-                                  rows="3" data-i18n-placeholder="form.enterDescription" placeholder="Enter description"></textarea>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light-100 border-end-0 text-sm px-12 align-items-start pt-12">🇺🇿 UZ</span>
+                                    <textarea class="form-control radius-8 border-start-0" id="description_uz" name="description_uz" 
+                                              rows="2" placeholder="Tavsif o'zbek tilida"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light-100 border-end-0 text-sm px-12 align-items-start pt-12">🇷🇺 RU</span>
+                                    <textarea class="form-control radius-8 border-start-0" id="description_ru" name="description_ru" 
+                                              rows="2" placeholder="Описание на русском"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light-100 border-end-0 text-sm px-12 align-items-start pt-12">🇬🇧 EN</span>
+                                    <textarea class="form-control radius-8 border-start-0" id="description_en" name="description_en" 
+                                              rows="2" placeholder="Description in English"></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-20">
@@ -53,7 +108,16 @@
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.languages">
                             Languages
                         </label>
-                        <div class="d-flex flex-wrap gap-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <small class="text-secondary-light">Select languages this category can be translated to</small>
+                            {% if user.is_superuser %}
+                            <button type="button" class="btn btn-sm btn-outline-primary radius-8 px-12 py-6" data-bs-toggle="modal" data-bs-target="#addLanguageModal">
+                                <iconify-icon icon="mdi:plus" class="text-lg"></iconify-icon>
+                                <span class="text-sm">Add New Language</span>
+                            </button>
+                            {% endif %}
+                        </div>
+                        <div id="languageCheckboxes" class="d-flex flex-wrap gap-3">
                             {% for lang in languages %}
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="languages" value="{{ lang.id }}" id="lang{{ lang.id }}">
@@ -84,8 +148,8 @@
                         <a href="{% url 'categoryList' %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8" data-i18n="common.cancel">
                             Cancel
                         </a>
-                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-40 py-12 radius-8 d-flex align-items-center">
-                            <iconify-icon icon="mdi:content-save" class="me-8"></iconify-icon>
+                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-40 py-12 radius-8 d-flex align-items-center gap-2">
+                            <iconify-icon icon="mdi:content-save" class="text-xl line-height-1"></iconify-icon>
                             <span data-i18n="form.createCategory">Create Category</span>
                         </button>
                     </div>
@@ -94,4 +158,131 @@
         </div>
     </div>
 </div>
-{% endblock content %}
+
+<!-- Add Language Modal -->
+{% if user.is_superuser %}
+<div class="modal fade" id="addLanguageModal" tabindex="-1" aria-labelledby="addLanguageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addLanguageModalLabel">Add New Language</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addLanguageForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="languageName" class="form-label">Language Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="languageName" required placeholder="e.g., English, French, Spanish">
+                    </div>
+                    <div class="mb-3">
+                        <label for="languageShortName" class="form-label">Short Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="languageShortName" required placeholder="e.g., EN, FR, ES" maxlength="10">
+                        <small class="text-secondary-light">2-3 letter code (will be auto-capitalized)</small>
+                    </div>
+                    <div id="languageError" class="alert alert-danger d-none"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveLanguageBtn">
+                    <iconify-icon icon="mdi:content-save" class="me-1"></iconify-icon>
+                    Create Language
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const saveLanguageBtn = document.getElementById('saveLanguageBtn');
+    const languageNameInput = document.getElementById('languageName');
+    const languageShortNameInput = document.getElementById('languageShortName');
+    const languageError = document.getElementById('languageError');
+    const addLanguageModal = new bootstrap.Modal(document.getElementById('addLanguageModal'));
+    
+    // Auto-capitalize short name
+    languageShortNameInput.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+    });
+    
+    saveLanguageBtn.addEventListener('click', function() {
+        const name = languageNameInput.value.trim();
+        const shortName = languageShortNameInput.value.trim().toUpperCase();
+        
+        if (!name || !shortName) {
+            languageError.textContent = 'Both fields are required.';
+            languageError.classList.remove('d-none');
+            return;
+        }
+        
+        // Disable button and show loading
+        saveLanguageBtn.disabled = true;
+        saveLanguageBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Creating...';
+        languageError.classList.add('d-none');
+        
+        // Send AJAX request
+        fetch('{% url "createLanguageInline" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                name: name,
+                short_name: shortName
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Add new checkbox to the list
+                const checkboxContainer = document.getElementById('languageCheckboxes');
+                const emptyMessage = checkboxContainer.querySelector('p');
+                if (emptyMessage) {
+                    emptyMessage.remove();
+                }
+                
+                const newCheckbox = document.createElement('div');
+                newCheckbox.className = 'form-check';
+                newCheckbox.innerHTML = `
+                    <input class="form-check-input" type="checkbox" name="languages" value="${data.language.id}" id="lang${data.language.id}" checked>
+                    <label class="form-check-label" for="lang${data.language.id}">
+                        ${data.language.name} (${data.language.short_name})
+                    </label>
+                `;
+                checkboxContainer.appendChild(newCheckbox);
+                
+                // Reset form and close modal
+                languageNameInput.value = '';
+                languageShortNameInput.value = '';
+                addLanguageModal.hide();
+                
+                // Show success message
+                alert('Language created successfully!');
+            } else {
+                languageError.textContent = data.error;
+                languageError.classList.remove('d-none');
+            }
+        })
+        .catch(error => {
+            languageError.textContent = 'An error occurred. Please try again.';
+            languageError.classList.remove('d-none');
+        })
+        .finally(() => {
+            saveLanguageBtn.disabled = false;
+            saveLanguageBtn.innerHTML = '<iconify-icon icon="mdi:content-save" class="me-1"></iconify-icon> Create Language';
+        });
+    });
+    
+    // Reset form when modal is hidden
+    document.getElementById('addLanguageModal').addEventListener('hidden.bs.modal', function() {
+        languageNameInput.value = '';
+        languageShortNameInput.value = '';
+        languageError.classList.add('d-none');
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

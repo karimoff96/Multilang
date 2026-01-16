@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
-from modeltranslation.admin import TranslationAdmin
 from django.utils.html import format_html
 from accounts.models import BotUser, AdditionalInfo
 
@@ -14,6 +13,7 @@ class BotUserAdmin(admin.ModelAdmin):
         "display_name",
         "username",
         "phone",
+        "branch",
         "is_agency",
         "is_used",
         "agency_display",
@@ -22,6 +22,7 @@ class BotUserAdmin(admin.ModelAdmin):
         "is_active",
     )
     list_filter = (
+        "branch",
         "language",
         "is_active",
         "is_agency",
@@ -31,10 +32,19 @@ class BotUserAdmin(admin.ModelAdmin):
     )
     search_fields = ("name", "username", "phone", "user_id", "agency_token")
     ordering = ("-created_at",)
-    list_select_related = ("agency",)
+    list_select_related = ("agency", "branch")
     actions = ["mark_as_unused"]
+    autocomplete_fields = ['branch', 'agency']
 
     fieldsets = (
+        (
+            "Branch Assignment",
+            {
+                "fields": (
+                    "branch",
+                )
+            },
+        ),
         (
             "Telegram User Information",
             {
@@ -146,24 +156,80 @@ class BotUserAdmin(admin.ModelAdmin):
 
 
 @admin.register(AdditionalInfo)
-class AdditionalInfoAdmin(TranslationAdmin):
-    list_display = ("holder_name", "bank_card", "created_at")
-    list_filter = ("created_at",)
-    search_fields = ("holder_name",)
-    ordering = ("-created_at",)
-
-    # TranslationAdmin will automatically handle the translated fields
-    # Fields: help_text, description, about_us will be available in all languages
-
-    readonly_fields = ("created_at", "updated_at")
-    fields = (
-        "bank_card",
-        "holder_name",
-        "help_text",
-        "about_us",
-        "created_at",
-        "updated_at",
+class AdditionalInfoAdmin(admin.ModelAdmin):
+    """Admin for AdditionalInfo - branch-specific settings"""
+    
+    list_display = (
+        '__str__',
+        'branch',
+        'bank_card',
+        'support_phone',
+        'updated_at',
     )
-
-    def get_queryset(self, request):
-        return super().get_queryset(request)
+    list_filter = ('branch__center', 'branch')
+    search_fields = ('branch__name', 'bank_card', 'holder_name', 'support_phone')
+    autocomplete_fields = ['branch']
+    
+    fieldsets = (
+        (
+            "Branch",
+            {
+                "fields": ("branch",),
+                "description": "Leave empty for global/default settings that apply when branch doesn't have its own."
+            }
+        ),
+        (
+            "Payment Information",
+            {
+                "fields": ("bank_card", "holder_name"),
+            }
+        ),
+        (
+            "Help Text",
+            {
+                "fields": ("help_text",),  # modeltranslation will add _uz, _ru, _en
+                "classes": ("collapse",),
+            }
+        ),
+        (
+            "Description",
+            {
+                "fields": ("description",),
+                "classes": ("collapse",),
+            }
+        ),
+        (
+            "About Us",
+            {
+                "fields": ("about_us",),
+                "classes": ("collapse",),
+            }
+        ),
+        (
+            "Working Hours",
+            {
+                "fields": ("working_hours",),
+            }
+        ),
+        (
+            "Contact Information",
+            {
+                "fields": ("support_phone", "support_telegram"),
+            }
+        ),
+        (
+            "Guide",
+            {
+                "fields": ("guide",),
+                "description": "Link to a guide resource (Telegram message, YouTube video, documentation, etc.)"
+            }
+        ),
+        (
+            "Reserved Fields",
+            {
+                "fields": ("reserved_field_1", "reserved_field_2", "reserved_field_3"),
+                "classes": ("collapse",),
+                "description": "Reserved fields for future use. Do not use unless instructed."
+            }
+        ),
+    )

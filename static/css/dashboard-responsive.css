@@ -1,0 +1,526 @@
+/**
+ * Dashboard Responsive & UI/UX Improvements
+ * WEMARD Multi-tenant Translation Centers Platform
+ * 
+ * 1. Remove horizontal scrollbars
+ * 2. Optimized table column widths
+ * 3. Responsive analytics widgets
+ * 4. Improved card/summary box layouts
+ */
+
+/* ============================================
+   1. GLOBAL OVERFLOW & SCROLL CONTROL
+   ============================================ */
+
+/* Prevent horizontal scroll on main containers */
+.dashboard-main,
+.dashboard-main-body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Ensure cards don't cause overflow */
+.card {
+    overflow: hidden;
+    max-width: 100%;
+}
+
+/* Remove default table min-width that causes horizontal scroll */
+.bordered-table,
+.table {
+    min-width: auto !important;
+    width: 100%;
+    table-layout: auto;
+}
+
+/* Force table-responsive to hide scrollbar when not needed */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive::-webkit-scrollbar {
+    height: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: var(--neutral-300);
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Hide scrollbar for tables that fit */
+@media (min-width: 992px) {
+    .table-responsive.scroll-sm {
+        overflow-x: visible;
+    }
+}
+
+/* ============================================
+   2. TABLE COLUMN OPTIMIZATION
+   ============================================ */
+
+/* DO NOT use table-fixed - it breaks responsive layouts */
+/* Instead, let table auto-size with max-width constraints */
+
+/* Compact table cells */
+.table-compact th,
+.table-compact td,
+.bordered-table.table-compact th,
+.bordered-table.table-compact td {
+    padding: 10px 12px !important;
+    font-size: 0.8125rem;
+}
+
+/* Dashboard-specific compact tables */
+.dashboard-main-body .bordered-table th,
+.dashboard-main-body .bordered-table td {
+    padding: 10px 12px !important;
+}
+
+/* Name column - flexible width */
+.col-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px;
+}
+
+/* Location column - compact merged info */
+.col-location {
+    white-space: nowrap;
+}
+
+/* Type/Category column */
+.col-type {
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Truncate long text in table cells */
+.text-truncate-cell {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Merged info column style */
+.cell-merged-info {
+    min-width: 80px;
+    max-width: 130px;
+}
+
+.cell-merged-info .cell-primary {
+    font-weight: 500;
+    font-size: 0.75rem;
+    color: var(--text-primary-light);
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+.cell-merged-info .cell-secondary {
+    font-size: 0.6875rem;
+    color: var(--text-secondary-light);
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+/* Compact badge styling for tables */
+.badge-compact {
+    padding: 4px 8px !important;
+    font-size: 0.6875rem !important;
+}
+
+/* Narrow action column */
+.col-action {
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Compact action buttons */
+.action-btn-sm {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.8rem !important;
+}
+
+.action-btn-sm iconify-icon {
+    font-size: 0.875rem !important;
+}
+
+/* Status column - compact */
+.col-status {
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Status badge small */
+.status-badge-sm {
+    padding: 2px 8px !important;
+    font-size: 0.6875rem !important;
+    white-space: nowrap;
+}
+
+/* Amount/Price column - right aligned, compact */
+.col-amount {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.col-amount small {
+    font-size: 0.6875rem;
+    line-height: 1.4;
+}
+
+/* Date column - compact */
+.col-date {
+    white-space: nowrap;
+}
+
+/* ID/Number column - minimal */
+.col-id {
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* ============================================
+   3. DASHBOARD STATS CARDS
+   ============================================ */
+
+/* Stat cards - responsive sizing */
+.stat-card-compact {
+    padding: 16px !important;
+}
+
+.stat-card-compact .card-body {
+    padding: 0 !important;
+}
+
+/* Ensure stat values don't overflow */
+.stat-value {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Compact icon containers */
+.stat-icon-sm {
+    width: 40px !important;
+    height: 40px !important;
+    flex-shrink: 0;
+}
+
+.stat-icon-sm iconify-icon {
+    font-size: 1.25rem;
+}
+
+/* Responsive stat cards grid */
+@media (max-width: 575px) {
+    .col-xxl-4.col-sm-6 .card.p-3 {
+        padding: 12px !important;
+    }
+    
+    .w-48-px {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .w-48-px iconify-icon {
+        font-size: 1.25rem !important;
+    }
+}
+
+/* ============================================
+   4. ANALYTICS WIDGETS & CHARTS
+   ============================================ */
+
+/* Chart container - prevent overflow */
+.chart-container {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* ApexCharts responsive fix */
+.apexcharts-canvas {
+    max-width: 100% !important;
+}
+
+.apexcharts-svg {
+    max-width: 100%;
+}
+
+/* Sparkline charts - compact */
+.sparkline-container {
+    width: 80px;
+    height: 50px;
+    flex-shrink: 0;
+}
+
+/* Donut/Pie chart container */
+.chart-donut-container {
+    max-width: 180px;
+    margin: 0 auto;
+}
+
+/* ============================================
+   5. ROLE-SPECIFIC DASHBOARD WIDGETS
+   ============================================ */
+
+/* Performance table - compact */
+.performance-table .table th,
+.performance-table .table td {
+    padding: 8px 10px !important;
+    font-size: 0.8125rem;
+}
+
+/* Staff/Branch performance cards */
+.performance-stat-box {
+    padding: 12px !important;
+}
+
+.performance-stat-box h4,
+.performance-stat-box h5 {
+    font-size: clamp(1rem, 3vw, 1.25rem);
+    margin-bottom: 2px;
+}
+
+.performance-stat-box small {
+    font-size: 0.6875rem;
+}
+
+/* Owner/Admin overview grid */
+@media (max-width: 767px) {
+    .col-4 .performance-stat-box {
+        padding: 10px !important;
+    }
+    
+    .col-4 .performance-stat-box iconify-icon {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* ============================================
+   6. QUICK ACTIONS & BUTTONS
+   ============================================ */
+
+/* Quick action cards - responsive */
+.quick-action-item {
+    padding: 8px 16px 8px 8px !important;
+    min-width: auto;
+}
+
+.quick-action-item .w-44-px {
+    width: 36px !important;
+    height: 36px !important;
+}
+
+@media (max-width: 767px) {
+    .quick-action-item {
+        padding: 8px !important;
+        flex: 1 1 45%;
+    }
+    
+    .quick-action-item > div:last-child {
+        display: none;
+    }
+}
+
+/* ============================================
+   7. RECENT ORDERS TABLE - DASHBOARD
+   ============================================ */
+
+/* Compact recent orders table */
+.recent-orders-table th,
+.recent-orders-table td {
+    padding: 10px 12px !important;
+    font-size: 0.8125rem;
+}
+
+/* Customer info cell - merged */
+.customer-cell {
+    max-width: 150px;
+}
+
+.customer-cell .text-md {
+    font-size: 0.8125rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.customer-cell .text-sm {
+    font-size: 0.6875rem !important;
+}
+
+/* Status badge - compact for dashboard */
+.status-badge-sm {
+    padding: 4px 10px !important;
+    font-size: 0.6875rem !important;
+    white-space: nowrap;
+}
+
+/* ============================================
+   8. RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+/* Large tablets and small desktops */
+@media (max-width: 1199px) {
+    .dashboard-main-body {
+        padding: 12px !important;
+    }
+    
+    .bordered-table th,
+    .bordered-table td {
+        padding: 10px 12px !important;
+        font-size: 0.8125rem;
+    }
+}
+
+/* Tablets */
+@media (max-width: 991px) {
+    /* Stack cards more efficiently */
+    .col-xxl-8 .row .col-xxl-4 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+    
+    /* Reduce card padding */
+    .card-body {
+        padding: 16px !important;
+    }
+    
+    .card-header {
+        padding: 12px 16px !important;
+    }
+}
+
+/* Mobile */
+@media (max-width: 575px) {
+    .dashboard-main-body {
+        padding: 10px !important;
+    }
+    
+    /* Full width cards on mobile */
+    .col-xxl-8 .row .col-xxl-4,
+    .col-sm-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    
+    /* Compact card padding */
+    .card-body {
+        padding: 12px !important;
+    }
+    
+    /* Hide less important columns on mobile */
+    .hide-mobile {
+        display: none !important;
+    }
+    
+    /* Smaller fonts for mobile tables */
+    .bordered-table th,
+    .bordered-table td {
+        padding: 8px 10px !important;
+        font-size: 0.75rem;
+    }
+    
+    /* Compact badges */
+    .badge,
+    [class*="px-24"] {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+}
+
+/* ============================================
+   9. UTILITY CLASSES FOR DASHBOARD
+   ============================================ */
+
+/* Text truncation utilities */
+.truncate-120 {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.truncate-150 {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.truncate-200 {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* No wrap for numbers/amounts */
+.nowrap {
+    white-space: nowrap;
+}
+
+/* Compact gap utilities */
+.gap-compact {
+    gap: 4px !important;
+}
+
+/* Flex shrink control */
+.flex-shrink-0 {
+    flex-shrink: 0 !important;
+}
+
+/* Hide horizontal overflow per-element */
+.no-h-scroll {
+    overflow-x: hidden !important;
+}
+
+/* Width utilities for 40px sizing */
+.w-40-px {
+    width: 40px !important;
+}
+
+.h-40-px {
+    height: 40px !important;
+}
+
+/* ============================================
+   10. PRINT STYLES
+   ============================================ */
+
+@media print {
+    .dashboard-main {
+        margin-inline-start: 0 !important;
+    }
+    
+    .sidebar,
+    .navbar,
+    .quick-action-item,
+    .action-btn-sm {
+        display: none !important;
+    }
+    
+    .table-responsive {
+        overflow: visible !important;
+    }
+}

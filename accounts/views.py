@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
@@ -9,6 +9,8 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 
 
 # ============ Admin Authentication Views ============
@@ -143,29 +145,64 @@ def reset_password(request, uidb64, token):
 from .models import BotUser
 from django.core.paginator import Paginator
 from django.db.models import Q
+from organizations.rbac import permission_required
 
 
-@login_required(login_url='admin_login')
+@login_required(login_url="admin_login")
+@permission_required('can_create_customers')
 def addUser(request):
-    """Add a new BotUser (Telegram user)"""
-    # Get all agencies for the dropdown
-    agencies = BotUser.objects.filter(is_agency=True).order_by('name')
+    """Add a new BotUser (Telegram user) - requires can_create_customers permission"""
+    from organizations.models import TranslationCenter, Branch
     
-    if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        phone = request.POST.get('phone', '').strip()
-        username = request.POST.get('username', '').strip()
-        user_id = request.POST.get('user_id', '').strip()
-        language = request.POST.get('language', 'uz')
-        is_active = request.POST.get('is_active') == 'on'
-        is_agency = request.POST.get('is_agency') == 'on'
-        agency_id = request.POST.get('agency', '')
+    # Get all agencies for the dropdown
+    agencies = BotUser.objects.filter(is_agency=True).order_by("name")
+    
+    # Get centers and branches based on user permissions
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True).order_by('name')
+        branches = Branch.objects.filter(is_active=True).select_related('center').order_by('center__name', 'name')
+    elif request.admin_profile:
+        # Get accessible centers and branches for this user
+        accessible_branches = request.admin_profile.get_accessible_branches()
+        branches = accessible_branches.select_related('center')
+        # Get unique centers from accessible branches
+        center_ids = branches.values_list('center_id', flat=True).distinct()
+        centers = TranslationCenter.objects.filter(id__in=center_ids, is_active=True).order_by('name')
+    else:
+        centers = TranslationCenter.objects.none()
+        branches = Branch.objects.none()
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        phone = request.POST.get("phone", "").strip()
+        username = request.POST.get("username", "").strip()
+        user_id = request.POST.get("user_id", "").strip()
+        language = request.POST.get("language", "uz")
+        is_active = request.POST.get("is_active") == "on"
+        is_agency = request.POST.get("is_agency") == "on"
+        agency_id = request.POST.get("agency", "")
+        center_id = request.POST.get("center", "")
+        branch_id = request.POST.get("branch", "")
         
+        # Check permission for creating agencies
+        if is_agency and not (request.user.is_superuser or 
+                             (request.admin_profile and (request.admin_profile.role.can_manage_agencies or request.admin_profile.role.can_create_agencies))):
+            messages.error(request, "You don't have permission to create agencies.")
+            context = {
+                "title": "Add User",
+                "subTitle": "Add User",
+                "agencies": agencies,
+                "centers": centers,
+                "branches": branches,
+                "languages": BotUser.LANGUAGES,
+            }
+            return render(request, "users/addUser.html", context)
+
         # Validation
         if not name:
-            messages.error(request, 'Full name is required.')
+            messages.error(request, "Full name is required.")
         elif not phone:
-            messages.error(request, 'Phone number is required.')
+            messages.error(request, "Phone number is required.")
         else:
             try:
                 # Create the BotUser
@@ -179,6 +216,25 @@ def addUser(request):
                     is_agency=is_agency,
                 )
                 
+                # Set center if selected
+                if center_id:
+                    try:
+                        center = TranslationCenter.objects.get(id=center_id)
+                        bot_user.center = center
+                    except TranslationCenter.DoesNotExist:
+                        pass
+                
+                # Set branch if selected
+                if branch_id:
+                    try:
+                        branch = Branch.objects.get(id=branch_id)
+                        bot_user.branch = branch
+                        # Also set center from branch if not already set
+                        if not bot_user.center and branch.center:
+                            bot_user.center = branch.center
+                    except Branch.DoesNotExist:
+                        pass
+
                 # Set agency if selected and not an agency itself
                 if agency_id and not is_agency:
                     try:
@@ -186,57 +242,89 @@ def addUser(request):
                         bot_user.agency = agency
                     except BotUser.DoesNotExist:
                         pass
-                
+
                 bot_user.save()
-                messages.success(request, f'User "{name}" has been created successfully.')
-                return redirect('usersList')
-                
+                messages.success(
+                    request, f'User "{name}" has been created successfully.'
+                )
+                return redirect("usersList")
+
             except Exception as e:
-                messages.error(request, f'Error creating user: {str(e)}')
-    
+                messages.error(request, f"Error creating user: {str(e)}")
+
     context = {
         "title": "Add User",
         "subTitle": "Add User",
         "agencies": agencies,
+        "centers": centers,
+        "branches": branches,
         "languages": BotUser.LANGUAGES,
     }
     return render(request, "users/addUser.html", context)
 
 
-@login_required(login_url='admin_login')
+@login_required(login_url="admin_login")
 def usersList(request):
-    """List all BotUsers with search and filter"""
-    users = BotUser.objects.all().order_by('-created_at')
-    
+    """List all BotUsers with search and filter - RBAC filtered"""
+    from organizations.rbac import get_user_customers
+    from organizations.models import TranslationCenter
+    from django.db.models import Count, Max
+
+    # Use RBAC-filtered customers with related branch/center data
+    # Add order statistics for each user
+    users = (
+        get_user_customers(request.user)
+        .select_related("branch", "branch__center", "agency")
+        .annotate(order_count=Count("order"), last_order_date=Max("order__created_at"))
+        .order_by("-created_at")
+    )
+
+    # Center filter for superuser
+    centers = None
+    center_filter = request.GET.get("center", "")
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_filter:
+            # Filter users by branch center
+            users = users.filter(branch__center_id=center_filter)
+
     # Search functionality
-    search_query = request.GET.get('search', '')
+    search_query = request.GET.get("search", "")
     if search_query:
         users = users.filter(
-            Q(name__icontains=search_query) |
-            Q(username__icontains=search_query) |
-            Q(phone__icontains=search_query)
+            Q(name__icontains=search_query)
+            | Q(username__icontains=search_query)
+            | Q(phone__icontains=search_query)
         )
-    
+
     # Status filter
-    status_filter = request.GET.get('status', '')
-    if status_filter == 'active':
+    status_filter = request.GET.get("status", "")
+    if status_filter == "active":
         users = users.filter(is_active=True)
-    elif status_filter == 'inactive':
+    elif status_filter == "inactive":
         users = users.filter(is_active=False)
-    elif status_filter == 'agency':
+    elif status_filter == "agency":
         users = users.filter(is_agency=True)
-    
+
+    # Branch filter for owners
+    from organizations.rbac import get_user_branches
+
+    branches = get_user_branches(request.user)
+    branch_filter = request.GET.get("branch", "")
+    if branch_filter:
+        users = users.filter(branch_id=branch_filter)
+
     # Pagination
-    per_page = request.GET.get('per_page', 10)
+    per_page = request.GET.get("per_page", 10)
     try:
         per_page = int(per_page)
     except ValueError:
         per_page = 10
-    
+
     paginator = Paginator(users, per_page)
-    page_number = request.GET.get('page', 1)
+    page_number = request.GET.get("page", 1)
     page_obj = paginator.get_page(page_number)
-    
+
     context = {
         "title": "Users List",
         "subTitle": "Users List",
@@ -246,33 +334,87 @@ def usersList(request):
         "status_filter": status_filter,
         "per_page": per_page,
         "total_users": paginator.count,
+        "centers": centers,
+        "center_filter": center_filter,
+        "branches": branches,
+        "branch_filter": branch_filter,
     }
     return render(request, "users/usersList.html", context)
 
 
-@login_required(login_url='admin_login')
+@login_required(login_url="admin_login")
+@permission_required('can_edit_customers')
 def editUser(request, user_id):
-    """Edit an existing BotUser"""
+    """Edit an existing BotUser - requires can_edit_customers permission"""
     from django.shortcuts import get_object_or_404
-    
+    from organizations.models import TranslationCenter, Branch
+
     user = get_object_or_404(BotUser, id=user_id)
-    agencies = BotUser.objects.filter(is_agency=True).exclude(id=user_id).order_by('name')
+    agencies = (
+        BotUser.objects.filter(is_agency=True).exclude(id=user_id).order_by("name")
+    )
     
-    if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        phone = request.POST.get('phone', '').strip()
-        username = request.POST.get('username', '').strip()
-        user_id_field = request.POST.get('user_id', '').strip()
-        language = request.POST.get('language', 'uz')
-        is_active = request.POST.get('is_active') == 'on'
-        is_agency = request.POST.get('is_agency') == 'on'
-        agency_id = request.POST.get('agency', '')
+    # Get centers and branches based on user permissions
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True).order_by('name')
+        branches = Branch.objects.filter(is_active=True).select_related('center').order_by('center__name', 'name')
+    elif request.admin_profile:
+        # Get accessible centers and branches for this user
+        accessible_branches = request.admin_profile.get_accessible_branches()
+        branches = accessible_branches.select_related('center')
+        # Get unique centers from accessible branches
+        center_ids = branches.values_list('center_id', flat=True).distinct()
+        centers = TranslationCenter.objects.filter(id__in=center_ids, is_active=True).order_by('name')
+    else:
+        centers = TranslationCenter.objects.none()
+        branches = Branch.objects.none()
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        phone = request.POST.get("phone", "").strip()
+        username = request.POST.get("username", "").strip()
+        user_id_field = request.POST.get("user_id", "").strip()
+        language = request.POST.get("language", "uz")
+        is_active = request.POST.get("is_active") == "on"
+        is_agency = request.POST.get("is_agency") == "on"
+        agency_id = request.POST.get("agency", "")
+        center_id = request.POST.get("center", "")
+        branch_id = request.POST.get("branch", "")
         
+        # Check permission for creating/modifying agencies
+        if is_agency != user.is_agency:  # Agency status is being changed
+            if is_agency and not (request.user.is_superuser or 
+                                 (request.admin_profile and (request.admin_profile.role.can_manage_agencies or request.admin_profile.role.can_create_agencies))):
+                messages.error(request, "You don't have permission to create agencies.")
+                context = {
+                    "title": "Edit User",
+                    "subTitle": "Edit User",
+                    "user": user,
+                    "agencies": agencies,
+                    "centers": centers,
+                    "branches": branches,
+                    "languages": BotUser.LANGUAGES,
+                }
+                return render(request, "users/editUser.html", context)
+            elif not is_agency and not (request.user.is_superuser or 
+                                       (request.admin_profile and (request.admin_profile.role.can_manage_agencies or request.admin_profile.role.can_edit_agencies))):
+                messages.error(request, "You don't have permission to modify agency status.")
+                context = {
+                    "title": "Edit User",
+                    "subTitle": "Edit User",
+                    "user": user,
+                    "agencies": agencies,
+                    "centers": centers,
+                    "branches": branches,
+                    "languages": BotUser.LANGUAGES,
+                }
+                return render(request, "users/editUser.html", context)
+
         # Validation
         if not name:
-            messages.error(request, 'Full name is required.')
+            messages.error(request, "Full name is required.")
         elif not phone:
-            messages.error(request, 'Phone number is required.')
+            messages.error(request, "Phone number is required.")
         else:
             try:
                 # Update the BotUser
@@ -284,6 +426,29 @@ def editUser(request, user_id):
                 user.is_active = is_active
                 user.is_agency = is_agency
                 
+                # Set center if selected
+                if center_id:
+                    try:
+                        center = TranslationCenter.objects.get(id=center_id)
+                        user.center = center
+                    except TranslationCenter.DoesNotExist:
+                        user.center = None
+                else:
+                    user.center = None
+                
+                # Set branch if selected
+                if branch_id:
+                    try:
+                        branch = Branch.objects.get(id=branch_id)
+                        user.branch = branch
+                        # Also set center from branch if not already set
+                        if not user.center and branch.center:
+                            user.center = branch.center
+                    except Branch.DoesNotExist:
+                        user.branch = None
+                else:
+                    user.branch = None
+
                 # Set agency if selected and not an agency itself
                 if agency_id and not is_agency:
                     try:
@@ -293,48 +458,89 @@ def editUser(request, user_id):
                         user.agency = None
                 else:
                     user.agency = None
-                
+
                 user.save()
-                messages.success(request, f'User "{name}" has been updated successfully.')
-                return redirect('usersList')
-                
+                messages.success(
+                    request, f'User "{name}" has been updated successfully.'
+                )
+                return redirect("usersList")
+
             except Exception as e:
-                messages.error(request, f'Error updating user: {str(e)}')
-    
+                messages.error(request, f"Error updating user: {str(e)}")
+
     context = {
         "title": "Edit User",
         "subTitle": "Edit User",
         "user": user,
         "agencies": agencies,
+        "centers": centers,
+        "branches": branches,
         "languages": BotUser.LANGUAGES,
     }
     return render(request, "users/editUser.html", context)
 
 
-@login_required(login_url='admin_login')
+@login_required(login_url="admin_login")
+@permission_required('can_delete_customers')
+def deleteUser(request, user_id):
+    """Delete a BotUser - requires can_delete_customers permission"""
+    from django.shortcuts import get_object_or_404
+    from django.http import JsonResponse
+    from core.audit import log_delete
+    
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    
+    user = get_object_or_404(BotUser, id=user_id)
+    user_name = user.name or user.username or f"User #{user_id}"
+    
+    try:
+        # Log the deletion before deleting
+        log_delete(
+            user=request.user,
+            target=user,
+            request=request
+        )
+        
+        user.delete()
+        messages.success(request, f'User "{user_name}" has been deleted successfully.')
+    except Exception as e:
+        messages.error(request, f"Error deleting user: {str(e)}")
+    
+    # Check if AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({"success": True, "message": f'User "{user_name}" deleted.'})
+    
+    return redirect("usersList")
+
+
+@login_required(login_url="admin_login")
 def userDetail(request):
     """View BotUser (Telegram user) profile details"""
     from orders.models import Order
     from django.shortcuts import get_object_or_404
-    
-    user_id = request.GET.get('id')
+
+    user_id = request.GET.get("id")
     if not user_id:
         messages.error(request, "User ID is required.")
-        return redirect('usersList')
-    
+        return redirect("usersList")
+
     user = get_object_or_404(BotUser, id=user_id)
-    
+
     # Get user's orders
-    orders = Order.objects.filter(bot_user=user).order_by('-created_at')[:10]
+    orders = Order.objects.filter(bot_user=user).order_by("-created_at")[:10]
     total_orders = Order.objects.filter(bot_user=user).count()
-    completed_orders = Order.objects.filter(bot_user=user, status='completed').count()
-    pending_orders = Order.objects.filter(bot_user=user, status__in=['pending', 'payment_pending', 'payment_received', 'in_progress']).count()
-    
+    completed_orders = Order.objects.filter(bot_user=user, status="completed").count()
+    pending_orders = Order.objects.filter(
+        bot_user=user,
+        status__in=["pending", "payment_pending", "payment_received", "in_progress"],
+    ).count()
+
     # Get agency users if this user is an agency
     agency_users = []
     if user.is_agency:
-        agency_users = BotUser.objects.filter(agency=user).order_by('-created_at')[:5]
-    
+        agency_users = BotUser.objects.filter(agency=user).order_by("-created_at")[:5]
+
     context = {
         "title": "User Details",
         "subTitle": "User Details",
@@ -344,14 +550,17 @@ def userDetail(request):
         "completed_orders": completed_orders,
         "pending_orders": pending_orders,
         "agency_users": agency_users,
-        "agency_users_count": BotUser.objects.filter(agency=user).count() if user.is_agency else 0,
+        "agency_users_count": (
+            BotUser.objects.filter(agency=user).count() if user.is_agency else 0
+        ),
     }
     return render(request, "users/userDetail.html", context)
 
 
 # ============ Admin Profile Views ============
 
-@login_required(login_url='admin_login')
+
+@login_required(login_url="admin_login")
 def viewProfile(request):
     """View admin profile page"""
     context = {
@@ -361,78 +570,143 @@ def viewProfile(request):
     return render(request, "users/viewProfile.html", context)
 
 
-@login_required(login_url='admin_login')
+@login_required(login_url="admin_login")
 def updateProfile(request):
     """Update admin profile"""
-    if request.method == 'POST':
+    if request.method == "POST":
         user = request.user
-        first_name = request.POST.get('first_name', '').strip()
-        last_name = request.POST.get('last_name', '').strip()
-        email = request.POST.get('email', '').strip()
-        
+        first_name = request.POST.get("first_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
+        email = request.POST.get("email", "").strip()
+        phone = request.POST.get("phone", "").strip()
+        avatar = request.FILES.get("avatar")
+
         # Validation
         if not first_name:
-            messages.error(request, 'First name is required.')
-            return redirect('viewProfile')
-        
-        if not email:
-            messages.error(request, 'Email is required.')
-            return redirect('viewProfile')
-        
-        # Check if email is already used by another user
-        if User.objects.filter(email=email).exclude(pk=user.pk).exists():
-            messages.error(request, 'This email is already in use.')
-            return redirect('viewProfile')
-        
+            messages.error(request, "First name is required.")
+            return redirect("viewProfile")
+
+        # Check if email is already used by another user (only if email is provided)
+        if email and User.objects.filter(email=email).exclude(pk=user.pk).exists():
+            messages.error(request, "This email is already in use.")
+            return redirect("viewProfile")
+
         try:
             user.first_name = first_name
             user.last_name = last_name
             user.email = email
             user.save()
-            messages.success(request, 'Profile updated successfully.')
+
+            # Update admin_profile fields (avatar and phone)
+            # Create AdminUser if it doesn't exist (for superusers, role can be null)
+            from organizations.models import AdminUser
+            
+            admin_profile, created = AdminUser.objects.get_or_create(
+                user=user,
+                defaults={'is_active': True}
+            )
+            
+            if avatar:
+                admin_profile.avatar = avatar
+            admin_profile.phone = phone
+            admin_profile.save()
+
+            messages.success(request, "Profile updated successfully.")
+            return redirect("dashboard")
         except Exception as e:
-            messages.error(request, f'Error updating profile: {str(e)}')
-    
-    return redirect('viewProfile')
+            messages.error(request, f"Error updating profile: {str(e)}")
+            return redirect("viewProfile")
+
+    # If GET request, redirect to profile page
+    return redirect("viewProfile")
 
 
-@login_required(login_url='admin_login')
+@login_required(login_url="admin_login")
 def changePassword(request):
     """Change admin password"""
-    if request.method == 'POST':
+    if request.method == "POST":
         user = request.user
-        current_password = request.POST.get('current_password', '')
-        new_password = request.POST.get('new_password', '')
-        confirm_password = request.POST.get('confirm_password', '')
-        
+        current_password = request.POST.get("current_password", "")
+        new_password = request.POST.get("new_password", "")
+        confirm_password = request.POST.get("confirm_password", "")
+
         # Validation
         if not current_password:
-            messages.error(request, 'Current password is required.')
-            return redirect('viewProfile')
-        
+            messages.error(request, "Current password is required.")
+            return redirect("viewProfile")
+
         if not user.check_password(current_password):
-            messages.error(request, 'Current password is incorrect.')
-            return redirect('viewProfile')
-        
+            messages.error(request, "Current password is incorrect.")
+            return redirect("viewProfile")
+
         if not new_password:
-            messages.error(request, 'New password is required.')
-            return redirect('viewProfile')
-        
+            messages.error(request, "New password is required.")
+            return redirect("viewProfile")
+
         if len(new_password) < 8:
-            messages.error(request, 'Password must be at least 8 characters long.')
-            return redirect('viewProfile')
-        
+            messages.error(request, "Password must be at least 8 characters long.")
+            return redirect("viewProfile")
+
         if new_password != confirm_password:
-            messages.error(request, 'Passwords do not match.')
-            return redirect('viewProfile')
-        
+            messages.error(request, "Passwords do not match.")
+            return redirect("viewProfile")
+
         try:
             user.set_password(new_password)
             user.save()
-            # Re-login the user with new password
-            login(request, user)
-            messages.success(request, 'Password changed successfully.')
+            # Keep the user logged in after password change
+            update_session_auth_hash(request, user)
+            messages.success(request, "Password changed successfully.")
+            return redirect("dashboard")
         except Exception as e:
-            messages.error(request, f'Error changing password: {str(e)}')
+            messages.error(request, f"Error changing password: {str(e)}")
+
+    return redirect("viewProfile")
+
+
+@login_required(login_url="admin_login")
+@require_POST
+@login_required(login_url="admin_login")
+@permission_required('can_delete_customers')
+@require_POST
+def bulk_delete_users(request):
+    """Bulk delete multiple users (BotUsers) - requires can_delete_customers permission"""
+    from django.http import JsonResponse
+    from organizations.rbac import get_user_customers
+    from core.audit import log_delete
     
-    return redirect('viewProfile')
+    # Try both formats: user_ids[] and user_ids
+    user_ids = request.POST.getlist('user_ids[]') or request.POST.getlist('user_ids')
+    
+    if not user_ids:
+        return JsonResponse({'success': False, 'message': 'No users selected'}, status=400)
+    
+    # Get users that the logged-in user can access
+    accessible_users = get_user_customers(request.user)
+    users = accessible_users.filter(id__in=user_ids)
+    
+    deleted_count = users.count()
+    
+    if deleted_count == 0:
+        return JsonResponse({'success': False, 'message': 'No users found or you don\'t have permission to delete them'}, status=404)
+    
+    try:
+        # Log each deletion
+        for user in users:
+            log_delete(
+                user=request.user,
+                target=user,
+                request=request
+            )
+        
+        # Delete all users
+        users.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'{deleted_count} user(s) deleted successfully',
+            'deleted_count': deleted_count
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Error deleting users: {str(e)}'}, status=500)

@@ -1,0 +1,461 @@
+{% extends 'layout/layout.html' %} 
+{% load number_filters %}
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Page Header with Filters -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-20">
+                    <div>
+                        <h5 class="fw-bold mb-8">
+                            <iconify-icon icon="solar:users-group-two-rounded-bold" class="text-primary-600 me-2"></iconify-icon>
+                            {{ title }}
+                        </h5>
+                        <p class="text-secondary-light mb-0">Track and manage outstanding customer debts</p>
+                    </div>
+                    <a href="{% url 'unit_economy' %}" class="btn btn-outline-primary">
+                        <iconify-icon icon="solar:arrow-left-bold" class="me-1"></iconify-icon>
+                        Back to Unit Economy
+                    </a>
+                </div>
+
+                <!-- Filters Form -->
+                <form method="GET" id="filtersForm">
+                    <div class="row g-3 mb-3">
+                        <!-- Period Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label text-sm mb-1">Period</label>
+                            <select name="period" id="periodSelect" class="form-select">
+                                {% for value, label in period_choices %}
+                                <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Custom Date Range -->
+                        <div id="customDateRange" class="col-md-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                            <label class="form-label text-sm mb-1">From</label>
+                            <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                        </div>
+                        <div id="customDateRangeTo" class="col-md-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                            <label class="form-label text-sm mb-1">To</label>
+                            <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                        </div>
+                        <!-- Search -->
+                        <div class="col-md-2">
+                            <label class="form-label text-sm mb-1">Search</label>
+                            <input type="text" name="search" class="form-control" placeholder="Name or phone..." value="{{ search }}">
+                        </div>
+                        <!-- Client Type -->
+                        <div class="col-md-2">
+                            <label class="form-label text-sm mb-1">Client Type</label>
+                            <select name="client_type" class="form-select">
+                                <option value="">All Types</option>
+                                <option value="b2b" {% if client_type == 'b2b' %}selected{% endif %}>B2B Only</option>
+                                <option value="b2c" {% if client_type == 'b2c' %}selected{% endif %}>B2C Only</option>
+                            </select>
+                        </div>
+                        {% if show_center and centers %}
+                        <!-- Center -->
+                        <div class="col-md-2">
+                            <label class="form-label text-sm mb-1">Center</label>
+                            <select name="center" id="centerSelect" class="form-select">
+                                <option value="">All Centers</option>
+                                {% for center in centers %}
+                                <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        {% if show_branch and branches %}
+                        <!-- Branch -->
+                        <div class="col-md-2">
+                            <label class="form-label text-sm mb-1">Branch</label>
+                            <select name="branch" id="branchSelect" class="form-select">
+                                <option value="">All Branches</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %} data-center="{{ branch.center_id }}">{{ branch.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <!-- Debt Range -->
+                        <div class="col-md-2">
+                            <label class="form-label text-sm mb-1">Debt Range</label>
+                            <select name="debt_range" class="form-select">
+                                <option value="">All Amounts</option>
+                                <option value="0-1000000" {% if debt_range == '0-1000000' %}selected{% endif %}>< 1M</option>
+                                <option value="1000000-5000000" {% if debt_range == '1000000-5000000' %}selected{% endif %}>1M - 5M</option>
+                                <option value="5000000-10000000" {% if debt_range == '5000000-10000000' %}selected{% endif %}>5M - 10M</option>
+                                <option value="10000000-999999999" {% if debt_range == '10000000-999999999' %}selected{% endif %}>> 10M</option>
+                            </select>
+                        </div>
+                        <!-- Collection Rate -->
+                        <div class="col-md-2">
+                            <label class="form-label text-sm mb-1">Collection Rate</label>
+                            <select name="collection_rate" class="form-select">
+                                <option value="">All Rates</option>
+                                <option value="0-30" {% if collection_rate_filter == '0-30' %}selected{% endif %}>Low (0-30%)</option>
+                                <option value="30-70" {% if collection_rate_filter == '30-70' %}selected{% endif %}>Medium (30-70%)</option>
+                                <option value="70-100" {% if collection_rate_filter == '70-100' %}selected{% endif %}>High (70-100%)</option>
+                            </select>
+                        </div>
+                        <!-- Orders Count -->
+                        <div class="col-md-2">
+                            <label class="form-label text-sm mb-1">Orders Count</label>
+                            <select name="orders_count" class="form-select">
+                                <option value="">All Orders</option>
+                                <option value="1-5" {% if orders_count_filter == '1-5' %}selected{% endif %}>1-5 orders</option>
+                                <option value="6-10" {% if orders_count_filter == '6-10' %}selected{% endif %}>6-10 orders</option>
+                                <option value="11-999" {% if orders_count_filter == '11-999' %}selected{% endif %}>11+ orders</option>
+                            </select>
+                        </div>
+                        <!-- Sort By -->
+                        <div class="col-md-2">
+                            <label class="form-label text-sm mb-1">Sort By</label>
+                            <select name="sort_by" class="form-select">
+                                <option value="remaining-desc" {% if sort_by == 'remaining-desc' %}selected{% endif %}>Debt: High to Low</option>
+                                <option value="remaining-asc" {% if sort_by == 'remaining-asc' %}selected{% endif %}>Debt: Low to High</option>
+                                <option value="orders-desc" {% if sort_by == 'orders-desc' %}selected{% endif %}>Orders: High to Low</option>
+                                <option value="rate-asc" {% if sort_by == 'rate-asc' %}selected{% endif %}>Collection: Low to High</option>
+                                <option value="rate-desc" {% if sort_by == 'rate-desc' %}selected{% endif %}>Collection: High to Low</option>
+                                <option value="name-asc" {% if sort_by == 'name-asc' %}selected{% endif %}>Name: A to Z</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-sm mb-1">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <iconify-icon icon="solar:filter-bold" class="me-1"></iconify-icon>
+                                Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if period_label %}
+                <div class="mb-3">
+                    <span class="badge bg-primary-light text-primary-main px-12 py-6">
+                        <iconify-icon icon="solar:calendar-bold" class="me-1"></iconify-icon>
+                        {{ period_label }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-1 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-danger-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:wallet-2-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Total Debt</span>
+                        <h4 class="fw-bold mb-0 text-danger-main">{{ total_debt|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                    </div>
+                </div>
+                <p class="text-sm mb-0 text-secondary-light">
+                    <span class="badge bg-danger-focus text-danger-main">{{ total_count }}</span>
+                    customers with debt
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-2 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-success-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:check-circle-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Total Received</span>
+                        <h4 class="fw-bold mb-0 text-success-main">{{ total_received|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-3 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-primary-600 text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:money-bag-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Total Expected</span>
+                        <h4 class="fw-bold mb-0">{{ total_expected|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-4 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-info-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:chart-2-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Avg Collection Rate</span>
+                        <h4 class="fw-bold mb-0 {% if avg_collection_rate >= 80 %}text-success-main{% elif avg_collection_rate >= 50 %}text-warning-main{% else %}text-danger-main{% endif %}">{{ avg_collection_rate }}%</h4>
+                    </div>
+                </div>
+                <div class="progress bg-neutral-100 h-8-px" style="height: 6px;">
+                    <div class="progress-bar {% if avg_collection_rate >= 80 %}bg-success-main{% elif avg_collection_rate >= 50 %}bg-warning-main{% else %}bg-danger-main{% endif %}" 
+                         role="progressbar" style="width: {{ avg_collection_rate }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debtors Table -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex justify-content-between align-items-center mb-20">
+                    <h6 class="fw-bold text-lg mb-0">All Debtors ({{ total_count }})</h6>
+                    <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                        <iconify-icon icon="vscode-icons:file-type-excel" class="me-1"></iconify-icon>
+                        Export to Excel
+                    </button>
+                </div>
+
+                {% if debtors %}
+                <div class="table-responsive">
+                    <table class="table basic-table mb-0" id="debtorsTable">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 40px;">#</th>
+                                <th style="min-width: 150px;">Customer</th>
+                                <th class="text-center" style="width: 120px;">Phone</th>
+                                <th class="text-center" style="width: 70px;">Type</th>
+                                {% if show_center %}<th class="text-center" style="min-width: 100px;">Center</th>{% endif %}
+                                {% if show_branch %}<th class="text-center" style="min-width: 100px;">Branch</th>{% endif %}
+                                <th class="text-end" style="min-width: 110px;">Remaining Debt</th>
+                                <th class="text-center" style="width: 90px;">Orders w/ Debt</th>
+                                <th class="text-end" style="min-width: 110px;">Total Expected</th>
+                                <th class="text-end" style="min-width: 110px;">Total Received</th>
+                                <th class="text-center" style="min-width: 140px;">Collection Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for debtor in debtors %}
+                            <tr>
+                                <td class="text-center text-secondary-light">{{ forloop.counter }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="w-32-px h-32-px bg-neutral-200 text-secondary-light d-flex justify-content-center align-items-center rounded-circle fw-semibold">
+                                            {{ debtor.customer_name|slice:":1"|upper }}
+                                        </span>
+                                        <span class="fw-medium">{{ debtor.customer_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="text-center text-secondary-light">
+                                    {% if debtor.customer_phone %}
+                                        <small>{{ debtor.customer_phone }}</small>
+                                    {% else %}
+                                        <small class="text-muted">—</small>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if debtor.is_agency %}
+                                        <span class="badge bg-primary-focus text-primary-main px-8 py-4">B2B</span>
+                                    {% else %}
+                                        <span class="badge bg-warning-focus text-warning-main px-8 py-4">B2C</span>
+                                    {% endif %}
+                                </td>
+                                {% if show_center %}
+                                <td class="text-center">
+                                    <span class="badge bg-info-focus text-info-main px-2 py-1">{{ debtor.center_name|default:"N/A" }}</span>
+                                </td>
+                                {% endif %}
+                                {% if show_branch %}
+                                <td class="text-center">
+                                    <span class="badge bg-purple-focus text-purple-main px-2 py-1">{{ debtor.branch_name|default:"N/A" }}</span>
+                                </td>
+                                {% endif %}
+                                <td class="text-end text-danger-main fw-semibold">{{ debtor.remaining|floatformat:0|intcomma }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-neutral-200 text-light px-2 py-1">{{ debtor.orders_with_debt }}</span>
+                                </td>
+                                <td class="text-end">{{ debtor.total_expected|floatformat:0|intcomma }}</td>
+                                <td class="text-end text-success-600 fw-semibold">{{ debtor.total_received|floatformat:0|intcomma }}</td>
+                                <td class="text-center">
+                                    <div class="d-flex align-items-center justify-content-center gap-2">
+                                        <div class="progress" style="width: 70px; height: 10px;">
+                                            <div class="progress-bar {% if debtor.collection_rate >= 70 %}bg-success-600{% elif debtor.collection_rate >= 40 %}bg-warning-600{% else %}bg-danger-600{% endif %}" 
+                                                 style="width: {{ debtor.collection_rate }}%"></div>
+                                        </div>
+                                        <span class="fw-semibold {% if debtor.collection_rate >= 70 %}text-success-600{% elif debtor.collection_rate >= 40 %}text-warning-600{% else %}text-danger-600{% endif %}">{{ debtor.collection_rate }}%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="table-secondary">
+                            <tr class="fw-bold">
+                                <td colspan="{% if show_center and show_branch %}6{% elif show_center or show_branch %}5{% else %}4{% endif %}" class="text-end">TOTALS:</td>
+                                <td class="text-end text-danger-main">{{ total_debt|floatformat:0|intcomma }}</td>
+                                <td class="text-center">{{ total_orders_with_debt }}</td>
+                                <td class="text-end">{{ total_expected|floatformat:0|intcomma }}</td>
+                                <td class="text-end text-success-600">{{ total_received|floatformat:0|intcomma }}</td>
+                                <td class="text-center">{{ avg_collection_rate }}%</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                    <span class="mb-0 w-64-px h-64-px bg-neutral-100 flex-shrink-0 text-secondary-light d-flex justify-content-center align-items-center rounded-circle mb-3">
+                        <iconify-icon icon="solar:user-cross-rounded-line-duotone" class="text-xxl"></iconify-icon>
+                    </span>
+                    <h6 class="fw-semibold text-secondary-light mb-1">No debtors found</h6>
+                    <p class="text-sm text-secondary-light mb-0">Try adjusting your filters or date range</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Period selection toggle
+    const periodSelect = document.getElementById('periodSelect');
+    const customDateRange = document.getElementById('customDateRange');
+    const customDateRangeTo = document.getElementById('customDateRangeTo');
+    const form = document.getElementById('filtersForm');
+    
+    if (periodSelect) {
+        periodSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customDateRange.style.display = 'block';
+                customDateRangeTo.style.display = 'block';
+                // Don't auto-submit for custom - wait for user to select dates
+            } else {
+                customDateRange.style.display = 'none';
+                customDateRangeTo.style.display = 'none';
+                // Auto-submit for predefined periods
+                form.submit();
+            }
+        });
+    }
+    
+    // Auto-submit when custom date range is selected
+    const dateFromInput = form.querySelector('input[name="date_from"]');
+    const dateToInput = form.querySelector('input[name="date_to"]');
+    
+    if (dateFromInput && dateToInput) {
+        dateFromInput.addEventListener('change', function() {
+            if (dateToInput.value) {
+                form.submit();
+            }
+        });
+        
+        dateToInput.addEventListener('change', function() {
+            if (dateFromInput.value) {
+                form.submit();
+            }
+        });
+    }
+
+    // Center-Branch filter relationship
+    const centerSelect = document.getElementById('centerSelect');
+    const branchSelect = document.getElementById('branchSelect');
+    
+    if (centerSelect && branchSelect) {
+        centerSelect.addEventListener('change', function() {
+            const selectedCenter = this.value;
+            const branchOptions = branchSelect.querySelectorAll('option');
+            
+            branchOptions.forEach(option => {
+                if (option.value === '') {
+                    option.style.display = 'block';
+                } else {
+                    const branchCenter = option.getAttribute('data-center');
+                    if (!selectedCenter || branchCenter === selectedCenter) {
+                        option.style.display = 'block';
+                    } else {
+                        option.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Reset branch selection if hidden
+            if (branchSelect.selectedOptions[0] && branchSelect.selectedOptions[0].style.display === 'none') {
+                branchSelect.value = '';
+            }
+        });
+    }
+
+    // Auto-submit on filter change
+    const autoSubmitSelects = form.querySelectorAll('select:not(#periodSelect)');
+    const searchInput = form.querySelector('input[name="search"]');
+    
+    autoSubmitSelects.forEach(filter => {
+        filter.addEventListener('change', function() {
+            form.submit();
+        });
+    });
+    
+    // Auto-submit on search with debounce
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                form.submit();
+            }, 500); // Wait 500ms after user stops typing
+        });
+    }
+});
+
+function exportToExcel() {
+    const table = document.getElementById('debtorsTable');
+    if (!table) {
+        alert('No data to export');
+        return;
+    }
+    
+    let csv = [];
+    const rows = table.querySelectorAll('tr');
+    
+    for (let i = 0; i < rows.length; i++) {
+        const row = [];
+        const cols = rows[i].querySelectorAll('td, th');
+        
+        for (let j = 0; j < cols.length; j++) {
+            let text = cols[j].innerText.replace(/,/g, '');
+            row.push('"' + text + '"');
+        }
+        
+        csv.push(row.join(','));
+    }
+    
+    const csvContent = csv.join('\\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `debtors_report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+{% endblock script %}

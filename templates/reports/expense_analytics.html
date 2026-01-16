@@ -1,0 +1,711 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+{% load number_filters %}
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Page Header -->
+    <div class="col-12">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+            <h6 class="fw-semibold mb-0">
+                <iconify-icon icon="solar:chart-linear" class="me-8 text-primary-600"></iconify-icon>
+                <span data-i18n="reports.expenseAnalytics">Expense Analytics Report</span>
+            </h6>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{% url 'expenseList' %}" class="btn btn-outline-secondary btn-sm">
+                    <iconify-icon icon="solar:wallet-bold" class="me-1"></iconify-icon>
+                    Manage Expenses
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Header with Filters -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-0">{{ title }}</h5>
+                        <p class="text-secondary-light mb-0">{{ subTitle }}</p>
+                    </div>
+                    <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                        <!-- Period Filter -->
+                        <div>
+                            <label class="form-label text-sm mb-1">Period</label>
+                            <select name="period" id="periodSelect" class="form-select" style="min-width: 140px;">
+                                {% for value, label in period_choices %}
+                                <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Custom Date Range -->
+                        <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                            <div>
+                                <label class="form-label text-sm mb-1">From</label>
+                                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                            </div>
+                            <div>
+                                <label class="form-label text-sm mb-1">To</label>
+                                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                            </div>
+                        </div>
+                        <!-- Expense Type -->
+                        <div>
+                            <label class="form-label text-sm mb-1">Type</label>
+                            <select name="expense_type" class="form-select">
+                                <option value="">All Types</option>
+                                <option value="b2b" {% if expense_type_filter == 'b2b' %}selected{% endif %}>B2B Only</option>
+                                <option value="b2c" {% if expense_type_filter == 'b2c' %}selected{% endif %}>B2C Only</option>
+                            </select>
+                        </div>
+                        {% if is_superuser and centers %}
+                        <div>
+                            <label class="form-label text-sm mb-1">Center</label>
+                            <select name="center" class="form-select">
+                                <option value="">All Centers</option>
+                                {% for center in centers %}
+                                <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        {% if branches and not is_branch_level %}
+                        <div>
+                            <label class="form-label text-sm mb-1">Branch</label>
+                            <select name="branch" class="form-select">
+                                <option value="">All Branches</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                            <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
+                            <span>Apply</span>
+                        </button>
+                    </form>
+                </div>
+                {% if period_label %}
+                <div class="mt-3">
+                    <span class="badge bg-primary-light text-primary-main px-12 py-6">
+                        <iconify-icon icon="solar:calendar-bold" class="me-1"></iconify-icon>
+                        {{ period_label }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-1 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-primary-600 text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="solar:wallet-bold" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Total Expenses</span>
+                        <h4 class="fw-bold mb-0">{{ total_expenses|format_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <small class="text-secondary-light">{{ total_count }} items</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-2 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-info-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="mdi:office-building" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">B2B Expenses</span>
+                        <h4 class="fw-bold mb-0">{{ b2b_total|format_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <small class="text-secondary-light">{{ b2b_count }} items</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-3 h-100">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="w-48-px h-48-px bg-success-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="mdi:account-group" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">B2C Expenses</span>
+                        <h4 class="fw-bold mb-0">{{ b2c_total|format_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <small class="text-secondary-light">{{ b2c_count }} items</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xxl-3 col-sm-6">
+        <div class="card p-3 radius-8 border shadow-none bg-gradient-end-4 h-100">2">
+                    <span class="w-48-px h-48-px bg-warning-main text-white d-flex justify-content-center align-items-center rounded-circle">
+                        <iconify-icon icon="mdi:account-multiple" class="text-xl"></iconify-icon>
+                    </span>
+                    <div>
+                        <span class="text-secondary-light text-sm">Both Types</span>
+                        <h4 class="fw-bold mb-0">{{ both_total|format_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <small class="text-secondary-light">{{ both_count }} items</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Center-Level Breakdown (Superuser) -->
+    {% if is_superuser and by_center %}
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-header border-bottom bg-base py-16 px-24">
+                <h6 class="mb-0 fw-semibold">
+                    <iconify-icon icon="mdi:office-building" class="me-2 text-primary-600"></iconify-icon>
+                    Expenses by Center
+                </h6>
+            </div>
+            <div class="card-body p-24">
+                {% for center_data in by_center %}
+                <div class="mb-32">
+                    <div class="d-flex justify-content-between align-items-center mb-16 pb-12 border-bottom">
+                        <h6 class="mb-0 fw-bold text-primary-600">
+                            <iconify-icon icon="mdi:domain" class="me-2"></iconify-icon>
+                            {{ center_data.center.name }}
+                        </h6>
+                        <div class="text-end">
+                            <h5 class="mb-0 fw-bold text-primary-600">{{ center_data.total|format_number }}</h5>
+                            <small class="text-secondary-light">{{ center_data.count }} expenses</small>
+                        </div>
+                    </div>
+                    
+                    {% if center_data.branches %}
+                    <div class="table-responsive">
+                        <table class="table bordered-table mb-0">
+                            <thead>
+                                <tr class="bg-neutral-50">
+                                    <th class="text-sm">Branch</th>
+                                    <th class="text-sm text-end">B2B</th>
+                                    <th class="text-sm text-end">B2C</th>
+                                    <th class="text-sm text-end">Both</th>
+                                    <th class="text-sm text-end">Total</th>
+                                    <th class="text-sm text-center">Count</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for branch in center_data.branches %}
+                                <tr>
+                                    <td class="fw-medium">
+                                        <iconify-icon icon="mdi:source-branch" class="me-2"></iconify-icon>
+                                        {{ branch.branch__name }}
+                                    </td>
+                                    <td class="text-end text-info-600">{{ branch.b2b_total|default:0|format_number }}</td>
+                                    <td class="text-end text-success-600">{{ branch.b2c_total|default:0|format_number }}</td>
+                                    <td class="text-end text-warning-600">{{ branch.both_total|default:0|format_number }}</td>
+                                    <td class="text-end fw-semibold">{{ branch.total|format_number }}</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-neutral-200 text-neutral-900">{{ branch.count }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-secondary-light mb-0"><i>No branch expenses found for this center</i></p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Branch Breakdown with Stats -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-header border-bottom bg-base py-16 px-24">
+                <h6 class="mb-0 fw-semibold">
+                    <iconify-icon icon="mdi:source-branch" class="me-2 text-primary-600"></iconify-icon>
+                    Expenses by Branch
+                </h6>
+            </div>
+            <div class="card-body p-24">
+                {% if by_branch %}
+                <div class="table-responsive">
+                    <table class="table bordered-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Branch</th>
+                                {% if is_superuser %}<th>Center</th>{% endif %}
+                                <th class="text-end">B2B</th>
+                                <th class="text-end">B2C</th>
+                                <th class="text-end">Both</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-center">Count</th>
+                                <th class="text-end">Avg</th>
+                                <th class="text-end">% of Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for branch in by_branch %}
+                            <tr>
+                                <td class="fw-medium">
+                                    <iconify-icon icon="mdi:source-branch" class="me-2"></iconify-icon>
+                                    {{ branch.branch__name }}
+                                </td>
+                                {% if is_superuser %}
+                                <td class="text-secondary-light">{{ branch.branch__center__name }}</td>
+                                {% endif %}
+                                <td class="text-end text-info-600">{{ branch.b2b_total|default:0|format_number }}</td>
+                                <td class="text-end text-success-600">{{ branch.b2c_total|default:0|format_number }}</td>
+                                <td class="text-end text-warning-600">{{ branch.both_total|default:0|format_number }}</td>
+                                <td class="text-end fw-semibold text-primary-600">{{ branch.total|format_number }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-neutral-200 text-neutral-900">{{ branch.count }}</span>
+                                </td>
+                                <td class="text-end text-secondary-light">{{ branch.avg_expense|floatformat:0|format_number }}</td>
+                                <td class="text-end">
+                                    {% widthratio branch.total total_expenses 100 as percentage %}
+                                    <div class="d-flex align-items-center gap-2 justify-content-end">
+                                        <div class="progress" style="width: 60px; height: 6px;">
+                                            <div class="progress-bar bg-primary-600" style="width: {{ percentage }}%"></div>
+                                        </div>
+                                        <span class="text-sm">{{ percentage }}%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <iconify-icon icon="solar:inbox-bold-duotone" class="text-secondary-light" style="font-size: 64px;"></iconify-icon>
+                    <p class="text-secondary-light mt-3">No expense data available for the selected period</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Type Distribution & Statistics Side by Side -->
+    <div class="col-12">
+        <div class="row gy-4">
+            <div class="col-md-6">
+                <div class="card radius-8 border-0 h-100">
+                    <div class="card-header border-bottom bg-base py-16 px-24">
+                        <h6 class="mb-0 fw-semibold">
+                            <iconify-icon icon="mdi:chart-pie" class="me-2 text-primary-600"></iconify-icon>
+                            Expense Type Distribution
+                        </h6>
+                        <p class="text-sm text-secondary-light mb-0 mt-1">Breakdown by customer type (B2B, B2C, Both)</p>
+                    </div>
+            <div class="card-body p-24">
+                {% if type_distribution %}
+                <div class="text-center mb-16">
+                    <canvas id="typeDistributionChart" height="140"></canvas>
+                </div>
+                <div>
+                    {% for item in type_distribution %}
+                    <div class="mb-12 p-3 radius-8 {% if item.expense_type == 'b2b' %}bg-info-focus{% elif item.expense_type == 'b2c' %}bg-success-focus{% else %}bg-warning-focus{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center mb-8">
+                            <div>
+                                {% if item.expense_type == 'b2b' %}
+                                <span class="badge bg-info-600 text-white px-12 py-6">B2B - Business</span>
+                                {% elif item.expense_type == 'b2c' %}
+                                <span class="badge bg-success-600 text-white px-12 py-6">B2C - Individual</span>
+                                {% else %}
+                                <span class="badge bg-warning-600 text-white px-12 py-6">Both Types</span>
+                                {% endif %}
+                            </div>
+                            <span class="fw-bold text-lg">{{ item.total|format_number }} UZS</span>
+                        </div>
+                        <div class="d-flex justify-content-between text-sm text-secondary-light mb-2">
+                            <span><i class="ri-file-list-3-line me-1"></i>{{ item.count }} expenses</span>
+                            {% widthratio item.total total_expenses 100 as type_pct %}
+                            <span class="fw-semibold">{{ type_pct }}% of total</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            {% widthratio item.total total_expenses 100 as type_percentage %}
+                            <div class="progress-bar {% if item.expense_type == 'b2b' %}bg-info-600{% elif item.expense_type == 'b2c' %}bg-success-600{% else %}bg-warning-600{% endif %}" style="width: {{ type_percentage }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <iconify-icon icon="solar:inbox-bold-duotone" class="text-secondary-light" style="font-size: 48px;"></iconify-icon>
+                    <p class="text-secondary-light mb-0 mt-2">No data available</p>
+                </div>
+                {% endif %}
+                </div>
+            </div>
+            </div>
+
+            <!-- Expense Statistics -->
+            <div class="col-md-6">
+                <div class="card radius-8 border-0 h-100">
+                    <div class="card-header border-bottom bg-base py-16 px-24">
+                        <h6 class="mb-0 fw-semibold">
+                            <iconify-icon icon="solar:chart-2-bold" class="me-2 text-primary-600"></iconify-icon>
+                            Expense Statistics
+                        </h6>
+                        <p class="text-sm text-secondary-light mb-0 mt-1">Min, Max, Average & Median values</p>
+                    </div>
+            <div class="card-body p-24">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="p-3 bg-success-focus radius-8 h-100">
+                            <div class="d-flex align-items-start gap-2">
+                                <iconify-icon icon="solar:arrow-up-bold" class="text-success-600 text-xl"></iconify-icon>
+                                <div>
+                                    <span class="text-sm text-secondary-light d-block">Highest Expense</span>
+                                    <h5 class="fw-bold mb-0 text-success-600">{{ highest_expense|format_number }}</h5>
+                                    <small class="text-secondary-light">UZS</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-danger-focus radius-8 h-100">
+                            <div class="d-flex align-items-start gap-2">
+                                <iconify-icon icon="solar:arrow-down-bold" class="text-danger-600 text-xl"></iconify-icon>
+                                <div>
+                                    <span class="text-sm text-secondary-light d-block">Lowest Expense</span>
+                                    <h5 class="fw-bold mb-0 text-danger-600">{{ lowest_expense|format_number }}</h5>
+                                    <small class="text-secondary-light">UZS</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-warning-focus radius-8 h-100">
+                            <div class="d-flex align-items-start gap-2">
+                                <iconify-icon icon="solar:chart-bold" class="text-warning-600 text-xl"></iconify-icon>
+                                <div>
+                                    <span class="text-sm text-secondary-light d-block">Average Expense</span>
+                                    <h5 class="fw-bold mb-0 text-warning-600">{{ avg_expense|format_number }}</h5>
+                                    <small class="text-secondary-light">UZS</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-info-focus radius-8 h-100">
+                            <div class="d-flex align-items-start gap-2">
+                                <iconify-icon icon="solar:calculator-minimalistic-bold" class="text-info-600 text-xl"></iconify-icon>
+                                <div>
+                                    <span class="text-sm text-secondary-light d-block">Median Expense</span>
+                                    <h5 class="fw-bold mb-0 text-info-600">{{ median_expense|format_number }}</h5>
+                                    <small class="text-secondary-light">UZS</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if monthly_trend %}
+                <div class="mt-4 pt-4 border-top">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="text-sm fw-semibold mb-0">Monthly Trend</h6>
+                        <span class="badge bg-primary-100 text-primary-600">{{ monthly_trend|length }} months</span>
+                    </div>
+                    <canvas id="monthlyTrendChart" height="140"></canvas>
+                </div>
+                {% endif %}
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branch Chart -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-header border-bottom bg-base py-16 px-24">
+                <h6 class="mb-0 fw-semibold">
+                    <iconify-icon icon="mdi:chart-bar" class="me-2 text-primary-600"></iconify-icon>
+                    Branch Comparison (Top 10)
+                </h6>
+            </div>
+            <div class="card-body p-24">
+                {% if by_branch %}
+                <canvas id="branchComparisonChart" height="100"></canvas>
+                {% else %}
+                <div class="text-center py-5">
+                    <iconify-icon icon="solar:inbox-bold-duotone" class="text-secondary-light" style="font-size: 64px;"></iconify-icon>
+                    <p class="text-secondary-light mt-3 mb-0">No data available yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Expenses -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-header border-bottom bg-base py-16 px-24">
+                <h6 class="mb-0 fw-semibold">
+                    <iconify-icon icon="solar:medal-star-bold" class="me-2 text-warning-600"></iconify-icon>
+                    Top 10 Highest Expenses
+                </h6>
+            </div>
+            <div class="card-body p-24">
+                {% if top_expenses %}
+                <div class="table-responsive">
+                    <table class="table bordered-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Expense Name</th>
+                                <th>Type</th>
+                                <th>Branch</th>
+                                <th class="text-end">Unit Price</th>
+                                <th class="text-end">Orders</th>
+                                <th class="text-end">Total Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in top_expenses %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td class="fw-medium">{{ item.expense.name }}</td>
+                                <td>
+                                    {% if item.expense.expense_type == 'b2b' %}
+                                    <span class="badge bg-info-100 text-info-600">B2B</span>
+                                    {% elif item.expense.expense_type == 'b2c' %}
+                                    <span class="badge bg-success-100 text-success-600">B2C</span>
+                                    {% else %}
+                                    <span class="badge bg-warning-100 text-warning-600">Both</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-secondary-light">{{ item.expense.branch.name }}</td>
+                                <td class="text-end text-secondary-light">{{ item.expense.price|format_number }}</td>
+                                <td class="text-end">
+                                    <span class="badge bg-primary-100 text-primary-600">{{ item.order_count }}</span>
+                                </td>
+                                <td class="text-end fw-bold text-primary-600">{{ item.total_cost|format_number }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <p class="text-secondary-light mb-0">No expenses found</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+// Period selector - show/hide custom date inputs and auto-submit
+document.getElementById('periodSelect').addEventListener('change', function() {
+    const isCustom = this.value === 'custom';
+    const customDateRange = document.getElementById('customDateRange');
+    
+    if (isCustom) {
+        customDateRange.style.display = 'flex';
+    } else {
+        customDateRange.style.display = 'none';
+        // Auto-submit form when non-custom period is selected
+        this.closest('form').submit();
+    }
+});
+
+// Auto-submit on filter changes
+const filterForm = document.querySelector('form[method="GET"]');
+
+// Expense Type filter
+const expenseTypeSelect = document.querySelector('select[name="expense_type"]');
+if (expenseTypeSelect) {
+    expenseTypeSelect.addEventListener('change', function() {
+        filterForm.submit();
+    });
+}
+
+// Center filter
+const centerSelect = document.querySelector('select[name="center"]');
+if (centerSelect) {
+    centerSelect.addEventListener('change', function() {
+        filterForm.submit();
+    });
+}
+
+// Branch filter
+const branchSelect = document.querySelector('select[name="branch"]');
+if (branchSelect) {
+    branchSelect.addEventListener('change', function() {
+        filterForm.submit();
+    });
+}
+
+// Chart.js for visualizations
+{% if type_distribution %}
+// Type Distribution Pie Chart
+const typeCtx = document.getElementById('typeDistributionChart').getContext('2d');
+new Chart(typeCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ type_labels|safe }},
+        datasets: [{
+            data: {{ type_values|safe }},
+            backgroundColor: [
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(255, 206, 86, 0.8)'
+            ],
+            borderColor: [
+                'rgba(54, 162, 235, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(255, 206, 86, 1)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            }
+        }
+    }
+});
+{% endif %}
+
+{% if by_branch %}
+// Branch Comparison Bar Chart
+const branchCtx = document.getElementById('branchComparisonChart').getContext('2d');
+new Chart(branchCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ branch_labels|safe }},
+        datasets: [
+            {
+                label: 'B2B Expenses',
+                data: {{ branch_b2b|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'B2C Expenses',
+                data: {{ branch_b2c|safe }},
+                backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Both Types',
+                data: {{ branch_both|safe }},
+                backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                borderColor: 'rgba(255, 206, 86, 1)',
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+            x: {
+                stacked: false,
+            },
+            y: {
+                stacked: false,
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return value.toLocaleString() + ' UZS';
+                    }
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.dataset.label + ': ' + context.parsed.y.toLocaleString() + ' UZS';
+                    }
+                }
+            }
+        }
+    }
+});
+{% endif %}
+
+{% if monthly_trend %}
+// Monthly Trend Line Chart
+const monthlyCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+const monthlyLabels = {{ monthly_trend_labels|safe }};
+const monthlyValues = {{ monthly_trend_values|safe }};
+
+new Chart(monthlyCtx, {
+    type: 'line',
+    data: {
+        labels: monthlyLabels,
+        datasets: [{
+            label: 'Monthly Expenses',
+            data: monthlyValues,
+            borderColor: 'rgba(99, 102, 241, 1)',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return value.toLocaleString() + ' UZS';
+                    }
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return 'Expenses: ' + context.parsed.y.toLocaleString() + ' UZS';
+                    }
+                }
+            }
+        }
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

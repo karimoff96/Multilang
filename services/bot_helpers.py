@@ -1,12 +1,15 @@
 """
 Bot integration helpers for the translation center services
 """
-
+import logging
 from services.models import Category, Product
 from orders.models import Order, OrderMedia
-from accounts.models import TelegramUser
+from accounts.models import BotUser
 from services.page_counter import count_pages_from_uploaded_file
+from bot.notification_service import send_order_notification
 import os
+
+logger = logging.getLogger(__name__)
 
 
 class ServiceManager:
@@ -58,7 +61,7 @@ class ServiceManager:
     def create_order(user_id, document_id, description="", files=None, pages=1):
         """Create an order for a user with file uploads"""
         try:
-            user = TelegramUser.objects.get(user_id=user_id, is_active=True)
+            user = BotUser.objects.get(user_id=user_id, is_active=True)
             document = Product.objects.get(id=document_id, is_active=True)
 
             # Create order
@@ -85,9 +88,15 @@ class ServiceManager:
                 order.update_total_pages()
                 order.total_price = order.calculated_price
                 order.save()
+            
+            # Send notification to Telegram channels
+            try:
+                send_order_notification(order.id)
+            except Exception as e:
+                logger.warning(f"Failed to send order notification for order {order.id}: {e}")
 
             return order
-        except (TelegramUser.DoesNotExist, Product.DoesNotExist):
+        except (BotUser.DoesNotExist, Product.DoesNotExist):
             return None
 
     @staticmethod
@@ -162,7 +171,7 @@ def get_user_friendly_price(price, is_agency=False, pages=1):
 def get_documents_for_user(user_id):
     """Get all available documents for a user"""
     try:
-        user = TelegramUser.objects.get(user_id=user_id, is_active=True)
+        user = BotUser.objects.get(user_id=user_id, is_active=True)
         return Product.objects.filter(is_active=True)
-    except TelegramUser.DoesNotExist:
+    except BotUser.DoesNotExist:
         return Product.objects.filter(is_active=True)

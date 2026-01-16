@@ -5,24 +5,26 @@ from telebot.apihelper import ApiTelegramException
 from django.http import HttpResponse
 from dotenv import load_dotenv
 import os
+import logging
 from .translations import get_text, create_or_update_user
+from .notification_service import send_order_notification
 from django.core.files.base import ContentFile
-import tempfile
 from django.utils import timezone
 import mimetypes
-import zipfile
 from io import BytesIO
 from django.core.files.storage import default_storage
 import uuid
 from accounts.models import BotUser
-from io import BytesIO
-import zipfile
+
+# Import persistent state (Redis-backed for multi-worker support)
+from .persistent_state import user_data, uploaded_files
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-# Initialize user_data and uploaded_files dictionaries to store temporary user data
-user_data = {}
-uploaded_files = {}
+# user_data and uploaded_files are now imported from persistent_state.py
+# They use Redis/database-backed storage for multi-worker support
 
 # Disable SSL verification (for development only - not recommended for production)
 import ssl
@@ -30,33 +32,31 @@ from telebot import apihelper
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.poolmanager import PoolManager
-
-
 class NoSSLAdapter(HTTPAdapter):
     def init_poolmanager(self, *args, **kwargs):
         kwargs["ssl_context"] = ssl._create_unverified_context()
         return super().init_poolmanager(*args, **kwargs)
-
-
 # Create custom session with SSL verification disabled
 session = requests.Session()
 session.mount("https://", NoSSLAdapter())
 apihelper.SESSION = session
 
-# Initialize bot after setting up the session
-bot = telebot.TeleBot(os.getenv("BOT_TOKEN"), parse_mode="HTML")
+# Initialize bot with a PLACEHOLDER token for handler registration only.
+# This template bot is NEVER used for actual polling - it only serves as a 
+# container for handler definitions that get copied to center-specific bots.
+# Multi-tenant bots are created separately with actual tokens from the database.
+_TEMPLATE_TOKEN = "0000000000:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+bot = telebot.TeleBot(_TEMPLATE_TOKEN, parse_mode="HTML", threaded=False)
 
 # Admin user IDs (add your admin user IDs here)
 ADMINS = []  # Example: [123456789, 987654321]
-
-
 def get_translated_field(obj, field_name, language):
     """
     Get translated field value based on user's language.
     For modeltranslation, fields are stored as field_uz, field_ru, field_en
 
     Args:
-        obj: Model instance (MainService or DocumentType)
+        obj: Model instance (Cateogry or Product)
         field_name: Base field name ('name' or 'description')
         language: User's language ('uz', 'ru', 'en')
 
@@ -75,8 +75,6 @@ def get_translated_field(obj, field_name, language):
         value = getattr(obj, field_name, "")
 
     return value
-
-
 # Channel IDs for order forwarding
 B2C_CHANNEL_ID = os.getenv("B2C_CHANNEL_ID")  # For regular users
 B2B_CHANNEL_ID = os.getenv("B2B_CHANNEL_ID")  # For agency users
@@ -92,34 +90,34 @@ ALLOWED_EXTENSIONS = {
     ".gif",
     ".bmp",
     ".tiff",
+    ".tif",
     ".webp",
     ".heic",
+    ".heif",
 }
 STEP_LANGUAGE_SELECTED = 1
-STEP_REGISTRATION_STARTED = 2
-STEP_NAME_REQUESTED = 3
-STEP_PHONE_REQUESTED = 4
-STEP_REGISTERED = 5
-STEP_EDITING_PROFILE = 6
-STEP_EDITING_NAME = 7
-STEP_EDITING_PHONE = 8
-STEP_SELECTING_SERVICE = 9
-STEP_SELECTING_DOCUMENT = 10
-STEP_SELECTING_COPY_NUMBER = 11
-STEP_UPLOADING_FILES = 12
-STEP_PAYMENT_METHOD = 13
-STEP_AWAITING_PAYMENT = 14
-STEP_UPLOADING_RECEIPT = 15
-
-
+STEP_BRANCH_SELECTION = 2  # NEW: After language, before registration
+STEP_REGISTRATION_STARTED = 3
+STEP_NAME_REQUESTED = 4
+STEP_PHONE_REQUESTED = 5
+STEP_REGISTERED = 6
+STEP_EDITING_PROFILE = 7
+STEP_EDITING_NAME = 8
+STEP_EDITING_PHONE = 9
+STEP_SELECTING_SERVICE = 10
+STEP_SELECTING_DOCUMENT = 11
+STEP_SELECTING_COPY_NUMBER = 12
+STEP_UPLOADING_FILES = 13
+STEP_PAYMENT_METHOD = 14
+STEP_AWAITING_PAYMENT = 15
+STEP_UPLOADING_RECEIPT = 16
+STEP_AWAITING_RECEIPT = 17  # For additional payment receipts on existing orders
 def is_valid_file_format(file_name):
     """Check if file has allowed extension"""
     if not file_name:
         return False
     _, ext = os.path.splitext(file_name.lower())
     return ext in ALLOWED_EXTENSIONS
-
-
 def create_order_zip(order):
     """
     Create a ZIP file containing all order files and receipt (if exists)
@@ -159,75 +157,399 @@ def create_order_zip(order):
         return temp_zip.name
 
     except Exception as e:
-        print(f"[ERROR] Failed to create ZIP file: {e}")
-        import traceback
-
-        traceback.print_exc()
+        logger.error(f"Failed to create ZIP file: {e}", exc_info=True)
         return None
-
-
 def send_order_status_notification(order, old_status, new_status):
     """
-    Send notification to user when order status changes
+    Send notification to user when order status changes.
+    Handles both status and payment-related notifications with enhanced formatting.
     """
-    from accounts.models import BotUser, AdditionalInfo
+    from accounts.models import AdditionalInfo
 
-    # Only send notifications for specific status changes
-    notifiable_statuses = [
-        "payment_confirmed",
-        "in_progress",
-        "ready",
-        "completed",
-        "cancelled",
-    ]
+    # Define all notifiable statuses with their notification types
+    notifiable_statuses = {
+        "payment_pending": "payment",
+        "payment_received": "payment",
+        "payment_confirmed": "payment",
+        "in_progress": "status",
+        "ready": "status",
+        "completed": "status",
+        "cancelled": "status",
+    }
 
     if new_status not in notifiable_statuses:
         return
 
     try:
         user = order.bot_user
+        if not user or not user.user_id:
+            logger.warning(f"No user or user_id for order {order.id}")
+            return
+            
         language = user.language or "uz"
 
-        # Get notification text key
-        text_key = f"status_{new_status}"
-
-        # Get base notification text
-        notification_text = get_text(text_key, language)
-
-        if not notification_text:
-            print(f"[WARNING] No notification text found for status: {new_status}")
-            return
-
-        # Prepare placeholder values
-        price = f"{order.total_price:,.0f}"
-        days = order.product.estimated_days
-
         # Get additional info for address and phone
-        additional_info = AdditionalInfo.objects.first()
-        phone = additional_info.bank_card if additional_info else "N/A"
-        address = "Translation Center"  # You can add address field to AdditionalInfo if needed
+        additional_info = AdditionalInfo.get_for_user(user)
+        phone = additional_info.support_phone if additional_info and additional_info.support_phone else "N/A"
+        branch_name = order.branch.name if order.branch else "Translation Center"
+        branch_address = order.branch.address if order.branch and order.branch.address else ""
+        
+        # Build notification based on status with enhanced formatting
+        if new_status == "payment_pending":
+            if language == "uz":
+                notification_text = (
+                    f"💳 <b>TO'LOV KUTILMOQDA</b>\n"
+                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"💰 <b>To'lov summasi:</b> {order.total_price:,.0f} so'm\n\n"
+                    f"📱 To'lov chekini yuborishingizni kutmoqdamiz.\n"
+                    f"💳 Karta orqali to'lovdan so'ng chek rasmini yuboring."
+                )
+            elif language == "ru":
+                notification_text = (
+                    f"💳 <b>ОЖИДАНИЕ ОПЛАТЫ</b>\n"
+                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"💰 <b>Сумма к оплате:</b> {order.total_price:,.0f} сум\n\n"
+                    f"📱 Ожидаем квитанцию об оплате.\n"
+                    f"💳 После оплаты картой отправьте фото чека."
+                )
+            else:
+                notification_text = (
+                    f"💳 <b>PAYMENT PENDING</b>\n"
+                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"💰 <b>Amount:</b> {order.total_price:,.0f} sum\n\n"
+                    f"📱 Waiting for your payment receipt.\n"
+                    f"💳 After card payment, send the receipt photo."
+                )
+        
+        elif new_status == "payment_received":
+            if language == "uz":
+                notification_text = (
+                    f"📨 <b>CHEK QABUL QILINDI</b>\n"
+                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"💰 <b>Summa:</b> {order.total_price:,.0f} so'm\n"
+                    f"🧾 <b>Status:</b> Chek tekshirilmoqda ✅\n\n"
+                    f"⏳ To'lovingiz tekshirilmoqda.\n"
+                    f"⚡ Tez orada tasdiqlash habarimiz keladi."
+                )
+            elif language == "ru":
+                notification_text = (
+                    f"📨 <b>ЧЕК ПОЛУЧЕН</b>\n"
+                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"💰 <b>Сумма:</b> {order.total_price:,.0f} сум\n"
+                    f"🧾 <b>Статус:</b> Чек проверяется ✅\n\n"
+                    f"⏳ Ваша оплата проверяется.\n"
+                    f"⚡ Скоро вы получите подтверждение."
+                )
+            else:
+                notification_text = (
+                    f"📨 <b>RECEIPT RECEIVED</b>\n"
+                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"💰 <b>Amount:</b> {order.total_price:,.0f} sum\n"
+                    f"🧾 <b>Status:</b> Receipt being verified ✅\n\n"
+                    f"⏳ Your payment is being verified.\n"
+                    f"⚡ You'll receive confirmation shortly."
+                )
+        
+        elif new_status == "payment_confirmed":
+            if language == "uz":
+                notification_text = (
+                    f"✅ <b>TO'LOV TASDIQLANDI!</b>\n"
+                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"💰 <b>Summa:</b> {order.total_price:,.0f} so'm ✅\n"
+                    f"📊 <b>Progress:</b> ▰▰▱▱▱▱▱ 30%\n\n"
+                    f"🔄 Buyurtmangiz jarayonga qo'shildi.\n"
+                    f"👥 Operatorlarimiz tez orada bog'lanishadi."
+                )
+            elif language == "ru":
+                notification_text = (
+                    f"✅ <b>ОПЛАТА ПОДТВЕРЖДЕНА!</b>\n"
+                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"💰 <b>Сумма:</b> {order.total_price:,.0f} сум ✅\n"
+                    f"📊 <b>Прогресс:</b> ▰▰▱▱▱▱▱ 30%\n\n"
+                    f"🔄 Ваш заказ добавлен в обработку.\n"
+                    f"👥 Наши операторы свяжутся с вами."
+                )
+            else:
+                notification_text = (
+                    f"✅ <b>PAYMENT CONFIRMED!</b>\n"
+                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"💰 <b>Amount:</b> {order.total_price:,.0f} sum ✅\n"
+                    f"📊 <b>Progress:</b> ▰▰▱▱▱▱▱ 30%\n\n"
+                    f"🔄 Your order is now being processed.\n"
+                    f"👥 Our operators will contact you soon."
+                )
+        
+        elif new_status == "in_progress":
+            estimated_days = order.product.estimated_days if order.product else "N/A"
+            if language == "uz":
+                notification_text = (
+                    f"🔄 <b>BUYURTMA JARAYONDA!</b>\n"
+                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"⏱️ <b>Taxminiy muddat:</b> {estimated_days} kun\n"
+                    f"📊 <b>Progress:</b> ▰▰▰▰▱▱▱ 60%\n\n"
+                    f"✅ Sizga tayyor bo'lganda xabar beramiz.\n"
+                    f"📱 Savollaringiz bo'lsa, biz bilan bog'laning."
+                )
+            elif language == "ru":
+                notification_text = (
+                    f"🔄 <b>ЗАКАЗ В ПРОЦЕССЕ!</b>\n"
+                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"⏱️ <b>Примерный срок:</b> {estimated_days} дней\n"
+                    f"📊 <b>Прогресс:</b> ▰▰▰▰▱▱▱ 60%\n\n"
+                    f"✅ Мы сообщим вам, когда будет готово.\n"
+                    f"📱 Если есть вопросы, свяжитесь с нами."
+                )
+            else:
+                notification_text = (
+                    f"🔄 <b>ORDER IN PROGRESS!</b>\n"
+                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"⏱️ <b>Estimated time:</b> {estimated_days} days\n"
+                    f"📊 <b>Progress:</b> ▰▰▰▰▱▱▱ 60%\n\n"
+                    f"✅ We'll notify you when it's ready.\n"
+                    f"📱 Contact us if you have questions."
+                )
+        
+        elif new_status == "ready":
+            if language == "uz":
+                notification_text = (
+                    f"✅ <b>BUYURTMA TAYYOR!</b>\n"
+                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"📦 <b>Status:</b> Olib ketishingiz mumkin!\n"
+                    f"📊 <b>Progress:</b> ▰▰▰▰▰▰▱ 85%\n\n"
+                    f"🏢 <b>Filial:</b> {branch_name}\n"
+                )
+                if branch_address:
+                    notification_text += f"📍 <b>Manzil:</b> {branch_address}\n"
+                if phone != "N/A":
+                    notification_text += f"📞 <b>Telefon:</b> {phone}\n"
+                notification_text += f"\n⏰ Ish vaqti: 9:00 - 18:00"
+            elif language == "ru":
+                notification_text = (
+                    f"✅ <b>ЗАКАЗ ГОТОВ!</b>\n"
+                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"📦 <b>Статус:</b> Можно забрать!\n"
+                    f"📊 <b>Прогресс:</b> ▰▰▰▰▰▰▱ 85%\n\n"
+                    f"🏢 <b>Филиал:</b> {branch_name}\n"
+                )
+                if branch_address:
+                    notification_text += f"📍 <b>Адрес:</b> {branch_address}\n"
+                if phone != "N/A":
+                    notification_text += f"📞 <b>Телефон:</b> {phone}\n"
+                notification_text += f"\n⏰ Время работы: 9:00 - 18:00"
+            else:
+                notification_text = (
+                    f"✅ <b>ORDER READY!</b>\n"
+                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"📦 <b>Status:</b> Ready for pickup!\n"
+                    f"📊 <b>Progress:</b> ▰▰▰▰▰▰▱ 85%\n\n"
+                    f"🏢 <b>Branch:</b> {branch_name}\n"
+                )
+                if branch_address:
+                    notification_text += f"📍 <b>Address:</b> {branch_address}\n"
+                if phone != "N/A":
+                    notification_text += f"📞 <b>Phone:</b> {phone}\n"
+                notification_text += f"\n⏰ Working hours: 9:00 - 18:00"
+        
+        elif new_status == "completed":
+            if language == "uz":
+                notification_text = (
+                    f"🎉 <b>BUYURTMA YAKUNLANDI!</b>\n"
+                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"📊 <b>Progress:</b> ▰▰▰▰▰▰▰ 100% ✅\n\n"
+                    f"🙏 Xizmatlarimizdan foydalanganingiz uchun rahmat!\n"
+                    f"⭐ Fikr-mulohazangizni kutamiz.\n\n"
+                    f"🔄 Biz bilan yana ishlamoqchimisiz?\n"
+                    f"📱 Buyurtma berish uchun /start bosing."
+                )
+            elif language == "ru":
+                notification_text = (
+                    f"🎉 <b>ЗАКАЗ ЗАВЕРШЕН!</b>\n"
+                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"📊 <b>Прогресс:</b> ▰▰▰▰▰▰▰ 100% ✅\n\n"
+                    f"🙏 Спасибо за использование наших услуг!\n"
+                    f"⭐ Ждем ваших отзывов.\n\n"
+                    f"🔄 Хотите работать с нами снова?\n"
+                    f"📱 Нажмите /start для нового заказа."
+                )
+            else:
+                notification_text = (
+                    f"🎉 <b>ORDER COMPLETED!</b>\n"
+                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"📊 <b>Progress:</b> ▰▰▰▰▰▰▰ 100% ✅\n\n"
+                    f"🙏 Thank you for using our services!\n"
+                    f"⭐ We look forward to your feedback.\n\n"
+                    f"🔄 Want to work with us again?\n"
+                    f"📱 Press /start for a new order."
+                )
+        
+        elif new_status == "cancelled":
+            if language == "uz":
+                notification_text = (
+                    f"❌ <b>BUYURTMA BEKOR QILINDI</b>\n"
+                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"📊 <b>Status:</b> Bekor qilingan\n\n"
+                    f"📞 Savollaringiz bo'lsa, biz bilan bog'laning.\n"
+                )
+                if phone != "N/A":
+                    notification_text += f"📱 <b>Telefon:</b> {phone}\n"
+                notification_text += f"\n🔄 Yangi buyurtma berish: /start"
+            elif language == "ru":
+                notification_text = (
+                    f"❌ <b>ЗАКАЗ ОТМЕНЕН</b>\n"
+                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"📊 <b>Статус:</b> Отменен\n\n"
+                    f"📞 Если есть вопросы, свяжитесь с нами.\n"
+                )
+                if phone != "N/A":
+                    notification_text += f"📱 <b>Телефон:</b> {phone}\n"
+                notification_text += f"\n🔄 Новый заказ: /start"
+            else:
+                notification_text = (
+                    f"❌ <b>ORDER CANCELLED</b>\n"
+                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"📊 <b>Status:</b> Cancelled\n\n"
+                    f"📞 Contact us if you have questions.\n"
+                )
+                if phone != "N/A":
+                    notification_text += f"📱 <b>Phone:</b> {phone}\n"
+                notification_text += f"\n🔄 New order: /start"
+        else:
+            # Generic fallback
+            notification_text = get_text(f"status_{new_status}", language)
+            if not notification_text or "Missing translation" in notification_text:
+                logger.warning(f"No notification text found for status: {new_status}")
+                return
+            notification_text = notification_text.format(
+                order_id=order.id,
+                price=f"{order.total_price:,.0f}",
+                days=order.product.estimated_days if order.product else "N/A",
+                phone=phone,
+                address=branch_address or branch_name
+            )
 
-        # Replace placeholders
-        notification_text = notification_text.format(
-            order_id=order.id, price=price, days=days, phone=phone, address=address
-        )
+        # Get the correct bot instance for this order's center
+        from bot.webhook_manager import get_bot_for_center
+        if order.branch and order.branch.center:
+            center_bot = get_bot_for_center(order.branch.center)
+            if center_bot:
+                center_bot.send_message(
+                    chat_id=user.user_id, text=notification_text, parse_mode="HTML"
+                )
+            else:
+                # Fallback to global bot
+                bot.send_message(
+                    chat_id=user.user_id, text=notification_text, parse_mode="HTML"
+                )
+        else:
+            # No branch center, use global bot
+            bot.send_message(
+                chat_id=user.user_id, text=notification_text, parse_mode="HTML"
+            )
 
-        # Send notification
-        bot.send_message(
-            chat_id=user.user_id, text=notification_text, parse_mode="HTML"
-        )
-
-        print(
-            f"[INFO] Sent status notification to user {user.user_id} for order {order.id}: {old_status} → {new_status}"
+        logger.info(
+            f"Sent status notification to user {user.user_id} for order {order.id}: {old_status} → {new_status}"
         )
 
     except Exception as e:
-        print(f"[ERROR] Failed to send status notification: {e}")
-        import traceback
+        logger.error(f"Failed to send status notification: {e}", exc_info=True)
+def send_payment_received_notification(order, amount_received, total_received):
+    """
+    Send notification to user when a payment amount is received (partial payment support).
+    """
+    try:
+        user = order.bot_user
+        if not user or not user.user_id:
+            logger.warning(f"No user or user_id for order {order.id} during payment notification")
+            return
+            
+        language = user.language or "uz"
+        
+        # Calculate remaining balance
+        remaining = order.remaining
+        total_due = order.total_due
+        
+        # Check if payment is fully completed
+        is_fully_paid = remaining <= 0 or order.payment_accepted_fully
+        
+        if is_fully_paid:
+            # Full payment notification
+            if language == "uz":
+                notification_text = (
+                    f"✅ <b>To'lov to'liq qabul qilindi!</b>\n\n"
+                    f"📋 Buyurtma raqami: #{order.id}\n"
+                    f"💰 Qabul qilingan summa: {amount_received:,.0f} so'm\n"
+                    f"💵 Jami to'langan: {total_received:,.0f} / {total_due:,.0f} so'm\n\n"
+                    f"🎉 Rahmat! Buyurtmangiz tez orada bajariladi."
+                )
+            elif language == "ru":
+                notification_text = (
+                    f"✅ <b>Оплата полностью получена!</b>\n\n"
+                    f"📋 Номер заказа: #{order.id}\n"
+                    f"💰 Полученная сумма: {amount_received:,.0f} сум\n"
+                    f"💵 Всего оплачено: {total_received:,.0f} / {total_due:,.0f} сум\n\n"
+                    f"🎉 Спасибо! Ваш заказ скоро будет выполнен."
+                )
+            else:
+                notification_text = (
+                    f"✅ <b>Payment Fully Received!</b>\n\n"
+                    f"📋 Order #: #{order.id}\n"
+                    f"💰 Amount received: {amount_received:,.0f} sum\n"
+                    f"💵 Total paid: {total_received:,.0f} / {total_due:,.0f} sum\n\n"
+                    f"🎉 Thank you! Your order will be processed soon."
+                )
+        else:
+            # Partial payment notification
+            if language == "uz":
+                notification_text = (
+                    f"💳 <b>Qisman to'lov qabul qilindi</b>\n\n"
+                    f"📋 Buyurtma raqami: #{order.id}\n"
+                    f"💰 Qabul qilingan summa: {amount_received:,.0f} so'm\n"
+                    f"💵 Jami to'langan: {total_received:,.0f} / {total_due:,.0f} so'm\n"
+                    f"📊 Qolgan summa: {remaining:,.0f} so'm\n\n"
+                    f"ℹ️ To'lov to'liq qabul qilinganida xabar beramiz."
+                )
+            elif language == "ru":
+                notification_text = (
+                    f"💳 <b>Частичная оплата получена</b>\n\n"
+                    f"📋 Номер заказа: #{order.id}\n"
+                    f"💰 Полученная сумма: {amount_received:,.0f} сум\n"
+                    f"💵 Всего оплачено: {total_received:,.0f} / {total_due:,.0f} сум\n"
+                    f"📊 Остаток: {remaining:,.0f} сум\n\n"
+                    f"ℹ️ Мы сообщим, когда оплата будет завершена."
+                )
+            else:
+                notification_text = (
+                    f"💳 <b>Partial Payment Received</b>\n\n"
+                    f"📋 Order #: #{order.id}\n"
+                    f"💰 Amount received: {amount_received:,.0f} sum\n"
+                    f"💵 Total paid: {total_received:,.0f} / {total_due:,.0f} sum\n"
+                    f"📊 Remaining: {remaining:,.0f} sum\n\n"
+                    f"ℹ️ We'll notify you when payment is complete."
+                )
+        
+        # Get the correct bot instance for this order's center
+        from bot.webhook_manager import get_bot_for_center
+        if order.branch and order.branch.center:
+            center_bot = get_bot_for_center(order.branch.center)
+            if center_bot:
+                center_bot.send_message(
+                    chat_id=user.user_id, text=notification_text, parse_mode="HTML"
+                )
+            else:
+                bot.send_message(
+                    chat_id=user.user_id, text=notification_text, parse_mode="HTML"
+                )
+        else:
+            bot.send_message(
+                chat_id=user.user_id, text=notification_text, parse_mode="HTML"
+            )
 
-        traceback.print_exc()
+        logger.info(
+            f"Sent payment notification to user {user.user_id} for order {order.id}: received {amount_received}, total {total_received}"
+        )
 
-
+    except Exception as e:
+        logger.error(f"Failed to send payment notification: {e}", exc_info=True)
 def generate_order_summary_caption(order, language):
     """
     Generate order summary caption for channel forwarding
@@ -374,23 +696,39 @@ def generate_order_summary_caption(order, language):
         caption += f"📅 Order date: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
 
     return caption
-
-
 def forward_order_to_channel(order, language):
     """
-    Forward order with all files to appropriate channel
+    Forward order with all files to appropriate channel(s).
+    Uses multi-tenant notification system that sends to:
+    1. Center's company_orders_channel_id (if configured)
+    2. Branch's B2C or B2B channel based on customer type
+    
+    Falls back to env-based channels if branch/center channels not configured.
     """
     try:
-        # Determine channel based on user type
+        # Try multi-tenant notification first
+        try:
+            notification_result = send_order_notification(order.id)
+            if notification_result.get('success'):
+                logger.info(f"Order {order.id} sent via multi-tenant notification")
+                return True
+        except Exception as e:
+            logger.warning(f"Multi-tenant notification failed: {e}, falling back to legacy")
+        
+        # Fallback to legacy env-based channel forwarding
         channel_id = B2B_CHANNEL_ID if order.bot_user.is_agency else B2C_CHANNEL_ID
+        
+        if not channel_id:
+            logger.warning(f"No channel configured for order {order.id}")
+            return False
 
-        print(f"[DEBUG] Forwarding order {order.id} to channel {channel_id}")
+        logger.debug(f"Forwarding order {order.id} to channel {channel_id}")
 
         # Create ZIP file with all order files
         zip_path = create_order_zip(order)
 
         if not zip_path:
-            print(f"[ERROR] Failed to create ZIP file for order {order.id}")
+            logger.error(f"Failed to create ZIP file for order {order.id}")
             return False
 
         # Generate caption
@@ -410,8 +748,8 @@ def forward_order_to_channel(order, language):
                     visible_file_name=zip_filename,
                 )
 
-            print(
-                f"[DEBUG] Successfully forwarded order {order.id} to channel {channel_id}"
+            logger.debug(
+                f"Successfully forwarded order {order.id} to channel {channel_id}"
             )
 
             # Clean up temporary ZIP file
@@ -423,10 +761,7 @@ def forward_order_to_channel(order, language):
             return True
 
         except Exception as e:
-            print(f"[ERROR] Failed to send ZIP to channel: {e}")
-            import traceback
-
-            traceback.print_exc()
+            logger.error(f"Failed to send ZIP to channel: {e}", exc_info=True)
 
             # Clean up temporary ZIP file
             try:
@@ -437,13 +772,23 @@ def forward_order_to_channel(order, language):
             return False
 
     except Exception as e:
-        print(f"[ERROR] Failed to forward order to channel: {e}")
-        import traceback
-
-        traceback.print_exc()
+        logger.error(f"Failed to forward order to channel: {e}", exc_info=True)
         return False
-
-
+def truncate_filename(filename, max_length=50):
+    """Truncate filename to prevent database field overflow while preserving extension"""
+    if not filename or len(filename) <= max_length:
+        return filename
+    
+    name, ext = os.path.splitext(filename)
+    # Reserve space for extension and some characters from name
+    max_name_length = max_length - len(ext) - 3  # -3 for "..."
+    
+    if max_name_length <= 0:
+        # Extension too long, just use hash
+        import hashlib
+        return hashlib.md5(filename.encode()).hexdigest()[:max_length]
+    
+    return f"{name[:max_name_length]}...{ext}"
 def get_file_pages_from_content(file_content, file_name):
     """Get accurate page count using the most precise methods available"""
     _, ext = os.path.splitext(file_name.lower())
@@ -472,7 +817,7 @@ def get_file_pages_from_content(file_content, file_name):
             page_count = len(pdf_reader.pages)
             return max(1, page_count)
         except Exception as e:
-            print(f"[WARNING] Failed to read PDF pages: {e}")
+            logger.warning(f"Failed to read PDF pages: {e}")
             # Fallback to word count estimation if PDF parsing fails
             try:
                 text = file_content.decode("utf-8", errors="ignore")
@@ -483,20 +828,9 @@ def get_file_pages_from_content(file_content, file_name):
     else:
         # Unknown file type, default to 1 page
         return 1
-
-
 def generate_totals_message(language, total_files, total_pages):
     """Generate totals message in appropriate language"""
-    if language == "uz":
-        return f"📋 Jami yuklangan fayllar: {total_files}\n📄 Jami sahifalar: {total_pages}"
-    elif language == "ru":
-        return (
-            f"📋 Всего загружено файлов: {total_files}\n📄 Всего страниц: {total_pages}"
-        )
-    else:  # English
-        return f"📋 Total uploaded files: {total_files}\n📄 Total pages: {total_pages}"
-
-
+    return f"{get_text('file_summary_uploaded', language)}: {total_files}\n{get_text('file_summary_pages', language)}: {total_pages}"
 def update_totals_message(user_id, language):
     """Update the totals message for a user"""
     if user_id in uploaded_files and uploaded_files[user_id].get("files"):
@@ -530,8 +864,6 @@ def update_totals_message(user_id, language):
             except:
                 pass
             del uploaded_files[user_id]["totals_message_id"]
-
-
 def clear_user_files(user_id):
     """Clear uploaded files for a user"""
     if user_id in uploaded_files:
@@ -545,28 +877,39 @@ def clear_user_files(user_id):
             except:
                 pass  # Message might already be deleted
         del uploaded_files[user_id]
-
-
 def get_user_files(user_id):
     """Get uploaded files for a user"""
     user_data = uploaded_files.get(user_id)
     if user_data and isinstance(user_data, dict) and "files" in user_data:
         return user_data["files"]
     return {}
-
-
 def get_user_language(user_id):
     """Get user's preferred language"""
     try:
-        from accounts.models import BotUser
-
-        user = BotUser.objects.get(user_id=user_id)
-        return user.language
-    except Exception as e:
-        print(f"[DEBUG] Error getting user language for {user_id}: {e}")
+        user = get_bot_user(user_id)
+        if user:
+            return user.language
         return "uz"
-
-
+    except Exception as e:
+        logger.debug(f"Error getting user language for {user_id}: {e}")
+        return "uz"
+def update_user_username(message):
+    """Update user's Telegram username if it has changed.
+    Call this function when processing messages to keep username in sync."""
+    try:
+        if not message or not message.from_user:
+            return
+        
+        user_id = message.from_user.id
+        telegram_username = message.from_user.username or ""
+        
+        user = get_bot_user(user_id)
+        if user and user.username != telegram_username:
+            user.username = telegram_username
+            user.save(update_fields=['username'])
+            logger.debug(f"Updated username for user {user_id}: {telegram_username}")
+    except Exception as e:
+        logger.debug(f"Error updating username for user: {e}")
 def send_message(chat_id, text, reply_markup=None, parse_mode="HTML"):
     """Helper function to send messages with proper language handling"""
     try:
@@ -581,66 +924,338 @@ def send_message(chat_id, text, reply_markup=None, parse_mode="HTML"):
             chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode=parse_mode
         )
     except Exception as e:
-        print(f"[ERROR] Failed to send message to {chat_id}: {e}")
+        logger.error(f"Failed to send message to {chat_id}: {e}")
         # Fallback to direct message sending if our custom function fails
         return bot.send_message(
             chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode=parse_mode
         )
-
-
+def send_branch_location(chat_id, branch, language):
+    """
+    Send branch location to user with pickup information.
+    Extracts coordinates from location_url if possible, otherwise sends URL link.
+    """
+    try:
+        if not branch:
+            return False
+        
+        # Prepare location message based on language
+        if language == "uz":
+            location_text = "📍 <b>Buyurtmangizni olish manzili:</b>\n\n"
+            location_text += f"🏢 <b>{branch.name}</b>\n"
+            if branch.address:
+                location_text += f"📍 Manzil: {branch.address}\n"
+            if branch.phone:
+                location_text += f"📞 Telefon: {branch.phone}\n"
+            location_text += "\n✅ Buyurtmangiz tayyor bo'lganda sizga xabar beramiz.\n"
+            location_text += "📦 Shu manzildan olib ketishingiz mumkin bo'ladi."
+        elif language == "ru":
+            location_text = "📍 <b>Адрес для получения заказа:</b>\n\n"
+            location_text += f"🏢 <b>{branch.name}</b>\n"
+            if branch.address:
+                location_text += f"📍 Адрес: {branch.address}\n"
+            if branch.phone:
+                location_text += f"📞 Телефон: {branch.phone}\n"
+            location_text += "\n✅ Когда ваш заказ будет готов, мы вас уведомим.\n"
+            location_text += "📦 Вы сможете забрать его по этому адресу."
+        else:  # English
+            location_text = "📍 <b>Pickup location:</b>\n\n"
+            location_text += f"🏢 <b>{branch.name}</b>\n"
+            if branch.address:
+                location_text += f"📍 Address: {branch.address}\n"
+            if branch.phone:
+                location_text += f"📞 Phone: {branch.phone}\n"
+            location_text += "\n✅ We will notify you when your order is ready.\n"
+            location_text += "📦 You can pick it up from this location."
+        
+        # Send location message
+        bot.send_message(chat_id=chat_id, text=location_text, parse_mode="HTML")
+        
+        # Try to extract coordinates from location_url and send map location
+        if branch.location_url:
+            coords = extract_coordinates_from_url(branch.location_url)
+            if coords:
+                try:
+                    bot.send_location(
+                        chat_id=chat_id,
+                        latitude=coords['lat'],
+                        longitude=coords['lng']
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to send location coordinates: {e}")
+                    # Send URL as fallback
+                    bot.send_message(chat_id=chat_id, text=f"🗺️ {branch.location_url}")
+            else:
+                # No coordinates extracted, send URL
+                bot.send_message(chat_id=chat_id, text=f"🗺️ {branch.location_url}")
+        
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send branch location: {e}")
+        return False
+def extract_coordinates_from_url(url):
+    """
+    Extract latitude and longitude from Google Maps or Yandex Maps URL.
+    Returns dict with 'lat' and 'lng' keys, or None if extraction fails.
+    
+    Supports:
+    - Google Maps: https://maps.google.com/?q=41.311081,69.240562
+    - Google Maps: https://www.google.com/maps/@41.311081,69.240562,15z
+    - Google Maps: https://goo.gl/maps/... (short URLs - returns None, just use URL)
+    - Yandex Maps: https://yandex.com/maps/?ll=69.240562,41.311081
+    - Yandex Maps: https://yandex.uz/maps/-/...
+    """
+    import re
+    
+    if not url:
+        return None
+    
+    try:
+        # Google Maps patterns
+        # Pattern 1: ?q=lat,lng or @lat,lng
+        google_pattern1 = r'[?&@]q?=?(-?\d+\.?\d*),(-?\d+\.?\d*)'
+        match = re.search(google_pattern1, url)
+        if match:
+            lat, lng = float(match.group(1)), float(match.group(2))
+            if -90 <= lat <= 90 and -180 <= lng <= 180:
+                return {'lat': lat, 'lng': lng}
+        
+        # Pattern 2: @lat,lng,zoom
+        google_pattern2 = r'@(-?\d+\.?\d*),(-?\d+\.?\d*),\d+z'
+        match = re.search(google_pattern2, url)
+        if match:
+            lat, lng = float(match.group(1)), float(match.group(2))
+            if -90 <= lat <= 90 and -180 <= lng <= 180:
+                return {'lat': lat, 'lng': lng}
+        
+        # Pattern 3: /place/.../@lat,lng
+        google_pattern3 = r'/place/[^/]+/@(-?\d+\.?\d*),(-?\d+\.?\d*)'
+        match = re.search(google_pattern3, url)
+        if match:
+            lat, lng = float(match.group(1)), float(match.group(2))
+            if -90 <= lat <= 90 and -180 <= lng <= 180:
+                return {'lat': lat, 'lng': lng}
+        
+        # Yandex Maps patterns
+        # Pattern: ll=lng,lat (note: Yandex uses lng,lat order)
+        yandex_pattern = r'll=(-?\d+\.?\d*),(-?\d+\.?\d*)'
+        match = re.search(yandex_pattern, url)
+        if match:
+            lng, lat = float(match.group(1)), float(match.group(2))
+            if -90 <= lat <= 90 and -180 <= lng <= 180:
+                return {'lat': lat, 'lng': lng}
+        
+        # Pattern: pt=lng,lat
+        yandex_pattern2 = r'pt=(-?\d+\.?\d*),(-?\d+\.?\d*)'
+        match = re.search(yandex_pattern2, url)
+        if match:
+            lng, lat = float(match.group(1)), float(match.group(2))
+            if -90 <= lat <= 90 and -180 <= lng <= 180:
+                return {'lat': lat, 'lng': lng}
+        
+        return None
+    except Exception as e:
+        logger.warning(f"Failed to extract coordinates from URL: {e}")
+        return None
+def get_current_center():
+    """
+    Get the TranslationCenter associated with the current bot token.
+    This is essential for multi-tenant support.
+    """
+    try:
+        from organizations.models import TranslationCenter
+        center = TranslationCenter.objects.filter(bot_token=bot.token).first()
+        return center
+    except Exception as e:
+        logger.error(f"Failed to get current center: {e}")
+        return None
+def get_bot_user(user_id, center=None):
+    """
+    Get BotUser for the given user_id and center.
+    Each Telegram user has a separate account per translation center.
+    
+    Args:
+        user_id: Telegram user ID
+        center: TranslationCenter instance. If None, uses current bot's center.
+    
+    Returns:
+        BotUser instance or None if not found
+    """
+    if center is None:
+        center = get_current_center()
+    
+    try:
+        return BotUser.objects.filter(user_id=user_id, center=center).first()
+    except Exception as e:
+        logger.error(f"Failed to get bot user: {e}")
+        return None
+def get_or_create_bot_user(user_id, center=None, defaults=None):
+    """
+    Get or create BotUser for the given user_id and center.
+    
+    Args:
+        user_id: Telegram user ID
+        center: TranslationCenter instance. If None, uses current bot's center.
+        defaults: Dict of default values for creation
+    
+    Returns:
+        Tuple of (BotUser instance, created boolean)
+    """
+    if center is None:
+        center = get_current_center()
+    
+    if defaults is None:
+        defaults = {}
+    
+    defaults['center'] = center
+    
+    try:
+        return BotUser.objects.get_or_create(
+            user_id=user_id,
+            center=center,
+            defaults=defaults
+        )
+    except Exception as e:
+        logger.error(f"Failed to get or create bot user: {e}")
+        return None, False
+def get_center_branches(center=None):
+    """
+    Get all active branches for a center.
+    If no center provided, uses the current bot's center.
+    """
+    if center is None:
+        center = get_current_center()
+    
+    if center is None:
+        return []
+    
+    try:
+        from organizations.models import Branch
+        return list(Branch.objects.filter(center=center, is_active=True))
+    except Exception as e:
+        logger.error(f"Failed to get branches: {e}")
+        return []
+def show_branch_selection(message, language):
+    """
+    Show branch selection after phone number is received.
+    User must select a branch before registration completes.
+    """
+    user_id = message.from_user.id
+    update_user_step(user_id, STEP_BRANCH_SELECTION)
+    
+    center = get_current_center()
+    if not center:
+        send_message(message.chat.id, get_text("error_config", language))
+        return
+    
+    branches = get_center_branches(center)
+    
+    if not branches:
+        send_message(message.chat.id, get_text("error_no_branches", language))
+        return
+    
+    # If only one branch, auto-select it and complete registration
+    if len(branches) == 1:
+        branch = branches[0]
+        # Save branch to user and complete registration
+        user = get_bot_user(user_id, center)
+        if user:
+            user.branch = branch
+            user.is_active = True
+            user.step = STEP_REGISTERED
+            user.save()
+        else:
+            user = create_or_update_user(user_id=user_id, branch=branch, center=center)
+            if user:
+                user.is_active = True
+                user.step = STEP_REGISTERED
+                user.save()
+        
+        # Show registration complete and main menu
+        complete_text = get_text("registration_complete", language)
+        send_message(message.chat.id, complete_text)
+        show_main_menu(message, language)
+        return
+    
+    # Multiple branches - show selection
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    
+    # Build branch selection message
+    header = get_text("select_branch_header", language)
+    
+    for branch in branches:
+        # Format branch button text with name and address
+        branch_name = branch.name
+        branch_address = branch.address or ""
+        
+        if branch_address:
+            button_text = f"📍 {branch_name}"
+        else:
+            button_text = f"📍 {branch_name}"
+        
+        markup.add(types.InlineKeyboardButton(
+            text=button_text,
+            callback_data=f"select_branch_{branch.id}"
+        ))
+    
+    # Add back button
+    back_text = get_text("back_to_menu", language)
+    markup.add(types.InlineKeyboardButton(text=f"🔙 {back_text}", callback_data="back_to_language"))
+    
+    # Build detailed branch info message
+    branch_info = header + "\n\n"
+    for branch in branches:
+        branch_info += f"🏢 <b>{branch.name}</b>\n"
+        if branch.address:
+            branch_info += f"   📍 {branch.address}\n"
+        if branch.phone:
+            branch_info += f"   📞 {branch.phone}\n"
+        branch_info += "\n"
+    
+    send_message(message.chat.id, branch_info, reply_markup=markup)
 def ensure_additional_info_exists():
     """Check if AdditionalInfo record exists in database - only create if missing"""
     try:
         from accounts.models import AdditionalInfo
 
         if not AdditionalInfo.objects.exists():
-            # Only create if no record exists
+            # Only create a global default if no record exists
             AdditionalInfo.objects.create(
+                branch=None,  # Global/default settings
                 bank_card=None,
                 holder_name="",
-                help_text="",
                 help_text_uz="📞 Savollaringiz bo'lsa, admin bilan bog'laning\n🌐 Til o'zgartirish: /start\n📋 Buyurtma berish: Hizmatdan foydalanish",
                 help_text_ru="📞 Если у вас есть вопросы, свяжитесь с администратором\n🌐 Сменить язык: /start\n📋 Сделать заказ: Воспользоваться услугой",
                 help_text_en="📞 If you have questions, contact administrator\n🌐 Change language: /start\n📋 Place order: Use Service",
-                description="",
                 description_uz="📞 Savollaringiz bo'lsa, admin bilan bog'laning\n🌐 Kompaniyamiz haqida ko'proq ma'lumot tez kunda qo'shiladi!",
                 description_ru="📞 Если у вас есть вопросы, свяжитесь с администратором\n🌐 Информация о нашей компании будет добавлена в ближайшее время!",
                 description_en="📞 If you have questions, contact administrator\n🌐 Information about our company will be added soon!",
-                about_us="",
                 about_us_uz="📞 Savollaringiz bo'lsa, admin bilan bog'laning\n🌐 Kompaniyamiz haqida ko'proq ma'lumot tez kunda qo'shiladi!",
                 about_us_ru="📞 Если у вас есть вопросы, свяжитесь с администратором\n🌐 Информация о нашей компании будет добавлена в ближайшее время!",
                 about_us_en="📞 If you have questions, contact administrator\n🌐 Information about our company will be added soon!",
             )
-            print("[INFO] Created default AdditionalInfo record")
+            logger.info("Created default AdditionalInfo record")
         else:
-            print("[INFO] AdditionalInfo record already exists - using existing record")
+            logger.info("AdditionalInfo record already exists - using existing record")
     except Exception as e:
-        print(f"[ERROR] Failed to check AdditionalInfo: {e}")
-
-
+        logger.error(f"Failed to check AdditionalInfo: {e}")
 def update_user_step(user_id, step):
     """Update user's current step"""
     try:
-        from accounts.models import BotUser
-
-        user = BotUser.objects.get(user_id=user_id)
-        user.step = step
-        user.save()
+        user = get_bot_user(user_id)
+        if user:
+            user.step = step
+            user.save()
     except:
         pass
-
-
 def get_user_step(user_id):
     """Get user's current step"""
     try:
-        from accounts.models import BotUser
-
-        user = BotUser.objects.get(user_id=user_id)
-        return user.step
+        user = get_bot_user(user_id)
+        if user:
+            return user.step
+        return 0
     except:
         return 0
-
-
 def calculate_order_pricing(order, user):
     """
     Calculate order pricing with copy charges
@@ -676,8 +1291,6 @@ def calculate_order_pricing(order, user):
     total_price = base_price + copy_charge
 
     return base_price, copy_charge, total_price, copy_percentage
-
-
 @bot.message_handler(commands=["start"])
 def start(message):
     import uuid as uuid_module
@@ -686,6 +1299,9 @@ def start(message):
     user_id = message.from_user.id
     username = message.from_user.username
     first_name = message.from_user.first_name or ""
+    
+    # Update username in case it changed
+    update_user_username(message)
 
     # Default language (will be updated if user exists)
     language = "uz"
@@ -698,35 +1314,36 @@ def start(message):
     # Check for deep link parameter (e.g., /start agency_1234-5678-...)
     if len(message.text.split()) > 1:
         param = message.text.split()[1]
-        print(f"[DEBUG] Start parameter received: {param}")
+        logger.debug(f"Start parameter received: {param}")
 
         if param.startswith("agency_"):
             try:
                 agency_token = param[7:]  # Remove "agency_" prefix
-                print(f"[DEBUG] Extracted token: {agency_token}")
+                logger.debug(f"Extracted token: {agency_token}")
 
                 # Validate it's a valid UUID
                 uuid_obj = uuid_module.UUID(agency_token)
-                print(f"[DEBUG] Token is valid UUID: {uuid_obj}")
+                logger.debug(f"Token is valid UUID: {uuid_obj}")
 
                 # Try to get the agency by token
                 agency = BotUser.get_agency_by_token(agency_token)
                 if agency:
                     is_agency_invite = True
-                    print(
-                        f"[INFO] ✅ Valid agency token found for agency: {agency.name} (ID: {agency.id})"
+                    logger.info(
+                        f"Valid agency token found for agency: {agency.name} (ID: {agency.id})"
                     )
                 else:
-                    print(
-                        f"[WARNING] ❌ Invalid or already used agency token: {agency_token}"
+                    logger.warning(
+                        f"Invalid or already used agency token: {agency_token}"
                     )
             except (ValueError, IndexError) as e:
-                print(f"[ERROR] ❌ Invalid agency token format: {e}")
+                logger.error(f"Invalid agency token format: {e}")
             except Exception as e:
-                print(f"[ERROR] ❌ Unexpected error processing agency token: {e}")
+                logger.error(f"Unexpected error processing agency token: {e}")
 
-    # Check if user already exists
-    existing_user = BotUser.objects.filter(user_id=user_id).first()
+    # Check if user already exists for this center
+    center = get_current_center()
+    existing_user = get_bot_user(user_id, center)
 
     if existing_user:
         # User already exists
@@ -752,7 +1369,7 @@ def start(message):
                     agency.name
                 )
                 send_message(message.chat.id, success_msg)
-                print(f"[INFO] Linked existing user {user_id} to agency {agency.name}")
+                logger.info(f" Linked existing user {user_id} to agency {agency.name}")
         elif is_agency_invite and not agency:
             # Invalid token
             error_msg = get_text("invalid_agency_invite", language)
@@ -792,17 +1409,21 @@ def start(message):
         send_message(message.chat.id, error_msg)
 
         # Continue with normal registration
+        center = get_current_center()
         user = create_or_update_user(
             user_id=user_id,
             username=username,
             language=language,
+            center=center,
         )
     else:
         # Normal user registration
+        center = get_current_center()
         user = create_or_update_user(
             user_id=user_id,
             username=username,
             language=language,
+            center=center,
         )
 
     if user is None:
@@ -835,8 +1456,6 @@ def start(message):
 
         send_message(message.chat.id, welcome_text, reply_markup=markup)
         update_user_step(user_id, 0)
-
-
 @bot.message_handler(
     func=lambda message: message.text in ["🇺🇿 O'zbek", "🇷🇺 Русский", "🇬🇧 English"]
 )
@@ -852,7 +1471,8 @@ def handle_language_selection(message):
         language = "en"
         language_name = "English"
 
-    create_or_update_user(user_id=user_id, language=language)
+    center = get_current_center()
+    create_or_update_user(user_id=user_id, language=language, center=center)
     update_user_step(user_id, STEP_LANGUAGE_SELECTED)
 
     language_selected_text = get_text("language_selected", language).format(
@@ -860,9 +1480,81 @@ def handle_language_selection(message):
     )
     send_message(message.chat.id, language_selected_text)
 
-    ask_name(message, language)
-
-
+    # Go directly to registration (ask name first)
+    start_registration(message, language)
+# Handler for branch selection callback
+@bot.callback_query_handler(func=lambda call: call.data.startswith("select_branch_"))
+def handle_branch_selection(call):
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    
+    try:
+        branch_id = int(call.data.split("_")[2])
+        from organizations.models import Branch
+        from accounts.models import BotUser
+        
+        branch = Branch.objects.get(id=branch_id)
+        center = get_current_center()
+        
+        # Update user with selected branch and complete registration
+        user = get_bot_user(user_id, center)
+        if user:
+            user.branch = branch
+            user.is_active = True
+            user.step = STEP_REGISTERED
+            user.save()
+        else:
+            user = create_or_update_user(user_id=user_id, branch=branch, center=center)
+            if user:
+                user.is_active = True
+                user.step = STEP_REGISTERED
+                user.save()
+        
+        # Delete the branch selection message
+        try:
+            bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+        except:
+            pass
+        
+        # Confirm branch selection
+        confirm_text = get_text("branch_selected", language).format(branch=branch.name)
+        
+        send_message(call.message.chat.id, confirm_text)
+        
+        # Show registration complete message
+        complete_text = get_text("registration_complete", language)
+        send_message(call.message.chat.id, complete_text)
+        
+        # Create a message-like object with correct from_user and show main menu
+        class MessageWrapper:
+            def __init__(self, chat, from_user):
+                self.chat = chat
+                self.from_user = from_user
+        
+        wrapped_message = MessageWrapper(call.message.chat, call.from_user)
+        show_main_menu(wrapped_message, language)
+        
+    except Branch.DoesNotExist:
+        bot.answer_callback_query(call.id, get_text("error_branch_not_found", language))
+    except Exception as e:
+        logger.error(f" Branch selection error: {e}")
+        bot.answer_callback_query(call.id, get_text("error_general", language))
+# Handler for back to language from branch selection
+@bot.callback_query_handler(func=lambda call: call.data == "back_to_language")
+def handle_back_to_language(call):
+    try:
+        bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+    except:
+        pass
+    
+    # Create a message-like object with correct from_user
+    class MessageWrapper:
+        def __init__(self, chat, from_user):
+            self.chat = chat
+            self.from_user = from_user
+    
+    wrapped_message = MessageWrapper(call.message.chat, call.from_user)
+    show_language_selection(wrapped_message)
 def ask_name(message, language):
     user_id = message.from_user.id
     update_user_step(user_id, STEP_NAME_REQUESTED)
@@ -873,14 +1565,10 @@ def ask_name(message, language):
 
     ask_name_text = get_text("ask_name", language)
     send_message(message.chat.id, ask_name_text, reply_markup=markup)
-
-
 def start_registration(message, language):
     user_id = message.from_user.id
     update_user_step(user_id, STEP_REGISTRATION_STARTED)
     ask_name(message, language)
-
-
 def ask_contact(message, language):
     user_id = message.from_user.id
     update_user_step(user_id, STEP_PHONE_REQUESTED)
@@ -894,8 +1582,6 @@ def ask_contact(message, language):
 
     ask_contact_text = get_text("ask_contact", language)
     send_message(message.chat.id, ask_contact_text, reply_markup=markup)
-
-
 def show_language_selection(message):
     user_id = message.from_user.id
     language = get_user_language(user_id)
@@ -907,25 +1593,75 @@ def show_language_selection(message):
     markup.add(btn1, btn2, btn3)
     welcome_text = get_text("welcome", language)
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
-
-
 def handle_back_button(message, language):
     user_id = message.from_user.id
     current_step = get_user_step(user_id)
 
     if current_step == STEP_PHONE_REQUESTED:
+        # Back from phone request -> ask name again
         update_user_step(user_id, STEP_NAME_REQUESTED)
         ask_name(message, language)
     elif current_step == STEP_NAME_REQUESTED:
+        # Back from name request -> language selection
         show_language_selection(message)
     elif current_step == STEP_REGISTRATION_STARTED:
         show_language_selection(message)
     elif current_step == STEP_LANGUAGE_SELECTED:
         show_language_selection(message)
-    else:
+    elif current_step == STEP_BRANCH_SELECTION:
+        # Back from branch selection -> language selection
+        show_language_selection(message)
+    elif current_step == STEP_SELECTING_SERVICE:
+        # Back from service selection -> main menu
         show_main_menu(message, language)
-
-
+    elif current_step == STEP_SELECTING_DOCUMENT:
+        # Back from document selection -> services
+        show_categorys(message, language)
+    elif current_step == STEP_SELECTING_COPY_NUMBER:
+        # Back from copy number -> document types
+        user_data = uploaded_files.get(user_id, {})
+        if user_data and "service_id" in user_data:
+            service_id = user_data["service_id"]
+            show_products(message, language, service_id)
+        else:
+            show_categorys(message, language)
+    elif current_step == STEP_UPLOADING_FILES:
+        # Back from file upload -> document types (since copy number leads to upload)
+        user_data = uploaded_files.get(user_id, {})
+        if user_data and "service_id" in user_data:
+            service_id = user_data["service_id"]
+            show_products(message, language, service_id)
+        else:
+            show_categorys(message, language)
+    elif current_step == STEP_PAYMENT_METHOD:
+        # Back from payment method -> file upload
+        handle_back_to_upload_docs_message(message, language)
+    elif current_step in (STEP_AWAITING_PAYMENT, STEP_UPLOADING_RECEIPT, STEP_AWAITING_RECEIPT):
+        # Back from payment/receipt screens -> try to restore payment options
+        user_data = uploaded_files.get(user_id, {})
+        if user_data and "order_id" in user_data:
+            try:
+                from orders.models import Order
+                order = Order.objects.get(id=user_data["order_id"])
+                show_payment_options(message, language, order)
+            except:
+                show_main_menu(message, language)
+        else:
+            show_main_menu(message, language)
+    elif current_step == STEP_EDITING_PROFILE:
+        # Back from profile editing -> main menu
+        show_main_menu(message, language)
+    elif current_step == STEP_EDITING_NAME:
+        # Back from name editing -> profile
+        update_user_step(user_id, STEP_EDITING_PROFILE)
+        show_profile(message, language)
+    elif current_step == STEP_EDITING_PHONE:
+        # Back from phone editing -> profile
+        update_user_step(user_id, STEP_EDITING_PROFILE)
+        show_profile(message, language)
+    else:
+        # Default: go to main menu
+        show_main_menu(message, language)
 @bot.message_handler(content_types=["contact"])
 def handle_contact(message):
     user_id = message.from_user.id
@@ -935,7 +1671,8 @@ def handle_contact(message):
     current_step = get_user_step(user_id)
     if current_step == STEP_EDITING_PHONE and message.contact:
         phone = message.contact.phone_number
-        create_or_update_user(user_id=user_id, phone=phone)
+        center = get_current_center()
+        create_or_update_user(user_id=user_id, phone=phone, center=center)
         update_user_step(user_id, STEP_EDITING_PROFILE)
 
         # Remove keyboard
@@ -950,22 +1687,29 @@ def handle_contact(message):
     # Handle regular registration contact (existing functionality)
     elif current_step == STEP_PHONE_REQUESTED and message.contact:
         phone = message.contact.phone_number
-        user = create_or_update_user(user_id=user_id, phone=phone)
+        center = get_current_center()
+        user = create_or_update_user(user_id=user_id, phone=phone, center=center)
 
         if user:
             current_step = get_user_step(user_id)
             if current_step == STEP_PHONE_REQUESTED:
-                user.is_active = True
-                user.step = STEP_REGISTERED
-                user.save()
-
                 contact_text = get_text("phone_received", language).format(phone=phone)
                 send_message(message.chat.id, contact_text)
 
-                complete_text = get_text("registration_complete", language)
-                send_message(message.chat.id, complete_text)
-
-                show_main_menu(message, language)
+                # Check if user already has a branch selected
+                bot_user = get_bot_user(user_id, center)
+                if bot_user and bot_user.branch:
+                    # User already has a branch, complete registration
+                    bot_user.is_active = True
+                    bot_user.step = STEP_REGISTERED
+                    bot_user.save()
+                    
+                    complete_text = get_text("registration_complete", language)
+                    send_message(message.chat.id, complete_text)
+                    show_main_menu(message, language)
+                else:
+                    # No branch yet, show branch selection
+                    show_branch_selection(message, language)
             elif current_step == STEP_EDITING_PHONE:
                 send_message(
                     message.chat.id,
@@ -978,11 +1722,21 @@ def handle_contact(message):
                 message.chat.id,
                 "translation:error_processing_contact",
             )
-
-
 def show_main_menu(message, language):
-    user_id = message.from_user.id
+    # Handle both direct messages and callback messages
+    if hasattr(message, 'from_user') and message.from_user:
+        user_id = message.from_user.id
+    else:
+        user_id = message.chat.id
+    
     update_user_step(user_id, STEP_REGISTERED)
+    
+    # Check if branch has pricelist enabled
+    user = get_bot_user(user_id)
+    should_show_pricelist = False
+    if user and user.branch and user.branch.show_pricelist:
+        should_show_pricelist = True
+    
     markup = types.ReplyKeyboardMarkup(
         resize_keyboard=True, row_width=2, one_time_keyboard=True
     )
@@ -992,25 +1746,29 @@ def show_main_menu(message, language):
         btn3 = types.KeyboardButton("👤 Profil")
         btn4 = types.KeyboardButton("ℹ️ Biz haqimizda")
         btn5 = types.KeyboardButton("❓ Yordam")
+        btn_pricelist = types.KeyboardButton("💰 Narxlar ro'yxati")
     elif language == "ru":
         btn1 = types.KeyboardButton("🛍️ Воспользоваться услугой")
         btn2 = types.KeyboardButton("📋 Мои заявки")
         btn3 = types.KeyboardButton("👤 Профиль")
         btn4 = types.KeyboardButton("ℹ️ О нас")
         btn5 = types.KeyboardButton("❓ Помощь")
+        btn_pricelist = types.KeyboardButton("💰 Прайс-лист")
     else:  # English
         btn1 = types.KeyboardButton("🛍️ Use Service")
         btn2 = types.KeyboardButton("📋 My Orders")
         btn3 = types.KeyboardButton("👤 Profile")
         btn4 = types.KeyboardButton("ℹ️ About Us")
         btn5 = types.KeyboardButton("❓ Help")
+        btn_pricelist = types.KeyboardButton("💰 Price List")
     markup.add(btn1, btn2)
     markup.add(btn3, btn4)
-    markup.add(btn5)
+    if should_show_pricelist:
+        markup.add(btn5, btn_pricelist)
+    else:
+        markup.add(btn5)
     welcome_text = get_text("main_menu_welcome", language)
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
-
-
 @bot.message_handler(
     func=lambda message: message.text
     in [
@@ -1029,16 +1787,23 @@ def show_main_menu(message, language):
         "❓ Yordam",
         "❓ Помощь",
         "❓ Help",
+        "💰 Narxlar ro'yxati",
+        "💰 Прайс-лист",
+        "💰 Price List",
     ]
 )
 def handle_main_menu(message):
-    from accounts.models import AdditionalInfo
+    from accounts.models import AdditionalInfo, BotUser
 
     user_id = message.from_user.id
     language = get_user_language(user_id)
 
-    # Get AdditionalInfo object
-    additional_info = AdditionalInfo.objects.first()
+    # Get AdditionalInfo for user's branch (with fallback)
+    user = get_bot_user(user_id)
+    if user:
+        additional_info = AdditionalInfo.get_for_user(user)
+    else:
+        additional_info = AdditionalInfo.get_for_branch(None)
 
     if (
         "Hizmatdan foydalanish" in message.text
@@ -1057,30 +1822,35 @@ def handle_main_menu(message):
         or "Profile" in message.text
         or "Профиль" in message.text
     ):
-        bot.delete_message(message.chat.id, message.message_id)
+        try:
+            bot.delete_message(message.chat.id, message.message_id)
+        except Exception as e:
+            logger.debug(f" Could not delete profile button message: {e}")
         show_profile(message, language)
     elif (
         "Biz haqimizda" in message.text
         or "О нас" in message.text
         or "About Us" in message.text
     ):
-        # Get about us text based on language
+        # Get about us text based on language using translated field
+        about_content = additional_info.get_translated_field('about_us', language) if additional_info else ""
+        
         if language == "uz":
             about_text = "ℹ️ <b>Biz haqimizda</b>\n\n"
-            if additional_info and additional_info.about_us_uz:
-                about_text += additional_info.about_us_uz
+            if about_content:
+                about_text += about_content
             else:
                 about_text += "📞 Savollaringiz bo'lsa, admin bilan bog'laning\n🌐 Kompaniyamiz haqida ko'proq ma'lumot tez kunda qo'shiladi!"
         elif language == "ru":
             about_text = "ℹ️ <b>О нас</b>\n\n"
-            if additional_info and additional_info.about_us_ru:
-                about_text += additional_info.about_us_ru
+            if about_content:
+                about_text += about_content
             else:
                 about_text += "📞 Если у вас есть вопросы, свяжитесь с администратором\n🌐 Информация о нашей компании будет добавлена в ближайшее время!"
         else:  # English
             about_text = "ℹ️ <b>About Us</b>\n\n"
-            if additional_info and additional_info.about_us_en:
-                about_text += additional_info.about_us_en
+            if about_content:
+                about_text += about_content
             else:
                 about_text += "📞 If you have questions, contact administrator\n🌐 Information about our company will be added soon!"
 
@@ -1088,39 +1858,218 @@ def handle_main_menu(message):
         show_main_menu(message, language)
 
     elif "Yordam" in message.text or "Помощь" in message.text or "Help" in message.text:
-        # Get help text based on language
+        # Get help text based on language using translated field
+        help_content = additional_info.get_translated_field('help_text', language) if additional_info else ""
+        
         if language == "uz":
             help_text = "❓ <b>Yordam</b>\n\n"
-            if additional_info and additional_info.help_text_uz:
-                help_text += additional_info.help_text_uz
+            if help_content:
+                help_text += help_content
             else:
                 help_text += "📞 Savollaringiz bo'lsa, admin bilan bog'laning\n🌐 Til o'zgartirish: /start\n📋 Buyurtma berish: Hizmatdan foydalanish"
         elif language == "ru":
             help_text = "❓ <b>Помощь</b>\n\n"
-            if additional_info and additional_info.help_text_ru:
-                help_text += additional_info.help_text_ru
+            if help_content:
+                help_text += help_content
             else:
                 help_text += "📞 Если у вас есть вопросы, свяжитесь с администратором\n🌐 Сменить язык: /start\n📋 Сделать заказ: Воспользоваться услугой"
         else:  # English
             help_text = "❓ <b>Help</b>\n\n"
-            if additional_info and additional_info.help_text_en:
-                help_text += additional_info.help_text_en
+            if help_content:
+                help_text += help_content
             else:
                 help_text += "📞 If you have questions, contact administrator\n🌐 Change language: /start\n📋 Place order: Use Service"
 
         send_message(message.chat.id, help_text, parse_mode="HTML")
         show_main_menu(message, language)
 
-
+    elif (
+        "Narxlar ro'yxati" in message.text
+        or "Прайс-лист" in message.text
+        or "Price List" in message.text
+    ):
+        show_pricelist(message, language)
+def show_pricelist(message, language):
+    """Show price list for the user's branch"""
+    from services.models import Category, Product
+    
+    user_id = message.from_user.id
+    user = get_bot_user(user_id)
+    
+    if not user or not user.branch:
+        send_message(message.chat.id, get_text("pricelist_empty", language), parse_mode="HTML")
+        show_main_menu(message, language)
+        return
+    
+    # Check if branch has price list enabled
+    if not user.branch.show_pricelist:
+        send_message(message.chat.id, get_text("pricelist_empty", language), parse_mode="HTML")
+        show_main_menu(message, language)
+        return
+    
+    # Determine if user is agency (B2B) or regular (B2C)
+    is_agency = user.is_agency if hasattr(user, 'is_agency') else False
+    
+    # Get categories for this branch
+    categories = Category.objects.filter(
+        branch=user.branch,
+        is_active=True
+    ).prefetch_related('product_set').order_by('name')
+    
+    # Build price list text with creative formatting
+    if language == 'uz':
+        pricelist_text = "╔══════════════════════╗\n"
+        pricelist_text += "   💰 <b>NARXLAR RO'YXATI</b> 💰\n"
+        pricelist_text += "╚══════════════════════╝\n\n"
+        pricelist_text += f"🏢 <b>{user.branch.name}</b>\n"
+        pricelist_text += "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
+    elif language == 'ru':
+        pricelist_text = "╔══════════════════════╗\n"
+        pricelist_text += "     💰 <b>ПРАЙС-ЛИСТ</b> 💰\n"
+        pricelist_text += "╚══════════════════════╝\n\n"
+        pricelist_text += f"🏢 <b>{user.branch.name}</b>\n"
+        pricelist_text += "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
+    else:
+        pricelist_text = "╔══════════════════════╗\n"
+        pricelist_text += "     💰 <b>PRICE LIST</b> 💰\n"
+        pricelist_text += "╚══════════════════════╝\n\n"
+        pricelist_text += f"🏢 <b>{user.branch.name}</b>\n"
+        pricelist_text += "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n"
+    
+    # Add B2B/B2C note with icons
+    if is_agency:
+        if language == 'uz':
+            pricelist_text += "💼 <i>Agentlik narxlari</i> 🔥\n\n"
+        elif language == 'ru':
+            pricelist_text += "💼 <i>Цены для агентств</i> 🔥\n\n"
+        else:
+            pricelist_text += "💼 <i>Agency prices</i> 🔥\n\n"
+    else:
+        if language == 'uz':
+            pricelist_text += "👤 <i>Mijozlar uchun narxlar</i> ✨\n\n"
+        elif language == 'ru':
+            pricelist_text += "👤 <i>Цены для клиентов</i> ✨\n\n"
+        else:
+            pricelist_text += "👤 <i>Customer prices</i> ✨\n\n"
+    
+    has_products = False
+    category_icons = ['📁', '📂', '🗂', '📋', '📑', '🗃']
+    
+    for idx, category in enumerate(categories):
+        products = category.product_set.filter(is_active=True).order_by('name')
+        
+        if products.exists():
+            has_products = True
+            # Get category name based on language
+            category_name = get_translated_field(category, 'name', language)
+            
+            # Determine charging type for this category
+            is_dynamic = category.charging == 'dynamic'
+            
+            # Use rotating icons for categories
+            cat_icon = category_icons[idx % len(category_icons)]
+            
+            pricelist_text += f"┌{'─' * 20}┐\n"
+            pricelist_text += f"│ {cat_icon} <b>{category_name.upper()}</b>\n"
+            pricelist_text += f"└{'─' * 20}┘\n"
+            
+            for product in products:
+                # Get product name based on language
+                product_name = get_translated_field(product, 'name', language)
+                
+                # Get prices based on user type (agency vs regular)
+                if is_agency:
+                    first_price = product.agency_first_page_price
+                    other_price = product.agency_other_page_price
+                else:
+                    first_price = product.ordinary_first_page_price
+                    other_price = product.ordinary_other_page_price
+                
+                # Format prices
+                first_formatted = "{:,.0f}".format(first_price).replace(",", " ")
+                other_formatted = "{:,.0f}".format(other_price).replace(",", " ")
+                
+                if is_dynamic:
+                    # Dynamic pricing - show first page and other pages prices
+                    if language == 'uz':
+                        pricelist_text += f"\n  📄 <b>{product_name}</b>\n"
+                        pricelist_text += f"     ├ 1️⃣ sahifa: <code>{first_formatted}</code> so'm\n"
+                        pricelist_text += f"     ├ ➕ keyingi: <code>{other_formatted}</code> so'm\n"
+                        if product.estimated_days:
+                            pricelist_text += f"     └ ⏰ ~{product.estimated_days} kun\n"
+                    elif language == 'ru':
+                        pricelist_text += f"\n  📄 <b>{product_name}</b>\n"
+                        pricelist_text += f"     ├ 1️⃣ стр.: <code>{first_formatted}</code> сум\n"
+                        pricelist_text += f"     ├ ➕ далее: <code>{other_formatted}</code> сум\n"
+                        if product.estimated_days:
+                            pricelist_text += f"     └ ⏰ ~{product.estimated_days} дн.\n"
+                    else:
+                        pricelist_text += f"\n  📄 <b>{product_name}</b>\n"
+                        pricelist_text += f"     ├ 1️⃣ page: <code>{first_formatted}</code> sum\n"
+                        pricelist_text += f"     ├ ➕ next: <code>{other_formatted}</code> sum\n"
+                        if product.estimated_days:
+                            pricelist_text += f"     └ ⏰ ~{product.estimated_days} days\n"
+                else:
+                    # Static pricing - single price per document
+                    if language == 'uz':
+                        pricelist_text += f"\n  📄 {product_name}\n"
+                        pricelist_text += f"     ├ 💵 <code>{first_formatted}</code> so'm"
+                        if product.estimated_days:
+                            pricelist_text += f"\n     └ ⏰ ~{product.estimated_days} kun\n"
+                        else:
+                            pricelist_text += "\n"
+                    elif language == 'ru':
+                        pricelist_text += f"\n  📄 {product_name}\n"
+                        pricelist_text += f"     ├ 💵 <code>{first_formatted}</code> сум"
+                        if product.estimated_days:
+                            pricelist_text += f"\n     └ ⏰ ~{product.estimated_days} дн.\n"
+                        else:
+                            pricelist_text += "\n"
+                    else:
+                        pricelist_text += f"\n  📄 {product_name}\n"
+                        pricelist_text += f"     ├ 💵 <code>{first_formatted}</code> sum"
+                        if product.estimated_days:
+                            pricelist_text += f"\n     └ ⏰ ~{product.estimated_days} days\n"
+                        else:
+                            pricelist_text += "\n"
+            
+            pricelist_text += "\n"
+    
+    if not has_products:
+        pricelist_text = get_text("pricelist_empty", language)
+    else:
+        # Add creative footer
+        pricelist_text += "═══════════════════════\n"
+        if language == 'uz':
+            pricelist_text += "📞 <b>Savollar bormi?</b>\n"
+            pricelist_text += "💬 Biz bilan bog'laning!\n"
+            pricelist_text += "═══════════════════════\n"
+            pricelist_text += "🚀 <i>Tez • Sifatli • Ishonchli</i>"
+        elif language == 'ru':
+            pricelist_text += "📞 <b>Есть вопросы?</b>\n"
+            pricelist_text += "💬 Свяжитесь с нами!\n"
+            pricelist_text += "═══════════════════════\n"
+            pricelist_text += "🚀 <i>Быстро • Качественно • Надежно</i>"
+        else:
+            pricelist_text += "📞 <b>Have questions?</b>\n"
+            pricelist_text += "💬 Contact us!\n"
+            pricelist_text += "═══════════════════════\n"
+            pricelist_text += "🚀 <i>Fast • Quality • Reliable</i>"
+    
+    send_message(message.chat.id, pricelist_text, parse_mode="HTML")
+    show_main_menu(message, language)
 def show_user_orders(message, language):
     """Show all orders for the current user"""
     user_id = message.from_user.id
 
     try:
-        from accounts.models import BotUser, AdditionalInfo
+        from accounts.models import AdditionalInfo
         from orders.models import Order
 
-        user = BotUser.objects.get(user_id=user_id)
+        user = get_bot_user(user_id)
+        if not user:
+            send_message(message.chat.id, get_text("error_general", language))
+            return
 
         # Get all orders for this user
         orders = Order.objects.filter(bot_user=user).order_by("-id")
@@ -1266,31 +2215,145 @@ def show_user_orders(message, language):
                 order_text += f"{status_emoji} Status: {status_text}\n"
                 order_text += f"📅 Date: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
 
-            # Send individual message for this order (no inline buttons)
-            send_message(
-                chat_id=message.chat.id,
-                text=order_text,
-                parse_mode="HTML",
-            )
+            # Add payment info if partially paid
+            if order.received > 0 or order.remaining > 0:
+                if language == "uz":
+                    order_text += f"\n💰 To'langan: {order.received:,.0f} so'm\n"
+                    order_text += f"💳 Qoldiq: {order.remaining:,.0f} so'm\n"
+                elif language == "ru":
+                    order_text += f"\n💰 Оплачено: {order.received:,.0f} сум\n"
+                    order_text += f"💳 Остаток: {order.remaining:,.0f} сум\n"
+                else:
+                    order_text += f"\n💰 Paid: {order.received:,.0f} sum\n"
+                    order_text += f"💳 Remaining: {order.remaining:,.0f} sum\n"
+
+            # Check if order has unpaid balance
+            has_remaining = order.remaining > 0 and not order.is_fully_paid
+            
+            # Create inline keyboard for Pay button if unpaid
+            if has_remaining:
+                markup = types.InlineKeyboardMarkup()
+                pay_text = get_text("btn_pay", language)
+                markup.add(types.InlineKeyboardButton(
+                    text=pay_text,
+                    callback_data=f"pay_order_{order.id}"
+                ))
+                send_message(
+                    chat_id=message.chat.id,
+                    text=order_text,
+                    parse_mode="HTML",
+                    reply_markup=markup
+                )
+            else:
+                send_message(
+                    chat_id=message.chat.id,
+                    text=order_text,
+                    parse_mode="HTML",
+                )
 
         # After showing all orders, display main menu
         show_main_menu(message, language)
 
     except Exception as e:
-        print(f"[ERROR] Failed to show user orders: {e}")
+        logger.error(f" Failed to show user orders: {e}")
         import traceback
 
         traceback.print_exc()
-        error_text = "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring."
-        if language == "ru":
-            error_text = "❌ Произошла ошибка. Пожалуйста, попробуйте еще раз."
-        elif language == "en":
-            error_text = "❌ An error occurred. Please try again."
-
-        send_message(message.chat.id, error_text)
+        send_message(message.chat.id, get_text("error_general", language))
         show_main_menu(message, language)
-
-
+# Payment callback handler
+@bot.callback_query_handler(func=lambda call: call.data.startswith("pay_order_"))
+def handle_pay_order(call):
+    """Handle pay order button click"""
+    from orders.models import Order
+    
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    order_id = call.data.replace("pay_order_", "")
+    
+    try:
+        order = Order.objects.get(id=order_id)
+        user = get_bot_user(user_id)
+        
+        # Verify this order belongs to this user
+        if order.bot_user_id != user.id:
+            bot.answer_callback_query(call.id, get_text("error_general", language))
+            return
+        
+        # Store order in user session for receipt upload
+        if user_id not in uploaded_files:
+            uploaded_files[user_id] = {}
+        uploaded_files[user_id]["pending_payment_order_id"] = order_id
+        update_user_step(user_id, STEP_AWAITING_RECEIPT)
+        
+        # Get bank card info from AdditionalInfo
+        from accounts.models import AdditionalInfo
+        additional_info = AdditionalInfo.get_for_user(user)
+        
+        # Build payment instructions
+        total_due = order.total_due
+        received = order.received or 0
+        remaining = order.remaining
+        
+        # Build text using translation keys
+        text = get_text("payment_title", language) + "\n\n"
+        text += f"{get_text('payment_order', language)}: #{order.id}\n"
+        text += f"{get_text('payment_total_price', language)}: {total_due:,.0f} so'm\n"
+        text += f"{get_text('payment_paid', language)}: {received:,.0f} so'm\n"
+        text += f"{get_text('payment_remaining', language)}: <b>{remaining:,.0f} so'm</b>\n\n"
+        
+        if additional_info and additional_info.bank_card:
+            text += f"{get_text('payment_card_number', language)}:\n<code>{additional_info.bank_card}</code>\n"
+            if additional_info.holder_name:
+                text += f"{get_text('payment_card_holder', language)}: {additional_info.holder_name}\n"
+            text += "\n"
+        else:
+            text += get_text("payment_card_not_found", language) + "\n\n"
+        
+        text += get_text("payment_send_receipt", language) + "\n"
+        text += get_text("payment_receipt_format", language)
+        
+        # Create cancel button
+        markup = types.InlineKeyboardMarkup()
+        cancel_text = get_text("btn_back_to_orders", language)
+        markup.add(types.InlineKeyboardButton(
+            text=cancel_text,
+            callback_data="cancel_payment"
+        ))
+        
+        bot.answer_callback_query(call.id)
+        send_message(
+            chat_id=call.message.chat.id,
+            text=text,
+            parse_mode="HTML",
+            reply_markup=markup
+        )
+        
+    except Order.DoesNotExist:
+        bot.answer_callback_query(call.id, get_text("error_order_not_found", language))
+    except Exception as e:
+        logger.error(f" handle_pay_order: {e}")
+        bot.answer_callback_query(call.id, get_text("error_general", language))
+@bot.callback_query_handler(func=lambda call: call.data == "cancel_payment")
+def handle_cancel_payment(call):
+    """Cancel payment and return to orders"""
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    
+    # Clear payment state
+    if user_id in uploaded_files:
+        uploaded_files[user_id].pop("pending_payment_order_id", None)
+    update_user_step(user_id, STEP_REGISTERED)
+    
+    bot.answer_callback_query(call.id)
+    
+    # Delete the payment message
+    try:
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+    except:
+        pass
+    
+    show_main_menu(call.message, language)
 def show_profile(message, language):
     """Show user profile with edit options
 
@@ -1323,7 +2386,7 @@ def show_profile(message, language):
 
     # If we still don't have a chat_id, we can't proceed
     if chat_id is None:
-        print("[ERROR] Could not determine chat_id in show_profile")
+        logger.error("Could not determine chat_id in show_profile")
         return
 
     # Get user info with fallbacks
@@ -1340,7 +2403,7 @@ def show_profile(message, language):
     # If we still don't have a user_id, use the chat_id as user_id
     if user_id is None:
         user_id = chat_id
-        print(f"[WARNING] Using chat_id as user_id: {user_id}")
+        logger.warning(f" Using chat_id as user_id: {user_id}")
 
     # Get username and name with fallbacks
     username = ""
@@ -1357,9 +2420,13 @@ def show_profile(message, language):
     try:
         from accounts.models import BotUser
 
+        # Get current center for multi-tenant support
+        center = get_current_center()
+
         # Try to get user, create if doesn't exist
         user, created = BotUser.objects.get_or_create(
             user_id=user_id,
+            center=center,
             defaults={
                 "username": username,
                 "name": name,
@@ -1371,37 +2438,27 @@ def show_profile(message, language):
         )
 
         if created:
-            print(f"[DEBUG] Created new user: {user_id}")
+            logger.debug(f" Created new user: {user_id}")
 
-        # Create profile text
-        if language == "uz":
-            profile_text = "👤 <b>Sizning profilingiz:</b>\n\n"
-            profile_text += f"👤 Ism: {user.name}\n"
-            profile_text += f"📞 Telefon: {user.phone}\n"
-            profile_text += f"""🌍 Til: {"O'zbek" if user.language == 'uz' else 'Русский' if user.language == 'ru' else 'English'}\n"""
-            profile_text += f"📊 Holat: {'Faol' if user.is_active else 'Faol emas'}\n"
-            profile_text += f"📅 Qo'shilgan: {timezone.localtime(user.created_at).strftime('%d.%m.%Y')}\n\n"
-            profile_text += "📝 Ma'lumotlarni o'zgartirish uchun quyidagi tugmalardan birini bosing:"
-        elif language == "ru":
-            profile_text = "👤 <b>Ваш профиль:</b>\n\n"
-            profile_text += f"👤 Имя: {user.name}\n"
-            profile_text += f"📞 Телефон: {user.phone}\n"
-            profile_text += f"🌍 Язык: {'Узбекский' if user.language == 'uz' else 'Русский' if user.language == 'ru' else 'Английский'}\n"
-            profile_text += (
-                f"📊 Статус: {'Активен' if user.is_active else 'Не активен'}\n"
-            )
-            profile_text += f"📅 Присоединился: {timezone.localtime(user.created_at).strftime('%d.%m.%Y')}\n\n"
-            profile_text += "📝 Для изменения данных нажмите одну из кнопок ниже:"
-        else:  # English
-            profile_text = "👤 <b>Your Profile:</b>\n\n"
-            profile_text += f"👤 Name: {user.name}\n"
-            profile_text += f"📞 Phone: {user.phone}\n"
-            profile_text += f"🌍 Language: {'Uzbek' if user.language == 'uz' else 'Russian' if user.language == 'ru' else 'English'}\n"
-            profile_text += f"📊 Status: {'Active' if user.is_active else 'Inactive'}\n"
-            profile_text += f"📅 Joined: {timezone.localtime(user.created_at).strftime('%d.%m.%Y')}\n\n"
-            profile_text += (
-                "📝 To edit your information, click one of the buttons below:"
-            )
+        # Create profile text using translation keys
+        branch_name = user.branch.name if user.branch else "—"
+        lang_name = get_text(f"language_name_{user.language}", language)
+        status_text = get_text("status_active", language) if user.is_active else get_text("status_inactive", language)
+        
+        profile_text = get_text("profile_title", language) + "\n"
+        
+        # Add agency badge if user is an agency
+        if user.is_agency:
+            profile_text += get_text("profile_agency_badge", language) + "\n"
+        
+        profile_text += "\n"
+        profile_text += f"{get_text('profile_name', language)}: {user.name}\n"
+        profile_text += f"{get_text('profile_phone', language)}: {user.phone}\n"
+        profile_text += f"{get_text('profile_branch', language)}: {branch_name}\n"
+        profile_text += f"{get_text('profile_language', language)}: {lang_name}\n"
+        profile_text += f"{get_text('profile_status', language)}: {status_text}\n"
+        profile_text += f"{get_text('profile_joined', language)}: {timezone.localtime(user.created_at).strftime('%d.%m.%Y')}\n\n"
+        profile_text += get_text("profile_edit_hint", language)
 
         # Create inline keyboard with edit options
         markup = types.InlineKeyboardMarkup(row_width=2)
@@ -1411,6 +2468,10 @@ def show_profile(message, language):
         edit_phone_button = types.InlineKeyboardButton(
             text=get_text("edit_phone", language), callback_data="edit_phone"
         )
+        edit_branch_button = types.InlineKeyboardButton(
+            text=get_text("change_branch", language), 
+            callback_data="edit_branch"
+        )
         edit_language_button = types.InlineKeyboardButton(
             text=get_text("edit_language", language), callback_data="edit_language"
         )
@@ -1419,39 +2480,30 @@ def show_profile(message, language):
         )
 
         markup.add(edit_name_button, edit_phone_button)
-        markup.add(edit_language_button)
+        markup.add(edit_branch_button, edit_language_button)
         markup.add(back_button)
 
         send_message(
-            chat_id=message.chat.id,
+            chat_id=chat_id,
             text=profile_text,
             reply_markup=markup,
             parse_mode="HTML",
         )
 
     except Exception as e:
-        print(f"[ERROR] Failed to show profile: {e}")
+        logger.error(f" Failed to show profile: {e}")
         import traceback
 
         traceback.print_exc()
-        error_text = "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring."
-        if language == "ru":
-            error_text = "❌ Произошла ошибка. Пожалуйста, попробуйте еще раз."
-        elif language == "en":
-            error_text = "❌ An error occurred. Please try again."
-
+        
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
         back_button = types.KeyboardButton(text=get_text("back_to_menu", language))
         markup.add(back_button)
 
-        send_message(message.chat.id, error_text, reply_markup=markup)
-
-
+        send_message(chat_id, get_text("error_general", language), reply_markup=markup)
 @bot.callback_query_handler(func=lambda call: call.data == "edit_profile")
 def handle_profile_actions(call):
     show_edit_profile_menu(call.message)
-
-
 def show_edit_profile_menu(message):
     user_id = message.chat.id
     language = get_user_language(user_id)
@@ -1477,16 +2529,12 @@ def show_edit_profile_menu(message):
 
     edit_text = get_text("edit_profile_menu", language)
     send_message(message.chat.id, edit_text, reply_markup=markup)
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "edit_name")
 def handle_edit_name_request(call):
     user_id = call.message.chat.id
     language = get_user_language(user_id)
     update_user_step(user_id, STEP_EDITING_NAME)
     bot.send_message(call.message.chat.id, get_text("enter_new_name", language))
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "edit_phone")
 def handle_edit_phone_request(call):
     user_id = call.message.chat.id
@@ -1502,8 +2550,129 @@ def handle_edit_phone_request(call):
     bot.send_message(
         call.message.chat.id, get_text("enter_new_phone", language), reply_markup=markup
     )
-
-
+@bot.callback_query_handler(func=lambda call: call.data == "edit_branch")
+def handle_edit_branch_request(call):
+    """Show branch selection for changing preferred branch"""
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    
+    center = get_current_center()
+    if not center:
+        bot.answer_callback_query(call.id, "Configuration error")
+        return
+    
+    branches = get_center_branches(center)
+    
+    if not branches:
+        bot.answer_callback_query(call.id, "No branches available")
+        return
+    
+    # Build branch selection message
+    if language == "uz":
+        header = "🏢 <b>Filialni tanlang</b>\n\nQuyidagi filiallardan birini tanlang:"
+    elif language == "ru":
+        header = "🏢 <b>Выберите филиал</b>\n\nВыберите один из филиалов ниже:"
+    else:
+        header = "🏢 <b>Select Branch</b>\n\nPlease select one of the branches below:"
+    
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    
+    # Get current user's branch
+    current_branch_id = None
+    user = get_bot_user(user_id)
+    if user and user.branch:
+        current_branch_id = user.branch.id
+    
+    for branch in branches:
+        # Mark current branch with checkmark
+        if branch.id == current_branch_id:
+            button_text = f"✅ {branch.name}"
+        else:
+            button_text = f"📍 {branch.name}"
+        
+        markup.add(types.InlineKeyboardButton(
+            text=button_text,
+            callback_data=f"change_branch_{branch.id}"
+        ))
+    
+    # Add back button
+    back_text = "🔙 " + ("Orqaga" if language == "uz" else "Назад" if language == "ru" else "Back")
+    markup.add(types.InlineKeyboardButton(text=back_text, callback_data="back_to_profile"))
+    
+    # Build detailed branch info
+    branch_info = header + "\n\n"
+    for branch in branches:
+        if branch.id == current_branch_id:
+            branch_info += f"✅ <b>{branch.name}</b> (joriy)\n" if language == "uz" else f"✅ <b>{branch.name}</b> (текущий)\n" if language == "ru" else f"✅ <b>{branch.name}</b> (current)\n"
+        else:
+            branch_info += f"🏢 <b>{branch.name}</b>\n"
+        if branch.address:
+            branch_info += f"   📍 {branch.address}\n"
+        branch_info += "\n"
+    
+    try:
+        bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            text=branch_info,
+            reply_markup=markup,
+            parse_mode="HTML"
+        )
+    except:
+        send_message(call.message.chat.id, branch_info, reply_markup=markup)
+@bot.callback_query_handler(func=lambda call: call.data.startswith("change_branch_"))
+def handle_change_branch(call):
+    """Handle branch change from profile"""
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    
+    try:
+        branch_id = int(call.data.split("_")[2])
+        from organizations.models import Branch
+        
+        branch = Branch.objects.get(id=branch_id)
+        
+        # Update user's branch
+        user = get_bot_user(user_id)
+        if not user:
+            bot.answer_callback_query(call.id, "User not found")
+            return
+        user.branch = branch
+        user.save()
+        
+        # Confirm change
+        if language == "uz":
+            confirm_text = f"✅ Filial <b>{branch.name}</b> ga o'zgartirildi."
+        elif language == "ru":
+            confirm_text = f"✅ Филиал изменен на <b>{branch.name}</b>."
+        else:
+            confirm_text = f"✅ Branch changed to <b>{branch.name}</b>."
+        
+        bot.answer_callback_query(call.id, confirm_text.replace("<b>", "").replace("</b>", ""))
+        
+        # Show updated profile
+        class MessageWrapper:
+            def __init__(self, chat, from_user):
+                self.chat = chat
+                self.from_user = from_user
+        
+        wrapped_message = MessageWrapper(call.message.chat, call.from_user)
+        
+        # Delete old message
+        try:
+            bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+        except:
+            pass
+        
+        show_profile(wrapped_message, language)
+        
+    except Branch.DoesNotExist:
+        bot.answer_callback_query(call.id, "Branch not found")
+    except BotUser.DoesNotExist:
+        bot.answer_callback_query(call.id, "User not found")
+    except Exception as e:
+        logger.error(f" Change branch error: {e}")
+        bot.answer_callback_query(call.id, "Error occurred")
 @bot.callback_query_handler(func=lambda call: call.data == "edit_language")
 def handle_edit_language_request(call):
     try:
@@ -1539,7 +2708,7 @@ def handle_edit_language_request(call):
                 parse_mode="HTML",
             )
         except Exception as e:
-            print(f"[ERROR] Error editing message: {e}")
+            logger.error(f" Error editing message: {e}")
             # If editing fails, send a new message
             send_message(
                 chat_id=user_id,
@@ -1547,7 +2716,7 @@ def handle_edit_language_request(call):
                 reply_markup=markup,
             )
     except Exception as e:
-        print(f"[ERROR] Error in handle_edit_language_request: {e}")
+        logger.error(f" Error in handle_edit_language_request: {e}")
         try:
             send_message(
                 call.message.chat.id,
@@ -1557,8 +2726,19 @@ def handle_edit_language_request(call):
             )
         except:
             pass
-
-
+@bot.callback_query_handler(func=lambda call: call.data == "back_to_profile")
+def handle_back_to_profile(call):
+    """Handle back to profile button from inline keyboards"""
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    
+    try:
+        bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+    except:
+        pass
+    
+    update_user_step(user_id, STEP_EDITING_PROFILE)
+    show_profile(call.message, language)
 @bot.callback_query_handler(
     func=lambda call: call.data.startswith("lang_") and call.data.count("_") >= 2
 )
@@ -1576,7 +2756,7 @@ def handle_service_language_selection(call):
         # Extract language ID and service ID from callback data
         parts = call.data.split("_")
         if len(parts) < 3:
-            print(f"[ERROR] Invalid service language selection format: {call.data}")
+            logger.error(f" Invalid service language selection format: {call.data}")
             send_message(user_id, get_text("error_occurred", language))
             show_categorys(call.message, language)
             return
@@ -1586,7 +2766,7 @@ def handle_service_language_selection(call):
             service_id = int(parts[2])
             doc_type_id = int(parts[3]) if len(parts) > 3 else None
         except (ValueError, IndexError) as e:
-            print(f"[ERROR] Error parsing callback data {call.data}: {e}")
+            logger.error(f" Error parsing callback data {call.data}: {e}")
             send_message(user_id, get_text("error_occurred", language))
             show_categorys(call.message, language)
             return
@@ -1605,13 +2785,13 @@ def handle_service_language_selection(call):
             if lang_obj:
                 uploaded_files[user_id]["lang_name"] = lang_obj.name
         except Exception as ex:
-            print(f"[WARNING] Could not get language name: {ex}")
+            logger.warning(f" Could not get language name: {ex}")
 
         # Delete the language selection message
         try:
             bot.delete_message(chat_id=user_id, message_id=message.message_id)
         except Exception as e:
-            print(f"[ERROR] Error deleting message: {e}")
+            logger.error(f" Error deleting message: {e}")
 
         # Show document types for the selected language and service
         show_products(
@@ -1623,7 +2803,7 @@ def handle_service_language_selection(call):
         )
 
     except Exception as e:
-        print(f"[ERROR] Error in handle_service_language_selection: {e}")
+        logger.error(f" Error in handle_service_language_selection: {e}")
         # Get user language again in case of error
         user_id = call.message.chat.id
         language = get_user_language(user_id)
@@ -1632,12 +2812,10 @@ def handle_service_language_selection(call):
             send_message(user_id, get_text("error_occurred", language))
             show_categorys(call.message, language)
         except Exception as inner_e:
-            print(f"[ERROR] Failed to handle error: {inner_e}")
+            logger.error(f" Failed to handle error: {inner_e}")
             # If we can't handle the error, just log it
             pass
         print(f"Unexpected error in handle_service_language_selection: {e}")
-
-
 # Add a new handler for profile language updates
 @bot.callback_query_handler(func=lambda call: call.data.startswith("profile_lang_"))
 def handle_profile_language_update(call):
@@ -1651,15 +2829,19 @@ def handle_profile_language_update(call):
             if language not in ["uz", "ru", "en"]:
                 raise ValueError(f"Invalid language code: {language}")
         except (IndexError, ValueError) as e:
-            print(f"[ERROR] Invalid language selection: {e}")
+            logger.error(f" Invalid language selection: {e}")
             language = "uz"  # Default to Uzbek if language is invalid
 
         # Update the user's profile language
         try:
             from accounts.models import BotUser
+            
+            # Get current center for multi-tenant support
+            center = get_current_center()
 
             user, created = BotUser.objects.get_or_create(
                 user_id=user_id,
+                center=center,
                 defaults={
                     "username": call.from_user.username,
                     "language": language,
@@ -1672,17 +2854,18 @@ def handle_profile_language_update(call):
                 user.language = language
                 user.save()
 
-            print(f"[DEBUG] Updated profile language for user {user_id} to {language}")
+            logger.debug(f" Updated profile language for user {user_id} to {language}")
 
         except Exception as e:
-            print(f"[ERROR] Error updating user {user_id} language: {e}")
+            logger.error(f" Error updating user {user_id} language: {e}")
             try:
                 # Try to create the user if update failed
+                center = get_current_center()
                 create_or_update_user(
-                    user_id=user_id, username=call.from_user.username, language=language
+                    user_id=user_id, username=call.from_user.username, language=language, center=center
                 )
             except Exception as inner_e:
-                print(f"[CRITICAL] Failed to create user {user_id}: {inner_e}")
+                logger.critical(f" Failed to create user {user_id}: {inner_e}")
                 language = "uz"  # Default to Uzbek as fallback
 
         # Delete the old message
@@ -1691,36 +2874,58 @@ def handle_profile_language_update(call):
                 chat_id=call.message.chat.id, message_id=call.message.message_id
             )
         except Exception as e:
-            print(f"[WARNING] Error deleting message: {e}")
+            logger.warning(f" Error deleting message: {e}")
 
         # Show profile with updated language
         try:
             show_profile(call.message, language)
         except Exception as e:
-            print(f"[ERROR] Failed to show profile after language update: {e}")
+            logger.error(f" Failed to show profile after language update: {e}")
             # If showing profile fails, at least send a confirmation message
             confirmation_msg = get_text("language_updated", language)
             send_message(user_id, confirmation_msg)
             show_main_menu(call.message, language)
 
     except Exception as e:
-        print(f"[CRITICAL] Unhandled error in handle_profile_language_update: {e}")
+        logger.critical(f" Unhandled error in handle_profile_language_update: {e}")
         # Try to recover by showing main menu in default language
         try:
             send_message(call.from_user.id, get_text("error_occurred", "uz"))
             show_main_menu(call.message, "uz")
         except:
             pass  # If even this fails, there's nothing more we can do
-
-
 def show_categorys(message, language):
-    user_id = message.from_user.id
+    # Handle both direct messages and callback messages
+    if hasattr(message, 'from_user') and message.from_user:
+        user_id = message.from_user.id
+    else:
+        user_id = message.chat.id
+    
     update_user_step(user_id, STEP_SELECTING_SERVICE)
-    from services.models import MainService
+    from services.models import Category
 
     try:
-        services = MainService.objects.all()
-        if services:
+        # Get user's branch and filter categories by that branch
+        user = get_bot_user(user_id)
+        if not user:
+            send_message(message.chat.id, get_text("error_user_not_found", language))
+            return
+        
+        if not user.branch:
+            # No branch selected - show message to select branch first
+            if language == "uz":
+                no_branch_text = "⚠️ Iltimos, avval filialni tanlang.\n\nProfilga o'ting va filialni tanlang."
+            elif language == "ru":
+                no_branch_text = "⚠️ Пожалуйста, сначала выберите филиал.\n\nПерейдите в профиль и выберите филиал."
+            else:
+                no_branch_text = "⚠️ Please select a branch first.\n\nGo to Profile and select a branch."
+            send_message(message.chat.id, no_branch_text)
+            show_main_menu(message, language)
+            return
+        
+        services = Category.objects.filter(branch=user.branch, is_active=True)
+        
+        if services.exists():
             markup = types.InlineKeyboardMarkup(row_width=2)
             for service in services:
                 button = types.InlineKeyboardButton(
@@ -1738,23 +2943,62 @@ def show_categorys(message, language):
                 reply_markup=markup,
             )
         else:
-            send_message(message.chat.id, "translation:no_services_found")
+            # No services available for this branch
+            if language == "uz":
+                no_services_text = "📋 Hozircha bu filialda xizmatlar mavjud emas."
+            elif language == "ru":
+                no_services_text = "📋 В данном филиале пока нет доступных услуг."
+            else:
+                no_services_text = "📋 No services available for this branch yet."
+            send_message(message.chat.id, no_services_text)
+            show_main_menu(message, language)
+    except Category.DoesNotExist:
+        logger.error(f" Category query failed for user {user_id}")
+        send_message(message.chat.id, get_text("error_general", language))
+        show_main_menu(message, language)
+    except AttributeError as e:
+        logger.error(f" AttributeError in show_categorys: {e}")
+        send_message(message.chat.id, get_text("error_general", language))
+        show_main_menu(message, language)
     except Exception as e:
-        send_message(message.chat.id, f"translation:error_fetching_services {e}")
-
-
+        logger.error(f" Unexpected error in show_categorys: {e}", exc_info=True)
+        send_message(message.chat.id, get_text("error_general", language))
+        show_main_menu(message, language)
 @bot.callback_query_handler(func=lambda call: call.data == ("main_menu"))
-def handle_main_menu(call):
-    bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
-    show_main_menu(call.message, get_user_language(call.message.chat.id))
-
-
+def handle_main_menu_callback(call):
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    
+    try:
+        bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+    except:
+        pass
+    
+    # Create wrapper with proper from_user
+    class MessageWrapper:
+        def __init__(self, chat, from_user):
+            self.chat = chat
+            self.from_user = from_user
+    
+    wrapped_message = MessageWrapper(call.message.chat, call.from_user)
+    show_main_menu(wrapped_message, language)
 @bot.callback_query_handler(func=lambda call: call.data.startswith("category_"))
 def handle_service_selection(call):
-    language = get_user_language(call.message.chat.id)
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    
+    # Create wrapper with proper from_user for functions that need it
+    class MessageWrapper:
+        def __init__(self, chat, from_user, message_id=None):
+            self.chat = chat
+            self.from_user = from_user
+            self.message_id = message_id
+    
+    wrapped_message = MessageWrapper(call.message.chat, call.from_user, call.message.message_id)
+    
     try:
-        service_id = int(call.data.split("_")[2])
-        from services.models import MainService
+        service_id = int(call.data.split("_")[1])
+        from services.models import Category
 
         # Delete the service selection message
         try:
@@ -1764,32 +3008,30 @@ def handle_service_selection(call):
         except:
             pass
 
-        category = MainService.objects.get(id=service_id)
+        category = Category.objects.get(id=service_id)
 
         # Check if service has multiple languages
         if category.languages.count() > 1:
-            show_available_langs(call.message, language, service_id)
+            show_available_langs(wrapped_message, language, service_id)
         else:
             # If only one language is available, use it and go directly to document types
             lang = category.languages.first()
             show_products(
-                message=call.message,
+                message=wrapped_message,
                 language=language,
                 service_id=service_id,
                 lang_id=lang.id if lang else None,
             )
 
-    except MainService.DoesNotExist:
+    except Category.DoesNotExist:
         error_msg = get_text("service_not_found", language)
         bot.send_message(call.message.chat.id, error_msg)
-        show_categorys(call.message, language)
+        show_categorys(wrapped_message, language)
     except Exception as e:
         error_msg = get_text("error_occurred", language)
         bot.send_message(call.message.chat.id, error_msg)
         print(f"Error in handle_service_selection: {e}")
-        show_main_menu(call.message, language)
-
-
+        show_main_menu(wrapped_message, language)
 def show_available_langs(
     message,
     language,
@@ -1808,9 +3050,9 @@ def show_available_langs(
             if message_id is None and hasattr(message, "message_id"):
                 message_id = message.message_id
 
-        from services.models import MainService, Language
+        from services.models import Category, Language
 
-        service = MainService.objects.get(id=service_id)
+        service = Category.objects.get(id=service_id)
 
         # Get available languages for this service
         available_languages = service.languages.all()
@@ -1885,7 +3127,7 @@ def show_available_langs(
                 user_data[user_id]["message_ids"] = []
             user_data[user_id]["message_ids"].append(sent_message.message_id)
 
-    except MainService.DoesNotExist:
+    except Category.DoesNotExist:
         error_msg = get_text("service_not_found", language)
         if edit_message and message_id:
             bot.edit_message_text(
@@ -1904,8 +3146,6 @@ def show_available_langs(
             bot.send_message(chat_id, error_msg)
         print(f"Error in show_available_langs: {e}")
         show_main_menu(message, language)
-
-
 def show_products(
     message,
     language,
@@ -1919,7 +3159,7 @@ def show_products(
     lang_id=None,
 ):
     """Show document types for the selected service and language"""
-    from services.models import DocumentType, Language, MainService
+    from services.models import Category, Product, Language
 
     # Get chat_id and message_id if not provided
     if chat_id is None:
@@ -1944,11 +3184,11 @@ def show_products(
 
     # Get the service and language objects
     try:
-        service = MainService.objects.get(id=service_id)
+        service = Category.objects.get(id=service_id)
         lang = Language.objects.get(id=lang_id) if lang_id else None
 
         # Get available document types for this service
-        doc_types = DocumentType.objects.filter(category=service, is_active=True)
+        doc_types = Product.objects.filter(category=service, is_active=True)
 
         # Update user step
         update_user_step(chat_id, STEP_SELECTING_DOCUMENT)
@@ -2036,7 +3276,7 @@ def show_products(
                 user_data[user_id]["message_ids"] = []
             user_data[user_id]["message_ids"].append(sent_message.message_id)
 
-    except MainService.DoesNotExist:
+    except Category.DoesNotExist:
         error_msg = get_text("service_not_found", language)
         if edit_message and message_id:
             bot.edit_message_text(
@@ -2055,14 +3295,27 @@ def show_products(
             bot.send_message(chat_id, error_msg)
         print(f"Error in show_products: {e}")
         show_main_menu(message, language)
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "back_to_services")
 def handle_back_to_services(call):
-    language = get_user_language(call.message.chat.id)
-    show_categorys(call.message, language)
-
-
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    
+    # Create a wrapper message with proper from_user
+    class MessageWrapper:
+        def __init__(self, chat, from_user):
+            self.chat = chat
+            self.from_user = from_user
+            self.message_id = call.message.message_id
+    
+    wrapped_message = MessageWrapper(call.message.chat, call.from_user)
+    
+    # Delete the current message
+    try:
+        bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+    except:
+        pass
+    
+    show_categorys(wrapped_message, language)
 def show_copy_number_selection(message, language, doc_type, lang_name):
     """Show copy number selection step"""
     user_id = message.chat.id
@@ -2104,8 +3357,6 @@ def show_copy_number_selection(message, language, doc_type, lang_name):
     bot.send_message(
         chat_id=user_id, text=message_text, reply_markup=markup, parse_mode="HTML"
     )
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("copy_num_"))
 def handle_copy_number_selection(call):
     """Handle copy number selection from inline buttons"""
@@ -2128,7 +3379,7 @@ def handle_copy_number_selection(call):
             uploaded_files[user_id] = {}
         uploaded_files[user_id]["copy_number"] = copy_number
 
-        print(f"[DEBUG] User {user_id} selected {copy_number} copies")
+        logger.debug(f" User {user_id} selected {copy_number} copies")
 
         # Delete the copy number message
         try:
@@ -2147,9 +3398,9 @@ def handle_copy_number_selection(call):
             return
 
         # Get document type and language
-        from services.models import DocumentType, Language
+        from services.models import Product, Language
 
-        doc_type = DocumentType.objects.get(id=doc_type_id)
+        doc_type = Product.objects.get(id=doc_type_id)
         lang_name = Language.objects.get(id=lang_id).name if lang_id else ""
 
         # Show upload files interface
@@ -2158,19 +3409,17 @@ def handle_copy_number_selection(call):
         )
 
     except Exception as e:
-        print(f"[ERROR] Failed to handle copy number selection: {e}")
+        logger.error(f" Failed to handle copy number selection: {e}")
         import traceback
 
         traceback.print_exc()
         bot.answer_callback_query(call.id, get_text("error_occurred", language))
-
-
 @bot.callback_query_handler(
     func=lambda call: call.data == "back_to_documents_from_copy"
 )
 def handle_back_to_documents_from_copy(call):
     """Handle back button from copy number selection"""
-    user_id = call.message.chat.id
+    user_id = call.from_user.id
     language = get_user_language(user_id)
 
     # Get service info from uploaded_files
@@ -2181,7 +3430,7 @@ def handle_back_to_documents_from_copy(call):
     if service_id:
         # Delete the copy number message
         try:
-            bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
+            bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
         except:
             pass
 
@@ -2193,10 +3442,14 @@ def handle_back_to_documents_from_copy(call):
             lang_id=lang_id,
         )
     else:
-        # Fallback to main services
-        show_categorys(call.message, language)
-
-
+        # Fallback to main services - create wrapper with proper from_user
+        class MessageWrapper:
+            def __init__(self, chat, from_user):
+                self.chat = chat
+                self.from_user = from_user
+        
+        wrapped_message = MessageWrapper(call.message.chat, call.from_user)
+        show_categorys(wrapped_message, language)
 def show_upload_files_interface(message, language, doc_type, lang_name, copy_number):
     """Show file upload interface after copy number is selected"""
     user_id = message.chat.id
@@ -2210,7 +3463,7 @@ def show_upload_files_interface(message, language, doc_type, lang_name, copy_num
     message_text += get_text("upload_files", language)
     message_text += "\n\n📎 <b>" + get_text("allowed_formats", language) + "</b>\n"
     message_text += "📄 DOC, DOCX, PDF\n"
-    message_text += "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC"
+    message_text += "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC, HEIF"
 
     # Create reply keyboard
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
@@ -2236,15 +3489,7 @@ def show_upload_files_interface(message, language, doc_type, lang_name, copy_num
     # Update user step
     update_user_step(user_id, STEP_UPLOADING_FILES)
 
-    print(f"[DEBUG] User {user_id} moved to file upload with {copy_number} copies")
-
-
-@bot.callback_query_handler(func=lambda call: call.data == "back_to_services")
-def handle_back_to_services(call):
-    language = get_user_language(call.message.chat.id)
-    show_categorys(call.message, language)
-
-
+    logger.debug(f" User {user_id} moved to file upload with {copy_number} copies")
 @bot.callback_query_handler(func=lambda call: call.data.startswith("doc_type_"))
 def handle_document_selection(call):
     language = get_user_language(call.message.chat.id)
@@ -2256,10 +3501,10 @@ def handle_document_selection(call):
         lang_id = int(parts[4]) if len(parts) > 4 else None
 
         # Get document type and language details
-        from services.models import DocumentType, Language, MainService
+        from services.models import Category, Product, Language
 
-        doc_type = DocumentType.objects.get(id=doc_type_id)
-        category = MainService.objects.get(id=service_id)
+        doc_type = Product.objects.get(id=doc_type_id)
+        category = Category.objects.get(id=service_id)
         lang = Language.objects.get(id=lang_id) if lang_id else None
 
         # Store the selected document type and language in user data
@@ -2285,9 +3530,9 @@ def handle_document_selection(call):
         }
 
         # Get document type and language names for the message
-        from services.models import DocumentType, Language
+        from services.models import Product, Language
 
-        doc_type = DocumentType.objects.get(id=doc_type_id)
+        doc_type = Product.objects.get(id=doc_type_id)
         lang_name = Language.objects.get(id=lang_id).name if lang_id else ""
 
         # Store copy number as 0 by default
@@ -2307,7 +3552,7 @@ def handle_document_selection(call):
         print(f"Unexpected error in handle_document_selection: {e}")
         show_main_menu(call.message, language)
 
-    print(f"[DEBUG] Updated uploaded_files: {uploaded_files.get(user_id, {})}")
+    logger.debug(f" Updated uploaded_files: {uploaded_files.get(user_id, {})}")
 
     update_user_step(user_id, STEP_UPLOADING_FILES)
 
@@ -2315,9 +3560,7 @@ def handle_document_selection(call):
     bot.answer_callback_query(call.id)
 
     # Message is already sent above, just log the action
-    print(f"[DEBUG] File upload message sent to user {user_id}")
-
-
+    logger.debug(f" File upload message sent to user {user_id}")
 def show_payment_options(message, language, order):
     """Show payment options for the order"""
     user_id = message.chat.id
@@ -2461,73 +3704,130 @@ def show_payment_options(message, language, order):
         reply_markup=markup,
         parse_mode="HTML",
     )
-
-
 @bot.message_handler(content_types=["document", "photo"])
 def handle_file_upload(message):
     user_id = message.from_user.id
     language = get_user_language(user_id)
     current_step = get_user_step(user_id)
+    
+    # Update username in case it changed on Telegram
+    update_user_username(message)
 
-    print(f"[DEBUG] File upload from user {user_id}, step: {current_step}")
+    logger.debug(f" ====== FILE UPLOAD START ======")
+    logger.debug(f" File upload from user {user_id}, step: {current_step}")
+    logger.debug(f" STEP_UPLOADING_RECEIPT = {STEP_UPLOADING_RECEIPT}")
+    logger.debug(f" STEP_UPLOADING_FILES = {STEP_UPLOADING_FILES}")
+    logger.debug(f" Has document: {message.document is not None}")
+    logger.debug(f" Has photo: {message.photo is not None}")
 
     # Handle payment receipt uploads
     if current_step == STEP_UPLOADING_RECEIPT:
+        logger.debug(f" Entering STEP_UPLOADING_RECEIPT handler")
         if message.document or message.photo:
             try:
+                logger.debug(f" Getting user_data from uploaded_files...")
                 user_data = uploaded_files.get(user_id, {})
+                logger.debug(f" user_data = {user_data}")
+                
                 if "order_id" not in user_data:
+                    logger.error(f" order_id not found in user_data!")
                     bot.send_message(
                         message.chat.id,
-                        "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang.",
+                        get_text("order_not_found_restart", language),
                     )
                     return
 
                 order_id = user_data["order_id"]
-                from accounts.models import Order
-
+                logger.debug(f" order_id = {order_id}")
+                
+                from orders.models import Order
                 order = Order.objects.get(id=order_id)
+                logger.debug(f" Order found: {order}")
 
                 # Save receipt file
                 from django.core.files.base import ContentFile
                 from django.core.files.storage import default_storage
+                from orders.models import Receipt
+                import time
 
+                logger.debug(f" Downloading file from Telegram...")
                 if message.document:
                     file_info = bot.get_file(message.document.file_id)
                     downloaded_file = bot.download_file(file_info.file_path)
-                    file_name = f"receipt_{order_id}_{message.document.file_name}"
+                    # Truncate original filename to prevent path length issues
+                    original_name = truncate_filename(message.document.file_name or "doc.pdf", max_length=30)
+                    file_name = f"rcpt_{order_id}_{int(time.time())}_{original_name}"
+                    telegram_file_id = message.document.file_id
                 else:  # message.photo
                     file_info = bot.get_file(message.photo[-1].file_id)
                     downloaded_file = bot.download_file(file_info.file_path)
-                    file_name = f"receipt_{order_id}_{message.photo[-1].file_id}.jpg"
+                    file_name = f"rcpt_{order_id}_{int(time.time())}.jpg"
+                    telegram_file_id = message.photo[-1].file_id
+                
+                logger.debug(f" File downloaded, size: {len(downloaded_file)} bytes")
+                logger.debug(f" File name: {file_name}")
 
                 # Save receipt to storage
+                logger.debug(f" Saving file to storage...")
                 file_content = ContentFile(downloaded_file, name=file_name)
                 receipt_path = default_storage.save(
                     f"receipts/{file_name}", file_content
                 )
+                logger.debug(f" File saved to: {receipt_path}")
 
-                # Update order with payment receipt
+                # Get user for Receipt record
+                user = get_bot_user(user_id)
+                logger.debug(f" Bot user: {user}")
+
+                # Create Receipt record with proper file handling
+                logger.debug(f" Creating Receipt record...")
+                try:
+                    from django.core.files import File
+                    
+                    receipt = Receipt.objects.create(
+                        order=order,
+                        telegram_file_id=telegram_file_id,
+                        amount=order.total_due,
+                        source='bot',
+                        status='pending',
+                        uploaded_by_user=user,
+                    )
+                    # Open the file and assign it properly
+                    with default_storage.open(receipt_path, 'rb') as f:
+                        receipt.file.save(os.path.basename(receipt_path), File(f), save=True)
+                    
+                    logger.debug(f" Receipt created: {receipt.id}")
+                except Exception as receipt_error:
+                    logger.error(f" Failed to create Receipt record: {receipt_error}")
+                    import traceback
+                    traceback.print_exc()
+
+                # Keep legacy field for backward compatibility
+                logger.debug(f" Updating order...")
                 order.recipt = receipt_path
                 order.payment_type = "card"
                 order.status = "payment_received"
                 order.is_active = True
                 order.save()
+                logger.debug(f" Order updated successfully")
 
                 # Forward order to channel
+                logger.debug(f" Forwarding order to channel...")
                 forward_success = forward_order_to_channel(order, language)
 
                 if not forward_success:
-                    print(f"[WARNING] Failed to forward order {order.id} to channel")
+                    logger.warning(f" Failed to forward order {order.id} to channel")
 
                 # Clear uploaded files data
+                logger.debug(f" Clearing user files...")
                 clear_user_files(user_id)
                 update_user_step(user_id, STEP_REGISTERED)
 
                 # Send completion confirmation
-                from accounts.models import BotUser
-
-                user = BotUser.objects.get(user_id=user_id)
+                user = get_bot_user(user_id)
+                if not user:
+                    logger.error(f" User not found for order completion: {user_id}")
+                    return
 
                 # Calculate pricing with copy charges
                 base_price, copy_charge, total_price, copy_percentage = (
@@ -2664,30 +3964,287 @@ def handle_file_upload(message):
                     )
 
                 # Send completion message
+                logger.debug(f" Sending completion message...")
                 bot.send_message(
                     chat_id=message.chat.id,
                     text=completion_text,
                     parse_mode="HTML",
                 )
 
+                # Send branch location for pickup
+                if order.branch:
+                    send_branch_location(message.chat.id, order.branch, language)
+
                 # Return user to main menu
+                logger.debug(f" ====== FILE UPLOAD SUCCESS ======")
                 show_main_menu(message, language)
                 return
 
             except Exception as e:
-                print(f"[ERROR] Failed to handle receipt upload: {e}")
+                logger.error(f" ====== FILE UPLOAD FAILED ======")
+                logger.error(f" Exception type: {type(e).__name__}")
+                logger.error(f" Exception message: {e}")
+                import traceback
+                traceback.print_exc()
+                
+                # Send detailed error to user (in development)
+                error_detail = f"Debug: {type(e).__name__}: {str(e)[:100]}"
+                bot.send_message(
+                    message.chat.id,
+                    f"{get_text('receipt_upload_failed', language)}\n\n<code>{error_detail}</code>",
+                    parse_mode="HTML",
+                )
+                return
+        else:
+            logger.debug(f" No document or photo in message for STEP_UPLOADING_RECEIPT")
+
+    # Handle additional receipt uploads for existing orders
+    if current_step == STEP_AWAITING_RECEIPT:
+        if message.document or message.photo:
+            try:
+                user_data = uploaded_files.get(user_id, {})
+                order_id = user_data.get("pending_payment_order_id")
+                
+                if not order_id:
+                    bot.send_message(
+                        message.chat.id,
+                        get_text("order_not_found_restart", language),
+                    )
+                    return
+
+                from orders.models import Order, Receipt
+
+                order = Order.objects.get(id=order_id)
+                user = get_bot_user(user_id)
+
+                # Save receipt file
+                from django.core.files.base import ContentFile
+                from django.core.files.storage import default_storage
+                import time
+
+                if message.document:
+                    file_info = bot.get_file(message.document.file_id)
+                    downloaded_file = bot.download_file(file_info.file_path)
+                    file_name = f"receipt_{order_id}_{int(time.time())}_{message.document.file_name}"
+                else:  # message.photo
+                    file_info = bot.get_file(message.photo[-1].file_id)
+                    downloaded_file = bot.download_file(file_info.file_path)
+                    file_name = f"receipt_{order_id}_{int(time.time())}_{message.photo[-1].file_id}.jpg"
+
+                # Save receipt to storage
+                file_content = ContentFile(downloaded_file, name=file_name)
+                receipt_path = default_storage.save(
+                    f"receipts/{file_name}", file_content
+                )
+
+                # Get telegram file id for quick access
+                telegram_file_id = None
+                if message.document:
+                    telegram_file_id = message.document.file_id
+                elif message.photo:
+                    telegram_file_id = message.photo[-1].file_id
+
+                # Create Receipt record - avoid passing path directly to FileField
+                try:
+                    receipt = Receipt.objects.create(
+                        order=order,
+                        telegram_file_id=telegram_file_id,
+                        amount=order.remaining,  # Default to remaining amount
+                        source='bot',
+                        status='pending',
+                        uploaded_by_user=user,
+                    )
+                    # Set file path directly
+                    receipt.file.name = receipt_path
+                    receipt.save()
+                except Exception as receipt_error:
+                    logger.error(f" Failed to create Receipt record: {receipt_error}")
+                    # Continue without Receipt record
+
+                # Clear user state
+                if user_id in uploaded_files:
+                    uploaded_files[user_id].pop("pending_payment_order_id", None)
+                update_user_step(user_id, STEP_REGISTERED)
+
+                # Send success message
+                if language == "uz":
+                    success_text = f"✅ <b>Chek yuklandi!</b>\n\n"
+                    success_text += f"📋 Buyurtma #{order.id}\n"
+                    success_text += f"💰 Qoldiq: {order.remaining:,.0f} so'm\n\n"
+                    success_text += "⏳ To'lov tekshiruvga yuborildi.\n"
+                    success_text += "📞 Tasdiqlanganidan keyin sizga xabar beramiz."
+                elif language == "ru":
+                    success_text = f"✅ <b>Чек загружен!</b>\n\n"
+                    success_text += f"📋 Заказ #{order.id}\n"
+                    success_text += f"💰 Остаток: {order.remaining:,.0f} сум\n\n"
+                    success_text += "⏳ Оплата отправлена на проверку.\n"
+                    success_text += "📞 Мы уведомим вас после подтверждения."
+                else:
+                    success_text = f"✅ <b>Receipt uploaded!</b>\n\n"
+                    success_text += f"📋 Order #{order.id}\n"
+                    success_text += f"💰 Remaining: {order.remaining:,.0f} sum\n\n"
+                    success_text += "⏳ Payment sent for verification.\n"
+                    success_text += "📞 We will notify you after confirmation."
+
+                bot.send_message(
+                    chat_id=message.chat.id,
+                    text=success_text,
+                    parse_mode="HTML",
+                )
+
+                # Return to main menu
+                show_main_menu(message, language)
+                return
+
+            except Order.DoesNotExist:
+                bot.send_message(
+                    message.chat.id,
+                    get_text("error_order_not_found", language),
+                )
+                return
+            except Exception as e:
+                logger.error(f" Failed to handle additional receipt upload: {e}")
                 import traceback
 
                 traceback.print_exc()
                 bot.send_message(
                     message.chat.id,
-                    "❌ Chek yuklanmadi. Iltimos, qayta urinib ko'ring.",
+                    get_text("receipt_upload_failed", language),
+                )
+                return
+
+    # Handle payment receipt uploads when user is awaiting payment (after card selection)
+    if current_step == STEP_AWAITING_PAYMENT:
+        if message.document or message.photo:
+            try:
+                logger.debug(f" Processing payment receipt for STEP_AWAITING_PAYMENT")
+                user_data = uploaded_files.get(user_id, {})
+                order_id = user_data.get("order_id")
+                
+                if not order_id:
+                    bot.send_message(
+                        message.chat.id,
+                        get_text("order_not_found_restart", language),
+                    )
+                    return
+
+                from orders.models import Order, Receipt
+                from django.core.files.base import ContentFile
+                from django.core.files.storage import default_storage
+                import time
+
+                order = Order.objects.get(id=order_id)
+                user = get_bot_user(user_id)
+
+                # Download and save receipt file - accept ANY file format
+                if message.document:
+                    file_info = bot.get_file(message.document.file_id)
+                    downloaded_file = bot.download_file(file_info.file_path)
+                    original_name = message.document.file_name or "receipt"
+                    # Truncate if too long
+                    if len(original_name) > 30:
+                        name_parts = original_name.rsplit('.', 1)
+                        ext = f".{name_parts[1]}" if len(name_parts) > 1 else ""
+                        original_name = name_parts[0][:25] + ext
+                    file_name = f"rcpt_{order_id}_{int(time.time())}_{original_name}"
+                    telegram_file_id = message.document.file_id
+                else:  # message.photo
+                    file_info = bot.get_file(message.photo[-1].file_id)
+                    downloaded_file = bot.download_file(file_info.file_path)
+                    file_name = f"rcpt_{order_id}_{int(time.time())}.jpg"
+                    telegram_file_id = message.photo[-1].file_id
+
+                logger.debug(f" Receipt file: {file_name}, size: {len(downloaded_file)} bytes")
+
+                # Save receipt to storage
+                file_content = ContentFile(downloaded_file, name=file_name)
+                receipt_path = default_storage.save(f"receipts/{file_name}", file_content)
+
+                # Create Receipt record
+                try:
+                    receipt = Receipt.objects.create(
+                        order=order,
+                        telegram_file_id=telegram_file_id,
+                        amount=order.total_due,
+                        source='bot',
+                        status='pending',
+                        uploaded_by_user=user,
+                    )
+                    receipt.file.name = receipt_path
+                    receipt.save()
+                    logger.debug(f" Receipt created: {receipt.id}")
+                except Exception as receipt_error:
+                    logger.error(f" Failed to create Receipt record: {receipt_error}")
+
+                # Update order
+                order.recipt = receipt_path
+                order.payment_type = "card"
+                order.status = "payment_received"
+                order.is_active = True
+                order.save()
+
+                # Forward order to channel
+                forward_success = forward_order_to_channel(order, language)
+                if not forward_success:
+                    logger.warning(f" Failed to forward order {order.id} to channel")
+
+                # Clear user data and update step
+                clear_user_files(user_id)
+                update_user_step(user_id, STEP_REGISTERED)
+
+                # Send confirmation message
+                if language == "uz":
+                    confirm_text = "✅ <b>To'lov cheki qabul qilindi!</b>\n\n"
+                    confirm_text += f"📋 Buyurtma #{order.id}\n"
+                    confirm_text += f"💰 Summa: {order.total_price:,} so'm\n\n"
+                    confirm_text += "⏳ To'lov tekshiruvga yuborildi.\n"
+                    confirm_text += "📞 Tasdiqlanganidan keyin sizga xabar beramiz."
+                elif language == "ru":
+                    confirm_text = "✅ <b>Чек об оплате получен!</b>\n\n"
+                    confirm_text += f"📋 Заказ #{order.id}\n"
+                    confirm_text += f"💰 Сумма: {order.total_price:,} сум\n\n"
+                    confirm_text += "⏳ Оплата отправлена на проверку.\n"
+                    confirm_text += "📞 Мы уведомим вас после подтверждения."
+                else:
+                    confirm_text = "✅ <b>Payment receipt received!</b>\n\n"
+                    confirm_text += f"📋 Order #{order.id}\n"
+                    confirm_text += f"💰 Amount: {order.total_price:,} sum\n\n"
+                    confirm_text += "⏳ Payment sent for verification.\n"
+                    confirm_text += "📞 We will notify you after confirmation."
+
+                bot.send_message(
+                    chat_id=message.chat.id,
+                    text=confirm_text,
+                    parse_mode="HTML",
+                )
+
+                # Send branch location for pickup
+                if order.branch:
+                    send_branch_location(message.chat.id, order.branch, language)
+
+                # Return to main menu
+                show_main_menu(message, language)
+                return
+
+            except Order.DoesNotExist:
+                bot.send_message(
+                    message.chat.id,
+                    get_text("error_order_not_found", language),
+                )
+                return
+            except Exception as e:
+                logger.error(f" Failed to handle payment receipt upload: {e}")
+                import traceback
+                traceback.print_exc()
+                bot.send_message(
+                    message.chat.id,
+                    get_text("receipt_upload_failed", language),
                 )
                 return
 
     # Handle regular file uploads for orders
     if current_step == STEP_UPLOADING_FILES:
-        print(f"[DEBUG] Processing file upload for user {user_id}")
+        logger.debug(f" Processing file upload for user {user_id}")
 
         try:
             # Get file information
@@ -2703,40 +4260,22 @@ def handle_file_upload(message):
             else:
                 return
 
-            print(f"[DEBUG] File info: {file_name}, size: {file_size}")
+            logger.debug(f" File info: {file_name}, size: {file_size}")
 
             # Validate file format
             if not is_valid_file_format(file_name):
-                error_text = (
-                    "❌ Fayl formati noto'g'ri!\n\n"
-                    "📎 Ruxsat etilgan formatlar:\n"
-                    "📄 DOC, DOCX, PDF\n"
-                    "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC"
-                    if language == "uz"
-                    else (
-                        "❌ Invalid file format!\n\n"
-                        "📎 Allowed formats:\n"
-                        "📄 DOC, DOCX, PDF\n"
-                        "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC"
-                        if language == "en"
-                        else "❌ Неверный формат файла!\n\n"
-                        "📎 Разрешенные форматы:\n"
-                        "📄 DOC, DOCX, PDF\n"
-                        "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC"
-                    )
-                )
-                bot.send_message(message.chat.id, error_text)
+                bot.send_message(message.chat.id, get_text("invalid_file_format_full", language))
                 return
 
             # Download file
             file_info = bot.get_file(file_id)
             downloaded_file = bot.download_file(file_info.file_path)
 
-            print(f"[DEBUG] File downloaded, size: {len(downloaded_file)} bytes")
+            logger.debug(f" File downloaded, size: {len(downloaded_file)} bytes")
 
             # Get page count
             pages = get_file_pages_from_content(downloaded_file, file_name)
-            print(f"[DEBUG] Detected pages: {pages}")
+            logger.debug(f" Detected pages: {pages}")
 
             # Save file to storage
             from django.core.files.base import ContentFile
@@ -2744,30 +4283,36 @@ def handle_file_upload(message):
 
             file_content = ContentFile(downloaded_file, name=file_name)
             file_path = default_storage.save(
-                f"order_files/{user_id}_{file_name}", file_content
+                f"order_media/{user_id}_{file_name}", file_content
             )
 
-            print(f"[DEBUG] File saved to: {file_path}")
+            logger.debug(f" File saved to: {file_path}")
 
             # Store file information with unique ID
             import time
 
-            if user_id not in uploaded_files:
-                uploaded_files[user_id] = {"files": {}}
-
-            # Ensure 'files' key exists (in case dict was partially initialized)
-            if "files" not in uploaded_files[user_id]:
-                uploaded_files[user_id]["files"] = {}
+            # Get current user data or initialize
+            current_data = uploaded_files.get(user_id) or {}
+            if not isinstance(current_data, dict):
+                current_data = dict(current_data) if current_data else {}
+            
+            # Ensure 'files' key exists
+            if "files" not in current_data:
+                current_data["files"] = {}
 
             # Generate unique file ID using timestamp and file_id
             file_uid = f"{int(time.time() * 1000)}_{file_id[:8]}"
 
-            uploaded_files[user_id]["files"][file_uid] = {
+            # Add new file to files dict
+            current_data["files"][file_uid] = {
                 "file_path": file_path,
                 "file_name": file_name,
                 "pages": pages,
                 "file_size": file_size,
             }
+            
+            # Reassign to trigger save to persistent storage
+            uploaded_files[user_id] = current_data
 
             print(
                 f"[DEBUG] Total files for user: {len(uploaded_files[user_id]['files'])}"
@@ -2798,22 +4343,20 @@ def handle_file_upload(message):
                 confirm_text += f"📊 Pages: {pages}\n"
                 confirm_text += f"💾 Size: {size_display}\n"
 
-            # Add delete button with correct index
+            # Add delete button with file_uid for precise deletion
             markup = types.InlineKeyboardMarkup()
-            # Get the current index of the just-added file
-            current_file_index = len(uploaded_files[user_id]["files"]) - 1
             delete_button = types.InlineKeyboardButton(
                 text=(
                     "🗑️ O'chirish"
                     if language == "uz"
                     else "🗑️ Delete" if language == "en" else "🗑️ Удалить"
                 ),
-                callback_data=f"delete_file_{current_file_index}_{user_id}",
+                callback_data=f"delete_file_{file_uid}",
             )
             markup.add(delete_button)
 
             print(
-                f"[DEBUG] Created delete button with index {current_file_index} for user {user_id}"
+                f"[DEBUG] Created delete button with file_uid {file_uid} for user {user_id}"
             )
 
             bot.send_message(
@@ -2827,26 +4370,16 @@ def handle_file_upload(message):
             update_totals_message(user_id, language)
 
         except Exception as e:
-            print(f"[ERROR] Failed to process file upload: {e}")
+            logger.error(f" Failed to process file upload: {e}")
             import traceback
 
             traceback.print_exc()
 
-            error_text = "❌ Fayl yuklanmadi. Iltimos, qayta urinib ko'ring."
-            if language == "ru":
-                error_text = (
-                    "❌ Не удалось загрузить файл. Пожалуйста, попробуйте еще раз."
-                )
-            elif language == "en":
-                error_text = "❌ Failed to upload file. Please try again."
-
-            bot.send_message(message.chat.id, error_text)
+            bot.send_message(message.chat.id, get_text("file_upload_failed", language))
         return
 
     # If not in uploading steps, ignore
-    print(f"[DEBUG] User not in uploading step, ignoring file")
-
-
+    logger.debug(f" User not in uploading step, ignoring file")
 @bot.callback_query_handler(func=lambda call: call.data.startswith("payment_card_"))
 def handle_payment_card_selection(call):
     """Handle card payment selection"""
@@ -2854,7 +4387,7 @@ def handle_payment_card_selection(call):
     order_id = int(call.data.split("_")[2])
 
     try:
-        from accounts.models import Order
+        from orders.models import Order
 
         order = Order.objects.get(id=order_id)
 
@@ -2890,10 +4423,8 @@ def handle_payment_card_selection(call):
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
-            text="❌ Buyurtma topilmadi.",
+            text=get_text("error_order_not_found", language),
         )
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("payment_cash_"))
 def handle_payment_cash_selection(call):
     """Handle cash payment selection"""
@@ -2901,7 +4432,7 @@ def handle_payment_cash_selection(call):
     order_id = int(call.data.split("_")[2])
 
     try:
-        from accounts.models import Order
+        from orders.models import Order
 
         order = Order.objects.get(id=order_id)
 
@@ -2942,10 +4473,8 @@ def handle_payment_cash_selection(call):
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
-            text="❌ Buyurtma topilmadi.",
+            text=get_text("error_order_not_found", language),
         )
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("payment_receipt_"))
 def handle_payment_receipt_upload(call):
     """Handle payment receipt upload confirmation"""
@@ -2953,7 +4482,7 @@ def handle_payment_receipt_upload(call):
     order_id = int(call.data.split("_")[2])
 
     try:
-        from accounts.models import Order
+        from orders.models import Order
 
         order = Order.objects.get(id=order_id)
 
@@ -2996,90 +4525,18 @@ def handle_payment_receipt_upload(call):
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
-            text="❌ Buyurtma topilmadi.",
+            text=get_text("error_order_not_found", language),
         )
-
-
 @bot.message_handler(content_types=["photo"])
 def handle_payment_receipt_photo(message):
-    """Handle payment receipt photo uploads"""
-    user_id = message.from_user.id
-    language = get_user_language(user_id)
-
-    # Check if user is in payment receipt step
-    current_step = get_user_step(user_id)
-    if current_step != STEP_AWAITING_PAYMENT:
-        return
-
-    try:
-        # Get order information from uploaded_files
-        user_files = get_user_files(user_id)
-        if not user_files or "order_id" not in user_files:
-            bot.send_message(message.chat.id, "❌ Buyurtma ma'lumotlari topilmadi.")
-            return
-
-        order_id = user_files["order_id"]
-
-        # Save receipt photo
-        from accounts.models import Order
-        from django.core.files.base import ContentFile
-
-        order = Order.objects.get(id=order_id)
-
-        # Download and save receipt photo
-        photo_file = bot.get_file(message.photo[-1].file_id)
-        downloaded_file = bot.download_file(photo_file.file_path)
-        file_name = f"receipt_{order_id}_{message.photo[-1].file_id}.jpg"
-        file_content = ContentFile(downloaded_file, name=file_name)
-
-        # Save to media directory
-        from django.core.files.storage import default_storage
-
-        file_path = default_storage.save(f"receipts/{file_name}", file_content)
-
-        # Update order with receipt
-        order.recipt = file_path
-        order.save()
-
-        # Show confirmation
-        confirm_text = "✅ To'lov cheki muvaffaqiyatli yuklandi!\n\n"
-        confirm_text += f"📋 Buyurtma raqami: #{order_id}\n"
-        confirm_text += f"💰 Summa: {order.total_price:,} so'm\n\n"
-        confirm_text += "Admin tomonidan tekshirilgandan keyin sizga xabar beramiz."
-
-        if language == "ru":
-            confirm_text = "✅ Чек об оплате успешно загружен!\n\n"
-            confirm_text += f"📋 Номер заказа: #{order_id}\n"
-            confirm_text += f"💰 Сумма: {order.total_price:,} сум\n\n"
-            confirm_text += "После проверки администратором мы сообщим вам."
-        elif language == "en":
-            confirm_text = "✅ Payment receipt uploaded successfully!\n\n"
-            confirm_text += f"📋 Order number: #{order_id}\n"
-            confirm_text += f"💰 Amount: {order.total_price:,} som\n\n"
-            confirm_text += "We will notify you after admin verification."
-
-        # Show done button to complete payment
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
-        done_button = types.KeyboardButton(get_text("payment_done_button", language))
-
-        markup.add(done_button)
-
-        bot.send_message(message.chat.id, confirm_text, reply_markup=markup)
-
-    except Exception as e:
-        print(f"[ERROR] Failed to handle payment receipt: {e}")
-        import traceback
-
-        traceback.print_exc()
-        error_text = "❌ Chek yuklanmadi. Iltimos, qayta urinib ko'ring."
-        if language == "ru":
-            error_text = "❌ Не удалось загрузить чек. Пожалуйста, попробуйте еще раз."
-        elif language == "en":
-            error_text = "❌ Failed to upload receipt. Please try again."
-
-        bot.send_message(message.chat.id, error_text)
-
-
+    """
+    Legacy handler for photo uploads - now handled by main file handler.
+    This handler is kept for backward compatibility but the main document/photo
+    handler now processes all receipt uploads including photos.
+    """
+    # All photo handling for receipts is now done in handle_file_upload
+    # This handler is no longer needed for STEP_AWAITING_PAYMENT
+    pass
 @bot.message_handler(func=lambda message: True, content_types=["text"])
 def handle_text_messages(message):
     user_id = message.from_user.id
@@ -3088,14 +4545,12 @@ def handle_text_messages(message):
     if message.text.startswith("/"):
         return
 
-    try:
-        from accounts.models import BotUser
-
-        user = BotUser.objects.get(user_id=user_id)
-        current_step = user.step
-    except BotUser.DoesNotExist:
+    user = get_bot_user(user_id)
+    if not user:
         start(message)
         return
+    
+    current_step = user.step
 
     # Handle copy number input
     if current_step == STEP_SELECTING_COPY_NUMBER:
@@ -3124,9 +4579,9 @@ def handle_text_messages(message):
                 return
 
             # Get document type and language
-            from services.models import DocumentType, Language
+            from services.models import Product, Language
 
-            doc_type = DocumentType.objects.get(id=doc_type_id)
+            doc_type = Product.objects.get(id=doc_type_id)
             lang_name = Language.objects.get(id=lang_id).name if lang_id else ""
 
             # Show upload files interface
@@ -3153,29 +4608,20 @@ def handle_text_messages(message):
             if "order_id" not in user_data:
                 bot.send_message(
                     message.chat.id,
-                    "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang.",
+                    get_text("order_not_found_restart", language),
                 )
                 return
 
             order_id = user_data["order_id"]
 
             try:
-                from accounts.models import Order
+                from orders.models import Order
 
                 order = Order.objects.get(id=order_id)
 
                 # Check if receipt was uploaded
                 if not order.recipt:
-                    error_text = (
-                        "❌ Iltimos, avval to'lov chekini yuboring!"
-                        if language == "uz"
-                        else (
-                            "❌ Please upload payment receipt first!"
-                            if language == "en"
-                            else "❌ Пожалуйста, сначала загрузите чек об оплате!"
-                        )
-                    )
-                    bot.send_message(message.chat.id, error_text)
+                    bot.send_message(message.chat.id, get_text("upload_receipt_first", language))
                     return
 
                 # Receipt is uploaded - finalize the order
@@ -3187,16 +4633,17 @@ def handle_text_messages(message):
                 forward_success = forward_order_to_channel(order, language)
 
                 if not forward_success:
-                    print(f"[WARNING] Failed to forward order {order.id} to channel")
+                    logger.warning(f" Failed to forward order {order.id} to channel")
 
                 # Clear uploaded files data
                 clear_user_files(user_id)
                 update_user_step(user_id, STEP_REGISTERED)
 
                 # Get user for display
-                from accounts.models import BotUser
-
-                user = BotUser.objects.get(user_id=user_id)
+                user = get_bot_user(user_id)
+                if not user:
+                    logger.error(f" User not found for completion: {user_id}")
+                    return
 
                 # Format user display with username if available
                 user_display = user.name
@@ -3265,25 +4712,29 @@ def handle_text_messages(message):
                     text=completion_text,
                     parse_mode="HTML",
                 )
+                
+                # Send branch location for pickup
+                if order.branch:
+                    send_branch_location(message.chat.id, order.branch, language)
                 return
 
             except Order.DoesNotExist:
                 bot.send_message(
                     message.chat.id,
-                    "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang.",
+                    get_text("order_not_found_restart", language),
                 )
                 clear_user_files(user_id)
                 update_user_step(user_id, STEP_REGISTERED)
                 show_categorys(message, language)
                 return
             except Exception as e:
-                print(f"[ERROR] Failed to finalize order: {e}")
+                logger.error(f" Failed to finalize order: {e}")
                 import traceback
 
                 traceback.print_exc()
                 bot.send_message(
                     message.chat.id,
-                    "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
+                    get_text("error_general", language),
                 )
                 return
 
@@ -3325,13 +4776,15 @@ def handle_text_messages(message):
 
     # Handle name input during registration
     if current_step == STEP_NAME_REQUESTED:
-        create_or_update_user(user_id=user_id, name=message.text)
+        center = get_current_center()
+        create_or_update_user(user_id=user_id, name=message.text, center=center)
         ask_contact(message, language)
         return
 
     # Handle name editing
     elif current_step == STEP_EDITING_NAME:
-        create_or_update_user(user_id=user_id, name=message.text)
+        center = get_current_center()
+        create_or_update_user(user_id=user_id, name=message.text, center=center)
         update_user_step(user_id, STEP_EDITING_PROFILE)
         bot.send_message(message.chat.id, get_text("name_updated", language))
         show_profile(message, language)
@@ -3345,15 +4798,13 @@ def handle_text_messages(message):
             else (message.contact.phone_number if message.contact else None)
         )
         if phone_number:
-            create_or_update_user(user_id=user_id, phone=phone_number)
+            center = get_current_center()
+            create_or_update_user(user_id=user_id, phone=phone_number, center=center)
             update_user_step(user_id, STEP_EDITING_PROFILE)
             bot.send_message(message.chat.id, get_text("phone_updated", language))
             show_profile(message, language)
         else:
-            bot.send_message(
-                message.chat.id,
-                "❌ Iltimos, telefon raqamingizni yuboring yoki kontakt orqali yuboring.",
-            )
+            bot.send_message(message.chat.id, get_text("send_phone_or_contact", language))
         return
 
     # Handle payment options buttons
@@ -3370,30 +4821,31 @@ def handle_text_messages(message):
     # Default: show main menu for registered users
     elif current_step >= STEP_REGISTERED:
         show_main_menu(message, language)
-
-
 def handle_card_payment_message(message, language):
     """Handle card payment button press from keyboard"""
     user_id = message.from_user.id
 
-    print(f"[DEBUG] Card payment request from user {user_id}")
+    logger.debug(f" Card payment request from user {user_id}")
 
     # Get order_id from uploaded_files
     user_data = uploaded_files.get(user_id, {})
     if "order_id" not in user_data:
         bot.send_message(
-            message.chat.id, "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang."
+            message.chat.id, get_text("order_not_found_restart", language)
         )
         return
 
     order_id = user_data["order_id"]
 
     try:
-        from accounts.models import AdditionalInfo, BotUser
+        from accounts.models import AdditionalInfo
         from orders.models import Order
 
         order = Order.objects.get(id=order_id)
-        user = BotUser.objects.get(user_id=user_id)
+        user = get_bot_user(user_id)
+        if not user:
+            bot.send_message(message.chat.id, get_text("user_not_found", language))
+            return
 
         # Update order payment type to card (but don't mark as active yet)
         order.payment_type = "card"
@@ -3401,8 +4853,8 @@ def handle_card_payment_message(message, language):
         order.is_active = False  # Keep inactive until receipt is uploaded
         order.save()
 
-        # Get card details from AdditionalInfo model
-        additional_info = AdditionalInfo.objects.first()
+        # Get card details from AdditionalInfo for user's branch
+        additional_info = AdditionalInfo.get_for_user(user)
         card_number = additional_info.bank_card if additional_info else "Noma'lum"
         card_holder = additional_info.holder_name if additional_info else "Noma'lum"
 
@@ -3460,7 +4912,7 @@ def handle_card_payment_message(message, language):
             summary_text += f"👤 Karta egasi: {card_holder}\n\n"
             summary_text += "📤 <b>Iltimos, to'lov chekini yuboring</b>\n"
             summary_text += (
-                "📎 Ruxsat etilgan formatlar: JPG, PNG, PDF, DOC, DOCX, HEIC"
+                "📎 Ruxsat etilgan formatlar: JPG, PNG, PDF, DOC, DOCX, HEIC, HEIF"
             )
         elif language == "ru":
             summary_text = "📋 <b>Сводка заказа</b>\n\n"
@@ -3492,7 +4944,7 @@ def handle_card_payment_message(message, language):
             summary_text += f"💳 Номер карты: <code>{card_number}</code>\n"
             summary_text += f"👤 Владелец карты: {card_holder}\n\n"
             summary_text += "📤 <b>Пожалуйста, загрузите чек об оплате</b>\n"
-            summary_text += "📎 Разрешенные форматы: JPG, PNG, PDF, DOC, DOCX, HEIC"
+            summary_text += "📎 Разрешенные форматы: JPG, PNG, PDF, DOC, DOCX, HEIC, HEIF"
         else:  # English
             summary_text = "📋 <b>Order Summary</b>\n\n"
             summary_text += f"📄 Order number: #{order.id}\n"
@@ -3521,7 +4973,7 @@ def handle_card_payment_message(message, language):
             summary_text += f"💳 Card number: <code>{card_number}</code>\n"
             summary_text += f"👤 Card holder: {card_holder}\n\n"
             summary_text += "📤 <b>Please upload your payment receipt</b>\n"
-            summary_text += "📎 Allowed formats: JPG, PNG, PDF, DOC, DOCX, HEIC"
+            summary_text += "📎 Allowed formats: JPG, PNG, PDF, DOC, DOCX, HEIC, HEIF"
 
         # Create markup with send receipt and back buttons
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
@@ -3549,24 +5001,22 @@ def handle_card_payment_message(message, language):
         update_user_step(user_id, STEP_UPLOADING_RECEIPT)
 
     except Order.DoesNotExist:
-        print(f"[DEBUG] Order {order_id} not found")
+        logger.debug(f" Order {order_id} not found")
         bot.send_message(
-            message.chat.id, "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang."
+            message.chat.id, get_text("order_not_found_restart", language)
         )
         clear_user_files(user_id)
         update_user_step(user_id, STEP_REGISTERED)
         show_categorys(message, language)
     except Exception as e:
-        print(f"[ERROR] Failed to handle card payment: {e}")
+        logger.error(f" Failed to handle card payment: {e}")
         import traceback
 
         traceback.print_exc()
         bot.send_message(
-            message.chat.id, "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring."
+            message.chat.id, get_text("error_general", language)
         )
         show_categorys(message, language)
-
-
 def handle_finish_upload_message(message, language):
     """Handle finish upload button press from keyboard"""
     user_id = message.from_user.id
@@ -3574,88 +5024,102 @@ def handle_finish_upload_message(message, language):
     # Check if user has uploaded files - access uploaded_files directly
     user_data = uploaded_files.get(user_id, {})
 
-    print(f"[DEBUG] Finish upload request from user {user_id}")
-    print(f"[DEBUG] User data: {user_data}")
+    logger.debug(f" Finish upload request from user {user_id}")
+    logger.debug(f" User data: {user_data}")
 
     if not user_data or not user_data.get("files"):
         # No files uploaded, show error message
-        error_text = "❌ Iltimos, avval fayllarni yuklang!"
-        if language == "ru":
-            error_text = "❌ Пожалуйста, сначала загрузите файлы!"
-        elif language == "en":
-            error_text = "❌ Please upload files first!"
-        bot.send_message(message.chat.id, error_text)
+        bot.send_message(message.chat.id, get_text("upload_files_first", language))
         return
 
     # Check if doc_type_id exists
     if "doc_type_id" not in user_data:
-        print(f"[DEBUG] doc_type_id not found in user_data: {user_data}")
-        bot.send_message(
-            message.chat.id,
-            "❌ Error: Document type information not found. Please start over.",
-        )
+        logger.debug(f" doc_type_id not found in user_data: {user_data}")
+        bot.send_message(message.chat.id, get_text("doc_type_not_found", language))
         return
 
-    print(f"[DEBUG] Found doc_type_id: {user_data['doc_type_id']}")
+    logger.debug(f" Found doc_type_id: {user_data['doc_type_id']}")
 
     try:
         # Create order with uploaded files
-        from accounts.models import BotUser, Order, OrderFiles
-        from services.models import DocumentType
+        from orders.models import Order, OrderMedia
+        from services.models import Product, Language
+        from django.db import transaction
 
-        user = BotUser.objects.get(user_id=user_id)
-        doc_type = DocumentType.objects.get(id=user_data["doc_type_id"])
+        user = get_bot_user(user_id)
+        if not user:
+            bot.send_message(message.chat.id, get_text("user_not_found", language))
+            return
+        
+        # Validate branch assignment
+        if not user.branch:
+            bot.send_message(message.chat.id, get_text("error_no_branch_assigned", language))
+            logger.error(f"User {user_id} has no branch assigned")
+            show_main_menu(message, language)
+            return
+        
+        try:
+            doc_type = Product.objects.get(id=user_data["doc_type_id"])
+        except Product.DoesNotExist:
+            bot.send_message(message.chat.id, get_text("error_product_not_found", language))
+            logger.error(f"Product {user_data.get('doc_type_id')} not found")
+            return
 
-        print(f"[DEBUG] Creating order for user {user_id} with doc_type {doc_type.id}")
+        logger.debug(f" Creating order for user {user_id} with doc_type {doc_type.id}")
 
         # Get language ID from user data if available
         lang_id = user_data.get("lang_id")
+        service_lang = None
+        
+        if lang_id:
+            try:
+                service_lang = Language.objects.get(id=lang_id)
+            except Language.DoesNotExist:
+                logger.warning(f" Language with ID {lang_id} not found")
 
         # Get copy number from user data (default to 0)
         copy_number = user_data.get("copy_number", 0)
 
-        # Create order with language and copy number
-        order_data = {
-            "bot_user": user,
-            "product": doc_type,
-            "language": None,  # Will be set below if lang_id exists
-            "total_pages": 0,  # Will be calculated from files
-            "copy_number": copy_number,  # Add copy number
-            "is_active": False,
-            "description": "",
-            "payment_type": "cash",  # Default, will be updated based on user choice
-            "total_price": 0,  # Will be calculated based on pages, user type, and copies
-        }
-
-        # Add language if available
-        if lang_id:
-            from services.models import Language
-
-            try:
-                service_lang = Language.objects.get(id=lang_id)
-                order_data["language"] = service_lang
-            except Language.DoesNotExist:
-                print(f"[WARNING] Language with ID {lang_id} not found")
-
-        order = Order.objects.create(**order_data)
-
-        total_pages = 0
-
-        # Save all uploaded files (now from dictionary)
-        for file_uid, file_info in user_data["files"].items():
-            # Create OrderFiles entry
-            order_file = OrderFiles.objects.create(
-                file=file_info["file_path"], pages=file_info["pages"]
+        # Use atomic transaction to ensure all-or-nothing order creation
+        with transaction.atomic():
+            # Create order with language and copy number
+            order = Order.objects.create(
+                bot_user=user,
+                product=doc_type,
+                branch=user.branch,
+                language=service_lang,
+                total_pages=0,  # Will be calculated from files
+                copy_number=copy_number,
+                is_active=False,
+                description="",
+                payment_type="cash",  # Default, will be updated based on user choice
+                total_price=0,  # Will be calculated based on pages, user type, and copies
             )
-            order.files.add(order_file)
-            total_pages += file_info["pages"]
 
-        # Update order with total pages and price
-        order.total_pages = total_pages
-        order.total_price = order.calculated_price
-        order.save()
+            total_pages = 0
 
-        print(f"[DEBUG] Order created successfully: {order.id}")
+            # Save all uploaded files (now from dictionary)
+            for file_uid, file_info in user_data["files"].items():
+                # Truncate file path if needed
+                file_path = file_info["file_path"]
+                if len(file_path) > 90:  # Leave some margin
+                    logger.warning(f"File path too long: {file_path}")
+                    file_path = file_path[:90]
+                
+                # Create OrderMedia entry
+                order_file = OrderMedia.objects.create(
+                    file=file_path, 
+                    pages=file_info["pages"]
+                )
+                order.files.add(order_file)
+                total_pages += file_info["pages"]
+
+            # Update order with total pages and price
+            order.total_pages = total_pages
+            order.total_price = order.calculated_price
+            order.save()
+
+        logger.debug(f" Order created successfully: {order.id}")
 
         # Clear uploaded files for this user first
         clear_user_files(user_id)
@@ -3666,28 +5130,35 @@ def handle_finish_upload_message(message, language):
         # Show payment options instead of going to main menu
         show_payment_options(message, language, order)
 
+    except KeyError as e:
+        logger.error(f" Missing required data in user_data: {e}")
+        bot.send_message(message.chat.id, get_text("error_general", language))
+        clear_user_files(user_id)
+        show_main_menu(message, language)
+    except Product.DoesNotExist:
+        logger.error(f" Product not found for order creation")
+        bot.send_message(message.chat.id, get_text("error_product_not_found", language))
+        clear_user_files(user_id)
+        show_main_menu(message, language)
     except Exception as e:
-        print(f"[ERROR] Failed to create order: {e}")
+        logger.error(f" Failed to create order: {e}", exc_info=True)
         import traceback
-
         traceback.print_exc()
-        bot.send_message(
-            message.chat.id, "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring."
-        )
-
-
+        bot.send_message(message.chat.id, get_text("error_general", language))
+        clear_user_files(user_id)
+        show_main_menu(message, language)
 def handle_back_to_upload_docs_message(message, language):
     """Handle back to upload docs button press from keyboard"""
     user_id = message.from_user.id
 
-    print(f"[DEBUG] Back to upload docs request from user {user_id}")
+    logger.debug(f" Back to upload docs request from user {user_id}")
 
     # Check if user has uploaded files and document type info
     user_data = uploaded_files.get(user_id, {})
 
     # If no data exists, start fresh
     if not user_data:
-        print(f"[DEBUG] No user data found, starting fresh")
+        logger.debug(f" No user data found, starting fresh")
         clear_user_files(user_id)
         update_user_step(user_id, STEP_REGISTERED)
         show_categorys(message, language)
@@ -3695,16 +5166,16 @@ def handle_back_to_upload_docs_message(message, language):
 
     if "order_id" in user_data:
         order_id = user_data["order_id"]
-        print(f"[DEBUG] Found order_id: {order_id}")
+        logger.debug(f" Found order_id: {order_id}")
 
         try:
             # Get the order and restore files
-            from accounts.models import Order, OrderFiles
+            from orders.models import Order, OrderMedia
 
             order = Order.objects.get(id=order_id)
 
-            # Restore complete user data including language
-            uploaded_files[user_id] = {
+            # Build complete user data including language
+            restored_data = {
                 "doc_type_id": order.product.id,
                 "service_id": order.product.category.id,
                 "lang_id": order.language.id if order.language else None,
@@ -3716,7 +5187,7 @@ def handle_back_to_upload_docs_message(message, language):
 
             for idx, order_file in enumerate(order.files.all()):
                 file_uid = f"{int(time.time() * 1000)}_{idx}"
-                uploaded_files[user_id]["files"][file_uid] = {
+                restored_data["files"][file_uid] = {
                     "file_path": order_file.file.name,
                     "file_name": order_file.file.name.split("/")[-1],
                     "pages": order_file.pages,
@@ -3724,6 +5195,9 @@ def handle_back_to_upload_docs_message(message, language):
                         order_file.file.size if hasattr(order_file.file, "size") else 0
                     ),
                 }
+
+            # Assign all at once to trigger save to persistent storage
+            uploaded_files[user_id] = restored_data
 
             print(
                 f"[DEBUG] Restored {len(uploaded_files[user_id]['files'])} files from order"
@@ -3745,7 +5219,7 @@ def handle_back_to_upload_docs_message(message, language):
             upload_text = get_text("upload_files", language)
             upload_text += "\n\n📎 <b>Ruxsat etilgan formatlar:</b>\n"
             upload_text += "📄 DOC, DOCX, PDF\n"
-            upload_text += "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC"
+            upload_text += "🖼️ JPG, PNG, GIF, BMP, TIFF, WEBP, HEIC, HEIF"
 
             bot.send_message(
                 chat_id=message.chat.id,
@@ -3755,46 +5229,43 @@ def handle_back_to_upload_docs_message(message, language):
             )
 
         except Order.DoesNotExist:
-            print(f"[DEBUG] Order {order_id} not found, starting fresh")
+            logger.debug(f" Order {order_id} not found, starting fresh")
             # Order doesn't exist, start fresh
             clear_user_files(user_id)
             update_user_step(user_id, STEP_REGISTERED)
             show_categorys(message, language)
         except Exception as e:
-            print(f"[ERROR] Failed to restore order: {e}")
+            logger.error(f" Failed to restore order: {e}")
             bot.send_message(
-                message.chat.id, "❌ Xatolik yuz berdi. Iltimos, qaytadan boshlang."
+                message.chat.id, get_text("error_general", language)
             )
             show_categorys(message, language)
     else:
         # No order found, start fresh
-        print(f"[DEBUG] No order_id found for user {user_id}")
+        logger.debug(f" No order_id found for user {user_id}")
         clear_user_files(user_id)
         update_user_step(user_id, STEP_REGISTERED)
-        bot.send_message(
-            message.chat.id, "❌ Ma'lumotlar yo'qolgan. Qaytadan boshlang."
-        )
+        bot.send_message(message.chat.id, get_text("data_lost_restart", language))
         show_categorys(message, language)
-
-
 def handle_cash_payment_message(message, language):
     """Handle cash payment button press from keyboard"""
     user_id = message.from_user.id
 
-    print(f"[DEBUG] Cash payment request from user {user_id}")
+    logger.debug(f" Cash payment request from user {user_id}")
 
     # Get order_id from uploaded_files
     user_data = uploaded_files.get(user_id, {})
     if "order_id" not in user_data:
         bot.send_message(
-            message.chat.id, "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang."
+            message.chat.id, get_text("order_not_found_restart", language)
         )
         return
 
     order_id = user_data["order_id"]
 
     try:
-        from accounts.models import Order, BotUser
+        from accounts.models import BotUser
+        from orders.models import Order
 
         order = Order.objects.get(id=order_id)
 
@@ -3808,14 +5279,17 @@ def handle_cash_payment_message(message, language):
         forward_success = forward_order_to_channel(order, language)
 
         if not forward_success:
-            print(f"[WARNING] Failed to forward order {order.id} to channel")
+            logger.warning(f" Failed to forward order {order.id} to channel")
 
         # Clear uploaded files data
         clear_user_files(user_id)
         update_user_step(user_id, STEP_REGISTERED)
 
         # Generate order summary with cash payment status
-        user = BotUser.objects.get(user_id=user_id)
+        user = get_bot_user(user_id)
+        if not user:
+            logger.error(f" User not found for cash payment: {user_id}")
+            return
 
         # Calculate pricing with copy charges
         base_price, copy_charge, total_price, copy_percentage = calculate_order_pricing(
@@ -3930,28 +5404,30 @@ def handle_cash_payment_message(message, language):
         # Send order summary first
         bot.send_message(chat_id=message.chat.id, text=cash_text, parse_mode="HTML")
 
+        # Send branch location for pickup
+        if order.branch:
+            send_branch_location(message.chat.id, order.branch, language)
+
         # Then show main menu
         show_main_menu(message, language)
 
     except Order.DoesNotExist:
-        print(f"[DEBUG] Order {order_id} not found")
+        logger.debug(f" Order {order_id} not found")
         bot.send_message(
-            message.chat.id, "❌ Buyurtma topilmadi. Iltimos, qaytadan boshlang."
+            message.chat.id, get_text("order_not_found_restart", language)
         )
         clear_user_files(user_id)
         update_user_step(user_id, STEP_REGISTERED)
         show_categorys(message, language)
     except Exception as e:
-        print(f"[ERROR] Failed to handle cash payment: {e}")
+        logger.error(f" Failed to handle cash payment: {e}")
         import traceback
 
         traceback.print_exc()
         bot.send_message(
-            message.chat.id, "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring."
+            message.chat.id, get_text("error_general", language)
         )
         show_categorys(message, language)
-
-
 def handle_back_to_documents_message(message, language):
     """Handle back to documents button press from keyboard"""
     user_id = message.from_user.id
@@ -3961,7 +5437,7 @@ def handle_back_to_documents_message(message, language):
 
     if user_data and "service_id" in user_data:
         service_id = user_data["service_id"]
-        print(f"[DEBUG] Going back to documents for service_id: {service_id}")
+        logger.debug(f" Going back to documents for service_id: {service_id}")
         show_products(message, language, service_id)
     else:
         # Fallback if service_id not found - reset and go to main services
@@ -3971,13 +5447,8 @@ def handle_back_to_documents_message(message, language):
         # Clear any incomplete data
         clear_user_files(user_id)
         update_user_step(user_id, STEP_REGISTERED)
-        bot.send_message(
-            message.chat.id,
-            "❌ Ma'lumotlar yo'qolgan. Qaytadan boshlang.\n📋 \"Hizmatdan foydalanish\" ga o'ting.",
-        )
+        bot.send_message(message.chat.id, get_text("data_lost_use_service", language))
         show_categorys(message, language)
-
-
 def handle_back_to_copy_number_message(message, language):
     """Handle back to copy number button press from keyboard"""
     user_id = message.from_user.id
@@ -3989,9 +5460,9 @@ def handle_back_to_copy_number_message(message, language):
 
     if doc_type_id:
         try:
-            from services.models import DocumentType, Language
+            from services.models import Product, Language
 
-            doc_type = DocumentType.objects.get(id=doc_type_id)
+            doc_type = Product.objects.get(id=doc_type_id)
             lang_name = Language.objects.get(id=lang_id).name if lang_id else ""
 
             # Clear any uploaded files but keep doc_type and service info
@@ -4008,7 +5479,7 @@ def handle_back_to_copy_number_message(message, language):
             show_copy_number_selection(message, language, doc_type, lang_name)
 
         except Exception as e:
-            print(f"[ERROR] Failed to go back to copy number: {e}")
+            logger.error(f" Failed to go back to copy number: {e}")
             bot.send_message(message.chat.id, get_text("error_occurred", language))
             show_categorys(message, language)
     else:
@@ -4017,8 +5488,6 @@ def handle_back_to_copy_number_message(message, language):
         update_user_step(user_id, STEP_REGISTERED)
         bot.send_message(message.chat.id, get_text("error_occurred", language))
         show_categorys(message, language)
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("payment_cash_"))
 def handle_payment_cash(call):
     """Handle cash payment selection"""
@@ -4026,7 +5495,7 @@ def handle_payment_cash(call):
     order_id = int(call.data.split("_")[2])
 
     try:
-        from accounts.models import Order
+        from orders.models import Order
 
         order = Order.objects.get(id=order_id)
 
@@ -4052,20 +5521,14 @@ def handle_payment_cash(call):
         order.save()
 
     except Exception as e:
-        print(f"[ERROR] Failed to handle cash payment: {e}")
-        bot.answer_callback_query(call.id, "❌ Xatolik yuz berdi")
-
-
+        logger.error(f" Failed to handle cash payment: {e}")
+        bot.answer_callback_query(call.id, get_text("error_general", language))
 def handle_main_menu(call):
     bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
     show_main_menu(call.message, get_user_language(call.message.chat.id))
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "edit_profile")
 def handle_profile_actions(call):
     show_edit_profile_menu(call.message)
-
-
 def show_edit_profile_menu(message):
     user_id = message.chat.id
     language = get_user_language(user_id)
@@ -4088,16 +5551,12 @@ def show_edit_profile_menu(message):
     markup.add(edit_name_button, edit_phone_button)
     markup.add(edit_language_button)
     markup.add(back_button)
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "edit_name")
 def handle_edit_name_request(call):
     user_id = call.message.chat.id
     language = get_user_language(user_id)
     update_user_step(user_id, STEP_EDITING_NAME)
     bot.send_message(call.message.chat.id, get_text("enter_new_name", language))
-
-
 @bot.callback_query_handler(func=lambda call: call.data == "edit_phone")
 def handle_edit_phone_request(call):
     user_id = call.message.chat.id
@@ -4113,11 +5572,11 @@ def handle_edit_phone_request(call):
     bot.send_message(
         call.message.chat.id, get_text("enter_new_phone", language), reply_markup=markup
     )
-
-
 @bot.message_handler(commands=["admin"])
 def admin_panel(message):
     user_id = message.from_user.id
+    language = get_user_language(user_id)
+    
     if user_id in ADMINS:
         markup = types.InlineKeyboardMarkup()
         btn1 = types.InlineKeyboardButton("👥 Users", callback_data="admin_users")
@@ -4129,11 +5588,10 @@ def admin_panel(message):
             message.chat.id,
             "🔧 <b>Admin Panel</b>\n\nChoose an option:",
             reply_markup=markup,
+            parse_mode="HTML",
         )
     else:
-        bot.send_message(message.chat.id, "❌ You don't have admin permissions")
-
-
+        bot.send_message(message.chat.id, get_text("no_admin_permission", language))
 @bot.callback_query_handler(func=lambda call: call.data.startswith("admin_"))
 def handle_admin_callbacks(call):
     if call.from_user.id not in ADMINS:
@@ -4141,9 +5599,14 @@ def handle_admin_callbacks(call):
     if call.data == "admin_users":
         try:
             from accounts.models import BotUser
-
-            total_users = BotUser.objects.count()
-            active_users = BotUser.objects.filter(is_active=True).count()
+            
+            center = get_current_center()
+            if center:
+                total_users = BotUser.objects.filter(center=center).count()
+                active_users = BotUser.objects.filter(center=center, is_active=True).count()
+            else:
+                total_users = BotUser.objects.count()
+                active_users = BotUser.objects.filter(is_active=True).count()
             text = f"👥 <b>Users Statistics</b>\n\n"
             text += f"Total users: {total_users}\n"
             text += f"Active users: {active_users}\n"
@@ -4151,61 +5614,68 @@ def handle_admin_callbacks(call):
             bot.edit_message_text(text, call.message.chat.id, call.message.message_id)
         except:
             bot.edit_message_text(
-                "❌ Error getting user statistics",
+                get_text("error_stats", "en"),
                 call.message.chat.id,
                 call.message.message_id,
             )
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("delete_file_"))
 def handle_delete_file(call):
     user_id = call.message.chat.id
     language = get_user_language(user_id)
 
     try:
-        # Extract file index from callback data
-        file_index = int(call.data.split("_")[2])
-        print(f"[DEBUG] Delete request for file index: {file_index}")
+        # Extract file_uid from callback data (format: delete_file_{file_uid})
+        file_uid = call.data.replace("delete_file_", "")
+        logger.debug(f" Delete request for file_uid: {file_uid}")
 
         # Get user's uploaded files
-        user_data = uploaded_files.get(user_id, {})
-        if not user_data or "files" not in user_data:
-            print(f"[DEBUG] No user data found for user {user_id}")
-            bot.answer_callback_query(call.id, "❌ No files to delete!")
+        current_data = uploaded_files.get(user_id)
+        if not current_data:
+            current_data = {}
+        else:
+            # Convert to regular dict for modification
+            current_data = dict(current_data)
+            
+        if not current_data or "files" not in current_data:
+            logger.debug(f" No user data found for user {user_id}")
+            bot.answer_callback_query(call.id, get_text("no_files_to_delete", language))
             return
 
-        files = user_data["files"]
-        print(f"[DEBUG] User has {len(files)} files")
+        files = current_data["files"]
+        logger.debug(f" User has {len(files)} files")
 
         if not files:
-            print(f"[DEBUG] Files list is empty for user {user_id}")
-            bot.answer_callback_query(call.id, "❌ No files to delete!")
+            logger.debug(f" Files dict is empty for user {user_id}")
+            bot.answer_callback_query(call.id, get_text("no_files_to_delete", language))
             return
 
-        if not (0 <= file_index < len(files)):
-            print(f"[DEBUG] Invalid file index {file_index}, files count: {len(files)}")
-            bot.answer_callback_query(call.id, "❌ File not found!")
+        if file_uid not in files:
+            logger.debug(f" File UID {file_uid} not found in files: {list(files.keys())}")
+            bot.answer_callback_query(call.id, get_text("file_not_found", language))
             return
 
         # Get file info before deletion
-        file_info = files[file_index]
+        file_info = files[file_uid]
         file_path = file_info["file_path"]
         file_name = file_info["file_name"]
 
-        print(f"[DEBUG] Deleting file: {file_name} at path: {file_path}")
+        logger.debug(f" Deleting file: {file_name} at path: {file_path}")
 
         # Delete file from storage if it exists
         from django.core.files.storage import default_storage
 
         if default_storage.exists(file_path):
             default_storage.delete(file_path)
-            print(f"[DEBUG] Successfully deleted file from storage: {file_path}")
+            logger.debug(f" Successfully deleted file from storage: {file_path}")
         else:
-            print(f"[DEBUG] File not found in storage: {file_path}")
+            logger.debug(f" File not found in storage: {file_path}")
 
-        # Remove file from uploaded_files
-        deleted_file = files.pop(file_index)
-        print(f"[DEBUG] Successfully removed file from uploaded_files: {file_name}")
+        # Remove file from the dict
+        del files[file_uid]
+        
+        # Reassign to trigger save to persistent storage
+        uploaded_files[user_id] = current_data
+        logger.debug(f" Successfully removed file from uploaded_files: {file_name}")
 
         # Send confirmation message first (before deleting the original message)
         if language == "uz":
@@ -4216,36 +5686,30 @@ def handle_delete_file(call):
             confirm_text = f"✅ File successfully deleted!\n📄 {file_name}"
 
         confirmation = bot.send_message(call.message.chat.id, confirm_text)
-        print(f"[DEBUG] Sent confirmation message {confirmation.message_id}")
+        logger.debug(f" Sent confirmation message {confirmation.message_id}")
 
         # Try to delete the message with the file (might fail if already deleted)
         try:
             bot.delete_message(
                 chat_id=call.message.chat.id, message_id=call.message.message_id
             )
-            print(f"[DEBUG] Successfully deleted message {call.message.message_id}")
+            logger.debug(f" Successfully deleted message {call.message.message_id}")
         except Exception as e:
-            print(f"[DEBUG] Failed to delete message {call.message.message_id}: {e}")
+            logger.debug(f" Failed to delete message {call.message.message_id}: {e}")
             # Don't fail the whole operation if message deletion fails
 
         # Update totals message
         update_totals_message(user_id, language)
 
     except Exception as e:
-        print(f"[ERROR] Failed to delete file: {e}")
+        logger.error(f" Failed to delete file: {e}")
         import traceback
 
         traceback.print_exc()
-        bot.answer_callback_query(
-            call.id, "❌ Failed to delete file. Please try again."
-        )
-
-
+        bot.answer_callback_query(call.id, get_text("delete_file_failed", language))
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-
-
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def index(request):
@@ -4264,15 +5728,15 @@ def index(request):
         # Check if update is from a bot and ignore it
         if "message" in update_dict:
             if update_dict["message"].get("from", {}).get("is_bot", False):
-                print("[DEBUG] Ignoring message from bot")
+                logger.debug("Ignoring message from bot")
                 return JsonResponse({"ok": True}, status=200)
 
         if "callback_query" in update_dict:
             if update_dict["callback_query"].get("from", {}).get("is_bot", False):
-                print("[DEBUG] Ignoring callback from bot")
+                logger.debug("Ignoring callback from bot")
                 return JsonResponse({"ok": True}, status=200)
 
-        print(f"Received update: {update_data[:100]}...")  # Debug
+        logger.debug(f"Received update: {update_data[:100]}...")  # Debug
 
         bot.process_new_updates([telebot.types.Update.de_json(update_data)])
 

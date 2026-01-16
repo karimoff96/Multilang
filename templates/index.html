@@ -159,6 +159,206 @@
         </div>
     </div>
 
+    <!-- Role-Specific Dashboard Section -->
+    {% if role_title %}
+    <div class="col-xxl-4">
+        <div class="card h-100 radius-8 border">
+            <div class="card-header border-bottom bg-base py-16 px-24">
+                <h6 class="text-lg fw-semibold mb-0">{{ role_title }}</h6>
+            </div>
+            <div class="card-body p-24">
+                {% if my_total_assigned is not None %}
+                <!-- Staff View -->
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="bg-primary-50 p-3 rounded-3 text-center">
+                            <span class="text-primary-600 d-block mb-1">
+                                <iconify-icon icon="solar:inbox-line-bold" class="text-xxl"></iconify-icon>
+                            </span>
+                            <h4 class="fw-bold mb-0">{{ my_total_assigned }}</h4>
+                            <small class="text-secondary-light" data-i18n="dashboard.totalAssigned">Total Assigned</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bg-warning-50 p-3 rounded-3 text-center">
+                            <span class="text-warning-600 d-block mb-1">
+                                <iconify-icon icon="solar:clock-circle-bold" class="text-xxl"></iconify-icon>
+                            </span>
+                            <h4 class="fw-bold mb-0">{{ my_pending }}</h4>
+                            <small class="text-secondary-light" data-i18n="status.pending">Pending</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bg-success-50 p-3 rounded-3 text-center">
+                            <span class="text-success-600 d-block mb-1">
+                                <iconify-icon icon="solar:check-circle-bold" class="text-xxl"></iconify-icon>
+                            </span>
+                            <h4 class="fw-bold mb-0">{{ my_completed_today }}</h4>
+                            <small class="text-secondary-light" data-i18n="dashboard.completedTodayShort">Completed Today</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="bg-info-50 p-3 rounded-3 text-center">
+                            <span class="text-info-600 d-block mb-1">
+                                <iconify-icon icon="solar:medal-star-bold" class="text-xxl"></iconify-icon>
+                            </span>
+                            <h4 class="fw-bold mb-0">{{ my_total_completed }}</h4>
+                            <small class="text-secondary-light" data-i18n="dashboard.totalCompleted">Total Completed</small>
+                        </div>
+                    </div>
+                </div>
+                {% elif branch_name %}
+                <!-- Manager View -->
+                <div class="mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <iconify-icon icon="solar:building-bold" class="text-xl text-primary-600"></iconify-icon>
+                        <span class="fw-semibold">{{ branch_name }}</span>
+                    </div>
+                    <div class="bg-primary-50 p-3 rounded-3 d-flex align-items-center justify-content-between mb-3">
+                        <span class="text-secondary-light" data-i18n="common.staffMembers">Staff Members</span>
+                        <span class="fw-bold text-lg">{{ total_staff }}</span>
+                    </div>
+                </div>
+                {% if staff_performance %}
+                <h6 class="text-sm fw-semibold mb-2" data-i18n="dashboard.staffPerformance">Staff Performance</h6>
+                <div class="table-responsive performance-table">
+                    <table class="table bordered-table sm-table mb-0">
+                        <thead>
+                            <tr>
+                                <th data-i18n="common.staff">Staff</th>
+                                <th class="text-center col-id" title="Assigned">#A</th>
+                                <th class="text-center col-id" title="Completed">#D</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for staff in staff_performance %}
+                            <tr>
+                                <td class="truncate-120">{{ staff.name|truncatechars:15 }}</td>
+                                <td class="text-center">{{ staff.assigned }}</td>
+                                <td class="text-center text-success-main">{{ staff.completed }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+                {% elif total_centers is not None %}
+                <!-- Owner/Superuser View -->
+                <div class="row g-3 mb-3">
+                    <div class="col-4">
+                        <div class="bg-primary-50 p-3 rounded-3 text-center">
+                            <iconify-icon icon="solar:buildings-bold" class="text-xxl text-primary-600 d-block mb-1"></iconify-icon>
+                            <h5 class="fw-bold mb-0">{{ total_centers }}</h5>
+                            <small class="text-secondary-light" data-i18n="common.centers">Centers</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-success-50 p-3 rounded-3 text-center">
+                            <iconify-icon icon="solar:building-bold" class="text-xxl text-success-600 d-block mb-1"></iconify-icon>
+                            <h5 class="fw-bold mb-0">{{ total_branches }}</h5>
+                            <small class="text-secondary-light" data-i18n="common.branches">Branches</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="bg-info-50 p-3 rounded-3 text-center">
+                            <iconify-icon icon="solar:users-group-rounded-bold" class="text-xxl text-info-600 d-block mb-1"></iconify-icon>
+                            <h5 class="fw-bold mb-0">{{ total_staff }}</h5>
+                            <small class="text-secondary-light" data-i18n="common.staff">Staff</small>
+                        </div>
+                    </div>
+                </div>
+                {% if branch_performance %}
+                <h6 class="text-sm fw-semibold mb-2" data-i18n="dashboard.branchPerformanceThisMonth">Branch Performance (This Month)</h6>
+                <div class="table-responsive performance-table">
+                    <table class="table bordered-table sm-table mb-0">
+                        <thead>
+                            <tr>
+                                <th data-i18n="table.branch">Branch</th>
+                                <th class="text-center col-id" data-i18n="sidebar.orders">#</th>
+                                <th class="text-end col-amount" data-i18n="dashboard.revenue">Rev.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for branch in branch_performance %}
+                            <tr>
+                                <td><a href="{% url 'branch_detail' branch.id %}" class="text-primary-600 fw-medium truncate-120">{{ branch.name|truncatechars:12 }}</a></td>
+                                <td class="text-center">{{ branch.orders }}</td>
+                                <td class="text-end text-success-main nowrap">{{ branch.revenue|floatformat:0|default:"0" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="col-12">
+        <div class="card radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between mb-20">
+                    <h6 class="mb-0 fw-bold text-lg" data-i18n="dashboard.quickActions">Quick Actions</h6>
+                </div>
+
+                <div class="d-flex justify-content-center flex-wrap gap-2">
+                    <a href="{% url 'orders:ordersList' %}" class="quick-action-item d-inline-flex align-items-center gap-2 radius-8 border br-hover-primary group-item text-decoration-none">
+                        <span class="bg-neutral-100 w-40-px h-40-px text-xl radius-8 d-flex justify-content-center align-items-center text-secondary-light group-hover:bg-primary-600 group-hover:text-white flex-shrink-0">
+                            <iconify-icon icon="solar:bag-4-bold" class="icon"></iconify-icon>
+                        </span>
+                        <div>
+                            <span class="text-secondary-light text-xs fw-medium" data-i18n="sidebar.orders">Orders</span>
+                            <h6 class="text-sm fw-semibold mb-0">{{ total_orders }}</h6>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'sales' %}" class="quick-action-item d-inline-flex align-items-center gap-2 radius-8 border br-hover-primary group-item text-decoration-none">
+                        <span class="bg-neutral-100 w-40-px h-40-px text-xl radius-8 d-flex justify-content-center align-items-center text-secondary-light group-hover:bg-primary-600 group-hover:text-white flex-shrink-0">
+                            <iconify-icon icon="solar:chart-bold" class="icon"></iconify-icon>
+                        </span>
+                        <div>
+                            <span class="text-secondary-light text-xs fw-medium" data-i18n="sidebar.sales">Sales</span>
+                            <h6 class="text-sm fw-semibold mb-0" data-i18n="common.analytics">Analytics</h6>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'finance' %}" class="quick-action-item d-inline-flex align-items-center gap-2 radius-8 border br-hover-primary group-item text-decoration-none">
+                        <span class="bg-neutral-100 w-40-px h-40-px text-xl radius-8 d-flex justify-content-center align-items-center text-secondary-light group-hover:bg-primary-600 group-hover:text-white flex-shrink-0">
+                            <iconify-icon icon="solar:wallet-money-bold" class="icon"></iconify-icon>
+                        </span>
+                        <div>
+                            <span class="text-secondary-light text-xs fw-medium" data-i18n="sidebar.finance">Finance</span>
+                            <h6 class="text-sm fw-semibold mb-0 truncate-120">{{ total_revenue|floatformat:0 }}</h6>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'usersList' %}" class="quick-action-item d-inline-flex align-items-center gap-2 radius-8 border br-hover-primary group-item text-decoration-none">
+                        <span class="bg-neutral-100 w-40-px h-40-px text-xl radius-8 d-flex justify-content-center align-items-center text-secondary-light group-hover:bg-primary-600 group-hover:text-white flex-shrink-0">
+                            <iconify-icon icon="solar:users-group-rounded-bold" class="icon"></iconify-icon>
+                        </span>
+                        <div>
+                            <span class="text-secondary-light text-xs fw-medium" data-i18n="sidebar.users">Users</span>
+                            <h6 class="text-sm fw-semibold mb-0">{{ total_users }}</h6>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'productList' %}" class="quick-action-item d-inline-flex align-items-center gap-2 radius-8 border br-hover-primary group-item text-decoration-none">
+                        <span class="bg-neutral-100 w-40-px h-40-px text-xl radius-8 d-flex justify-content-center align-items-center text-secondary-light group-hover:bg-primary-600 group-hover:text-white flex-shrink-0">
+                            <iconify-icon icon="solar:box-bold" class="icon"></iconify-icon>
+                        </span>
+                        <div>
+                            <span class="text-secondary-light text-xs fw-medium" data-i18n="sidebar.products">Products</span>
+                            <h6 class="text-sm fw-semibold mb-0" data-i18n="common.manage">Manage</h6>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Revenue Growth Chart (Right side) -->
     <div class="col-xxl-4">
         <div class="card h-100 radius-8 border">
@@ -180,7 +380,7 @@
 
     <!-- Quick Status Overview -->
     <div class="col-xxl-4">
-        <div class="card h-100 radius-8 border-0">
+        <div class="card h-100 radius-8 border">
             <div class="card-body p-24">
                 <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
                     <h6 class="mb-2 fw-bold text-lg" data-i18n="dashboard.todaysStatus">Today's Status</h6>
@@ -265,7 +465,7 @@
 
     <!-- User Overview -->
     <div class="col-xxl-4">
-        <div class="card h-100 radius-8 border-0 overflow-hidden">
+        <div class="card h-100 radius-8 border overflow-hidden">
             <div class="card-body p-24">
                 <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
                     <h6 class="mb-2 fw-bold text-lg" data-i18n="dashboard.userOverview">User Overview</h6>
@@ -297,117 +497,118 @@
     </div>
 
     <!-- Recent Orders -->
-    <div class="col-xxl-4">
+    <div class="col-12">
         <div class="card h-100">
             <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="text-lg fw-semibold mb-0" data-i18n="dashboard.recentOrders">Recent Orders</h6>
-                <a href="{% url 'ordersList' %}" class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
+                <a href="{% url 'orders:ordersList' %}" class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
                     <span data-i18n="common.viewAll">View All</span>
                     <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
                 </a>
             </div>
             <div class="card-body p-24">
-                <div class="table-responsive scroll-sm">
+                <div class="table-responsive">
                     <table class="table bordered-table mb-0">
                         <thead>
                             <tr>
+                                <th scope="col">#</th>
+                                {% if user.is_superuser or is_owner %}
+                                <th scope="col" data-i18n="table.location">Location</th>
+                                {% endif %}
                                 <th scope="col" data-i18n="table.customer">Customer</th>
-                                <th scope="col" data-i18n="table.amount">Amount</th>
-                                <th scope="col" data-i18n="table.status">Status</th>
+                                <th scope="col" data-i18n="table.phone">Phone</th>
+                                <th scope="col" data-i18n="table.service">Service</th>
+                                <th scope="col" class="text-end" data-i18n="table.amount">Amount</th>
+                                <th scope="col" data-i18n="table.paymentMethod">Payment</th>
+                                <th scope="col" data-i18n="table.assignedTo">Assigned To</th>
+                                <th scope="col" class="text-center" data-i18n="table.status">Status</th>
+                                <th scope="col" data-i18n="table.dateTime">Date & Time</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for order in recent_orders %}
                             <tr>
-                                <td>
-                                    <div>
-                                        <span class="text-md d-block line-height-1 fw-medium text-primary-light">{{ order.customer }}</span>
-                                        <span class="text-sm d-block fw-normal text-secondary-light">{{ order.created_at }}</span>
-                                    </div>
-                                </td>
-                                <td>{{ order.total_price|floatformat:0 }} UZS</td>
-                                <td>
-                                    {% if order.status == 'completed' %}
-                                    <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm" data-i18n="status.completed">{{ order.status_display }}</span>
-                                    {% elif order.status == 'cancelled' %}
-                                    <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm" data-i18n="status.cancelled">{{ order.status_display }}</span>
-                                    {% elif order.status == 'in_progress' %}
-                                    <span class="bg-info-focus text-info-main px-24 py-4 rounded-pill fw-medium text-sm" data-i18n="status.inProgress">{{ order.status_display }}</span>
+                                <td class="fw-medium text-secondary-light">{{ forloop.counter }}</td>
+                                {% if user.is_superuser or is_owner %}
+                                <td class="cell-merged-info">
+                                    {% if user.is_superuser and order.branch and order.branch.center %}
+                                    <span class="cell-primary">{{ order.branch.center.name|truncatechars:15 }}</span>
+                                    {% endif %}
+                                    {% if order.branch %}
+                                    <span class="cell-secondary">{{ order.branch.name|truncatechars:18 }}</span>
                                     {% else %}
-                                    <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm" data-i18n="status.pending">{{ order.status_display }}</span>
+                                    <span class="cell-secondary text-muted">-</span>
                                     {% endif %}
                                 </td>
+                                {% endif %}
+                                <td>
+                                    <span class="fw-medium text-primary-600 d-block">{{ order.get_customer_display_name|truncatechars:25 }}</span>
+                                </td>
+                                <td class="text-secondary-light">{{ order.get_customer_phone }}</td>
+                                <td>
+                                    {% if order.product %}
+                                    <span class="text-sm">{{ order.product.name|truncatechars:30 }}</span>
+                                    {% if order.total_pages > 1 %}
+                                    <span class="badge bg-neutral-200 text-neutral-900 ms-1">{{ order.total_pages }} pages</span>
+                                    {% endif %}
+                                    {% else %}
+                                    <span class="text-secondary-light">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end fw-semibold">{{ order.total_price|floatformat:0 }} <small class="text-xs fw-normal text-secondary-light">UZS</small></td>
+                                <td>
+                                    {% if order.payment_method == 'cash' %}
+                                    <span class="badge bg-success-100 text-success-600"><iconify-icon icon="solar:wallet-bold" class="me-1"></iconify-icon>Cash</span>
+                                    {% elif order.payment_method == 'card' %}
+                                    <span class="badge bg-info-100 text-info-600"><iconify-icon icon="solar:card-bold" class="me-1"></iconify-icon>Card</span>
+                                    {% elif order.payment_method == 'transfer' %}
+                                    <span class="badge bg-primary-100 text-primary-600"><iconify-icon icon="solar:transfer-bold" class="me-1"></iconify-icon>Transfer</span>
+                                    {% else %}
+                                    <span class="text-secondary-light">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if order.assigned_to %}
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="w-24-px h-24-px bg-primary-100 text-primary-600 rounded-circle d-flex align-items-center justify-content-center text-xs fw-semibold">
+                                            {% if order.assigned_to.user.first_name %}
+                                            {{ order.assigned_to.user.first_name|slice:":1"|upper }}
+                                            {% else %}
+                                            {{ order.assigned_to.user.username|slice:":1"|upper }}
+                                            {% endif %}
+                                        </span>
+                                        <span class="text-sm">
+                                            {% if order.assigned_to.user.get_full_name %}
+                                            {{ order.assigned_to.user.get_full_name|truncatechars:15 }}
+                                            {% else %}
+                                            {{ order.assigned_to.user.username|truncatechars:15 }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-secondary-light">Unassigned</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if order.status == 'completed' %}
+                                    <span class="bg-success-focus text-success-main status-badge-sm rounded-pill fw-medium" data-i18n="status.completed">Completed</span>
+                                    {% elif order.status == 'cancelled' %}
+                                    <span class="bg-danger-focus text-danger-main status-badge-sm rounded-pill fw-medium" data-i18n="status.cancelled">Cancelled</span>
+                                    {% elif order.status == 'in_progress' %}
+                                    <span class="bg-info-focus text-info-main status-badge-sm rounded-pill fw-medium" data-i18n="status.inProgress">In Progress</span>
+                                    {% else %}
+                                    <span class="bg-warning-focus text-warning-main status-badge-sm rounded-pill fw-medium" data-i18n="status.pending">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-secondary-light nowrap">{{ order.created_at|date:"d M Y, H:i" }}</td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="3" class="text-center text-secondary-light" data-i18n="table.noRecentOrders">No recent orders</td>
+                                <td colspan="{% if user.is_superuser or is_owner %}10{% else %}9{% endif %}" class="text-center text-secondary-light py-5" data-i18n="table.noRecentOrders">No recent orders</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="col-xxl-8">
-        <div class="card h-100 radius-8 border-0">
-            <div class="card-body p-24">
-                <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between mb-20">
-                    <h6 class="mb-0 fw-bold text-lg" data-i18n="dashboard.quickActions">Quick Actions</h6>
-                </div>
-
-                <div class="d-flex justify-content-center flex-wrap gap-3">
-                    <a href="{% url 'ordersList' %}" class="d-inline-flex align-items-center gap-2 p-2 radius-8 border pe-36 br-hover-primary group-item text-decoration-none">
-                        <span class="bg-neutral-100 w-44-px h-44-px text-xxl radius-8 d-flex justify-content-center align-items-center text-secondary-light group-hover:bg-primary-600 group-hover:text-white">
-                            <iconify-icon icon="solar:bag-4-bold" class="icon"></iconify-icon>
-                        </span>
-                        <div>
-                            <span class="text-secondary-light text-sm fw-medium" data-i18n="sidebar.orders">Orders</span>
-                            <h6 class="text-md fw-semibold mb-0">{{ total_orders }}</h6>
-                        </div>
-                    </a>
-
-                    <a href="{% url 'sales' %}" class="d-inline-flex align-items-center gap-2 p-2 radius-8 border pe-36 br-hover-primary group-item text-decoration-none">
-                        <span class="bg-neutral-100 w-44-px h-44-px text-xxl radius-8 d-flex justify-content-center align-items-center text-secondary-light group-hover:bg-primary-600 group-hover:text-white">
-                            <iconify-icon icon="solar:chart-bold" class="icon"></iconify-icon>
-                        </span>
-                        <div>
-                            <span class="text-secondary-light text-sm fw-medium" data-i18n="sidebar.sales">Sales</span>
-                            <h6 class="text-md fw-semibold mb-0" data-i18n="common.analytics">Analytics</h6>
-                        </div>
-                    </a>
-
-                    <a href="{% url 'finance' %}" class="d-inline-flex align-items-center gap-2 p-2 radius-8 border pe-36 br-hover-primary group-item text-decoration-none">
-                        <span class="bg-neutral-100 w-44-px h-44-px text-xxl radius-8 d-flex justify-content-center align-items-center text-secondary-light group-hover:bg-primary-600 group-hover:text-white">
-                            <iconify-icon icon="solar:wallet-money-bold" class="icon"></iconify-icon>
-                        </span>
-                        <div>
-                            <span class="text-secondary-light text-sm fw-medium" data-i18n="sidebar.finance">Finance</span>
-                            <h6 class="text-md fw-semibold mb-0">{{ total_revenue|floatformat:0 }}</h6>
-                        </div>
-                    </a>
-
-                    <a href="{% url 'usersList' %}" class="d-inline-flex align-items-center gap-2 p-2 radius-8 border pe-36 br-hover-primary group-item text-decoration-none">
-                        <span class="bg-neutral-100 w-44-px h-44-px text-xxl radius-8 d-flex justify-content-center align-items-center text-secondary-light group-hover:bg-primary-600 group-hover:text-white">
-                            <iconify-icon icon="solar:users-group-rounded-bold" class="icon"></iconify-icon>
-                        </span>
-                        <div>
-                            <span class="text-secondary-light text-sm fw-medium" data-i18n="sidebar.users">Users</span>
-                            <h6 class="text-md fw-semibold mb-0">{{ total_users }}</h6>
-                        </div>
-                    </a>
-
-                    <a href="{% url 'productList' %}" class="d-inline-flex align-items-centers gap-2 p-2 radius-8 border pe-36 br-hover-primary group-item text-decoration-none">
-                        <span class="bg-neutral-100 w-44-px h-44-px text-xxl radius-8 d-flex justify-content-center align-items-center text-secondary-light group-hover:bg-primary-600 group-hover:text-white">
-                            <iconify-icon icon="solar:box-bold" class="icon"></iconify-icon>
-                        </span>
-                        <div>
-                            <span class="text-secondary-light text-sm fw-medium" data-i18n="sidebar.products">Products</span>
-                            <h6 class="text-md fw-semibold mb-0" data-i18n="common.manage">Manage</h6>
-                        </div>
-                    </a>
                 </div>
             </div>
         </div>

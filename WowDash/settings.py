@@ -29,7 +29,16 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "93.183.81.223", "alltranslation.uz"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "77.42.31.194", "multilang.uz", ".multilang.uz"]
+    
+# CSRF trusted origins for ngrok and production
+CSRF_TRUSTED_ORIGINS = [
+    "https://multilang.uz",
+    "https://*.multilang.uz",
+]
+
+# Main domain for subdomain extraction
+MAIN_DOMAIN = os.getenv("MAIN_DOMAIN", "multilang.uz")
 
 
 # Application definition
@@ -42,10 +51,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "core",
+    "organizations",
     "accounts",
     "services",
     "bot",
     "orders",
+    "marketing",
 ]
 
 MIDDLEWARE = [
@@ -56,6 +68,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "organizations.middleware.SubdomainMiddleware",  # Subdomain-based tenant identification
+    "organizations.rbac.RBACMiddleware",
 ]
 
 ROOT_URLCONF = "WowDash.urls"
@@ -71,6 +85,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "organizations.context_processors.rbac_context",
+                "organizations.context_processors.site_settings",
             ],
         },
     },
@@ -124,14 +140,23 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "uz"
+
+LANGUAGES = [
+    ("uz", "O'zbekcha"),
+    ("ru", "Русский"),
+    ("en", "English"),
+]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, "locale"),
+]
 
 TIME_ZONE = "Asia/Tashkent"
 
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -143,10 +168,44 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# =============================================================================
+# CACHE CONFIGURATION (Redis for multi-worker support)
+# =============================================================================
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
+if os.getenv("USE_REDIS", "False").lower() == "true":
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                # hiredis is automatically used when installed (redis>=5.0)
+                "CONNECTION_POOL_KWARGS": {"max_connections": 50},
+                "SOCKET_CONNECT_TIMEOUT": 5,
+                "SOCKET_TIMEOUT": 5,
+            },
+            "KEY_PREFIX": "wowdash",
+        }
+    }
+    # Use Redis for sessions in production
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+else:
+    # Development: use local memory cache
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
+        }
+    }
+    SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
 MODELTRANSLATION_DEFAULT_LANGUAGE = "uz"
 MODELTRANSLATION_LANGUAGES = ("uz", "ru", "en")
 MODELTRANSLATION_TRANSLATION_FILES = (
     "accounts.translations",
+    "core.translations",
     "services.translations",
 )
 STATIC_URL = "static/"
@@ -169,3 +228,172 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'standard': {
+            'format': '{levelname} {asctime} [{name}] {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+        },
+        'file_error': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_DIR / 'error.log',
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'file_audit': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_DIR / 'audit.log',
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 10,
+            'formatter': 'standard',
+        },
+        'file_bot': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_DIR / 'bot.log',
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'standard',
+        },
+        'file_orders': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_DIR / 'orders.log',
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'standard',
+        },
+        'file_payments': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_DIR / 'payments.log',
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'standard',
+        },
+        'file_marketing': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_DIR / 'marketing.log',
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'standard',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+        },
+    },
+    'loggers': {
+        # Django loggers
+        'django': {
+            'handlers': ['console', 'file_error'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', 'file_error', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['console', 'file_error', 'mail_admins'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        # Application loggers
+        'accounts': {
+            'handlers': ['console', 'file_audit', 'file_error'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'orders': {
+            'handlers': ['console', 'file_orders', 'file_error'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'orders.payment_service': {
+            'handlers': ['console', 'file_payments', 'file_error'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'organizations': {
+            'handlers': ['console', 'file_audit', 'file_error'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'services': {
+            'handlers': ['console', 'file_audit', 'file_error'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'marketing': {
+            'handlers': ['console', 'file_marketing', 'file_error'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'bot': {
+            'handlers': ['console', 'file_bot', 'file_error'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'core': {
+            'handlers': ['console', 'file_audit', 'file_error'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'core.audit': {
+            'handlers': ['console', 'file_audit'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Audit logger for critical actions
+        'audit': {
+            'handlers': ['console', 'file_audit'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file_error'],
+        'level': 'WARNING',
+    },
+}

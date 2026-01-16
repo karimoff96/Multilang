@@ -17,3 +17,13 @@ python-docx==1.1.2
 Pillow==11.0.0
 python-magic==0.4.27
 psycopg2-binary
+openpyxl==3.1.2
+watchdog==4.0.0
+
+# Redis for caching and session management (multi-worker support)
+redis==5.0.1
+django-redis==5.4.0
+hiredis
+
+# Production server
+gunicorn==21.2.0

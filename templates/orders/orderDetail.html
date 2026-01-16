@@ -1,5 +1,6 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
+{% load permission_tags %}
 
 {% block content %}
 <div class="row gy-4">
@@ -7,22 +8,22 @@
     <div class="col-lg-8">
         <div class="card h-100 p-0 radius-12">
             <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
-                <h6 class="text-lg fw-semibold mb-0"><span data-i18n="sidebar.orders">Order</span> #{{ order.id }}</h6>
+                <h6 class="text-lg fw-semibold mb-0"><span data-i18n="sidebar.orders">Order</span> #{{ order.get_order_number }}</h6>
                 <div class="d-flex align-items-center gap-2">
                     {% if order.status == 'pending' %}
                         <span class="bg-warning-focus text-warning-600 border border-warning-main px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.pending">Pending</span>
                     {% elif order.status == 'payment_pending' %}
-                        <span class="bg-info-focus text-info-600 border border-info-main px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.paymentPending">Payment Pending</span>
+                        <span class="bg-info-focus text-info-600 border border-info-main px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.paymentPending">Awaiting</span>
                     {% elif order.status == 'payment_received' %}
-                        <span class="bg-primary-focus text-primary-600 border border-primary-main px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.paymentReceived">Payment Received</span>
+                        <span class="bg-primary-focus text-primary-600 border border-primary-main px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.paymentReceived">Received</span>
                     {% elif order.status == 'payment_confirmed' %}
-                        <span class="bg-cyan-focus text-cyan border border-cyan px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.paymentConfirmed">Payment Confirmed</span>
+                        <span class="bg-cyan-focus text-cyan border border-cyan px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.paymentConfirmed">Confirmed</span>
                     {% elif order.status == 'in_progress' %}
-                        <span class="bg-lilac-focus text-lilac-600 border border-lilac-600 px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.inProgress">In Progress</span>
+                        <span class="bg-lilac-focus text-lilac-600 border border-lilac-600 px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.inProgress">In Process</span>
                     {% elif order.status == 'ready' %}
                         <span class="bg-success-focus text-success-600 border border-success-main px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.ready">Ready</span>
                     {% elif order.status == 'completed' %}
-                        <span class="bg-success-focus text-success-600 border border-success-main px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.completed">Completed</span>
+                        <span class="bg-success-focus text-success-600 border border-success-main px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.completed">Done</span>
                     {% elif order.status == 'cancelled' %}
                         <span class="bg-danger-focus text-danger-600 border border-danger-main px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.cancelled">Cancelled</span>
                     {% endif %}
@@ -31,20 +32,41 @@
             <div class="card-body p-24">
                 <!-- Order Details -->
                 <div class="row gy-3">
-                    <div class="col-sm-6">
+                    <div class="col-sm-4">
+                        <div class="p-16 bg-neutral-50 radius-8">
+                            <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.category">Category</span>
+                            <h6 class="text-lg fw-semibold mb-0">
+                                {% if order.category %}
+                                    {{ order.category.name }}
+                                {% else %}
+                                    <span class="text-secondary-light">N/A</span>
+                                {% endif %}
+                            </h6>
+                            {% if order.category.charging %}
+                            <small class="text-primary-light">
+                                {% if order.category.charging == 'static' %}
+                                    <span data-i18n="category.staticPrice">Fixed Price</span>
+                                {% elif order.category.charging == 'dynamic' %}
+                                    <span data-i18n="category.dynamicPrice">Per Page</span>
+                                {% endif %}
+                            </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
                         <div class="p-16 bg-neutral-50 radius-8">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.productService">Product / Service</span>
                             <h6 class="text-lg fw-semibold mb-0">{{ order.product.name }}</h6>
                             {% if order.language %}
-                            <small class="text-muted"><span data-i18n="form.language">Language</span>: {{ order.language.name }}</small>
+                            <small class="text-primary-light"><span data-i18n="form.language">Language</span>: {{ order.language.name }}</small>
                             {% endif %}
                         </div>
                     </div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-4">
                         <div class="p-16 bg-neutral-50 radius-8">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.orderDate">Order Date</span>
                             <h6 class="text-lg fw-semibold mb-0">{{ order.created_at|date:"d M Y" }}</h6>
-                            <small class="text-muted">{{ order.created_at|time:"H:i" }}</small>
+                            <small class="text-primary-light">{{ order.created_at|time:"H:i" }}</small>
                         </div>
                     </div>
                     <div class="col-sm-4">
@@ -65,6 +87,97 @@
                             <h4 class="text-success-600 fw-bold mb-0">{{ order.total_price|floatformat:0 }} UZS</h4>
                         </div>
                     </div>
+                    
+                    <!-- Payment Progress Section -->
+                    {% if order.extra_fee > 0 or order.received > 0 or order.payment_accepted_fully %}
+                    <div class="col-12 mt-16">
+                        <div class="p-16 bg-neutral-50 radius-8">
+                            <div class="d-flex justify-content-between align-items-center mb-12">
+                                <span class="text-md fw-semibold">Payment Progress</span>
+                                {% if order.is_fully_paid %}
+                                <span class="badge bg-success-focus text-success-600 px-12 py-6">
+                                    <iconify-icon icon="mdi:check-circle" class="me-1"></iconify-icon> Fully Paid
+                                </span>
+                                {% else %}
+                                <span class="badge bg-warning-focus text-warning-600 px-12 py-6">
+                                    {{ order.payment_percentage }}% Paid
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="progress mb-12" style="height: 8px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {{ order.payment_percentage }}%"></div>
+                            </div>
+                            
+                            <div class="row text-sm">
+                                <div class="col-4 text-center">
+                                    <span class="text-secondary-light d-block">Total Due</span>
+                                    <span class="fw-semibold">{{ order.total_due|floatformat:0 }} UZS</span>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <span class="text-secondary-light d-block">Received</span>
+                                    <span class="fw-semibold text-success-600">{{ order.received|floatformat:0 }} UZS</span>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <span class="text-secondary-light d-block">Remaining</span>
+                                    <span class="fw-semibold {% if order.remaining > 0 %}text-danger-600{% else %}text-success-600{% endif %}">
+                                        {{ order.remaining|floatformat:0 }} UZS
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            {% if order.extra_fee > 0 %}
+                            <div class="mt-12 pt-12 border-top">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-secondary-light">Extra Fee:</span>
+                                    <span class="fw-semibold">{{ order.extra_fee|floatformat:0 }} UZS</span>
+                                </div>
+                                {% if order.extra_fee_description %}
+                                <small class="text-muted">{{ order.extra_fee_description }}</small>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Branch & Assignment Info -->
+                <div class="mt-24">
+                    <h6 class="text-md fw-semibold mb-16">Branch & Assignment</h6>
+                    <div class="row gy-3">
+                        <div class="col-sm-6">
+                            <div class="p-16 bg-neutral-50 radius-8">
+                                <span class="text-secondary-light text-sm d-block mb-8">Branch</span>
+                                <h6 class="text-md fw-semibold mb-0">
+                                    {% if order.branch %}
+                                        {{ order.branch.name }}
+                                        <small class="text-primary-light d-block">{{ order.branch.center.name }}</small>
+                                    {% else %}
+                                        <span class="text-primary-light">Not assigned to branch</span>
+                                    {% endif %}
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-16 bg-neutral-50 radius-8">
+                                <span class="text-secondary-light text-sm d-block mb-8">Assigned To</span>
+                                <h6 class="text-md fw-semibold mb-0">
+                                    {% if order.assigned_to %}
+                                        {{ order.assigned_to.user.get_full_name|default:order.assigned_to.user.username }}
+                                        <small class="text-primary-light d-block">
+                                            Assigned {{ order.assigned_at|date:"d M Y H:i" }}
+                                            {% if order.assigned_by %}by {{ order.assigned_by.user.get_full_name|default:order.assigned_by.user.username }}{% endif %}
+                                        </small>
+                                    {% else %}
+                                        <span class="text-warning-600">Unassigned</span>
+                                    {% endif %}
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Payment Info -->
@@ -80,8 +193,62 @@
                                 <iconify-icon icon="mdi:credit-card" class="me-1 text-lg"></iconify-icon> <span data-i18n="detail.cardPayment">Card Payment</span>
                             </span>
                         {% endif %}
+                        
+                        {% if order.payment_received_by %}
+                            <span class="badge bg-success-focus text-success-600 px-16 py-8">
+                                <iconify-icon icon="mdi:check-circle" class="me-1"></iconify-icon>
+                                Payment received by {{ order.payment_received_by.user.get_full_name|default:order.payment_received_by.user.username }}
+                            </span>
+                        {% endif %}
                     </div>
-                    {% if order.recipt %}
+                    
+                    <!-- Receipts Section -->
+                    {% if order.receipts.exists %}
+                    <div class="mt-16">
+                        <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.receipts">Receipts ({{ order.receipts.count }})</span>
+                        <div class="table-responsive">
+                            <table class="table bordered-table sm-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>File</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for receipt in order.receipts.all %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ receipt.amount|floatformat:0 }} UZS</td>
+                                        <td>
+                                            {% if receipt.status == 'pending' %}
+                                                <span class="badge bg-warning-focus text-warning-600">Pending</span>
+                                            {% elif receipt.status == 'verified' %}
+                                                <span class="badge bg-success-focus text-success-600">Verified</span>
+                                            {% elif receipt.status == 'rejected' %}
+                                                <span class="badge bg-danger-focus text-danger-600">Rejected</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ receipt.created_at|date:"d M Y H:i" }}</td>
+                                        <td>
+                                            {% if receipt.file %}
+                                                <a href="{{ receipt.file.url }}" target="_blank" class="btn btn-outline-primary btn-sm py-4 px-8">
+                                                    <iconify-icon icon="mdi:file-document"></iconify-icon> View
+                                                </a>
+                                            {% else %}
+                                                <span class="text-secondary-light">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% elif order.recipt %}
+                    <!-- Legacy single receipt -->
                     <div class="mt-16">
                         <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.receipt">Receipt</span>
                         <a href="{{ order.recipt.url }}" target="_blank" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center">
@@ -90,6 +257,20 @@
                     </div>
                     {% endif %}
                 </div>
+
+                <!-- Completion Info -->
+                {% if order.completed_by %}
+                <div class="mt-24">
+                    <h6 class="text-md fw-semibold mb-16">Completion</h6>
+                    <div class="p-16 bg-success-50 radius-8">
+                        <span class="text-success-600 d-block">
+                            <iconify-icon icon="mdi:check-circle" class="me-1 text-lg"></iconify-icon>
+                            Completed by {{ order.completed_by.user.get_full_name|default:order.completed_by.user.username }}
+                            on {{ order.completed_at|date:"d M Y H:i" }}
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
 
                 <!-- Description -->
                 {% if order.description %}
@@ -143,8 +324,15 @@
         <div class="card radius-12 mb-24">
             <div class="card-header border-bottom bg-base py-16 px-24">
                 <h6 class="text-md fw-semibold mb-0" data-i18n="detail.customerInformation">Customer Information</h6>
+                {% if order.is_manual_order %}
+                <span class="badge bg-warning-focus text-warning-600 mt-8">
+                    <iconify-icon icon="solar:phone-calling-bold" class="me-1"></iconify-icon> Manual Order
+                </span>
+                {% endif %}
             </div>
             <div class="card-body p-24">
+                {% if order.bot_user %}
+                <!-- Bot User Information -->
                 <div class="d-flex align-items-center gap-3 mb-16">
                     <div class="w-56-px h-56-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center">
                         <span class="text-primary-600 fw-bold text-xl">{{ order.bot_user.name|slice:":1"|upper }}</span>
@@ -158,7 +346,7 @@
                 </div>
                 <div class="mb-12">
                     <span class="text-secondary-light text-sm" data-i18n="detail.phone">Phone</span>
-                    <p class="text-md fw-medium mb-0">{{ order.bot_user.phone }}</p>
+                    <p class="text-md fw-medium mb-0">{{ order.bot_user.phone_number|default:"N/A" }}</p>
                 </div>
                 <div class="mb-12">
                     <span class="text-secondary-light text-sm" data-i18n="form.language">Language</span>
@@ -174,45 +362,160 @@
                     <span class="badge bg-warning-focus text-warning-600" data-i18n="detail.agencyAccount">Agency Account</span>
                 </div>
                 {% endif %}
+                {% else %}
+                <!-- Manual Customer Information -->
+                <div class="d-flex align-items-center gap-3 mb-16">
+                    <div class="w-56-px h-56-px rounded-circle bg-warning-100 d-flex align-items-center justify-content-center">
+                        <iconify-icon icon="solar:user-bold" class="text-warning-600 text-2xl"></iconify-icon>
+                    </div>
+                    <div>
+                        <h6 class="text-md fw-semibold mb-4">{{ order.get_customer_display_name }}</h6>
+                        <span class="text-secondary-light text-xs">Walk-in / Phone Order</span>
+                    </div>
+                </div>
+                <div class="mb-12">
+                    <span class="text-secondary-light text-sm">First Name</span>
+                    <p class="text-md fw-medium mb-0">{{ order.manual_first_name|default:"N/A" }}</p>
+                </div>
+                {% if order.manual_last_name %}
+                <div class="mb-12">
+                    <span class="text-secondary-light text-sm">Last Name</span>
+                    <p class="text-md fw-medium mb-0">{{ order.manual_last_name }}</p>
+                </div>
+                {% endif %}
+                <div class="mb-12">
+                    <span class="text-secondary-light text-sm" data-i18n="detail.phone">Phone</span>
+                    <p class="text-md fw-medium mb-0">{{ order.manual_phone|default:"N/A" }}</p>
+                </div>
+                <div class="alert alert-warning-50 text-warning-600 p-12 radius-8 mb-0">
+                    <iconify-icon icon="solar:info-circle-bold" class="me-1"></iconify-icon>
+                    <span class="text-xs">Manual order - customer not registered in bot</span>
+                </div>
+                {% endif %}
             </div>
         </div>
 
         <!-- Update Status -->
         <div class="card radius-12">
             <div class="card-header border-bottom bg-base py-16 px-24">
-                <h6 class="text-md fw-semibold mb-0" data-i18n="detail.updateStatus">Update Status</h6>
+                <h6 class="text-md fw-semibold mb-0">Actions</h6>
             </div>
             <div class="card-body p-24">
-                <form method="post" action="{% url 'updateOrderStatus' order.id %}">
-                    {% csrf_token %}
-                    <div class="mb-16">
-                        <label class="form-label text-secondary-light text-sm mb-8" data-i18n="detail.newStatus">New Status</label>
-                        <select name="status" class="form-select radius-8">
-                            <option value="pending" {% if order.status == 'pending' %}selected{% endif %} data-i18n="status.pending">Pending</option>
-                            <option value="payment_pending" {% if order.status == 'payment_pending' %}selected{% endif %} data-i18n="status.paymentPending">Payment Pending</option>
-                            <option value="payment_received" {% if order.status == 'payment_received' %}selected{% endif %} data-i18n="status.paymentReceived">Payment Received</option>
-                            <option value="payment_confirmed" {% if order.status == 'payment_confirmed' %}selected{% endif %} data-i18n="status.paymentConfirmed">Payment Confirmed</option>
-                            <option value="in_progress" {% if order.status == 'in_progress' %}selected{% endif %} data-i18n="status.inProgress">In Progress</option>
-                            <option value="ready" {% if order.status == 'ready' %}selected{% endif %} data-i18n="status.ready">Ready</option>
-                            <option value="completed" {% if order.status == 'completed' %}selected{% endif %} data-i18n="status.completed">Completed</option>
-                            <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %} data-i18n="status.cancelled">Cancelled</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
-                        <iconify-icon icon="mdi:check" class="me-1"></iconify-icon> <span data-i18n="detail.updateStatus">Update Status</span>
+                <!-- Edit Button -->
+                {% can_do 'orders.edit' as can_edit_order %}
+                {% if can_edit_order %}
+                <div class="mb-16">
+                    <a href="{% url 'orders:orderEdit' order.id %}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+                        <iconify-icon icon="lucide:edit" class="me-1"></iconify-icon> <span data-i18n="common.edit">Edit Order</span>
+                    </a>
+                </div>
+                <hr class="my-16">
+                {% endif %}
+                
+                <!-- Assignment Section -->
+                {% can_do 'orders.assign' as can_assign_order %}
+                {% if can_assign_order %}
+                <div class="mb-24">
+                    <h6 class="text-sm fw-semibold mb-12">Assignment</h6>
+                    {% if order.assigned_to %}
+                        <div class="d-flex align-items-center gap-2 mb-12">
+                            <div class="w-40-px h-40-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center">
+                                <span class="text-primary-600 fw-bold">{{ order.assigned_to.user.first_name|slice:":1"|upper }}{{ order.assigned_to.user.last_name|slice:":1"|upper }}</span>
+                            </div>
+                            <div>
+                                <span class="d-block fw-medium">{{ order.assigned_to.user.get_full_name|default:order.assigned_to.user.username }}</span>
+                                <small class="text-primary-light">{{ order.assigned_to.role.get_display_name }}</small>
+                            </div>
+                        </div>
+                        <form method="post" action="{% url 'orders:unassignOrder' order.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-warning btn-sm w-100">
+                                <iconify-icon icon="mdi:account-remove" class="me-1"></iconify-icon> Unassign
+                            </button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{% url 'orders:assignOrder' order.id %}">
+                            {% csrf_token %}
+                            <select name="staff_id" class="form-select radius-8 mb-12" required>
+                                <option value="">Select staff member...</option>
+                                {% for staff in available_staff %}
+                                <option value="{{ staff.pk }}">
+                                    {{ staff.user.get_full_name|default:staff.user.username }} ({{ staff.role.get_display_name }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                                <iconify-icon icon="mdi:account-plus" class="me-1"></iconify-icon> Assign
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+                <hr>
+                {% endif %}
+
+                <!-- Quick Actions -->
+                {% can_do 'payments.receive' as can_receive_payment_permission %}
+                {% if can_receive_payment_permission %}
+                <div class="mb-16">
+                    <button type="button" class="btn btn-success w-100 d-flex align-items-center justify-content-center" 
+                            data-bs-toggle="modal" data-bs-target="#paymentModal">
+                        <iconify-icon icon="mdi:cash-check" class="me-1"></iconify-icon> 
+                        {% if order.is_fully_paid %}
+                            View Payment
+                        {% else %}
+                            Record Payment
+                        {% endif %}
                     </button>
-                </form>
+                </div>
+                {% endif %}
+
+                {% can_do 'orders.complete' as can_complete_order %}
+                {% if can_complete_order and order.status == 'ready' or can_complete_order and order.status == 'in_progress' %}
+                <div class="mb-16">
+                    <form method="post" action="{% url 'orders:completeOrder' order.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success w-100 d-flex align-items-center justify-content-center">
+                            <iconify-icon icon="mdi:check-all" class="me-1"></iconify-icon> Complete Order
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+                <!-- Status Update -->
+                {% can_do 'orders.update_status' as can_update_status_permission %}
+                {% if can_update_status_permission and allowed_transitions %}
+                <div class="mb-16">
+                    <h6 class="text-sm fw-semibold mb-12" data-i18n="detail.updateStatus">Update Status</h6>
+                    <form method="post" action="{% url 'orders:updateOrderStatus' order.id %}">
+                        {% csrf_token %}
+                        <select name="status" class="form-select radius-8 mb-12">
+                            {% for status_value in allowed_transitions %}
+                                {% for choice_value, choice_label in status_choices %}
+                                    {% if choice_value == status_value %}
+                                        <option value="{{ choice_value }}">{{ choice_label }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+                            <iconify-icon icon="mdi:check" class="me-1"></iconify-icon> <span data-i18n="detail.updateStatus">Update Status</span>
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
                 
                 <hr class="my-16">
                 
-                <a href="{% url 'categoryList' %}" class="btn btn-secondary radius-8 px-20 py-11 flex-grow-1 d-flex align-items-center justify-content-center">
-                        <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
-                        <span data-i18n="detail.back">Back</span>
-                    </a>
+                <a href="{% url 'orders:ordersList' %}" class="btn btn-secondary radius-8 px-20 py-11 w-100 d-flex align-items-center justify-content-center mb-12">
+                    <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
+                    <span data-i18n="detail.back">Back to Orders</span>
+                </a>
                 
+                {% if can_delete %}
                 <button type="button" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#deleteOrderModal">
                     <iconify-icon icon="mdi:delete" class="me-1"></iconify-icon> <span data-i18n="detail.deleteOrder">Delete Order</span>
                 </button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -223,7 +526,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><span data-i18n="detail.deleteOrder">Delete Order</span> #{{ order.id }}</h5>
+                <h5 class="modal-title"><span data-i18n="detail.deleteOrder">Delete Order</span> #{{ order.get_order_number }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -231,12 +534,280 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Cancel</button>
-                <form method="post" action="{% url 'deleteOrder' order.id %}">
-                    {% csrf_token %}
+                <form method="post" action="{% url 'orders:deleteOrder' order.id %}">
+                    {% csrf_token %>
                     <button type="submit" class="btn btn-danger" data-i18n="detail.deleteOrder">Delete Order</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Payment Modal -->
+{% if can_receive_payment %}
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <iconify-icon icon="mdi:cash" class="me-2"></iconify-icon>
+                    Payment Management - Order #{{ order.get_order_number }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Payment Summary -->
+                <div class="row mb-24">
+                    <div class="col-md-3 col-6 text-center">
+                        <div class="p-12 bg-neutral-50 radius-8">
+                            <small class="text-secondary-light d-block">Total Price</small>
+                            <span class="fw-bold" id="pm-total-price">{{ order.total_price|floatformat:0 }}</span> UZS
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6 text-center">
+                        <div class="p-12 bg-neutral-50 radius-8">
+                            <small class="text-secondary-light d-block">Extra Fee</small>
+                            <span class="fw-bold" id="pm-extra-fee">{{ order.extra_fee|floatformat:0 }}</span> UZS
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6 text-center">
+                        <div class="p-12 bg-success-50 radius-8">
+                            <small class="text-secondary-light d-block">Received</small>
+                            <span class="fw-bold text-success-600" id="pm-received">{{ order.received|floatformat:0 }}</span> UZS
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6 text-center">
+                        <div class="p-12 {% if order.remaining > 0 %}bg-danger-50{% else %}bg-success-50{% endif %} radius-8">
+                            <small class="text-secondary-light d-block">Remaining</small>
+                            <span class="fw-bold {% if order.remaining > 0 %}text-danger-600{% else %}text-success-600{% endif %}" id="pm-remaining">
+                                {{ order.remaining|floatformat:0 }}
+                            </span> UZS
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="progress mb-24" style="height: 10px;">
+                    <div class="progress-bar bg-success" role="progressbar" id="pm-progress"
+                         style="width: {{ order.payment_percentage }}%"></div>
+                </div>
+                
+                {% if not order.is_fully_paid %}
+                <!-- Payment Form -->
+                <form id="paymentForm">
+                    <!-- Accept Fully Checkbox -->
+                    <div class="form-check form-switch mb-16">
+                        <input class="form-check-input" type="checkbox" id="acceptFully" name="accept_fully">
+                        <label class="form-check-label fw-semibold" for="acceptFully">
+                            Mark as Fully Paid
+                        </label>
+                        <small class="text-secondary-light d-block">
+                            Check this to accept the full amount regardless of what's been received
+                        </small>
+                    </div>
+                    
+                    <!-- Partial Payment Amount -->
+                    <div id="partialPaymentSection">
+                        <div class="row">
+                            <div class="col-md-6 mb-16">
+                                <label class="form-label fw-semibold">Amount Received Now</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="paymentAmount" 
+                                           name="amount" min="0" step="100" 
+                                           placeholder="Enter amount">
+                                    <span class="input-group-text">UZS</span>
+                                </div>
+                                <small class="text-secondary-light">
+                                    Quick: 
+                                    <button type="button" class="btn btn-sm btn-outline-primary ms-2" 
+                                            onclick="setAmount({{ order.remaining }})">
+                                        Full ({{ order.remaining|floatformat:0 }})
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-1" 
+                                            onclick="setAmount({{ order.remaining|divisibleby:2 }})">
+                                        Half
+                                    </button>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Extra Fee Section (collapsible) -->
+                    <div class="mt-16 pt-16 border-top">
+                        <a class="text-decoration-none d-flex align-items-center" 
+                           data-bs-toggle="collapse" href="#extraFeeSection">
+                            <iconify-icon icon="mdi:plus-circle" class="me-2"></iconify-icon>
+                            Add Extra Fee
+                        </a>
+                        <div class="collapse mt-12" id="extraFeeSection">
+                            <div class="row">
+                                <div class="col-md-4 mb-12">
+                                    <label class="form-label">Extra Fee Amount</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="extraFeeAmount" 
+                                               name="extra_fee" min="0" step="100">
+                                        <span class="input-group-text">UZS</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 mb-12">
+                                    <label class="form-label">Reason</label>
+                                    <input type="text" class="form-control" id="extraFeeDescription" 
+                                           name="extra_fee_description" 
+                                           placeholder="e.g., Rush delivery, special handling">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if request.user.is_superuser or request.admin_profile.is_owner %}
+                    <!-- Force Accept (Owner only) -->
+                    <div class="mt-16 pt-16 border-top">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="forceAccept" name="force_accept">
+                            <label class="form-check-label text-warning-600" for="forceAccept">
+                                <iconify-icon icon="mdi:shield-alert" class="me-1"></iconify-icon>
+                                Force Accept (Owner Override)
+                            </label>
+                            <small class="text-secondary-light d-block">
+                                Mark as fully paid even if received is less than total
+                            </small>
+                        </div>
+                    </div>
+                    {% endif %}
+                </form>
+                {% else %}
+                <!-- Already Fully Paid -->
+                <div class="text-center py-24">
+                    <iconify-icon icon="mdi:check-circle" class="text-success-600" style="font-size: 64px;"></iconify-icon>
+                    <h5 class="mt-16 text-success-600">Payment Complete</h5>
+                    <p class="text-secondary-light">This order has been fully paid.</p>
+                </div>
+                {% endif %}
+                
+                <!-- Alert container -->
+                <div id="paymentAlert" class="mt-16" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {% if not order.is_fully_paid %}
+                <button type="button" class="btn btn-success" id="submitPayment" onclick="submitPayment()">
+                    <iconify-icon icon="mdi:check" class="me-1"></iconify-icon> Record Payment
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock content %}
+
+{% block script %}
+<script>
+const orderId = {{ order.id }};
+const csrfToken = '{{ csrf_token }}';
+
+{% if can_receive_payment %}
+// Toggle partial payment section based on "accept fully" checkbox
+document.getElementById('acceptFully')?.addEventListener('change', function() {
+    const partialSection = document.getElementById('partialPaymentSection');
+    if (this.checked) {
+        partialSection.style.display = 'none';
+    } else {
+        partialSection.style.display = 'block';
+    }
+});
+
+function setAmount(amount) {
+    document.getElementById('paymentAmount').value = Math.round(amount);
+}
+
+function showAlert(message, type = 'danger') {
+    const alertDiv = document.getElementById('paymentAlert');
+    alertDiv.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    alertDiv.style.display = 'block';
+}
+
+function updatePaymentDisplay(data) {
+    document.getElementById('pm-total-price').textContent = Math.round(data.total_price);
+    document.getElementById('pm-extra-fee').textContent = Math.round(data.extra_fee);
+    document.getElementById('pm-received').textContent = Math.round(data.received);
+    document.getElementById('pm-remaining').textContent = Math.round(data.remaining);
+    document.getElementById('pm-progress').style.width = data.payment_percentage + '%';
+    
+    // Update remaining color
+    const remainingEl = document.getElementById('pm-remaining');
+    if (data.remaining > 0) {
+        remainingEl.className = 'fw-bold text-danger-600';
+    } else {
+        remainingEl.className = 'fw-bold text-success-600';
+    }
+}
+
+async function submitPayment() {
+    const submitBtn = document.getElementById('submitPayment');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
+    
+    try {
+        const formData = new FormData();
+        
+        const acceptFully = document.getElementById('acceptFully')?.checked;
+        const amount = document.getElementById('paymentAmount')?.value;
+        const extraFee = document.getElementById('extraFeeAmount')?.value;
+        const extraFeeDesc = document.getElementById('extraFeeDescription')?.value;
+        const forceAccept = document.getElementById('forceAccept')?.checked;
+        
+        if (acceptFully) {
+            formData.append('accept_fully', 'true');
+        } else if (amount) {
+            formData.append('amount', amount);
+        }
+        
+        if (extraFee) {
+            formData.append('extra_fee', extraFee);
+            if (extraFeeDesc) {
+                formData.append('extra_fee_description', extraFeeDesc);
+            }
+        }
+        
+        if (forceAccept) {
+            formData.append('force_accept', 'true');
+        }
+        
+        const response = await fetch(`/orders/${orderId}/payment/record/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showAlert('Payment recorded successfully!', 'success');
+            updatePaymentDisplay(data);
+            
+            // Reload page after 1.5 seconds to update all UI
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showAlert(data.error || 'Failed to record payment', 'danger');
+        }
+    } catch (error) {
+        showAlert('An error occurred: ' + error.message, 'danger');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<iconify-icon icon="mdi:check" class="me-1"></iconify-icon> Record Payment';
+    }
+}
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,446 @@
+{% extends 'layout/layout.html' %} 
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Row 1: Quick Stats Cards (matching index.html gradient style) -->
+    <div class="col-xxl-8">
+        <div class="row gy-4">
+            <!-- Today's Orders -->
+            <div class="col-xxl-4 col-sm-6">
+                <div class="card p-3 shadow-2 radius-8 border input-form-light h-100 bg-gradient-end-1">
+                    <div class="card-body p-0">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="mb-0 w-48-px h-48-px bg-primary-600 flex-shrink-0 text-white d-flex justify-content-center align-items-center rounded-circle h6 mb-0">
+                                    <iconify-icon icon="solar:bag-4-bold" class="icon"></iconify-icon>
+                                </span>
+                                <div>
+                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="report.today">Today</span>
+                                    <h6 class="fw-semibold">{{ today_count }} <small class="text-xs fw-normal" data-i18n="report.ordersAssigned">orders</small></h6>
+                                </div>
+                            </div>
+                            <div id="todaySparkline" class="remove-tooltip-title rounded-tooltip-value"></div>
+                        </div>
+                        <p class="text-sm mb-0">
+                            <span class="bg-success-focus px-1 rounded-2 fw-medium text-success-main text-sm">{{ today_completed }}</span>
+                            <span data-i18n="report.completed">completed</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- This Week's Orders -->
+            <div class="col-xxl-4 col-sm-6">
+                <div class="card p-3 shadow-2 radius-8 border input-form-light h-100 bg-gradient-end-2">
+                    <div class="card-body p-0">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="mb-0 w-48-px h-48-px bg-success-main flex-shrink-0 text-white d-flex justify-content-center align-items-center rounded-circle h6">
+                                    <iconify-icon icon="solar:calendar-mark-bold" class="icon"></iconify-icon>
+                                </span>
+                                <div>
+                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="report.thisWeek">This Week</span>
+                                    <h6 class="fw-semibold">{{ week_count }} <small class="text-xs fw-normal" data-i18n="report.ordersAssigned">orders</small></h6>
+                                </div>
+                            </div>
+                            <div id="weekSparkline" class="remove-tooltip-title rounded-tooltip-value"></div>
+                        </div>
+                        <p class="text-sm mb-0">
+                            <span class="bg-success-focus px-1 rounded-2 fw-medium text-success-main text-sm">{{ week_completed }}</span>
+                            <span data-i18n="report.completed">completed</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completion Rate -->
+            <div class="col-xxl-4 col-sm-6">
+                <div class="card p-3 shadow-2 radius-8 border input-form-light h-100 bg-gradient-end-3">
+                    <div class="card-body p-0">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="mb-0 w-48-px h-48-px bg-yellow text-white flex-shrink-0 d-flex justify-content-center align-items-center rounded-circle h6">
+                                    <iconify-icon icon="solar:chart-2-bold" class="icon"></iconify-icon>
+                                </span>
+                                <div>
+                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="report.completionRate">Completion Rate</span>
+                                    <h6 class="fw-semibold">{{ completion_rate }}%</h6>
+                                </div>
+                            </div>
+                            <div id="completionSparkline" class="remove-tooltip-title rounded-tooltip-value"></div>
+                        </div>
+                        <p class="text-sm mb-0">
+                            <span class="bg-success-focus px-1 rounded-2 fw-medium text-success-main text-sm">{{ total_completed }}</span>
+                            <span data-i18n="report.totalCompleted">total completed</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- This Month's Orders -->
+            <div class="col-xxl-4 col-sm-6">
+                <div class="card p-3 shadow-2 radius-8 border input-form-light h-100 bg-gradient-end-4">
+                    <div class="card-body p-0">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="mb-0 w-48-px h-48-px bg-warning-main text-white flex-shrink-0 d-flex justify-content-center align-items-center rounded-circle h6">
+                                    <iconify-icon icon="solar:calendar-minimalistic-bold" class="icon"></iconify-icon>
+                                </span>
+                                <div>
+                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="report.thisMonth">This Month</span>
+                                    <h6 class="fw-semibold">{{ month_count }} <small class="text-xs fw-normal" data-i18n="report.ordersAssigned">orders</small></h6>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-sm mb-0">
+                            <span class="bg-success-focus px-1 rounded-2 fw-medium text-success-main text-sm">{{ month_completed }}</span>
+                            <span data-i18n="report.completed">completed</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Pages -->
+            <div class="col-xxl-4 col-sm-6">
+                <div class="card p-3 shadow-2 radius-8 border input-form-light h-100 bg-gradient-end-5">
+                    <div class="card-body p-0">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="mb-0 w-48-px h-48-px bg-info-main text-white flex-shrink-0 d-flex justify-content-center align-items-center rounded-circle h6">
+                                    <iconify-icon icon="solar:document-text-bold" class="icon"></iconify-icon>
+                                </span>
+                                <div>
+                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="report.totalPages">Total Pages</span>
+                                    <h6 class="fw-semibold">{{ total_pages }}</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-sm mb-0">
+                            <span class="text-secondary-light">{{ month_pages }} <span data-i18n="report.thisMonth">this month</span></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Time Orders -->
+            <div class="col-xxl-4 col-sm-6">
+                <div class="card p-3 shadow-2 radius-8 border input-form-light h-100 bg-gradient-end-6">
+                    <div class="card-body p-0">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="mb-0 w-48-px h-48-px bg-danger-main text-white flex-shrink-0 d-flex justify-content-center align-items-center rounded-circle h6">
+                                    <iconify-icon icon="solar:history-bold" class="icon"></iconify-icon>
+                                </span>
+                                <div>
+                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="report.allTime">All Time</span>
+                                    <h6 class="fw-semibold">{{ total_count }} <small class="text-xs fw-normal" data-i18n="sidebar.orders">orders</small></h6>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-sm mb-0">
+                            <span class="bg-success-focus px-1 rounded-2 fw-medium text-success-main text-sm">
+                                <iconify-icon icon="solar:medal-star-bold" class="icon"></iconify-icon> {{ total_completed }} <span data-i18n="report.completed">completed</span>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Overview (Right side) -->
+    <div class="col-xxl-4">
+        <div class="card h-100 radius-8 border-0">
+            <div class="card-body p-24">
+                <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
+                    <h6 class="mb-2 fw-bold text-lg" data-i18n="report.ordersByStatus">Orders by Status</h6>
+                    <span class="bg-primary-50 text-primary-600 text-sm px-12 py-4 rounded-pill" data-i18n="report.thisMonth">This Month</span>
+                </div>
+
+                <div class="mt-3" id="statusProgressList">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Performance Chart -->
+    <div class="col-xxl-8">
+        <div class="card h-100 radius-8 border">
+            <div class="card-body p-24">
+                <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
+                    <div>
+                        <h6 class="mb-2 fw-bold text-lg" data-i18n="report.dailyPerformance">Daily Performance</h6>
+                        <span class="text-sm fw-medium text-secondary-light" data-i18n="report.thisMonth">This Month</span>
+                    </div>
+                    <div class="text-end">
+                        <h6 class="mb-2 fw-bold text-lg">{{ month_count }} <small class="text-xs fw-normal">orders</small></h6>
+                        <span class="bg-success-focus ps-12 pe-12 pt-2 pb-2 rounded-2 fw-medium text-success-main text-sm">{{ month_pages }} pages</span>
+                    </div>
+                </div>
+                <div id="dailyPerformanceChart" class="mt-28"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Donut Chart -->
+    <div class="col-xxl-4">
+        <div class="card h-100 radius-8 border-0 overflow-hidden">
+            <div class="card-body p-24">
+                <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
+                    <h6 class="mb-2 fw-bold text-lg" data-i18n="report.statusBreakdown">Status Breakdown</h6>
+                </div>
+
+                <div class="d-flex flex-wrap align-items-center mt-3">
+                    <ul class="flex-shrink-0" id="statusLegend">
+                        <!-- Will be populated by JS -->
+                    </ul>
+                    <div id="statusDonutChart" class="flex-grow-1 apexcharts-tooltip-z-none title-style circle-none"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="col-12">
+        <div class="card h-100">
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
+                <h6 class="text-lg fw-semibold mb-0" data-i18n="report.recentOrders">Recent Orders</h6>
+                <div class="d-flex gap-2 align-items-center">
+                    <a href="{% url 'export_report' 'my_statistics' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1">
+                        <iconify-icon icon="vscode-icons:file-type-excel" class="icon line-height-1"></iconify-icon>
+                        <span data-i18n="common.exportExcel">Export Excel</span>
+                    </a>
+                    <a href="{% url 'orders:ordersList' %}?assignment=mine" class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
+                        <span data-i18n="common.viewAll">View All</span>
+                        <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-24 compact-table">
+                <div class="table-responsive scroll-sm">
+                    <table class="table bordered-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" data-i18n="order.id">Order ID</th>
+                                <th scope="col" data-i18n="order.customer">Customer</th>
+                                <th scope="col" class="hide-mobile" data-i18n="order.product">Product</th>
+                                <th scope="col" class="hide-tablet" data-i18n="order.pages">Pages</th>
+                                <th scope="col" data-i18n="order.status">Status</th>
+                                <th scope="col" class="hide-mobile" data-i18n="order.createdAt">Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td><a href="{% url 'orders:orderDetail' order.id %}" class="text-primary-600 fw-medium">#{{ order.id }}</a></td>
+                                <td>
+                                    <div>
+                                        <span class="text-md d-block line-height-1 fw-medium text-primary-light text-truncate-sm">{{ order.bot_user.name|default:order.bot_user.phone }}</span>
+                                    </div>
+                                </td>
+                                <td class="hide-mobile">{{ order.product.name|default:"-"|truncatechars:20 }}</td>
+                                <td class="hide-tablet">{{ order.total_pages|default:0 }}</td>
+                                <td>
+                                    {% if order.status == 'completed' %}
+                                    <span class="bg-success-focus text-success-main status-badge-sm rounded-pill fw-medium" data-i18n="status.completed">Done</span>
+                                    {% elif order.status == 'cancelled' %}
+                                    <span class="bg-danger-focus text-danger-main status-badge-sm rounded-pill fw-medium" data-i18n="status.cancelled">Can</span>
+                                    {% elif order.status == 'in_progress' %}
+                                    <span class="bg-info-focus text-info-main status-badge-sm rounded-pill fw-medium" data-i18n="status.inProgress">WIP</span>
+                                    {% else %}
+                                    <span class="bg-warning-focus text-warning-main status-badge-sm rounded-pill fw-medium" data-i18n="status.pending">{{ order.status|slice:":4" }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="hide-mobile">
+                                    <span class="text-sm text-secondary-light">{{ order.created_at|date:"d M" }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-secondary-light py-4">
+                                    <iconify-icon icon="solar:inbox-line-duotone" class="text-4xl mb-2 d-block"></iconify-icon>
+                                    <p class="mb-0" data-i18n="report.noOrdersFound">No orders found</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+// Data from Django
+const dailyLabels = {{ daily_labels|safe }};
+const dailyCounts = {{ daily_counts|safe }};
+const dailyPages = {{ daily_pages|safe }};
+const statusData = {{ status_data|safe }};
+const completionRate = {{ completion_rate }};
+
+function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function getThemeColors() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    return {
+        textColor: isDark ? '#9CA3AF' : '#6C757D',
+        gridColor: isDark ? '#374151' : '#E4E7EC',
+        bgColor: isDark ? '#1F2937' : '#ffffff'
+    };
+}
+
+const STATUS_ICONS = {
+    'completed': 'solar:check-circle-bold',
+    'in_progress': 'solar:hourglass-bold',
+    'pending': 'solar:clock-circle-bold',
+    'cancelled': 'solar:close-circle-bold',
+    'payment_pending': 'solar:wallet-bold',
+    'payment_received': 'solar:card-bold',
+    'payment_confirmed': 'solar:check-square-bold',
+    'ready': 'solar:inbox-bold'
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const colors = getThemeColors();
+    
+    // Populate status progress list
+    const statusListEl = document.getElementById('statusProgressList');
+    const total = statusData.reduce((sum, s) => sum + s.count, 0) || 1;
+    
+    if (statusData.length > 0) {
+        statusData.forEach(status => {
+            const percent = Math.round((status.count / total) * 100);
+            const icon = STATUS_ICONS[status.status] || 'solar:info-circle-bold';
+            statusListEl.innerHTML += `
+                <div class="d-flex align-items-center justify-content-between gap-3 mb-12">
+                    <div class="d-flex align-items-center">
+                        <span class="text-xxl line-height-1 d-flex align-content-center flex-shrink-0" style="color: ${status.color};">
+                            <iconify-icon icon="${icon}" class="icon"></iconify-icon>
+                        </span>
+                        <span class="text-primary-light fw-medium text-sm ps-12">${status.label}</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 w-100">
+                        <div class="w-100 max-w-66 ms-auto">
+                            <div class="progress progress-sm rounded-pill" role="progressbar">
+                                <div class="progress-bar rounded-pill" style="width: ${percent}%; background-color: ${status.color};"></div>
+                            </div>
+                        </div>
+                        <span class="text-secondary-light font-xs fw-semibold">${status.count}</span>
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        statusListEl.innerHTML = '<div class="text-center text-secondary-light py-4"><iconify-icon icon="solar:inbox-line-duotone" class="text-4xl mb-2"></iconify-icon><p class="mb-0">No orders this month</p></div>';
+    }
+    
+    // Populate status legend
+    const legendEl = document.getElementById('statusLegend');
+    statusData.slice(0, 3).forEach(status => {
+        legendEl.innerHTML += `
+            <li class="d-flex align-items-center gap-2 mb-28">
+                <span class="w-12-px h-12-px rounded-circle" style="background-color: ${status.color};"></span>
+                <span class="text-secondary-light text-sm fw-medium">${status.label}: ${status.count}</span>
+            </li>
+        `;
+    });
+    
+    // Daily Performance Chart (matching index.html style)
+    if (dailyLabels.length > 0) {
+        const dailyOptions = {
+            series: [{ name: 'Orders', data: dailyCounts }],
+            chart: { type: 'bar', height: 180, toolbar: { show: false } },
+            colors: ['#487FFF'],
+            plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+            dataLabels: { enabled: false },
+            xaxis: {
+                categories: dailyLabels,
+                labels: { style: { colors: colors.textColor, fontSize: '11px' } },
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                labels: {
+                    formatter: function(val) { return val; },
+                    style: { colors: colors.textColor, fontSize: '11px' }
+                }
+            },
+            grid: { borderColor: colors.gridColor, strokeDashArray: 3 },
+            tooltip: { y: { formatter: function(val) { return val + ' orders'; } } }
+        };
+        new ApexCharts(document.querySelector("#dailyPerformanceChart"), dailyOptions).render();
+    } else {
+        document.querySelector("#dailyPerformanceChart").innerHTML = '<div class="text-center text-secondary-light py-5"><iconify-icon icon="solar:chart-2-line-duotone" class="text-4xl mb-2"></iconify-icon><p>No data for this month</p></div>';
+    }
+
+    // Today's Orders Sparkline
+    if (dailyCounts.length > 0) {
+        new ApexCharts(document.querySelector("#todaySparkline"), {
+            series: [{ data: dailyCounts.slice(-7) }],
+            chart: { type: 'area', height: 50, width: 80, sparkline: { enabled: true } },
+            colors: ['#487FFF'],
+            stroke: { curve: 'smooth', width: 2 },
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1 } },
+            tooltip: { enabled: false }
+        }).render();
+    }
+
+    // Week Sparkline
+    if (dailyCounts.length > 0) {
+        new ApexCharts(document.querySelector("#weekSparkline"), {
+            series: [{ data: dailyCounts.slice(-7) }],
+            chart: { type: 'area', height: 50, width: 80, sparkline: { enabled: true } },
+            colors: ['#45B369'],
+            stroke: { curve: 'smooth', width: 2 },
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1 } },
+            tooltip: { enabled: false }
+        }).render();
+    }
+
+    // Completion Sparkline (Radial)
+    new ApexCharts(document.querySelector("#completionSparkline"), {
+        series: [completionRate],
+        chart: { type: 'radialBar', height: 60, width: 60, sparkline: { enabled: true } },
+        colors: ['#F59E0B'],
+        plotOptions: { radialBar: { hollow: { size: '40%' }, dataLabels: { show: false }, track: { background: colors.gridColor } } }
+    }).render();
+
+    // Status Donut Chart (matching index.html userDonutChart style)
+    if (statusData.length > 0) {
+        const statusLabels = statusData.map(item => item.label);
+        const statusValues = statusData.map(item => item.count);
+        const statusColors = statusData.map(item => item.color);
+
+        new ApexCharts(document.querySelector("#statusDonutChart"), {
+            series: statusValues,
+            chart: { type: 'donut', height: 150 },
+            labels: statusLabels,
+            colors: statusColors,
+            legend: { show: false },
+            dataLabels: { enabled: false },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '65%',
+                        labels: {
+                            show: true,
+                            name: { show: true, fontSize: '12px', color: colors.textColor },
+                            value: { show: true, fontSize: '16px', fontWeight: 600, color: colors.textColor },
+                            total: { show: true, label: 'Total', color: colors.textColor, formatter: function(w) { return w.globals.seriesTotals.reduce((a, b) => a + b, 0); } }
+                        }
+                    }
+                }
+            }
+        }).render();
+    } else {
+        document.querySelector("#statusDonutChart").innerHTML = '<div class="text-center text-secondary-light py-3"><p class="mb-0">No data</p></div>';
+    }
+});
+</script>
+{% endblock script %}

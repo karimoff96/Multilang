@@ -99,6 +99,28 @@
                                 <span class="text-md fw-medium">{{ bot_user.created_at|date:"d M Y, H:i" }}</span>
                             </div>
                         </li>
+                        {% if bot_user.center %}
+                        <li class="d-flex align-items-center gap-8 mb-16">
+                            <div class="w-40-px h-40-px rounded-circle bg-cyan-50 d-flex align-items-center justify-content-center flex-shrink-0">
+                                <iconify-icon icon="mdi:office-building" class="text-cyan-600 text-xl"></iconify-icon>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-sm text-secondary-light d-block" data-i18n="detail.center">Center</span>
+                                <span class="text-md fw-medium">{{ bot_user.center.name }}</span>
+                            </div>
+                        </li>
+                        {% endif %}
+                        {% if bot_user.branch %}
+                        <li class="d-flex align-items-center gap-8 mb-16">
+                            <div class="w-40-px h-40-px rounded-circle bg-indigo-50 d-flex align-items-center justify-content-center flex-shrink-0">
+                                <iconify-icon icon="mdi:store" class="text-indigo-600 text-xl"></iconify-icon>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-sm text-secondary-light d-block" data-i18n="detail.branch">Branch</span>
+                                <span class="text-md fw-medium">{{ bot_user.branch.name }}</span>
+                            </div>
+                        </li>
+                        {% endif %}
                         {% if bot_user.agency %}
                         <li class="d-flex align-items-center gap-8">
                             <div class="w-40-px h-40-px rounded-circle bg-purple-50 d-flex align-items-center justify-content-center flex-shrink-0">
@@ -206,7 +228,7 @@
             <div class="card-header bg-base border-bottom py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="mb-0" data-i18n="detail.recentOrders">Recent Orders</h6>
                 {% if total_orders > 0 %}
-                <a href="{% url 'ordersList' %}?search={{ bot_user.name }}" class="text-primary-600 text-sm fw-medium">
+                <a href="{% url 'orders:ordersList' %}?search={{ bot_user.name }}" class="text-primary-600 text-sm fw-medium">
                     <span data-i18n="detail.viewAll">View All</span> <iconify-icon icon="ep:arrow-right" class="ms-4"></iconify-icon>
                 </a>
                 {% endif %}
@@ -218,6 +240,12 @@
                         <thead>
                             <tr>
                                 <th scope="col" data-i18n="table.orderId">Order ID</th>
+                                {% if user.is_superuser %}
+                                <th scope="col" data-i18n="table.center">Center</th>
+                                {% endif %}
+                                {% if user.is_superuser or is_owner %}
+                                <th scope="col" data-i18n="table.branch">Branch</th>
+                                {% endif %}
                                 <th scope="col" data-i18n="table.product">Product</th>
                                 <th scope="col" data-i18n="common.pages">Pages</th>
                                 <th scope="col" data-i18n="table.status">Status</th>
@@ -231,23 +259,33 @@
                                 <td>
                                     <span class="fw-medium">#{{ order.id }}</span>
                                 </td>
+                                {% if user.is_superuser %}
+                                <td>
+                                    <span class="text-md fw-medium text-primary-light">{{ order.branch.center.name }}</span>
+                                </td>
+                                {% endif %}
+                                {% if user.is_superuser or is_owner %}
+                                <td>
+                                    <span class="text-md fw-medium text-secondary-light">{{ order.branch.name }}</span>
+                                </td>
+                                {% endif %}
                                 <td>{{ order.product.title }}</td>
                                 <td>{{ order.total_pages }}</td>
                                 <td>
                                     {% if order.status == 'pending' %}
                                         <span class="badge bg-warning-focus text-warning-600" data-i18n="status.pending">Pending</span>
                                     {% elif order.status == 'payment_pending' %}
-                                        <span class="badge bg-info-focus text-info-600" data-i18n="status.paymentPending">Payment Pending</span>
+                                        <span class="badge bg-info-focus text-info-600" data-i18n="status.paymentPending">Awaiting</span>
                                     {% elif order.status == 'payment_received' %}
-                                        <span class="badge bg-primary-focus text-primary-600" data-i18n="status.paymentReceived">Payment Received</span>
+                                        <span class="badge bg-primary-focus text-primary-600" data-i18n="status.paymentReceived">Received</span>
                                     {% elif order.status == 'payment_confirmed' %}
-                                        <span class="badge bg-success-focus text-success-600" data-i18n="status.paymentConfirmed">Payment Confirmed</span>
+                                        <span class="badge bg-success-focus text-success-600" data-i18n="status.paymentConfirmed">Confirmed</span>
                                     {% elif order.status == 'in_progress' %}
-                                        <span class="badge bg-info-focus text-info-600" data-i18n="status.inProgress">In Progress</span>
+                                        <span class="badge bg-info-focus text-info-600" data-i18n="status.inProgress">In Process</span>
                                     {% elif order.status == 'ready' %}
                                         <span class="badge bg-primary-focus text-primary-600" data-i18n="status.ready">Ready</span>
                                     {% elif order.status == 'completed' %}
-                                        <span class="badge bg-success-focus text-success-600" data-i18n="status.completed">Completed</span>
+                                        <span class="badge bg-success-focus text-success-600" data-i18n="status.completed">Done</span>
                                     {% elif order.status == 'cancelled' %}
                                         <span class="badge bg-danger-focus text-danger-600" data-i18n="status.cancelled">Cancelled</span>
                                     {% else %}
@@ -256,7 +294,7 @@
                                 </td>
                                 <td>{{ order.created_at|date:"d M Y" }}</td>
                                 <td class="text-center">
-                                    <a href="{% url 'orderDetail' order.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-36-px h-36-px d-inline-flex justify-content-center align-items-center rounded-circle">
+                                    <a href="{% url 'orders:orderDetail' order.id %}" class="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-36-px h-36-px d-inline-flex justify-content-center align-items-center rounded-circle">
                                         <iconify-icon icon="majesticons:eye-line" class="icon text-lg"></iconify-icon>
                                     </a>
                                 </td>

@@ -19,6 +19,17 @@
     $(this).toggleClass("active");
     $(".sidebar").toggleClass("active");
     $(".dashboard-main").toggleClass("active");
+    
+    // Toggle between full logo and icon
+    if ($(".sidebar").hasClass("active")) {
+      // Sidebar is collapsed - show icons
+      $(".sidebar-open-element").hide();
+      $(".sidebar-close-element").show();
+    } else {
+      // Sidebar is expanded - show full logos
+      $(".sidebar-open-element").show();
+      $(".sidebar-close-element").hide();
+    }
   });
 
   $(".sidebar-mobile-toggle").on("click", function(){

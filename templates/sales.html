@@ -1,6 +1,36 @@
 ﻿{% extends './layout/layout.html' %} 
 
 {% block content %}
+<!-- Filter Bar -->
+<div class="card radius-8 border-0 mb-24">
+    <div class="card-body p-16">
+        <form method="GET" class="d-flex align-items-center gap-3">
+            <span class="text-md fw-semibold text-secondary-light" data-i18n="filter.defaultPeriod">Default Period:</span>
+            <select name="period" id="mainPeriodSelect" class="form-select form-select-sm w-auto">
+                <option value="today" {% if period == 'today' %}selected{% endif %} data-i18n="filter.today">Today</option>
+                <option value="week" {% if period == 'week' %}selected{% endif %} data-i18n="filter.thisWeek">This Week</option>
+                <option value="month" {% if period == 'month' %}selected{% endif %} data-i18n="filter.thisMonth">This Month</option>
+                <option value="year" {% if period == 'year' %}selected{% endif %} data-i18n="filter.thisYear">This Year</option>
+                <option value="custom" {% if period == 'custom' %}selected{% endif %} data-i18n="filter.custom">Custom Range</option>
+            </select>
+            <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}" style="width: 150px;">
+                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}" style="width: 150px;">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm px-16 d-inline-flex align-items-center gap-2">
+                <iconify-icon icon="solar:filter-bold" class="icon"></iconify-icon>
+                <span data-i18n="common.apply">Apply</span>
+            </button>
+            {% if period_label %}
+            <span class="badge bg-primary-light text-primary-main px-12 py-6">
+                <iconify-icon icon="solar:calendar-bold" class="me-1"></iconify-icon>
+                {{ period_label }}
+            </span>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
 <div class="row gy-4">
     <!-- Row 1: Quick Stats Cards -->
     <div class="col-xxl-3 col-sm-6">
@@ -136,45 +166,56 @@
         <div class="card radius-8 border">
             <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="text-lg fw-semibold mb-0" data-i18n="sales.recentOrders">Recent Orders</h6>
-                <a href="{% url 'ordersList' %}" class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
+                <a href="{% url 'orders:ordersList' %}" class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
                     <span data-i18n="common.viewAll">View All</span> <iconify-icon icon="solar:alt-arrow-right-linear" class="icon"></iconify-icon>
                 </a>
             </div>
             <div class="card-body p-24">
-                <div class="table-responsive scroll-sm">
+                <div class="table-responsive">
                     <table class="table bordered-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" data-i18n="table.orderId">Order ID</th>
+                                <th scope="col" class="col-id" data-i18n="table.orderId">#</th>
+                                {% if user.is_superuser or is_owner %}
+                                <th scope="col" data-i18n="table.location">Location</th>
+                                {% endif %}
                                 <th scope="col" data-i18n="table.customer">Customer</th>
-                                <th scope="col" data-i18n="table.product">Product</th>
-                                <th scope="col" data-i18n="table.amount">Amount</th>
-                                <th scope="col" data-i18n="table.date">Date</th>
-                                <th scope="col" data-i18n="table.status">Status</th>
+                                <th scope="col" class="hide-mobile" data-i18n="table.product">Product</th>
+                                <th scope="col" class="col-amount" data-i18n="table.amount">Amount</th>
+                                <th scope="col" class="col-date hide-mobile" data-i18n="table.date">Date</th>
+                                <th scope="col" class="col-status" data-i18n="table.status">Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for order in recent_orders %}
                             <tr>
-                                <td><span class="text-primary-600 fw-medium">#{{ order.id }}</span></td>
-                                <td><span class="text-primary-light fw-medium">{{ order.customer }}</span></td>
-                                <td><span class="text-secondary-light">{{ order.product }}</span></td>
-                                <td><span class="fw-medium">{{ order.total_price|floatformat:0 }} UZS</span></td>
-                                <td><span class="text-secondary-light text-sm">{{ order.created_at }}</span></td>
-                                <td>
+                                <td class="col-id"><span class="text-primary-600 fw-medium">{{ order.id }}</span></td>
+                                {% if user.is_superuser or is_owner %}
+                                <td class="cell-merged-info">
+                                    {% if user.is_superuser %}
+                                    <span class="cell-primary truncate-120">{{ order.center|default:"-"|truncatechars:12 }}</span>
+                                    {% endif %}
+                                    <span class="cell-secondary truncate-120">{{ order.branch|default:"-"|truncatechars:15 }}</span>
+                                </td>
+                                {% endif %}
+                                <td class="truncate-150"><span class="text-primary-light fw-medium">{{ order.customer|truncatechars:18 }}</span></td>
+                                <td class="truncate-120 hide-mobile"><span class="text-secondary-light">{{ order.product|truncatechars:15 }}</span></td>
+                                <td class="col-amount"><span class="fw-medium nowrap">{{ order.total_price|floatformat:0 }}</span></td>
+                                <td class="col-date hide-mobile"><span class="text-secondary-light text-xs">{{ order.created_at|date:"d/m H:i" }}</span></td>
+                                <td class="col-status">
                                     {% if order.status == 'completed' %}
-                                    <span class="bg-success-focus text-success-main px-16 py-4 rounded-pill fw-medium text-sm" data-i18n="status.completed">{{ order.status_display }}</span>
+                                    <span class="bg-success-focus text-success-main status-badge-sm rounded-pill fw-medium" data-i18n="status.completed">Done</span>
                                     {% elif order.status == 'cancelled' %}
-                                    <span class="bg-danger-focus text-danger-main px-16 py-4 rounded-pill fw-medium text-sm" data-i18n="status.cancelled">{{ order.status_display }}</span>
+                                    <span class="bg-danger-focus text-danger-main status-badge-sm rounded-pill fw-medium" data-i18n="status.cancelled">Cancel</span>
                                     {% elif order.status == 'in_progress' %}
-                                    <span class="bg-info-focus text-info-main px-16 py-4 rounded-pill fw-medium text-sm" data-i18n="status.inProgress">{{ order.status_display }}</span>
+                                    <span class="bg-info-focus text-info-main status-badge-sm rounded-pill fw-medium" data-i18n="status.inProgress">Active</span>
                                     {% else %}
-                                    <span class="bg-warning-focus text-warning-main px-16 py-4 rounded-pill fw-medium text-sm" data-i18n="status.pending">{{ order.status_display }}</span>
+                                    <span class="bg-warning-focus text-warning-main status-badge-sm rounded-pill fw-medium" data-i18n="status.pending">Pend</span>
                                     {% endif %}
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="6" class="text-center text-secondary-light py-24" data-i18n="table.noRecentOrders">No recent orders</td></tr>
+                            <tr><td colspan="{% if user.is_superuser or is_owner %}7{% else %}5{% endif %}" class="text-center text-secondary-light py-24" data-i18n="table.noRecentOrders">No recent orders</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -196,14 +237,14 @@
                 </select>
             </div>
             <div class="card-body p-24">
-                <div class="table-responsive scroll-sm">
+                <div class="table-responsive">
                     <table class="table bordered-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col">#</th>
+                                <th scope="col" class="col-id">#</th>
                                 <th scope="col" data-i18n="table.agency">Agency</th>
-                                <th scope="col" class="text-center" data-i18n="table.orders">Orders</th>
-                                <th scope="col" data-i18n="table.revenue">Revenue</th>
+                                <th scope="col" class="text-center col-id" data-i18n="table.orders">#</th>
+                                <th scope="col" class="col-amount" data-i18n="table.revenue">Revenue</th>
                             </tr>
                         </thead>
                         <tbody id="agenciesTableBody"></tbody>
@@ -228,14 +269,14 @@
                 </select>
             </div>
             <div class="card-body p-24">
-                <div class="table-responsive scroll-sm">
+                <div class="table-responsive">
                     <table class="table bordered-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col">#</th>
+                                <th scope="col" class="col-id">#</th>
                                 <th scope="col" data-i18n="table.customer">Customer</th>
-                                <th scope="col" class="text-center" data-i18n="table.orders">Orders</th>
-                                <th scope="col" data-i18n="table.revenue">Revenue</th>
+                                <th scope="col" class="text-center col-id" data-i18n="table.orders">#</th>
+                                <th scope="col" class="col-amount" data-i18n="table.revenue">Revenue</th>
                             </tr>
                         </thead>
                         <tbody id="customersTableBody"></tbody>
@@ -252,6 +293,22 @@
 
 {% block script %}
 <script>
+// Main period filter toggle for custom date range
+const mainPeriodSelect = document.getElementById('mainPeriodSelect');
+const customDateRange = document.getElementById('customDateRange');
+
+if (mainPeriodSelect && customDateRange) {
+    mainPeriodSelect.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            customDateRange.style.display = 'flex';
+        } else {
+            customDateRange.style.display = 'none';
+            // Auto-submit when not custom
+            this.form.submit();
+        }
+    });
+}
+
 const ordersData = {
     today: { count: {{ today_count }}, revenue: {{ today_revenue }}, change: {{ today_change }}, dailyAvg: {{ today_daily_avg }}, chartData: {{ today_chart_data|safe }}, chartLabels: {{ today_chart_labels|safe }} },
     weekly: { count: {{ weekly_count }}, revenue: {{ weekly_revenue }}, change: {{ weekly_change }}, dailyAvg: {{ weekly_daily_avg }}, chartData: {{ weekly_chart_data|safe }}, chartLabels: {{ weekly_chart_labels|safe }} },
@@ -296,16 +353,16 @@ function initOrdersChart() {
     const colors = getThemeColors();
     const data = ordersData.yearly;
     ordersChart = new ApexCharts(document.querySelector("#ordersChart"), {
-        series: [{ name: 'Revenue', data: data.chartData }],
+        series: [{ name: 'Orders', data: data.chartData }],
         chart: { type: 'area', height: 264, toolbar: { show: false } },
         colors: ['#487FFF'],
         fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1 } },
         stroke: { curve: 'smooth', width: 2 },
         dataLabels: { enabled: false },
         xaxis: { categories: data.chartLabels, labels: { style: { colors: colors.textColor, fontSize: '12px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-        yaxis: { labels: { formatter: val => val >= 1000000 ? (val/1000000).toFixed(1)+'M' : val >= 1000 ? (val/1000).toFixed(0)+'K' : val, style: { colors: colors.textColor, fontSize: '12px' } } },
+        yaxis: { labels: { style: { colors: colors.textColor, fontSize: '12px' } } },
         grid: { borderColor: colors.gridColor, strokeDashArray: 3 },
-        tooltip: { y: { formatter: val => formatNumber(val) + ' UZS' } }
+        tooltip: { y: { formatter: val => formatNumber(val) + ' orders' } }
     });
     ordersChart.render();
 }
@@ -313,7 +370,7 @@ function initOrdersChart() {
 function updateOrdersChart(period) {
     const data = ordersData[period];
     ordersChart.updateOptions({ xaxis: { categories: data.chartLabels } });
-    ordersChart.updateSeries([{ name: 'Revenue', data: data.chartData }]);
+    ordersChart.updateSeries([{ name: 'Orders', data: data.chartData }]);
 }
 
 // Status Donut Chart

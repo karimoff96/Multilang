@@ -1,0 +1,263 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+{% load number_filters %}
+
+{% block content %}
+<div class="row gy-4">
+    <div class="col-12">
+        <div class="card h-100 p-0 radius-12">
+            <div class="card-header border-bottom bg-base py-16 px-24">
+                <h6 class="text-lg fw-semibold mb-0">{{ title }}</h6>
+            </div>
+            <div class="card-body p-24">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="row gy-3">
+                        <!-- User Account Section -->
+                        <div class="col-12">
+                            <h6 class="text-md fw-semibold mb-16 pb-8 border-bottom" data-i18n="form.accountInfo">Account Information</h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <span data-i18n="form.username">Username</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="username" class="form-control radius-8" 
+                                   value="{% if staff_member %}{{ staff_member.user.username }}{% endif %}"
+                                   {% if staff_member %}readonly{% endif %}
+                                   data-i18n-placeholder="form.enterUsername" placeholder="Enter username" required>
+                            {% if staff_member %}
+                            <small class="text-secondary-light" data-i18n="form.usernameCannotChange">Username cannot be changed</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.email">Email</label>
+                            <input type="email" name="email" class="form-control radius-8" 
+                                   value="{% if staff_member %}{{ staff_member.user.email }}{% endif %}"
+                                   data-i18n-placeholder="form.enterEmail" placeholder="Enter email">
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <span data-i18n="form.firstName">First Name</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="first_name" class="form-control radius-8" 
+                                   value="{% if staff_member %}{{ staff_member.user.first_name }}{% endif %}"
+                                   data-i18n-placeholder="form.enterFirstName" placeholder="Enter first name" required>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.lastName">Last Name</label>
+                            <input type="text" name="last_name" class="form-control radius-8" 
+                                   value="{% if staff_member %}{{ staff_member.user.last_name }}{% endif %}"
+                                   data-i18n-placeholder="form.enterLastName" placeholder="Enter last name">
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <span data-i18n="form.password">Password</span> {% if not staff_member %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            <input type="password" name="password" class="form-control radius-8" 
+                                   data-i18n-placeholder="{% if staff_member %}form.leaveBlankToKeep{% else %}form.enterPassword{% endif %}" placeholder="{% if staff_member %}Leave blank to keep current{% else %}Enter password{% endif %}"
+                                   {% if not staff_member %}required{% endif %}>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.phone">Phone</label>
+                            <input type="tel" name="phone" class="form-control radius-8" 
+                                   value="{% if staff_member %}{{ staff_member.phone|default:'' }}{% endif %}"
+                                   data-i18n-placeholder="form.enterPhone" placeholder="Enter phone number">
+                        </div>
+                        
+                        <!-- Role & Assignment Section -->
+                        <div class="col-12 mt-24">
+                            <h6 class="text-md fw-semibold mb-16 pb-8 border-bottom" data-i18n="form.roleAssignment">Role & Assignment</h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <span data-i18n="form.role">Role</span> <span class="text-danger">*</span>
+                            </label>
+                            <select name="role" id="role-select" class="form-select radius-8" required onchange="updatePermissionDisplay()">
+                                <option value="" data-i18n="form.selectRole">Select Role</option>
+                                {% for role in roles %}
+                                <option value="{{ role.id }}" 
+                                        {% if staff_member and staff_member.role_id == role.id %}selected{% endif %}
+                                        data-permissions='{% for perm in all_permissions %}{% if role|has_effective_permission:perm %}"{{ perm }}",{% endif %}{% endfor %}'>
+                                    {{ role.get_name_display }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-secondary-light" data-i18n="form.roleHelp">Select a role to see its permissions below</small>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <span data-i18n="form.branch">Branch</span> <span class="text-danger">*</span>
+                            </label>
+                            <select name="branch" class="form-select radius-8" required>
+                                <option value="" data-i18n="form.selectBranch">Select Branch</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}" {% if staff_member and staff_member.branch_id == branch.id %}selected{% endif %}>
+                                    {{ branch.name }} ({{ branch.center.name }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        {% if staff_member %}
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.status">Status</label>
+                            <div class="form-check form-switch switch-primary d-flex align-items-center gap-3">
+                                <input class="form-check-input" type="checkbox" role="switch" 
+                                       name="is_active" id="is_active" {% if staff_member.is_active %}checked{% endif %}>
+                                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="is_active" data-i18n="common.active">
+                                    Active
+                                </label>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Role Permissions Display Section -->
+                        <div class="col-12 mt-24">
+                            <h6 class="text-md fw-semibold mb-16 pb-8 border-bottom" data-i18n="form.rolePermissions">Role Permissions</h6>
+                            <p class="text-secondary-light text-sm mb-16" data-i18n="form.permissionsHelp">
+                                The selected role grants the following permissions to this user:
+                            </p>
+                            
+                            <div id="permissions-display">
+                                <!-- No role selected message -->
+                                <div class="text-center py-24 text-secondary-light {% if staff_member %}d-none{% endif %}" id="no-role-selected">
+                                    <iconify-icon icon="solar:shield-keyhole-bold" class="text-4xl mb-8"></iconify-icon>
+                                    <p data-i18n="form.selectRoleFirst">Select a role to view its permissions</p>
+                                </div>
+                                
+                                <!-- Permission Categories -->
+                                <div id="permission-categories" class="{% if not staff_member %}d-none{% endif %}">
+                                    <div class="row g-4">
+                                        {% for cat_key, category in permission_categories.items %}
+                                        <div class="col-lg-6 col-12 permission-category" data-category="{{ cat_key }}">
+                                            <div class="card border radius-8 h-100">
+                                                <div class="card-header bg-neutral-50 py-12 px-16">
+                                                    <h6 class="text-sm fw-semibold mb-0 d-flex align-items-center gap-8">
+                                                        <iconify-icon icon="{% if category.icon == 'fa-building' %}solar:buildings-2-bold{% elif category.icon == 'fa-code-branch' %}solar:home-smile-bold{% elif category.icon == 'fa-users' %}solar:users-group-rounded-bold{% elif category.icon == 'fa-file-lines' %}solar:document-text-bold{% elif category.icon == 'fa-money-bill-wave' %}solar:wallet-money-bold{% elif category.icon == 'fa-chart-line' %}solar:chart-2-bold{% elif category.icon == 'fa-box' %}solar:box-bold{% elif category.icon == 'fa-user-group' %}solar:user-rounded-bold{% elif category.icon == 'fa-bullhorn' %}solar:volume-loud-bold{% elif category.icon == 'fa-cog' %}solar:settings-bold{% elif category.icon == 'fa-handshake' %}solar:hand-shake-bold{% else %}solar:shield-check-bold{% endif %}" 
+                                                               class="text-{% if category.color == 'primary' %}primary{% elif category.color == 'success' %}success{% elif category.color == 'warning' %}warning{% elif category.color == 'info' %}info{% elif category.color == 'danger' %}danger{% else %}secondary{% endif %}-600 text-lg"></iconify-icon>
+                                                        {{ category.title }}
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body p-12">
+                                                    <div class="d-flex flex-column gap-8">
+                                                        {% for perm in category.permissions %}
+                                                        <div class="permission-item d-flex align-items-center gap-8 p-8 radius-4" data-permission="{{ perm }}">
+                                                            {% if staff_member %}
+                                                                {% with has_perm=staff_member.role|has_effective_permission:perm %}
+                                                                <iconify-icon icon="{% if has_perm %}solar:check-circle-bold{% else %}solar:close-circle-bold{% endif %}" 
+                                                                              class="{% if has_perm %}text-success-600{% else %}text-neutral-400{% endif %} text-lg perm-icon"></iconify-icon>
+                                                                <span class="text-sm {% if has_perm %}fw-medium text-dark{% else %}text-secondary-light{% endif %} perm-label">
+                                                                    {{ permission_labels|default_if_none:""|get_item:perm|default:perm }}
+                                                                </span>
+                                                                {% endwith %}
+                                                            {% else %}
+                                                                <iconify-icon icon="solar:close-circle-bold" class="text-neutral-400 text-lg perm-icon"></iconify-icon>
+                                                                <span class="text-sm text-secondary-light perm-label">
+                                                                    {{ permission_labels|default_if_none:""|get_item:perm|default:perm }}
+                                                                </span>
+                                                            {% endif %}
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
+                        <a href="{% url 'staff_list' %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8" data-i18n="common.cancel">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8" data-i18n="{% if staff_member %}form.updateStaff{% else %}form.createStaff{% endif %}">
+                            {% if staff_member %}Update{% else %}Create{% endif %} Staff
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Permission labels mapping
+const permissionLabels = {
+    {% for perm, label in permission_labels.items %}
+    "{{ perm }}": "{{ label }}",
+    {% endfor %}
+};
+
+function updatePermissionDisplay() {
+    const roleSelect = document.getElementById('role-select');
+    const selectedOption = roleSelect.options[roleSelect.selectedIndex];
+    const noRoleMsg = document.getElementById('no-role-selected');
+    const permCategories = document.getElementById('permission-categories');
+    const permItems = document.querySelectorAll('.permission-item');
+    
+    if (!selectedOption.value) {
+        // No role selected
+        if (noRoleMsg) noRoleMsg.classList.remove('d-none');
+        if (permCategories) permCategories.classList.add('d-none');
+        return;
+    }
+    
+    // Get permissions for selected role
+    let permsData = selectedOption.getAttribute('data-permissions') || '';
+    permsData = permsData.replace(/,\s*$/, ''); // Remove trailing comma
+    let rolePerms = [];
+    try {
+        rolePerms = JSON.parse('[' + permsData + ']');
+    } catch(e) {
+        rolePerms = [];
+    }
+    
+    // Hide "no role selected" message, show categories
+    if (noRoleMsg) noRoleMsg.classList.add('d-none');
+    if (permCategories) permCategories.classList.remove('d-none');
+    
+    // Update each permission item
+    permItems.forEach(item => {
+        const perm = item.getAttribute('data-permission');
+        const hasPerm = rolePerms.includes(perm);
+        const icon = item.querySelector('.perm-icon');
+        const label = item.querySelector('.perm-label');
+        
+        if (hasPerm) {
+            icon.setAttribute('icon', 'solar:check-circle-bold');
+            icon.classList.remove('text-neutral-400');
+            icon.classList.add('text-success-600');
+            if (label) {
+                label.classList.remove('text-secondary-light');
+                label.classList.add('fw-medium', 'text-dark');
+            }
+        } else {
+            icon.setAttribute('icon', 'solar:close-circle-bold');
+            icon.classList.remove('text-success-600');
+            icon.classList.add('text-neutral-400');
+            if (label) {
+                label.classList.add('text-secondary-light');
+                label.classList.remove('fw-medium', 'text-dark');
+            }
+        }
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updatePermissionDisplay();
+});
+</script>
+{% endblock %}
