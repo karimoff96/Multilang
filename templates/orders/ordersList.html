@@ -204,6 +204,16 @@
                     {% endfor %}
                 </select>
                 {% endif %}
+                {% if staff_members %}
+                <select name="staff" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="" data-i18n="orders.allStaff">All Staff</option>
+                    {% for staff in staff_members %}
+                    <option value="{{ staff.id }}" {% if staff_filter == staff.id|stringformat:"i" %}selected{% endif %}>
+                        {{ staff.user.get_full_name|default:staff.user.username }}{% if staff.role %} ({{ staff.role.name }}){% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% endif %}
                 {% if can_view_all %}
                 <select name="assignment" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
                     <option value="" data-i18n="orders.allOrders">All Orders</option>
@@ -300,7 +310,8 @@
                                     <input class="form-check-input radius-4 border border-neutral-400 order-checkbox" type="checkbox" name="order_ids" value="{{ order.id }}">
                                 </div>
                                 <div>
-                                    <span class="fw-semibold text-primary-600">#{{ order.id }}</span>
+                                    <span class="fw-semibold text-primary-600">#{{ order.get_order_number }}</span>
+                                </div>
                                     {% with pending_count=order.receipts.all|length %}
                                     {% if pending_count > 0 %}
                                     <span class="badge bg-warning-focus text-warning-600 ms-4" title="Pending receipts">
@@ -331,11 +342,11 @@
                         <td>
                             <div class="d-flex align-items-center">
                                 <div class="w-32-px h-32-px rounded-circle flex-shrink-0 me-8 overflow-hidden bg-primary-100 d-flex align-items-center justify-content-center">
-                                    <span class="text-primary-600 fw-semibold text-xs">{{ order.bot_user.name|slice:":1"|upper }}</span>
+                                    <span class="text-primary-600 fw-semibold text-xs">{{ order.get_customer_display_name|slice:":1"|upper }}</span>
                                 </div>
                                 <div>
-                                    <span class="text-sm fw-medium text-secondary-light d-block" style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ order.bot_user.name }}</span>
-                                    <small class="text-secondary-light" style="font-size: 11px;">{{ order.bot_user.phone }}</small>
+                                    <span class="text-sm fw-medium text-secondary-light d-block" style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ order.get_customer_display_name }}</span>
+                                    <small class="text-secondary-light" style="font-size: 11px;">{{ order.get_customer_phone }}</small>
                                 </div>
                             </div>
                         </td>
@@ -431,7 +442,7 @@
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title"><span data-i18n="orders.delete">Delete Order</span> #{{ order.id }}</h5>
+                                            <h5 class="modal-title"><span data-i18n="orders.delete">Delete Order</span> #{{ order.get_order_number }}</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body" data-i18n="common.confirmDeleteOrder">
