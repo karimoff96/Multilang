@@ -431,7 +431,7 @@ def sales(request):
     def get_top_users(orders_queryset, is_agency=True, limit=5):
         """Get top users by order count"""
         return (
-            orders_queryset.filter(bot_user__is_agency=is_agency)
+            orders_queryset.filter(bot_user__isnull=False, bot_user__is_agency=is_agency)
             .values(
                 "bot_user__id",
                 "bot_user__name",
@@ -842,10 +842,10 @@ def finance(request):
 
     # ============ REVENUE BY USER TYPE (Agency vs Regular) ============
     def get_user_type_revenue(orders_queryset):
-        agency = orders_queryset.filter(bot_user__is_agency=True).aggregate(
+        agency = orders_queryset.filter(bot_user__isnull=False, bot_user__is_agency=True).aggregate(
             count=Count("id"), revenue=Sum("total_price")
         )
-        regular = orders_queryset.filter(bot_user__is_agency=False).aggregate(
+        regular = orders_queryset.filter(bot_user__isnull=False, bot_user__is_agency=False).aggregate(
             count=Count("id"), revenue=Sum("total_price")
         )
         return {

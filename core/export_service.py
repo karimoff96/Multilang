@@ -1019,7 +1019,7 @@ def export_customer_analytics(
     ))
     
     # Sheet 2: Top Customers by Revenue
-    top_customers = orders.values(
+    top_customers = orders.filter(bot_user__isnull=False).values(
         'bot_user__id', 'bot_user__name', 'bot_user__phone', 'bot_user__is_agency'
     ).annotate(
         order_count=Count('id'),
@@ -1077,8 +1077,8 @@ def export_customer_analytics(
     ))
     
     # Sheet 4: B2B vs B2C Breakdown
-    b2b_orders = orders.filter(bot_user__is_agency=True)
-    b2c_orders = orders.filter(bot_user__is_agency=False)
+    b2b_orders = orders.filter(bot_user__isnull=False, bot_user__is_agency=True)
+    b2c_orders = orders.filter(bot_user__isnull=False, bot_user__is_agency=False)
     
     type_data = [
         [

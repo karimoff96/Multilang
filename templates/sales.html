@@ -320,6 +320,23 @@ const topAgenciesData = {{ top_agencies_data|safe }};
 const topCustomersData = {{ top_customers_data|safe }};
 const completionRatesData = {{ completion_rates|safe }};
 
+// Debug: Log the data to console
+console.log('=== SALES PAGE DEBUG ===');
+console.log('Top Agencies Data:', topAgenciesData);
+console.log('Top Customers Data:', topCustomersData);
+console.log('Top Agencies (yearly):', topAgenciesData?.yearly);
+console.log('Top Customers (yearly):', topCustomersData?.yearly);
+console.log('Type of topAgenciesData:', typeof topAgenciesData);
+console.log('Type of topCustomersData:', typeof topCustomersData);
+
+// Show alert if no data
+if (!topAgenciesData || !topAgenciesData.yearly || topAgenciesData.yearly.length === 0) {
+    console.warn('WARNING: No agencies data for yearly period!');
+}
+if (!topCustomersData || !topCustomersData.yearly || topCustomersData.yearly.length === 0) {
+    console.warn('WARNING: No customers data for yearly period!');
+}
+
 function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
 function formatShort(num) {
     num = parseFloat(num) || 0;
@@ -416,14 +433,31 @@ function initStatusDonutChart() {
 
 // Top Tables
 function updateAgenciesTable(period) {
+    console.log('updateAgenciesTable called with period:', period);
     const agencies = topAgenciesData[period] || [];
+    console.log('Agencies for period', period, ':', agencies);
+    console.log('Agencies count:', agencies.length);
+    
     const tbody = document.getElementById('agenciesTableBody');
     const empty = document.getElementById('noAgenciesMessage');
+    
+    if (!tbody) {
+        console.error('ERROR: agenciesTableBody element not found!');
+        return;
+    }
+    if (!empty) {
+        console.error('ERROR: noAgenciesMessage element not found!');
+        return;
+    }
+    
     if (!agencies || agencies.length === 0) {
+        console.log('No agencies found, showing empty message');
         tbody.innerHTML = '';
         empty.classList.remove('d-none');
         return;
     }
+    
+    console.log('Rendering', agencies.length, 'agencies');
     empty.classList.add('d-none');
     tbody.innerHTML = agencies.map((a, i) => 
         '<tr><td class="text-primary-600 fw-medium">' + (i+1) + '</td>' +
@@ -431,17 +465,35 @@ function updateAgenciesTable(period) {
         '<td class="text-center"><span class="bg-info-focus text-info-main px-12 py-4 rounded-pill fw-medium text-sm">' + a.order_count + '</span></td>' +
         '<td class="fw-medium">' + formatNumber(a.total_spent) + ' UZS</td></tr>'
     ).join('');
+    console.log('Table HTML updated');
 }
 
 function updateCustomersTable(period) {
+    console.log('updateCustomersTable called with period:', period);
     const customers = topCustomersData[period] || [];
+    console.log('Customers for period', period, ':', customers);
+    console.log('Customers count:', customers.length);
+    
     const tbody = document.getElementById('customersTableBody');
     const empty = document.getElementById('noCustomersMessage');
+    
+    if (!tbody) {
+        console.error('ERROR: customersTableBody element not found!');
+        return;
+    }
+    if (!empty) {
+        console.error('ERROR: noCustomersMessage element not found!');
+        return;
+    }
+    
     if (!customers || customers.length === 0) {
+        console.log('No customers found, showing empty message');
         tbody.innerHTML = '';
         empty.classList.remove('d-none');
         return;
     }
+    
+    console.log('Rendering', customers.length, 'customers');
     empty.classList.add('d-none');
     tbody.innerHTML = customers.map((c, i) => 
         '<tr><td class="text-primary-600 fw-medium">' + (i+1) + '</td>' +
@@ -449,15 +501,24 @@ function updateCustomersTable(period) {
         '<td class="text-center"><span class="bg-success-focus text-success-main px-12 py-4 rounded-pill fw-medium text-sm">' + c.order_count + '</span></td>' +
         '<td class="fw-medium">' + formatNumber(c.total_spent) + ' UZS</td></tr>'
     ).join('');
+    console.log('Table HTML updated');
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== DOM CONTENT LOADED ===');
+    console.log('Initializing sales page...');
+    
     initOrdersChart();
     initStatusDonutChart();
     updateStatCards('yearly');
+    
+    console.log('Calling updateAgenciesTable(yearly)...');
     updateAgenciesTable('yearly');
+    
+    console.log('Calling updateCustomersTable(yearly)...');
     updateCustomersTable('yearly');
     
+    console.log('Setting up event listeners...');
     document.getElementById('ordersPeriodSelect').addEventListener('change', function(e) {
         const period = e.target.value;
         updateStatCards(period);
@@ -467,6 +528,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('statusPeriodSelect').addEventListener('change', e => updateStatusChart(e.target.value));
     document.getElementById('agenciesPeriodSelect').addEventListener('change', e => updateAgenciesTable(e.target.value));
     document.getElementById('customersPeriodSelect').addEventListener('change', e => updateCustomersTable(e.target.value));
+    
+    console.log('=== SALES PAGE INITIALIZATION COMPLETE ===');
 });
 </script>
 {% endblock script %}

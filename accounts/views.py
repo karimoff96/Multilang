@@ -264,6 +264,7 @@ def addUser(request):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_view_customers')
 def usersList(request):
     """List all BotUsers with search and filter - RBAC filtered"""
     from organizations.rbac import get_user_customers
@@ -515,6 +516,7 @@ def deleteUser(request, user_id):
 
 
 @login_required(login_url="admin_login")
+@permission_required('can_view_customers')
 def userDetail(request):
     """View BotUser (Telegram user) profile details"""
     from orders.models import Order

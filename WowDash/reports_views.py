@@ -484,43 +484,83 @@ def staff_performance(request):
     all_orders = get_user_orders(request.user)
     branches = get_user_branches(request.user)
 
-    # Center filter for superuser
+    # Determine user's access level
     centers = None
+    user_center = None
+    user_branch = None
+    is_center_level = False
+    is_branch_level = False
+    
     if request.user.is_superuser:
+        # Superuser sees all centers
         centers = TranslationCenter.objects.filter(is_active=True)
+        is_center_level = True
         if center_id:
             all_orders = all_orders.filter(branch__center_id=center_id)
             branches = branches.filter(center_id=center_id)
+    elif hasattr(request, "admin_profile") and request.admin_profile:
+        admin_profile = request.admin_profile
+        
+        # Check if user has center-level access (owner or has center in profile)
+        if admin_profile.center:
+            user_center = admin_profile.center
+            # Owner or user with center assigned - center level access
+            is_center_level = True
+            # Show their center in dropdown for consistency
+            centers = TranslationCenter.objects.filter(id=user_center.id)
+            # If they selected a center filter (should be their own), apply it
+            if center_id and str(center_id) == str(user_center.id):
+                all_orders = all_orders.filter(branch__center=user_center)
+                branches = branches.filter(center=user_center)
+        
+        # Check if user has only branch-level access
+        if admin_profile.branch and not is_center_level:
+            user_branch = admin_profile.branch
+            is_branch_level = True
+            # Branch-level users don't get center dropdown, only their branch's data
+            branches = branches.filter(id=user_branch.id)
+            all_orders = all_orders.filter(branch=user_branch)
 
-    # Filter orders by date and branch
+    # Filter orders by date
     orders = all_orders.filter(created_at__gte=date_from, created_at__lte=date_to)
 
+    # Apply branch filter
+    selected_branch = None
     if branch_id:
         orders = orders.filter(branch_id=branch_id)
         selected_branch = branches.filter(id=branch_id).first()
-    else:
-        selected_branch = None
 
-    # Get staff members based on permissions
+    # Get staff members based on user's access level
     if request.user.is_superuser:
-        staff_members = AdminUser.objects.filter(is_active=True)
+        staff_members = AdminUser.objects.filter(is_active=True).select_related('user', 'role', 'branch', 'branch__center', 'center')
         if center_id:
-            staff_members = staff_members.filter(branch__center_id=center_id)
+            # Filter by center - staff can be in center OR have branches in that center
+            staff_members = staff_members.filter(
+                models.Q(center_id=center_id) | models.Q(branch__center_id=center_id)
+            )
     elif hasattr(request, "admin_profile") and request.admin_profile:
-        if request.admin_profile.is_owner:
+        admin_profile = request.admin_profile
+        
+        if is_center_level and user_center:
+            # Center-level user: show all staff in their center (across all branches)
             staff_members = AdminUser.objects.filter(
-                center=request.admin_profile.center, is_active=True
-            )
-        elif request.admin_profile.is_manager:
+                models.Q(center=user_center) | models.Q(branch__center=user_center),
+                is_active=True
+            ).select_related('user', 'role', 'branch', 'branch__center', 'center').distinct()
+        elif is_branch_level and user_branch:
+            # Branch-level user: show only staff in their branch
             staff_members = AdminUser.objects.filter(
-                branch=request.admin_profile.branch, is_active=True
-            )
+                branch=user_branch,
+                is_active=True
+            ).select_related('user', 'role', 'branch', 'branch__center')
         else:
-            staff_members = AdminUser.objects.filter(pk=request.admin_profile.pk)
+            # Fallback: show only themselves
+            staff_members = AdminUser.objects.filter(pk=admin_profile.pk).select_related('user', 'role', 'branch', 'branch__center')
     else:
         staff_members = AdminUser.objects.none()
 
-    if branch_id:
+    # Apply branch filter to staff if specified
+    if branch_id and is_center_level:
         staff_members = staff_members.filter(branch_id=branch_id)
 
     # Calculate performance for each staff member
@@ -589,6 +629,11 @@ def staff_performance(request):
         "selected_branch": branch_id,
         "centers": centers,
         "selected_center": center_id,
+        # Access level info
+        "is_center_level": is_center_level,
+        "is_branch_level": is_branch_level,
+        "user_center": user_center,
+        "user_branch": user_branch,
         # Staff data with pagination
         "staff_data": staff_page,
         "staff_page": staff_page,
@@ -775,7 +820,8 @@ def customer_analytics(request):
 
     # Top customers by orders
     top_customers = (
-        orders.values("bot_user__id", "bot_user__name", "bot_user__is_agency")
+        orders.filter(bot_user__isnull=False)
+        .values("bot_user__id", "bot_user__name", "bot_user__is_agency")
         .annotate(order_count=Count("id"), total_spent=Sum("total_price"))
         .order_by("-total_spent")[:10]
     )

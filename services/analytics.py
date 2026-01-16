@@ -162,7 +162,7 @@ def get_remaining_by_client_type(user, date_from=None, date_to=None):
     
     orders = orders.exclude(status='cancelled')
     
-    client_data = orders.annotate(
+    client_data = orders.filter(bot_user__isnull=False).annotate(
         total_due=Coalesce(F('total_price'), Decimal('0')) + Coalesce(F('extra_fee'), Decimal('0')),
         calc_remaining=Case(
             When(payment_accepted_fully=True, then=Decimal('0')),
@@ -298,7 +298,7 @@ def get_top_debtors(user, limit=10, date_from=None, date_to=None):
     
     orders = orders.exclude(status='cancelled')
     
-    customer_data = orders.annotate(
+    customer_data = orders.filter(bot_user__isnull=False).annotate(
         total_due=Coalesce(F('total_price'), Decimal('0')) + Coalesce(F('extra_fee'), Decimal('0')),
         calc_remaining=Case(
             When(payment_accepted_fully=True, then=Decimal('0')),
