@@ -18,12 +18,12 @@
     {% else %}
     <!-- Other users with view_all permission: Show toggle buttons -->
     <div class="btn-group" role="group">
-        <a href="?view=all{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}" 
+        <a href="?view=all{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}" 
            class="btn {% if view_mode == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm px-16">
             <iconify-icon icon="solar:documents-bold" class="me-4"></iconify-icon>
             <span data-i18n="orders.allOrders">All Orders</span> <span class="badge {% if view_mode == 'all' %}bg-white text-primary-600{% else %}bg-primary-100 text-primary-600{% endif %} ms-4">{{ stats.total }}</span>
         </a>
-        <a href="?view=mine{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}" 
+        <a href="?view=mine{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}" 
            class="btn {% if view_mode == 'mine' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm px-16">
             <iconify-icon icon="solar:user-bold" class="me-4"></iconify-icon>
             <span data-i18n="orders.myOrders">My Orders</span> {% if my_stats %}<span class="badge {% if view_mode == 'mine' %}bg-white text-primary-600{% else %}bg-primary-100 text-primary-600{% endif %} ms-4">{{ my_stats.total }}</span>{% endif %}
@@ -144,7 +144,7 @@
     <!-- Pending Receipts Card -->
     {% if pending_receipts_count > 0 or has_pending_receipts == 'true' %}
     <div class="col-xxl-2 col-lg-4 col-sm-6">
-        <a href="{% if has_pending_receipts == 'true' %}{% url 'orders:ordersList' %}{% else %}{% url 'orders:ordersList' %}?has_pending_receipts=true{% endif %}" class="text-decoration-none">
+        <a href="{% if has_pending_receipts == 'true' %}?view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}{% else %}?has_pending_receipts=true&view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}{% endif %}" class="text-decoration-none">
             <div class="card px-16 py-12 shadow-none radius-8 border h-100 {% if has_pending_receipts == 'true' %}border-warning{% endif %}">
                 <div class="d-flex align-items-center gap-2">
                     <div class="w-48-px h-48-px radius-8 bg-warning-100 d-flex justify-content-center align-items-center">
@@ -162,10 +162,10 @@
 </div>
 
 <div class="card h-100 p-0 radius-12">
-    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
-        <div class="d-flex align-items-center flex-wrap gap-3">
-            <span class="text-md fw-medium text-secondary-light mb-0" data-i18n="orders.show">Show</span>
-            <form method="get" class="d-flex align-items-center gap-3 flex-wrap">
+    <div class="card-header border-bottom bg-base py-16 px-24">
+        <form method="get" id="filterForm">
+            <div class="d-flex align-items-center flex-wrap gap-3">
+                <span class="text-md fw-medium text-secondary-light mb-0" data-i18n="orders.show">Show</span>
                 <select name="per_page" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
                     <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
                     <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
@@ -221,24 +221,25 @@
                     <option value="assigned" {% if assignment_filter == 'assigned' %}selected{% endif %} data-i18n="common.assigned">Assigned</option>
                 </select>
                 {% endif %}
-                <!-- Preserve view mode in form -->
+                
+                <!-- Hidden field to preserve view mode -->
                 <input type="hidden" name="view" value="{{ view_mode }}">
-            </form>
-            
-            <!-- Actions Dropdown -->
-            {% can_do 'orders.delete' as can_delete_orders_perm %}
-            {% if can_delete_orders_perm or can_delete_orders %}
-            <div class="d-flex align-items-center gap-2" style="margin-left: 10px;">
-                <select id="bulkActionSelect" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px">
-                    <option value="" data-i18n="common.actions">Actions</option>
-                    <option value="delete" data-i18n="common.deleteSelected">Delete selected</option>
-                </select>
-                <button id="applyBulkAction" class="btn btn-primary btn-sm px-16 h-40-px" disabled>
-                    <span data-i18n="common.apply">Apply</span>
-                </button>
+                
+                <!-- Actions Dropdown -->
+                {% can_do 'orders.delete' as can_delete_orders_perm %}
+                {% if can_delete_orders_perm or can_delete_orders %}
+                <div class="d-flex align-items-center gap-2">
+                    <select id="bulkActionSelect" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px">
+                        <option value="" data-i18n="common.actions">Actions</option>
+                        <option value="delete" data-i18n="common.deleteSelected">Delete selected</option>
+                    </select>
+                    <button type="button" id="applyBulkAction" class="btn btn-primary btn-sm px-16 h-40-px" disabled>
+                        <span data-i18n="common.apply">Apply</span>
+                    </button>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
-        </div>
+        </form>
     </div>
     
     <!-- Bulk Delete Confirmation Modal -->
