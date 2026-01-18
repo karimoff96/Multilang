@@ -1259,7 +1259,7 @@ def get_user_step(user_id):
 def calculate_order_pricing(order, user):
     """
     Calculate order pricing with copy charges
-    Returns: (base_price, copy_charge, total_price, copy_percentage)
+    Returns: (base_price, copy_charge, total_price, copy_pricing_value, copy_pricing_is_percentage)
     """
     # Determine charging type
     is_dynamic = order.product.category.charging == "dynamic"
@@ -1297,19 +1297,33 @@ def calculate_order_pricing(order, user):
 
     # Calculate copy charge
     copy_charge = 0
+    copy_pricing_value = 0
+    copy_pricing_is_percentage = True
     if order.copy_number > 0:
         if use_percentage:
             # Old system: percentage of base price
             copy_charge = (base_price * copy_percentage * order.copy_number) / 100
-            copy_display = copy_percentage  # For return value (percentage)
+            copy_pricing_value = copy_percentage
+            copy_pricing_is_percentage = True
         else:
             # New system: fixed price per copy
             copy_charge = copy_multiplier * order.copy_number
-            copy_display = copy_multiplier  # For return value (fixed price)
+            copy_pricing_value = copy_multiplier
+            copy_pricing_is_percentage = False
 
     total_price = base_price + copy_charge
 
-    return base_price, copy_charge, total_price, copy_display if order.copy_number > 0 else 0
+    return base_price, copy_charge, total_price, copy_pricing_value, copy_pricing_is_percentage
+
+
+def format_copy_pricing_label(value, is_percentage, language):
+    if is_percentage:
+        return f"{value}%"
+    if language == "ru":
+        return f"{value:,.0f} 																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															 a0 a0 a0 a0 a0 a0 a0 a0сум/копия"
+    if language == "en":
+        return f"{value:,.0f} sum/copy"
+    return f"{value:,.0f} so'm/nusxa"
 @bot.message_handler(commands=["start"])
 def start(message):
     import uuid as uuid_module
