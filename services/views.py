@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 from decimal import Decimal, InvalidOperation
 from .models import Category, Product, Language, Expense
 from organizations.rbac import get_user_categories, get_user_products, get_user_branches, get_user_expenses, permission_required, any_permission_required
-from organizations.models import TranslationCenter
+from organizations.models import TranslationCenter, Branch
 
 logger = logging.getLogger(__name__)
 audit_logger = logging.getLogger('audit')
@@ -722,13 +722,18 @@ def expenseDetail(request, expense_id):
 @any_permission_required('can_create_expenses', 'can_manage_expenses', 'can_manage_financial')
 def addExpense(request):
     """Add a new expense"""
-    # Get RBAC-filtered branches
-    branches = get_user_branches(request.user).select_related('center').order_by('name')
+    # Get RBAC-filtered branches for validation
+    accessible_branches = get_user_branches(request.user)
+    
+    # Branches for display (with center info for UI)
+    branches = accessible_branches.select_related('center').order_by('center__name', 'name')
     
     # Center selection for superadmin
     centers = None
     if request.user.is_superuser:
         centers = TranslationCenter.objects.filter(is_active=True).order_by('name')
+        # For superadmin, get all active branches for dynamic filtering in UI
+        branches = Branch.objects.filter(is_active=True).select_related('center').order_by('center__name', 'name')
     
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
@@ -756,8 +761,8 @@ def addExpense(request):
             pass  # Error already shown above
         else:
             try:
-                # Validate branch access
-                branch = get_object_or_404(branches, id=branch_id)
+                # Validate branch access with RBAC-filtered queryset
+                branch = get_object_or_404(accessible_branches, id=branch_id)
                 expense = Expense.objects.create(
                     name=name,
                     price=price_decimal,

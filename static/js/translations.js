@@ -1245,6 +1245,16 @@ const translations = {
         ru: 'Вы уверены, что хотите удалить',
         en: 'Are you sure you want to delete'
     },
+    'common.allUserTypes': {
+        uz: 'Barcha foydalanuvchi turlari',
+        ru: 'Все типы пользователей',
+        en: 'All User Types'
+    },
+    'common.ordinaryUsers': {
+        uz: 'Oddiy foydalanuvchilar',
+        ru: 'Обычные пользователи',
+        en: 'Ordinary Users'
+    },
     'common.addCategory': {
         uz: 'Kategoriya qo\'shish',
         ru: 'Добавить категорию',

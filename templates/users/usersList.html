@@ -34,7 +34,11 @@
                     <option value="" data-i18n="common.allStatus">All Status</option>
                     <option value="active" {% if status_filter == 'active' %}selected{% endif %} data-i18n="common.active">Active</option>
                     <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %} data-i18n="common.inactive">Inactive</option>
-                    <option value="agency" {% if status_filter == 'agency' %}selected{% endif %} data-i18n="common.agencies">Agencies</option>
+                </select>
+                <select name="user_type" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="" data-i18n="common.allUserTypes">All User Types</option>
+                    <option value="ordinary" {% if user_type_filter == 'ordinary' %}selected{% endif %} data-i18n="common.ordinaryUsers">Ordinary Users</option>
+                    <option value="agency" {% if user_type_filter == 'agency' %}selected{% endif %} data-i18n="common.agencies">Agencies</option>
                 </select>
                 {% if user.is_superuser and centers %}
                 <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
@@ -282,12 +286,12 @@
             <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                 {% if users.has_previous %}
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page=1&search={{ search_query }}&status={{ status_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page=1&search={{ search_query }}&status={{ status_filter }}&user_type={{ user_type_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:d-arrow-left"></iconify-icon>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ users.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ users.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}&user_type={{ user_type_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:arrow-left"></iconify-icon>
                     </a>
                 </li>
@@ -300,19 +304,19 @@
                     </li>
                     {% elif num > users.number|add:'-3' and num < users.number|add:'3' %}
                     <li class="page-item">
-                        <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" href="?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">{{ num }}</a>
+                        <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" href="?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&user_type={{ user_type_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">{{ num }}</a>
                     </li>
                     {% endif %}
                 {% endfor %}
                 
                 {% if users.has_next %}
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ users.next_page_number }}&search={{ search_query }}&status={{ status_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ users.next_page_number }}&search={{ search_query }}&status={{ status_filter }}&user_type={{ user_type_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:arrow-right"></iconify-icon>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ users.paginator.num_pages }}&search={{ search_query }}&status={{ status_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ users.paginator.num_pages }}&search={{ search_query }}&status={{ status_filter }}&user_type={{ user_type_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&per_page={{ per_page }}">
                         <iconify-icon icon="ep:d-arrow-right"></iconify-icon>
                     </a>
                 </li>

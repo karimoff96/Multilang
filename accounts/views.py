@@ -304,8 +304,13 @@ def usersList(request):
         users = users.filter(is_active=True)
     elif status_filter == "inactive":
         users = users.filter(is_active=False)
-    elif status_filter == "agency":
+
+    # User type filter
+    user_type_filter = request.GET.get("user_type", "")
+    if user_type_filter == "agency":
         users = users.filter(is_agency=True)
+    elif user_type_filter == "ordinary":
+        users = users.filter(is_agency=False)
 
     # Branch filter for owners
     from organizations.rbac import get_user_branches
@@ -333,6 +338,7 @@ def usersList(request):
         "paginator": paginator,
         "search_query": search_query,
         "status_filter": status_filter,
+        "user_type_filter": user_type_filter,
         "per_page": per_page,
         "total_users": paginator.count,
         "centers": centers,

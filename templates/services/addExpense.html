@@ -141,19 +141,12 @@
 </div>
 {% endblock content %}
 
-{% block scripts %}
+{% block script %}
 {% if centers %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const centerSelect = document.getElementById('center');
     const branchSelect = document.getElementById('branch');
-    
-    // Branch data grouped by center
-    const branchesByCenter = {
-        {% for branch in branches %}
-        {% if branch.center_id not in branches_by_center %}{% endif %}
-        {% endfor %}
-    };
     
     // Build branches by center mapping
     const branchData = [
@@ -162,12 +155,18 @@ document.addEventListener('DOMContentLoaded', function() {
         {% endfor %}
     ];
     
+    console.log('Branch data loaded:', branchData);
+    
     centerSelect.addEventListener('change', function() {
         const centerId = this.value;
+        console.log('Center selected:', centerId);
+        
         branchSelect.innerHTML = '<option value="">Select Branch</option>';
         
         if (centerId) {
-            const filteredBranches = branchData.filter(b => b.centerId === centerId);
+            // Convert both to strings for comparison
+            const filteredBranches = branchData.filter(b => String(b.centerId) === String(centerId));
+            console.log('Filtered branches:', filteredBranches);
             
             if (filteredBranches.length > 0) {
                 branchSelect.disabled = false;
@@ -189,4 +188,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endif %}
-{% endblock scripts %}
+{% endblock script %}
