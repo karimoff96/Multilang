@@ -264,18 +264,24 @@
                     
                     <!-- Product and Language -->
                     <div class="row">
+                        <div class="col-md-4 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.category">Category</label>
+                            <select name="category" class="form-select radius-8" id="categorySelect">
+                                <option value="">-- All Categories --</option>
+                            </select>
+                            <small class="text-primary-light" data-i18n="form.categoryHint">Filter products by category</small>
+                        </div>
                         <div class="col-md-8 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.productService">Product / Service *</label>
                             <select name="product" class="form-select radius-8" required id="productSelect">
                                 <option value="">-- Select Product --</option>
-                                {% for product in products %}
-                                <option value="{{ product.id }}" data-price="{{ product.price|default:'0' }}">
-                                    {{ product.category.branch.center.name }} - {{ product.category.name }} | {{ product.name }} ({{ product.price|floatformat:0 }} UZS/page)
-                                </option>
-                                {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-4 mb-20">
+                    </div>
+                    
+                    <!-- Language -->
+                    <div class="row">
+                        <div class="col-md-12 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.language">Language</label>
                             <select name="language" class="form-select radius-8">
                                 <option value="">-- Optional --</option>
@@ -299,12 +305,22 @@
                         </div>
                         <div class="col-md-4 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="table.payment">Payment Type *</label>
-                            <select name="payment_type" class="form-select radius-8" required>
+                            <select name="payment_type" id="paymentType" class="form-select radius-8" required>
                                 {% for value, label in payment_choices %}
                                 <option value="{{ value }}">{{ label }}</option>
                                 {% endfor %}
                             </select>
                         </div>
+                    </div>
+                    
+                    <!-- Payment Receipt Upload (shown for card payments) -->
+                    <div class="mb-20" id="receiptSection" style="display: none;">
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                            <iconify-icon icon="solar:document-add-bold" class="me-1"></iconify-icon>
+                            Payment Receipt
+                        </label>
+                        <input type="file" name="recipt" class="form-control radius-8" accept="image/*,.pdf">
+                        <small class="text-primary-light">Upload payment receipt for card transactions</small>
                     </div>
                     
                     <!-- Description -->
@@ -426,6 +442,96 @@ document.addEventListener('DOMContentLoaded', function() {
         width: '100%'
     });
     
+    // Initialize Select2 for category search
+    $('#categorySelect').select2({
+        ajax: {
+            url: "{% url 'orders:search_categories' %}",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                const branchId = $('#branchSelect').val();
+                return {
+                    q: params.term || '',
+                    branch: branchId || ''
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.results
+                };
+            },
+            cache: false // Don't cache to allow branch filter changes
+        },
+        placeholder: '-- Select Branch First --',
+        allowClear: true,
+        minimumInputLength: 0,
+        minimumResultsForSearch: 0,
+        width: '100%',
+        language: {
+            searching: function() {
+                return 'Searching...';
+            },
+            noResults: function() {
+                return 'No categories found';
+            }
+        }
+    });
+    
+    // Initialize Select2 for product search with category filtering
+    $('#productSelect').select2({
+        ajax: {
+            url: "{% url 'orders:search_products' %}",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                const branchId = $('#branchSelect').val();
+                const categoryId = $('#categorySelect').val();
+                return {
+                    q: params.term || '',
+                    branch: branchId || '',
+                    category: categoryId || ''
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.results
+                };
+            },
+            cache: false // Don't cache to allow category/branch filter changes
+        },
+        placeholder: '-- Select Branch First --',
+        allowClear: true,
+        minimumInputLength: 0,
+        minimumResultsForSearch: 0,
+        width: '100%',
+        language: {
+            searching: function() {
+                return 'Searching...';
+            },
+            noResults: function() {
+                return 'No products found';
+            }
+        }
+    });
+    
+    // When category changes, clear and refresh product dropdown
+    $('#categorySelect').on('change', function() {
+        // Clear current product selection
+        $('#productSelect').val(null).trigger('change');
+        // Trigger Select2 to reload with new category filter
+        $('#productSelect').select2('close');
+    });
+    
+    // When branch changes, clear category and product selections
+    $('#branchSelect').on('change', function() {
+        // Clear category and product selections
+        $('#categorySelect').val(null).trigger('change');
+        $('#productSelect').val(null).trigger('change');
+        // Trigger Select2 to reload with new branch filter
+        $('#categorySelect').select2('close');
+        $('#productSelect').select2('close');
+    });
+    
     // Manual Order Toggle
     const manualOrderToggle = document.getElementById('manualOrderToggle');
     const botUserSection = document.getElementById('botUserSection');
@@ -443,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Update field requirements
                 customerSelect.removeAttribute('required');
-                customerSelect.value = '';
+                $('#customerSelect').val(null).trigger('change'); // Clear Select2
                 manualFirstName.setAttribute('required', 'required');
                 manualPhone.setAttribute('required', 'required');
             } else {
@@ -532,27 +638,58 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Price calculation
     function calculatePrice() {
-        const productSelect = document.getElementById('productSelect');
         const totalPages = parseInt(document.getElementById('totalPages').value) || 1;
         const copyNumber = parseInt(document.getElementById('copyNumber').value) || 0;
         
-        const selectedOption = productSelect.options[productSelect.selectedIndex];
-        const pricePerPage = parseFloat(selectedOption?.dataset?.price) || 0;
+        // Get selected product data from Select2
+        const productData = $('#productSelect').select2('data')[0];
         
-        const totalCopies = copyNumber + 1; // Original + copies
-        const estimatedTotal = pricePerPage * totalPages * totalCopies;
-        
-        document.getElementById('estimatedPrice').textContent = 
-            estimatedTotal.toLocaleString('en-US') + ' UZS';
+        if (productData && productData.price_first !== undefined && productData.price_other !== undefined) {
+            const priceFirst = parseFloat(productData.price_first) || 0;
+            const priceOther = parseFloat(productData.price_other) || 0;
+            
+            // Calculate: first page + (remaining pages * other price)
+            const priceForOriginal = priceFirst + ((totalPages - 1) * priceOther);
+            
+            // Total copies = original + copies
+            const totalCopies = copyNumber + 1;
+            
+            // Total = original price * total copies
+            const estimatedTotal = priceForOriginal * totalCopies;
+            
+            document.getElementById('estimatedPrice').textContent = 
+                estimatedTotal.toLocaleString('en-US') + ' UZS';
+        } else {
+            document.getElementById('estimatedPrice').textContent = '0 UZS';
+        }
     }
     
-    // Attach event listeners
-    document.getElementById('productSelect')?.addEventListener('change', calculatePrice);
+    // Attach event listeners for price calculation
+    $('#productSelect').on('change', calculatePrice);
     document.getElementById('totalPages')?.addEventListener('input', calculatePrice);
     document.getElementById('copyNumber')?.addEventListener('input', calculatePrice);
     
     // Initial calculation
     calculatePrice();
+    
+    // Show/hide receipt upload based on payment type
+    const paymentTypeSelect = document.getElementById('paymentType');
+    const receiptSection = document.getElementById('receiptSection');
+    
+    if (paymentTypeSelect && receiptSection) {
+        paymentTypeSelect.addEventListener('change', function() {
+            if (this.value === 'card') {
+                receiptSection.style.display = 'block';
+            } else {
+                receiptSection.style.display = 'none';
+            }
+        });
+        
+        // Initialize on page load
+        if (paymentTypeSelect.value === 'card') {
+            receiptSection.style.display = 'block';
+        }
+    }
 });  // End DOMContentLoaded
 </script>
 {% endblock script %}

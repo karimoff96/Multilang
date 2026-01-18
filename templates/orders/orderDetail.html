@@ -533,9 +533,9 @@
                 <p data-i18n="detail.deleteConfirm">Are you sure you want to delete this order? This action cannot be undone.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Cancel</button>
-                <form method="post" action="{% url 'orders:deleteOrder' order.id %}">
-                    {% csrf_token %>
+                <form method="post" action="{% url 'orders:deleteOrder' order.id %}" style="display: contents;">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Cancel</button>
                     <button type="submit" class="btn btn-danger" data-i18n="detail.deleteOrder">Delete Order</button>
                 </form>
             </div>

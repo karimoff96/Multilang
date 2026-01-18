@@ -1439,6 +1439,16 @@ const translations = {
         ru: 'Выберите категорию',
         en: 'Select Category'
     },
+    'form.category': {
+        uz: 'Kategoriya',
+        ru: 'Категория',
+        en: 'Category'
+    },
+    'form.categoryHint': {
+        uz: 'Mahsulotlarni kategoriya bo\'yicha filtrlash',
+        ru: 'Фильтровать продукты по категории',
+        en: 'Filter products by category'
+    },
     'form.description': {
         uz: 'Tavsif',
         ru: 'Описание',

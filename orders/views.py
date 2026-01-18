@@ -389,7 +389,11 @@ def orderEdit(request, order_id):
     from accounts.models import BotUser
     
     order = get_object_or_404(
-        Order.objects.select_related('bot_user', 'product', 'language', 'branch'),
+        Order.objects.select_related(
+            'bot_user', 'product', 'product__category', 
+            'product__category__branch', 'product__category__branch__center',
+            'language', 'branch', 'branch__center'
+        ),
         id=order_id
     )
     
@@ -397,6 +401,16 @@ def orderEdit(request, order_id):
     if not has_order_permission(request, 'can_edit_orders', order):
         messages.error(request, "You don't have permission to edit this order.")
         return redirect('orders:orderDetail', order_id=order_id)
+    
+    # Get accessible centers and branches
+    centers = None
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        branches = Branch.objects.filter(is_active=True).select_related('center')
+    elif request.admin_profile:
+        branches = request.admin_profile.get_accessible_branches()
+    else:
+        branches = Branch.objects.none()
     
     # Get available products and languages
     products = Product.objects.filter(is_active=True)
@@ -431,6 +445,7 @@ def orderEdit(request, order_id):
         manual_first_name = request.POST.get('manual_first_name', '').strip()
         manual_last_name = request.POST.get('manual_last_name', '').strip()
         manual_phone = request.POST.get('manual_phone', '').strip()
+        branch_id = request.POST.get('branch')
         product_id = request.POST.get('product')
         language_id = request.POST.get('language')
         total_pages = request.POST.get('total_pages')
@@ -446,6 +461,7 @@ def orderEdit(request, order_id):
             'manual_first_name': order.manual_first_name,
             'manual_last_name': order.manual_last_name,
             'manual_phone': order.manual_phone,
+            'branch': str(order.branch) if order.branch else None,
             'product': str(order.product),
             'language': str(order.language) if order.language else None,
             'total_pages': order.total_pages,
@@ -490,6 +506,8 @@ def orderEdit(request, order_id):
                 order.manual_phone = None
             
             # Update order
+            if branch_id:
+                order.branch = Branch.objects.get(pk=branch_id)
             if product_id:
                 order.product = Product.objects.get(pk=product_id)
             if language_id:
@@ -501,6 +519,13 @@ def orderEdit(request, order_id):
             order.copy_number = int(copy_number) if copy_number else 0
             order.payment_type = payment_type if payment_type else order.payment_type
             order.description = description
+            
+            # Handle receipt upload/replacement
+            if 'recipt' in request.FILES:
+                # Delete old receipt if exists
+                if order.recipt:
+                    order.recipt.delete(save=False)
+                order.recipt = request.FILES['recipt']
             
             # Handle file deletions
             files_to_delete = request.POST.getlist('delete_files')
@@ -547,6 +572,7 @@ def orderEdit(request, order_id):
                 'manual_first_name': order.manual_first_name,
                 'manual_last_name': order.manual_last_name,
                 'manual_phone': order.manual_phone,
+                'branch': str(order.branch) if order.branch else None,
                 'product': str(order.product),
                 'language': str(order.language) if order.language else None,
                 'total_pages': order.total_pages,
@@ -578,10 +604,13 @@ def orderEdit(request, order_id):
         "title": f"Edit Order #{order.id}",
         "subTitle": "Edit Order",
         "order": order,
+        "centers": centers,
+        "branches": branches,
         "products": products,
         "languages": languages,
         "bot_users": bot_users,
         "payment_choices": Order.PAYMENT_TYPE,
+        "is_superuser": request.user.is_superuser,
     }
     return render(request, "orders/orderEdit.html", context)
 
@@ -672,25 +701,42 @@ def updateOrderStatus(request, order_id):
 @any_permission_required('can_delete_orders', 'can_manage_orders')
 def deleteOrder(request, order_id):
     """Delete an order - permission-based access control"""
-    order = get_object_or_404(Order, id=order_id)
-    
-    # Check permission using granular permission system
-    if not has_order_permission(request, 'can_delete_orders', order):
-        messages.error(request, "You don't have permission to delete orders.")
+    try:
+        order = get_object_or_404(Order, id=order_id)
+        
+        # Check permission using granular permission system
+        if not has_order_permission(request, 'can_delete_orders', order):
+            messages.error(request, "You don't have permission to delete orders.")
+            return redirect('orders:ordersList')
+        
+        # Store order info before deletion
+        order_number = order.get_order_number()
+        
+        # Audit log before deletion
+        try:
+            log_action(
+                user=request.user,
+                action='delete',
+                target=order,
+                details=f'Order #{order.id} deleted',
+                changes={'order_id': order.id, 'status': order.status},
+                request=request
+            )
+        except Exception as log_error:
+            # Log the error but continue with deletion
+            import logging
+            logging.getLogger(__name__).warning(f"Failed to log deletion: {log_error}")
+        
+        # Delete the order
+        order.delete()
+        messages.success(request, f'Order {order_number} has been deleted successfully')
         return redirect('orders:ordersList')
-    
-    # Audit log before deletion
-    log_action(
-        user=request.user,
-        action='delete',
-        target=order,
-        details=f'Order #{order.id} deleted',
-        changes={'order_id': order.id, 'status': order.status},
-        request=request
-    )
-    order.delete()
-    messages.success(request, f'Order #{order_id} has been deleted')
-    return redirect('orders:ordersList')
+        
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Error deleting order {order_id}: {str(e)}")
+        messages.error(request, f"Failed to delete order: {str(e)}")
+        return redirect('orders:ordersList')
 
 
 @login_required(login_url='admin_login')
@@ -1134,6 +1180,11 @@ def orderCreate(request):
                 is_active=True,
             )
             
+            # Handle receipt upload for card payments
+            if 'recipt' in request.FILES:
+                order.recipt = request.FILES['recipt']
+                order.save()
+            
             # Handle file uploads
             files = request.FILES.getlist('files')
             for file in files:
@@ -1363,20 +1414,18 @@ def search_customers(request):
     Returns JSON list of customers matching the search query
     """
     from accounts.models import BotUser
+    from organizations.rbac import get_user_branches
     
     # Get search query parameter
     search = request.GET.get('q', '').strip()
     
-    # Base queryset - all bot users
-    customers = BotUser.objects.all()
+    # Get accessible branches using RBAC
+    accessible_branches = get_user_branches(request.user)
     
-    # Filter by admin's accessible centers/branches if not superuser
-    if not request.user.is_superuser and request.admin_profile:
-        accessible_branches = request.admin_profile.get_accessible_branches()
-        # Filter customers by accessible branches
-        customers = customers.filter(
-            Q(branch__in=accessible_branches) | Q(branch__isnull=True)
-        )
+    # Filter customers by accessible branches
+    customers = BotUser.objects.filter(
+        Q(branch__in=accessible_branches) | Q(branch__isnull=True)
+    )
     
     # Apply search filter if search query provided
     if search:
@@ -1399,6 +1448,163 @@ def search_customers(request):
         results.append({
             'id': customer.id,
             'text': display_text
+        })
+    
+    return JsonResponse({
+        'results': results
+    })
+
+
+@login_required
+def search_categories(request):
+    """
+    API endpoint to search categories with RBAC compliance
+    Returns JSON list of categories accessible to the user
+    """
+    from services.models import Category, Product
+    from organizations.rbac import get_user_branches
+    
+    # Get search query parameter
+    search = request.GET.get('q', '').strip()
+    branch_id = request.GET.get('branch', '').strip()
+    
+    logger.debug(f"search_categories called: q={search}, branch_id={branch_id}, user={request.user.username}")
+    
+    # Get accessible branches using RBAC
+    accessible_branches = get_user_branches(request.user)
+    
+    logger.debug(f"User {request.user.username} has access to {accessible_branches.count()} branches")
+    
+    # If no accessible branches, return empty results
+    if not accessible_branches.exists():
+        logger.warning(f"User {request.user.username} has no accessible branches")
+        return JsonResponse({'results': []})
+    
+    # Get categories for accessible branches
+    categories = Category.objects.filter(
+        branch__in=accessible_branches,
+        is_active=True
+    ).select_related('branch', 'branch__center')
+    
+    # Filter by branch if provided
+    if branch_id:
+        try:
+            branch_id_int = int(branch_id)
+            categories = categories.filter(branch_id=branch_id_int)
+            logger.debug(f"Filtered by branch_id={branch_id_int}, found {categories.count()} categories")
+        except ValueError:
+            logger.error(f"Invalid branch_id: {branch_id}")
+    
+    # Apply search filter if provided
+    if search:
+        categories = categories.filter(name__icontains=search)
+    
+    # Order and limit results
+    categories = categories.order_by('branch__center__name', 'branch__name', 'name')[:50]
+    
+    logger.debug(f"search_categories: Returning {len(categories)} categories for user {request.user.username}")
+    
+    # Format response as Select2 expects
+    results = []
+    for category in categories:
+        # Only show center name for superusers
+        if request.user.is_superuser:
+            display_text = f"{category.branch.center.name} - {category.branch.name} | {category.name}"
+        else:
+            display_text = f"{category.branch.name} | {category.name}"
+        results.append({
+            'id': category.id,
+            'text': display_text
+        })
+    
+    return JsonResponse({
+        'results': results
+    })
+
+
+@login_required
+def search_products(request):
+    """
+    API endpoint to search products with RBAC compliance
+    Supports optional category filter
+    Returns JSON list of products accessible to the user
+    """
+    from services.models import Product
+    from organizations.rbac import get_user_branches
+    
+    # Get search query and category filter
+    search = request.GET.get('q', '').strip()
+    category_id = request.GET.get('category', '').strip()
+    branch_id = request.GET.get('branch', '').strip()
+    
+    logger.debug(f"search_products called: q={search}, category_id={category_id}, branch_id={branch_id}, user={request.user.username}")
+    
+    # Get accessible branches using RBAC
+    accessible_branches = get_user_branches(request.user)
+    
+    logger.debug(f"User {request.user.username} has access to {accessible_branches.count()} branches")
+    
+    # If no accessible branches, return empty results
+    if not accessible_branches.exists():
+        logger.warning(f"User {request.user.username} has no accessible branches")
+        return JsonResponse({'results': []})
+    
+    # Get products for accessible branches
+    products = Product.objects.filter(
+        category__branch__in=accessible_branches,
+        is_active=True
+    ).select_related('category', 'category__branch', 'category__branch__center')
+    
+    # Filter by branch if provided
+    if branch_id:
+        try:
+            branch_id_int = int(branch_id)
+            products = products.filter(category__branch_id=branch_id_int)
+            logger.debug(f"Filtered by branch_id={branch_id_int}, found {products.count()} products")
+        except ValueError:
+            logger.error(f"Invalid branch_id: {branch_id}")
+    
+    # Filter by category if provided
+    if category_id:
+        try:
+            category_id_int = int(category_id)
+            products = products.filter(category_id=category_id_int)
+            logger.debug(f"Filtered by category_id={category_id_int}, found {products.count()} products")
+        except ValueError:
+            logger.error(f"Invalid category_id: {category_id}")
+    
+    # Apply search filter if provided
+    if search:
+        products = products.filter(
+            Q(name__icontains=search) |
+            Q(category__name__icontains=search)
+        )
+    
+    # Order and limit results
+    products = products.order_by('category__branch__center__name', 'category__name', 'name')[:50]
+    
+    logger.debug(f"search_products: Returning {len(products)} products for user {request.user.username}")
+    
+    # Format response as Select2 expects
+    results = []
+    for product in products:
+        # Only show center name for superusers
+        if request.user.is_superuser:
+            display_text = (
+                f"{product.category.branch.center.name} - "
+                f"{product.category.name} | {product.name} "
+                f"({product.ordinary_first_page_price}/{product.ordinary_other_page_price} UZS/page)"
+            )
+        else:
+            display_text = (
+                f"{product.category.name} | {product.name} "
+                f"({product.ordinary_first_page_price}/{product.ordinary_other_page_price} UZS/page)"
+            )
+        results.append({
+            'id': product.id,
+            'text': display_text,
+            'price_first': float(product.ordinary_first_page_price),
+            'price_other': float(product.ordinary_other_page_price)
         })
     
     return JsonResponse({

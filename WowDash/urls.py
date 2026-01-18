@@ -19,9 +19,16 @@ from django.contrib import admin
 from django.urls import path, include
 from WowDash import home_views
 from WowDash import reports_views
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def test_select2(request):
+    return render(request, 'test_select2.html')
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("test-select2/", test_select2, name="test_select2"),
     # Root URL redirects to dashboard
     path("", home_views.index, name="dashboard"),
     # Authentication & User management (accounts app)
