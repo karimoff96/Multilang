@@ -3,6 +3,18 @@
 {% load user_filters %}
 
 {% block content %}
+<style>
+    .table-responsive {
+        width: 100%;
+    }
+    .table {
+        width: 100% !important;
+        table-layout: auto;
+    }
+    .card-body {
+        overflow-x: auto;
+    }
+</style>
 <div class="card h-100 p-0 radius-12">
     <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
         <div class="d-flex align-items-center flex-wrap gap-3">
@@ -95,8 +107,8 @@
     </div>
     
     <div class="card-body p-24">
-        <div class="table-responsive">
-            <table class="table bordered-table sm-table mb-0">
+        <div class="table-responsive" style="overflow-x: auto;">
+            <table class="table bordered-table sm-table mb-0" style="width: 100%; min-width: 100%;">
                 <thead>
                     <tr>
                         <th scope="col" class="col-id">
@@ -114,6 +126,7 @@
                         <th scope="col" class="hide-mobile" data-i18n="table.contact">Contact</th>
                         <th scope="col" class="col-id" data-i18n="table.orders">#</th>
                         <th scope="col" class="hide-mobile" data-i18n="table.details">Details</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.joinedDate">Joined Date</th>
                         <th scope="col" class="text-center col-status" data-i18n="table.status">Status</th>
                         <th scope="col" class="text-center col-action" data-i18n="table.action">Action</th>
                     </tr>
@@ -183,18 +196,22 @@
                                     <span class="badge bg-neutral-200 text-neutral-600 badge-compact">{{ bot_user.language|upper }}</span>
                                 {% endif %}
                                 {% if bot_user.is_agency %}
-                                    <span class="badge bg-warning-focus text-warning-600 badge-compact">Agn</span>
+                                    <span class="badge bg-warning-focus text-warning-600 badge-compact" data-i18n="common.agencyShort">Agn</span>
                                 {% elif bot_user.agency %}
                                     <span class="badge bg-neutral-200 text-neutral-600 badge-compact">{{ bot_user.agency.name|slice:":5" }}</span>
                                 {% endif %}
                             </div>
                         </td>
+                        <!-- Joined Date -->
+                        <td class="hide-mobile">
+                            <span class="text-secondary-light text-sm nowrap">{{ bot_user.created_at|date:"d M Y" }}</span>
+                        </td>
                         <!-- Status -->
                         <td class="text-center col-status">
                             {% if bot_user.is_active %}
-                                <span class="bg-success-focus text-success-600 status-badge-sm radius-4 fw-medium">Active</span>
+                                <span class="bg-success-focus text-success-600 status-badge-sm radius-4 fw-medium" data-i18n="common.active">Active</span>
                             {% else %}
-                                <span class="bg-neutral-200 text-neutral-600 status-badge-sm radius-4 fw-medium">Off</span>
+                                <span class="bg-neutral-200 text-neutral-600 status-badge-sm radius-4 fw-medium" data-i18n="common.off">Off</span>
                             {% endif %}
                         </td>
                         <!-- Action -->
@@ -247,7 +264,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="{% if user.is_superuser or is_owner %}8{% else %}7{% endif %}" class="text-center py-4">
+                        <td colspan="{% if user.is_superuser or is_owner %}9{% else %}8{% endif %}" class="text-center py-4">
                             <div class="text-secondary-light">
                                 <iconify-icon icon="mdi:account-off-outline" class="text-4xl mb-2"></iconify-icon>
                                 <p class="mb-0" data-i18n="common.noUsersFound">No users found</p>
@@ -261,7 +278,7 @@
 
         {% if users %}
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
-            <span>Showing {{ users.start_index }} to {{ users.end_index }} of {{ total_users }} entries</span>
+            <span><span data-i18n="table.showing">Showing</span> {{ users.start_index }} <span data-i18n="table.to">to</span> {{ users.end_index }} <span data-i18n="table.of">of</span> {{ total_users }} <span data-i18n="table.entries">entries</span></span>
             <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                 {% if users.has_previous %}
                 <li class="page-item">
@@ -310,6 +327,13 @@
 {% block script %}
 <script>
 $(document).ready(function() {
+    // Force translation update on page load
+    if (window.LanguageManager) {
+        setTimeout(function() {
+            window.LanguageManager.translatePage();
+        }, 100);
+    }
+    
     console.log('Bulk delete script loaded');
     
     // Select all checkbox functionality

@@ -35,7 +35,7 @@
                 </select>
                 {% endif %}
                 <select name="expense_type" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="">All Types</option>
+                    <option value="" data-i18n="common.allTypes">All Types</option>
                     {% for type_val, type_label in expense_types %}
                     <option value="{{ type_val }}" {% if expense_type_filter == type_val %}selected{% endif %}>{{ type_label }}</option>
                     {% endfor %}
@@ -51,7 +51,7 @@
         {% if can_create_expense %}
         <a href="{% url 'addExpense' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
             <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
-            <span>Add Expense</span>
+            <span data-i18n="expenses.addExpense">Add Expense</span>
         </a>
         {% endif %}
     </div>
@@ -62,21 +62,21 @@
             <div class="col-md-4">
                 <div class="bg-primary-50 radius-8 p-16 text-center">
                     <iconify-icon icon="solar:wallet-bold" class="text-primary-600 text-3xl mb-8"></iconify-icon>
-                    <h6 class="text-primary-600 mb-4">Total Expenses</h6>
+                    <h6 class="text-primary-600 mb-4" data-i18n="expenses.totalExpenses">Total Expenses</h6>
                     <h4 class="text-primary-600 mb-0">{{ total_amount|format_number }}</h4>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="bg-info-50 radius-8 p-16 text-center">
                     <iconify-icon icon="mdi:office-building" class="text-info-600 text-3xl mb-8"></iconify-icon>
-                    <h6 class="text-info-600 mb-4">B2B Expenses</h6>
+                    <h6 class="text-info-600 mb-4" data-i18n="expenses.b2bExpenses">B2B Expenses</h6>
                     <h4 class="text-info-600 mb-0">{{ b2b_total|format_number }}</h4>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="bg-success-50 radius-8 p-16 text-center">
                     <iconify-icon icon="mdi:account-group" class="text-success-600 text-3xl mb-8"></iconify-icon>
-                    <h6 class="text-success-600 mb-4">B2C Expenses</h6>
+                    <h6 class="text-success-600 mb-4" data-i18n="expenses.b2cExpenses">B2C Expenses</h6>
                     <h4 class="text-success-600 mb-0">{{ b2c_total|format_number }}</h4>
                 </div>
             </div>
@@ -89,13 +89,13 @@
                 <thead>
                     <tr>
                         <th scope="col" class="col-id">#</th>
-                        <th scope="col">Expense</th>
+                        <th scope="col" data-i18n="table.expense">Expense</th>
                         {% if user.is_superuser or is_owner %}
                         <th scope="col" class="hide-mobile" data-i18n="table.location">Location</th>
                         {% endif %}
-                        <th scope="col" class="col-amount">Price</th>
-                        <th scope="col" class="hide-mobile">Type</th>
-                        <th scope="col" class="col-id" title="Products">Products</th>
+                        <th scope="col" class="col-amount" data-i18n="table.price">Price</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.type">Type</th>
+                        <th scope="col" class="col-id" data-i18n="table.products" title="Products">Products</th>
                         <th scope="col" class="text-center col-status" data-i18n="table.status">Status</th>
                         <th scope="col" class="text-center col-action" data-i18n="table.action">Action</th>
                     </tr>
@@ -127,11 +127,11 @@
                         </td>
                         <td class="hide-mobile">
                             {% if expense.expense_type == 'b2b' %}
-                            <span class="badge bg-info-100 text-info-600 badge-compact">B2B</span>
+                            <span class="badge bg-info-100 text-info-600 badge-compact" data-i18n="common.b2b">B2B</span>
                             {% elif expense.expense_type == 'b2c' %}
-                            <span class="badge bg-success-100 text-success-600 badge-compact">B2C</span>
+                            <span class="badge bg-success-100 text-success-600 badge-compact" data-i18n="common.b2c">B2C</span>
                             {% else %}
-                            <span class="badge bg-warning-100 text-warning-600 badge-compact">Both</span>
+                            <span class="badge bg-warning-100 text-warning-600 badge-compact" data-i18n="common.both">Both</span>
                             {% endif %}
                         </td>
                         <td class="col-id">
@@ -172,15 +172,15 @@
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title">Delete Expense</h5>
+                                            <h5 class="modal-title" data-i18n="expenses.deleteExpense">Delete Expense</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <p>Are you sure you want to delete <strong>{{ expense.name }}</strong>?</p>
+                                            <p><span data-i18n="common.confirmDelete">Are you sure you want to delete</span> <strong>{{ expense.name }}</strong>?</p>
                                             {% if expense.product_count > 0 %}
                                             <div class="alert alert-warning">
                                                 <iconify-icon icon="mdi:warning" class="me-8"></iconify-icon>
-                                                This expense is linked to {{ expense.product_count }} product(s). They will be unlinked.
+                                                <span data-i18n="expenses.unlinkWarning">This expense is linked to</span> {{ expense.product_count }} <span data-i18n="expenses.productsWillUnlink">product(s). They will be unlinked.</span>
                                             </div>
                                             {% endif %}
                                         </div>
@@ -201,7 +201,7 @@
                         <td colspan="{% if user.is_superuser or is_owner %}8{% else %}7{% endif %}" class="text-center py-4">
                             <div class="text-secondary-light">
                                 <iconify-icon icon="solar:wallet-linear" class="text-4xl mb-2"></iconify-icon>
-                                <p class="mb-0">No expenses found</p>
+                                <p class="mb-0" data-i18n="expenses.noExpensesFound">No expenses found</p>
                             </div>
                         </td>
                     </tr>
@@ -212,7 +212,7 @@
 
         {% if expenses %}
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
-            <span>Showing {{ expenses.start_index }} to {{ expenses.end_index }} of {{ total_expenses }} entries</span>
+            <span><span data-i18n="table.showing">Showing</span> {{ expenses.start_index }} <span data-i18n="table.to">to</span> {{ expenses.end_index }} <span data-i18n="table.of">of</span> {{ total_expenses }} <span data-i18n="table.entries">entries</span></span>
             <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                 {% if expenses.has_previous %}
                 <li class="page-item">

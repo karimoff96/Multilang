@@ -1133,6 +1133,41 @@ const translations = {
         ru: 'Ориент. дней',
         en: 'Est. Days'
     },
+    'table.location': {
+        uz: 'Joylashuv',
+        ru: 'Местоположение',
+        en: 'Location'
+    },
+    'table.contact': {
+        uz: 'Aloqa',
+        ru: 'Контакт',
+        en: 'Contact'
+    },
+    'table.details': {
+        uz: 'Tafsilotlar',
+        ru: 'Детали',
+        en: 'Details'
+    },
+    'table.joinedDate': {
+        uz: 'Qo\'shilgan sana',
+        ru: 'Дата регистрации',
+        en: 'Joined Date'
+    },
+    'table.userDate': {
+        uz: '#',
+        ru: '#',
+        en: '#'
+    },
+    'table.expense': {
+        uz: 'Xarajat',
+        ru: 'Расход',
+        en: 'Expense'
+    },
+    'table.price': {
+        uz: 'Narx',
+        ru: 'Цена',
+        en: 'Price'
+    },
 
     // ========== COMMON LABELS ==========
     'common.show': {
@@ -1179,6 +1214,36 @@ const translations = {
         uz: 'Faol emas',
         ru: 'Неактивный',
         en: 'Inactive'
+    },
+    'common.off': {
+        uz: 'O\'chiq',
+        ru: 'Выключен',
+        en: 'Off'
+    },
+    'common.allTypes': {
+        uz: 'Barcha turlar',
+        ru: 'Все типы',
+        en: 'All Types'
+    },
+    'common.b2b': {
+        uz: 'B2B',
+        ru: 'B2B',
+        en: 'B2B'
+    },
+    'common.b2c': {
+        uz: 'B2C',
+        ru: 'B2C',
+        en: 'B2C'
+    },
+    'common.both': {
+        uz: 'Ikkala',
+        ru: 'Оба',
+        en: 'Both'
+    },
+    'common.confirmDelete': {
+        uz: 'Rostdan ham o\'chirmoqchimisiz',
+        ru: 'Вы уверены, что хотите удалить',
+        en: 'Are you sure you want to delete'
     },
     'common.addCategory': {
         uz: 'Kategoriya qo\'shish',
@@ -3755,6 +3820,11 @@ const translations = {
         ru: 'Агентство',
         en: 'Agency'
     },
+    'common.agencyShort': {
+        uz: 'Agn',
+        ru: 'Агн',
+        en: 'Agn'
+    },
 
     // ========== FINANCIAL REPORTS ==========
     'report.financialReport': {
@@ -4914,6 +4984,46 @@ const translations = {
         uz: 'O\'chirish',
         ru: 'Удалить',
         en: 'Delete'
+    },
+    'expenses.addExpense': {
+        uz: 'Xarajat qo\'shish',
+        ru: 'Добавить расход',
+        en: 'Add Expense'
+    },
+    'expenses.totalExpenses': {
+        uz: 'Jami xarajatlar',
+        ru: 'Всего расходов',
+        en: 'Total Expenses'
+    },
+    'expenses.b2bExpenses': {
+        uz: 'B2B xarajatlar',
+        ru: 'B2B расходы',
+        en: 'B2B Expenses'
+    },
+    'expenses.b2cExpenses': {
+        uz: 'B2C xarajatlar',
+        ru: 'B2C расходы',
+        en: 'B2C Expenses'
+    },
+    'expenses.deleteExpense': {
+        uz: 'Xarajatni o\'chirish',
+        ru: 'Удалить расход',
+        en: 'Delete Expense'
+    },
+    'expenses.unlinkWarning': {
+        uz: 'Bu xarajat quyidagilarga bog\'langan:',
+        ru: 'Этот расход связан с',
+        en: 'This expense is linked to'
+    },
+    'expenses.productsWillUnlink': {
+        uz: 'mahsulot(lar). Ular bog\'lanish bekor qilinadi.',
+        ru: 'продукт(ов). Они будут отвязаны.',
+        en: 'product(s). They will be unlinked.'
+    },
+    'expenses.noExpensesFound': {
+        uz: 'Xarajatlar topilmadi',
+        ru: 'Расходы не найдены',
+        en: 'No expenses found'
     },
     'expenses.filterByCategory': {
         uz: 'Kategoriya bo\'yicha',

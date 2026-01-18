@@ -201,7 +201,7 @@
                                 <td class="truncate-150"><span class="text-primary-light fw-medium">{{ order.customer|truncatechars:18 }}</span></td>
                                 <td class="truncate-120 hide-mobile"><span class="text-secondary-light">{{ order.product|truncatechars:15 }}</span></td>
                                 <td class="col-amount"><span class="fw-medium nowrap">{{ order.total_price|floatformat:0 }}</span></td>
-                                <td class="col-date hide-mobile"><span class="text-secondary-light text-xs">{{ order.created_at|date:"d/m H:i" }}</span></td>
+                                <td class="col-date hide-mobile"><span class="text-secondary-light text-xs">{{ order.created_at }}</span></td>
                                 <td class="col-status">
                                     {% if order.status == 'completed' %}
                                     <span class="bg-success-focus text-success-main status-badge-sm rounded-pill fw-medium" data-i18n="status.completed">Done</span>
