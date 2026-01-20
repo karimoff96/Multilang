@@ -25,32 +25,27 @@
                 <form method="GET" id="filtersForm">
                     <div class="row g-3 mb-3">
                         <!-- Period Filter -->
-                        <div class="col-md-2">
+                        <div class="col-xl col-lg-3 col-md-4 col-sm-6">
                             <label class="form-label text-sm mb-1">Period</label>
-                            <select name="period" id="periodSelect" class="form-select">
+                            <select name="period" id="periodSelect" class="form-select form-select-sm">
                                 {% for value, label in period_choices %}
                                 <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <!-- Custom Date Range -->
-                        <div id="customDateRange" class="col-md-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                        <div id="customDateRange" class="col-xl col-lg-3 col-md-4 col-sm-6" style="{% if period != 'custom' %}display: none;{% endif %}">
                             <label class="form-label text-sm mb-1">From</label>
-                            <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                            <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}">
                         </div>
-                        <div id="customDateRangeTo" class="col-md-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                        <div id="customDateRangeTo" class="col-xl col-lg-3 col-md-4 col-sm-6" style="{% if period != 'custom' %}display: none;{% endif %}">
                             <label class="form-label text-sm mb-1">To</label>
-                            <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
-                        </div>
-                        <!-- Search -->
-                        <div class="col-md-2">
-                            <label class="form-label text-sm mb-1">Search</label>
-                            <input type="text" name="search" class="form-control" placeholder="Name or phone..." value="{{ search }}">
+                            <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}">
                         </div>
                         <!-- Client Type -->
-                        <div class="col-md-2">
+                        <div class="col-xl col-lg-3 col-md-4 col-sm-6">
                             <label class="form-label text-sm mb-1">Client Type</label>
-                            <select name="client_type" class="form-select">
+                            <select name="client_type" class="form-select form-select-sm">
                                 <option value="">All Types</option>
                                 <option value="b2b" {% if client_type == 'b2b' %}selected{% endif %}>B2B Only</option>
                                 <option value="b2c" {% if client_type == 'b2c' %}selected{% endif %}>B2C Only</option>
@@ -58,9 +53,9 @@
                         </div>
                         {% if show_center and centers %}
                         <!-- Center -->
-                        <div class="col-md-2">
+                        <div class="col-xl col-lg-3 col-md-4 col-sm-6">
                             <label class="form-label text-sm mb-1">Center</label>
-                            <select name="center" id="centerSelect" class="form-select">
+                            <select name="center" id="centerSelect" class="form-select form-select-sm">
                                 <option value="">All Centers</option>
                                 {% for center in centers %}
                                 <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
@@ -68,14 +63,11 @@
                             </select>
                         </div>
                         {% endif %}
-                    </div>
-
-                    <div class="row g-3 mb-3">
                         {% if show_branch and branches %}
                         <!-- Branch -->
-                        <div class="col-md-2">
+                        <div class="col-xl col-lg-3 col-md-4 col-sm-6">
                             <label class="form-label text-sm mb-1">Branch</label>
-                            <select name="branch" id="branchSelect" class="form-select">
+                            <select name="branch" id="branchSelect" class="form-select form-select-sm">
                                 <option value="">All Branches</option>
                                 {% for branch in branches %}
                                 <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %} data-center="{{ branch.center_id }}">{{ branch.name }}</option>
@@ -84,9 +76,9 @@
                         </div>
                         {% endif %}
                         <!-- Debt Range -->
-                        <div class="col-md-2">
+                        <div class="col-xl col-lg-3 col-md-4 col-sm-6">
                             <label class="form-label text-sm mb-1">Debt Range</label>
-                            <select name="debt_range" class="form-select">
+                            <select name="debt_range" class="form-select form-select-sm">
                                 <option value="">All Amounts</option>
                                 <option value="0-1000000" {% if debt_range == '0-1000000' %}selected{% endif %}>< 1M</option>
                                 <option value="1000000-5000000" {% if debt_range == '1000000-5000000' %}selected{% endif %}>1M - 5M</option>
@@ -95,9 +87,9 @@
                             </select>
                         </div>
                         <!-- Collection Rate -->
-                        <div class="col-md-2">
+                        <div class="col-xl col-lg-3 col-md-4 col-sm-6">
                             <label class="form-label text-sm mb-1">Collection Rate</label>
-                            <select name="collection_rate" class="form-select">
+                            <select name="collection_rate" class="form-select form-select-sm">
                                 <option value="">All Rates</option>
                                 <option value="0-30" {% if collection_rate_filter == '0-30' %}selected{% endif %}>Low (0-30%)</option>
                                 <option value="30-70" {% if collection_rate_filter == '30-70' %}selected{% endif %}>Medium (30-70%)</option>
@@ -105,9 +97,9 @@
                             </select>
                         </div>
                         <!-- Orders Count -->
-                        <div class="col-md-2">
+                        <div class="col-xl col-lg-3 col-md-4 col-sm-6">
                             <label class="form-label text-sm mb-1">Orders Count</label>
-                            <select name="orders_count" class="form-select">
+                            <select name="orders_count" class="form-select form-select-sm">
                                 <option value="">All Orders</option>
                                 <option value="1-5" {% if orders_count_filter == '1-5' %}selected{% endif %}>1-5 orders</option>
                                 <option value="6-10" {% if orders_count_filter == '6-10' %}selected{% endif %}>6-10 orders</option>
@@ -115,9 +107,9 @@
                             </select>
                         </div>
                         <!-- Sort By -->
-                        <div class="col-md-2">
+                        <div class="col-xl col-lg-3 col-md-4 col-sm-6">
                             <label class="form-label text-sm mb-1">Sort By</label>
-                            <select name="sort_by" class="form-select">
+                            <select name="sort_by" class="form-select form-select-sm">
                                 <option value="remaining-desc" {% if sort_by == 'remaining-desc' %}selected{% endif %}>Debt: High to Low</option>
                                 <option value="remaining-asc" {% if sort_by == 'remaining-asc' %}selected{% endif %}>Debt: Low to High</option>
                                 <option value="orders-desc" {% if sort_by == 'orders-desc' %}selected{% endif %}>Orders: High to Low</option>
@@ -126,12 +118,19 @@
                                 <option value="name-asc" {% if sort_by == 'name-asc' %}selected{% endif %}>Name: A to Z</option>
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-xl-auto col-lg-3 col-md-4 col-sm-6">
                             <label class="form-label text-sm mb-1">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary w-100">
+                            <button type="submit" class="btn btn-sm btn-primary w-100">
                                 <iconify-icon icon="solar:filter-bold" class="me-1"></iconify-icon>
                                 Apply Filters
                             </button>
+                        </div>
+                        <div class="col-xl-auto col-lg-3 col-md-4 col-sm-6">
+                            <label class="form-label text-sm mb-1">&nbsp;</label>
+                            <a href="{% url 'debtors_report' %}" class="btn btn-sm btn-outline-danger w-100">
+                                <iconify-icon icon="solar:close-circle-bold" class="me-1"></iconify-icon>
+                                Clear Filters
+                            </a>
                         </div>
                     </div>
                 </form>
@@ -222,98 +221,227 @@
     <div class="col-12">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
-                <div class="d-flex justify-content-between align-items-center mb-20">
-                    <h6 class="fw-bold text-lg mb-0">All Debtors ({{ total_count }})</h6>
-                    <button type="button" class="btn btn-success" onclick="exportToExcel()">
-                        <iconify-icon icon="vscode-icons:file-type-excel" class="me-1"></iconify-icon>
-                        Export to Excel
-                    </button>
+                <div class="row align-items-center mb-20">
+                    <div class="col-md-3">
+                        <h6 class="fw-bold text-lg mb-0">All Debtors ({{ total_count }})</h6>
+                    </div>
+                    <div class="col-md-6">
+                        <form method="GET" class="d-flex gap-2">
+                            <!-- Preserve existing filters -->
+                            <input type="hidden" name="period" value="{{ period }}">
+                            <input type="hidden" name="client_type" value="{{ client_type }}">
+                            <input type="hidden" name="center" value="{{ selected_center }}">
+                            <input type="hidden" name="branch" value="{{ selected_branch }}">
+                            <input type="hidden" name="debt_range" value="{{ debt_range }}">
+                            <input type="hidden" name="collection_rate" value="{{ collection_rate_filter }}">
+                            <input type="hidden" name="orders_count" value="{{ orders_count_filter }}">
+                            <input type="hidden" name="sort_by" value="{{ sort_by }}">
+                            <div class="flex-grow-1">
+                                <input type="text" name="search" class="form-control form-control-sm" placeholder="Quick search by name or phone..." value="{{ search }}">
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <iconify-icon icon="solar:magnifer-bold" class="me-1"></iconify-icon>
+                                Search
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <button type="button" class="btn btn-success btn-sm" onclick="exportToExcel()">
+                            <iconify-icon icon="vscode-icons:file-type-excel" class="me-1"></iconify-icon>
+                            Export to Excel
+                        </button>
+                    </div>
                 </div>
 
                 {% if debtors %}
-                <div class="table-responsive">
-                    <table class="table basic-table mb-0" id="debtorsTable">
+                <div class="table-responsive" style="zoom: 0.9;">
+                    <table class="table basic-table mb-0" id="debtorsTable" style="table-layout: fixed; width: 100%;">
                         <thead>
                             <tr>
-                                <th class="text-center" style="width: 40px;">#</th>
-                                <th style="min-width: 150px;">Customer</th>
-                                <th class="text-center" style="width: 120px;">Phone</th>
-                                <th class="text-center" style="width: 70px;">Type</th>
-                                {% if show_center %}<th class="text-center" style="min-width: 100px;">Center</th>{% endif %}
-                                {% if show_branch %}<th class="text-center" style="min-width: 100px;">Branch</th>{% endif %}
-                                <th class="text-end" style="min-width: 110px;">Remaining Debt</th>
-                                <th class="text-center" style="width: 90px;">Orders w/ Debt</th>
-                                <th class="text-end" style="min-width: 110px;">Total Expected</th>
-                                <th class="text-end" style="min-width: 110px;">Total Received</th>
-                                <th class="text-center" style="min-width: 140px;">Collection Rate</th>
+                                <th class="text-center" style="width: 3%;">#</th>
+                                <th style="width: 15%;">Customer</th>
+                                <th class="text-center" style="width: 9%;">Phone</th>
+                                <th class="text-center" style="width: 6%;">Type</th>
+                                {% if show_center %}<th class="text-center" style="width: 8%;">Center</th>{% endif %}
+                                {% if show_branch %}<th class="text-center" style="width: 8%;">Branch</th>{% endif %}
+                                <th class="text-end" style="width: 10%;">Remaining Debt</th>
+                                <th class="text-center" style="width: 7%;">Orders</th>
+                                <th class="text-end" style="width: 10%;">Expected</th>
+                                <th class="text-end" style="width: 10%;">Received</th>
+                                <th class="text-center" style="width: 10%;">Rate</th>
+                                <th class="text-center" style="width: 8%;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for debtor in debtors %}
                             <tr>
-                                <td class="text-center text-secondary-light">{{ forloop.counter }}</td>
+                                <td class="text-center text-secondary-light"><small>{{ forloop.counter }}</small></td>
                                 <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="w-32-px h-32-px bg-neutral-200 text-secondary-light d-flex justify-content-center align-items-center rounded-circle fw-semibold">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <span class="w-24-px h-24-px bg-neutral-200 text-secondary-light d-flex justify-content-center align-items-center rounded-circle fw-semibold flex-shrink-0" style="font-size: 10px;">
                                             {{ debtor.customer_name|slice:":1"|upper }}
                                         </span>
-                                        <span class="fw-medium">{{ debtor.customer_name }}</span>
+                                        <span class="fw-medium text-truncate" style="max-width: 120px; font-size: 13px;" title="{{ debtor.customer_name }}">{{ debtor.customer_name }}</span>
                                     </div>
                                 </td>
                                 <td class="text-center text-secondary-light">
                                     {% if debtor.customer_phone %}
-                                        <small>{{ debtor.customer_phone }}</small>
+                                        <small style="font-size: 11px;">{{ debtor.customer_phone|slice:":10" }}</small>
                                     {% else %}
                                         <small class="text-muted">—</small>
                                     {% endif %}
                                 </td>
                                 <td class="text-center">
                                     {% if debtor.is_agency %}
-                                        <span class="badge bg-primary-focus text-primary-main px-8 py-4">B2B</span>
+                                        <span class="badge bg-primary-focus text-primary-main px-1 py-0" style="font-size: 10px;">B2B</span>
                                     {% else %}
-                                        <span class="badge bg-warning-focus text-warning-main px-8 py-4">B2C</span>
+                                        <span class="badge bg-warning-focus text-warning-main px-1 py-0" style="font-size: 10px;">B2C</span>
                                     {% endif %}
                                 </td>
                                 {% if show_center %}
                                 <td class="text-center">
-                                    <span class="badge bg-info-focus text-info-main px-2 py-1">{{ debtor.center_name|default:"N/A" }}</span>
+                                    <span class="badge bg-info-focus text-info-main px-1 py-0 text-truncate d-inline-block" style="max-width: 80px; font-size: 10px;" title="{{ debtor.center_name|default:'N/A' }}">{{ debtor.center_name|default:"N/A" }}</span>
                                 </td>
                                 {% endif %}
                                 {% if show_branch %}
                                 <td class="text-center">
-                                    <span class="badge bg-purple-focus text-purple-main px-2 py-1">{{ debtor.branch_name|default:"N/A" }}</span>
+                                    <span class="badge bg-purple-focus text-purple-main px-1 py-0 text-truncate d-inline-block" style="max-width: 80px; font-size: 10px;" title="{{ debtor.branch_name|default:'N/A' }}">{{ debtor.branch_name|default:"N/A" }}</span>
                                 </td>
                                 {% endif %}
-                                <td class="text-end text-danger-main fw-semibold">{{ debtor.remaining|floatformat:0|intcomma }}</td>
+                                <td class="text-end text-danger-main fw-semibold"><small style="font-size: 11px;">{{ debtor.remaining|floatformat:0|intcomma }}</small></td>
                                 <td class="text-center">
-                                    <span class="badge bg-neutral-200 text-light px-2 py-1">{{ debtor.orders_with_debt }}</span>
+                                    <span class="badge bg-neutral-200 text-light px-1 py-0" style="font-size: 10px;">{{ debtor.orders_with_debt }}</span>
                                 </td>
-                                <td class="text-end">{{ debtor.total_expected|floatformat:0|intcomma }}</td>
-                                <td class="text-end text-success-600 fw-semibold">{{ debtor.total_received|floatformat:0|intcomma }}</td>
+                                <td class="text-end"><small style="font-size: 11px;">{{ debtor.total_expected|floatformat:0|intcomma }}</small></td>
+                                <td class="text-end text-success-600 fw-semibold"><small style="font-size: 11px;">{{ debtor.total_received|floatformat:0|intcomma }}</small></td>
                                 <td class="text-center">
-                                    <div class="d-flex align-items-center justify-content-center gap-2">
-                                        <div class="progress" style="width: 70px; height: 10px;">
+                                    <div class="d-flex align-items-center justify-content-center gap-1">
+                                        <div class="progress" style="width: 35px; height: 6px;">
                                             <div class="progress-bar {% if debtor.collection_rate >= 70 %}bg-success-600{% elif debtor.collection_rate >= 40 %}bg-warning-600{% else %}bg-danger-600{% endif %}" 
                                                  style="width: {{ debtor.collection_rate }}%"></div>
                                         </div>
-                                        <span class="fw-semibold {% if debtor.collection_rate >= 70 %}text-success-600{% elif debtor.collection_rate >= 40 %}text-warning-600{% else %}text-danger-600{% endif %}">{{ debtor.collection_rate }}%</span>
+                                        <span class="fw-semibold {% if debtor.collection_rate >= 70 %}text-success-600{% elif debtor.collection_rate >= 40 %}text-warning-600{% else %}text-danger-600{% endif %}" style="font-size: 11px;">{{ debtor.collection_rate }}%</span>
                                     </div>
+                                </td>
+                                <td class="text-center">
+                                    <a href="{% url 'orders:bulk_payment_page' %}?customer_id={{ debtor.customer_id }}" 
+                                       class="btn btn-sm btn-primary-600 radius-8 px-1 py-0"
+                                       style="font-size: 11px;"
+                                       title="Pay debt for {{ debtor.customer_name }}">
+                                        <iconify-icon icon="solar:wallet-money-bold" style="font-size: 12px;"></iconify-icon>
+                                        Pay
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                         <tfoot class="table-secondary">
                             <tr class="fw-bold">
-                                <td colspan="{% if show_center and show_branch %}6{% elif show_center or show_branch %}5{% else %}4{% endif %}" class="text-end">TOTALS:</td>
-                                <td class="text-end text-danger-main">{{ total_debt|floatformat:0|intcomma }}</td>
-                                <td class="text-center">{{ total_orders_with_debt }}</td>
-                                <td class="text-end">{{ total_expected|floatformat:0|intcomma }}</td>
-                                <td class="text-end text-success-600">{{ total_received|floatformat:0|intcomma }}</td>
-                                <td class="text-center">{{ avg_collection_rate }}%</td>
+                                <td colspan="{% if show_center and show_branch %}6{% elif show_center or show_branch %}5{% else %}4{% endif %}" class="text-end"><small>TOTALS:</small></td>
+                                <td class="text-end text-danger-main"><small>{{ total_debt|floatformat:0|intcomma }}</small></td>
+                                <td class="text-center"><small>{{ total_orders_with_debt }}</small></td>
+                                <td class="text-end"><small>{{ total_expected|floatformat:0|intcomma }}</small></td>
+                                <td class="text-end text-success-600"><small>{{ total_received|floatformat:0|intcomma }}</small></td>
+                                <td class="text-center"><small>{{ avg_collection_rate }}%</small></td>
+                                <td></td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
+                
+                <!-- Pagination -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 pt-3 border-top gap-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-secondary-light text-sm">Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} entries</span>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="mb-0 text-secondary-light text-sm">Show:</label>
+                        <form method="GET" id="perPageForm" class="d-inline">
+                            <input type="hidden" name="period" value="{{ period }}">
+                            <input type="hidden" name="date_from" value="{{ date_from }}">
+                            <input type="hidden" name="date_to" value="{{ date_to }}">
+                            <input type="hidden" name="search" value="{{ search }}">
+                            <input type="hidden" name="client_type" value="{{ client_type }}">
+                            <input type="hidden" name="center" value="{{ selected_center }}">
+                            <input type="hidden" name="branch" value="{{ selected_branch }}">
+                            <input type="hidden" name="debt_range" value="{{ debt_range }}">
+                            <input type="hidden" name="collection_rate" value="{{ collection_rate_filter }}">
+                            <input type="hidden" name="orders_count" value="{{ orders_count_filter }}">
+                            <input type="hidden" name="sort_by" value="{{ sort_by }}">
+                            <select name="per_page" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+                                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                                <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+                                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                                <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                            </select>
+                        </form>
+                        <span class="text-secondary-light text-sm">entries</span>
+                    </div>
+                    
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1&period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ search }}&client_type={{ client_type }}&center={{ selected_center }}&branch={{ selected_branch }}&debt_range={{ debt_range }}&collection_rate={{ collection_rate_filter }}&orders_count={{ orders_count_filter }}&sort_by={{ sort_by }}&per_page={{ per_page }}">
+                                    <iconify-icon icon="solar:alt-arrow-left-line-duotone"></iconify-icon>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ search }}&client_type={{ client_type }}&center={{ selected_center }}&branch={{ selected_branch }}&debt_range={{ debt_range }}&collection_rate={{ collection_rate_filter }}&orders_count={{ orders_count_filter }}&sort_by={{ sort_by }}&per_page={{ per_page }}">
+                                    <iconify-icon icon="solar:arrow-left-line-duotone"></iconify-icon>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><iconify-icon icon="solar:alt-arrow-left-line-duotone"></iconify-icon></span>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link"><iconify-icon icon="solar:arrow-left-line-duotone"></iconify-icon></span>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}&period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ search }}&client_type={{ client_type }}&center={{ selected_center }}&branch={{ selected_branch }}&debt_range={{ debt_range }}&collection_rate={{ collection_rate_filter }}&orders_count={{ orders_count_filter }}&sort_by={{ sort_by }}&per_page={{ per_page }}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}&period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ search }}&client_type={{ client_type }}&center={{ selected_center }}&branch={{ selected_branch }}&debt_range={{ debt_range }}&collection_rate={{ collection_rate_filter }}&orders_count={{ orders_count_filter }}&sort_by={{ sort_by }}&per_page={{ per_page }}">
+                                    <iconify-icon icon="solar:arrow-right-line-duotone"></iconify-icon>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ paginator.num_pages }}&period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}&search={{ search }}&client_type={{ client_type }}&center={{ selected_center }}&branch={{ selected_branch }}&debt_range={{ debt_range }}&collection_rate={{ collection_rate_filter }}&orders_count={{ orders_count_filter }}&sort_by={{ sort_by }}&per_page={{ per_page }}">
+                                    <iconify-icon icon="solar:alt-arrow-right-line-duotone"></iconify-icon>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><iconify-icon icon="solar:arrow-right-line-duotone"></iconify-icon></span>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link"><iconify-icon icon="solar:alt-arrow-right-line-duotone"></iconify-icon></span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    
+                    <div class="text-secondary-light text-sm">
+                        Page <strong>{{ page_obj.number }}</strong> of <strong>{{ paginator.num_pages }}</strong>
+                    </div>
+                </div>
+                
                 {% else %}
                 <div class="d-flex flex-column align-items-center justify-content-center py-5">
                     <span class="mb-0 w-64-px h-64-px bg-neutral-100 flex-shrink-0 text-secondary-light d-flex justify-content-center align-items-center rounded-circle mb-3">

@@ -90,6 +90,17 @@
                 </a>
             </li>
             
+            <!-- Bulk Payment & Top Up - Permission-based -->
+            {% has_any_perm 'can_view_financial_reports,can_manage_bulk_payments' as can_bulk_payments %}
+            {% if can_bulk_payments or is_owner or user.is_superuser %}
+            <li>
+                <a href="{% url 'orders:bulk_payment_page' %}">
+                    <iconify-icon icon="solar:wallet-money-bold" class="menu-icon"></iconify-icon>
+                    <span data-i18n="sidebar.bulkPayment">Bulk Payment & Top Up</span>
+                </a>
+            </li>
+            {% endif %}
+            
             {% has_any_perm 'can_view_products,can_manage_products,can_view_expenses,can_manage_expenses' as can_services %}
             {% if can_services %}
             <li class="dropdown">
@@ -174,7 +185,10 @@
                         <a href="{% url 'unit_economy' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.unitEconomy">Unit Economy</span></a>
                     </li>
                     <li>
-                        <a href="{% url 'orders:bulk_payment_page' %}"><i class="ri-circle-fill circle-icon text-purple-main w-auto"></i> <span data-i18n="sidebar.bulkPayments">Bulk Payments</span></a>
+                        <a href="{% url 'debtors_report' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.debtorsReport">Debtors Report</span></a>
+                    </li>
+                    <li>
+                        <a href="{% url 'orders:payment_history' %}"><i class="ri-circle-fill circle-icon text-purple-main w-auto"></i> <span data-i18n="sidebar.paymentHistory">Payment History</span></a>
                     </li>
                     {% endif %}
                     {% has_any_perm 'can_view_expenses,can_manage_expenses,can_view_financial_reports' as can_expense_analytics %}

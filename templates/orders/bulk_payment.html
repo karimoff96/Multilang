@@ -2,496 +2,195 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}{% trans "Bulk Payment Management" %}{% endblock %}
+{% block title %}{% trans "Bulk Payment & Top Up" %}{% endblock %}
 
 {% block extra_css %}
 <style>
-    :root {
-        --indigo-500: #6366f1;
-        --indigo-600: #4f46e5;
-        --indigo-700: #4338ca;
-        --red-400: #f87171;
-        --amber-400: #fbbf24;
-        --green-400: #4ade80;
-        --cyan-400: #22d3ee;
-    }
-
-    /* ========== Card Styles ========== */
-    .bulk-card {
-        background-color: var(--bg-card);
-        border: 1px solid var(--border-color);
+    .customer-search-card {
         border-radius: 12px;
-        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
-    .bulk-card-header {
-        background-color: var(--bg-card);
-        border-bottom: 1px solid var(--border-color);
-        padding: 16px 20px;
-    }
-    .bulk-card-body {
-        padding: 20px;
-    }
-
-    /* ========== Filter Section ========== */
-    .filter-bar {
-        background-color: rgba(99, 102, 241, 0.05);
-        border: 1px solid var(--border-color);
+    
+    .debt-summary-card {
+        border-left: 4px solid #ef4444;
         border-radius: 8px;
-        padding: 16px;
-        margin-bottom: 20px;
+        background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
     }
-    .filter-bar label {
-        color: var(--text-primary);
-        font-weight: 500;
-        font-size: 13px;
-        margin-bottom: 6px;
+    
+    .order-debt-card {
+        border-left: 3px solid #f59e0b;
+        transition: all 0.2s;
     }
-    .filter-bar .form-control,
-    .filter-bar .form-select {
-        background-color: var(--bg-card);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        font-size: 14px;
+    
+    .order-debt-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
     }
-    .filter-bar .form-control:focus,
-    .filter-bar .form-select:focus {
-        background-color: var(--bg-card);
-        color: var(--text-primary);
-        border-color: var(--indigo-500);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    
+    .payment-input-section {
+        background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+        border-radius: 12px;
+        border: 2px solid #3b82f6;
     }
-    .filter-bar .form-control::placeholder {
-        color: var(--text-secondary);
+    
+    .debt-amount {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #dc2626;
     }
-    .filter-bar .form-select option {
-        background-color: var(--bg-card);
-        color: var(--text-primary);
+    
+    .payment-preview-card {
+        background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+        border-left: 4px solid #10b981;
     }
-
-    /* ========== Debtors Table ========== */
-    .debtors-table-wrapper {
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    .debtors-table {
-        margin-bottom: 0;
-        color: var(--text-primary);
-    }
-    .debtors-table thead th {
-        background-color: rgba(99, 102, 241, 0.08);
-        color: var(--text-primary);
-        font-weight: 600;
-        font-size: 13px;
-        padding: 12px 16px;
-        border-bottom: 2px solid var(--border-color);
-        white-space: nowrap;
-    }
-    .debtors-table tbody tr {
-        background-color: var(--bg-card);
-        border-bottom: 1px solid var(--border-color);
+    
+    .debtor-row {
         cursor: pointer;
-        transition: background-color 0.15s ease;
+        transition: all 0.2s;
     }
-    .debtors-table tbody tr:hover {
-        background-color: rgba(99, 102, 241, 0.06);
+    
+    .debtor-row:hover {
+        background-color: #f3f4f6 !important;
+        transform: scale(1.01);
     }
-    .debtors-table tbody tr.selected {
-        background-color: rgba(99, 102, 241, 0.12);
-        border-left: 3px solid var(--indigo-600);
+    
+    .debtor-row.selected {
+        background-color: #dbeafe !important;
+        border-left: 4px solid #3b82f6;
     }
-    .debtors-table tbody td {
-        padding: 14px 16px;
-        vertical-align: middle;
-        color: var(--text-primary);
-        font-size: 14px;
+    
+    .debt-badge-high {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
     }
-    .debtors-table .customer-name {
+    
+    .debt-badge-medium {
+        background: #fed7aa;
+        color: #9a3412;
+        border: 1px solid #fdba74;
+    }
+    
+    .debt-badge-low {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #86efac;
+    }
+    
+    .fifo-order-item {
+        border-left: 3px solid #6366f1;
+        background: #fafafa;
+        transition: all 0.2s;
+    }
+    
+    .fifo-order-item.fully-paid {
+        border-left-color: #10b981;
+        background: #f0fdf4;
+    }
+    
+    .amount-input {
+        font-size: 1.5rem;
         font-weight: 600;
-        color: var(--text-primary);
-    }
-    .debtors-table .customer-phone {
-        font-size: 12px;
-        color: var(--text-secondary);
-    }
-
-    /* ========== Badges ========== */
-    .badge-agency {
-        background-color: rgba(6, 182, 212, 0.15);
-        color: var(--cyan-400);
-        font-weight: 500;
-        padding: 4px 10px;
-        border-radius: 4px;
-        font-size: 12px;
-    }
-    .badge-individual {
-        background-color: rgba(34, 197, 94, 0.15);
-        color: var(--green-400);
-        font-weight: 500;
-        padding: 4px 10px;
-        border-radius: 4px;
-        font-size: 12px;
-    }
-    .badge-orders {
-        background-color: rgba(251, 191, 36, 0.2);
-        color: var(--amber-400);
-        font-weight: 600;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-    }
-
-    /* ========== Debt Amount Colors ========== */
-    .debt-high { color: var(--red-400); font-weight: 700; }
-    .debt-medium { color: var(--amber-400); font-weight: 700; }
-    .debt-low { color: var(--green-400); font-weight: 700; }
-
-    /* ========== Pagination ========== */
-    .pagination-wrapper {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px;
-        border-top: 1px solid var(--border-color);
-        background-color: var(--bg-card);
-    }
-    .pagination-info {
-        color: var(--text-secondary);
-        font-size: 13px;
-    }
-    .pagination {
-        margin: 0;
-    }
-    .pagination .page-link {
-        background-color: var(--bg-card);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        padding: 6px 12px;
-        font-size: 13px;
-    }
-    .pagination .page-link:hover {
-        background-color: rgba(99, 102, 241, 0.1);
-        color: var(--indigo-500);
-        border-color: var(--indigo-500);
-    }
-    .pagination .page-item.active .page-link {
-        background-color: var(--indigo-600);
-        border-color: var(--indigo-600);
-        color: white;
-    }
-    .pagination .page-item.disabled .page-link {
-        background-color: var(--bg-card);
-        color: var(--text-secondary);
-        opacity: 0.5;
-    }
-
-    /* ========== Step Headers ========== */
-    .step-header {
-        display: flex;
-        align-items: center;
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin: 24px 0 16px 0;
-    }
-    .step-number {
-        width: 28px;
-        height: 28px;
-        background-color: var(--indigo-600);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        font-weight: 700;
-        margin-right: 12px;
-    }
-
-    /* ========== Debt Overview Card ========== */
-    .debt-overview {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        border-radius: 12px;
-        padding: 24px;
-        color: white;
-        margin-bottom: 24px;
-    }
-    .debt-overview h6 {
-        opacity: 0.8;
-        font-size: 13px;
-        margin-bottom: 4px;
-    }
-    .debt-overview h3, .debt-overview h4 {
-        margin: 0;
-        font-weight: 700;
-    }
-
-    /* ========== Orders Table ========== */
-    .orders-container {
-        max-height: 350px;
-        overflow-y: auto;
-        border: 1px solid var(--border-color);
+        border: 2px solid #3b82f6;
         border-radius: 8px;
     }
-    .orders-table {
-        margin-bottom: 0;
-        color: var(--text-primary);
+    
+    .amount-input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
-    .orders-table thead th {
-        background-color: var(--bg-card);
-        color: var(--text-primary);
-        font-weight: 600;
-        font-size: 13px;
-        padding: 12px;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        border-bottom: 1px solid var(--border-color);
+    
+    .pagination .page-link {
+        color: #3b82f6;
+        border-color: #e5e7eb;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
     }
-    .orders-table tbody tr {
-        background-color: var(--bg-card);
+    
+    .pagination.pagination-sm .page-link {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8125rem;
     }
-    .orders-table tbody td {
-        padding: 12px;
-        color: var(--text-primary);
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    /* ========== Payment Preview ========== */
-    .payment-preview {
-        background-color: rgba(34, 197, 94, 0.08);
-        border: 1px solid rgba(34, 197, 94, 0.2);
-        border-radius: 12px;
-        padding: 20px;
-        margin-top: 20px;
-    }
-    .payment-preview h6 {
-        color: var(--green-400);
-        font-size: 13px;
-        margin-bottom: 4px;
-    }
-    .payment-preview h4 {
-        color: var(--text-primary);
-        margin: 0;
-    }
-    .distribution-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 0;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .distribution-item:last-child {
-        border-bottom: none;
-    }
-    .fully-paid-tag {
-        background-color: var(--green-400);
-        color: #000;
-        font-size: 11px;
-        font-weight: 600;
-        padding: 2px 8px;
-        border-radius: 4px;
-        margin-left: 8px;
-    }
-
-    /* ========== Form Elements ========== */
-    .form-label {
-        color: var(--text-primary);
-        font-weight: 500;
-    }
-    .form-control, .form-select {
-        background-color: var(--bg-card);
-        color: var(--text-primary);
-        border-color: var(--border-color);
-    }
-    .form-control:focus, .form-select:focus {
-        background-color: var(--bg-card);
-        color: var(--text-primary);
-        border-color: var(--indigo-500);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-    }
-    .input-group-text {
-        background-color: var(--bg-card);
-        color: var(--text-primary);
-        border-color: var(--border-color);
-    }
-
-    /* ========== Buttons ========== */
-    .btn-apply {
-        background-color: var(--indigo-600);
-        border-color: var(--indigo-600);
+    
+    .pagination .page-item.active .page-link {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
         color: white;
         font-weight: 600;
     }
-    .btn-apply:hover {
-        background-color: var(--indigo-700);
-        border-color: var(--indigo-700);
-        color: white;
+    
+    .pagination .page-link:hover:not(.active) {
+        background-color: #eff6ff;
+        border-color: #3b82f6;
+        color: #2563eb;
     }
-    .btn-apply:disabled {
-        opacity: 0.6;
+    
+    .pagination .page-item.disabled .page-link {
+        color: #9ca3af;
+        background-color: #f9fafb;
+        border-color: #e5e7eb;
     }
-
-    /* ========== Empty State ========== */
-    .empty-state {
-        text-align: center;
-        padding: 48px 20px;
-        color: var(--text-secondary);
-    }
-    .empty-state i {
-        font-size: 48px;
-        margin-bottom: 16px;
-        opacity: 0.5;
-    }
-
-    /* ========== Responsive ========== */
-    @media (max-width: 767px) {
-        .hide-mobile { display: none !important; }
-        .debtors-table tbody td { padding: 10px 12px; }
-        .debt-overview { padding: 16px; }
-        .debt-overview .col-6 { margin-bottom: 16px; }
+    
+    .pagination .page-link:focus {
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+        z-index: 3;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-    <!-- Top Debtors Section -->
+    <!-- Page Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="bulk-card">
-                <div class="bulk-card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <div>
-                        <h5 class="mb-1">
-                            <i class="fas fa-users me-2 text-warning"></i>
-                            {% trans "Top Debtors" %}
-                        </h5>
-                        <small class="text-muted">{% trans "Customers with outstanding debts (RBAC filtered)" %}</small>
-                    </div>
-                    <a href="{% url 'orders:payment_history' %}" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-history me-1"></i> {% trans "Payment History" %}
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1">
+                        <i class="fas fa-money-bill-wave text-success me-2"></i>
+                        {% trans "Bulk Payment & Top Up" %}
+                    </h4>
+                    <p class="text-muted mb-0">
+                        {% trans "Process payments for agencies and customers with outstanding debts" %}
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'orders:payment_history' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-history me-2"></i>
+                        {% trans "Payment History" %}
                     </a>
                 </div>
-                
-                <div class="bulk-card-body">
-                    <!-- Filters -->
-                    <div class="filter-bar">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-12 col-sm-6 col-md-3">
-                                <label>{% trans "Customer Type" %}</label>
-                                <select id="customerTypeFilter" class="form-select form-select-sm">
-                                    <option value="">{% trans "All Customers" %}</option>
-                                    <option value="agency">{% trans "Agencies Only" %}</option>
-                                    <option value="individual">{% trans "Individuals Only" %}</option>
-                                </select>
-                            </div>
-                            {% if show_branch_filter %}
-                            <div class="col-12 col-sm-6 col-md-3">
-                                <label>{% trans "Branch" %}</label>
-                                <select id="branchFilter" class="form-select form-select-sm">
-                                    <option value="">{% trans "All Branches" %}</option>
-                                </select>
-                            </div>
-                            {% endif %}
-                            <div class="col-12 col-sm-6 col-md-{% if show_branch_filter %}3{% else %}6{% endif %}">
-                                <label><i class="fas fa-search me-1"></i>{% trans "Quick Search" %}</label>
-                                <input type="text" id="quickSearch" class="form-control form-control-sm" 
-                                       placeholder="{% trans 'Search by name or phone...' %}">
-                            </div>
-                            <div class="col-12 col-sm-6 col-md-3">
-                                <div class="d-flex gap-2">
-                                    <button id="applyFiltersBtn" class="btn btn-sm btn-primary flex-grow-1">
-                                        <i class="fas fa-filter me-1"></i> {% trans "Apply" %}
-                                    </button>
-                                    <button id="clearFiltersBtn" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            </div>
+        </div>
+    </div>
 
-                    <!-- Debtors Table -->
-                    <div class="debtors-table-wrapper">
-                        <div class="table-responsive">
-                            <table class="table debtors-table">
-                                <thead>
-                                    <tr>
-                                        <th class="hide-mobile" style="width: 50px;">#</th>
-                                        <th>{% trans "Customer" %}</th>
-                                        <th class="hide-mobile">{% trans "Phone" %}</th>
-                                        <th class="hide-mobile">{% trans "Type" %}</th>
-                                        <th class="text-end">{% trans "Debt" %}</th>
-                                        <th class="text-center hide-mobile">{% trans "Orders" %}</th>
-                                        <th class="text-center" style="width: 100px;">{% trans "Action" %}</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="debtorsTableBody">
-                                    {% for debtor in top_debtors %}
-                                    <tr class="debtor-row" 
-                                        data-id="{{ debtor.id }}" 
-                                        data-name="{{ debtor.name }}" 
-                                        data-phone="{{ debtor.phone }}">
-                                        <td class="hide-mobile text-muted">{{ forloop.counter }}</td>
-                                        <td>
-                                            <div class="customer-name">{{ debtor.name }}</div>
-                                            <div class="customer-phone d-md-none">{{ debtor.phone }}</div>
-                                        </td>
-                                        <td class="hide-mobile">{{ debtor.phone }}</td>
-                                        <td class="hide-mobile">
-                                            {% if debtor.is_agency %}
-                                            <span class="badge-agency"><i class="fas fa-building me-1"></i>{% trans "Agency" %}</span>
-                                            {% else %}
-                                            <span class="badge-individual"><i class="fas fa-user me-1"></i>{% trans "Individual" %}</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-end {% if debtor.total_debt > 1000 %}debt-high{% elif debtor.total_debt > 500 %}debt-medium{% else %}debt-low{% endif %}">
-                                            ${{ debtor.total_debt|floatformat:2 }}
-                                            <div class="d-md-none">
-                                                <span class="badge-orders">{{ debtor.order_count }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="text-center hide-mobile">
-                                            <span class="badge-orders">{{ debtor.order_count }}</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-primary select-btn" data-id="{{ debtor.id }}">
-                                                <i class="fas fa-hand-pointer"></i>
-                                                <span class="hide-mobile ms-1">{% trans "Select" %}</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="7">
-                                            <div class="empty-state">
-                                                <i class="fas fa-check-circle text-success d-block"></i>
-                                                <strong>{% trans "All Paid!" %}</strong>
-                                                <p class="mb-0">{% trans "No outstanding debts found." %}</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Pagination -->
-                        <div class="pagination-wrapper">
-                            <div class="pagination-info">
-                                {% trans "Showing" %} <span id="showStart">1</span>-<span id="showEnd">20</span> 
-                                {% trans "of" %} <span id="showTotal">{{ top_debtors|length }}</span>
+    <!-- Quick Customer Search (Only shown when no customer selected) -->
+    <div class="row mb-4" id="customerSearchSection">
+        <div class="col-12">
+            <div class="card customer-search-card">
+                <div class="card-body">
+                    <h6 class="mb-3">
+                        <iconify-icon icon="solar:user-search-bold" class="me-2"></iconify-icon>
+                        {% trans "Search Customer" %}
+                    </h6>
+                    <div class="row align-items-end">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <iconify-icon icon="solar:magnifer-bold"></iconify-icon>
+                                </span>
+                                <input type="text" 
+                                       id="customerSearch" 
+                                       class="form-control" 
+                                       placeholder="{% trans 'Search by name or phone number...' %}"
+                                       autocomplete="off">
                             </div>
-                            <nav>
-                                <ul class="pagination pagination-sm" id="pagination">
-                                    <li class="page-item" id="prevPage">
-                                        <a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a>
-                                    </li>
-                                    <li class="page-item" id="nextPage">
-                                        <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
-                                    </li>
-                                </ul>
-                            </nav>
+                            <div id="searchResults" class="mt-2"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'debtors_report' %}" class="btn btn-outline-primary w-100">
+                                <iconify-icon icon="solar:users-group-rounded-bold" class="me-2"></iconify-icon>
+                                {% trans "View All Debtors" %}
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -499,158 +198,189 @@
         </div>
     </div>
 
-    <!-- Payment Processing Section -->
-    <div class="row">
+    <!-- Payment Section Message -->
+    <div class="row mb-4" id="noCustomerMessage">
         <div class="col-12">
-            <div class="bulk-card">
-                <div class="bulk-card-header">
-                    <h5 class="mb-1">
-                        <i class="fas fa-money-bill-wave me-2"></i>
-                        {% trans "Process Payment" %}
-                    </h5>
-                    <small class="text-muted">{% trans "Select a customer from the table above to process payment" %}</small>
+            <div class="alert alert-info d-flex align-items-center">
+                <iconify-icon icon="solar:info-circle-bold" class="text-xl me-3"></iconify-icon>
+                <div>
+                    <strong>{% trans "No customer selected" %}</strong><br>
+                    <small>{% trans "Search for a customer above or select from the" %} <a href="{% url 'debtors_report' %}">{% trans "debtors report" %}</a> {% trans "to process a payment" %}</small>
                 </div>
-                
-                <div class="bulk-card-body">
-                    <!-- Payment Section (hidden initially) -->
-                    <div id="paymentSection" style="display: none;">
-                        
-                        <!-- Step 1: Debt Overview -->
-                        <div class="step-header">
-                            <span class="step-number">1</span>
-                            {% trans "Debt Overview" %}
-                        </div>
-                        
-                        <div class="debt-overview">
-                            <div class="row">
-                                <div class="col-6 col-md-3">
-                                    <h6>{% trans "Customer" %}</h6>
-                                    <h4 id="ovCustomerName">-</h4>
-                                    <small id="ovCustomerPhone">-</small>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <h6>{% trans "Total Debt" %}</h6>
-                                    <h3 id="ovTotalDebt">$0.00</h3>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <h6>{% trans "Orders" %}</h6>
-                                    <h3 id="ovOrderCount">0</h3>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <h6>{% trans "Oldest" %}</h6>
-                                    <h3 id="ovOldest">-</h3>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Step 2: Outstanding Orders -->
-                        <div class="step-header">
-                            <span class="step-number">2</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selected Customer & Payment Section (Initially Hidden) -->
+    <div id="paymentSection" style="display: none;">
+        
+        <!-- Change Customer Button -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <button type="button" id="changeCustomerBtn" class="btn btn-outline-secondary btn-sm">
+                    <iconify-icon icon="solar:arrow-left-bold" class="me-1"></iconify-icon>
+                    {% trans "Change Customer" %}
+                </button>
+            </div>
+        </div>
+        
+        <!-- Customer Debt Summary -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card debt-summary-card">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-2">
+                            <i class="fas fa-user-circle me-2"></i>
+                            {% trans "Customer" %}
+                        </h6>
+                        <h5 id="selectedCustomerName" class="mb-1">-</h5>
+                        <p id="selectedCustomerPhone" class="text-muted mb-0">-</p>
+                        <span id="selectedCustomerType" class="badge mt-2">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card debt-summary-card">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-2">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {% trans "Total Outstanding Debt" %}
+                        </h6>
+                        <div class="debt-amount" id="totalDebtAmount">$0.00</div>
+                        <p class="text-muted mb-0">
+                            <span id="debtOrderCount">0</span> {% trans "orders" %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card debt-summary-card">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-2">
+                            <i class="fas fa-clock me-2"></i>
+                            {% trans "Oldest Debt" %}
+                        </h6>
+                        <h4 id="oldestDebtDays">-</h4>
+                        <p class="text-muted mb-0">{% trans "days old" %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Outstanding Orders List -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-invoice-dollar me-2"></i>
                             {% trans "Outstanding Orders" %}
+                        </h5>
+                        <p class="mb-0 small text-muted mt-1">
+                            {% trans "Orders will be paid in FIFO order (oldest first)" %}
+                        </p>
+                    </div>
+                    <div class="card-body">
+                        <div id="outstandingOrdersList" class="row">
+                            <!-- Orders populated via JavaScript -->
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Input Section -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card payment-input-section">
+                    <div class="card-body">
+                        <h5 class="mb-4">
+                            <i class="fas fa-hand-holding-usd me-2"></i>
+                            {% trans "Process Payment" %}
+                        </h5>
                         
-                        <div class="orders-container">
-                            <table class="table orders-table">
-                                <thead>
-                                    <tr>
-                                        <th>{% trans "Order #" %}</th>
-                                        <th class="hide-mobile">{% trans "Date" %}</th>
-                                        <th class="hide-mobile">{% trans "Product" %}</th>
-                                        <th class="text-end">{% trans "Total" %}</th>
-                                        <th class="text-end">{% trans "Paid" %}</th>
-                                        <th class="text-end">{% trans "Remaining" %}</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="ordersBody">
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">
-                                            {% trans "Select a customer to view orders" %}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Step 3: Payment Details -->
-                        <div class="step-header">
-                            <span class="step-number">3</span>
-                            {% trans "Payment Details" %}
-                        </div>
-                        
-                        <div class="row g-3">
-                            <div class="col-12 col-md-4">
-                                <label class="form-label">{% trans "Payment Amount" %}</label>
-                                <div class="input-group">
+                        <form id="paymentForm">
+                            {% csrf_token %}
+                            <input type="hidden" id="selectedCustomerId" name="customer_id">
+                            
+                            <div class="mb-3">
+                                <label for="paymentAmount" class="form-label fw-bold">
+                                    {% trans "Payment Amount" %}
+                                </label>
+                                <div class="input-group input-group-lg">
                                     <span class="input-group-text">$</span>
-                                    <input type="number" id="paymentAmount" class="form-control" 
-                                           placeholder="0.00" step="0.01" min="0">
+                                    <input type="number" 
+                                           class="form-control amount-input" 
+                                           id="paymentAmount" 
+                                           name="payment_amount"
+                                           step="0.01" 
+                                           min="0.01" 
+                                           placeholder="0.00"
+                                           required>
                                 </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {% trans "Payment will be distributed to orders using FIFO (First In, First Out)" %}
+                                </small>
                             </div>
-                            <div class="col-12 col-md-4">
-                                <label class="form-label">{% trans "Payment Method" %}</label>
-                                <select id="paymentMethod" class="form-select">
+                            
+                            <div class="mb-3">
+                                <label for="paymentMethod" class="form-label fw-bold">
+                                    {% trans "Payment Method" %}
+                                </label>
+                                <select class="form-select" id="paymentMethod" name="payment_method" required>
                                     <option value="cash">{% trans "Cash" %}</option>
                                     <option value="bank_transfer">{% trans "Bank Transfer" %}</option>
-                                    <option value="card">{% trans "Card" %}</option>
+                                    <option value="card">{% trans "Card Payment" %}</option>
                                     <option value="other">{% trans "Other" %}</option>
                                 </select>
                             </div>
-                            <div class="col-12 col-md-4">
-                                <label class="form-label">{% trans "Note" %} <small class="text-muted">({% trans "optional" %})</small></label>
-                                <input type="text" id="paymentNote" class="form-control" 
-                                       placeholder="{% trans 'Receipt number, transaction ID...' %}">
-                            </div>
-                        </div>
-                        
-                        <!-- Step 4: Payment Preview -->
-                        <div id="previewSection" style="display: none;">
-                            <div class="step-header">
-                                <span class="step-number">4</span>
-                                {% trans "Payment Preview" %}
+                            
+                            <div class="mb-4">
+                                <label for="receiptNote" class="form-label">
+                                    {% trans "Receipt/Note" %} <small class="text-muted">({% trans "optional" %})</small>
+                                </label>
+                                <textarea class="form-control" 
+                                          id="receiptNote" 
+                                          name="receipt_note"
+                                          rows="3" 
+                                          placeholder="{% trans 'Transaction ID, receipt number, or notes...' %}"></textarea>
                             </div>
                             
-                            <div class="payment-preview">
-                                <div class="row mb-3">
-                                    <div class="col-6 col-md-3">
-                                        <h6>{% trans "Amount" %}</h6>
-                                        <h4 id="pvAmount">$0.00</h4>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <h6>{% trans "Orders Affected" %}</h6>
-                                        <h4 id="pvOrders">0</h4>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <h6>{% trans "Fully Paid" %}</h6>
-                                        <h4 id="pvFullyPaid">0</h4>
-                                    </div>
-                                    <div class="col-6 col-md-3">
-                                        <h6>{% trans "Remaining Debt" %}</h6>
-                                        <h4 id="pvRemaining">$0.00</h4>
-                                    </div>
-                                </div>
-                                
-                                <h6 class="mb-2">{% trans "Distribution (FIFO):" %}</h6>
-                                <div id="distributionList"></div>
+                            <div class="d-grid gap-2">
+                                <button type="button" 
+                                        id="previewPaymentBtn" 
+                                        class="btn btn-info btn-lg">
+                                    <i class="fas fa-eye me-2"></i>
+                                    {% trans "Preview Distribution" %}
+                                </button>
+                                <button type="submit" 
+                                        id="processPaymentBtn" 
+                                        class="btn btn-success btn-lg"
+                                        style="display: none;">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    {% trans "Process Payment" %}
+                                </button>
                             </div>
-                        </div>
-                        
-                        <!-- Actions -->
-                        <div class="d-flex justify-content-end gap-2 mt-4">
-                            <button type="button" class="btn btn-secondary" id="cancelBtn">
-                                <i class="fas fa-times me-1"></i> {% trans "Cancel" %}
-                            </button>
-                            <button type="button" class="btn btn-success btn-lg btn-apply" id="applyBtn" disabled>
-                                <i class="fas fa-check-circle me-1"></i> {% trans "Apply Payment" %}
-                            </button>
-                        </div>
+                        </form>
                     </div>
-                    
-                    <!-- Empty State -->
-                    <div id="emptyPaymentState">
-                        <div class="empty-state">
-                            <i class="fas fa-hand-pointer d-block"></i>
-                            <strong>{% trans "No Customer Selected" %}</strong>
-                            <p class="mb-0">{% trans "Click on a customer row or 'Select' button above to process payment" %}</p>
+                </div>
+            </div>
+            
+            <!-- Payment Preview -->
+            <div class="col-md-6">
+                <div id="paymentPreviewCard" class="card payment-preview-card" style="display: none;">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>
+                            {% trans "Payment Distribution Preview" %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="paymentPreviewContent">
+                            <!-- Preview content populated via JavaScript -->
                         </div>
                     </div>
                 </div>
@@ -658,425 +388,461 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-(function() {
-    'use strict';
-    
-    // ========== State ==========
-    let currentPage = 1;
-    const perPage = 20;
-    let allRows = [];
-    let visibleRows = [];
-    let selectedCustomerId = null;
-    let customerData = null;
-    
-    // ========== DOM Elements ==========
-    const debtorsBody = document.getElementById('debtorsTableBody');
-    const quickSearch = document.getElementById('quickSearch');
-    const customerTypeFilter = document.getElementById('customerTypeFilter');
-    const branchFilter = document.getElementById('branchFilter');
-    const applyFiltersBtn = document.getElementById('applyFiltersBtn');
-    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-    const prevPage = document.getElementById('prevPage');
-    const nextPage = document.getElementById('nextPage');
-    const pagination = document.getElementById('pagination');
-    const paymentSection = document.getElementById('paymentSection');
-    const emptyPaymentState = document.getElementById('emptyPaymentState');
-    const previewSection = document.getElementById('previewSection');
-    const paymentAmountInput = document.getElementById('paymentAmount');
-    const applyBtn = document.getElementById('applyBtn');
-    const cancelBtn = document.getElementById('cancelBtn');
-    
-    // ========== Initialize ==========
-    function init() {
-        allRows = Array.from(debtorsBody.querySelectorAll('.debtor-row'));
-        visibleRows = [...allRows];
-        
-        bindEvents();
-        renderPage();
-    }
-    
-    // ========== Event Bindings ==========
-    function bindEvents() {
-        // Quick Search
-        quickSearch.addEventListener('input', debounce(handleSearch, 300));
-        
-        // Filters
-        applyFiltersBtn.addEventListener('click', handleApplyFilters);
-        clearFiltersBtn.addEventListener('click', handleClearFilters);
-        
-        // Pagination
-        prevPage.addEventListener('click', (e) => { e.preventDefault(); goToPage(currentPage - 1); });
-        nextPage.addEventListener('click', (e) => { e.preventDefault(); goToPage(currentPage + 1); });
-        
-        // Row Selection
-        bindRowEvents();
-        
-        // Payment Amount
-        paymentAmountInput.addEventListener('input', handlePaymentInput);
-        
-        // Cancel
-        cancelBtn.addEventListener('click', resetPayment);
-        
-        // Apply Payment
-        applyBtn.addEventListener('click', handleApplyPayment);
-    }
-    
-    function bindRowEvents() {
-        document.querySelectorAll('.debtor-row').forEach(row => {
-            row.addEventListener('click', () => selectCustomer(row.dataset.id));
-        });
-        document.querySelectorAll('.select-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                selectCustomer(btn.dataset.id);
-            });
-        });
-    }
-    
-    // ========== Search ==========
-    function handleSearch() {
-        const term = quickSearch.value.toLowerCase().trim();
-        
-        visibleRows = allRows.filter(row => {
-            const name = (row.dataset.name || '').toLowerCase();
-            const phone = (row.dataset.phone || '').toLowerCase();
-            return name.includes(term) || phone.includes(term);
-        });
-        
-        currentPage = 1;
-        renderPage();
-    }
-    
-    // ========== Filters ==========
-    function handleApplyFilters() {
-        const customerType = customerTypeFilter.value;
-        const branchId = branchFilter ? branchFilter.value : '';
-        
-        const params = new URLSearchParams();
-        if (customerType) params.append('customer_type', customerType);
-        if (branchId) params.append('branch_id', branchId);
-        
-        fetch(`/orders/bulk-payment/top-debtors/?${params.toString()}`)
-            .then(res => res.json())
-            .then(data => {
-                renderNewDebtors(data.debtors);
-            })
-            .catch(err => {
-                console.error('Filter error:', err);
-                showAlert('{% trans "Failed to apply filters" %}', 'danger');
-            });
-    }
-    
-    function handleClearFilters() {
-        customerTypeFilter.value = '';
-        if (branchFilter) branchFilter.value = '';
-        quickSearch.value = '';
-        handleApplyFilters();
-    }
-    
-    function renderNewDebtors(debtors) {
-        if (!debtors.length) {
-            debtorsBody.innerHTML = `
-                <tr>
-                    <td colspan="7">
-                        <div class="empty-state">
-                            <i class="fas fa-check-circle text-success d-block"></i>
-                            <strong>{% trans "All Paid!" %}</strong>
-                            <p class="mb-0">{% trans "No outstanding debts found." %}</p>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            allRows = [];
-            visibleRows = [];
-            renderPage();
-            return;
-        }
-        
-        debtorsBody.innerHTML = debtors.map((d, i) => {
-            const debtClass = d.total_debt > 1000 ? 'debt-high' : d.total_debt > 500 ? 'debt-medium' : 'debt-low';
-            const typeHtml = d.is_agency 
-                ? `<span class="badge-agency"><i class="fas fa-building me-1"></i>{% trans "Agency" %}</span>`
-                : `<span class="badge-individual"><i class="fas fa-user me-1"></i>{% trans "Individual" %}</span>`;
-            
-            return `
-                <tr class="debtor-row" data-id="${d.id}" data-name="${d.name}" data-phone="${d.phone}">
-                    <td class="hide-mobile text-muted">${i + 1}</td>
-                    <td>
-                        <div class="customer-name">${d.name}</div>
-                        <div class="customer-phone d-md-none">${d.phone}</div>
-                    </td>
-                    <td class="hide-mobile">${d.phone}</td>
-                    <td class="hide-mobile">${typeHtml}</td>
-                    <td class="text-end ${debtClass}">$${d.total_debt.toFixed(2)}</td>
-                    <td class="text-center hide-mobile"><span class="badge-orders">${d.order_count}</span></td>
-                    <td class="text-center">
-                        <button class="btn btn-sm btn-primary select-btn" data-id="${d.id}">
-                            <i class="fas fa-hand-pointer"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-        
-        allRows = Array.from(debtorsBody.querySelectorAll('.debtor-row'));
-        visibleRows = [...allRows];
-        currentPage = 1;
-        bindRowEvents();
-        renderPage();
-    }
-    
-    // ========== Pagination ==========
-    function renderPage() {
-        const total = visibleRows.length;
-        const totalPages = Math.ceil(total / perPage) || 1;
-        
-        if (currentPage > totalPages) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
-        
-        const start = (currentPage - 1) * perPage;
-        const end = Math.min(start + perPage, total);
-        
-        // Hide all, show current page
-        allRows.forEach(row => row.style.display = 'none');
-        visibleRows.slice(start, end).forEach(row => row.style.display = '');
-        
-        // Update info
-        document.getElementById('showStart').textContent = total ? start + 1 : 0;
-        document.getElementById('showEnd').textContent = end;
-        document.getElementById('showTotal').textContent = total;
-        
-        // Update buttons
-        prevPage.classList.toggle('disabled', currentPage <= 1);
-        nextPage.classList.toggle('disabled', currentPage >= totalPages);
-        
-        // Render page numbers
-        renderPageNumbers(totalPages);
-    }
-    
-    function renderPageNumbers(totalPages) {
-        // Remove existing page numbers
-        pagination.querySelectorAll('.page-number').forEach(el => el.remove());
-        
-        let startP = Math.max(1, currentPage - 2);
-        let endP = Math.min(totalPages, startP + 4);
-        if (endP - startP < 4) startP = Math.max(1, endP - 4);
-        
-        for (let i = startP; i <= endP; i++) {
-            const li = document.createElement('li');
-            li.className = `page-item page-number ${i === currentPage ? 'active' : ''}`;
-            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-            li.addEventListener('click', (e) => { e.preventDefault(); goToPage(i); });
-            nextPage.parentNode.insertBefore(li, nextPage);
-        }
-    }
-    
-    function goToPage(page) {
-        const totalPages = Math.ceil(visibleRows.length / perPage) || 1;
-        if (page < 1 || page > totalPages) return;
-        currentPage = page;
-        renderPage();
-    }
-    
-    // ========== Customer Selection ==========
-    function selectCustomer(id) {
-        selectedCustomerId = id;
-        
-        // Highlight row
-        document.querySelectorAll('.debtor-row').forEach(r => r.classList.remove('selected'));
-        const row = document.querySelector(`.debtor-row[data-id="${id}"]`);
-        if (row) row.classList.add('selected');
-        
-        // Load customer data
-        loadCustomerData(id);
-        
-        // Scroll to payment
-        paymentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    
-    function loadCustomerData(id) {
-        fetch(`/orders/bulk-payment/customer-debt/${id}/`)
-            .then(res => res.json())
-            .then(data => {
-                customerData = data;
-                displayDebtOverview(data);
-                displayOrders(data.orders);
-                
-                emptyPaymentState.style.display = 'none';
-                paymentSection.style.display = 'block';
-                previewSection.style.display = 'none';
-                paymentAmountInput.value = '';
-                applyBtn.disabled = true;
-            })
-            .catch(err => {
-                console.error('Load error:', err);
-                showAlert('{% trans "Failed to load customer data" %}', 'danger');
-            });
-    }
-    
-    function displayDebtOverview(data) {
-        document.getElementById('ovCustomerName').textContent = data.customer.name;
-        document.getElementById('ovCustomerPhone').textContent = data.customer.phone;
-        document.getElementById('ovTotalDebt').textContent = '$' + data.debt_summary.total_debt.toFixed(2);
-        document.getElementById('ovOrderCount').textContent = data.debt_summary.order_count;
-        document.getElementById('ovOldest').textContent = data.debt_summary.oldest_debt_days 
-            ? data.debt_summary.oldest_debt_days + 'd' : '-';
-    }
-    
-    function displayOrders(orders) {
-        const tbody = document.getElementById('ordersBody');
-        
-        if (!orders.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">{% trans "No orders" %}</td></tr>';
-            return;
-        }
-        
-        tbody.innerHTML = orders.map(o => `
-            <tr>
-                <td><strong>#${o.order_number}</strong></td>
-                <td class="hide-mobile">${o.created_at}</td>
-                <td class="hide-mobile">${o.product}</td>
-                <td class="text-end">$${o.total_price.toFixed(2)}</td>
-                <td class="text-end">$${o.received.toFixed(2)}</td>
-                <td class="text-end text-danger"><strong>$${o.remaining.toFixed(2)}</strong></td>
-            </tr>
-        `).join('');
-    }
-    
-    // ========== Payment ==========
-    function handlePaymentInput() {
-        const amount = parseFloat(paymentAmountInput.value);
-        
-        if (amount > 0 && selectedCustomerId) {
-            fetchPreview(amount);
-        } else {
-            previewSection.style.display = 'none';
-            applyBtn.disabled = true;
-        }
-    }
-    
-    function fetchPreview(amount) {
-        const formData = new FormData();
-        formData.append('customer_id', selectedCustomerId);
-        formData.append('payment_amount', amount);
-        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-        
-        fetch('/orders/bulk-payment/preview/', { method: 'POST', body: formData })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    displayPreview(data);
-                    applyBtn.disabled = false;
-                }
-            })
-            .catch(err => console.error('Preview error:', err));
-    }
-    
-    function displayPreview(data) {
-        previewSection.style.display = 'block';
-        
-        document.getElementById('pvAmount').textContent = '$' + data.summary.payment_amount.toFixed(2);
-        document.getElementById('pvOrders').textContent = data.summary.orders_affected;
-        document.getElementById('pvFullyPaid').textContent = data.summary.fully_paid_orders;
-        document.getElementById('pvRemaining').textContent = '$' + data.summary.remaining_debt_after.toFixed(2);
-        
-        document.getElementById('distributionList').innerHTML = data.distribution.map(d => `
-            <div class="distribution-item">
-                <div>
-                    <strong>{% trans "Order" %} #${d.order_number}</strong>
-                    ${d.fully_paid ? '<span class="fully-paid-tag">✓ {% trans "Paid" %}</span>' : ''}
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle me-2"></i>
+                    {% trans "Payment Successful" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
                 </div>
-                <div class="text-end">
-                    <strong class="text-success">$${d.amount_applied.toFixed(2)}</strong>
-                    <div class="small text-muted">$${d.current_remaining.toFixed(2)} → $${d.new_remaining.toFixed(2)}</div>
+                <h4 class="mb-3">{% trans "Payment Processed Successfully!" %}</h4>
+                <div id="successModalContent">
+                    <!-- Success details populated via JavaScript -->
                 </div>
             </div>
-        `).join('');
-    }
-    
-    function handleApplyPayment() {
-        const amount = parseFloat(paymentAmountInput.value);
-        const method = document.getElementById('paymentMethod').value;
-        const note = document.getElementById('paymentNote').value;
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {% trans "Close" %}
+                </button>
+                <button type="button" class="btn btn-primary" onclick="window.location.reload()">
+                    <i class="fas fa-plus me-2"></i>
+                    {% trans "Process Another Payment" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    let selectedCustomerId = null;
+    let customerDebtData = null;
+    let paymentPreviewData = null;
+
+    $(document).ready(function() {
+        console.log('Document ready - jQuery is working');
+        console.log('Search input exists:', $('#customerSearch').length);
         
-        if (!selectedCustomerId || amount <= 0) {
-            showAlert('{% trans "Enter valid payment amount" %}', 'warning');
+        // Hide customer search section and show no customer message initially
+        $('#customerSearchSection').show();
+        $('#noCustomerMessage').show();
+        $('#paymentSection').hide();
+        
+        // Auto-select customer if coming from debtors report
+        {% if preselected_customer_id %}
+        const preselectedCustomerId = '{{ preselected_customer_id }}';
+        if (preselectedCustomerId) {
+            console.log('Auto-selecting customer:', preselectedCustomerId);
+            $('#customerSearchSection').hide();
+            $('#noCustomerMessage').hide();
+            setTimeout(function() {
+                selectCustomer(parseInt(preselectedCustomerId));
+            }, 500);
+        }
+        {% endif %}
+        
+        // Customer search with debounce
+        let searchTimeout;
+        
+        function performSearch() {
+            const query = $('#customerSearch').val().trim();
+            console.log('Performing search with query:', query);
+            
+            if (query.length < 2) {
+                console.log('Query too short, clearing results');
+                $('#searchResults').empty();
+                return;
+            }
+            
+            searchCustomers(query);
+        }
+        
+        $('#customerSearch').on('input', function() {
+            clearTimeout(searchTimeout);
+            const query = $(this).val().trim();
+            
+            if (query.length < 2) {
+                $('#searchResults').empty();
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                searchCustomers(query);
+            }, 300);
+        });
+        
+        // Enter key to search
+        $('#customerSearch').on('keypress', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                console.log('Enter key pressed');
+                performSearch();
+            }
+        });
+        
+        // Click on search result to select customer
+        $(document).on('click', '.search-result-item', function(e) {
+            e.preventDefault();
+            const customerId = $(this).data('customer-id');
+            selectCustomer(customerId);
+        });
+
+        // Preview payment button
+        $('#previewPaymentBtn').on('click', function() {
+            previewPayment();
+        });
+
+        // Process payment form submission
+        $('#paymentForm').on('submit', function(e) {
+            e.preventDefault();
+            processPayment();
+        });
+        
+        // Change customer button
+        $('#changeCustomerBtn').on('click', function() {
+            $('#paymentSection').slideUp();
+            $('#customerSearchSection').slideDown();
+            $('#noCustomerMessage').slideDown();
+            $('#customerSearch').val('').focus();
+            $('#searchResults').empty();
+            selectedCustomerId = null;
+            customerDebtData = null;
+            paymentPreviewData = null;
+        });
+    });
+
+    function searchCustomers(query) {
+        console.log('Searching customers with query:', query);
+        $.ajax({
+            url: '{% url "orders:search_customers_with_debt" %}',
+            data: { q: query },
+            success: function(response) {
+                console.log('Search successful:', response);
+                displaySearchResults(response.customers);
+            },
+            error: function(xhr, status, error) {
+                console.error('Search error:', status, error);
+                showError('{% trans "Failed to search customers" %}');
+            }
+        });
+    }
+
+    function displaySearchResults(customers) {
+        const $results = $('#searchResults');
+        $results.empty();
+        
+        if (customers.length === 0) {
+            $results.html('<p class="text-muted small">{% trans "No customers found" %}</p>');
             return;
         }
         
-        if (!confirm('{% trans "Apply this payment? This cannot be undone." %}')) return;
-        
-        applyBtn.disabled = true;
-        applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> {% trans "Processing..." %}';
-        
-        const formData = new FormData();
-        formData.append('customer_id', selectedCustomerId);
-        formData.append('payment_amount', amount);
-        formData.append('payment_method', method);
-        formData.append('receipt_note', note);
-        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-        
-        fetch('/orders/bulk-payment/process/', { method: 'POST', body: formData })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    showAlert(data.message, 'success');
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    showAlert(data.error || '{% trans "Payment failed" %}', 'danger');
-                    applyBtn.disabled = false;
-                    applyBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i> {% trans "Apply Payment" %}';
-                }
-            })
-            .catch(err => {
-                console.error('Payment error:', err);
-                showAlert('{% trans "An error occurred" %}', 'danger');
-                applyBtn.disabled = false;
-                applyBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i> {% trans "Apply Payment" %}';
+        const $list = $('<div class="list-group"></div>');
+        customers.forEach(customer => {
+            const typeClass = customer.is_agency ? 'primary' : 'info';
+            const typeIcon = customer.is_agency ? 'building' : 'user';
+            
+            const $item = $(`
+                <a href="#" class="list-group-item list-group-item-action search-result-item" 
+                   data-customer-id="${customer.id}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${customer.name}</strong>
+                            <br>
+                            <small class="text-muted">
+                                <i class="fas fa-phone me-1"></i>${customer.phone}
+                            </small>
+                            <span class="badge bg-${typeClass} ms-2">
+                                <i class="fas fa-${typeIcon} me-1"></i>${customer.customer_type}
+                            </span>
+                        </div>
+                        <div class="text-end">
+                            <strong class="text-danger">$${customer.total_debt.toFixed(2)}</strong>
+                            <br>
+                            <small class="text-muted">${customer.order_count} {% trans "orders" %}</small>
+                        </div>
+                    </div>
+                </a>
+            `);
+            
+            $item.on('click', function(e) {
+                e.preventDefault();
+                selectCustomer(customer.id);
+                $results.empty();
+                $('#customerSearch').val('');
             });
-    }
-    
-    function resetPayment() {
-        selectedCustomerId = null;
-        customerData = null;
+            
+            $list.append($item);
+        });
         
-        document.querySelectorAll('.debtor-row').forEach(r => r.classList.remove('selected'));
+        $results.append($list);
+    }
+
+    function selectCustomer(customerId) {
+        selectedCustomerId = customerId;
         
-        paymentSection.style.display = 'none';
-        emptyPaymentState.style.display = 'block';
-        previewSection.style.display = 'none';
+        // Highlight selected row in table
+        $('.debtor-row').removeClass('selected');
+        $(`.debtor-row[data-customer-id="${customerId}"]`).addClass('selected');
         
-        paymentAmountInput.value = '';
-        document.getElementById('paymentNote').value = '';
-        document.getElementById('paymentMethod').value = 'cash';
-        applyBtn.disabled = true;
-        applyBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i> {% trans "Apply Payment" %}';
+        // Scroll to payment section
+        $('html, body').animate({
+            scrollTop: $('#paymentSection').offset().top - 100
+        }, 500);
+        
+        // Load customer debt details
+        loadCustomerDebt(customerId);
     }
-    
-    // ========== Utilities ==========
-    function debounce(fn, delay) {
-        let timer;
-        return function(...args) {
-            clearTimeout(timer);
-            timer = setTimeout(() => fn.apply(this, args), delay);
-        };
+
+    function loadCustomerDebt(customerId) {
+        $.ajax({
+            url: `{% url 'orders:get_customer_debt_details' 0 %}`.replace('/0/', `/${customerId}/`),
+            success: function(response) {
+                customerDebtData = response;
+                displayCustomerDebt(response);
+                // Hide search section and show payment section
+                $('#customerSearchSection').slideUp();
+                $('#noCustomerMessage').slideUp();
+                $('#paymentSection').slideDown();
+                // Scroll to payment section
+                $('html, body').animate({
+                    scrollTop: $('#paymentSection').offset().top - 100
+                }, 500);
+            },
+            error: function() {
+                showError('{% trans "Failed to load customer debt details" %}');
+            }
+        });
     }
-    
-    function showAlert(message, type) {
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        alert.style.cssText = 'top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 300px;';
-        alert.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-        document.body.appendChild(alert);
-        setTimeout(() => alert.remove(), 5000);
+
+    function displayCustomerDebt(data) {
+        // Update customer info
+        $('#selectedCustomerId').val(data.customer.id);
+        $('#selectedCustomerName').text(data.customer.name);
+        $('#selectedCustomerPhone').text(data.customer.phone);
+        
+        const typeClass = data.customer.is_agency ? 'primary' : 'info';
+        $('#selectedCustomerType').removeClass().addClass('badge mt-2 bg-' + typeClass)
+            .html(`<i class="fas fa-${data.customer.is_agency ? 'building' : 'user'} me-1"></i>${data.customer.customer_type}`);
+        
+        // Update debt summary
+        $('#totalDebtAmount').text('$' + data.debt_summary.total_debt.toFixed(2));
+        $('#debtOrderCount').text(data.debt_summary.order_count);
+        $('#oldestDebtDays').text(data.debt_summary.oldest_debt_days || '-');
+        
+        // Display orders
+        const $ordersList = $('#outstandingOrdersList');
+        $ordersList.empty();
+        
+        data.orders.forEach(order => {
+            const orderHtml = `
+                <div class="col-md-6 mb-3">
+                    <div class="card order-debt-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <i class="fas fa-file-alt me-1"></i>
+                                        {% trans "Order" %} #${order.order_number}
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>${order.created_at}
+                                        <span class="ms-2">
+                                            <i class="fas fa-clock me-1"></i>${order.days_old} {% trans "days old" %}
+                                        </span>
+                                    </small>
+                                </div>
+                                <span class="badge bg-warning">${order.status}</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="row small">
+                                <div class="col-6">
+                                    <strong>{% trans "Product" %}:</strong><br>
+                                    ${order.product}
+                                </div>
+                                <div class="col-6">
+                                    <strong>{% trans "Branch" %}:</strong><br>
+                                    ${order.branch}
+                                </div>
+                            </div>
+                            <hr class="my-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted">{% trans "Total" %}:</small> $${order.total_price.toFixed(2)}<br>
+                                    <small class="text-muted">{% trans "Received" %}:</small> $${order.received.toFixed(2)}
+                                </div>
+                                <div class="text-end">
+                                    <div class="badge bg-danger fs-6 px-3 py-2">
+                                        <strong>$${order.remaining.toFixed(2)}</strong><br>
+                                        <small>{% trans "remaining" %}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $ordersList.append(orderHtml);
+        });
     }
-    
-    // ========== Start ==========
-    document.addEventListener('DOMContentLoaded', init);
-})();
+
+    function previewPayment() {
+        const amount = parseFloat($('#paymentAmount').val());
+        
+        if (!amount || amount <= 0) {
+            showError('{% trans "Please enter a valid payment amount" %}');
+            return;
+        }
+        
+        if (!selectedCustomerId) {
+            showError('{% trans "Please select a customer" %}');
+            return;
+        }
+        
+        $.ajax({
+            url: '{% url "orders:preview_payment_distribution" %}',
+            method: 'POST',
+            data: {
+                customer_id: selectedCustomerId,
+                payment_amount: amount,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                paymentPreviewData = response;
+                displayPaymentPreview(response);
+            },
+            error: function(xhr) {
+                const error = xhr.responseJSON?.error || '{% trans "Failed to preview payment" %}';
+                showError(error);
+            }
+        });
+    }
+
+    function displayPaymentPreview(data) {
+        const $preview = $('#paymentPreviewContent');
+        $preview.empty();
+        
+        // Summary
+        let summaryHtml = `
+            <div class="alert alert-info">
+                <h6><i class="fas fa-info-circle me-2"></i>{% trans "Payment Summary" %}</h6>
+                <ul class="mb-0">
+                    <li><strong>{% trans "Payment Amount" %}:</strong> $${data.summary.payment_amount.toFixed(2)}</li>
+                    <li><strong>{% trans "Orders Affected" %}:</strong> ${data.summary.orders_affected}</li>
+                    <li><strong>{% trans "Fully Paid Orders" %}:</strong> ${data.summary.fully_paid_orders}</li>
+                    <li><strong>{% trans "Remaining Debt After" %}:</strong> $${data.summary.remaining_debt_after.toFixed(2)}</li>
+                    ${data.summary.unused_amount > 0 ? `<li class="text-warning"><strong>{% trans "Unused Amount" %}:</strong> $${data.summary.unused_amount.toFixed(2)}</li>` : ''}
+                </ul>
+            </div>
+        `;
+        
+        // Distribution details
+        let distributionHtml = '<h6 class="mt-3"><i class="fas fa-list me-2"></i>{% trans "FIFO Distribution" %}</h6>';
+        
+        data.distribution.forEach((item, index) => {
+            const fullyPaidClass = item.fully_paid ? 'fully-paid' : '';
+            const fullyPaidBadge = item.fully_paid ? '<span class="badge bg-success ms-2">{% trans "Fully Paid" %}</span>' : '';
+            
+            distributionHtml += `
+                <div class="fifo-order-item ${fullyPaidClass} p-3 mb-2 rounded">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${index + 1}. {% trans "Order" %} #${item.order_number}</strong>
+                            ${fullyPaidBadge}
+                            <br>
+                            <small class="text-muted">
+                                {% trans "Current Remaining" %}: $${item.current_remaining.toFixed(2)}
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <strong class="text-success">-$${item.amount_applied.toFixed(2)}</strong>
+                            <br>
+                            <small class="text-muted">
+                                {% trans "New Remaining" %}: $${item.new_remaining.toFixed(2)}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        $preview.html(summaryHtml + distributionHtml);
+        $('#paymentPreviewCard').slideDown();
+        $('#processPaymentBtn').slideDown();
+        
+        // Scroll to preview
+        $('html, body').animate({
+            scrollTop: $('#paymentPreviewCard').offset().top - 100
+        }, 500);
+    }
+
+    function processPayment() {
+        if (!paymentPreviewData) {
+            showError('{% trans "Please preview the payment first" %}');
+            return;
+        }
+        
+        const $btn = $('#processPaymentBtn');
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>{% trans "Processing..." %}');
+        
+        $.ajax({
+            url: '{% url "orders:process_bulk_payment" %}',
+            method: 'POST',
+            data: $('#paymentForm').serialize(),
+            success: function(response) {
+                displaySuccessModal(response);
+                $btn.prop('disabled', false).html('<i class="fas fa-check-circle me-2"></i>{% trans "Process Payment" %}');
+            },
+            error: function(xhr) {
+                const error = xhr.responseJSON?.error || '{% trans "Failed to process payment" %}';
+                showError(error);
+                $btn.prop('disabled', false).html('<i class="fas fa-check-circle me-2"></i>{% trans "Process Payment" %}');
+            }
+        });
+    }
+
+    function displaySuccessModal(response) {
+        const content = `
+            <div class="row">
+                <div class="col-6">
+                    <p class="mb-1"><strong>{% trans "Payment Amount" %}</strong></p>
+                    <h4 class="text-success">$${response.summary.payment_amount.toFixed(2)}</h4>
+                </div>
+                <div class="col-6">
+                    <p class="mb-1"><strong>{% trans "Orders Paid" %}</strong></p>
+                    <h4 class="text-primary">${response.summary.orders_paid}</h4>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-6">
+                    <p class="mb-1"><strong>{% trans "Fully Paid" %}</strong></p>
+                    <h5 class="text-success">${response.summary.fully_paid_orders}</h5>
+                </div>
+                <div class="col-6">
+                    <p class="mb-1"><strong>{% trans "Remaining Debt" %}</strong></p>
+                    <h5 class="text-danger">$${response.summary.remaining_debt.toFixed(2)}</h5>
+                </div>
+            </div>
+        `;
+        
+        $('#successModalContent').html(content);
+        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+        modal.show();
+    }
+
+    function showError(message) {
+        // You can use your existing toast/alert system
+        alert(message);
+    }
 </script>
 {% endblock %}

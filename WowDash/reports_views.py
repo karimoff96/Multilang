@@ -1369,6 +1369,19 @@ def debtors_report(request):
     elif 'name' in sort_by:
         filtered_debtors.sort(key=lambda x: x['customer_name'], reverse=reverse)
     
+    # Pagination
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    per_page = int(request.GET.get('per_page', 20))
+    page_number = request.GET.get('page', 1)
+    
+    paginator = Paginator(filtered_debtors, per_page)
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.get_page(1)
+    except EmptyPage:
+        page_obj = paginator.get_page(paginator.num_pages)
+    
     # Calculate summary stats
     total_debt = sum(d['remaining'] for d in filtered_debtors)
     total_orders_with_debt = sum(d['orders_with_debt'] for d in filtered_debtors)
@@ -1394,7 +1407,9 @@ def debtors_report(request):
     
     context = {
         'title': 'Debtors Management',
-        'debtors': filtered_debtors,
+        'debtors': page_obj,
+        'page_obj': page_obj,
+        'paginator': paginator,
         'total_count': len(filtered_debtors),
         'total_debt': total_debt,
         'total_orders_with_debt': total_orders_with_debt,
@@ -1419,6 +1434,7 @@ def debtors_report(request):
         'orders_count_filter': orders_count,
         'sort_by': sort_by,
         'search': search,
+        'per_page': per_page,
     }
     
     return render(request, "reports/debtors_report.html", context)
