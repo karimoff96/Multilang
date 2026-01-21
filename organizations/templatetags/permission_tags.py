@@ -102,6 +102,12 @@ PERMISSION_ACTIONS = {
     'expenses.edit': ['can_manage_expenses', 'can_edit_expenses'],
     'expenses.delete': ['can_manage_expenses', 'can_delete_expenses'],
     
+    # Languages
+    'languages.manage': ['can_manage_languages'],
+    'languages.view': ['can_manage_languages', 'can_view_languages'],
+    'languages.create': ['can_manage_languages', 'can_create_languages'],
+    'languages.edit': ['can_manage_languages', 'can_edit_languages'],
+    
     # Customers
     'customers.manage': ['can_manage_customers'],
     'customers.view': ['can_manage_customers', 'can_view_customers'],

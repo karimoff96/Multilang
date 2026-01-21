@@ -262,6 +262,13 @@ class Role(models.Model):
     can_edit_expenses = models.BooleanField(_("Can edit expenses"), default=False)
     can_delete_expenses = models.BooleanField(_("Can delete expenses"), default=False)
     
+    # Permissions - Languages
+    can_manage_languages = models.BooleanField(_("Can manage languages (full access)"), default=False,
+        help_text=_("Full language management - overrides other language permissions"))
+    can_view_languages = models.BooleanField(_("Can view languages"), default=False)
+    can_create_languages = models.BooleanField(_("Can create languages"), default=False)
+    can_edit_languages = models.BooleanField(_("Can edit languages"), default=False)
+    
     can_manage_customers = models.BooleanField(_("Can manage customers (full access)"), default=False,
         help_text=_("Full customer management - overrides other customer permissions"))
     can_view_customers = models.BooleanField(_("Can view customers"), default=False)
@@ -346,6 +353,7 @@ class Role(models.Model):
         "can_manage_reports",
         "can_manage_products",
         "can_manage_expenses",
+        "can_manage_languages",
         "can_manage_customers",
         "can_manage_marketing",
         "can_manage_branch_settings",
@@ -372,6 +380,7 @@ class Role(models.Model):
         "can_manage_reports": ["can_view_reports", "can_view_analytics", "can_export_data"],
         "can_manage_products": ["can_view_products", "can_create_products", "can_edit_products", "can_delete_products"],
         "can_manage_expenses": ["can_view_expenses", "can_create_expenses", "can_edit_expenses", "can_delete_expenses"],
+        "can_manage_languages": ["can_view_languages", "can_create_languages", "can_edit_languages"],
         "can_manage_customers": ["can_view_customers", "can_edit_customers", "can_delete_customers"],
         "can_manage_marketing": ["can_create_marketing_posts", "can_send_branch_broadcasts", 
                                   "can_send_center_broadcasts", "can_view_broadcast_stats"],
@@ -711,6 +720,11 @@ class Role(models.Model):
             "can_create_expenses": _("Create Expenses"),
             "can_edit_expenses": _("Edit Expenses"),
             "can_delete_expenses": _("Delete Expenses"),
+            # Languages
+            "can_manage_languages": _("Full Language Management"),
+            "can_view_languages": _("View Languages"),
+            "can_create_languages": _("Create Languages"),
+            "can_edit_languages": _("Edit Languages"),
             # Customers
             "can_manage_customers": _("Full Customer Management"),
             "can_view_customers": _("View Customers"),
@@ -789,6 +803,11 @@ class Role(models.Model):
             "can_create_expenses": _("Add new expense entries"),
             "can_edit_expenses": _("Edit existing expense records"),
             "can_delete_expenses": _("Remove expense records from the system"),
+            # Languages
+            "can_manage_languages": _("Full control over all language operations - overrides individual permissions"),
+            "can_view_languages": _("View language list and pricing"),
+            "can_create_languages": _("Add new languages with pricing"),
+            "can_edit_languages": _("Edit language names and pricing"),
             # Customers
             "can_manage_customers": _("Full control over all customer operations - overrides individual permissions"),
             "can_view_customers": _("View customer information and history"),
@@ -1183,6 +1202,10 @@ class AdminUser(models.Model):
             'can_create_expenses': ['can_manage_expenses'],
             'can_edit_expenses': ['can_manage_expenses'],
             'can_delete_expenses': ['can_manage_expenses'],
+            # Language Management
+            'can_view_languages': ['can_manage_languages'],
+            'can_create_languages': ['can_manage_languages'],
+            'can_edit_languages': ['can_manage_languages'],
             # Staff Management
             'can_view_staff': ['can_manage_staff'],
             'can_create_staff': ['can_manage_staff'],

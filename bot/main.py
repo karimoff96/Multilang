@@ -1258,29 +1258,70 @@ def get_user_step(user_id):
         return 0
 def calculate_order_pricing(order, user):
     """
-    Calculate order pricing with copy charges
-    Returns: (base_price, copy_charge, total_price, copy_pricing_value, copy_pricing_is_percentage)
+    Calculate order pricing with language costs and copy charges.
+    Uses the new combined pricing system that includes language additional costs.
+    Returns: (base_price, copy_charge, total_price, copy_pricing_value, copy_pricing_is_percentage, price_breakdown)
     """
+    # Use the Order model's get_price_breakdown method for accurate calculation
+    try:
+        breakdown = order.get_price_breakdown()
+        
+        # Extract values from breakdown
+        base_price = breakdown['product_subtotal']
+        copy_charge = breakdown['copies_subtotal']
+        total_price = breakdown['grand_total']
+        
+        # Determine copy pricing info
+        if user.is_agency:
+            if order.product.agency_copy_price_decimal is not None:
+                copy_pricing_value = order.product.agency_copy_price_decimal
+                copy_pricing_is_percentage = False
+            else:
+                copy_pricing_value = order.product.agency_copy_price_percentage
+                copy_pricing_is_percentage = True
+        else:
+            if order.product.user_copy_price_decimal is not None:
+                copy_pricing_value = order.product.user_copy_price_decimal
+                copy_pricing_is_percentage = False
+            else:
+                copy_pricing_value = order.product.user_copy_price_percentage
+                copy_pricing_is_percentage = True
+        
+        return base_price, copy_charge, total_price, copy_pricing_value, copy_pricing_is_percentage, breakdown
+        
+    except Exception as e:
+        logger.error(f"Error calculating order pricing with breakdown: {e}", exc_info=True)
+        # Fallback to manual calculation if breakdown fails
+        pass
+    
+    # Fallback: Manual calculation (old method as backup)
     # Determine charging type
     is_dynamic = order.product.category.charging == "dynamic"
 
-    # Get base prices based on user type
-    if user.is_agency:
-        first_page_price = order.product.agency_first_page_price
-        other_page_price = order.product.agency_other_page_price
+    # Get combined prices based on user type (includes language costs)
+    is_agency = user.is_agency
+    language = order.language
+    
+    if is_agency:
+        first_page_price = order.product.get_combined_first_page_price(language, is_agency)
+        other_page_price = order.product.get_combined_other_page_price(language, is_agency)
+        copy_price = order.product.get_combined_copy_price(language, is_agency)
+        
         # Priority: Use new decimal field if available, otherwise fallback to percentage
         if order.product.agency_copy_price_decimal is not None:
-            copy_multiplier = order.product.agency_copy_price_decimal
+            copy_multiplier = copy_price
             use_percentage = False
         else:
             copy_percentage = order.product.agency_copy_price_percentage
             use_percentage = True
     else:
-        first_page_price = order.product.ordinary_first_page_price
-        other_page_price = order.product.ordinary_other_page_price
+        first_page_price = order.product.get_combined_first_page_price(language, is_agency)
+        other_page_price = order.product.get_combined_other_page_price(language, is_agency)
+        copy_price = order.product.get_combined_copy_price(language, is_agency)
+        
         # Priority: Use new decimal field if available, otherwise fallback to percentage
         if order.product.user_copy_price_decimal is not None:
-            copy_multiplier = order.product.user_copy_price_decimal
+            copy_multiplier = copy_price
             use_percentage = False
         else:
             copy_percentage = order.product.user_copy_price_percentage
@@ -1313,7 +1354,14 @@ def calculate_order_pricing(order, user):
 
     total_price = base_price + copy_charge
 
-    return base_price, copy_charge, total_price, copy_pricing_value, copy_pricing_is_percentage
+    # Create a simple breakdown dict
+    breakdown = {
+        'product_subtotal': base_price,
+        'copies_subtotal': copy_charge,
+        'grand_total': total_price
+    }
+
+    return base_price, copy_charge, total_price, copy_pricing_value, copy_pricing_is_percentage, breakdown
 
 
 def format_copy_pricing_label(value, is_percentage, language):
@@ -3610,24 +3658,31 @@ def show_payment_options(message, language, order):
     user = order.bot_user  # Get user from order
 
     # Calculate pricing with copy charges
-    base_price, copy_charge, total_price, copy_percentage = calculate_order_pricing(
+    base_price, copy_charge, total_price, copy_pricing_value, copy_pricing_is_percentage, breakdown = calculate_order_pricing(
         order, user
     )
 
     # Determine charging type and user type labels
     is_dynamic = order.product.category.charging == "dynamic"
+    is_agency = user.is_agency
 
-    if user.is_agency:
-        first_page_price = order.product.agency_first_page_price
-        other_page_price = order.product.agency_other_page_price
+    # Get first page and other page prices with language costs
+    if is_agency:
+        first_page_price = order.product.get_combined_first_page_price(order.language, is_agency)
+        other_page_price = order.product.get_combined_other_page_price(order.language, is_agency)
         user_type = (
             "Agency"
             if language == "en"
             else "Агентство" if language == "ru" else "Agentlik"
         )
     else:
-        first_page_price = order.product.ordinary_first_page_price
-        other_page_price = order.product.ordinary_other_page_price
+        first_page_price = order.product.get_combined_first_page_price(order.language, is_agency)
+        other_page_price = order.product.get_combined_other_page_price(order.language, is_agency)
+        user_type = (
+            "Regular User"
+            if language == "en"
+            else "Обычный пользователь" if language == "ru" else "Oddiy foydalanuvchi"
+        )
         user_type = (
             "Regular User"
             if language == "en"
@@ -3636,38 +3691,55 @@ def show_payment_options(message, language, order):
 
     # Get service language name if available
     service_lang_line = ""
+    language_price_line = ""
     try:
         if order.language:
             lang_name = order.language.name
+            
+            # Get language additional cost from breakdown if available
+            lang_cost = breakdown.get('language_subtotal', 0)
+            
             if language == "uz":
                 service_lang_line = f"🌍 Xizmat tili: {lang_name}\n"
+                if lang_cost > 0:
+                    language_price_line = f"  • Til qo'shimcha narxi: {lang_cost:,.0f} so'm\n"
             elif language == "ru":
                 service_lang_line = f"🌍 Язык услуги: {lang_name}\n"
+                if lang_cost > 0:
+                    language_price_line = f"  • Доп. стоимость языка: {lang_cost:,.0f} сум\n"
             else:
                 service_lang_line = f"🌍 Service language: {lang_name}\n"
-    except Exception:
-        pass
+                if lang_cost > 0:
+                    language_price_line = f"  • Language additional cost: {lang_cost:,.0f} sum\n"
+    except Exception as e:
+        logger.error(f"Error getting language info: {e}")
 
-    # Create summary text with copy information
+    # Create summary text with detailed breakdown
     if language == "uz":
         summary_text = "📋 <b>Buyurtma xulosasi</b>\n\n"
         summary_text += f"📄 Buyurtma raqami: #{order.id}\n"
         summary_text += f"📎 Jami fayllar: {order.files.count()}\n"
         summary_text += f"📄 Jami sahifalar: {order.total_pages}\n"
         summary_text += service_lang_line
-        summary_text += f"🏢 Foydalanuvchi turi: {user_type}\n"
+        summary_text += f"🏢 Foydalanuvchi turi: {user_type}\n\n"
+        
+        summary_text += "💰 <b>Narxlar tafsiloti:</b>\n"
         if is_dynamic:
-            summary_text += f"💰 1-sahifa narxi: {first_page_price:,.0f} so'm\n"
+            summary_text += f"  • 1-sahifa: {first_page_price:,.0f} so'm\n"
             if order.total_pages > 1:
-                summary_text += f"💰 Qolgan sahifalar: {other_page_price:,.0f} so'm\n"
-        summary_text += f"💵 Asosiy narx: {base_price:,.0f} so'm\n"
+                summary_text += f"  • Qolgan sahifalar: {other_page_price:,.0f} so'm\n"
+        summary_text += f"  • Asosiy narx: {base_price:,.0f} so'm\n"
+        summary_text += language_price_line
 
         # Add copy information
         if order.copy_number > 0:
-            summary_text += f"📋 Nusxalar soni: {order.copy_number}\n"
-            summary_text += f"💳 Nusxalar uchun to'lov ({copy_percentage}%): {copy_charge:,.0f} so'm\n"
+            summary_text += f"  • Nusxalar soni: {order.copy_number}\n"
+            if copy_pricing_is_percentage:
+                summary_text += f"  • Nusxalar uchun to'lov ({copy_pricing_value}%): {copy_charge:,.0f} so'm\n"
+            else:
+                summary_text += f"  • Nusxalar uchun to'lov: {copy_charge:,.0f} so'm\n"
 
-        summary_text += f"💵 <b>Jami summa: {total_price:,.0f} so'm</b>\n"
+        summary_text += f"\n💵 <b>Jami summa: {total_price:,.0f} so'm</b>\n"
         summary_text += f"⏱️ Taxminiy muddat: {order.product.estimated_days} kun\n\n"
         if user.is_agency:
             summary_text += "💳 <b>To'lov usulini tanlang:</b>"
@@ -3679,21 +3751,27 @@ def show_payment_options(message, language, order):
         summary_text += f"📎 Всего файлов: {order.files.count()}\n"
         summary_text += f"📄 Всего страниц: {order.total_pages}\n"
         summary_text += service_lang_line
-        summary_text += f"🏢 Тип пользователя: {user_type}\n"
+        summary_text += f"🏢 Тип пользователя: {user_type}\n\n"
+        
+        summary_text += "💰 <b>Детали цен:</b>\n"
         if is_dynamic:
-            summary_text += f"💰 Цена 1-й страницы: {first_page_price:,.0f} сум\n"
+            summary_text += f"  • 1-я страница: {first_page_price:,.0f} сум\n"
             if order.total_pages > 1:
-                summary_text += f"💰 Остальные страницы: {other_page_price:,.0f} сум\n"
-        summary_text += f"💵 Базовая цена: {base_price:,.0f} сум\n"
+                summary_text += f"  • Остальные страницы: {other_page_price:,.0f} сум\n"
+        summary_text += f"  • Базовая цена: {base_price:,.0f} сум\n"
+        summary_text += language_price_line
 
         # Add copy information
         if order.copy_number > 0:
-            summary_text += f"📋 Количество копий: {order.copy_number}\n"
-            summary_text += (
-                f"💳 Оплата за копии ({copy_percentage}%): {copy_charge:,.0f} сум\n"
-            )
+            summary_text += f"  • Количество копий: {order.copy_number}\n"
+            if copy_pricing_is_percentage:
+                summary_text += (
+                    f"💳 Оплата за копии ({copy_pricing_value}%): {copy_charge:,.0f} сум\n"
+                )
+            else:
+                summary_text += f"  • Оплата за копии: {copy_charge:,.0f} сум\n"
 
-        summary_text += f"💵 <b>Общая сумма: {total_price:,.0f} сум</b>\n"
+        summary_text += f"\n💵 <b>Общая сумма: {total_price:,.0f} сум</b>\n"
         summary_text += f"⏱️ Примерный срок: {order.product.estimated_days} дней\n\n"
         if user.is_agency:
             summary_text += "💳 <b>Выберите способ оплаты:</b>"
@@ -3705,21 +3783,27 @@ def show_payment_options(message, language, order):
         summary_text += f"📎 Total files: {order.files.count()}\n"
         summary_text += f"📄 Total pages: {order.total_pages}\n"
         summary_text += service_lang_line
-        summary_text += f"🏢 User type: {user_type}\n"
+        summary_text += f"🏢 User type: {user_type}\n\n"
+        
+        summary_text += "💰 <b>Price Details:</b>\n"
         if is_dynamic:
-            summary_text += f"💰 1st page price: {first_page_price:,.0f} sum\n"
+            summary_text += f"  • 1st page: {first_page_price:,.0f} sum\n"
             if order.total_pages > 1:
-                summary_text += f"💰 Other pages: {other_page_price:,.0f} sum\n"
-        summary_text += f"💵 Base price: {base_price:,.0f} sum\n"
+                summary_text += f"  • Other pages: {other_page_price:,.0f} sum\n"
+        summary_text += f"  • Base price: {base_price:,.0f} sum\n"
+        summary_text += language_price_line
 
         # Add copy information
         if order.copy_number > 0:
-            summary_text += f"📋 Number of copies: {order.copy_number}\n"
-            summary_text += (
-                f"💳 Copy charges ({copy_percentage}%): {copy_charge:,.0f} sum\n"
-            )
+            summary_text += f"  • Number of copies: {order.copy_number}\n"
+            if copy_pricing_is_percentage:
+                summary_text += (
+                    f"💳 Copy charges ({copy_pricing_value}%): {copy_charge:,.0f} sum\n"
+                )
+            else:
+                summary_text += f"  • Copy charges: {copy_charge:,.0f} sum\n"
 
-        summary_text += f"💵 <b>Total amount: {total_price:,.0f} sum</b>\n"
+        summary_text += f"\n💵 <b>Total amount: {total_price:,.0f} sum</b>\n"
         summary_text += f"⏱️ Estimated time: {order.product.estimated_days} days\n\n"
         summary_text += "💳 <b>Choose payment method:</b>\n📌 Note: Cash payment is only available at our office 💵. \nIf you are sending documents outside the office, you must choose card payment 💳. \nEven if you cannot pay the full amount by card, make a “Partial” payment to ensure your work is successfully confirmed ✅."
 
@@ -3866,7 +3950,7 @@ def handle_file_upload(message):
                     return
 
                 # Calculate pricing with copy charges
-                base_price, copy_charge, total_price, copy_percentage = (
+                base_price, copy_charge, total_price, copy_pricing_value, copy_pricing_is_percentage, breakdown = (
                     calculate_order_pricing(order, user)
                 )
 
@@ -3918,7 +4002,10 @@ def handle_file_upload(message):
                     # Add copy information
                     if order.copy_number > 0:
                         completion_text += f"📋 Nusxalar soni: {order.copy_number}\n"
-                        completion_text += f"💳 Nusxalar uchun to'lov ({copy_percentage}%): {copy_charge:,.0f} so'm\n"
+                        if copy_pricing_is_percentage:
+                            completion_text += f"💳 Nusxalar uchun to'lov ({copy_pricing_value}%): {copy_charge:,.0f} so'm\n"
+                        else:
+                            completion_text += f"💳 Nusxalar uchun to'lov: {copy_charge:,.0f} so'm\n"
 
                     completion_text += (
                         f"💵 <b>Jami summa: {total_price:,.0f} so'm</b>\n"
@@ -4895,7 +4982,7 @@ def handle_card_payment_message(message, language):
         card_holder = additional_info.holder_name if additional_info else "Noma'lum"
 
         # Calculate pricing with copy charges
-        base_price, copy_charge, total_price, copy_percentage = calculate_order_pricing(
+        base_price, copy_charge, total_price, copy_pricing_value, copy_pricing_is_percentage, breakdown = calculate_order_pricing(
             order, user
         )
 
@@ -4937,9 +5024,12 @@ def handle_card_payment_message(message, language):
             # Add copy information
             if order.copy_number > 0:
                 summary_text += f"📋 Nusxalar soni: {order.copy_number}\n"
-                summary_text += f"💳 Nusxalar uchun to'lov ({copy_percentage}%): {copy_charge:,.0f} so'm\n"
+                if copy_pricing_is_percentage:
+                    summary_text += f"  • Nusxalar uchun to'lov ({copy_pricing_value}%): {copy_charge:,.0f} so'm\n"
+                else:
+                    summary_text += f"  • Nusxalar uchun to'lov: {copy_charge:,.0f} so'm\n"
 
-            summary_text += f"💵 <b>Jami summa: {total_price:,.0f} so'm</b>\n"
+            summary_text += f"\n💵 <b>Jami summa: {total_price:,.0f} so'm</b>\n"
             summary_text += f"⏱️ Taxminiy muddat: {order.product.estimated_days} kun\n\n"
             summary_text += "💳 <b>To'lov holati:</b> Kutilmoqda ⏳\n\n"
             summary_text += "━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -4968,11 +5058,14 @@ def handle_card_payment_message(message, language):
             # Add copy information
             if order.copy_number > 0:
                 summary_text += f"📋 Количество копий: {order.copy_number}\n"
-                summary_text += (
-                    f"💳 Оплата за копии ({copy_percentage}%): {copy_charge:,.0f} сум\n"
-                )
+                if copy_pricing_is_percentage:
+                    summary_text += (
+                        f"💳 Оплата за копии ({copy_pricing_value}%): {copy_charge:,.0f} сум\n"
+                    )
+                else:
+                    summary_text += f"  • Оплата за копии: {copy_charge:,.0f} сум\n"
 
-            summary_text += f"💵 <b>Общая сумма: {total_price:,.0f} сум</b>\n"
+            summary_text += f"\n💵 <b>Общая сумма: {total_price:,.0f} сум</b>\n"
             summary_text += f"⏱️ Примерный срок: {order.product.estimated_days} дней\n\n"
             summary_text += "💳 <b>Статус оплаты:</b> Ожидается ⏳\n\n"
             summary_text += "━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -4997,11 +5090,14 @@ def handle_card_payment_message(message, language):
             # Add copy information
             if order.copy_number > 0:
                 summary_text += f"📋 Number of copies: {order.copy_number}\n"
-                summary_text += (
-                    f"💳 Copy charges ({copy_percentage}%): {copy_charge:,.0f} sum\n"
-                )
+                if copy_pricing_is_percentage:
+                    summary_text += (
+                        f"💳 Copy charges ({copy_pricing_value}%): {copy_charge:,.0f} sum\n"
+                    )
+                else:
+                    summary_text += f"  • Copy charges: {copy_charge:,.0f} sum\n"
 
-            summary_text += f"💵 <b>Total amount: {total_price:,.0f} sum</b>\n"
+            summary_text += f"\n💵 <b>Total amount: {total_price:,.0f} sum</b>\n"
             summary_text += f"⏱️ Estimated time: {order.product.estimated_days} days\n\n"
             summary_text += "💳 <b>Payment status:</b> Pending ⏳\n\n"
             summary_text += "━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -5328,7 +5424,7 @@ def handle_cash_payment_message(message, language):
             return
 
         # Calculate pricing with copy charges
-        base_price, copy_charge, total_price, copy_percentage = calculate_order_pricing(
+        base_price, copy_charge, total_price, copy_pricing_value, copy_pricing_is_percentage, breakdown = calculate_order_pricing(
             order, user
         )
 
@@ -5376,7 +5472,10 @@ def handle_cash_payment_message(message, language):
             # Add copy information
             if order.copy_number > 0:
                 cash_text += f"📋 Nusxalar soni: {order.copy_number}\n"
-                cash_text += f"💳 Nusxalar uchun to'lov ({copy_percentage}%): {copy_charge:,.0f} so'm\n"
+                if copy_pricing_is_percentage:
+                    cash_text += f"💳 Nusxalar uchun to'lov ({copy_pricing_value}%): {copy_charge:,.0f} so'm\n"
+                else:
+                    cash_text += f"💳 Nusxalar uchun to'lov: {copy_charge:,.0f} so'm\n"
 
             cash_text += f"💵 <b>Jami summa: {total_price:,.0f} so'm</b>\n"
             cash_text += f"📅 Taxminiy muddat: {order.product.estimated_days} kun\n\n"
@@ -5401,9 +5500,12 @@ def handle_cash_payment_message(message, language):
             # Add copy information
             if order.copy_number > 0:
                 cash_text += f"📋 Количество копий: {order.copy_number}\n"
-                cash_text += (
-                    f"💳 Оплата за копии ({copy_percentage}%): {copy_charge:,.0f} сум\n"
-                )
+                if copy_pricing_is_percentage:
+                    cash_text += (
+                        f"💳 Оплата за копии ({copy_pricing_value}%): {copy_charge:,.0f} сум\n"
+                    )
+                else:
+                    cash_text += f"💳 Оплата за копии: {copy_charge:,.0f} сум\n"
 
             cash_text += f"💵 <b>Общая сумма: {total_price:,.0f} сум</b>\n"
             cash_text += f"📅 Примерный срок: {order.product.estimated_days} дней\n\n"
@@ -5428,9 +5530,12 @@ def handle_cash_payment_message(message, language):
             # Add copy information
             if order.copy_number > 0:
                 cash_text += f"📋 Number of copies: {order.copy_number}\n"
-                cash_text += (
-                    f"💳 Copy charges ({copy_percentage}%): {copy_charge:,.0f} sum\n"
-                )
+                if copy_pricing_is_percentage:
+                    cash_text += (
+                        f"💳 Copy charges ({copy_pricing_value}%): {copy_charge:,.0f} sum\n"
+                    )
+                else:
+                    cash_text += f"💳 Copy charges: {copy_charge:,.0f} sum\n"
 
             cash_text += f"💵 <b>Total amount: {total_price:,.0f} sum</b>\n"
             cash_text += f"📅 Estimated time: {order.product.estimated_days} days\n\n"

@@ -124,6 +124,12 @@
                         <a href="{% url 'expenseList' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.expenses">Expenses</span></a>
                     </li>
                     {% endif %}
+                    {% can_do 'languages.view' as can_view_languages %}
+                    {% if can_view_languages %}
+                    <li>
+                        <a href="{% url 'languageList' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.languages">Languages</span></a>
+                    </li>
+                    {% endif %}
                 </ul>
             </li>
             {% endif %}

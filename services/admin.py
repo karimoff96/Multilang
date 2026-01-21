@@ -6,7 +6,61 @@ from .models import Category, Product, Language, Expense
 
 @admin.register(Language)
 class LanguageAdmin(admin.ModelAdmin):
-    list_display = ("name", "short_name", "created_at")
+    list_display = (
+        "name", 
+        "short_name",
+        "agency_first_page_display",
+        "agency_other_page_display",
+        "agency_copy_display",
+        "ordinary_first_page_display",
+        "ordinary_other_page_display",
+        "ordinary_copy_display",
+        "created_at"
+    )
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'short_name')
+        }),
+        ('Agency Pricing', {
+            'fields': ('agency_page_price', 'agency_other_page_price', 'agency_copy_price'),
+            'description': 'Additional prices for agency users'
+        }),
+        ('Ordinary User Pricing', {
+            'fields': ('ordinary_page_price', 'ordinary_other_page_price', 'ordinary_copy_price'),
+            'description': 'Additional prices for ordinary users'
+        }),
+    )
+    
+    def agency_first_page_display(self, obj):
+        return format_html('<span style="color: #007bff; font-weight: bold;">{}</span>', f"{obj.agency_page_price:,.2f}")
+    agency_first_page_display.short_description = "Agency 1st Page"
+    agency_first_page_display.admin_order_field = "agency_page_price"
+    
+    def agency_other_page_display(self, obj):
+        return format_html('<span style="color: #17a2b8;">{}</span>', f"{obj.agency_other_page_price:,.2f}")
+    agency_other_page_display.short_description = "Agency Other"
+    agency_other_page_display.admin_order_field = "agency_other_page_price"
+    
+    def agency_copy_display(self, obj):
+        return format_html('<span style="color: #6c757d;">{}</span>', f"{obj.agency_copy_price:,.2f}")
+    agency_copy_display.short_description = "Agency Copy"
+    agency_copy_display.admin_order_field = "agency_copy_price"
+    
+    def ordinary_first_page_display(self, obj):
+        return format_html('<span style="color: #28a745; font-weight: bold;">{}</span>', f"{obj.ordinary_page_price:,.2f}")
+    ordinary_first_page_display.short_description = "Ordinary 1st Page"
+    ordinary_first_page_display.admin_order_field = "ordinary_page_price"
+    
+    def ordinary_other_page_display(self, obj):
+        return format_html('<span style="color: #20c997;">{}</span>', f"{obj.ordinary_other_page_price:,.2f}")
+    ordinary_other_page_display.short_description = "Ordinary Other"
+    ordinary_other_page_display.admin_order_field = "ordinary_other_page_price"
+    
+    def ordinary_copy_display(self, obj):
+        return format_html('<span style="color: #6c757d;">{}</span>', f"{obj.ordinary_copy_price:,.2f}")
+    ordinary_copy_display.short_description = "Ordinary Copy"
+    ordinary_copy_display.admin_order_field = "ordinary_copy_price"
 
 
 @admin.register(Expense)

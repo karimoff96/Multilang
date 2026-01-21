@@ -9,6 +9,54 @@
     .customer-search-card {
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: visible;
+    }
+    
+    .search-input-wrapper {
+        position: relative;
+        overflow: visible;
+    }
+    
+    #searchResults {
+        position: absolute !important;
+        z-index: 1050 !important;
+        width: 100%;
+        max-height: 400px;
+        overflow-y: auto;
+        background: white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border-radius: 8px;
+        margin: 0 !important;
+        padding: 0 !important;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        display: block;
+    }
+    
+    #searchResults:empty {
+        display: none !important;
+    }
+    
+    #searchResults .list-group {
+        border-radius: 8px;
+        margin: 0 !important;
+        margin-bottom: 0 !important;
+    }
+    
+    #searchResults .list-group-item {
+        margin: 0 !important;
+        border: 1px solid #dee2e6;
+    }
+    
+    #searchResults .list-group-item:first-child {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    
+    #searchResults .list-group-item:last-child {
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
     }
     
     .debt-summary-card {
@@ -163,6 +211,161 @@
         </div>
     </div>
 
+    <!-- Summary Statistics Cards -->
+    <div class="row mb-4" id="summaryStatistics">
+        <div class="col-md-3">
+            <div class="card border-start border-danger border-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 text-sm">{% trans "Total Debt" %}</p>
+                            <h4 class="mb-0 text-danger fw-bold">
+                                {% load number_filters %}
+                                {{ total_debt_amount|format_number }} {% trans "UZS" %}
+                            </h4>
+                        </div>
+                        <div class="avatar-sm bg-danger bg-opacity-10 rounded-3">
+                            <iconify-icon icon="solar:wallet-money-bold" class="text-danger fs-2"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-start border-warning border-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 text-sm">{% trans "Total Debtors" %}</p>
+                            <h4 class="mb-0 text-warning fw-bold">{{ total_debtors }}</h4>
+                            <small class="text-muted">{% trans "customers" %}</small>
+                        </div>
+                        <div class="avatar-sm bg-warning bg-opacity-10 rounded-3">
+                            <iconify-icon icon="solar:users-group-rounded-bold" class="text-warning fs-2"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-start border-info border-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 text-sm">{% trans "Outstanding Orders" %}</p>
+                            <h4 class="mb-0 text-info fw-bold">{{ total_orders_with_debt }}</h4>
+                            <small class="text-muted">{% trans "orders" %}</small>
+                        </div>
+                        <div class="avatar-sm bg-info bg-opacity-10 rounded-3">
+                            <iconify-icon icon="solar:file-text-bold" class="text-info fs-2"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 text-sm">{% trans "Average Debt" %}</p>
+                            <h4 class="mb-0 text-primary fw-bold">
+                                {{ avg_debt_per_customer|floatformat:0|format_number }} {% trans "UZS" %}
+                            </h4>
+                        </div>
+                        <div class="avatar-sm bg-primary bg-opacity-10 rounded-3">
+                            <iconify-icon icon="solar:chart-bold" class="text-primary fs-2"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top 10 Debtors Widget -->
+    {% if top_10_debtors %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <iconify-icon icon="solar:medal-star-bold" class="text-warning me-2"></iconify-icon>
+                        {% trans "Top 10 Debtors" %}
+                    </h6>
+                    <small class="text-muted">{% trans "Click to select for payment" %}</small>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 40px;">#</th>
+                                    <th>{% trans "Customer" %}</th>
+                                    <th>{% trans "Type" %}</th>
+                                    <th class="text-end">{% trans "Total Debt" %}</th>
+                                    <th class="text-center">{% trans "Orders" %}</th>
+                                    <th class="text-center">{% trans "Action" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for debtor in top_10_debtors %}
+                                <tr class="debtor-row" style="cursor: pointer;" data-customer-id="{{ debtor.customer_id }}">
+                                    <td class="text-muted">{{ forloop.counter }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-xs bg-primary bg-opacity-10 rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                                <iconify-icon icon="solar:user-bold" class="text-primary"></iconify-icon>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">{{ debtor.name }}</div>
+                                                <small class="text-muted">{{ debtor.phone|default:"-" }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if debtor.customer_type == 'agency' %}
+                                        <span class="badge bg-primary-subtle text-primary">
+                                            <iconify-icon icon="solar:buildings-2-bold" class="me-1"></iconify-icon>
+                                            {% trans "Agency" %}
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-success-subtle text-success">
+                                            <iconify-icon icon="solar:user-bold" class="me-1"></iconify-icon>
+                                            {% trans "Individual" %}
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="fw-bold text-danger">{{ debtor.total_debt|floatformat:0|format_number }} {% trans "UZS" %}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-info">{{ debtor.order_count }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-primary select-debtor-btn" data-customer-id="{{ debtor.customer_id }}">
+                                            <iconify-icon icon="solar:check-circle-bold" class="me-1"></iconify-icon>
+                                            {% trans "Select" %}
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-light text-center">
+                    <a href="{% url 'debtors_report' %}" class="text-decoration-none">
+                        {% trans "View All Debtors" %} →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Quick Customer Search (Only shown when no customer selected) -->
     <div class="row mb-4" id="customerSearchSection">
         <div class="col-12">
@@ -174,17 +377,19 @@
                     </h6>
                     <div class="row align-items-end">
                         <div class="col-md-8">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <iconify-icon icon="solar:magnifer-bold"></iconify-icon>
-                                </span>
-                                <input type="text" 
-                                       id="customerSearch" 
-                                       class="form-control" 
-                                       placeholder="{% trans 'Search by name or phone number...' %}"
-                                       autocomplete="off">
+                            <div class="search-input-wrapper">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <iconify-icon icon="solar:magnifer-bold"></iconify-icon>
+                                    </span>
+                                    <input type="text" 
+                                           id="customerSearch" 
+                                           class="form-control" 
+                                           placeholder="{% trans 'Search by name or phone number...' %}"
+                                           autocomplete="off">
+                                </div>
+                                <div id="searchResults"></div>
                             </div>
-                            <div id="searchResults" class="mt-2"></div>
                         </div>
                         <div class="col-md-4">
                             <a href="{% url 'debtors_report' %}" class="btn btn-outline-primary w-100">
@@ -449,11 +654,36 @@
             console.log('Auto-selecting customer:', preselectedCustomerId);
             $('#customerSearchSection').hide();
             $('#noCustomerMessage').hide();
+            $('#summaryStatistics').hide();
             setTimeout(function() {
                 selectCustomer(parseInt(preselectedCustomerId));
             }, 500);
         }
         {% endif %}
+        
+        // Handle clicks on top debtors table
+        $('.select-debtor-btn').on('click', function(e) {
+            e.stopPropagation();
+            const customerId = $(this).data('customer-id');
+            console.log('Selecting debtor from top 10:', customerId);
+            $('#customerSearchSection').hide();
+            $('#noCustomerMessage').hide();
+            $('#summaryStatistics').hide();
+            selectCustomer(customerId);
+            // Scroll to payment section
+            setTimeout(() => {
+                $('html, body').animate({
+                    scrollTop: $('#paymentSection').offset().top - 100
+                }, 500);
+            }, 300);
+        });
+        
+        // Handle clicks on debtor row (anywhere except button)
+        $('.debtor-row').on('click', function(e) {
+            if (!$(e.target).hasClass('select-debtor-btn')) {
+                $(this).find('.select-debtor-btn').click();
+            }
+        });
         
         // Customer search with debounce
         let searchTimeout;
@@ -517,11 +747,16 @@
             $('#paymentSection').slideUp();
             $('#customerSearchSection').slideDown();
             $('#noCustomerMessage').slideDown();
+            $('#summaryStatistics').slideDown();
             $('#customerSearch').val('').focus();
             $('#searchResults').empty();
             selectedCustomerId = null;
             customerDebtData = null;
             paymentPreviewData = null;
+            // Scroll to top
+            $('html, body').animate({
+                scrollTop: 0
+            }, 500);
         });
     });
 
@@ -546,11 +781,11 @@
         $results.empty();
         
         if (customers.length === 0) {
-            $results.html('<p class="text-muted small">{% trans "No customers found" %}</p>');
+            $results.html('<p class="text-muted small m-2">{% trans "No customers found" %}</p>');
             return;
         }
         
-        const $list = $('<div class="list-group"></div>');
+        const $list = $('<div class="list-group" style="margin: 0 !important;"></div>');
         customers.forEach(customer => {
             const typeClass = customer.is_agency ? 'primary' : 'info';
             const typeIcon = customer.is_agency ? 'building' : 'user';

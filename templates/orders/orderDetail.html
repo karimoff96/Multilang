@@ -258,6 +258,89 @@
                     {% endif %}
                 </div>
 
+                <!-- Price Breakdown -->
+                {% if price_breakdown %}
+                <div class="mt-24">
+                    <h6 class="text-md fw-semibold mb-16">
+                        <iconify-icon icon="mdi:calculator" class="me-2"></iconify-icon>
+                        Price Breakdown
+                    </h6>
+                    <div class="table-responsive">
+                        <table class="table bordered-table sm-table mb-0">
+                            <thead class="bg-neutral-100">
+                                <tr>
+                                    <th>Component</th>
+                                    <th class="text-end">Product Price</th>
+                                    {% if price_breakdown.language_name %}
+                                    <th class="text-end">Language Price ({{ price_breakdown.language_name }})</th>
+                                    {% endif %}
+                                    <th class="text-end">Combined Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-semibold">First Page</td>
+                                    <td class="text-end">{{ price_breakdown.product_first_page|floatformat:0 }} UZS</td>
+                                    {% if price_breakdown.language_name %}
+                                    <td class="text-end text-info-600">+ {{ price_breakdown.language_first_page|floatformat:0 }} UZS</td>
+                                    {% endif %}
+                                    <td class="text-end fw-semibold text-primary-600">{{ price_breakdown.combined_first_page|floatformat:0 }} UZS</td>
+                                </tr>
+                                {% if price_breakdown.total_pages > 1 %}
+                                <tr>
+                                    <td class="fw-semibold">Other Pages ({{ price_breakdown.total_pages|add:"-1" }} pages)</td>
+                                    <td class="text-end">{{ price_breakdown.product_other_page|floatformat:0 }} UZS/page</td>
+                                    {% if price_breakdown.language_name %}
+                                    <td class="text-end text-info-600">+ {{ price_breakdown.language_other_page|floatformat:0 }} UZS/page</td>
+                                    {% endif %}
+                                    <td class="text-end fw-semibold text-primary-600">{{ price_breakdown.combined_other_page|floatformat:0 }} UZS/page</td>
+                                </tr>
+                                {% endif %}
+                                <tr class="bg-neutral-50">
+                                    <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-semibold">Original Document Total:</td>
+                                    <td class="text-end fw-bold text-success-600">{{ price_breakdown.original_price|floatformat:0 }} UZS</td>
+                                </tr>
+                                {% if price_breakdown.copy_number > 0 %}
+                                <tr>
+                                    <td class="fw-semibold">Copy Price ({{ price_breakdown.copy_number }} copies)</td>
+                                    <td class="text-end">{{ price_breakdown.product_copy_price|floatformat:0 }} UZS/copy</td>
+                                    {% if price_breakdown.language_name %}
+                                    <td class="text-end text-info-600">+ {{ price_breakdown.language_copy_price|floatformat:0 }} UZS/copy</td>
+                                    {% endif %}
+                                    <td class="text-end fw-semibold text-warning-600">{{ price_breakdown.combined_copy_price|floatformat:0 }} UZS/copy</td>
+                                </tr>
+                                <tr class="bg-neutral-50">
+                                    <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-semibold">Copies Total:</td>
+                                    <td class="text-end fw-bold text-warning-600">{{ price_breakdown.copy_total|floatformat:0 }} UZS</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                            <tfoot class="bg-primary-50">
+                                <tr>
+                                    <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-bold text-lg">Grand Total:</td>
+                                    <td class="text-end fw-bold text-primary-600 text-lg">{{ price_breakdown.total_price|floatformat:0 }} UZS</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {% if price_breakdown.is_agency %}
+                    <div class="mt-12 p-12 bg-info-50 radius-8">
+                        <small class="text-info-600">
+                            <iconify-icon icon="mdi:information" class="me-1"></iconify-icon>
+                            This order uses <strong>Agency pricing</strong>
+                        </small>
+                    </div>
+                    {% else %}
+                    <div class="mt-12 p-12 bg-success-50 radius-8">
+                        <small class="text-success-600">
+                            <iconify-icon icon="mdi:information" class="me-1"></iconify-icon>
+                            This order uses <strong>Ordinary User pricing</strong>
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
                 <!-- Completion Info -->
                 {% if order.completed_by %}
                 <div class="mt-24">

@@ -258,35 +258,97 @@ class Order(models.Model):
 
     @property
     def calculated_price(self):
-        """Calculate price based on user type, total pages, and copy number"""
+        """Calculate price based on user type, total pages, language, and copy number"""
         # Determine if user is agency (default to False for manual orders)
         is_agency = self.bot_user.is_agency if self.bot_user and hasattr(self.bot_user, 'is_agency') else False
         
-        base_price = self.product.get_price_for_user_type(
-            is_agency=is_agency, pages=self.total_pages
+        # Use combined pricing method that includes language costs
+        base_price = self.product.get_combined_total_price(
+            language=self.language,
+            is_agency=is_agency,
+            pages=self.total_pages,
+            copies=self.copy_number
         )
 
-        # Add copy charges if copy_number > 0
-        if self.copy_number > 0:
-            # Priority: Use new decimal field if available, otherwise fallback to percentage
-            if is_agency:
-                if self.product.agency_copy_price_decimal is not None:
-                    # New system: fixed price per copy
-                    copy_charge = self.product.agency_copy_price_decimal * self.copy_number
-                else:
-                    # Old system: percentage of base price
-                    copy_charge = (base_price * self.product.agency_copy_price_percentage * self.copy_number) / 100
-            else:
-                if self.product.user_copy_price_decimal is not None:
-                    # New system: fixed price per copy
-                    copy_charge = self.product.user_copy_price_decimal * self.copy_number
-                else:
-                    # Old system: percentage of base price
-                    copy_charge = (base_price * self.product.user_copy_price_percentage * self.copy_number) / 100
-            
-            return base_price + copy_charge
-
         return base_price
+
+    def get_price_breakdown(self):
+        """
+        Get detailed price breakdown showing product and language prices separately
+        Returns dict with detailed pricing information for display
+        """
+        from decimal import Decimal
+        
+        is_agency = self.bot_user.is_agency if self.bot_user and hasattr(self.bot_user, 'is_agency') else False
+        
+        # Product prices
+        product_first_page = self.product.get_first_page_price(is_agency=is_agency)
+        product_other_page = self.product.get_other_page_price(is_agency=is_agency)
+        
+        # Language prices (if language selected)
+        language_first_page = Decimal('0.00')
+        language_other_page = Decimal('0.00')
+        language_copy = Decimal('0.00')
+        
+        if self.language:
+            if is_agency:
+                language_first_page = self.language.agency_page_price
+                language_other_page = self.language.agency_other_page_price
+                language_copy = self.language.agency_copy_price
+            else:
+                language_first_page = self.language.ordinary_page_price
+                language_other_page = self.language.ordinary_other_page_price
+                language_copy = self.language.ordinary_copy_price
+        
+        # Combined prices
+        combined_first_page = product_first_page + language_first_page
+        combined_other_page = product_other_page + language_other_page
+        
+        # Calculate original document price
+        if self.product.category.charging == "static":
+            original_price = combined_first_page
+        else:
+            if self.total_pages == 1:
+                original_price = combined_first_page
+            else:
+                original_price = combined_first_page + (combined_other_page * (self.total_pages - 1))
+        
+        # Calculate copy price
+        product_copy_price = Decimal('0.00')
+        if is_agency:
+            product_copy_price = self.product.agency_copy_price_decimal or Decimal('0.00')
+        else:
+            product_copy_price = self.product.user_copy_price_decimal or Decimal('0.00')
+        
+        combined_copy_price = product_copy_price + language_copy
+        copy_total = combined_copy_price * self.copy_number if self.copy_number > 0 else Decimal('0.00')
+        
+        return {
+            'is_agency': is_agency,
+            'total_pages': self.total_pages,
+            'copy_number': self.copy_number,
+            'language_name': self.language.name if self.language else None,
+            
+            # Product prices
+            'product_first_page': product_first_page,
+            'product_other_page': product_other_page,
+            'product_copy_price': product_copy_price,
+            
+            # Language prices
+            'language_first_page': language_first_page,
+            'language_other_page': language_other_page,
+            'language_copy_price': language_copy,
+            
+            # Combined prices
+            'combined_first_page': combined_first_page,
+            'combined_other_page': combined_other_page,
+            'combined_copy_price': combined_copy_price,
+            
+            # Totals
+            'original_price': original_price,
+            'copy_total': copy_total,
+            'total_price': original_price + copy_total,
+        }
 
     @property
     def total_due(self):

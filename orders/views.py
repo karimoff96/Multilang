@@ -360,10 +360,14 @@ def orderDetail(request, order_id):
     # Get allowed status transitions based on current status
     allowed_transitions = get_allowed_status_transitions(order.status)
     
+    # Get detailed price breakdown
+    price_breakdown = order.get_price_breakdown()
+    
     context = {
         "title": f"Order #{order.id}",
         "subTitle": "Order Details",
         "order": order,
+        "price_breakdown": price_breakdown,
         "available_staff": available_staff,
         # Permission flags from the granular permission system
         "can_assign": order_permissions['can_assign_orders'],

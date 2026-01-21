@@ -150,6 +150,14 @@ def bulk_payment_page(request):
         if hasattr(admin_profile, 'center'):
             available_branches = Branch.objects.filter(center=admin_profile.center).order_by('name')
     
+    # Calculate summary statistics
+    total_debt_amount = sum(d['total_debt'] for d in top_debtors)
+    total_orders_with_debt = sum(d['order_count'] for d in top_debtors)
+    avg_debt_per_customer = total_debt_amount / len(top_debtors) if top_debtors else 0
+    
+    # Get top 10 debtors for quick view widget
+    top_10_debtors = top_debtors[:10] if len(top_debtors) > 10 else top_debtors
+    
     context = {
         'page_title': _('Bulk Payment Management'),
         'active_nav': 'bulk_payments',
@@ -169,6 +177,11 @@ def bulk_payment_page(request):
         'filter_per_page': per_page,
         'total_debtors': len(top_debtors),
         'preselected_customer_id': preselected_customer_id,  # For auto-selecting customer
+        # Summary statistics
+        'total_debt_amount': total_debt_amount,
+        'total_orders_with_debt': total_orders_with_debt,
+        'avg_debt_per_customer': avg_debt_per_customer,
+        'top_10_debtors': top_10_debtors,
     }
     
     return render(request, 'orders/bulk_payment.html', context)

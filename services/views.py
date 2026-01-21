@@ -1011,14 +1011,11 @@ def createExpenseInline(request):
 # ============ Inline Language Creation (AJAX) ============
 
 @login_required(login_url='admin_login')
+@any_permission_required('can_create_languages', 'can_manage_languages')
 @require_POST
 def createLanguageInline(request):
-    """Create a language inline via AJAX - Superuser only"""
+    """Create a language inline via AJAX"""
     import json
-    
-    # Only superusers can create languages
-    if not request.user.is_superuser:
-        return JsonResponse({'success': False, 'error': 'Only superusers can create languages.'}, status=403)
     
     try:
         # Check if JSON or form data
@@ -1029,6 +1026,14 @@ def createLanguageInline(request):
         
         name = data.get('name', '').strip()
         short_name = data.get('short_name', '').strip()
+        
+        # Get pricing fields (optional, default to 0)
+        agency_page_price = Decimal(data.get('agency_page_price', '0') or '0')
+        agency_other_page_price = Decimal(data.get('agency_other_page_price', '0') or '0')
+        agency_copy_price = Decimal(data.get('agency_copy_price', '0') or '0')
+        ordinary_page_price = Decimal(data.get('ordinary_page_price', '0') or '0')
+        ordinary_other_page_price = Decimal(data.get('ordinary_other_page_price', '0') or '0')
+        ordinary_copy_price = Decimal(data.get('ordinary_copy_price', '0') or '0')
         
         if not name:
             return JsonResponse({'success': False, 'error': 'Language name is required.'}, status=400)
@@ -1047,6 +1052,12 @@ def createLanguageInline(request):
         language = Language.objects.create(
             name=name,
             short_name=short_name.upper(),
+            agency_page_price=agency_page_price,
+            agency_other_page_price=agency_other_page_price,
+            agency_copy_price=agency_copy_price,
+            ordinary_page_price=ordinary_page_price,
+            ordinary_other_page_price=ordinary_other_page_price,
+            ordinary_copy_price=ordinary_copy_price,
         )
         
         return JsonResponse({
@@ -1062,3 +1073,96 @@ def createLanguageInline(request):
         return JsonResponse({'success': False, 'error': 'Invalid JSON data.'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+# ============ Language Management Views ============
+
+@login_required(login_url='admin_login')
+@any_permission_required('can_view_languages', 'can_manage_languages')
+def languageList(request):
+    """List all languages with pricing information"""
+    languages = Language.objects.all().order_by('name')
+    
+    # Search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        languages = languages.filter(
+            Q(name__icontains=search_query) |
+            Q(short_name__icontains=search_query)
+        )
+    
+    # Pagination
+    per_page = request.GET.get('per_page', 20)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 20
+    
+    paginator = Paginator(languages, per_page)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        "title": "Languages",
+        "subTitle": "Manage Languages",
+        "languages": page_obj,
+        "search_query": search_query,
+        "per_page": per_page,
+    }
+    return render(request, "services/languageList.html", context)
+
+
+@login_required(login_url='admin_login')
+@any_permission_required('can_edit_languages', 'can_manage_languages')
+def editLanguage(request, language_id):
+    """Edit an existing language"""
+    language = get_object_or_404(Language, id=language_id)
+    
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        short_name = request.POST.get('short_name', '').strip().upper()
+        
+        # Get pricing fields
+        try:
+            agency_page_price = Decimal(request.POST.get('agency_page_price', '0') or '0')
+            agency_other_page_price = Decimal(request.POST.get('agency_other_page_price', '0') or '0')
+            agency_copy_price = Decimal(request.POST.get('agency_copy_price', '0') or '0')
+            ordinary_page_price = Decimal(request.POST.get('ordinary_page_price', '0') or '0')
+            ordinary_other_page_price = Decimal(request.POST.get('ordinary_other_page_price', '0') or '0')
+            ordinary_copy_price = Decimal(request.POST.get('ordinary_copy_price', '0') or '0')
+        except (ValueError, InvalidOperation):
+            messages.error(request, 'Invalid price values. Please enter valid numbers.')
+            return render(request, "services/editLanguage.html", {"language": language})
+        
+        if not name:
+            messages.error(request, 'Language name is required.')
+        elif not short_name:
+            messages.error(request, 'Short name is required.')
+        elif Language.objects.filter(name__iexact=name).exclude(id=language_id).exists():
+            messages.error(request, f'A language with the name "{name}" already exists.')
+        elif Language.objects.filter(short_name__iexact=short_name).exclude(id=language_id).exists():
+            messages.error(request, f'A language with short name "{short_name}" already exists.')
+        else:
+            try:
+                language.name = name
+                language.short_name = short_name
+                language.agency_page_price = agency_page_price
+                language.agency_other_page_price = agency_other_page_price
+                language.agency_copy_price = agency_copy_price
+                language.ordinary_page_price = ordinary_page_price
+                language.ordinary_other_page_price = ordinary_other_page_price
+                language.ordinary_copy_price = ordinary_copy_price
+                language.save()
+                
+                messages.success(request, f'Language "{language.name}" updated successfully!')
+                return redirect('languageList')
+            except Exception as e:
+                logger.error(f"Error updating language {language_id}: {e}")
+                messages.error(request, f'Error updating language: {str(e)}')
+    
+    context = {
+        "title": f"Edit {language.name}",
+        "subTitle": "Edit Language",
+        "language": language,
+    }
+    return render(request, "services/editLanguage.html", context)

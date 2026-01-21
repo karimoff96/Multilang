@@ -164,7 +164,7 @@ class Expense(models.Model):
 
 # Create your models here.
 class Language(models.Model):
-    """Languages for translation"""
+    """Languages for translation with pricing"""
 
     name = models.CharField(
         max_length=100, unique=True, verbose_name=_("Language Name")
@@ -172,6 +172,53 @@ class Language(models.Model):
     short_name = models.CharField(
         max_length=10, unique=True, verbose_name=_("Short Name")
     )
+    
+    # Pricing fields for agencies
+    agency_page_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name=_("Agency First Page Price"),
+        help_text=_("Additional price for first page translation for agencies")
+    )
+    agency_other_page_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name=_("Agency Other Pages Price"),
+        help_text=_("Additional price per other page for agencies")
+    )
+    agency_copy_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name=_("Agency Copy Price"),
+        help_text=_("Additional price per copy for agencies")
+    )
+    
+    # Pricing fields for ordinary users
+    ordinary_page_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name=_("Ordinary User First Page Price"),
+        help_text=_("Additional price for first page translation for ordinary users")
+    )
+    ordinary_other_page_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name=_("Ordinary User Other Pages Price"),
+        help_text=_("Additional price per other page for ordinary users")
+    )
+    ordinary_copy_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name=_("Ordinary User Copy Price"),
+        help_text=_("Additional price per copy for ordinary users")
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
 
@@ -387,6 +434,123 @@ class Product(models.Model):
             if is_agency
             else self.ordinary_other_page_price
         )
+
+    def get_combined_first_page_price(self, language=None, is_agency=False):
+        """
+        Get combined first page price (Product + Language)
+        
+        Args:
+            language: Language instance or None
+            is_agency: Whether to use agency pricing
+        
+        Returns:
+            Decimal combined first page price
+        """
+        product_price = self.get_first_page_price(is_agency=is_agency)
+        
+        if language:
+            language_price = (
+                language.agency_page_price
+                if is_agency
+                else language.ordinary_page_price
+            )
+            return product_price + language_price
+        
+        return product_price
+
+    def get_combined_other_page_price(self, language=None, is_agency=False):
+        """
+        Get combined other pages price (Product + Language)
+        
+        Args:
+            language: Language instance or None
+            is_agency: Whether to use agency pricing
+        
+        Returns:
+            Decimal combined other page price
+        """
+        product_price = self.get_other_page_price(is_agency=is_agency)
+        
+        if language:
+            language_price = (
+                language.agency_other_page_price
+                if is_agency
+                else language.ordinary_other_page_price
+            )
+            return product_price + language_price
+        
+        return product_price
+
+    def get_combined_copy_price(self, language=None, is_agency=False):
+        """
+        Get combined copy price (Product + Language)
+        
+        Args:
+            language: Language instance or None
+            is_agency: Whether to use agency pricing
+        
+        Returns:
+            Decimal combined copy price
+        """
+        # Get product copy price (fixed decimal or percentage-based)
+        if is_agency:
+            product_price = (
+                self.agency_copy_price_decimal
+                if self.agency_copy_price_decimal is not None
+                else Decimal('0.00')
+            )
+        else:
+            product_price = (
+                self.user_copy_price_decimal
+                if self.user_copy_price_decimal is not None
+                else Decimal('0.00')
+            )
+        
+        if language:
+            language_price = (
+                language.agency_copy_price
+                if is_agency
+                else language.ordinary_copy_price
+            )
+            return product_price + language_price
+        
+        return product_price
+
+    def get_combined_total_price(self, language=None, is_agency=False, pages=1, copies=0):
+        """
+        Get combined total price including language pricing and copies
+        
+        Args:
+            language: Language instance or None
+            is_agency: Whether to use agency pricing
+            pages: Number of pages
+            copies: Number of copies (0 means only original)
+        
+        Returns:
+            Decimal total price
+        """
+        if self.category.charging == "static":
+            # Static pricing - just first page price
+            total = self.get_combined_first_page_price(language=language, is_agency=is_agency)
+        else:
+            # Dynamic pricing
+            if pages <= 0:
+                pages = 1
+            
+            first_page = self.get_combined_first_page_price(language=language, is_agency=is_agency)
+            
+            if pages == 1:
+                total = first_page
+            else:
+                other_page = self.get_combined_other_page_price(language=language, is_agency=is_agency)
+                total = first_page + (other_page * (pages - 1))
+        
+        # Add copy costs
+        if copies > 0:
+            copy_price = self.get_combined_copy_price(language=language, is_agency=is_agency)
+            total += (copy_price * copies)
+        
+        return total
 
     def get_expenses_total(self, expense_type=None):
         """
