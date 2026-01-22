@@ -188,6 +188,11 @@ const translations = {
         ru: 'Массовые платежи',
         en: 'Bulk Payments'
     },
+    'sidebar.bulkPayment': {
+        uz: 'Ommaviy to\'lov va to\'ldirish',
+        ru: 'Массовый платеж и пополнение',
+        en: 'Bulk Payment & Top Up'
+    },
     'sidebar.organization': {
         uz: 'Tashkilot',
         ru: 'Организация',

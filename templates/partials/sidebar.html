@@ -1,4 +1,5 @@
 {% load permission_tags %}
+{% load i18n %}
 <aside class="sidebar">
     <button type="button" class="sidebar-close-btn">
         <iconify-icon icon="radix-icons:cross-2"></iconify-icon>
@@ -16,7 +17,7 @@
             <li>
                 <a href="{% url 'dashboard' %}">
                     <iconify-icon icon="solar:home-smile-angle-bold" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.dashboard">Dashboard</span>
+                    <span data-i18n="sidebar.dashboard">{% trans "Dashboard" %}</span>
                 </a>
             </li>
             
@@ -26,25 +27,25 @@
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="mdi:domain" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.organization">Organization</span>
+                    <span data-i18n="sidebar.organization">{% trans "Organization" %}</span>
                 </a>
                 <ul class="sidebar-submenu">
                     <li>
-                        <a href="{% url 'center_list' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> <span data-i18n="sidebar.centers">Companies</span></a>
+                        <a href="{% url 'center_list' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> <span data-i18n="sidebar.centers">{% trans "Companies" %}</span></a>
                     </li>
                     <li>
-                        <a href="{% url 'branch_list' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.branches">Branches</span></a>
+                        <a href="{% url 'branch_list' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.branches">{% trans "Branches" %}</span></a>
                     </li>
                     {% has_any_perm 'can_manage_staff,can_view_staff' as can_view_staff_menu %}
                     {% if can_view_staff_menu %}
                     <li>
-                        <a href="{% url 'staff_list' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.staff">Staff</span></a>
+                        <a href="{% url 'staff_list' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.staff">{% trans "Staff" %}</span></a>
                     </li>
                     {% endif %}
                     {% is_role 'superuser' as is_super %}
                     {% if is_super %}
                     <li>
-                        <a href="{% url 'role_list' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.rolesPermissions">Roles & Permissions</span></a>
+                        <a href="{% url 'role_list' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.rolesPermissions">{% trans "Roles & Permissions" %}</span></a>
                     </li>
                     {% endif %}
                 </ul>
@@ -56,20 +57,20 @@
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="mdi:domain" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.myBranch">My Branch</span>
+                    <span data-i18n="sidebar.myBranch">{% trans "My Branch" %}</span>
                 </a>
                 <ul class="sidebar-submenu">
                     <li>
-                        <a href="{% url 'branch_list' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.branchInfo">Branch Info</span></a>
+                        <a href="{% url 'branch_list' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.branchInfo">{% trans "Branch Info" %}</span></a>
                     </li>
                     {% if can_staff_section %}
                     <li>
-                        <a href="{% url 'staff_list' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.staff">Staff</span></a>
+                        <a href="{% url 'staff_list' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.staff">{% trans "Staff" %}</span></a>
                     </li>
                     {% endif %}
                     {% if can_settings_section %}
                     <li>
-                        <a href="{% url 'branch_list' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.branchSettings">Bot Settings</span></a>
+                        <a href="{% url 'branch_list' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.branchSettings">{% trans "Bot Settings" %}</span></a>
                     </li>
                     {% endif %}
                 </ul>
@@ -80,13 +81,13 @@
             <li>
                 <a href="{% url 'usersList' %}">
                     <iconify-icon icon="solar:users-group-rounded-bold" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.users">Customers</span>
+                    <span data-i18n="sidebar.users">{% trans "Customers" %}</span>
                 </a>
             </li>
              <li>
                 <a href="{% url 'orders:ordersList' %}">
                     <iconify-icon icon="solar:bag-4-bold" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.orders">Orders</span>
+                    <span data-i18n="sidebar.orders">{% trans "Orders" %}</span>
                 </a>
             </li>
             
@@ -96,7 +97,7 @@
             <li>
                 <a href="{% url 'orders:bulk_payment_page' %}">
                     <iconify-icon icon="solar:wallet-money-bold" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.bulkPayment">Bulk Payment & Top Up</span>
+                    <span data-i18n="sidebar.bulkPayment">{% trans "Bulk Payment & Top Up" %}</span>
                 </a>
             </li>
             {% endif %}
@@ -106,28 +107,28 @@
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="solar:star-bold" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.services">Services</span>
+                    <span data-i18n="sidebar.services">{% trans "Services" %}</span>
                 </a>
                 <ul class="sidebar-submenu">
                     {% can_do 'products.view' as can_view_products %}
                     {% if can_view_products %}
                     <li>
-                        <a href="{% url 'categoryList' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> <span data-i18n="sidebar.categories">Categories</span></a>
+                        <a href="{% url 'categoryList' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> <span data-i18n="sidebar.categories">{% trans "Categories" %}</span></a>
                     </li>
                     <li>
-                        <a href="{% url 'productList' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.products">Products</span></a>
+                        <a href="{% url 'productList' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.products">{% trans "Products" %}</span></a>
                     </li>
                     {% endif %}
                     {% can_do 'expenses.view' as can_view_expenses %}
                     {% if can_view_expenses %}
                     <li>
-                        <a href="{% url 'expenseList' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.expenses">Expenses</span></a>
+                        <a href="{% url 'expenseList' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.expenses">{% trans "Expenses" %}</span></a>
                     </li>
                     {% endif %}
                     {% can_do 'languages.view' as can_view_languages %}
                     {% if can_view_languages %}
                     <li>
-                        <a href="{% url 'languageList' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.languages">Languages</span></a>
+                        <a href="{% url 'languageList' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.languages">{% trans "Languages" %}</span></a>
                     </li>
                     {% endif %}
                 </ul>
@@ -137,14 +138,14 @@
             <!-- Analytics Section - Permission-based visibility -->
             {% has_any_perm 'can_view_reports,can_view_analytics,can_view_financial_reports' as can_any_reports %}
             {% if can_any_reports or is_staff_member %}
-            <li class="sidebar-menu-group-title" data-i18n="sidebar.analyticsReports">Analytics & Reports</li>
+            <li class="sidebar-menu-group-title" data-i18n="sidebar.analyticsReports">{% trans "Analytics & Reports" %}</li>
             
             <!-- My Statistics - Visible to all staff members (their own stats) -->
             {% if is_staff_member %}
             <li>
                 <a href="{% url 'my_statistics' %}">
                     <iconify-icon icon="solar:chart-bold" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.myStatistics">My Statistics</span>
+                    <span data-i18n="sidebar.myStatistics">{% trans "My Statistics" %}</span>
                 </a>
             </li>
             {% endif %}
@@ -155,19 +156,19 @@
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="solar:wallet-money-bold-duotone" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.dashboards">Dashboards</span>
+                    <span data-i18n="sidebar.dashboards">{% trans "Dashboards" %}</span>
                 </a>
                 <ul class="sidebar-submenu">
                     {% can_do 'reports.view' as can_sales %}
                     {% if can_sales %}
                     <li>
-                        <a href="{% url 'sales' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> <span data-i18n="sidebar.salesDashboard">Sales Overview</span></a>
+                        <a href="{% url 'sales' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> <span data-i18n="sidebar.salesDashboard">{% trans "Sales Overview" %}</span></a>
                     </li>
                     {% endif %}
                     {% has_any_perm 'can_view_financial_reports,can_view_analytics' as can_finance %}
                     {% if can_finance %}
                     <li>
-                        <a href="{% url 'finance' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.financeDashboard">Finance & Payments</span></a>
+                        <a href="{% url 'finance' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.financeDashboard">{% trans "Finance & Payments" %}</span></a>
                     </li>
                     {% endif %}
                 </ul>
@@ -179,55 +180,55 @@
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="solar:chart-square-bold-duotone" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.reports">Reports</span>
+                    <span data-i18n="sidebar.reports">{% trans "Reports" %}</span>
                 </a>
                 <ul class="sidebar-submenu">
                     {% can_do 'reports.financial' as can_financial %}
                     {% if can_financial %}
                     <li>
-                        <a href="{% url 'financial_reports' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.financialReports">Financial Reports</span></a>
+                        <a href="{% url 'financial_reports' %}"><i class="ri-circle-fill circle-icon text-success-main w-auto"></i> <span data-i18n="sidebar.financialReports">{% trans "Financial Reports" %}</span></a>
                     </li>
                     <li>
-                        <a href="{% url 'unit_economy' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.unitEconomy">Unit Economy</span></a>
+                        <a href="{% url 'unit_economy' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.unitEconomy">{% trans "Unit Economy" %}</span></a>
                     </li>
                     <li>
-                        <a href="{% url 'debtors_report' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.debtorsReport">Debtors Report</span></a>
+                        <a href="{% url 'debtors_report' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.debtorsReport">{% trans "Debtors Report" %}</span></a>
                     </li>
                     <li>
-                        <a href="{% url 'orders:payment_history' %}"><i class="ri-circle-fill circle-icon text-purple-main w-auto"></i> <span data-i18n="sidebar.paymentHistory">Payment History</span></a>
+                        <a href="{% url 'orders:payment_history' %}"><i class="ri-circle-fill circle-icon text-purple-main w-auto"></i> <span data-i18n="sidebar.paymentHistory">{% trans "Payment History" %}</span></a>
                     </li>
                     {% endif %}
                     {% has_any_perm 'can_view_expenses,can_manage_expenses,can_view_financial_reports' as can_expense_analytics %}
                     {% if can_expense_analytics %}
                     <li>
-                        <a href="{% url 'expense_analytics_report' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.expenseAnalytics">Expense Analytics</span></a>
+                        <a href="{% url 'expense_analytics_report' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.expenseAnalytics">{% trans "Expense Analytics" %}</span></a>
                     </li>
                     {% endif %}
                     {% can_do 'reports.view' as can_order_reports %}
                     {% if can_order_reports %}
                     <li>
-                        <a href="{% url 'order_reports' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> <span data-i18n="sidebar.orderReports">Order Reports</span></a>
+                        <a href="{% url 'order_reports' %}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> <span data-i18n="sidebar.orderReports">{% trans "Order Reports" %}</span></a>
                     </li>
                     <li>
-                        <a href="{% url 'staff_performance' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.staffPerformance">Staff Performance</span></a>
+                        <a href="{% url 'staff_performance' %}"><i class="ri-circle-fill circle-icon text-info-main w-auto"></i> <span data-i18n="sidebar.staffPerformance">{% trans "Staff Performance" %}</span></a>
                     </li>
                     {% endif %}
                     {% can_do 'analytics.view' as can_analytics %}
                     {% if can_analytics %}
                     <li>
-                        <a href="{% url 'branch_comparison' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.branchComparison">Branch Comparison</span></a>
+                        <a href="{% url 'branch_comparison' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.branchComparison">{% trans "Branch Comparison" %}</span></a>
                     </li>
                     {% endif %}
                     {% has_any_perm 'can_view_analytics,can_view_customer_details' as can_customer_analytics %}
                     {% if can_customer_analytics %}
                     <li>
-                        <a href="{% url 'customer_analytics' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.customerAnalytics">Customer Analytics</span></a>
+                        <a href="{% url 'customer_analytics' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.customerAnalytics">{% trans "Customer Analytics" %}</span></a>
                     </li>
                     {% endif %}
                     {% has_any_perm 'can_view_audit_logs' as can_audit_logs %}
                     {% if can_audit_logs or is_owner or user.is_superuser %}
                     <li>
-                        <a href="{% url 'audit_logs' %}"><i class="ri-circle-fill circle-icon text-secondary-main w-auto"></i> <span data-i18n="sidebar.auditLogs">Audit Logs</span></a>
+                        <a href="{% url 'audit_logs' %}"><i class="ri-circle-fill circle-icon text-secondary-main w-auto"></i> <span data-i18n="sidebar.auditLogs">{% trans "Audit Logs" %}</span></a>
                     </li>
                     {% endif %}
                 </ul>
@@ -241,7 +242,7 @@
             <li>
                 <a href="{% url 'marketing_list' %}">
                     <iconify-icon icon="solar:chat-round-call-bold" class="menu-icon"></iconify-icon>
-                    <span data-i18n="sidebar.marketing">Marketing</span>
+                    <span data-i18n="sidebar.marketing">{% trans "Marketing" %}</span>
                 </a>
             </li>
             {% endif %}

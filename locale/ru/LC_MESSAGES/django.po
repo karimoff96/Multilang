@@ -25,44 +25,44 @@ msgstr ""
 #: services/models.py:39 services/models.py:172
 #: templates/reports/audit_logs.html:111
 msgid "Branch"
-msgstr ""
+msgstr "Филиал"
 
 #: accounts/models.py:28
 msgid "Leave empty for global/default settings"
-msgstr ""
+msgstr "Оставьте пустым для глобальных/стандартных настроек"
 
 #: accounts/models.py:36
 msgid "Bank Card Number"
-msgstr ""
+msgstr "Номер банковской карты"
 
 #: accounts/models.py:37
 msgid "Card number for receiving payments (e.g., 8600 1234 5678 9012)"
-msgstr ""
+msgstr "Номер карты для получения платежей (например, 8600 1234 5678 9012)"
 
 #: accounts/models.py:43
 msgid "Card Holder Name"
-msgstr ""
+msgstr "Имя держателя карты"
 
 #: accounts/models.py:44
 msgid "Name of the card holder"
-msgstr ""
+msgstr "Имя держателя карты"
 
 #: accounts/models.py:51
 msgid "Help Text"
-msgstr ""
+msgstr "Текст справки"
 
 #: accounts/models.py:52
 msgid "Help text shown in bot"
-msgstr ""
+msgstr "Текст справки, показываемый в боте"
 
 #: accounts/models.py:58 orders/models.py:73 organizations/models.py:172
 #: services/models.py:45 services/models.py:176 services/models.py:245
 msgid "Description"
-msgstr ""
+msgstr "Описание"
 
 #: accounts/models.py:59
 msgid "Description of the branch/center"
-msgstr ""
+msgstr "Описание филиала/центра"
 
 #: accounts/models.py:65
 msgid "About Us"
@@ -2524,3 +2524,394 @@ msgstr ""
 #: templates/reports/audit_logs.html:389
 msgid "Reset Filters"
 msgstr ""
+
+# Debtors Report Translations
+#: templates/reports/debtors_report.html
+msgid "Track and manage outstanding customer debts"
+msgstr "Отслеживайте и управляйте непогашенными долгами клиентов"
+
+#: templates/reports/debtors_report.html
+msgid "Back to Unit Economy"
+msgstr "Вернуться к Unit Economy"
+
+#: templates/reports/debtors_report.html
+msgid "Debt Range"
+msgstr "Диапазон долга"
+
+#: templates/reports/debtors_report.html
+msgid "All Amounts"
+msgstr "Все суммы"
+
+#: templates/reports/debtors_report.html
+msgid "Collection Rate"
+msgstr "Коэффициент сбора"
+
+#: templates/reports/debtors_report.html
+msgid "All Rates"
+msgstr "Все коэффициенты"
+
+#: templates/reports/debtors_report.html
+msgid "Low (0-30%)"
+msgstr "Низкий (0-30%)"
+
+#: templates/reports/debtors_report.html
+msgid "Medium (30-70%)"
+msgstr "Средний (30-70%)"
+
+#: templates/reports/debtors_report.html
+msgid "High (70-100%)"
+msgstr "Высокий (70-100%)"
+
+#: templates/reports/debtors_report.html
+msgid "Orders Count"
+msgstr "Количество заказов"
+
+#: templates/reports/debtors_report.html
+msgid "All Orders"
+msgstr "Все заказы"
+
+#: templates/reports/debtors_report.html
+msgid "1-5 orders"
+msgstr "1-5 заказов"
+
+#: templates/reports/debtors_report.html
+msgid "6-10 orders"
+msgstr "6-10 заказов"
+
+#: templates/reports/debtors_report.html
+msgid "11+ orders"
+msgstr "11+ заказов"
+
+#: templates/reports/debtors_report.html
+msgid "Sort By"
+msgstr "Сортировать"
+
+#: templates/reports/debtors_report.html
+msgid "Debt: High to Low"
+msgstr "Долг: от большего к меньшему"
+
+#: templates/reports/debtors_report.html
+msgid "Debt: Low to High"
+msgstr "Долг: от меньшего к большему"
+
+#: templates/reports/debtors_report.html
+msgid "Orders: High to Low"
+msgstr "Заказы: от большего к меньшему"
+
+#: templates/reports/debtors_report.html
+msgid "Collection: Low to High"
+msgstr "Сбор: от меньшего к большему"
+
+#: templates/reports/debtors_report.html
+msgid "Collection: High to Low"
+msgstr "Сбор: от большего к меньшему"
+
+#: templates/reports/debtors_report.html
+msgid "Name: A to Z"
+msgstr "Имя: от А до Я"
+
+#: templates/reports/debtors_report.html
+msgid "Apply Filters"
+msgstr "Применить фильтры"
+
+#: templates/reports/debtors_report.html
+msgid "Clear Filters"
+msgstr "Очистить фильтры"
+
+#: templates/reports/debtors_report.html
+msgid "Total Debt"
+msgstr "Общий долг"
+
+#: templates/reports/debtors_report.html
+msgid "customers with debt"
+msgstr "клиентов с долгом"
+
+#: templates/reports/debtors_report.html
+msgid "Total Received"
+msgstr "Всего получено"
+
+#: templates/reports/debtors_report.html
+msgid "Total Expected"
+msgstr "Всего ожидается"
+
+#: templates/reports/debtors_report.html
+msgid "Avg Collection Rate"
+msgstr "Средний коэффициент сбора"
+
+#: templates/reports/debtors_report.html
+msgid "All Debtors"
+msgstr "Все должники"
+
+#: templates/reports/debtors_report.html
+msgid "Quick search by name or phone..."
+msgstr "Быстрый поиск по имени или телефону..."
+
+#: templates/reports/debtors_report.html
+msgid "Export to Excel"
+msgstr "Экспорт в Excel"
+
+#: templates/reports/debtors_report.html
+msgid "Customer"
+msgstr "Клиент"
+
+#: templates/reports/debtors_report.html
+msgid "Type"
+msgstr "Тип"
+
+#: templates/reports/debtors_report.html
+msgid "Location"
+msgstr "Местоположение"
+
+#: templates/reports/debtors_report.html
+msgid "Debt"
+msgstr "Долг"
+
+#: templates/reports/debtors_report.html
+msgid "Count"
+msgstr "Количество"
+
+#: templates/reports/debtors_report.html
+msgid "Expected"
+msgstr "Ожидается"
+
+#: templates/reports/debtors_report.html
+msgid "Received"
+msgstr "Получено"
+
+#: templates/reports/debtors_report.html
+msgid "Rate"
+msgstr "Коэффициент"
+
+#: templates/reports/debtors_report.html
+msgid "Pay debt for"
+msgstr "Оплатить долг для"
+
+#: templates/reports/debtors_report.html
+msgid "Pay"
+msgstr "Оплатить"
+
+#: templates/reports/debtors_report.html
+msgid "TOTALS:"
+msgstr "ИТОГО:"
+
+#: templates/reports/debtors_report.html
+msgid "of"
+msgstr "из"
+
+#: templates/reports/debtors_report.html
+msgid "Show:"
+msgstr "Показать:"
+
+#: templates/reports/debtors_report.html
+msgid "No debtors found"
+msgstr "Должники не найдены"
+
+#: templates/reports/debtors_report.html
+msgid "Try adjusting your filters or date range"
+msgstr "Попробуйте изменить фильтры или диапазон дат"
+
+# Home Views Translations
+#: WowDash/home_views.py
+msgid "Email"
+msgstr "Email"
+
+#: WowDash/home_views.py
+msgid "Components / Email"
+msgstr "Компоненты / Email"
+
+#: WowDash/home_views.py
+msgid "System Overview"
+msgstr "Обзор системы"
+
+#: WowDash/home_views.py
+msgid "Owner Dashboard"
+msgstr "Панель владельца"
+
+#: WowDash/home_views.py
+msgid "No Branch"
+msgstr "Нет филиала"
+
+#: WowDash/home_views.py
+msgid "Manager Dashboard"
+msgstr "Панель менеджера"
+
+#: WowDash/home_views.py
+msgid "My Dashboard"
+msgstr "Моя панель"
+
+#: WowDash/home_views.py
+msgid "Dashboard"
+msgstr "Панель управления"
+
+#: WowDash/home_views.py
+msgid "Executive Summary"
+msgstr "Исполнительное резюме"
+
+#: WowDash/home_views.py
+msgid "Kanban"
+msgstr "Канбан"
+
+#: WowDash/home_views.py
+msgid "Terms & Condition"
+msgstr "Условия и положения"
+
+#: WowDash/home_views.py
+msgid "Widgets"
+msgstr "Виджеты"
+
+#: WowDash/home_views.py
+msgid "This Week"
+msgstr "Эта неделя"
+
+#: WowDash/home_views.py
+msgid "This Month"
+msgstr "Этот месяц"
+
+#: WowDash/home_views.py
+msgid "This Year"
+msgstr "Этот год"
+
+#: WowDash/home_views.py
+msgid "Custom Range"
+msgstr "Пользовательский диапазон"
+
+#: WowDash/home_views.py
+msgid "Awaiting"
+msgstr "Ожидание"
+
+#: WowDash/home_views.py
+msgid "In Process"
+msgstr "В процессе"
+
+#: WowDash/home_views.py
+msgid "Ready"
+msgstr "Готово"
+
+#: WowDash/home_views.py
+msgid "Done"
+msgstr "Выполнено"
+
+#: WowDash/home_views.py
+msgid "No Orders"
+msgstr "Нет заказов"
+
+#: WowDash/home_views.py
+msgid "Sales Statistics"
+msgstr "Статистика продаж"
+
+#: WowDash/home_views.py
+msgid "Sales"
+msgstr "Продажи"
+
+#: WowDash/home_views.py
+msgid "Finance & Analytics"
+msgstr "Финансы и аналитика"
+
+#: WowDash/home_views.py
+msgid "Finance"
+msgstr "Финансы"
+
+# Sidebar Translations
+#: templates/partials/sidebar.html
+msgid "Organization"
+msgstr "Организация"
+
+#: templates/partials/sidebar.html
+msgid "Companies"
+msgstr "Компании"
+
+#: templates/partials/sidebar.html
+msgid "Roles & Permissions"
+msgstr "Роли и разрешения"
+
+#: templates/partials/sidebar.html
+msgid "My Branch"
+msgstr "Мой филиал"
+
+#: templates/partials/sidebar.html
+msgid "Branch Info"
+msgstr "Информация о филиале"
+
+#: templates/partials/sidebar.html
+msgid "Bot Settings"
+msgstr "Настройки бота"
+
+#: templates/partials/sidebar.html
+msgid "Bulk Payment & Top Up"
+msgstr "Массовый платеж и пополнение"
+
+#: templates/partials/sidebar.html
+msgid "Services"
+msgstr "Услуги"
+
+#: templates/partials/sidebar.html
+msgid "Categories"
+msgstr "Категории"
+
+#: templates/partials/sidebar.html
+msgid "Products"
+msgstr "Продукты"
+
+#: templates/partials/sidebar.html
+msgid "Languages"
+msgstr "Языки"
+
+#: templates/partials/sidebar.html
+msgid "Analytics & Reports"
+msgstr "Аналитика и отчеты"
+
+#: templates/partials/sidebar.html
+msgid "My Statistics"
+msgstr "Моя статистика"
+
+#: templates/partials/sidebar.html
+msgid "Dashboards"
+msgstr "Панели управления"
+
+#: templates/partials/sidebar.html
+msgid "Sales Overview"
+msgstr "Обзор продаж"
+
+#: templates/partials/sidebar.html
+msgid "Finance & Payments"
+msgstr "Финансы и платежи"
+
+#: templates/partials/sidebar.html
+msgid "Financial Reports"
+msgstr "Финансовые отчеты"
+
+#: templates/partials/sidebar.html
+msgid "Unit Economy"
+msgstr "Юнит-экономика"
+
+#: templates/partials/sidebar.html
+msgid "Payment History"
+msgstr "История платежей"
+
+#: templates/partials/sidebar.html
+msgid "Expense Analytics"
+msgstr "Аналитика расходов"
+
+#: templates/partials/sidebar.html
+msgid "Order Reports"
+msgstr "Отчеты по заказам"
+
+#: templates/partials/sidebar.html
+msgid "Staff Performance"
+msgstr "Производительность персонала"
+
+#: templates/partials/sidebar.html
+msgid "Branch Comparison"
+msgstr "Сравнение филиалов"
+
+#: templates/partials/sidebar.html
+msgid "Customer Analytics"
+msgstr "Аналитика клиентов"
+
+#: templates/partials/sidebar.html
+msgid "Audit Logs"
+msgstr "Журналы аудита"
+
+#: templates/partials/sidebar.html
+msgid "Marketing"
+msgstr "Маркетинг"

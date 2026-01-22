@@ -1,25 +1,54 @@
+# Environment and secrets
 .env
-/venv
-venv
-./__pycache__
-/order_files
-./order_files
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv
+
+# Django
 db.sqlite3
-db.sqlite3.backup*
+db.sqlite3-journal
 *.backup
-media
-__pycache__
-*.pyc
-*.pyo
-staticfiles
-/staticfiles
-/logs
-logs
-backups
+db.sqlite3.backup*
+staticfiles/
+media/
+
+# Logs
+logs/
 *.log
+
+# Backups
+backups/
+*.sql.gz
+*.db.gz
+
+# Temporary files
 *.tmp
 *.bak
 *.old
 *.orig
+*.swp
+*~
+
+# OS specific
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Order files
+order_files/

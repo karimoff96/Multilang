@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django.db.models import Sum, Count
 from datetime import timedelta
 from orders.models import Order
@@ -16,8 +17,8 @@ import json
 
 def email(request):
     context = {
-        "title": "Email",
-        "subTitle": "Components / Email",
+        "title": _("Email"),
+        "subTitle": _("Components / Email"),
     }
     return render(request, "email.html", context)
 
@@ -157,7 +158,7 @@ def index(request):
             "total_centers": TranslationCenter.objects.filter(is_active=True).count(),
             "total_branches": Branch.objects.filter(is_active=True).count(),
             "total_staff": AdminUser.objects.filter(is_active=True).count(),
-            "role_title": "System Overview",
+            "role_title": _("System Overview"),
         }
     elif hasattr(request, "admin_profile") and request.admin_profile:
         profile = request.admin_profile
@@ -193,7 +194,7 @@ def index(request):
                 "total_branches": branches.count(),
                 "total_staff": staff.count(),
                 "branch_performance": branch_performance,
-                "role_title": "Owner Dashboard",
+                "role_title": _("Owner Dashboard"),
             }
 
         elif profile.is_manager:
@@ -222,10 +223,10 @@ def index(request):
                 )
 
             role_context = {
-                "branch_name": branch.name if branch else "No Branch",
+                "branch_name": branch.name if branch else _("No Branch"),
                 "total_staff": branch_staff.count(),
                 "staff_performance": staff_performance,
-                "role_title": "Manager Dashboard",
+                "role_title": _("Manager Dashboard"),
             }
 
         else:
@@ -248,12 +249,12 @@ def index(request):
                 "my_completed_today": my_completed_today,
                 "my_total_completed": my_total_completed,
                 "my_total_assigned": my_orders.count(),
-                "role_title": "My Dashboard",
+                "role_title": _("My Dashboard"),
             }
 
     context = {
-        "title": "Dashboard",
-        "subTitle": "Executive Summary",
+        "title": _("Dashboard"),
+        "subTitle": _("Executive Summary"),
         # Today stats
         "today_count": today_count,
         "today_revenue": today_revenue,
@@ -291,40 +292,40 @@ def index(request):
 
 def kanban(request):
     context = {
-        "title": "Kanban",
-        "subTitle": "Kanban",
+        "title": _("Kanban"),
+        "subTitle": _("Kanban"),
     }
     return render(request, "kanban.html", context)
 
 
 def stared(request):
     context = {
-        "title": "Email",
-        "subTitle": "Components / Email",
+        "title": _("Email"),
+        "subTitle": _("Components / Email"),
     }
     return render(request, "stared.html", context)
 
 
 def termsAndConditions(request):
     context = {
-        "title": "Terms & Condition",
-        "subTitle": "Terms & Condition",
+        "title": _("Terms & Condition"),
+        "subTitle": _("Terms & Condition"),
     }
     return render(request, "termsAndConditions.html", context)
 
 
 def viewDetails(request):
     context = {
-        "title": "Email",
-        "subTitle": "Components / Email",
+        "title": _("Email"),
+        "subTitle": _("Components / Email"),
     }
     return render(request, "viewDetails.html", context)
 
 
 def widgets(request):
     context = {
-        "title": "Widgets",
-        "subTitle": "Widgets",
+        "title": _("Widgets"),
+        "subTitle": _("Widgets"),
     }
     return render(request, "widgets.html", context)
 
@@ -360,14 +361,14 @@ def sales(request):
     # ============ ORDER STATUS DATA FOR DONUT CHART ============
     # Status choices from model
     STATUS_LABELS = {
-        "pending": "Pending",
-        "payment_pending": "Awaiting",
-        "payment_received": "Received",
-        "payment_confirmed": "Confirmed",
-        "in_progress": "In Process",
-        "ready": "Ready",
-        "completed": "Done",
-        "cancelled": "Cancelled",
+        "pending": _("Pending"),
+        "payment_pending": _("Awaiting"),
+        "payment_received": _("Received"),
+        "payment_confirmed": _("Confirmed"),
+        "in_progress": _("In Process"),
+        "ready": _("Ready"),
+        "completed": _("Done"),
+        "cancelled": _("Cancelled"),
     }
 
     STATUS_COLORS = {
@@ -415,7 +416,7 @@ def sales(request):
                 colors.append(STATUS_COLORS[status])
         # If no data, add a placeholder
         if not values:
-            labels = ["No Orders"]
+            labels = [_("No Orders")]
             values = [1]
             colors = ["#E4F1FF"]
         return {"labels": labels, "values": values, "colors": colors}
@@ -714,8 +715,8 @@ def sales(request):
     }
 
     context = {
-        "title": "Sales Statistics",
-        "subTitle": "Sales",
+        "title": _("Sales Statistics"),
+        "subTitle": _("Sales"),
         # Period filter state
         "period": period,
         "date_from": date_from,
@@ -774,13 +775,13 @@ def finance(request):
     
     # Period label for display
     period_labels = {
-        "today": "Today",
-        "week": "This Week",
-        "month": "This Month",
-        "year": "This Year",
-        "custom": f"{date_from} to {date_to}" if date_from and date_to else "Custom Range"
+        "today": _("Today"),
+        "week": _("This Week"),
+        "month": _("This Month"),
+        "year": _("This Year"),
+        "custom": f"{date_from} to {date_to}" if date_from and date_to else _("Custom Range")
     }
-    period_label = period_labels.get(period, "This Year")
+    period_label = period_labels.get(period, _("This Year"))
     
     now = timezone.now()
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -954,8 +955,8 @@ def finance(request):
         )
 
     context = {
-        "title": "Finance & Analytics",
-        "subTitle": "Finance",
+        "title": _("Finance & Analytics"),
+        "subTitle": _("Finance"),
         # Period filter state
         "period": period,
         "date_from": date_from,

@@ -1,4 +1,5 @@
 {% extends './layout/layout.html' %} 
+{% load i18n %}
 
 {% block content %}
 <div class="row gy-4">
@@ -15,7 +16,7 @@
                                     <iconify-icon icon="solar:bag-4-bold" class="icon"></iconify-icon>
                                 </span>
                                 <div>
-                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="dashboard.todaysOrders">Today's Orders</span>
+                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="dashboard.todaysOrders">{% trans "Today's Orders" %}</span>
                                     <h6 class="fw-semibold gradient-card-text">{{ today_count }}</h6>
                                 </div>
                             </div>
@@ -27,7 +28,7 @@
                             {% else %}
                             <span class="bg-danger-focus px-1 rounded-2 fw-medium text-danger-main text-sm">{{ order_change }}</span>
                             {% endif %}
-                            <span data-i18n="dashboard.vsYesterday">vs yesterday</span>
+                            <span data-i18n="dashboard.vsYesterday">{% trans "vs yesterday" %}</span>
                         </p>
                     </div>
                 </div>
@@ -43,7 +44,7 @@
                                     <iconify-icon icon="solar:wallet-money-bold" class="icon"></iconify-icon>
                                 </span>
                                 <div>
-                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="dashboard.todaysRevenue">Today's Revenue</span>
+                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="dashboard.todaysRevenue">{% trans "Today's Revenue" %}</span>
                                     <h6 class="fw-semibold gradient-card-text">{{ today_revenue|floatformat:0 }} <small class="text-xs fw-normal gradient-card-text">UZS</small></h6>
                                 </div>
                             </div>
@@ -55,7 +56,7 @@
                             {% else %}
                             <span class="bg-danger-focus px-1 rounded-2 fw-medium text-danger-main text-sm">{{ revenue_change|floatformat:0 }}</span>
                             {% endif %}
-                            <span data-i18n="dashboard.vsYesterday">vs yesterday</span>
+                            <span data-i18n="dashboard.vsYesterday">{% trans "vs yesterday" %}</span>
                         </p>
                     </div>
                 </div>
@@ -71,7 +72,7 @@
                                     <iconify-icon icon="solar:chart-2-bold" class="icon"></iconify-icon>
                                 </span>
                                 <div>
-                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="dashboard.completionRate">Completion Rate</span>
+                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="dashboard.completionRate">{% trans "Completion Rate" %}</span>
                                     <h6 class="fw-semibold gradient-card-text">{{ completion_rate }}%</h6>
                                 </div>
                             </div>
@@ -79,7 +80,7 @@
                         </div>
                         <p class="text-sm mb-0">
                             <span class="bg-success-focus px-1 rounded-2 fw-medium text-success-main text-sm">{{ completed_today }}</span>
-                            <span data-i18n="dashboard.completedToday">completed today</span>
+                            <span data-i18n="dashboard.completedToday">{% trans "completed today" %}</span>
                         </p>
                     </div>
                 </div>
@@ -95,7 +96,7 @@
                                     <iconify-icon icon="solar:clock-circle-bold" class="icon"></iconify-icon>
                                 </span>
                                 <div>
-                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="dashboard.pendingOrders">Pending Orders</span>
+                                    <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="dashboard.pendingOrders">{% trans "Pending Orders" %}</span>
                                     <h6 class="fw-semibold gradient-card-text">{{ pending_orders }}</h6>
                                 </div>
                             </div>
