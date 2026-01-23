@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import logging  # Required for custom UTF8StreamHandler
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -243,6 +244,20 @@ DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 
+# Custom UTF-8 StreamHandler for Windows console
+import sys
+import codecs
+
+class UTF8StreamHandler(logging.StreamHandler):
+    """StreamHandler that forces UTF-8 encoding on Windows"""
+    def __init__(self, stream=None):
+        if stream is None:
+            stream = sys.stdout
+        # Wrap stream with UTF-8 encoding
+        if hasattr(stream, 'buffer'):
+            stream = codecs.getwriter('utf-8')(stream.buffer, 'replace')
+        super().__init__(stream)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -272,7 +287,7 @@ LOGGING = {
     'handlers': {
         'console': {
             'level': 'INFO',
-            'class': 'logging.StreamHandler',
+            '()': 'WowDash.settings.UTF8StreamHandler',  # Use custom UTF-8 handler
             'formatter': 'standard',
         },
         'file_error': {
@@ -282,6 +297,7 @@ LOGGING = {
             'maxBytes': 10 * 1024 * 1024,  # 10 MB
             'backupCount': 5,
             'formatter': 'verbose',
+            'encoding': 'utf-8',  # Fix Unicode encoding issues
         },
         'file_audit': {
             'level': 'INFO',
@@ -290,6 +306,7 @@ LOGGING = {
             'maxBytes': 10 * 1024 * 1024,  # 10 MB
             'backupCount': 10,
             'formatter': 'standard',
+            'encoding': 'utf-8',  # Fix Unicode encoding issues
         },
         'file_bot': {
             'level': 'INFO',
@@ -298,6 +315,7 @@ LOGGING = {
             'maxBytes': 10 * 1024 * 1024,  # 10 MB
             'backupCount': 5,
             'formatter': 'standard',
+            'encoding': 'utf-8',  # Fix Unicode encoding issues
         },
         'file_orders': {
             'level': 'INFO',
@@ -306,6 +324,7 @@ LOGGING = {
             'maxBytes': 10 * 1024 * 1024,  # 10 MB
             'backupCount': 5,
             'formatter': 'standard',
+            'encoding': 'utf-8',  # Fix Unicode encoding issues
         },
         'file_payments': {
             'level': 'INFO',
@@ -314,6 +333,7 @@ LOGGING = {
             'maxBytes': 10 * 1024 * 1024,  # 10 MB
             'backupCount': 5,
             'formatter': 'standard',
+            'encoding': 'utf-8',  # Fix Unicode encoding issues
         },
         'file_marketing': {
             'level': 'INFO',
@@ -322,6 +342,7 @@ LOGGING = {
             'maxBytes': 10 * 1024 * 1024,  # 10 MB
             'backupCount': 5,
             'formatter': 'standard',
+            'encoding': 'utf-8',  # Fix Unicode encoding issues
         },
         'mail_admins': {
             'level': 'ERROR',

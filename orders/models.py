@@ -15,6 +15,13 @@ logger = logging.getLogger(__name__)
 
 class OrderMedia(models.Model):
     file = models.FileField(upload_to="order_media/", max_length=500, verbose_name=_("File"))
+    telegram_file_id = models.CharField(
+        max_length=200, 
+        null=True, 
+        blank=True,
+        verbose_name=_("Telegram File ID"),
+        help_text=_("Telegram file ID for quick file access without downloading")
+    )
     pages = models.PositiveIntegerField(default=1, verbose_name=_("Pages"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))

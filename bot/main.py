@@ -3714,7 +3714,7 @@ def show_payment_options(message, language, order):
     if language == "uz":
         summary_text = "📋 <b>Buyurtma xulosasi</b>\n\n"
         summary_text += f"📄 Buyurtma raqami: #{order.id}\n"
-        summary_text += f"📦 Xizmat: {order.product.name}\n"
+        summary_text += f"📦 Xizmat: {order.product.name_uz}\n"
         summary_text += f"📎 Jami fayllar: {order.files.count()}\n"
         summary_text += f"📄 Jami sahifalar: {order.total_pages}\n"
         summary_text += service_lang_line
@@ -3724,11 +3724,13 @@ def show_payment_options(message, language, order):
         
         # Product base pricing
         product_first = breakdown.get('product_first_page', 0)
-        product_other = breakdown.get('product_other_page', 0)
+        product_other_per_page = breakdown.get('product_other_page', 0)
         if is_dynamic:
             summary_text += f"  • 1-sahifa (mahsulot): {product_first:,.0f} so'm\n"
             if order.total_pages > 1:
-                summary_text += f"  • Qolgan sahifalar (mahsulot): {product_other:,.0f} so'm\n"
+                other_pages_count = order.total_pages - 1
+                product_other_total = product_other_per_page * other_pages_count
+                summary_text += f"  • Qolgan sahifalar (mahsulot): {other_pages_count} × {product_other_per_page:,.0f} = {product_other_total:,.0f} so'm\n"
         else:
             summary_text += f"  • Mahsulot narxi: {product_first:,.0f} so'm\n"
         
@@ -3760,7 +3762,7 @@ def show_payment_options(message, language, order):
     elif language == "ru":
         summary_text = "📋 <b>Сводка заказа</b>\n\n"
         summary_text += f"📄 Номер заказа: #{order.id}\n"
-        summary_text += f"📦 Услуга: {order.product.name}\n"
+        summary_text += f"📦 Услуга: {order.product.name_ru}\n"
         summary_text += f"📎 Всего файлов: {order.files.count()}\n"
         summary_text += f"📄 Всего страниц: {order.total_pages}\n"
         summary_text += service_lang_line
@@ -3770,11 +3772,13 @@ def show_payment_options(message, language, order):
         
         # Product base pricing
         product_first = breakdown.get('product_first_page', 0)
-        product_other = breakdown.get('product_other_page', 0)
+        product_other_per_page = breakdown.get('product_other_page', 0)
         if is_dynamic:
             summary_text += f"  • 1-я страница (продукт): {product_first:,.0f} сум\n"
             if order.total_pages > 1:
-                summary_text += f"  • Остальные страницы (продукт): {product_other:,.0f} сум\n"
+                other_pages_count = order.total_pages - 1
+                product_other_total = product_other_per_page * other_pages_count
+                summary_text += f"  • Остальные страницы (продукт): {other_pages_count} × {product_other_per_page:,.0f} = {product_other_total:,.0f} сум\n"
         else:
             summary_text += f"  • Цена продукта: {product_first:,.0f} сум\n"
         
@@ -3808,7 +3812,7 @@ def show_payment_options(message, language, order):
     else:  # English
         summary_text = "📋 <b>Order Summary</b>\n\n"
         summary_text += f"📄 Order number: #{order.id}\n"
-        summary_text += f"📦 Service: {order.product.name}\n"
+        summary_text += f"📦 Service: {order.product.name_en}\n"
         summary_text += f"📎 Total files: {order.files.count()}\n"
         summary_text += f"📄 Total pages: {order.total_pages}\n"
         summary_text += service_lang_line
@@ -3818,11 +3822,13 @@ def show_payment_options(message, language, order):
         
         # Product base pricing
         product_first = breakdown.get('product_first_page', 0)
-        product_other = breakdown.get('product_other_page', 0)
+        product_other_per_page = breakdown.get('product_other_page', 0)
         if is_dynamic:
             summary_text += f"  • 1st page (product): {product_first:,.0f} sum\n"
             if order.total_pages > 1:
-                summary_text += f"  • Other pages (product): {product_other:,.0f} sum\n"
+                other_pages_count = order.total_pages - 1
+                product_other_total = product_other_per_page * other_pages_count
+                summary_text += f"  • Other pages (product): {other_pages_count} × {product_other_per_page:,.0f} = {product_other_total:,.0f} sum\n"
         else:
             summary_text += f"  • Product price: {product_first:,.0f} sum\n"
         
@@ -4189,11 +4195,14 @@ def handle_file_upload(message):
                 if message.document:
                     file_info = bot.get_file(message.document.file_id)
                     downloaded_file = bot.download_file(file_info.file_path)
-                    file_name = f"receipt_{order_id}_{int(time.time())}_{message.document.file_name}"
+                    # Truncate filename to prevent path length issues
+                    original_name = truncate_filename(message.document.file_name or "doc.pdf", max_length=30)
+                    file_name = f"receipt_{order_id}_{int(time.time())}_{original_name}"
                 else:  # message.photo
                     file_info = bot.get_file(message.photo[-1].file_id)
                     downloaded_file = bot.download_file(file_info.file_path)
-                    file_name = f"receipt_{order_id}_{int(time.time())}_{message.photo[-1].file_id}.jpg"
+                    # Use short hash instead of full file_id
+                    file_name = f"receipt_{order_id}_{int(time.time())}_{message.photo[-1].file_id[:8]}.jpg"
 
                 # Save receipt to storage
                 file_content = ContentFile(downloaded_file, name=file_name)
@@ -4412,15 +4421,22 @@ def handle_file_upload(message):
 
         try:
             # Get file information
+            import time
+            import hashlib
+            
             if message.document:
                 file_id = message.document.file_id
-                file_name = message.document.file_name
+                original_name = message.document.file_name
                 file_size = message.document.file_size
+                # Use short filename: timestamp + extension
+                ext = os.path.splitext(original_name)[1] if original_name else '.bin'
+                file_name = f"doc_{int(time.time())}_{hashlib.md5(file_id.encode()).hexdigest()[:8]}{ext}"
             elif message.photo:
                 file_id = message.photo[-1].file_id
                 file_info_obj = bot.get_file(file_id)
-                file_name = f"photo_{file_id}.jpg"
                 file_size = file_info_obj.file_size
+                # Use short filename: timestamp + hash
+                file_name = f"photo_{int(time.time())}_{hashlib.md5(file_id.encode()).hexdigest()[:8]}.jpg"
             else:
                 return
 
@@ -4445,10 +4461,23 @@ def handle_file_upload(message):
             from django.core.files.base import ContentFile
             from django.core.files.storage import default_storage
 
+            # Ensure filename is short enough to avoid path length issues
+            if len(file_name) > 100:
+                logger.warning(f"File name too long ({len(file_name)} chars), truncating: {file_name}")
+                file_name = truncate_filename(file_name, max_length=80)
+            
             file_content = ContentFile(downloaded_file, name=file_name)
-            file_path = default_storage.save(
-                f"order_media/{user_id}_{file_name}", file_content
-            )
+            storage_path = f"order_media/{user_id}_{file_name}"
+            
+            # Final path length check (Windows MAX_PATH = 260)
+            if len(storage_path) > 200:  # Leave room for base path
+                logger.warning(f"Storage path too long ({len(storage_path)} chars), using hash")
+                import hashlib
+                file_hash = hashlib.md5(file_name.encode()).hexdigest()[:16]
+                ext = os.path.splitext(file_name)[1]
+                storage_path = f"order_media/{user_id}_{file_hash}{ext}"
+            
+            file_path = default_storage.save(storage_path, file_content)
 
             logger.debug(f" File saved to: {file_path}")
 
@@ -4464,15 +4493,16 @@ def handle_file_upload(message):
             if "files" not in current_data:
                 current_data["files"] = {}
 
-            # Generate unique file ID using timestamp and file_id
-            file_uid = f"{int(time.time() * 1000)}_{file_id[:8]}"
+            # Generate unique file ID using timestamp
+            file_uid = f"{int(time.time() * 1000)}"
 
-            # Add new file to files dict
+            # Add new file to files dict with telegram_file_id for later use
             current_data["files"][file_uid] = {
                 "file_path": file_path,
                 "file_name": file_name,
                 "pages": pages,
                 "file_size": file_size,
+                "telegram_file_id": file_id,  # Store for sending back to admins
             }
             
             # Reassign to trigger save to persistent storage
@@ -5266,10 +5296,11 @@ def handle_finish_upload_message(message, language):
                     logger.warning(f"File path too long: {file_path}")
                     file_path = file_path[:90]
                 
-                # Create OrderMedia entry
+                # Create OrderMedia entry with telegram_file_id
                 order_file = OrderMedia.objects.create(
                     file=file_path, 
-                    pages=file_info["pages"]
+                    pages=file_info["pages"],
+                    telegram_file_id=file_info.get("telegram_file_id")  # Store for quick access
                 )
                 order.files.add(order_file)
                 total_pages += file_info["pages"]
