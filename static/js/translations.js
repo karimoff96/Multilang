@@ -5771,18 +5771,29 @@ const translations = {
 
 // Language management
 const LanguageManager = {
-    currentLang: localStorage.getItem('dashboardLanguage') || 'en',
+    currentLang: localStorage.getItem('dashboardLanguage') || 'uz',
 
     init() {
-        this.setLanguage(this.currentLang);
+        // Set Django cookie without reload during init
+        document.cookie = `django_language=${this.currentLang}; path=/; max-age=31536000; SameSite=Lax`;
+        this.translatePage();
         this.updateLanguageIndicator();
     },
 
     setLanguage(lang) {
+        // Only reload if language is actually changing
+        if (lang === this.currentLang) {
+            return;
+        }
+        
         this.currentLang = lang;
         localStorage.setItem('dashboardLanguage', lang);
-        this.translatePage();
-        this.updateLanguageIndicator();
+        
+        // Set Django language cookie for backend translation
+        document.cookie = `django_language=${lang}; path=/; max-age=31536000; SameSite=Lax`;
+        
+        // Reload page to apply backend translations
+        window.location.reload();
     },
 
     translate(key) {

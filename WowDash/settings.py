@@ -202,6 +202,7 @@ else:
     }
     SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
+# Modeltranslation settings
 MODELTRANSLATION_DEFAULT_LANGUAGE = "uz"
 MODELTRANSLATION_LANGUAGES = ("uz", "ru", "en")
 MODELTRANSLATION_TRANSLATION_FILES = (
@@ -209,6 +210,11 @@ MODELTRANSLATION_TRANSLATION_FILES = (
     "core.translations",
     "services.translations",
 )
+MODELTRANSLATION_FALLBACK_LANGUAGES = ("uz", "ru", "en")
+MODELTRANSLATION_PREPOPULATE_LANGUAGE = "uz"
+# Auto-populate translation fields when language changes
+MODELTRANSLATION_AUTO_POPULATE = False
+
 STATIC_URL = "static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles/")
