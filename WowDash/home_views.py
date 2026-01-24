@@ -411,12 +411,12 @@ def sales(request):
         colors = []
         for status, count in status_counts.items():
             if count > 0:
-                labels.append(STATUS_LABELS[status])
+                labels.append(str(STATUS_LABELS[status]))  # Convert translation proxy to string
                 values.append(count)
                 colors.append(STATUS_COLORS[status])
         # If no data, add a placeholder
         if not values:
-            labels = [_("No Orders")]
+            labels = [str(_("No Orders"))]  # Convert translation proxy to string
             values = [1]
             colors = ["#E4F1FF"]
         return {"labels": labels, "values": values, "colors": colors}
@@ -664,7 +664,7 @@ def sales(request):
                 "product": order.product.name if order.product else "Unknown",
                 "total_price": float(order.total_price or 0),
                 "status": order.status,
-                "status_display": STATUS_LABELS.get(order.status, order.status),
+                "status_display": str(STATUS_LABELS.get(order.status, order.status)),  # Convert translation proxy to string
                 "created_at": order.created_at.strftime("%d %b %Y, %H:%M"),
                 "branch": order.branch.name if order.branch else None,
                 "branch_id": order.branch.id if order.branch else None,
@@ -742,24 +742,50 @@ def sales(request):
         "yearly_revenue": yearly_revenue,
         "yearly_change": yearly_change,
         "yearly_daily_avg": round(daily_avg_yearly, 2),
-        # Chart data for each period (JSON for JS)
-        "yearly_chart_data": json.dumps(yearly_chart_data),
-        "yearly_chart_labels": json.dumps(yearly_chart_labels),
-        "monthly_chart_data": json.dumps(monthly_chart_data),
-        "monthly_chart_labels": json.dumps(monthly_chart_labels),
-        "weekly_chart_data": json.dumps(weekly_chart_data),
-        "weekly_chart_labels": json.dumps(weekly_chart_labels),
-        "today_chart_data": json.dumps(today_chart_data),
-        "today_chart_labels": json.dumps(today_chart_labels),
-        # Order status chart data (JSON for JS)
-        "status_chart_data": json.dumps(status_chart_data),
-        # Top agencies and customers data (JSON for JS)
-        "top_agencies_data": json.dumps(top_agencies_data),
-        "top_customers_data": json.dumps(top_customers_data),
+        # Orders data for all periods (complete object for JS)
+        "orders_data": {
+            "today": {
+                "count": today_count,
+                "revenue": today_revenue,
+                "change": today_change,
+                "dailyAvg": float(today_revenue),
+                "chartData": today_chart_data,
+                "chartLabels": today_chart_labels,
+            },
+            "weekly": {
+                "count": weekly_count,
+                "revenue": weekly_revenue,
+                "change": weekly_change,
+                "dailyAvg": round(daily_avg_weekly, 2),
+                "chartData": weekly_chart_data,
+                "chartLabels": weekly_chart_labels,
+            },
+            "monthly": {
+                "count": monthly_count,
+                "revenue": monthly_revenue,
+                "change": monthly_change,
+                "dailyAvg": round(daily_avg_monthly, 2),
+                "chartData": monthly_chart_data,
+                "chartLabels": monthly_chart_labels,
+            },
+            "yearly": {
+                "count": yearly_count,
+                "revenue": yearly_revenue,
+                "change": yearly_change,
+                "dailyAvg": round(daily_avg_yearly, 2),
+                "chartData": yearly_chart_data,
+                "chartLabels": yearly_chart_labels,
+            },
+        },
+        # Order status chart data
+        "status_chart_data": status_chart_data,
+        # Top agencies and customers data
+        "top_agencies_data": top_agencies_data,
+        "top_customers_data": top_customers_data,
         # Recent orders
         "recent_orders": recent_orders_data,
         # Completion rates
-        "completion_rates": json.dumps(completion_rates),
+        "completion_rates": completion_rates,
     }
     return render(request, "sales.html", context)
 

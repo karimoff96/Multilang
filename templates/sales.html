@@ -1,4 +1,6 @@
 ﻿{% extends './layout/layout.html' %} 
+{% load i18n %}
+{% load static %}
 
 {% block content %}
 <!-- Filter Bar -->
@@ -292,6 +294,12 @@
 {% endblock content %}
 
 {% block script %}
+{{ orders_data|json_script:"orders-data" }}
+{{ status_chart_data|json_script:"status-chart-data" }}
+{{ top_agencies_data|json_script:"top-agencies-data" }}
+{{ top_customers_data|json_script:"top-customers-data" }}
+{{ completion_rates|json_script:"completion-rates-data" }}
+
 <script>
 // Main period filter toggle for custom date range
 const mainPeriodSelect = document.getElementById('mainPeriodSelect');
@@ -309,25 +317,24 @@ if (mainPeriodSelect && customDateRange) {
     });
 }
 
-const ordersData = {
-    today: { count: {{ today_count }}, revenue: {{ today_revenue }}, change: {{ today_change }}, dailyAvg: {{ today_daily_avg }}, chartData: {{ today_chart_data|safe }}, chartLabels: {{ today_chart_labels|safe }} },
-    weekly: { count: {{ weekly_count }}, revenue: {{ weekly_revenue }}, change: {{ weekly_change }}, dailyAvg: {{ weekly_daily_avg }}, chartData: {{ weekly_chart_data|safe }}, chartLabels: {{ weekly_chart_labels|safe }} },
-    monthly: { count: {{ monthly_count }}, revenue: {{ monthly_revenue }}, change: {{ monthly_change }}, dailyAvg: {{ monthly_daily_avg }}, chartData: {{ monthly_chart_data|safe }}, chartLabels: {{ monthly_chart_labels|safe }} },
-    yearly: { count: {{ yearly_count }}, revenue: {{ yearly_revenue }}, change: {{ yearly_change }}, dailyAvg: {{ yearly_daily_avg }}, chartData: {{ yearly_chart_data|safe }}, chartLabels: {{ yearly_chart_labels|safe }} }
-};
-const statusChartData = {{ status_chart_data|safe }};
-const topAgenciesData = {{ top_agencies_data|safe }};
-const topCustomersData = {{ top_customers_data|safe }};
-const completionRatesData = {{ completion_rates|safe }};
+const ordersData = JSON.parse(document.getElementById('orders-data').textContent);
+const statusChartData = JSON.parse(document.getElementById('status-chart-data').textContent);
+const topAgenciesData = JSON.parse(document.getElementById('top-agencies-data').textContent);
+const topCustomersData = JSON.parse(document.getElementById('top-customers-data').textContent);
+const completionRatesData = JSON.parse(document.getElementById('completion-rates-data').textContent);
 
 // Debug: Log the data to console
 console.log('=== SALES PAGE DEBUG ===');
+console.log('ordersData:', ordersData);
+console.log('statusChartData:', statusChartData);
 console.log('Top Agencies Data:', topAgenciesData);
 console.log('Top Customers Data:', topCustomersData);
+console.log('completionRatesData:', completionRatesData);
 console.log('Top Agencies (yearly):', topAgenciesData?.yearly);
 console.log('Top Customers (yearly):', topCustomersData?.yearly);
 console.log('Type of topAgenciesData:', typeof topAgenciesData);
 console.log('Type of topCustomersData:', typeof topCustomersData);
+console.log('completionRatesData (yearly):', completionRatesData?.yearly);
 
 // Show alert if no data
 if (!topAgenciesData || !topAgenciesData.yearly || topAgenciesData.yearly.length === 0) {
@@ -336,9 +343,20 @@ if (!topAgenciesData || !topAgenciesData.yearly || topAgenciesData.yearly.length
 if (!topCustomersData || !topCustomersData.yearly || topCustomersData.yearly.length === 0) {
     console.warn('WARNING: No customers data for yearly period!');
 }
+if (!completionRatesData || !completionRatesData.yearly) {
+    console.error('ERROR: No completion rates data for yearly period!');
+}
 
-function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+function formatNumber(num) { 
+    if (window.NumberFormat && typeof window.NumberFormat.formatWithSeparators === 'function') {
+        return window.NumberFormat.formatWithSeparators(num);
+    }
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "); 
+}
 function formatShort(num) {
+    if (window.NumberFormat && typeof window.NumberFormat.shorten === 'function') {
+        return window.NumberFormat.shorten(num);
+    }
     num = parseFloat(num) || 0;
     if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B';
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -352,15 +370,25 @@ function getThemeColors() {
 
 // Update stat cards
 function updateStatCards(period) {
+    console.log('updateStatCards called with period:', period);
     const data = ordersData[period];
     const completion = completionRatesData[period];
+    
+    console.log('Data for period:', data);
+    console.log('Completion for period:', completion);
+    
+    if (!data || !completion) {
+        console.error('Missing data or completion for period:', period);
+        return;
+    }
+    
     document.getElementById('totalOrdersCard').textContent = formatNumber(data.count);
-    document.getElementById('totalRevenueCard').innerHTML = formatNumber(data.revenue) + ' <small class="text-xs fw-normal">UZS</small>';
+    document.getElementById('totalRevenueCard').innerHTML = formatShort(data.revenue) + ' <small class="text-xs fw-normal">UZS</small>';
     document.getElementById('completedCard').textContent = formatNumber(completion.completed);
     document.getElementById('cancelledCard').textContent = formatNumber(completion.cancelled);
     document.getElementById('completionRateCard').textContent = completion.rate + '%';
     const badge = document.getElementById('ordersChangeBadge');
-    badge.innerHTML = '<iconify-icon icon="bxs:' + (data.change >= 0 ? 'up' : 'down') + '-arrow" class="text-xs"></iconify-icon> ' + data.change + '%';
+    badge.innerHTML = '<iconify-icon icon="bxs:' + (data.change >= 0 ? 'up' : 'down') + '-arrow" class="text-xs"></iconify-icon> ' + Math.abs(data.change) + '%';
     badge.className = data.change >= 0 ? 'bg-success-focus px-1 rounded-2 fw-medium text-success-main text-sm' : 'bg-danger-focus px-1 rounded-2 fw-medium text-danger-main text-sm';
 }
 
@@ -508,26 +536,60 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('=== DOM CONTENT LOADED ===');
     console.log('Initializing sales page...');
     
+    // Initialize charts first
     initOrdersChart();
     initStatusDonutChart();
+    
+    // Update stat cards with yearly data
+    console.log('Updating stat cards...');
     updateStatCards('yearly');
     
+    // Update tables with initial data
     console.log('Calling updateAgenciesTable(yearly)...');
     updateAgenciesTable('yearly');
     
     console.log('Calling updateCustomersTable(yearly)...');
     updateCustomersTable('yearly');
     
+    // Set up event listeners
     console.log('Setting up event listeners...');
-    document.getElementById('ordersPeriodSelect').addEventListener('change', function(e) {
-        const period = e.target.value;
-        updateStatCards(period);
-        updateOrdersChart(period);
-    });
     
-    document.getElementById('statusPeriodSelect').addEventListener('change', e => updateStatusChart(e.target.value));
-    document.getElementById('agenciesPeriodSelect').addEventListener('change', e => updateAgenciesTable(e.target.value));
-    document.getElementById('customersPeriodSelect').addEventListener('change', e => updateCustomersTable(e.target.value));
+    const ordersPeriodSelect = document.getElementById('ordersPeriodSelect');
+    if (ordersPeriodSelect) {
+        ordersPeriodSelect.addEventListener('change', function(e) {
+            const period = e.target.value;
+            console.log('Orders period changed to:', period);
+            updateStatCards(period);
+            updateOrdersChart(period);
+        });
+    }
+    
+    const statusPeriodSelect = document.getElementById('statusPeriodSelect');
+    if (statusPeriodSelect) {
+        statusPeriodSelect.addEventListener('change', function(e) {
+            const period = e.target.value;
+            console.log('Status period changed to:', period);
+            updateStatusChart(period);
+        });
+    }
+    
+    const agenciesPeriodSelect = document.getElementById('agenciesPeriodSelect');
+    if (agenciesPeriodSelect) {
+        agenciesPeriodSelect.addEventListener('change', function(e) {
+            const period = e.target.value;
+            console.log('Agencies period changed to:', period);
+            updateAgenciesTable(period);
+        });
+    }
+    
+    const customersPeriodSelect = document.getElementById('customersPeriodSelect');
+    if (customersPeriodSelect) {
+        customersPeriodSelect.addEventListener('change', function(e) {
+            const period = e.target.value;
+            console.log('Customers period changed to:', period);
+            updateCustomersTable(period);
+        });
+    }
     
     console.log('=== SALES PAGE INITIALIZATION COMPLETE ===');
 });

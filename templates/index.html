@@ -1,5 +1,6 @@
 {% extends './layout/layout.html' %} 
 {% load i18n %}
+{% load number_filters %}
 
 {% block content %}
 <div class="row gy-4">
@@ -45,16 +46,16 @@
                                 </span>
                                 <div>
                                     <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="dashboard.todaysRevenue">{% trans "Today's Revenue" %}</span>
-                                    <h6 class="fw-semibold gradient-card-text">{{ today_revenue|floatformat:0 }} <small class="text-xs fw-normal gradient-card-text">UZS</small></h6>
+                                    <h6 class="fw-semibold gradient-card-text">{{ today_revenue|short_number }} <small class="text-xs fw-normal gradient-card-text">UZS</small></h6>
                                 </div>
                             </div>
                             <div id="revenueSparkline" class="remove-tooltip-title rounded-tooltip-value"></div>
                         </div>
                         <p class="text-sm mb-0">
                             {% if revenue_change >= 0 %}
-                            <span class="bg-success-focus px-1 rounded-2 fw-medium text-success-main text-sm">+{{ revenue_change|floatformat:0 }}</span>
+                            <span class="bg-success-focus px-1 rounded-2 fw-medium text-success-main text-sm">+{{ revenue_change|short_number }}</span>
                             {% else %}
-                            <span class="bg-danger-focus px-1 rounded-2 fw-medium text-danger-main text-sm">{{ revenue_change|floatformat:0 }}</span>
+                            <span class="bg-danger-focus px-1 rounded-2 fw-medium text-danger-main text-sm">{{ revenue_change|short_number }}</span>
                             {% endif %}
                             <span data-i18n="dashboard.vsYesterday">{% trans "vs yesterday" %}</span>
                         </p>
@@ -556,7 +557,7 @@
                                     <span class="text-secondary-light">-</span>
                                     {% endif %}
                                 </td>
-                                <td class="text-end fw-semibold">{{ order.total_price|floatformat:0 }} <small class="text-xs fw-normal text-secondary-light">UZS</small></td>
+                                <td class="text-end fw-semibold">{{ order.total_price|format_number }} <small class="text-xs fw-normal text-secondary-light">UZS</small></td>
                                 <td>
                                     {% if order.payment_method == 'cash' %}
                                     <span class="badge bg-success-100 text-success-600"><iconify-icon icon="solar:wallet-bold" class="me-1"></iconify-icon>Cash</span>

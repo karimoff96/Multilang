@@ -57,11 +57,11 @@ def get_item(dictionary, key):
 @register.filter
 def short_number(value):
     """
-    Convert large numbers to shortened format (K, M, B)
+    Convert large numbers to shortened format (K, M)
     Examples:
         1234 -> 1.2K
         1234567 -> 1.2M
-        1234567890 -> 1.2B
+        1234567890 -> 1235M
     """
     if value is None:
         return "0"
@@ -73,12 +73,20 @@ def short_number(value):
     except (TypeError, ValueError, InvalidOperation):
         return "0"
 
-    if value >= 1_000_000_000:
-        return f"{value / 1_000_000_000:.1f}B"
-    elif value >= 1_000_000:
-        return f"{value / 1_000_000:.1f}M"
+    if value >= 1_000_000:
+        # Format millions: 1234567 -> 1.2M or 1234000 -> 1M
+        result = value / 1_000_000
+        if result >= 10:
+            return f"{result:.0f}M"
+        else:
+            return f"{result:.1f}M".rstrip('0').rstrip('.')
     elif value >= 1_000:
-        return f"{value / 1_000:.1f}K"
+        # Format thousands: 1234 -> 1.2K or 1000 -> 1K
+        result = value / 1_000
+        if result >= 10:
+            return f"{result:.0f}K"
+        else:
+            return f"{result:.1f}K".rstrip('0').rstrip('.')
     else:
         return f"{value:.0f}"
 
@@ -143,10 +151,10 @@ def percentage(value, total):
 @register.filter
 def format_number(value):
     """
-    Format number with thousand separators.
+    Format number with thousand separators using space.
     Examples:
-        1234 -> 1,234
-        1234567.89 -> 1,234,567.89
+        1234 -> 1 234
+        1234567.89 -> 1 234 567.89
     """
     if value is None:
         return "0"
@@ -157,7 +165,7 @@ def format_number(value):
         else:
             value = float(value)
         if value == int(value):
-            return f"{int(value):,}"
-        return f"{value:,.2f}"
+            return f"{int(value):,}".replace(',', ' ')
+        return f"{value:,.2f}".replace(',', ' ')
     except (TypeError, ValueError, InvalidOperation):
         return "0"

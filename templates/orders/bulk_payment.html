@@ -312,7 +312,7 @@
                             </thead>
                             <tbody>
                                 {% for debtor in top_10_debtors %}
-                                <tr class="debtor-row" style="cursor: pointer;" data-customer-id="{{ debtor.customer_id }}">
+                                <tr class="debtor-row" style="cursor: pointer;" data-customer-id="{{ debtor.id }}">
                                     <td class="text-muted">{{ forloop.counter }}</td>
                                     <td>
                                         <div class="d-flex align-items-center">
@@ -345,7 +345,7 @@
                                         <span class="badge bg-info">{{ debtor.order_count }}</span>
                                     </td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-primary select-debtor-btn" data-customer-id="{{ debtor.customer_id }}">
+                                        <button class="btn btn-sm btn-primary select-debtor-btn" data-customer-id="{{ debtor.id }}">
                                             <iconify-icon icon="solar:check-circle-bold" class="me-1"></iconify-icon>
                                             {% trans "Select" %}
                                         </button>
