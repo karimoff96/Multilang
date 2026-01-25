@@ -28,6 +28,7 @@ urlpatterns = [
     # Languages
     path("languages/", views.languageList, name="languageList"),
     path("languages/<int:language_id>/edit/", views.editLanguage, name="editLanguage"),
+    path("languages/<int:language_id>/delete/", views.deleteLanguage, name="deleteLanguage"),
     
     # AJAX Endpoints
     path("api/create-language/", views.createLanguageInline, name="createLanguageInline"),

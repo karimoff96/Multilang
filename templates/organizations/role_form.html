@@ -608,6 +608,60 @@
                                 </div>
                             </div>
                             
+                            <!-- Languages -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="permission-card border border-info-100">
+                                    <h6 class="text-sm fw-semibold text-info-main permission-section-header">
+                                        <iconify-icon icon="lucide:languages"></iconify-icon>
+                                        <span>Languages</span>
+                                    </h6>
+                                    
+                                    <!-- Master Permission -->
+                                    <div class="master-permission">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="can_manage_languages" id="can_manage_languages"
+                                                   {% if role.can_manage_languages %}checked{% endif %}>
+                                            <label class="form-check-label" for="can_manage_languages">
+                                                Full Language Management
+                                            </label>
+                                        </div>
+                                        <div class="perm-hint text-secondary-light">Overrides all language permissions</div>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_view_languages" id="can_view_languages"
+                                               {% if role.can_view_languages %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_view_languages">
+                                            View Languages
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_create_languages" id="can_create_languages"
+                                               {% if role.can_create_languages %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_create_languages">
+                                            Create Languages
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_edit_languages" id="can_edit_languages"
+                                               {% if role.can_edit_languages %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_edit_languages">
+                                            Edit Languages
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="can_delete_languages" id="can_delete_languages"
+                                               {% if role.can_delete_languages %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_delete_languages">
+                                            Delete Languages
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <!-- Customers -->
                             <div class="col-md-6 col-lg-4">
                                 <div class="permission-card border border-danger-100">

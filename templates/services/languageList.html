@@ -88,14 +88,27 @@
                                 <td class="text-end text-success-600">{{ language.ordinary_copy_price|format_number }}</td>
                                 <!-- Actions -->
                                 <td class="text-center">
-                                    {% can_do 'languages.edit' as can_edit_languages %}
-                                    {% if can_edit_languages %}
-                                    <a href="{% url 'editLanguage' language.id %}" class="btn btn-sm btn-outline-primary py-4 px-12">
-                                        <iconify-icon icon="mdi:pencil"></iconify-icon> Edit
-                                    </a>
-                                    {% else %}
-                                    <span class="text-secondary-light">-</span>
-                                    {% endif %}
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        {% can_do 'languages.edit' as can_edit_languages %}
+                                        {% if can_edit_languages %}
+                                        <a href="{% url 'editLanguage' language.id %}" class="btn btn-sm btn-outline-primary py-4 px-12">
+                                            <iconify-icon icon="mdi:pencil"></iconify-icon> Edit
+                                        </a>
+                                        {% endif %}
+                                        
+                                        {% can_do 'languages.delete' as can_delete_languages %}
+                                        {% if can_delete_languages %}
+                                        <button type="button" class="btn btn-sm btn-outline-danger py-4 px-12 delete-language-btn" 
+                                                data-language-id="{{ language.id }}" 
+                                                data-language-name="{{ language.name }}">
+                                            <iconify-icon icon="mdi:delete"></iconify-icon> Delete
+                                        </button>
+                                        {% endif %}
+                                        
+                                        {% if not can_edit_languages and not can_delete_languages %}
+                                        <span class="text-secondary-light">-</span>
+                                        {% endif %}
+                                    </div>
                                 </td>
                             </tr>
                             {% empty %}
@@ -327,6 +340,131 @@ document.addEventListener('DOMContentLoaded', function() {
         errorDiv.classList.add('d-none');
         saveBtn.disabled = false;
         saveBtn.innerHTML = '<iconify-icon icon="mdi:content-save" class="me-1"></iconify-icon> Create Language';
+    });
+});
+</script>
+{% endif %}
+
+<!-- Delete Language Confirmation Modal -->
+{% can_do 'languages.delete' as can_delete_languages %}
+{% if can_delete_languages %}
+<div class="modal fade" id="deleteLanguageModal" tabindex="-1" aria-labelledby="deleteLanguageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger-50">
+                <h5 class="modal-title text-danger-600" id="deleteLanguageModalLabel">
+                    <iconify-icon icon="mdi:alert-circle" class="me-2"></iconify-icon>
+                    Confirm Language Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning d-flex align-items-start">
+                    <iconify-icon icon="mdi:alert" class="me-2 mt-4" style="font-size: 24px;"></iconify-icon>
+                    <div>
+                        <strong>Warning:</strong> This action cannot be undone.
+                    </div>
+                </div>
+                <p class="mb-2">Are you sure you want to delete the language:</p>
+                <p class="fw-bold text-danger mb-3" id="deleteLanguageName"></p>
+                <p class="text-secondary-light mb-0">Note: This may affect existing orders and products that use this language.</p>
+                <div id="deleteLanguageError" class="alert alert-danger d-none mt-3"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary radius-8" data-bs-dismiss="modal">
+                    <iconify-icon icon="mdi:close" class="me-1"></iconify-icon>
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-danger radius-8" id="confirmDeleteLanguageBtn">
+                    <iconify-icon icon="mdi:delete" class="me-1"></iconify-icon>
+                    Delete Language
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteModal = document.getElementById('deleteLanguageModal');
+    if (!deleteModal) return;
+    
+    const deleteLanguageNameEl = document.getElementById('deleteLanguageName');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteLanguageBtn');
+    const errorDiv = document.getElementById('deleteLanguageError');
+    let currentLanguageId = null;
+    
+    // Handle delete button clicks
+    document.querySelectorAll('.delete-language-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            currentLanguageId = this.dataset.languageId;
+            const languageName = this.dataset.languageName;
+            
+            deleteLanguageNameEl.textContent = languageName;
+            errorDiv.classList.add('d-none');
+            
+            const modalInstance = new bootstrap.Modal(deleteModal);
+            modalInstance.show();
+        });
+    });
+    
+    // Handle confirm delete
+    confirmDeleteBtn.addEventListener('click', function() {
+        if (!currentLanguageId) return;
+        
+        // Disable button and show loading
+        confirmDeleteBtn.disabled = true;
+        confirmDeleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Deleting...';
+        errorDiv.classList.add('d-none');
+        
+        // Send AJAX request
+        fetch(`/services/languages/${currentLanguageId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Close modal
+                const modalInstance = bootstrap.Modal.getInstance(deleteModal);
+                modalInstance.hide();
+                
+                // Show success message
+                const successAlert = document.createElement('div');
+                successAlert.className = 'alert alert-success alert-dismissible fade show';
+                successAlert.innerHTML = `
+                    <iconify-icon icon="mdi:check-circle" class="me-2"></iconify-icon>
+                    ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.querySelector('.card-body').insertBefore(successAlert, document.querySelector('.card-body').firstChild);
+                
+                // Reload page to show updated list
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                errorDiv.textContent = data.error || 'An error occurred while deleting the language.';
+                errorDiv.classList.remove('d-none');
+                confirmDeleteBtn.disabled = false;
+                confirmDeleteBtn.innerHTML = '<iconify-icon icon="mdi:delete" class="me-1"></iconify-icon> Delete Language';
+            }
+        })
+        .catch(error => {
+            errorDiv.textContent = 'Network error. Please try again.';
+            errorDiv.classList.remove('d-none');
+            confirmDeleteBtn.disabled = false;
+            confirmDeleteBtn.innerHTML = '<iconify-icon icon="mdi:delete" class="me-1"></iconify-icon> Delete Language';
+        });
+    });
+    
+    // Reset when modal is closed
+    deleteModal.addEventListener('hidden.bs.modal', function () {
+        currentLanguageId = null;
+        errorDiv.classList.add('d-none');
+        confirmDeleteBtn.disabled = false;
+        confirmDeleteBtn.innerHTML = '<iconify-icon icon="mdi:delete" class="me-1"></iconify-icon> Delete Language';
     });
 });
 </script>

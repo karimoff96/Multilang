@@ -60,6 +60,8 @@ def rbac_context(request):
         'can_view_financial_reports': False,
         'can_apply_discounts': False,
         'can_refund_orders': False,
+        'can_manage_bulk_payments': False,
+        'can_assign_bulk_payment_permission': False,
         # Reports & Analytics
         'can_manage_reports': False,
         'can_view_reports': False,
@@ -77,9 +79,16 @@ def rbac_context(request):
         'can_create_expenses': False,
         'can_edit_expenses': False,
         'can_delete_expenses': False,
+        # Languages
+        'can_manage_languages': False,
+        'can_view_languages': False,
+        'can_create_languages': False,
+        'can_edit_languages': False,
+        'can_delete_languages': False,
         # Customers
         'can_manage_customers': False,
         'can_view_customers': False,
+        'can_create_customers': False,
         'can_edit_customers': False,
         'can_delete_customers': False,
         # Marketing & Broadcasts
@@ -97,6 +106,11 @@ def rbac_context(request):
         'can_create_agencies': False,
         'can_edit_agencies': False,
         'can_delete_agencies': False,
+        # Audit Logs
+        'can_manage_audit_logs': False,
+        'can_view_audit_logs': False,
+        'can_export_audit_logs': False,
+        'can_grant_audit_permissions': False,
     }
     
     context = {

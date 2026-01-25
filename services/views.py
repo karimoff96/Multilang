@@ -1166,3 +1166,42 @@ def editLanguage(request, language_id):
         "language": language,
     }
     return render(request, "services/editLanguage.html", context)
+
+
+@login_required(login_url='admin_login')
+@any_permission_required('can_delete_languages', 'can_manage_languages')
+@require_POST
+def deleteLanguage(request, language_id):
+    """Delete a language via AJAX"""
+    import json
+    
+    try:
+        language = get_object_or_404(Language, id=language_id)
+        language_name = language.name
+        
+        # Check if language is being used in any orders
+        from orders.models import Order
+        orders_using_language = Order.objects.filter(
+            language_pairs__language=language
+        ).count()
+        
+        if orders_using_language > 0:
+            return JsonResponse({
+                'success': False,
+                'error': f'Cannot delete "{language_name}". It is currently used in {orders_using_language} order(s).'
+            }, status=400)
+        
+        # Delete the language
+        language.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Language "{language_name}" has been deleted successfully.'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error deleting language {language_id}: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Error deleting language: {str(e)}'
+        }, status=500)

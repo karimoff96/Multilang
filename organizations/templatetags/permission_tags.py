@@ -107,6 +107,7 @@ PERMISSION_ACTIONS = {
     'languages.view': ['can_manage_languages', 'can_view_languages'],
     'languages.create': ['can_manage_languages', 'can_create_languages'],
     'languages.edit': ['can_manage_languages', 'can_edit_languages'],
+    'languages.delete': ['can_manage_languages', 'can_delete_languages'],
     
     # Customers
     'customers.manage': ['can_manage_customers'],

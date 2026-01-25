@@ -268,6 +268,7 @@ class Role(models.Model):
     can_view_languages = models.BooleanField(_("Can view languages"), default=False)
     can_create_languages = models.BooleanField(_("Can create languages"), default=False)
     can_edit_languages = models.BooleanField(_("Can edit languages"), default=False)
+    can_delete_languages = models.BooleanField(_("Can delete languages"), default=False)
     
     can_manage_customers = models.BooleanField(_("Can manage customers (full access)"), default=False,
         help_text=_("Full customer management - overrides other customer permissions"))
@@ -618,6 +619,18 @@ class Role(models.Model):
                     "can_delete_expenses",
                 ],
             },
+            "languages": {
+                "title": _("Languages"),
+                "icon": "fa-language",
+                "color": "info",
+                "permissions": [
+                    "can_manage_languages",
+                    "can_view_languages",
+                    "can_create_languages",
+                    "can_edit_languages",
+                    "can_delete_languages",
+                ],
+            },
             "customers": {
                 "title": _("Customers"),
                 "icon": "fa-user-group",
@@ -725,6 +738,7 @@ class Role(models.Model):
             "can_view_languages": _("View Languages"),
             "can_create_languages": _("Create Languages"),
             "can_edit_languages": _("Edit Languages"),
+            "can_delete_languages": _("Delete Languages"),
             # Customers
             "can_manage_customers": _("Full Customer Management"),
             "can_view_customers": _("View Customers"),
@@ -808,6 +822,7 @@ class Role(models.Model):
             "can_view_languages": _("View language list and pricing"),
             "can_create_languages": _("Add new languages with pricing"),
             "can_edit_languages": _("Edit language names and pricing"),
+            "can_delete_languages": _("Remove languages from the system"),
             # Customers
             "can_manage_customers": _("Full control over all customer operations - overrides individual permissions"),
             "can_view_customers": _("View customer information and history"),
@@ -1206,6 +1221,7 @@ class AdminUser(models.Model):
             'can_view_languages': ['can_manage_languages'],
             'can_create_languages': ['can_manage_languages'],
             'can_edit_languages': ['can_manage_languages'],
+            'can_delete_languages': ['can_manage_languages'],
             # Staff Management
             'can_view_staff': ['can_manage_staff'],
             'can_create_staff': ['can_manage_staff'],
