@@ -270,6 +270,31 @@ const translations = {
         ru: 'Просмотр',
         en: 'View'
     },
+    'common.apply': {
+        uz: 'Qo\'llash',
+        ru: 'Применить',
+        en: 'Apply'
+    },
+    'common.deleteSelected': {
+        uz: 'Tanlanganlarni o\'chirish',
+        ru: 'Удалить выбранные',
+        en: 'Delete selected'
+    },
+    'common.selectAction': {
+        uz: 'Amalni tanlang',
+        ru: 'Выберите действие',
+        en: 'Please select an action'
+    },
+    'common.searching': {
+        uz: 'Qidirilmoqda...',
+        ru: 'Поиск...',
+        en: 'Searching...'
+    },
+    'common.optional': {
+        uz: 'Ixtiyoriy',
+        ru: 'Необязательно',
+        en: 'Optional'
+    },
     'common.save': {
         uz: 'Saqlash',
         ru: 'Сохранить',
@@ -1859,21 +1884,51 @@ const translations = {
         ru: 'Заменить',
         en: 'Replace'
     },
-    'form.currentMedia': {
-        uz: 'Joriy fayl',
-        ru: 'Текущий файл',
-        en: 'Current Media'
-    },
-    'form.uploadMedia': {
-        uz: 'Fayl yuklash',
-        ru: 'Загрузить файл',
-        en: 'Upload Media'
-    },
-    'form.title': {
-        uz: 'Sarlavha',
-        ru: 'Заголовок',
-        en: 'Title'
-    },
+        'form.b2cOrdersChannelHint': {
+            uz: 'Jismoniy shaxslar (non-agency) buyurtmalari shu kanalga yuboriladi',
+            ru: 'Заказы от физических лиц (non-agency) будут отправляться в этот канал',
+            en: 'Orders from individual customers (non-agency) will be sent here'
+        },
+        'form.b2bOrdersChannel': {
+            uz: 'B2B buyurtmalar kanali ID',
+            ru: 'ID канала B2B заказов',
+            en: 'B2B Orders Channel ID'
+        },
+        'form.b2cOrdersChannel': {
+            uz: 'B2C buyurtmalar kanali ID',
+            ru: 'ID канала B2C заказов',
+            en: 'B2C Orders Channel ID'
+        },
+        'form.b2bOrdersChannelHint': {
+            uz: 'Agentlik (is_agency=True) buyurtmalari shu kanalga yuboriladi',
+            ru: 'Заказы от агентств (is_agency=True) будут отправляться в этот канал',
+            en: 'Orders from agencies (is_agency=True) will be sent here'
+        },
+        'form.channelIdPlaceholder': {
+            uz: 'Telegram kanal ID (masalan, -1001234567890)',
+            ru: 'ID Telegram-канала (например, -1001234567890)',
+            en: 'Enter Telegram channel ID (e.g., -1001234567890)'
+        },
+        'form.showPricelist': {
+            uz: 'Botda narxlar ro‘yxatini ko‘rsatish',
+            ru: 'Показывать прайс-лист в боте',
+            en: 'Show Price List in Bot'
+        },
+        'form.showPricelistHelp': {
+            uz: 'Ushbu filial foydalanuvchilari uchun bot menyusida narxlar tugmasi ko‘rsatiladi',
+            ru: 'Кнопка прайс-листа будет показана в меню бота для пользователей этого филиала',
+            en: 'Show price list button in bot menu for this branch’s users'
+        },
+        'form.enable': {
+            uz: 'Yoqish',
+            ru: 'Включить',
+            en: 'Enable'
+        },
+        'form.botSettingsTitle': {
+            uz: 'Telegram bot sozlamalari',
+            ru: 'Настройки Telegram-бота',
+            en: 'Telegram Bot Settings'
+        },
     'form.contentType': {
         uz: 'Kontent turi',
         ru: 'Тип контента',
@@ -2154,10 +2209,140 @@ const translations = {
     },
 
     // ========== STAFF/USERS ==========
+    'staff.listTitle': {
+        uz: 'Xodimlarni boshqarish',
+        ru: 'Управление персоналом',
+        en: 'Staff Management'
+    },
+    'staff.listSubtitle': {
+        uz: 'Xodimlaringizni boshqaring',
+        ru: 'Управляйте сотрудниками',
+        en: 'Manage Staff Members'
+    },
+    'staff.createTitle': {
+        uz: 'Xodim qo\'shish',
+        ru: 'Добавить сотрудника',
+        en: 'Add Staff'
+    },
+    'staff.createSubtitle': {
+        uz: 'Yangi xodim yarating',
+        ru: 'Создайте нового сотрудника',
+        en: 'Create New Staff Member'
+    },
+    'staff.editTitle': {
+        uz: 'Xodimni tahrirlash',
+        ru: 'Редактировать сотрудника',
+        en: 'Edit Staff'
+    },
+    'staff.editSubtitle': {
+        uz: 'Xodim ma\'lumotlarini yangilang',
+        ru: 'Обновите данные сотрудника',
+        en: 'Update staff details'
+    },
+    'staff.detailSubtitle': {
+        uz: 'Xodim tafsilotlari',
+        ru: 'Детали сотрудника',
+        en: 'Staff Details'
+    },
     'staff.staffMembers': {
         uz: 'Xodimlar',
         ru: 'Сотрудники',
         en: 'Staff Members'
+    },
+    'staff.profile': {
+        uz: 'Xodim profili',
+        ru: 'Профиль сотрудника',
+        en: 'Staff Profile'
+    },
+    'staff.role': {
+        uz: 'Rol',
+        ru: 'Роль',
+        en: 'Role'
+    },
+    'staff.email': {
+        uz: 'Email',
+        ru: 'Email',
+        en: 'Email'
+    },
+    'staff.phone': {
+        uz: 'Telefon',
+        ru: 'Телефон',
+        en: 'Phone'
+    },
+    'staff.branch': {
+        uz: 'Filial',
+        ru: 'Филиал',
+        en: 'Branch'
+    },
+    'staff.center': {
+        uz: 'Markaz',
+        ru: 'Центр',
+        en: 'Center'
+    },
+    'staff.joinedAt': {
+        uz: 'Qo\'shilgan sana',
+        ru: 'Дата присоединения',
+        en: 'Joined'
+    },
+    'staff.createdBy': {
+        uz: 'Kim tomonidan yaratilgan',
+        ru: 'Создан кем',
+        en: 'Created By'
+    },
+    'staff.permissions': {
+        uz: 'Rol ruxsatlari',
+        ru: 'Разрешения роли',
+        en: 'Role Permissions'
+    },
+    'staff.noPermissions': {
+        uz: 'Maxsus ruxsatlar yo\'q',
+        ru: 'Нет отдельных разрешений',
+        en: 'No specific permissions assigned'
+    },
+    'staff.assignedOrders': {
+        uz: 'Biriktirilgan buyurtmalar',
+        ru: 'Назначенные заказы',
+        en: 'Assigned Orders'
+    },
+    'staff.completedOrders': {
+        uz: 'Yaqinda yakunlangan',
+        ru: 'Недавно завершенные',
+        en: 'Recently Completed'
+    },
+    'staff.readOnlyMessage': {
+        uz: 'Siz bu profilni faqat o\'qish rejimida ko\'ryapsiz. Tahrir uchun administrator bilan bog\'laning.',
+        ru: 'Вы просматриваете этот профиль в режиме только для чтения. Обратитесь к администратору для доступа на редактирование.',
+        en: 'You are viewing this profile in read-only mode. Contact your administrator for edit access.'
+    },
+    'stats.totalAssigned': {
+        uz: 'Jami biriktirilgan',
+        ru: 'Всего назначено',
+        en: 'Total Assigned'
+    },
+    'stats.totalCompleted': {
+        uz: 'Yakunlangan buyurtmalar',
+        ru: 'Завершенные заказы',
+        en: 'Orders Completed'
+    },
+    'stats.paymentsCollected': {
+        uz: 'Qabul qilingan to\'lovlar (kassir)',
+        ru: 'Полученные платежи (кассир)',
+        en: 'Payments Collected (Cashier)'
+    },
+    'stats.revenueGenerated': {
+        uz: 'Olingan daromad',
+        ru: 'Полученная выручка',
+        en: 'Revenue Generated'
+    },
+    'stats.amountCollected': {
+        uz: 'Yig\'ilgan summa',
+        ru: 'Собранная сумма',
+        en: 'Amount Collected'
+    },
+    'stats.activeOrders': {
+        uz: 'Faol buyurtmalar',
+        ru: 'Активные заказы',
+        en: 'Active Orders'
     },
     'staff.totalOrders': {
         uz: 'Jami buyurtmalar',
@@ -2629,6 +2814,31 @@ const translations = {
         ru: 'Продукты не найдены',
         en: 'No products found'
     },
+    'common.noCompletedOrders': {
+        uz: 'Yakunlangan buyurtmalar yo\'q',
+        ru: 'Нет завершенных заказов',
+        en: 'No completed orders yet'
+    },
+    'common.activate': {
+        uz: 'Faollashtirish',
+        ru: 'Активировать',
+        en: 'Activate'
+    },
+    'common.deactivate': {
+        uz: 'Faolsizlantirish',
+        ru: 'Деактивировать',
+        en: 'Deactivate'
+    },
+    'common.thisMonth': {
+        uz: 'bu oy',
+        ru: 'в этом месяце',
+        en: 'this month'
+    },
+    'common.readOnlyMode': {
+        uz: 'Faqat o\'qish rejimi',
+        ru: 'Режим только для чтения',
+        en: 'Read-Only Mode'
+    },
     'common.viewAll': {
         uz: 'Hammasini ko\'rish',
         ru: 'Смотреть все',
@@ -2679,10 +2889,80 @@ const translations = {
         ru: 'Управляйте своими филиалами',
         en: 'Manage your branches'
     },
+    'branch.listTitle': {
+        uz: 'Filiallar',
+        ru: 'Филиалы',
+        en: 'Branches'
+    },
+    'branch.listSubtitle': {
+        uz: 'Filiallaringizni boshqaring',
+        ru: 'Управляйте своими филиалами',
+        en: 'Manage your branches'
+    },
+    'branch.createTitle': {
+        uz: 'Filial yaratish',
+        ru: 'Создать филиал',
+        en: 'Create Branch'
+    },
+    'branch.createSubtitle': {
+        uz: 'Yangi filial qo\'shish',
+        ru: 'Добавить новый филиал',
+        en: 'Add New Branch'
+    },
+    'branch.editTitle': {
+        uz: 'Filialni tahrirlash',
+        ru: 'Редактировать филиал',
+        en: 'Edit Branch'
+    },
+    'branch.editSubtitle': {
+        uz: 'Filial ma\'lumotlarini yangilang',
+        ru: 'Обновите данные филиала',
+        en: 'Update branch details'
+    },
+    'branch.detailSubtitle': {
+        uz: 'Filial tafsilotlari',
+        ru: 'Детали филиала',
+        en: 'Branch Details'
+    },
     'common.manageCenters': {
         uz: 'Tarjima markazlaringizni boshqaring',
         ru: 'Управляйте своими центрами перевода',
         en: 'Manage your translation centers'
+    },
+    'common.createCenterTitle': {
+        uz: 'Markaz yaratish',
+        ru: 'Создать центр',
+        en: 'Create Center'
+    },
+    'common.addNewTranslationCenter': {
+        uz: 'Yangi tarjima markazini qo\'shing',
+        ru: 'Добавьте новый центр перевода',
+        en: 'Add New Translation Center'
+    },
+    'common.editCenterTitle': {
+        uz: 'Markazni tahrirlash',
+        ru: 'Редактировать центр',
+        en: 'Edit Center'
+    },
+    'common.editTranslationCenter': {
+        uz: 'Tarjima markazini yangilang',
+        ru: 'Обновите центр перевода',
+        en: 'Update translation center'
+    },
+    'common.translationCenters': {
+        uz: 'Tarjima markazlari',
+        ru: 'Центры перевода',
+        en: 'Translation Centers'
+    },
+    'common.total': {
+        uz: 'jami',
+        ru: 'всего',
+        en: 'total'
+    },
+    'common.viewOnMap': {
+        uz: 'Xaritada ko\'rish',
+        ru: 'Посмотреть на карте',
+        en: 'View on Map'
     },
     'common.manageRoles': {
         uz: 'Platformangiz uchun rollar va ruxsatlarni boshqaring',
@@ -2764,6 +3044,91 @@ const translations = {
         ru: 'Справочник разрешений',
         en: 'Permission Reference'
     },
+    'common.owner': {
+        uz: 'Egasi',
+        ru: 'Владелец',
+        en: 'Owner'
+    },
+    'common.addBranch': {
+        uz: 'Filial qo\'shish',
+        ru: 'Добавить филиал',
+        en: 'Add Branch'
+    },
+    'common.mainBranch': {
+        uz: 'Asosiy filial',
+        ru: 'Главный филиал',
+        en: 'Main Branch'
+    },
+    'common.noBranchesYet': {
+        uz: 'Hali filiallar yo\'q',
+        ru: 'Пока нет филиалов',
+        en: 'No branches yet'
+    },
+    'common.noStaffMembers': {
+        uz: 'Xodimlar yo\'q',
+        ru: 'Нет сотрудников',
+        en: 'No staff members'
+    },
+    'common.noCategories': {
+        uz: 'Kategoriyalar yo\'q',
+        ru: 'Нет категорий',
+        en: 'No categories'
+    },
+    'common.noProducts': {
+        uz: 'Hali mahsulotlar yo\'q',
+        ru: 'Пока нет продуктов',
+        en: 'No products yet'
+    },
+    'common.noCustomersYet': {
+        uz: 'Hali mijozlar yo\'q',
+        ru: 'Пока нет клиентов',
+        en: 'No customers yet'
+    },
+    'common.noOrdersYet': {
+        uz: 'Hali buyurtmalar yo\'q',
+        ru: 'Пока нет заказов',
+        en: 'No orders yet'
+    },
+    'common.recentOrders': {
+        uz: 'So\'nggi buyurtmalar',
+        ru: 'Последние заказы',
+        en: 'Recent Orders'
+    },
+    'common.viewAll': {
+        uz: 'Hammasini ko\'rish',
+        ru: 'Посмотреть все',
+        en: 'View All'
+    },
+    'common.viewDetails': {
+        uz: 'Tafsilotlarni ko\'rish',
+        ru: 'Просмотреть детали',
+        en: 'View Details'
+    },
+    'customer.agency': {
+        uz: 'Agentlik',
+        ru: 'Агентство',
+        en: 'Agency'
+    },
+    'customer.regular': {
+        uz: 'Oddiy',
+        ru: 'Обычный',
+        en: 'Regular'
+    },
+    'common.edit': {
+        uz: 'Tahrirlash',
+        ru: 'Редактировать',
+        en: 'Edit'
+    },
+    'common.map': {
+        uz: 'Xarita',
+        ru: 'Карта',
+        en: 'Map'
+    },
+    'common.contactSuperuser': {
+        uz: 'Tarjima markazlarini yaratish uchun superyuzerga murojaat qiling',
+        ru: 'Обратитесь к суперпользователю для создания центров перевода',
+        en: 'Contact a superuser to create translation centers'
+    },
 
     // ========== TABLE HEADERS ==========
     'table.customer': {
@@ -2790,6 +3155,11 @@ const translations = {
         uz: 'Mahsulot',
         ru: 'Продукт',
         en: 'Product'
+    },
+    'table.completedAt': {
+        uz: 'Yakunlangan vaqti',
+        ru: 'Время завершения',
+        en: 'Completed At'
     },
     'table.date': {
         uz: 'Sana',
@@ -2871,6 +3241,26 @@ const translations = {
         ru: 'Разрешения',
         en: 'Permissions'
     },
+    'table.name': {
+        uz: 'Ism',
+        ru: 'Имя',
+        en: 'Name'
+    },
+    'table.role': {
+        uz: 'Rol',
+        ru: 'Роль',
+        en: 'Role'
+    },
+    'table.category': {
+        uz: 'Kategoriya',
+        ru: 'Категория',
+        en: 'Category'
+    },
+    'table.regularPrice': {
+        uz: 'Oddiy narx',
+        ru: 'Обычная цена',
+        en: 'Regular Price'
+    },
 
     // ========== STATUS ==========
     'status.pending': {
@@ -2949,6 +3339,153 @@ const translations = {
         uz: 'Xodim',
         ru: 'Сотрудник',
         en: 'Staff'
+    },
+
+    // ========== ROLE PAGES ==========
+    'role.listTitle': {
+        uz: 'Rollar boshqaruvi',
+        ru: 'Управление ролями',
+        en: 'Role Management'
+    },
+    'role.listSubtitle': {
+        uz: 'Rollar va ruxsatlarni boshqaring',
+        ru: 'Управляйте ролями и разрешениями',
+        en: 'Manage roles and permissions'
+    },
+    'role.createTitle': {
+        uz: 'Rol yaratish',
+        ru: 'Создать роль',
+        en: 'Create Role'
+    },
+    'role.createSubtitle': {
+        uz: 'Yangi rol yarating va ruxsatlarni belgilang',
+        ru: 'Создайте роль и назначьте разрешения',
+        en: 'Create a role and assign permissions'
+    },
+    'role.editTitle': {
+        uz: 'Rolni tahrirlash',
+        ru: 'Редактировать роль',
+        en: 'Edit Role'
+    },
+    'role.editSubtitle': {
+        uz: 'Rol sozlamalarini yangilang',
+        ru: 'Обновите настройки роли',
+        en: 'Update role settings'
+    },
+    'role.systemDeleteBlocked': {
+        uz: 'Tizim rollarini o\'chirib bo\'lmaydi',
+        ru: 'Системные роли нельзя удалить',
+        en: 'System roles cannot be deleted'
+    },
+    'role.assignedDeleteBlocked': {
+        uz: 'O\'chirish mumkin emas - foydalanuvchilarga biriktirilgan',
+        ru: 'Нельзя удалить - есть назначенные пользователи',
+        en: 'Cannot delete - users are assigned'
+    },
+    'role.deleteConfirm': {
+        uz: 'Ushbu rolni o\'chirishni tasdiqlaysizmi?',
+        ru: 'Вы уверены, что хотите удалить эту роль?',
+        en: 'Are you sure you want to delete this role?'
+    },
+    'role.legend.organization': {
+        uz: 'Tashkilot',
+        ru: 'Организация',
+        en: 'Organization'
+    },
+    'role.legend.manageCenters': {
+        uz: '\u2022 Markazlarni boshqarish',
+        ru: '\u2022 Управление центрами',
+        en: '\u2022 Manage Centers'
+    },
+    'role.legend.manageBranches': {
+        uz: '\u2022 Filiallarni boshqarish',
+        ru: '\u2022 Управление филиалами',
+        en: '\u2022 Manage Branches'
+    },
+    'role.legend.staff': {
+        uz: 'Xodimlar',
+        ru: 'Персонал',
+        en: 'Staff'
+    },
+    'role.legend.manageStaff': {
+        uz: '\u2022 Xodimlarni boshqarish',
+        ru: '\u2022 Управление персоналом',
+        en: '\u2022 Manage Staff'
+    },
+    'role.legend.viewStaff': {
+        uz: '\u2022 Xodimlarni ko\'rish (faqat o\'qish)',
+        ru: '\u2022 Просмотр персонала (только чтение)',
+        en: '\u2022 View Staff (read-only)'
+    },
+    'role.legend.orders': {
+        uz: 'Buyurtmalar',
+        ru: 'Заказы',
+        en: 'Orders'
+    },
+    'role.legend.fullOrders': {
+        uz: '\u2022 To\'liq buyurtma boshqaruvi (master)',
+        ru: '\u2022 Полное управление заказами (master)',
+        en: '\u2022 Full order management (master)'
+    },
+    'role.legend.crudOrders': {
+        uz: '\u2022 Ko\'rish/Yaratish/Tahrirlash/O\'chirish',
+        ru: '\u2022 Просмотр/Создание/Редактирование/Удаление',
+        en: '\u2022 View/Create/Edit/Delete'
+    },
+    'role.legend.assignOrders': {
+        uz: '\u2022 Biriktirish/Status/Topshirish/Bekor qilish',
+        ru: '\u2022 Назначение/Статус/Завершение/Отмена',
+        en: '\u2022 Assign/Status/Complete/Cancel'
+    },
+    'role.legend.financial': {
+        uz: 'Moliya',
+        ru: 'Финансы',
+        en: 'Financial'
+    },
+    'role.legend.receivePayments': {
+        uz: '\u2022 To\'lovlarni qabul qilish',
+        ru: '\u2022 Прием платежей',
+        en: '\u2022 Receive Payments'
+    },
+    'role.legend.applyDiscounts': {
+        uz: '\u2022 Chegirmalar qo\'llash',
+        ru: '\u2022 Применение скидок',
+        en: '\u2022 Apply Discounts'
+    },
+    'role.legend.refundOrders': {
+        uz: '\u2022 Buyurtmalarni qaytarish',
+        ru: '\u2022 Возврат заказов',
+        en: '\u2022 Refund Orders'
+    },
+    'role.legend.reports': {
+        uz: 'Hisobotlar',
+        ru: 'Отчеты',
+        en: 'Reports'
+    },
+    'role.legend.viewReports': {
+        uz: '\u2022 Hisobot va tahlillarni ko\'rish',
+        ru: '\u2022 Просмотр отчетов и аналитики',
+        en: '\u2022 View reports and analytics'
+    },
+    'role.legend.exportData': {
+        uz: '\u2022 Ma\'lumotlarni eksport qilish (Excel/CSV)',
+        ru: '\u2022 Экспорт данных (Excel/CSV)',
+        en: '\u2022 Export data (Excel/CSV)'
+    },
+    'role.legend.products': {
+        uz: 'Mahsulotlar va mijozlar',
+        ru: 'Продукты и клиенты',
+        en: 'Products & Customers'
+    },
+    'role.legend.manageProducts': {
+        uz: '\u2022 Mahsulotlar va xizmatlarni boshqarish',
+        ru: '\u2022 Управление продуктами и услугами',
+        en: '\u2022 Manage products and services'
+    },
+    'role.legend.manageCustomers': {
+        uz: '\u2022 Mijozlarni boshqarish',
+        ru: '\u2022 Управление клиентами',
+        en: '\u2022 Manage customers'
     },
 
     // ========== PERMISSIONS ==========
@@ -3124,6 +3661,26 @@ const translations = {
         ru: 'Информация о филиале',
         en: 'Branch Information'
     },
+    'form.rolePermissions': {
+        uz: 'Rol ruxsatlari',
+        ru: 'Разрешения роли',
+        en: 'Role Permissions'
+    },
+    'form.permissionsHelp': {
+        uz: 'Tanlangan rol ushbu foydalanuvchiga quyidagi ruxsatlarni beradi:',
+        ru: 'Выбранная роль дает этому пользователю следующие разрешения:',
+        en: 'The selected role grants the following permissions to this user:'
+    },
+    'form.selectRoleFirst': {
+        uz: 'Ruxsatlarni ko\'rish uchun avval rolni tanlang',
+        ru: 'Выберите роль, чтобы увидеть ее разрешения',
+        en: 'Select a role to view its permissions'
+    },
+    'form.roleHelp': {
+        uz: 'Quyidagi ruxsatlarni ko\'rish uchun rolni tanlang',
+        ru: 'Выберите роль, чтобы увидеть соответствующие разрешения ниже',
+        en: 'Select a role to see its permissions below'
+    },
     'form.locationUrl': {
         uz: 'Joylashuv havolasi',
         ru: 'Ссылка на местоположение',
@@ -3223,6 +3780,251 @@ const translations = {
         uz: 'Markaz nomini kiriting',
         ru: 'Введите название центра',
         en: 'Enter center name'
+    },
+    'form.centerInfo': {
+        uz: 'Markaz ma\'lumotlari',
+        ru: 'Информация о центре',
+        en: 'Center Information'
+    },
+    'form.subdomain': {
+        uz: 'Subdomen',
+        ru: 'Поддомен',
+        en: 'Subdomain'
+    },
+    'form.exampleSubdomain': {
+        uz: 'masalan, kompaniya',
+        ru: 'например, company',
+        en: 'e.g., mycompany'
+    },
+    'form.superadminOnlyEdit': {
+        uz: 'Faqat superadmin tahrirlashi mumkin',
+        ru: 'Только суперадмин может редактировать',
+        en: 'Only superadmin can edit this field'
+    },
+    'form.subdomainPatternHelp': {
+        uz: 'Faqat kichik harflar, raqamlar va chiziqcha',
+        ru: 'Только строчные буквы, цифры и дефис',
+        en: 'Only lowercase letters, numbers and hyphens allowed'
+    },
+    'form.uniqueUrlHint': {
+        uz: 'Ushbu markaz uchun noyob URL (kichik harflar, probelsiz)',
+        ru: 'Уникальный URL для этого центра (строчные буквы, без пробелов)',
+        en: 'Unique URL for this center (lowercase, no spaces)'
+    },
+    'form.notSet': {
+        uz: 'O‘rnatilmagan',
+        ru: 'Не задано',
+        en: 'Not set'
+    },
+    'form.contactAdminChangeSubdomain': {
+        uz: 'Subdomenni o‘zgartirish uchun administrator bilan bog‘laning',
+        ru: 'Свяжитесь с администратором, чтобы изменить поддомен',
+        en: 'Contact administrator to change subdomain'
+    },
+    'form.selectOwnerPlaceholder': {
+        uz: 'Egasini tanlang',
+        ru: 'Выберите владельца',
+        en: 'Select Owner'
+    },
+    'form.ownerHelp': {
+        uz: 'Markazga egalik qiluvchi va boshqaruvchi foydalanuvchi',
+        ru: 'Пользователь, который будет владеть и управлять центром',
+        en: 'The user who will own and manage this center'
+    },
+    'form.createNewUserTooltip': {
+        uz: 'Yangi foydalanuvchi yaratish',
+        ru: 'Создать нового пользователя',
+        en: 'Create new user'
+    },
+    'form.owner': {
+        uz: 'Egasi',
+        ru: 'Владелец',
+        en: 'Owner'
+    },
+    'form.phone': {
+        uz: 'Telefon',
+        ru: 'Телефон',
+        en: 'Phone'
+    },
+    'form.enterPhone': {
+        uz: 'Telefon raqamini kiriting',
+        ru: 'Введите номер телефона',
+        en: 'Enter phone number'
+    },
+    'form.email': {
+        uz: 'Elektron pochta',
+        ru: 'Электронная почта',
+        en: 'Email'
+    },
+    'form.enterEmail': {
+        uz: 'Elektron pochta kiriting',
+        ru: 'Введите электронную почту',
+        en: 'Enter email'
+    },
+    'form.locationUrl': {
+        uz: 'Manzil URL',
+        ru: 'URL местоположения',
+        en: 'Location URL'
+    },
+    'form.locationHint': {
+        uz: 'Google yoki Yandex xarita havolasini kiriting',
+        ru: 'Введите ссылку Google или Yandex карт',
+        en: 'Enter Google Maps or Yandex Maps URL'
+    },
+    'form.address': {
+        uz: 'Manzil',
+        ru: 'Адрес',
+        en: 'Address'
+    },
+    'form.enterAddress': {
+        uz: 'To\'liq manzilni kiriting',
+        ru: 'Введите полный адрес',
+        en: 'Enter full address'
+    },
+    'form.status': {
+        uz: 'Holati',
+        ru: 'Статус',
+        en: 'Status'
+    },
+    'form.botConfiguration': {
+        uz: 'Bot konfiguratsiyasi',
+        ru: 'Конфигурация бота',
+        en: 'Bot Configuration'
+    },
+    'form.botToken': {
+        uz: 'Bot tokeni',
+        ru: 'Токен бота',
+        en: 'Bot Token'
+    },
+    'form.botTokenPlaceholder': {
+        uz: 'Telegram bot tokenini kiriting (masalan, 123456:ABC-DEF...)',
+        ru: 'Введите токен бота Telegram (например, 123456:ABC-DEF...)',
+        en: 'Enter Telegram bot token (e.g., 123456:ABC-DEF...)'
+    },
+    'form.botTokenHint': {
+        uz: 'Ushbu tokenni @BotFather dan oling',
+        ru: 'Получите этот токен у @BotFather',
+        en: 'Get this from @BotFather on Telegram'
+    },
+    'form.botTokenChangeHelp': {
+        uz: 'Bot tokenini o‘zgartirish uchun administrator bilan bog‘laning',
+        ru: 'Свяжитесь с администратором, чтобы изменить токен бота',
+        en: 'Contact administrator to change bot token'
+    },
+    'form.botUsername': {
+        uz: 'Bot foydalanuvchi nomi',
+        ru: 'Имя пользователя бота',
+        en: 'Bot Username'
+    },
+    'form.botUsernamePlaceholder': {
+        uz: 'bot_foydalanuvchi_nomi',
+        ru: 'bot_imya_polzovatelya',
+        en: 'my_translation_bot'
+    },
+    'form.botUsernameHelp': {
+        uz: 'Bot foydalanuvchi nomi @ belgisiz (agentlik taklif havolalari uchun zarur)',
+        ru: 'Имя бота без @ (нужно для пригласительных ссылок агентств)',
+        en: 'Bot username without @ (required for agency invitation links)'
+    },
+    'form.companyOrdersChannel': {
+        uz: 'Kompaniya buyurtmalari kanali ID',
+        ru: 'ID канала заказов компании',
+        en: 'Company Orders Channel ID'
+    },
+    'form.companyChannelPlaceholder': {
+        uz: 'Telegram kanal ID (masalan, -1001234567890)',
+        ru: 'ID Telegram канала (например, -1001234567890)',
+        en: 'Enter Telegram channel ID (e.g., -1001234567890)'
+    },
+    'form.companyChannelHelp': {
+        uz: 'Ushbu markazdagi barcha buyurtmalar shu kanalga yuboriladi',
+        ru: 'Все заказы этого центра будут отправляться сюда',
+        en: 'All orders from this center will be sent here'
+    },
+    'form.webhookStatus': {
+        uz: 'Webhook holati',
+        ru: 'Статус вебхука',
+        en: 'Webhook Status'
+    },
+    'form.webhookHint': {
+        uz: 'Webhook maʼlumotlarini ko‘rish uchun "Holatni tekshirish"ni bosing',
+        ru: 'Нажмите «Проверить статус», чтобы увидеть информацию о вебхуке',
+        en: 'Click "Check Status" to view webhook info'
+    },
+    'form.checkStatus': {
+        uz: 'Holatni tekshirish',
+        ru: 'Проверить статус',
+        en: 'Check Status'
+    },
+    'form.activate': {
+        uz: 'Faollashtirish',
+        ru: 'Активировать',
+        en: 'Activate'
+    },
+    'form.deactivate': {
+        uz: 'O‘chirib qo‘yish',
+        ru: 'Деактивировать',
+        en: 'Deactivate'
+    },
+    'form.createCenter': {
+        uz: 'Markaz yaratish',
+        ru: 'Создать центр',
+        en: 'Create Center'
+    },
+    'form.createNewUser': {
+        uz: 'Yangi foydalanuvchi yaratish',
+        ru: 'Создать нового пользователя',
+        en: 'Create New User'
+    },
+    'form.username': {
+        uz: 'Foydalanuvchi nomi',
+        ru: 'Имя пользователя',
+        en: 'Username'
+    },
+    'form.enterUsername': {
+        uz: 'Foydalanuvchi nomini kiriting',
+        ru: 'Введите имя пользователя',
+        en: 'Enter username'
+    },
+    'form.firstName': {
+        uz: 'Ism',
+        ru: 'Имя',
+        en: 'First Name'
+    },
+    'form.enterFirstName': {
+        uz: 'Ismni kiriting',
+        ru: 'Введите имя',
+        en: 'Enter first name'
+    },
+    'form.lastName': {
+        uz: 'Familiya',
+        ru: 'Фамилия',
+        en: 'Last Name'
+    },
+    'form.enterLastName': {
+        uz: 'Familiyani kiriting',
+        ru: 'Введите фамилию',
+        en: 'Enter last name'
+    },
+    'form.password': {
+        uz: 'Parol',
+        ru: 'Пароль',
+        en: 'Password'
+    },
+    'form.enterPassword': {
+        uz: 'Parolni kiriting',
+        ru: 'Введите пароль',
+        en: 'Enter password'
+    },
+    'form.minSixCharacters': {
+        uz: 'Kamida 6 ta belgi',
+        ru: 'Минимум 6 символов',
+        en: 'Minimum 6 characters'
+    },
+    'form.createUser': {
+        uz: 'Foydalanuvchi yaratish',
+        ru: 'Создать пользователя',
+        en: 'Create User'
     },
     'form.permissionGuide': {
         uz: 'Ruxsatlar qo\'llanmasi',
@@ -4622,6 +5424,26 @@ const translations = {
         ru: 'Массовые платежи',
         en: 'Bulk Payments'
     },
+    'permissions.manageBranches': {
+        uz: 'Filiallarni boshqarish',
+        ru: 'Управление филиалами',
+        en: 'Manage Branches'
+    },
+    'permissions.manageStaff': {
+        uz: 'Xodimlarni boshqarish',
+        ru: 'Управление персоналом',
+        en: 'Manage Staff'
+    },
+    'permissions.updateStatus': {
+        uz: 'Buyurtma holatini yangilash',
+        ru: 'Обновление статуса заказов',
+        en: 'Update Order Status'
+    },
+    'permissions.viewReportsAnalytics': {
+        uz: 'Hisobotlar va tahlillarni ko\'rish',
+        ru: 'Просмотр отчетов и аналитики',
+        en: 'View Reports & Analytics'
+    },
 
     // ========== MASTER PERMISSIONS ==========
     'permissions.fullCenterManagement': {
@@ -5019,6 +5841,16 @@ const translations = {
         ru: 'Назначение доступа к массовым платежам',
         en: 'Assign Bulk Payment Access'
     },
+    'permissions.processBulkPayments': {
+        uz: 'Ommaviy to\'lovlarni qayta ishlash',
+        ru: 'Обработка массовых платежей',
+        en: 'Process Bulk Payments'
+    },
+    'permissions.processBulkPaymentsHint': {
+        uz: 'Agentlik/mijoz qarzlari bo\'yicha bir nechta buyurtmalar uchun ommaviy to\'lovlarni amalga oshirishi mumkin',
+        ru: 'Может обрабатывать массовые платежи по долгам агентств/клиентов для нескольких заказов',
+        en: 'Can process bulk payments for agency/customer debts across multiple orders'
+    },
 
     // ========== PERMISSION HINTS ==========
     'permissions.overridesCenterPerms': {
@@ -5035,6 +5867,56 @@ const translations = {
         uz: 'Barcha xodim ruxsatlarini bekor qiladi',
         ru: 'Переопределяет все разрешения персонала',
         en: 'Overrides all staff permissions'
+    },
+    'permissions.overridesFinancialPerms': {
+        uz: 'Barcha moliyaviy ruxsatlarni bekor qiladi',
+        ru: 'Переопределяет все финансовые разрешения',
+        en: 'Overrides all financial permissions'
+    },
+    'permissions.overridesReportPerms': {
+        uz: 'Barcha hisobot ruxsatlarini bekor qiladi',
+        ru: 'Переопределяет все разрешения на отчеты',
+        en: 'Overrides all report permissions'
+    },
+    'permissions.overridesProductPerms': {
+        uz: 'Barcha mahsulot ruxsatlarini bekor qiladi',
+        ru: 'Переопределяет все разрешения на продукты',
+        en: 'Overrides all product permissions'
+    },
+    'permissions.overridesExpensePerms': {
+        uz: 'Barcha xarajat ruxsatlarini bekor qiladi',
+        ru: 'Переопределяет все разрешения на расходы',
+        en: 'Overrides all expense permissions'
+    },
+    'permissions.overridesLanguagePerms': {
+        uz: 'Barcha til ruxsatlarini bekor qiladi',
+        ru: 'Переопределяет все разрешения на языки',
+        en: 'Overrides all language permissions'
+    },
+    'permissions.overridesCustomerPerms': {
+        uz: 'Barcha mijoz ruxsatlarini bekor qiladi',
+        ru: 'Переопределяет все разрешения на клиентов',
+        en: 'Overrides all customer permissions'
+    },
+    'permissions.overridesMarketingPerms': {
+        uz: 'Barcha marketing ruxsatlarini bekor qiladi',
+        ru: 'Переопределяет все маркетинговые разрешения',
+        en: 'Overrides all marketing permissions'
+    },
+    'permissions.overridesAgencyPerms': {
+        uz: 'Barcha agentlik ruxsatlarini bekor qiladi',
+        ru: 'Переопределяет все разрешения агентств',
+        en: 'Overrides all agency permissions'
+    },
+    'permissions.overridesBranchSettingsPerms': {
+        uz: 'Barcha filial sozlamalari ruxsatlarini bekor qiladi',
+        ru: 'Переопределяет все разрешения настроек филиала',
+        en: 'Overrides all branch settings permissions'
+    },
+    'permissions.overridesAuditLogPerms': {
+        uz: 'Barcha audit jurnal ruxsatlarini bekor qiladi',
+        ru: 'Переопределяет все разрешения журналов аудита',
+        en: 'Overrides all audit log permissions'
     },
     'permissions.masterPermissionGrantsAll': {
         uz: 'Asosiy ruxsat - barcha buyurtma operatsiyalarini beradi',
@@ -5265,6 +6147,211 @@ const translations = {
         uz: 'Buyurtma yaratish',
         ru: 'Создать заказ',
         en: 'Create Order'
+    },
+    'orders.createTitle': {
+        uz: 'Buyurtma yaratish',
+        ru: 'Создание заказа',
+        en: 'Create Order'
+    },
+    'orders.createSubtitle': {
+        uz: 'Yangi buyurtmani qo\'lda yarating',
+        ru: 'Создайте новый заказ вручную',
+        en: 'Create a new order manually'
+    },
+    'orders.manualOrderToggle': {
+        uz: 'Qo\'lda buyurtma (telefon/yurib kelgan)',
+        ru: 'Ручной заказ (телефон/офис)',
+        en: 'Create Manual Order (Phone/Walk-in)'
+    },
+    'orders.manualOrderHint': {
+        uz: 'Telefon yoki kelgan mijozlar uchun buyurtma yarating (Telegram ro\'yxatisiz)',
+        ru: 'Создайте заказ для звонков или посетителей (без регистрации в Telegram)',
+        en: 'Create orders for phone or walk-in customers without Telegram registration'
+    },
+    'orders.manualInfoBanner': {
+        uz: 'Mijoz ma\'lumotlarini qo\'lda kiriting',
+        ru: 'Введите данные клиента вручную',
+        en: 'Enter customer details manually'
+    },
+    'orders.manualPhoneHint': {
+        uz: 'Mijozning aloqa raqami',
+        ru: 'Контактный номер клиента',
+        en: "Customer's contact number"
+    },
+    'orders.selectCustomer': {
+        uz: 'Mijozni tanlang',
+        ru: 'Выберите клиента',
+        en: 'Select Customer'
+    },
+    'orders.selectCustomerPlaceholder': {
+        uz: '-- Mijozni tanlang --',
+        ru: '-- Выберите клиента --',
+        en: '-- Select Customer --'
+    },
+    'orders.selectCustomerHint': {
+        uz: 'Telegram bot orqali ro\'yxatdan o\'tgan mavjud mijozlardan tanlang',
+        ru: 'Выберите из клиентов, зарегистрированных через Telegram-бот',
+        en: 'Select from existing customers registered via the Telegram bot'
+    },
+    'orders.selectCenter': {
+        uz: 'Markazni tanlang',
+        ru: 'Выберите центр',
+        en: 'Select Center'
+    },
+    'orders.centerPlaceholder': {
+        uz: '-- Markazni tanlang --',
+        ru: '-- Выберите центр --',
+        en: '-- Select Center --'
+    },
+    'orders.selectBranch': {
+        uz: 'Filialni tanlang',
+        ru: 'Выберите филиал',
+        en: 'Select Branch'
+    },
+    'orders.branchPlaceholder': {
+        uz: '-- Filialni tanlang --',
+        ru: '-- Выберите филиал --',
+        en: '-- Select Branch --'
+    },
+    'orders.branchPlaceholderCenterFirst': {
+        uz: '-- Avval markazni tanlang --',
+        ru: '-- Сначала выберите центр --',
+        en: '-- Select Center First --'
+    },
+    'orders.selectBranchFirst': {
+        uz: 'Avval filialni tanlang',
+        ru: 'Сначала выберите филиал',
+        en: 'Select branch first'
+    },
+    'orders.allCategories': {
+        uz: 'Barcha kategoriyalar',
+        ru: 'Все категории',
+        en: 'All Categories'
+    },
+    'orders.selectProduct': {
+        uz: 'Mahsulotni tanlang',
+        ru: 'Выберите продукт',
+        en: 'Select Product'
+    },
+    'orders.categoryPlaceholder': {
+        uz: '-- Barcha kategoriyalar --',
+        ru: '-- Все категории --',
+        en: '-- All Categories --'
+    },
+    'orders.productPlaceholder': {
+        uz: '-- Mahsulotni tanlang --',
+        ru: '-- Выберите продукт --',
+        en: '-- Select Product --'
+    },
+    'orders.noCategories': {
+        uz: 'Kategoriyalar topilmadi',
+        ru: 'Категории не найдены',
+        en: 'No categories found'
+    },
+    'orders.noProducts': {
+        uz: 'Mahsulotlar topilmadi',
+        ru: 'Продукты не найдены',
+        en: 'No products found'
+    },
+    'orders.languageOptional': {
+        uz: 'Ixtiyoriy',
+        ru: 'Необязательно',
+        en: 'Optional'
+    },
+    'orders.paymentReceipt': {
+        uz: 'To\'lov cheki',
+        ru: 'Платежный чек',
+        en: 'Payment Receipt'
+    },
+    'orders.paymentReceiptHint': {
+        uz: 'Karta to\'lovlari uchun to\'lov cheki yuklang',
+        ru: 'Загрузите чек для оплат картой',
+        en: 'Upload payment receipt for card transactions'
+    },
+    'orders.fileUploadHint': {
+        uz: 'Tarjima/qayta ishlash uchun hujjatlarni yuklang',
+        ru: 'Загрузите документы для перевода/обработки',
+        en: 'Upload documents to be translated/processed'
+    },
+    'orders.copyZeroHint': {
+        uz: '0 = faqat original nusxa',
+        ru: '0 = только оригинал',
+        en: '0 = original only'
+    },
+    'orders.estimatedTotal': {
+        uz: 'Taxminiy jami',
+        ru: 'Предварительный итог',
+        en: 'Estimated Total'
+    },
+    'orders.estimatedTotalNote': {
+        uz: 'Yakuni sahifalar bo\'yicha o\'zgarishi mumkin',
+        ru: 'Итог может измениться по фактическим страницам',
+        en: 'Final price may vary based on actual pages'
+    },
+    'orders.guidelinesTitle': {
+        uz: 'Buyurtma bo\'yicha ko\'rsatmalar',
+        ru: 'Памятка по заказу',
+        en: 'Order Guidelines'
+    },
+    'orders.requiredFieldsTitle': {
+        uz: 'Majburiy maydonlar',
+        ru: 'Обязательные поля',
+        en: 'Required Fields'
+    },
+    'orders.requiredCustomer': {
+        uz: 'Mijoz (bot foydalanuvchisi yoki qo\'lda ma\'lumot)',
+        ru: 'Клиент (бот или ручной ввод)',
+        en: 'Customer (bot user or manual info)'
+    },
+    'orders.requiredBranch': {
+        uz: 'Filial',
+        ru: 'Филиал',
+        en: 'Branch'
+    },
+    'orders.requiredProduct': {
+        uz: 'Mahsulot/xizmat',
+        ru: 'Продукт/услуга',
+        en: 'Product/Service'
+    },
+    'orders.requiredPages': {
+        uz: 'Jami sahifalar',
+        ru: 'Всего страниц',
+        en: 'Total Pages'
+    },
+    'orders.requiredPayment': {
+        uz: 'To\'lov turi',
+        ru: 'Тип оплаты',
+        en: 'Payment Type'
+    },
+    'orders.manualOrdersTitle': {
+        uz: 'Qo\'lda buyurtmalar',
+        ru: 'Ручные заказы',
+        en: 'Manual Orders'
+    },
+    'orders.manualOrdersDesc': {
+        uz: 'Telefon yoki tashrif buyurgan mijozlar uchun "Qo\'lda buyurtma" ni yoqing. Ism va telefonni kiriting.',
+        ru: 'Включите "Ручной заказ" для звонков или посетителей. Введите имя и телефон.',
+        en: 'Enable "Manual Order" for phone/walk-in customers. Enter their name and phone.'
+    },
+    'orders.noteTitle': {
+        uz: 'Eslatma',
+        ru: 'Примечание',
+        en: 'Note'
+    },
+    'orders.pendingNote': {
+        uz: 'Qo\'lda yaratilgan buyurtmalar "Kutilmoqda" holatida bo\'ladi. Keyin xodim tayinlab, holatini yangilang.',
+        ru: 'Ручные заказы будут в статусе "Ожидание". Позже назначьте сотрудника и обновите статус.',
+        en: 'Manual orders start in "Pending" status. Assign staff and update status later.'
+    },
+    'orders.botUserAlert': {
+        uz: 'Bot foydalanuvchilari uchun: mijozlar avval Telegram bot orqali ro\'yxatdan o\'tishi kerak.',
+        ru: 'Для пользователей бота: клиенты должны сначала зарегистрироваться в Telegram-боте.',
+        en: 'For bot users: customers must register via the Telegram bot first.'
+    },
+    'orders.noBranches': {
+        uz: 'Bu markaz uchun filial topilmadi',
+        ru: 'Нет филиалов для этого центра',
+        en: 'No branches for this center'
     },
     'orders.total': {
         uz: 'Jami',
@@ -5632,6 +6719,51 @@ const translations = {
         uz: 'Barcha holatlar',
         ru: 'Все статусы',
         en: 'All Status'
+    },
+    'users.bulkActions': {
+        uz: 'Ommaviy amallar',
+        ru: 'Массовые действия',
+        en: 'Bulk Actions'
+    },
+    'users.bulkDeleteTitle': {
+        uz: 'Tanlangan foydalanuvchilarni o\'chirish',
+        ru: 'Удалить выбранных пользователей',
+        en: 'Delete selected users'
+    },
+    'users.bulkDeleteWarning': {
+        uz: 'Bu amalni qaytarib bo\'lmaydi. O\'chirilgan foydalanuvchilarni tiklab bo\'lmaydi.',
+        ru: 'Это действие нельзя отменить. Удалённых пользователей нельзя восстановить.',
+        en: 'This action cannot be undone. Deleted users cannot be restored.'
+    },
+    'users.confirmDelete': {
+        uz: 'Siz haqiqatan ham tanlangan foydalanuvchilarni o\'chirmoqchimisiz?',
+        ru: 'Вы действительно хотите удалить выбранных пользователей?',
+        en: 'Are you sure you want to delete the selected users?'
+    },
+    'users.selectActionFirst': {
+        uz: 'Avval amalni tanlang',
+        ru: 'Сначала выберите действие',
+        en: 'Select an action first'
+    },
+    'users.selectRowsFirst': {
+        uz: 'Kamida bitta foydalanuvchini tanlang',
+        ru: 'Выберите хотя бы одного пользователя',
+        en: 'Select at least one user'
+    },
+    'users.noUsersFound': {
+        uz: 'Foydalanuvchilar topilmadi',
+        ru: 'Пользователи не найдены',
+        en: 'No users found'
+    },
+    'users.agencyToggleLabel': {
+        uz: 'Agentlik xodimi',
+        ru: 'Сотрудник агентства',
+        en: 'Agency staff'
+    },
+    'users.agencyToggleHint': {
+        uz: 'Agentlik xodimlari uchun xizmat narxlari avtomatik qo\'llanadi',
+        ru: 'Для сотрудников агентства применяются агентские цены автоматически',
+        en: 'Agency pricing applies automatically for agency staff'
     },
     'users.userDetails': {
         uz: 'Foydalanuvchi tafsilotlari',

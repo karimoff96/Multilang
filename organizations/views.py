@@ -56,6 +56,8 @@ def center_list(request):
     context = {
         "title": "Translation Centers",
         "subTitle": "Manage Your Centers",
+        "title_i18n": "common.translationCenters",
+        "subTitle_i18n": "common.manageCenters",
         "centers": page_obj,
         "paginator": paginator,
         "total_centers": paginator.count,
@@ -127,6 +129,8 @@ def center_create(request):
     context = {
         "title": "Create Center",
         "subTitle": "Add New Translation Center",
+        "title_i18n": "common.createCenterTitle",
+        "subTitle_i18n": "common.addNewTranslationCenter",
         "is_superuser": request.user.is_superuser,
         "available_owners": available_owners,
     }
@@ -210,6 +214,8 @@ def center_edit(request, center_id):
     context = {
         "title": "Edit Center",
         "subTitle": f"Edit {center.name}",
+        "title_i18n": "common.editCenterTitle",
+        "subTitle_i18n": "common.editTranslationCenter",
         "center": center,
         "is_superuser": request.user.is_superuser,
         "available_owners": available_owners,
@@ -345,6 +351,8 @@ def branch_list(request):
     context = {
         "title": "Branches",
         "subTitle": "Manage Branches",
+        "title_i18n": "branch.listTitle",
+        "subTitle_i18n": "branch.listSubtitle",
         "branches": page_obj,
         "paginator": paginator,
         "total_branches": paginator.count,
@@ -415,6 +423,8 @@ def branch_create(request, center_id=None):
     context = {
         "title": "Create Branch",
         "subTitle": "Add New Branch",
+        "title_i18n": "branch.createTitle",
+        "subTitle_i18n": "branch.createSubtitle",
         "centers": centers,
         "selected_center": center,
         "regions": regions,
@@ -470,6 +480,7 @@ def branch_detail(request, branch_id):
     context = {
         "title": branch.name,
         "subTitle": "Branch Details",
+        "subTitle_i18n": "branch.detailSubtitle",
         "branch": branch,
         "staff": staff,
         "categories": categories,
@@ -541,6 +552,8 @@ def branch_edit(request, branch_id):
     context = {
         "title": "Edit Branch",
         "subTitle": f"Edit {branch.name}",
+        "title_i18n": "branch.editTitle",
+        "subTitle_i18n": "branch.editSubtitle",
         "branch": branch,
         "regions": regions,
         "districts": districts,
@@ -617,6 +630,8 @@ def staff_list(request):
     context = {
         "title": "Staff Management",
         "subTitle": "Manage Staff Members",
+        "title_i18n": "staff.listTitle",
+        "subTitle_i18n": "staff.listSubtitle",
         "staff": page_obj,
         "branches": accessible_branches,
         "roles": roles,
@@ -761,6 +776,8 @@ def staff_create(request):
     context = {
         "title": "Add Staff",
         "subTitle": "Create New Staff Member",
+        "title_i18n": "staff.createTitle",
+        "subTitle_i18n": "staff.createSubtitle",
         "branches": accessible_branches,
         "roles": roles,
         "all_permissions": all_permissions,
@@ -895,6 +912,8 @@ def staff_edit(request, staff_id):
     context = {
         "title": "Edit Staff",
         "subTitle": f"Edit {staff_member.user.get_full_name()}",
+        "title_i18n": "staff.editTitle",
+        "subTitle_i18n": "staff.editSubtitle",
         "staff_member": staff_member,
         "branches": accessible_branches,
         "roles": roles,
@@ -1042,6 +1061,7 @@ def staff_detail(request, staff_id):
     context = {
         "title": staff_member.user.get_full_name() or staff_member.user.username,
         "subTitle": "Staff Details",
+        "subTitle_i18n": "staff.detailSubtitle",
         "staff_member": staff_member,
         "assigned_orders": assigned_orders,
         "completed_orders": completed_orders,
@@ -1250,6 +1270,8 @@ def role_list(request):
     context = {
         "title": "Role Management",
         "subTitle": "Manage Roles & Permissions",
+        "title_i18n": "role.listTitle",
+        "subTitle_i18n": "role.listSubtitle",
         "roles": roles,
         "available_permissions": Role.get_all_permissions(),
     }
@@ -1298,6 +1320,8 @@ def role_create(request):
     context = {
         "title": "Create Role",
         "subTitle": "Create New Role",
+        "title_i18n": "role.createTitle",
+        "subTitle_i18n": "role.createSubtitle",
         "available_permissions": available_permissions,
         "permission_labels": Role.get_permission_labels(),
     }
@@ -1351,6 +1375,8 @@ def role_edit(request, role_id):
     context = {
         "title": "Edit Role",
         "subTitle": f"Edit Role: {role.display_name}",
+        "title_i18n": "role.editTitle",
+        "subTitle_i18n": "role.editSubtitle",
         "role": role,
         "available_permissions": available_permissions,
         "permission_labels": Role.get_permission_labels(),

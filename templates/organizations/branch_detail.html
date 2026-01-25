@@ -15,7 +15,7 @@
                     <div class="d-flex align-items-center gap-8 mb-4">
                         <h4 class="text-xl fw-semibold mb-0">{{ branch.name }}</h4>
                         {% if branch.is_main %}
-                        <span class="badge bg-warning-focus text-warning-600">Main Branch</span>
+                        <span class="badge bg-warning-focus text-warning-600" data-i18n="common.mainBranch">Main Branch</span>
                         {% endif %}
                     </div>
                     <div class="d-flex align-items-center gap-8 text-secondary-light">
@@ -38,26 +38,26 @@
             </div>
             <div class="d-flex gap-8">
                 <span class="{% if branch.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-16 py-8 radius-8 text-sm fw-medium">
-                    {% if branch.is_active %}Active{% else %}Inactive{% endif %}
+                    {% if branch.is_active %}<span data-i18n="common.active">Active</span>{% else %}<span data-i18n="common.inactive">Inactive</span>{% endif %}
                 </span>
                 {% can_do 'branch_settings.view' as can_view_settings %}
                 {% if can_view_settings %}
                 <a href="{% url 'branch_settings' branch.id %}" class="btn btn-outline-info-600 btn-sm px-16 py-8 radius-8 d-inline-flex align-items-center">
                     <iconify-icon icon="fluent:settings-20-filled" class="me-4"></iconify-icon>
-                    Bot Settings
+                    <span data-i18n="sidebar.branchSettings">Bot Settings</span>
                 </a>
                 {% endif %}
                 {% can_do 'branches.edit' as can_edit_branch %}
                 {% if can_edit_branch %}
                 <a href="{% url 'branch_edit' branch.id %}" class="btn btn-outline-primary-600 btn-sm px-16 py-8 radius-8 d-inline-flex align-items-center">
                     <iconify-icon icon="fluent:edit-20-filled" class="me-4"></iconify-icon>
-                    Edit
+                    <span data-i18n="common.edit">Edit</span>
                 </a>
                 {% endif %}
                 {% if branch.location_url %}
                 <a href="{{ branch.location_url }}" target="_blank" class="btn btn-outline-info-600 btn-sm px-16 py-8 radius-8 d-inline-flex align-items-center">
                     <iconify-icon icon="fluent:map-20-filled" class="me-4"></iconify-icon>
-                    Map
+                    <span data-i18n="common.viewOnMap">Map</span>
                 </a>
                 {% endif %}
             </div>
@@ -176,7 +176,7 @@
                             <tr>
                                 <td colspan="3" class="text-center py-24 text-secondary-light bg-base">
                                     <iconify-icon icon="fluent:people-team-20-regular" class="text-3xl mb-8 d-block"></iconify-icon>
-                                    No staff members
+                                    <span data-i18n="common.noStaffMembers">No staff members</span>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -193,7 +193,7 @@
             <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="text-lg fw-semibold mb-0 d-flex align-items-center">
                     <iconify-icon icon="fluent:grid-20-filled" class="me-8 text-warning-600"></iconify-icon>
-                    Categories ({{ total_categories }})
+                    <span data-i18n="sidebar.categories">Categories</span> ({{ total_categories }})
                 </h6>
                 <div class="d-flex gap-2 align-items-center">
                     {% if total_categories > 5 %}
@@ -233,7 +233,7 @@
                             <tr>
                                 <td colspan="3" class="text-center py-24 text-secondary-light bg-base">
                                     <iconify-icon icon="fluent:grid-20-regular" class="text-3xl mb-8 d-block"></iconify-icon>
-                                    No categories
+                                    <span data-i18n="common.noCategories">No categories</span>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -250,9 +250,9 @@
     <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
         <h6 class="text-lg fw-semibold mb-0 d-flex align-items-center">
             <iconify-icon icon="fluent:box-20-filled" class="me-8 text-info-600"></iconify-icon>
-            Products ({{ total_products }})
+            <span data-i18n="sidebar.products">Products</span> ({{ total_products }})
         </h6>
-        <a href="{% url 'productList' %}?branch={{ branch.id }}" class="text-primary-600 text-sm">View All</a>
+        <a href="{% url 'productList' %}?branch={{ branch.id }}" class="text-primary-600 text-sm" data-i18n="common.viewAll">View All</a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -279,13 +279,13 @@
                         <td class="bg-info-focus">{{ product.agency_first_page_price|floatformat:0 }} UZS</td>
                         <td class="bg-info-focus">
                             <span class="{% if product.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-12 py-4 radius-4 text-xs fw-medium">
-                                {% if product.is_active %}Active{% else %}Inactive{% endif %}
+                                {% if product.is_active %}<span data-i18n="common.active">Active</span>{% else %}<span data-i18n="common.inactive">Inactive</span>{% endif %}
                             </span>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center py-24 text-secondary-light bg-base">No products yet</td>
+                        <td colspan="5" class="text-center py-24 text-secondary-light bg-base" data-i18n="common.noProducts">No products yet</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -344,7 +344,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center py-24 text-secondary-light bg-base">No orders yet</td>
+                        <td colspan="6" class="text-center py-24 text-secondary-light bg-base" data-i18n="common.noOrdersYet">No orders yet</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -384,16 +384,16 @@
                         <td class="bg-purple-focus">{{ customer.phone|default:"-" }}</td>
                         <td class="bg-purple-focus">
                             {% if customer.is_agency %}
-                            <span class="badge bg-warning-focus text-warning-600">Agency</span>
+                            <span class="badge bg-warning-focus text-warning-600" data-i18n="customer.agency">Agency</span>
                             {% else %}
-                            <span class="badge bg-primary-focus text-primary-600">Regular</span>
+                            <span class="badge bg-primary-focus text-primary-600" data-i18n="customer.regular">Regular</span>
                             {% endif %}
                         </td>
                         <td class="bg-purple-focus text-secondary-light">{{ customer.created_at|date:"M d, Y" }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center py-24 text-secondary-light bg-base">No customers yet</td>
+                        <td colspan="4" class="text-center py-24 text-secondary-light bg-base" data-i18n="common.noCustomersYet">No customers yet</td>
                     </tr>
                     {% endfor %}
                 </tbody>

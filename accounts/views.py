@@ -11,6 +11,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
+from django.utils.translation import gettext_lazy as _
 
 
 # ============ Admin Authentication Views ============
@@ -253,8 +254,10 @@ def addUser(request):
                 messages.error(request, f"Error creating user: {str(e)}")
 
     context = {
-        "title": "Add User",
-        "subTitle": "Add User",
+        "title": _("Add User"),
+        "subTitle": _("Add User"),
+        "title_i18n": "common.addUser",
+        "subTitle_i18n": "form.addNewUser",
         "agencies": agencies,
         "centers": centers,
         "branches": branches,
@@ -332,8 +335,10 @@ def usersList(request):
     page_obj = paginator.get_page(page_number)
 
     context = {
-        "title": "Users List",
-        "subTitle": "Users List",
+        "title": _("Users List"),
+        "subTitle": _("Users List"),
+        "title_i18n": "users.pageTitle",
+        "subTitle_i18n": "users.allUsers",
         "users": page_obj,
         "paginator": paginator,
         "search_query": search_query,

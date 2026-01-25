@@ -69,7 +69,7 @@
                                     </div>
                                     {% endif %}
                                     <!-- Status dot indicator -->
-                                    <span class="w-10-px h-10-px rounded-circle {% if member.is_active %}bg-success-main{% else %}bg-danger-main{% endif %} position-absolute bottom-0 end-0 border border-2 border-white" title="{% if member.is_active %}Active{% else %}Inactive{% endif %}"></span>
+                                    <span class="w-10-px h-10-px rounded-circle {% if member.is_active %}bg-success-main{% else %}bg-danger-main{% endif %} position-absolute bottom-0 end-0 border border-2 border-white" data-i18n-title="{% if member.is_active %}common.active{% else %}common.inactive{% endif %}" title="{% if member.is_active %}Active{% else %}Inactive{% endif %}"></span>
                                 </div>
                                 <div class="flex-grow-1">
                                     <h6 class="text-md mb-0 fw-medium">{{ member.user.get_full_name|truncatechars:20 }}</h6>
@@ -110,27 +110,27 @@
                         <td class="hide-mobile">
                             <div class="d-flex flex-wrap gap-4">
                                 {% if member.orders_in_progress > 0 %}
-                                <span class="badge bg-info-100 text-info-600 px-8 py-4 radius-4 text-xs" data-bs-toggle="tooltip" data-bs-placement="top" title="In Progress">
+                                <span class="badge bg-info-100 text-info-600 px-8 py-4 radius-4 text-xs" data-bs-toggle="tooltip" data-bs-placement="top" data-i18n-title="status.inProgress" title="In Progress">
                                     <iconify-icon icon="mdi:progress-clock" class="me-2"></iconify-icon>{{ member.orders_in_progress }}
                                 </span>
                                 {% endif %}
                                 {% if member.orders_pending > 0 %}
-                                <span class="badge bg-warning-100 text-warning-600 px-8 py-4 radius-4 text-xs" data-bs-toggle="tooltip" data-bs-placement="top" title="Pending">
+                                <span class="badge bg-warning-100 text-warning-600 px-8 py-4 radius-4 text-xs" data-bs-toggle="tooltip" data-bs-placement="top" data-i18n-title="status.pending" title="Pending">
                                     <iconify-icon icon="mdi:clock-outline" class="me-2"></iconify-icon>{{ member.orders_pending }}
                                 </span>
                                 {% endif %}
                                 {% if member.orders_completed > 0 %}
-                                <span class="badge bg-success-100 text-success-600 px-8 py-4 radius-4 text-xs" data-bs-toggle="tooltip" data-bs-placement="top" title="Completed">
+                                <span class="badge bg-success-100 text-success-600 px-8 py-4 radius-4 text-xs" data-bs-toggle="tooltip" data-bs-placement="top" data-i18n-title="status.completed" title="Completed">
                                     <iconify-icon icon="mdi:check-circle" class="me-2"></iconify-icon>{{ member.orders_completed }}
                                 </span>
                                 {% endif %}
                                 {% if member.orders_cancelled > 0 %}
-                                <span class="badge bg-danger-100 text-danger-600 px-8 py-4 radius-4 text-xs" data-bs-toggle="tooltip" data-bs-placement="top" title="Cancelled">
+                                <span class="badge bg-danger-100 text-danger-600 px-8 py-4 radius-4 text-xs" data-bs-toggle="tooltip" data-bs-placement="top" data-i18n-title="status.cancelled" title="Cancelled">
                                     <iconify-icon icon="mdi:close-circle" class="me-2"></iconify-icon>{{ member.orders_cancelled }}
                                 </span>
                                 {% endif %}
                                 {% if member.orders_total == 0 %}
-                                <span class="text-secondary-light text-xs">No orders</span>
+                                <span class="text-secondary-light text-xs" data-i18n="common.noOrdersYet">No orders</span>
                                 {% endif %}
                             </div>
                         </td>
@@ -148,17 +148,17 @@
                         <!-- Actions (compact icons) -->
                         <td class="text-center col-action">
                             <div class="d-flex align-items-center gap-4 justify-content-center">
-                                <a href="{% url 'staff_detail' member.id %}" class="bg-primary-focus text-primary-main action-btn-sm d-flex justify-content-center align-items-center radius-4" data-bs-toggle="tooltip" title="View Details">
+                                <a href="{% url 'staff_detail' member.id %}" class="bg-primary-focus text-primary-main action-btn-sm d-flex justify-content-center align-items-center radius-4" data-bs-toggle="tooltip" data-i18n-title="common.viewDetails" title="View Details">
                                     <iconify-icon icon="lucide:eye"></iconify-icon>
                                 </a>
                                 {% can_do 'staff.manage' as can_edit_staff %}
                                 {% if can_edit_staff %}
-                                <a href="{% url 'staff_edit' member.id %}" class="bg-info-focus text-info-main action-btn-sm d-flex justify-content-center align-items-center radius-4" data-bs-toggle="tooltip" title="Edit">
+                                <a href="{% url 'staff_edit' member.id %}" class="bg-info-focus text-info-main action-btn-sm d-flex justify-content-center align-items-center radius-4" data-bs-toggle="tooltip" data-i18n-title="common.edit" title="Edit">
                                     <iconify-icon icon="lucide:edit"></iconify-icon>
                                 </a>
                                 <form method="post" action="{% url 'staff_toggle_active' member.id %}" class="d-inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="{% if member.is_active %}bg-warning-focus text-warning-main{% else %}bg-success-focus text-success-main{% endif %} action-btn-sm d-flex justify-content-center align-items-center radius-4 border-0" data-bs-toggle="tooltip" title="{% if member.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                    <button type="submit" class="{% if member.is_active %}bg-warning-focus text-warning-main{% else %}bg-success-focus text-success-main{% endif %} action-btn-sm d-flex justify-content-center align-items-center radius-4 border-0" data-bs-toggle="tooltip" data-i18n-title="{% if member.is_active %}common.deactivate{% else %}common.activate{% endif %}" title="{% if member.is_active %}Deactivate{% else %}Activate{% endif %}">
                                         <iconify-icon icon="{% if member.is_active %}solar:user-cross-bold{% else %}solar:user-check-bold{% endif %}"></iconify-icon>
                                     </button>
                                 </form>

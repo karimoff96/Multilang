@@ -51,16 +51,16 @@
             </div>
             <div class="d-flex gap-8">
                 <span class="{% if center.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-16 py-8 radius-8 text-sm fw-medium">
-                    {% if center.is_active %}Active{% else %}Inactive{% endif %}
+                    {% if center.is_active %}<span data-i18n="common.active">Active</span>{% else %}<span data-i18n="common.inactive">Inactive</span>{% endif %}
                 </span>
                 <a href="{% url 'center_edit' center.id %}" class="btn btn-outline-primary-600 btn-sm px-16 py-8 radius-8 d-inline-flex align-items-center">
                     <iconify-icon icon="fluent:edit-20-filled" class="me-4"></iconify-icon>
-                    Edit
+                    <span data-i18n="common.edit">Edit</span>
                 </a>
                 {% if center.location_url %}
                 <a href="{{ center.location_url }}" target="_blank" class="btn btn-outline-info-600 btn-sm px-16 py-8 radius-8 d-inline-flex align-items-center">
                     <iconify-icon icon="fluent:map-20-filled" class="me-4"></iconify-icon>
-                    Map
+                    <span data-i18n="common.map">Map</span>
                 </a>
                 {% endif %}
             </div>

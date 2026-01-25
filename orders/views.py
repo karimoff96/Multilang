@@ -1229,8 +1229,10 @@ def orderCreate(request):
             return redirect('orders:orderCreate')
     
     context = {
-        "title": "Create Order",
-        "subTitle": "Create a new order manually",
+        "title": _("Create Order"),
+        "subTitle": _("Create a new order manually"),
+        "title_i18n": "orders.createTitle",
+        "subTitle_i18n": "orders.createSubtitle",
         "centers": centers,
         "branches": branches,
         "products": products,

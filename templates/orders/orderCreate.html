@@ -184,10 +184,10 @@
                             <input class="form-check-input" type="checkbox" id="manualOrderToggle">
                             <label class="form-check-label fw-semibold" for="manualOrderToggle">
                                 <iconify-icon icon="solar:phone-calling-bold" class="me-2 text-warning-600"></iconify-icon>
-                                Create Manual Order (Phone/Walk-in)
+                                <span data-i18n="orders.manualOrderToggle">Create Manual Order (Phone/Walk-in)</span>
                             </label>
                         </div>
-                        <small class="text-secondary-light d-block mt-8">
+                        <small class="text-secondary-light d-block mt-8" data-i18n="orders.manualOrderHint">
                             Enable this to create an order for customers who contacted via phone or walk-in (without Telegram registration)
                         </small>
                     </div>
@@ -197,12 +197,12 @@
                     <div class="col-md-6 mb-20" id="botUserSection">
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="orders.customer">Customer *</label>
                         <select name="bot_user" class="form-select radius-8" id="customerSelect">
-                            <option value="">-- Select Customer --</option>
+                            <option value="" data-i18n="orders.selectCustomerPlaceholder">-- Select Customer --</option>
                             {% for user in bot_users %}
                             <option value="{{ user.id }}">{{ user.display_name }} {% if user.phone_number %}({{ user.phone_number }}){% endif %}</option>
                             {% endfor %}
                         </select>
-                        <small class="text-primary-light">Select from existing customers (registered via Telegram bot)</small>
+                        <small class="text-primary-light" data-i18n="orders.selectCustomerHint">Select from existing customers (registered via Telegram bot)</small>
                     </div>
                     </div>
                     
@@ -210,22 +210,22 @@
                     <div id="manualCustomerSection" style="display: none;">
                         <div class="mb-16 p-12 bg-info-50 radius-8 border border-info-200">
                             <iconify-icon icon="solar:info-circle-bold" class="text-info-600 me-2"></iconify-icon>
-                            <span class="text-sm text-info-600 fw-medium">Enter customer details manually</span>
+                            <span class="text-sm text-info-600 fw-medium" data-i18n="orders.manualInfoBanner">Enter customer details manually</span>
                         </div>
                         
                         <div class="row">
                             <div class="col-md-6 mb-20">
-                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">First Name *</label>
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.customerFirstName">First Name *</label>
                                 <input type="text" name="manual_first_name" id="manualFirstName" class="form-control radius-8" data-i18n-placeholder="form.customerFirstName" placeholder="Customer's first name">
                             </div>
                             <div class="col-md-6 mb-20">
-                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">Last Name</label>
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.customerLastName">Last Name</label>
                                 <input type="text" name="manual_last_name" id="manualLastName" class="form-control radius-8" data-i18n-placeholder="form.customerLastName" placeholder="Customer's last name">
                             </div>
                         <div class="mb-20">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Phone Number *</label>
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.phoneNumber">Phone Number *</label>
                             <input type="tel" name="manual_phone" id="manualPhone" class="form-control radius-8" data-i18n-placeholder="form.phoneNumber" placeholder="+998 XX XXX XX XX">
-                            <small class="text-primary-light">Customer's contact number</small>
+                            <small class="text-primary-light" data-i18n="orders.manualPhoneHint">Customer's contact number</small>
                         </div>
                         </div>
                     </div>
@@ -236,7 +236,7 @@
                         <div class="col-md-6 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.center">Center *</label>
                             <select name="center" class="form-select radius-8" required id="centerSelect">
-                                <option value="">-- Select Center --</option>
+                                <option value="" data-i18n="orders.centerPlaceholder">-- Select Center --</option>
                                 {% for center in centers %}
                                 <option value="{{ center.id }}">{{ center.name }}</option>
                                 {% endfor %}
@@ -245,7 +245,7 @@
                         <div class="col-md-6 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.branch">Branch *</label>
                             <select name="branch" class="form-select radius-8" required id="branchSelect">
-                                <option value="">-- Select Center First --</option>
+                                <option value="" data-i18n="orders.branchPlaceholderCenterFirst">-- Select Center First --</option>
                             </select>
                         </div>
                     </div>
@@ -254,7 +254,7 @@
                     <div class="mb-20">
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.branch">Branch *</label>
                         <select name="branch" class="form-select radius-8" required id="branchSelect">
-                            <option value="">-- Select Branch --</option>
+                            <option value="" data-i18n="orders.branchPlaceholder">-- Select Branch --</option>
                             {% for branch in branches %}
                             <option value="{{ branch.id }}">{{ branch.name }}{% if branch.center %} ({{ branch.center.name }}){% endif %}</option>
                             {% endfor %}
@@ -267,14 +267,14 @@
                         <div class="col-md-4 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.category">Category</label>
                             <select name="category" class="form-select radius-8" id="categorySelect">
-                                <option value="">-- All Categories --</option>
+                                <option value="" data-i18n="orders.categoryPlaceholder">-- All Categories --</option>
                             </select>
                             <small class="text-primary-light" data-i18n="form.categoryHint">Filter products by category</small>
                         </div>
                         <div class="col-md-8 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.productService">Product / Service *</label>
                             <select name="product" class="form-select radius-8" required id="productSelect">
-                                <option value="">-- Select Product --</option>
+                                <option value="" data-i18n="orders.productPlaceholder">-- Select Product --</option>
                             </select>
                         </div>
                     </div>
@@ -284,7 +284,7 @@
                         <div class="col-md-12 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.language">Language</label>
                             <select name="language" class="form-select radius-8">
-                                <option value="">-- Optional --</option>
+                                <option value="" data-i18n="orders.languageOptional">-- Optional --</option>
                                 {% for language in languages %}
                                 <option value="{{ language.id }}">{{ language.name }}</option>
                                 {% endfor %}
@@ -301,7 +301,7 @@
                         <div class="col-md-4 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.copies">Copies</label>
                             <input type="number" name="copy_number" id="copyNumber" class="form-control radius-8" value="0" min="0">
-                            <small class="text-primary-light d-block mt-4">0 = original only</small>
+                            <small class="text-primary-light d-block mt-4" data-i18n="orders.copyZeroHint">0 = original only</small>
                         </div>
                         <div class="col-md-4 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="table.payment">Payment Type *</label>
@@ -317,10 +317,10 @@
                     <div class="mb-20" id="receiptSection" style="display: none;">
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                             <iconify-icon icon="solar:document-add-bold" class="me-1"></iconify-icon>
-                            Payment Receipt
+                            <span data-i18n="orders.paymentReceipt">Payment Receipt</span>
                         </label>
                         <input type="file" name="recipt" class="form-control radius-8" accept="image/*,.pdf">
-                        <small class="text-primary-light">Upload payment receipt for card transactions</small>
+                        <small class="text-primary-light" data-i18n="orders.paymentReceiptHint">Upload payment receipt for card transactions</small>
                     </div>
                     
                     <!-- Description -->
@@ -333,24 +333,24 @@
                     <div class="mb-20">
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.attachedFiles">Files (Optional)</label>
                         <input type="file" name="files" class="form-control radius-8" multiple accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png">
-                        <small class="text-primary-light">Upload documents to be translated/processed</small>
+                        <small class="text-primary-light" data-i18n="orders.fileUploadHint">Upload documents to be translated/processed</small>
                     </div>
                     
                     <!-- Estimated Price Display -->
                     <div class="mb-24 p-16 bg-muted radius-8 border">
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold text-secondary-light">Estimated Total:</span>
+                            <span class="fw-semibold text-secondary-light" data-i18n="orders.estimatedTotal">Estimated Total:</span>
                             <span class="fw-bold text-primary-600 text-xl" id="estimatedPrice">0 UZS</span>
                         </div>
-                        <small class="text-primary-light">* Final price may vary based on actual document pages</small>
+                        <small class="text-primary-light" data-i18n="orders.estimatedTotalNote">* Final price may vary based on actual document pages</small>
                     </div>
                     
                     <div class="d-flex justify-content-between">
                         <a href="{% url 'orders:ordersList' %}" class="btn btn-outline-secondary px-24">
-                            <iconify-icon icon="ep:back" class="me-1"></iconify-icon> Cancel
+                            <iconify-icon icon="ep:back" class="me-1"></iconify-icon> <span data-i18n="common.cancel">Cancel</span>
                         </a>
                         <button type="submit" class="btn btn-success px-24">
-                            <iconify-icon icon="solar:add-circle-bold" class="me-2"></iconify-icon> Create Order
+                            <iconify-icon icon="solar:add-circle-bold" class="me-2"></iconify-icon> <span data-i18n="orders.createOrder">Create Order</span>
                         </button>
                     </div>
                 </form>
@@ -364,38 +364,38 @@
             <div class="card-header border-bottom bg-base py-16 px-24">
                 <h6 class="text-lg fw-semibold mb-0">
                     <iconify-icon icon="solar:info-circle-bold" class="me-2 text-info-600"></iconify-icon>
-                    Order Guidelines
+                    <span data-i18n="orders.guidelinesTitle">Order Guidelines</span>
                 </h6>
             </div>
             <div class="card-body p-24">
                 <div class="mb-16">
-                    <h6 class="text-sm fw-semibold mb-8">Required Fields:</h6>
+                    <h6 class="text-sm fw-semibold mb-8" data-i18n="orders.requiredFieldsTitle">Required Fields:</h6>
                     <ul class="list-unstyled text-sm text-secondary-light">
-                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> Customer (bot user OR manual info)</li>
-                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> Branch</li>
-                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> Product/Service</li>
-                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> Total Pages</li>
-                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> Payment Type</li>
+                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> <span data-i18n="orders.requiredCustomer">Customer (bot user OR manual info)</span></li>
+                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> <span data-i18n="orders.requiredBranch">Branch</span></li>
+                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> <span data-i18n="orders.requiredProduct">Product/Service</span></li>
+                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> <span data-i18n="orders.requiredPages">Total Pages</span></li>
+                        <li class="mb-4"><iconify-icon icon="mdi:check-circle" class="text-success-600 me-2"></iconify-icon> <span data-i18n="orders.requiredPayment">Payment Type</span></li>
                     </ul>
                 </div>
                 
                 <div class="mb-16">
-                    <h6 class="text-sm fw-semibold mb-8">Manual Orders:</h6>
-                    <p class="text-sm text-secondary-light mb-0">
+                    <h6 class="text-sm fw-semibold mb-8" data-i18n="orders.manualOrdersTitle">Manual Orders:</h6>
+                    <p class="text-sm text-secondary-light mb-0" data-i18n="orders.manualOrdersDesc">
                         Enable "Manual Order" to create orders for walk-in customers or phone orders. You'll need to enter their name and phone number manually.
                     </p>
                 </div>
                 
                 <div class="mb-16">
-                    <h6 class="text-sm fw-semibold mb-8">Note:</h6>
-                    <p class="text-sm text-secondary-light mb-0">
+                    <h6 class="text-sm fw-semibold mb-8" data-i18n="orders.noteTitle">Note:</h6>
+                    <p class="text-sm text-secondary-light mb-0" data-i18n="orders.pendingNote">
                         Orders created manually will be in "Pending" status. You can assign staff and update status after creation.
                     </p>
                 </div>
                 
                 <div class="alert alert-warning-100 text-warning-600 p-12 radius-8">
                     <iconify-icon icon="solar:info-circle-bold" class="me-2"></iconify-icon>
-                    <span class="text-sm">For bot users: Customers must first register through the Telegram bot before appearing in the dropdown.</span>
+                    <span class="text-sm" data-i18n="orders.botUserAlert">For bot users: Customers must first register through the Telegram bot before appearing in the dropdown.</span>
                 </div>
             </div>
         </div>
@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             cache: true
         },
-        placeholder: '-- Select Customer --',
+        placeholder: window.translations?.[window.currentLanguage]?.['orders.selectCustomerPlaceholder'] || '-- Select Customer --',
         allowClear: true,
         minimumInputLength: 0,
         width: '100%'
@@ -462,17 +462,17 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             cache: false // Don't cache to allow branch filter changes
         },
-        placeholder: '-- Select Branch First --',
+        placeholder: window.translations?.[window.currentLanguage]?.['orders.branchPlaceholderCenterFirst'] || '-- Select Branch First --',
         allowClear: true,
         minimumInputLength: 0,
         minimumResultsForSearch: 0,
         width: '100%',
         language: {
             searching: function() {
-                return 'Searching...';
+                return window.translations?.[window.currentLanguage]?.['common.searching'] || 'Searching...';
             },
             noResults: function() {
-                return 'No categories found';
+                return window.translations?.[window.currentLanguage]?.['orders.noCategories'] || 'No categories found';
             }
         }
     });
@@ -499,17 +499,17 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             cache: false // Don't cache to allow category/branch filter changes
         },
-        placeholder: '-- Select Branch First --',
+        placeholder: window.translations?.[window.currentLanguage]?.['orders.branchPlaceholderCenterFirst'] || '-- Select Branch First --',
         allowClear: true,
         minimumInputLength: 0,
         minimumResultsForSearch: 0,
         width: '100%',
         language: {
             searching: function() {
-                return 'Searching...';
+                return window.translations?.[window.currentLanguage]?.['common.searching'] || 'Searching...';
             },
             noResults: function() {
-                return 'No products found';
+                return window.translations?.[window.currentLanguage]?.['orders.noProducts'] || 'No products found';
             }
         }
     });
@@ -601,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Add placeholder
                 const placeholder = document.createElement('option');
                 placeholder.value = '';
-                placeholder.textContent = '-- Select Branch --';
+                placeholder.textContent = window.translations?.[window.currentLanguage]?.['orders.branchPlaceholder'] || '-- Select Branch --';
                 branchSelect.appendChild(placeholder);
                 
                 // Filter and add matching branches
@@ -622,13 +622,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // If no branches found, show message
                 if (matchCount === 0) {
-                    branchSelect.innerHTML = '<option value="">-- No branches for this center --</option>';
+                    branchSelect.innerHTML = `<option value="">${window.translations?.[window.currentLanguage]?.['orders.noBranches'] || '-- No branches for this center --'}</option>`;
                 }
             } else {
                 // Add placeholder for no center selected
                 const placeholder = document.createElement('option');
                 placeholder.value = '';
-                placeholder.textContent = '-- Select Center First --';
+                placeholder.textContent = window.translations?.[window.currentLanguage]?.['orders.branchPlaceholderCenterFirst'] || '-- Select Center First --';
                 branchSelect.appendChild(placeholder);
             }
         });

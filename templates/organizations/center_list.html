@@ -5,10 +5,10 @@
 <div class="card h-100 p-0 radius-12">
     <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
         <div>
-            <h6 class="text-lg fw-semibold mb-0">{{ title }}</h6>
+            <h6 class="text-lg fw-semibold mb-0" data-i18n="common.translationCenters">{{ title }}</h6>
             <span class="text-sm text-secondary-light" data-i18n="common.manageCenters">Manage your translation centers</span>
             {% if total_centers > 0 %}
-            <span class="badge bg-primary-focus text-primary-main ms-2">{{ total_centers }} total</span>
+            <span class="badge bg-primary-focus text-primary-main ms-2">{{ total_centers }} <span data-i18n="common.total">total</span></span>
             {% endif %}
         </div>
         {% if request.user.is_superuser %}
@@ -35,7 +35,7 @@
                                 {% endif %}
                                 <div>
                                     <a href="{% url 'center_detail' center.id %}" class="text-lg fw-semibold mb-4 text-primary-light text-decoration-none d-block">{{ center.name }}</a>
-                                    <span class="text-sm text-secondary-light">Owner: {{ center.owner.get_full_name|default:center.owner.username }}</span>
+                                    <span class="text-sm text-secondary-light"><span data-i18n="common.owner">Owner</span>: {{ center.owner.get_full_name|default:center.owner.username }}</span>
                                 </div>
                             </div>
                         </div>
@@ -78,21 +78,21 @@
                         
                         <div class="d-flex align-items-center justify-content-between pt-16 border-top">
                             <span class="{% if center.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-16 py-4 radius-4 text-xs fw-medium" data-i18n="{% if center.is_active %}common.active{% else %}common.inactive{% endif %}">
-                                {% if center.is_active %}Active{% else %}Inactive{% endif %}
+                                {% if center.is_active %}<span data-i18n="common.active">Active</span>{% else %}<span data-i18n="common.inactive">Inactive</span>{% endif %}
                             </span>
                             <div class="d-flex gap-8">
-                                <span class="bg-info-focus text-info-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" title="View Details">
+                                <span class="bg-info-focus text-info-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" data-bs-toggle="tooltip" data-i18n-title="common.viewDetails" title="View Details">
                                     <iconify-icon icon="solar:eye-bold" class="icon"></iconify-icon>
                                 </span>
-                                <a href="{% url 'branch_create_for_center' center.id %}" class="bg-success-focus text-success-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" title="Add Branch" onclick="event.stopPropagation();">
+                                <a href="{% url 'branch_create_for_center' center.id %}" class="bg-success-focus text-success-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" data-bs-toggle="tooltip" data-i18n-title="common.addBranch" title="Add Branch" onclick="event.stopPropagation();">
                                     <iconify-icon icon="solar:add-circle-bold" class="icon"></iconify-icon>
                                 </a>
                                 {% if center.location_url %}
-                                <a href="{{ center.location_url }}" target="_blank" class="bg-cyan-focus text-cyan-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" title="View on Map" onclick="event.stopPropagation();">
+                                <a href="{{ center.location_url }}" target="_blank" class="bg-cyan-focus text-cyan-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" data-bs-toggle="tooltip" data-i18n-title="common.viewOnMap" title="View on Map" onclick="event.stopPropagation();">
                                     <iconify-icon icon="solar:map-point-bold" class="icon"></iconify-icon>
                                 </a>
                                 {% endif %}
-                                <a href="{% url 'center_edit' center.id %}" class="bg-primary-focus text-primary-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" title="Edit" onclick="event.stopPropagation();">
+                                <a href="{% url 'center_edit' center.id %}" class="bg-primary-focus text-primary-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" data-bs-toggle="tooltip" data-i18n-title="common.edit" title="Edit" onclick="event.stopPropagation();">
                                     <iconify-icon icon="solar:pen-bold" class="icon"></iconify-icon>
                                 </a>
                             </div>
@@ -112,7 +112,7 @@
                         <span data-i18n="common.addCenter">Add Center</span>
                     </a>
                     {% else %}
-                    <p class="text-secondary-light mb-16">Contact a superuser to create translation centers</p>
+                    <p class="text-secondary-light mb-16" data-i18n="common.contactSuperuser">Contact a superuser to create translation centers</p>
                     {% endif %}
                 </div>
             </div>

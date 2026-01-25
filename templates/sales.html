@@ -6,7 +6,7 @@
 <!-- Filter Bar -->
 <div class="card radius-8 border-0 mb-24">
     <div class="card-body p-16">
-        <form method="GET" class="d-flex align-items-center gap-3">
+        <form method="GET" action="{% url 'sales' %}" id="periodFilterForm" class="d-flex align-items-center gap-3">
             <span class="text-md fw-semibold text-secondary-light" data-i18n="filter.defaultPeriod">Default Period:</span>
             <select name="period" id="mainPeriodSelect" class="form-select form-select-sm w-auto">
                 <option value="today" {% if period == 'today' %}selected{% endif %} data-i18n="filter.today">Today</option>
@@ -19,7 +19,7 @@
                 <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}" style="width: 150px;">
                 <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}" style="width: 150px;">
             </div>
-            <button type="submit" class="btn btn-primary btn-sm px-16 d-inline-flex align-items-center gap-2">
+            <button type="submit" id="applyFilterBtn" class="btn btn-primary btn-sm px-16 d-inline-flex align-items-center gap-2">
                 <iconify-icon icon="solar:filter-bold" class="icon"></iconify-icon>
                 <span data-i18n="common.apply">Apply</span>
             </button>
@@ -304,17 +304,39 @@
 // Main period filter toggle for custom date range
 const mainPeriodSelect = document.getElementById('mainPeriodSelect');
 const customDateRange = document.getElementById('customDateRange');
+const periodFilterForm = document.getElementById('periodFilterForm');
+
+console.log('Filter form elements:', { 
+    mainPeriodSelect: mainPeriodSelect, 
+    customDateRange: customDateRange,
+    periodFilterForm: periodFilterForm
+});
 
 if (mainPeriodSelect && customDateRange) {
     mainPeriodSelect.addEventListener('change', function() {
+        console.log('Period select changed to:', this.value);
         if (this.value === 'custom') {
             customDateRange.style.display = 'flex';
+            console.log('Showing custom date range inputs');
         } else {
             customDateRange.style.display = 'none';
+            console.log('Hiding custom date range, auto-submitting form...');
             // Auto-submit when not custom
             this.form.submit();
         }
     });
+    console.log('Period select change listener added');
+}
+
+// Add submit event listener for debugging
+if (periodFilterForm) {
+    periodFilterForm.addEventListener('submit', function(e) {
+        console.log('Form submitting with period:', mainPeriodSelect.value);
+        console.log('Form action:', this.action);
+        console.log('Form method:', this.method);
+        // Let the form submit naturally
+    });
+    console.log('Form submit listener added');
 }
 
 const ordersData = JSON.parse(document.getElementById('orders-data').textContent);
@@ -394,9 +416,9 @@ function updateStatCards(period) {
 
 // Orders Chart
 let ordersChart;
-function initOrdersChart() {
+function initOrdersChart(initialPeriod = 'yearly') {
     const colors = getThemeColors();
-    const data = ordersData.yearly;
+    const data = ordersData[initialPeriod];
     ordersChart = new ApexCharts(document.querySelector("#ordersChart"), {
         series: [{ name: 'Orders', data: data.chartData }],
         chart: { type: 'area', height: 264, toolbar: { show: false } },
@@ -443,9 +465,9 @@ function updateStatusChart(period) {
     }
 }
 
-function initStatusDonutChart() {
+function initStatusDonutChart(initialPeriod = 'yearly') {
     const colors = getThemeColors();
-    const data = statusChartData.yearly;
+    const data = statusChartData[initialPeriod];
     statusDonutChart = new ApexCharts(document.querySelector("#statusDonutChart"), {
         series: data.values,
         chart: { type: 'donut', height: 200 },
@@ -456,7 +478,7 @@ function initStatusDonutChart() {
         plotOptions: { pie: { donut: { size: '70%', labels: { show: true, name: { show: true, fontSize: '12px', color: colors.textColor }, value: { show: true, fontSize: '14px', fontWeight: 600, color: colors.textColor, formatter: val => formatShort(val) }, total: { show: true, label: 'Total', color: colors.textColor, formatter: w => w.globals.seriesTotals.reduce((a,b) => a+b, 0) } } } } }
     });
     statusDonutChart.render();
-    updateStatusLegend('yearly');
+    updateStatusLegend(initialPeriod);
 }
 
 // Top Tables
@@ -536,26 +558,42 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('=== DOM CONTENT LOADED ===');
     console.log('Initializing sales page...');
     
-    // Initialize charts first
-    initOrdersChart();
-    initStatusDonutChart();
+    // Get the selected period from the backend
+    const selectedPeriod = '{{ period|default:"year" }}';
+    console.log('Selected period from backend:', selectedPeriod);
     
-    // Update stat cards with yearly data
-    console.log('Updating stat cards...');
-    updateStatCards('yearly');
+    // Map backend period names to JS data keys
+    const periodMap = {
+        'today': 'today',
+        'week': 'weekly',
+        'month': 'monthly',
+        'year': 'yearly',
+        'custom': 'yearly'  // Default to yearly for custom ranges
+    };
+    const initialPeriod = periodMap[selectedPeriod] || 'yearly';
+    console.log('Mapped to data key:', initialPeriod);
+    
+    // Initialize charts first with the selected period
+    initOrdersChart(initialPeriod);
+    initStatusDonutChart(initialPeriod);
+    
+    // Update stat cards with selected period data
+    console.log('Updating stat cards with period:', initialPeriod);
+    updateStatCards(initialPeriod);
     
     // Update tables with initial data
-    console.log('Calling updateAgenciesTable(yearly)...');
-    updateAgenciesTable('yearly');
+    console.log('Calling updateAgenciesTable(' + initialPeriod + ')...');
+    updateAgenciesTable(initialPeriod);
     
-    console.log('Calling updateCustomersTable(yearly)...');
-    updateCustomersTable('yearly');
+    console.log('Calling updateCustomersTable(' + initialPeriod + ')...');
+    updateCustomersTable(initialPeriod);
     
-    // Set up event listeners
+    // Set up event listeners and set initial dropdown values
     console.log('Setting up event listeners...');
     
     const ordersPeriodSelect = document.getElementById('ordersPeriodSelect');
     if (ordersPeriodSelect) {
+        ordersPeriodSelect.value = initialPeriod;
         ordersPeriodSelect.addEventListener('change', function(e) {
             const period = e.target.value;
             console.log('Orders period changed to:', period);
@@ -566,6 +604,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const statusPeriodSelect = document.getElementById('statusPeriodSelect');
     if (statusPeriodSelect) {
+        statusPeriodSelect.value = initialPeriod;
         statusPeriodSelect.addEventListener('change', function(e) {
             const period = e.target.value;
             console.log('Status period changed to:', period);
@@ -575,6 +614,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const agenciesPeriodSelect = document.getElementById('agenciesPeriodSelect');
     if (agenciesPeriodSelect) {
+        agenciesPeriodSelect.value = initialPeriod;
         agenciesPeriodSelect.addEventListener('change', function(e) {
             const period = e.target.value;
             console.log('Agencies period changed to:', period);
@@ -584,6 +624,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const customersPeriodSelect = document.getElementById('customersPeriodSelect');
     if (customersPeriodSelect) {
+        customersPeriodSelect.value = initialPeriod;
         customersPeriodSelect.addEventListener('change', function(e) {
             const period = e.target.value;
             console.log('Customers period changed to:', period);

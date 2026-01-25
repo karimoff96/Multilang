@@ -303,12 +303,12 @@
                                                 <span data-i18n="permissions.fullOrderManagement">Full Order Management</span>
                                             </label>
                                         </div>
-                                        <div class="perm-hint text-secondary-light" data-i18n="permissions.masterOrderPermission">Master permission - grants all order operations</div>
+                                        <div class="perm-hint text-secondary-light" data-i18n="permissions.masterPermissionGrantsAll">Master permission - grants all order operations</div>
                                     </div>
                                     
                                     <div class="row g-2">
                                         <div class="col-md-4">
-                                            <strong class="text-xs text-secondary-light d-block mb-2" data-i18n="permissions.viewOrdersSection">View Orders</strong>
+                                            <strong class="text-xs text-secondary-light d-block mb-2" data-i18n="permissions.viewOrders">View Orders</strong>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="can_view_all_orders" id="can_view_all_orders"
                                                        {% if role.can_view_all_orders %}checked{% endif %}>
@@ -329,7 +329,7 @@
                                         </div>
                                         
                                         <div class="col-md-4">
-                                            <strong class="text-xs text-secondary-light d-block mb-2" data-i18n="permissions.createModifySection">Create & Modify</strong>
+                                            <strong class="text-xs text-secondary-light d-block mb-2" data-i18n="permissions.createModify">Create & Modify</strong>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="can_create_orders" id="can_create_orders"
                                                        {% if role.can_create_orders %}checked{% endif %}>
@@ -359,7 +359,7 @@
                                         </div>
                                         
                                         <div class="col-md-4">
-                                            <strong class="text-xs text-secondary-light d-block mb-2" data-i18n="permissions.workflowStatusSection">Workflow & Status</strong>
+                                            <strong class="text-xs text-secondary-light d-block mb-2" data-i18n="permissions.workflowStatus">Workflow & Status</strong>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="can_assign_orders" id="can_assign_orders"
                                                        {% if role.can_assign_orders %}checked{% endif %}>
@@ -467,8 +467,8 @@
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="can_manage_reports" id="can_manage_reports"
                                                    {% if role.can_manage_reports %}checked{% endif %}>
-                                            <label class="form-check-label" for="can_manage_reports" data-i18n="permissions.fullReportsAccess">
-                                                Full Reports Access
+                                            <label class="form-check-label" for="can_manage_reports" data-i18n="permissions.fullReportsManagement">
+                                                Full Reports Management
                                             </label>
                                         </div>
                                         <div class="perm-hint text-secondary-light" data-i18n="permissions.overridesReportPerms">Overrides all report permissions</div>
@@ -860,8 +860,8 @@
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="can_manage_audit_logs" id="can_manage_audit_logs"
                                                    {% if role.can_manage_audit_logs %}checked{% endif %}>
-                                            <label class="form-check-label" for="can_manage_audit_logs" data-i18n="permissions.fullAuditLogAccess">
-                                                Full Audit Log Access
+                                            <label class="form-check-label" for="can_manage_audit_logs" data-i18n="permissions.fullAuditLogsManagement">
+                                                Full Audit Logs Management
                                             </label>
                                         </div>
                                         <div class="perm-hint text-secondary-light" data-i18n="permissions.overridesAuditLogPerms">Overrides all audit log permissions</div>
@@ -925,7 +925,7 @@
                                             <span data-i18n="permissions.assignBulkPaymentAccess">Assign Bulk Payment Access</span>
                                         </label>
                                     </div>
-                                    <div class="perm-hint text-danger-light" data-i18n="permissions.assignBulkPaymentAccessHint">⚠️ Can grant bulk payment permission to other roles. Grant with caution.</div>
+                                    <div class="perm-hint text-danger-light" data-i18n="permissions.bulkPaymentAssignCriticalHint">⚠️ Can grant bulk payment permission to other roles. Grant with caution.</div>
                                 </div>
                             </div>
                         </div>
@@ -1008,7 +1008,7 @@
                     {% if role.is_system_role %}
                     <div class="alert alert-warning-100 text-warning-600 radius-8 py-12 px-16 d-flex align-items-start gap-2">
                         <iconify-icon icon="lucide:alert-triangle" class="flex-shrink-0 mt-1"></iconify-icon>
-                        <span data-i18n="help.systemRoleWarning">System Role: The role name cannot be changed as it's used internally.</span>
+                        <span data-i18n="help.systemRoleWarningDesc">System Role: The role name cannot be changed as it's used internally.</span>
                     </div>
                     {% endif %}
                 </div>
