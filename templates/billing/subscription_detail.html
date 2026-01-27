@@ -1,0 +1,196 @@
+{% extends "layout/layout.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Subscription Detail" %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-main-body">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+        <h6 class="fw-semibold mb-0">{% trans "Subscription Details" %}</h6>
+        <ul class="d-flex align-items-center gap-2">
+            <li class="fw-medium">
+                <a href="{% url 'billing:subscription_list' %}" class="d-flex align-items-center gap-1 hover-text-primary">
+                    <iconify-icon icon="solar:arrow-left-bold" class="icon text-lg"></iconify-icon>
+                    {% trans "Back to List" %}
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="row gy-4">
+        <!-- Subscription Info -->
+        <div class="col-xxl-8">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">{% trans "Subscription Information" %}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row gy-3">
+                        <div class="col-md-6">
+                            <label class="text-secondary-light">{% trans "Organization" %}</label>
+                            <p class="fw-semibold">{{ subscription.organization.name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-secondary-light">{% trans "Tariff Plan" %}</label>
+                            <p class="fw-semibold">{{ subscription.tariff.title }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-secondary-light">{% trans "Duration" %}</label>
+                            <p class="fw-semibold">{{ subscription.pricing.duration_months }} {% trans "month(s)" %}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-secondary-light">{% trans "Status" %}</label>
+                            <p>
+                                {% if subscription.status == 'active' %}
+                                <span class="badge bg-success-600 text-white px-12 py-6">{% trans "Active" %}</span>
+                                {% elif subscription.status == 'expired' %}
+                                <span class="badge bg-danger-600 text-white px-12 py-6">{% trans "Expired" %}</span>
+                                {% elif subscription.status == 'pending' %}
+                                <span class="badge bg-warning-600 text-white px-12 py-6">{% trans "Pending" %}</span>
+                                {% else %}
+                                <span class="badge bg-secondary-600 text-white px-12 py-6">{{ subscription.get_status_display }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-secondary-light">{% trans "Start Date" %}</label>
+                            <p class="fw-semibold">{{ subscription.start_date|date:"F d, Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-secondary-light">{% trans "End Date" %}</label>
+                            <p class="fw-semibold">{{ subscription.end_date|date:"F d, Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-secondary-light">{% trans "Days Remaining" %}</label>
+                            <p class="fw-semibold {% if subscription.days_remaining <= 7 %}text-danger-600{% endif %}">
+                                {{ subscription.days_remaining }} {% trans "days" %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-secondary-light">{% trans "Auto-Renew" %}</label>
+                            <p class="fw-semibold">
+                                {% if subscription.auto_renew %}
+                                <span class="text-success-600">{% trans "Yes" %}</span>
+                                {% else %}
+                                <span class="text-danger-600">{% trans "No" %}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% if subscription.amount_paid %}
+                        <div class="col-md-6">
+                            <label class="text-secondary-light">{% trans "Amount Paid" %}</label>
+                            <p class="fw-semibold">{{ subscription.amount_paid|floatformat:0 }} {{ subscription.pricing.currency }}</p>
+                        </div>
+                        {% endif %}
+                        {% if subscription.payment_method %}
+                        <div class="col-md-6">
+                            <label class="text-secondary-light">{% trans "Payment Method" %}</label>
+                            <p class="fw-semibold">{{ subscription.payment_method }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Update Status Form -->
+                    <div class="mt-4 pt-4 border-top">
+                        <h6 class="mb-3">{% trans "Update Status" %}</h6>
+                        <form method="post" action="{% url 'billing:subscription_update_status' subscription.id %}">
+                            {% csrf_token %}
+                            <div class="row gy-3">
+                                <div class="col-md-6">
+                                    <select name="status" class="form-select">
+                                        <option value="pending" {% if subscription.status == 'pending' %}selected{% endif %}>{% trans "Pending" %}</option>
+                                        <option value="active" {% if subscription.status == 'active' %}selected{% endif %}>{% trans "Active" %}</option>
+                                        <option value="expired" {% if subscription.status == 'expired' %}selected{% endif %}>{% trans "Expired" %}</option>
+                                        <option value="cancelled" {% if subscription.status == 'cancelled' %}selected{% endif %}>{% trans "Cancelled" %}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" name="notes" class="form-control" placeholder="{% trans 'Notes (optional)' %}">
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary-600">{% trans "Update Status" %}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usage & History -->
+        <div class="col-xxl-4">
+            <!-- Current Usage -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">{% trans "Current Usage" %}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>{% trans "Branches" %}</span>
+                            <span>{{ current_usage.branches }} / {% if current_usage.branches_limit %}{{ current_usage.branches_limit }}{% else %}∞{% endif %}</span>
+                        </div>
+                        {% if current_usage.branches_limit %}
+                        <div class="progress">
+                            <div class="progress-bar {% if current_usage.branches_percent >= 90 %}bg-danger{% elif current_usage.branches_percent >= 70 %}bg-warning{% else %}bg-success{% endif %}" 
+                                 style="width: {{ current_usage.branches_percent }}%"></div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>{% trans "Staff" %}</span>
+                            <span>{{ current_usage.staff }} / {% if current_usage.staff_limit %}{{ current_usage.staff_limit }}{% else %}∞{% endif %}</span>
+                        </div>
+                        {% if current_usage.staff_limit %}
+                        <div class="progress">
+                            <div class="progress-bar {% if current_usage.staff_percent >= 90 %}bg-danger{% elif current_usage.staff_percent >= 70 %}bg-warning{% else %}bg-success{% endif %}" 
+                                 style="width: {{ current_usage.staff_percent }}%"></div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>{% trans "Orders (This Month)" %}</span>
+                            <span>{{ current_usage.orders }} / {% if current_usage.orders_limit %}{{ current_usage.orders_limit }}{% else %}∞{% endif %}</span>
+                        </div>
+                        {% if current_usage.orders_limit %}
+                        <div class="progress">
+                            <div class="progress-bar {% if current_usage.orders_percent >= 90 %}bg-danger{% elif current_usage.orders_percent >= 70 %}bg-warning{% else %}bg-success{% endif %}" 
+                                 style="width: {{ current_usage.orders_percent }}%"></div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- History -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">{% trans "History" %}</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        {% for history in subscription.history.all %}
+                        <li class="mb-3">
+                            <div class="d-flex align-items-start gap-2">
+                                <iconify-icon icon="solar:history-bold" class="text-primary-600 mt-1"></iconify-icon>
+                                <div>
+                                    <p class="mb-0 fw-semibold">{{ history.action }}</p>
+                                    <p class="mb-0 text-secondary-light text-sm">{{ history.description }}</p>
+                                    <p class="mb-0 text-secondary-light text-xs">{{ history.timestamp|date:"M d, Y H:i" }} by {{ history.performed_by.username }}</p>
+                                </div>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="text-center text-secondary-light">{% trans "No history available" %}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

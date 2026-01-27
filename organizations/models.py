@@ -88,6 +88,42 @@ class TranslationCenter(models.Model):
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         super().save(*args, **kwargs)
+    
+    # Billing helper methods
+    def get_current_month_orders_count(self):
+        """Get order count for current month"""
+        from datetime import date
+        from orders.models import Order
+        
+        today = date.today()
+        return Order.objects.filter(
+            created_by__organization=self,
+            created_at__year=today.year,
+            created_at__month=today.month
+        ).count()
+    
+    def get_staff_count(self):
+        """Get total staff count across all branches"""
+        from accounts.models import User
+        return User.objects.filter(organization=self).count()
+    
+    def has_active_subscription(self):
+        """Check if center has an active subscription"""
+        return hasattr(self, 'subscription') and self.subscription.is_active()
+    
+    def get_subscription_status(self):
+        """Get current subscription status"""
+        if not hasattr(self, 'subscription'):
+            return {'has_subscription': False}
+        
+        sub = self.subscription
+        return {
+            'has_subscription': True,
+            'is_active': sub.is_active(),
+            'tariff': sub.tariff.title,
+            'days_remaining': sub.days_remaining(),
+            'end_date': sub.end_date,
+        }
         # Auto-create default branch for new centers
         if is_new:
             Branch.objects.create(

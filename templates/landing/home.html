@@ -1050,23 +1050,26 @@
                                 {% if current_language == 'uz' %}1 ta Tarjima Markazi{% elif current_language == 'en' %}1 Translation Center{% else %}1 Центр Переводов{% endif %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}3 ta Filial{% elif current_language == 'en' %}3 Branches{% else %}3 Филиала{% endif %}
+                                {% if current_language == 'uz' %}1 ta Filial{% elif current_language == 'en' %}1 Branch{% else %}1 Филиал{% endif %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}5 ta Xodim{% elif current_language == 'en' %}5 Staff Members{% else %}5 Сотрудников{% endif %}
+                                {% if current_language == 'uz' %}3 ta Xodim{% elif current_language == 'en' %}3 Staff Members{% else %}3 Сотрудника{% endif %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}500 Buyurtma/oy{% elif current_language == 'en' %}500 Orders/month{% else %}500 Заказов/месяц{% endif %}
+                                {% if current_language == 'uz' %}150 Buyurtma/oy{% elif current_language == 'en' %}150 Orders/month{% else %}150 Заказов/месяц{% endif %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> Telegram Bot</li>
                             <li><i class="fas fa-check-circle"></i> 
                                 {% if current_language == 'uz' %}Asosiy Hisobotlar{% elif current_language == 'en' %}Basic Reports{% else %}Базовые Отчеты{% endif %}
                             </li>
+                            <li><i class="fas fa-check-circle"></i> 
+                                {% if current_language == 'uz' %}Excel Eksport{% elif current_language == 'en' %}Excel Export{% else %}Экспорт в Excel{% endif %}
+                            </li>
                             <li class="disabled"><i class="fas fa-times-circle"></i> 
                                 {% if current_language == 'uz' %}Kengaytirilgan Analitika{% elif current_language == 'en' %}Advanced Analytics{% else %}Расширенная Аналитика{% endif %}
                             </li>
                             <li class="disabled"><i class="fas fa-times-circle"></i> 
-                                {% if current_language == 'uz' %}API Kirish{% elif current_language == 'en' %}API Access{% else %}Доступ к API{% endif %}
+                                {% if current_language == 'uz' %}Marketing Vositalari{% elif current_language == 'en' %}Marketing Tools{% else %}Маркетинговые Инструменты{% endif %}
                             </li>
                         </ul>
                         <a href="#contact" class="btn btn-outline-custom w-100">
@@ -1093,13 +1096,13 @@
                                 {% if current_language == 'uz' %}1 ta Tarjima Markazi{% elif current_language == 'en' %}1 Translation Center{% else %}1 Центр Переводов{% endif %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}10 ta Filial{% elif current_language == 'en' %}10 Branches{% else %}10 Филиалов{% endif %}
+                                {% if current_language == 'uz' %}3 ta Filial{% elif current_language == 'en' %}3 Branches{% else %}3 Филиала{% endif %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}20 ta Xodim{% elif current_language == 'en' %}20 Staff Members{% else %}20 Сотрудников{% endif %}
+                                {% if current_language == 'uz' %}10 ta Xodim{% elif current_language == 'en' %}10 Staff Members{% else %}10 Сотрудников{% endif %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Cheksiz Buyurtmalar{% elif current_language == 'en' %}Unlimited Orders{% else %}Безлимитные Заказы{% endif %}
+                                {% if current_language == 'uz' %}500 Buyurtma/oy{% elif current_language == 'en' %}500 Orders/month{% else %}500 Заказов/месяц{% endif %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> Telegram Bot</li>
                             <li><i class="fas fa-check-circle"></i> 
@@ -1111,7 +1114,9 @@
                             <li><i class="fas fa-check-circle"></i> 
                                 {% if current_language == 'uz' %}Marketing Vositalari{% elif current_language == 'en' %}Marketing Tools{% else %}Маркетинговые Инструменты{% endif %}
                             </li>
-                            <li class="disabled"><i class="fas fa-times-circle"></i> API Access</li>
+                            <li><i class="fas fa-check-circle"></i> 
+                                {% if current_language == 'uz' %}Avtomatik Arxivlash{% elif current_language == 'en' %}Auto Archiving{% else %}Автоматическое Архивирование{% endif %}
+                            </li>
                         </ul>
                         <a href="#contact" class="btn btn-primary-custom w-100">
                             {% if current_language == 'uz' %}Tanlash{% elif current_language == 'en' %}Choose Plan{% else %}Выбрать План{% endif %}
@@ -1145,12 +1150,14 @@
                             <li><i class="fas fa-check-circle"></i> 
                                 {% if current_language == 'uz' %}Barcha Imkoniyatlar{% elif current_language == 'en' %}All Features{% else %}Все Возможности{% endif %}
                             </li>
-                            <li><i class="fas fa-check-circle"></i> API Access</li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Shaxsiy Qo'llab-quvvatlash{% elif current_language == 'en' %}Priority Support{% else %}Приоритетная Поддержка{% endif %}
+                                {% if current_language == 'uz' %}API Integratsiyasi{% elif current_language == 'en' %}API Integration{% else %}API Интеграция{% endif %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Maxsus Integratsiya{% elif current_language == 'en' %}Custom Integration{% else %}Кастомная Интеграция{% endif %}
+                                {% if current_language == 'uz' %}24/7 Texnik Qo'llab-quvvatlash{% elif current_language == 'en' %}24/7 Technical Support{% else %}24/7 Техническая Поддержка{% endif %}
+                            </li>
+                            <li><i class="fas fa-check-circle"></i> 
+                                {% if current_language == 'uz' %}Shaxsiy Menejer{% elif current_language == 'en' %}Dedicated Manager{% else %}Персональный Менеджер{% endif %}
                             </li>
                         </ul>
                         <a href="#contact" class="btn btn-outline-custom w-100">
