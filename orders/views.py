@@ -558,8 +558,8 @@ def orderEdit(request, order_id):
                 )
                 order.files.add(order_media)
             
-            # Recalculate price using the order's calculated_price() method
-            order.total_price = order.calculated_price()
+            # Recalculate price using the order's calculated_price property
+            order.total_price = order.calculated_price
             
             # Update extra fee
             try:
@@ -1174,7 +1174,7 @@ def orderCreate(request):
                 product=product,
                 total_pages=total_pages,
                 copy_number=copy_number,
-            ).calculated_price()
+            ).calculated_price
             
             # Create the order
             order = Order.objects.create(

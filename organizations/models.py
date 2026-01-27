@@ -1184,7 +1184,11 @@ class AdminUser(models.Model):
 
     def has_permission(self, permission):
         """Check if user has a specific permission with alias support"""
+        # If user has no role, they have no permissions (unless they're superuser)
         if not self.role:
+            # Check if the underlying Django user is a superuser
+            if hasattr(self, 'user') and self.user and self.user.is_superuser:
+                return True
             return False
         
         # Permission aliases for backward compatibility
