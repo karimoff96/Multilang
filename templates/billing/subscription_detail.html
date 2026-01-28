@@ -5,9 +5,27 @@
 
 {% block content %}
 <div class="dashboard-main-body">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-        <h6 class="fw-semibold mb-0">{% trans "Subscription Details" %}</h6>
+    <div class="d-flex justify-content-end gap-2 mb-24">
         <ul class="d-flex align-items-center gap-2">
+            {% if subscription.is_trial %}
+            <li>
+                <a href="{% url 'billing:convert_trial_to_paid' subscription.pk %}" 
+                   class="btn btn-warning-600 text-white"
+                   title="{% trans 'Convert to Paid' %}"
+                   data-bs-toggle="tooltip">
+                    <i class="ri-vip-crown-2-line"></i>
+                </a>
+            </li>
+            {% else %}
+            <li>
+                <a href="{% url 'billing:subscription_renew' subscription.pk %}" 
+                   class="btn btn-success-600 text-white"
+                   title="{% trans 'Renew Subscription' %}"
+                   data-bs-toggle="tooltip">
+                    <i class="ri-refresh-line"></i>
+                </a>
+            </li>
+            {% endif %}
             <li class="fw-medium">
                 <a href="{% url 'billing:subscription_list' %}" class="d-flex align-items-center gap-1 hover-text-primary">
                     <iconify-icon icon="solar:arrow-left-bold" class="icon text-lg"></iconify-icon>
@@ -18,8 +36,69 @@
     </div>
 
     <div class="row gy-4">
+        <!-- Analytics Summary -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">{% trans "Center Analytics Summary" %}</h6>
+                    <a href="{% url 'billing:subscription_analytics' subscription.organization.id %}" 
+                       class="btn btn-sm btn-primary-600"
+                       title="{% trans 'View Full Analytics' %}"
+                       data-bs-toggle="tooltip">
+                        <i class="ri-bar-chart-line"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <div class="text-primary-600 mb-2">
+                                    <i class="ri-calendar-check-line" style="font-size: 32px;"></i>
+                                </div>
+                                <h6 class="mb-1">
+                                    {% if analytics.account_age_years >= 1 %}
+                                        {{ analytics.account_age_years }} {% trans "years" %}
+                                    {% else %}
+                                        {{ analytics.account_age_days }} {% trans "days" %}
+                                    {% endif %}
+                                </h6>
+                                <small class="text-secondary-light">{% trans "Account Age" %}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <div class="text-success-600 mb-2">
+                                    <i class="ri-money-dollar-circle-line" style="font-size: 32px;"></i>
+                                </div>
+                                <h6 class="mb-1">{{ analytics.lifetime_value|floatformat:2 }} UZS</h6>
+                                <small class="text-secondary-light">{% trans "Lifetime Value" %}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <div class="text-info-600 mb-2">
+                                    <i class="ri-file-list-3-line" style="font-size: 32px;"></i>
+                                </div>
+                                <h6 class="mb-1">{{ analytics.total_subscriptions_count }}</h6>
+                                <small class="text-secondary-light">{% trans "Total Subscriptions" %}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <div class="text-warning-600 mb-2">
+                                    <i class="ri-calendar-todo-line" style="font-size: 32px;"></i>
+                                </div>
+                                <h6 class="mb-1">{{ analytics.first_subscription_date|date:"d M Y" }}</h6>
+                                <small class="text-secondary-light">{% trans "First Subscription" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Subscription Info -->
-        <div class="col-xxl-8">
+        <div class="col-xxl-8"
             <div class="card">
                 <div class="card-header">
                     <h6 class="mb-0">{% trans "Subscription Information" %}</h6>
@@ -41,6 +120,11 @@
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Status" %}</label>
                             <p>
+                                {% if subscription.is_trial %}
+                                <span class="badge bg-info-600 text-white px-12 py-6">
+                                    <i class="ri-vip-crown-line"></i> {% trans "Free Trial" %}
+                                </span>
+                                {% endif %}
                                 {% if subscription.status == 'active' %}
                                 <span class="badge bg-success-600 text-white px-12 py-6">{% trans "Active" %}</span>
                                 {% elif subscription.status == 'expired' %}
@@ -52,6 +136,18 @@
                                 {% endif %}
                             </p>
                         </div>
+                        {% if subscription.is_trial %}
+                        <div class="col-md-6">
+                            <label class="text-secondary-light">{% trans "Trial End Date" %}</label>
+                            <p class="fw-semibold">{{ subscription.trial_end_date|date:"F d, Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-secondary-light">{% trans "Trial Days Remaining" %}</label>
+                            <p class="fw-semibold {% if subscription.trial_days_remaining <= 3 %}text-danger-600{% endif %}">
+                                {{ subscription.trial_days_remaining }} {% trans "days" %}
+                            </p>
+                        </div>
+                        {% endif %}
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Start Date" %}</label>
                             <p class="fw-semibold">{{ subscription.start_date|date:"F d, Y" }}</p>
@@ -60,12 +156,14 @@
                             <label class="text-secondary-light">{% trans "End Date" %}</label>
                             <p class="fw-semibold">{{ subscription.end_date|date:"F d, Y" }}</p>
                         </div>
+                        {% if not subscription.is_trial %}
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Days Remaining" %}</label>
                             <p class="fw-semibold {% if subscription.days_remaining <= 7 %}text-danger-600{% endif %}">
                                 {{ subscription.days_remaining }} {% trans "days" %}
                             </p>
                         </div>
+                        {% endif %}
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Auto-Renew" %}</label>
                             <p class="fw-semibold">
@@ -166,28 +264,60 @@
                 </div>
             </div>
 
-            <!-- History -->
+            <!-- Recent History -->
             <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">{% trans "History" %}</h6>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">{% trans "Recent History" %}</h6>
+                    <span class="badge bg-primary-50 text-primary-600">{{ history_entries.count }} {% trans "entries" %}</span>
                 </div>
                 <div class="card-body">
-                    <ul class="list-unstyled">
-                        {% for history in subscription.history.all %}
-                        <li class="mb-3">
+                    <ul class="list-unstyled mb-0" style="max-height: 400px; overflow-y: auto;">
+                        {% for history in history_entries %}
+                        <li class="mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
                             <div class="d-flex align-items-start gap-2">
-                                <iconify-icon icon="solar:history-bold" class="text-primary-600 mt-1"></iconify-icon>
-                                <div>
-                                    <p class="mb-0 fw-semibold">{{ history.action }}</p>
-                                    <p class="mb-0 text-secondary-light text-sm">{{ history.description }}</p>
-                                    <p class="mb-0 text-secondary-light text-xs">{{ history.timestamp|date:"M d, Y H:i" }} by {{ history.performed_by.username }}</p>
+                                {% if history.action == 'created' %}
+                                    <i class="ri-add-circle-line text-success-600 mt-1" style="font-size: 20px;"></i>
+                                {% elif history.action == 'renewed' %}
+                                    <i class="ri-refresh-line text-primary-600 mt-1" style="font-size: 20px;"></i>
+                                {% elif history.action == 'trial_converted' %}
+                                    <i class="ri-vip-crown-line text-warning-600 mt-1" style="font-size: 20px;"></i>
+                                {% elif history.action == 'cancelled' %}
+                                    <i class="ri-close-circle-line text-danger-600 mt-1" style="font-size: 20px;"></i>
+                                {% elif history.action == 'status_changed' %}
+                                    <i class="ri-edit-line text-info-600 mt-1" style="font-size: 20px;"></i>
+                                {% else %}
+                                    <i class="ri-history-line text-secondary-600 mt-1" style="font-size: 20px;"></i>
+                                {% endif %}
+                                <div class="flex-grow-1">
+                                    <p class="mb-1 fw-semibold">{{ history.action|title }}</p>
+                                    <p class="mb-1 text-secondary-light text-sm">{{ history.description }}</p>
+                                    <p class="mb-0 text-secondary-light text-xs">
+                                        <i class="ri-time-line"></i> {{ history.timestamp|date:"M d, Y H:i" }}
+                                        {% if history.performed_by %}
+                                            | <i class="ri-user-line"></i> {{ history.performed_by.get_full_name|default:history.performed_by.username }}
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </li>
                         {% empty %}
-                        <li class="text-center text-secondary-light">{% trans "No history available" %}</li>
+                        <li class="text-center text-secondary-light py-4">
+                            <i class="ri-history-line" style="font-size: 48px; opacity: 0.3;"></i>
+                            <p class="mb-0 mt-2">{% trans "No history available" %}</p>
+                        </li>
                         {% endfor %}
                     </ul>
+                    
+                    {% if history_entries %}
+                    <div class="mt-3 pt-3 border-top text-center">
+                        <a href="{% url 'billing:subscription_analytics' subscription.organization.id %}" 
+                           class="btn btn-sm btn-outline-primary-600"
+                           title="{% trans 'View Complete History' %}"
+                           data-bs-toggle="tooltip">
+                            <i class="ri-file-list-line"></i>
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

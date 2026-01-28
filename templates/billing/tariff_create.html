@@ -1,0 +1,188 @@
+{% extends "layout/layout.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Create Tariff" %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-main-body">
+    <div class="d-flex justify-content-end gap-3 mb-24">
+        <a href="{% url 'billing:tariff_list' %}" 
+           class="btn btn-outline-primary-600 no-hover-effect"
+           title="{% trans 'Back to List' %}"
+           data-bs-toggle="tooltip">
+            <i class="ri-arrow-left-line text-white"></i>
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-24">
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Basic Information -->
+                <div class="row gy-3 mb-32">
+                    <div class="col-12">
+                        <h6 class="text-md text-primary-light mb-16">{% trans "Basic Information" %}</h6>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">{% trans "Title" %} *</label>
+                        <input type="text" name="title" class="form-control" required 
+                               placeholder="{% trans 'e.g., Starter, Professional, Enterprise' %}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">{% trans "Slug" %} *</label>
+                        <input type="text" name="slug" class="form-control" required 
+                               placeholder="{% trans 'e.g., starter, professional, enterprise' %}"
+                               pattern="[a-z0-9-]+" title="{% trans 'Only lowercase letters, numbers, and hyphens' %}">
+                        <small class="text-secondary-light">{% trans "URL-friendly identifier (lowercase, no spaces)" %}</small>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">{% trans "Description" %}</label>
+                        <textarea name="description" class="form-control" rows="3" 
+                                  placeholder="{% trans 'Describe this tariff plan...' %}"></textarea>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans "Display Order" %}</label>
+                        <input type="number" name="display_order" class="form-control" value="0">
+                        <small class="text-secondary-light">{% trans "Lower numbers appear first" %}</small>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label d-block mb-8">&nbsp;</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_active" id="isActive" checked>
+                            <label class="form-check-label" for="isActive">
+                                {% trans "Active" %}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label d-block mb-8">&nbsp;</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_featured" id="isFeatured">
+                            <label class="form-check-label" for="isFeatured">
+                                {% trans "Featured" %}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label d-block mb-8">&nbsp;</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_trial" id="isTrial" onchange="toggleTrialSettings()">
+                            <label class="form-check-label" for="isTrial">
+                                {% trans "Is Trial" %}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6" id="trialDaysContainer" style="display:none;">
+                        <label class="form-label">{% trans "Trial Days" %}</label>
+                        <input type="number" name="trial_days" id="trialDays" class="form-control" value="10" min="1">
+                        <small class="text-secondary-light">{% trans "Number of days for free trial period" %}</small>
+                    </div>
+                </div>
+
+                <!-- Limits -->
+                <div class="row gy-3 mb-32">
+                    <div class="col-12">
+                        <h6 class="text-md text-primary-light mb-8">{% trans "Resource Limits" %}</h6>
+                        <p class="text-sm text-secondary-light mb-16">{% trans "Leave empty for unlimited access" %}</p>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans "Max Branches" %}</label>
+                        <input type="number" name="max_branches" class="form-control" min="0" 
+                               placeholder="{% trans 'Empty = Unlimited' %}">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans "Max Staff" %}</label>
+                        <input type="number" name="max_staff" class="form-control" min="0" 
+                               placeholder="{% trans 'Empty = Unlimited' %}">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans "Max Monthly Orders" %}</label>
+                        <input type="number" name="max_monthly_orders" class="form-control" min="0" 
+                               placeholder="{% trans 'Empty = Unlimited' %}">
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="row gy-3 mb-32">
+                    <div class="col-12">
+                        <h6 class="text-md text-primary-light mb-16">{% trans "Included Features" %}</h6>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="row gy-2">
+                            {% for feature in features %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           name="features" value="{{ feature.id }}" 
+                                           id="feature{{ feature.id }}">
+                                    <label class="form-check-label" for="feature{{ feature.id }}">
+                                        <strong>{{ feature.name }}</strong>
+                                        {% if feature.category %}
+                                        <span class="badge bg-neutral-200 text-secondary-light text-xs ms-2">
+                                            {{ feature.category }}
+                                        </span>
+                                        {% endif %}
+                                        {% if feature.description %}
+                                        <br><small class="text-secondary-light">{{ feature.description|truncatewords:10 }}</small>
+                                        {% endif %}
+                                    </label>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="col-12">
+                                <p class="text-secondary-light">{% trans "No features available. Create features first in the admin panel." %}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex gap-2 justify-content-end">
+                    <a href="{% url 'billing:tariff_list' %}" 
+                       class="btn btn-outline-secondary-600 no-hover-effect"
+                       title="{% trans 'Cancel' %}"
+                       data-bs-toggle="tooltip">
+                        <i class="ri-close-line text-white"></i>
+                    </a>
+                    <button type="submit" 
+                            class="btn btn-primary-600 no-hover-effect"
+                            title="{% trans 'Create Tariff' %}"
+                            data-bs-toggle="tooltip">
+                        <i class="ri-add-line text-white"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleTrialSettings() {
+    const isTrial = document.getElementById('isTrial').checked;
+    const trialContainer = document.getElementById('trialDaysContainer');
+    const trialDaysInput = document.getElementById('trialDays');
+    
+    if (isTrial) {
+        trialContainer.style.display = 'block';
+        trialDaysInput.required = true;
+    } else {
+        trialContainer.style.display = 'none';
+        trialDaysInput.required = false;
+    }
+}
+</script>
+{% endblock %}

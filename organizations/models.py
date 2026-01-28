@@ -97,15 +97,20 @@ class TranslationCenter(models.Model):
         
         today = date.today()
         return Order.objects.filter(
-            created_by__organization=self,
+            branch__center=self,
             created_at__year=today.year,
             created_at__month=today.month
         ).count()
     
     def get_staff_count(self):
         """Get total staff count across all branches"""
-        from accounts.models import User
-        return User.objects.filter(organization=self).count()
+        # Count AdminUser (staff) that belong to this center
+        # Staff can be linked via center field OR via branch that belongs to this center
+        from organizations.models import AdminUser
+        return AdminUser.objects.filter(
+            models.Q(center=self) | models.Q(branch__center=self),
+            is_active=True
+        ).distinct().count()
     
     def has_active_subscription(self):
         """Check if center has an active subscription"""

@@ -20,8 +20,8 @@ class TariffPricingInline(admin.TabularInline):
 
 @admin.register(Tariff)
 class TariffAdmin(admin.ModelAdmin):
-    list_display = ['title', 'slug', 'is_active', 'is_featured', 'limits_summary', 'display_order']
-    list_filter = ['is_active', 'is_featured']
+    list_display = ['title', 'slug', 'is_trial', 'trial_days', 'is_active', 'is_featured', 'limits_summary', 'display_order']
+    list_filter = ['is_active', 'is_featured', 'is_trial']
     search_fields = ['title', 'slug', 'description']
     filter_horizontal = ['features']
     prepopulated_fields = {'slug': ('title',)}
@@ -29,6 +29,10 @@ class TariffAdmin(admin.ModelAdmin):
     fieldsets = (
         (_('Basic Information'), {
             'fields': ('title', 'slug', 'description', 'is_active', 'is_featured', 'display_order')
+        }),
+        (_('Trial Settings'), {
+            'fields': ('is_trial', 'trial_days'),
+            'description': _('Configure free trial period for this tariff')
         }),
         (_('Limits'), {
             'fields': ('max_branches', 'max_staff', 'max_monthly_orders')
@@ -90,6 +94,10 @@ class SubscriptionAdmin(admin.ModelAdmin):
         }),
         (_('Subscription Period'), {
             'fields': ('start_date', 'end_date', 'status', 'auto_renew')
+        }),
+        (_('Trial Period'), {
+            'fields': ('is_trial', 'trial_end_date'),
+            'description': _('Trial subscription information')
         }),
         (_('Payment Information'), {
             'fields': ('amount_paid', 'payment_date', 'payment_method', 'transaction_id')

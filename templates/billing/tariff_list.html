@@ -5,75 +5,174 @@
 
 {% block content %}
 <div class="dashboard-main-body">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-        <h6 class="fw-semibold mb-0">{% trans "Tariff Plans" %}</h6>
-        <ul class="d-flex align-items-center gap-2">
-            <li class="fw-medium">
-                <a href="{% url 'dashboard' %}" class="d-flex align-items-center gap-1 hover-text-primary">
-                    <iconify-icon icon="solar:home-smile-angle-outline" class="icon text-lg"></iconify-icon>
-                    {% trans "Dashboard" %}
-                </a>
-            </li>
-            <li>-</li>
-            <li class="fw-medium">{% trans "Tariffs" %}</li>
-        </ul>
-    </div>
-
-    <div class="alert alert-info">
-        <iconify-icon icon="solar:info-circle-bold" class="text-xl"></iconify-icon>
-        {% trans "Tariff plans can be managed through the Django admin panel at" %} <a href="/admin/billing/tariff/" target="_blank">/admin/billing/tariff/</a>
+    <div class="d-flex justify-content-end gap-3 mb-24">
+        <a href="{% url 'billing:tariff_create' %}" 
+           class="btn btn-primary-600"
+           title="{% trans 'Create New Tariff' %}"
+           data-bs-toggle="tooltip">
+            <i class="ri-add-line"></i>
+        </a>
     </div>
 
     <div class="row gy-4">
         {% for tariff in tariffs %}
         <div class="col-xxl-4 col-md-6">
-            <div class="card h-100 border {% if tariff.is_active %}border-primary-600{% endif %}">
-                <div class="card-body">
-                    <h5 class="mb-4">{{ tariff.title }}</h5>
-                    
-                    <div class="mb-4">
-                        <h6 class="text-secondary-light">{% trans "Limits" %}:</h6>
-                        <ul class="list-unstyled">
-                            <li><iconify-icon icon="solar:buildings-2-bold"></iconify-icon> {% trans "Branches" %}: 
-                                {% if tariff.max_branches %}{{ tariff.max_branches }}{% else %}<span class="text-success-600">{% trans "Unlimited" %}</span>{% endif %}
-                            </li>
-                            <li><iconify-icon icon="solar:users-group-rounded-bold"></iconify-icon> {% trans "Staff" %}: 
-                                {% if tariff.max_staff %}{{ tariff.max_staff }}{% else %}<span class="text-success-600">{% trans "Unlimited" %}</span>{% endif %}
-                            </li>
-                            <li><iconify-icon icon="solar:bag-4-bold"></iconify-icon> {% trans "Monthly Orders" %}: 
-                                {% if tariff.max_monthly_orders %}{{ tariff.max_monthly_orders }}{% else %}<span class="text-success-600">{% trans "Unlimited" %}</span>{% endif %}
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="mb-4">
-                        <h6 class="text-secondary-light">{% trans "Features" %}:</h6>
-                        <ul class="list-unstyled">
-                            {% for feature in tariff.features.all %}
-                            <li><iconify-icon icon="solar:check-circle-bold" class="text-success-600"></iconify-icon> {{ feature.name }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h6 class="text-secondary-light">{% trans "Pricing Options" %}:</h6>
-                        {% for pricing in tariff.pricing.all %}
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span>{{ pricing.duration_months }} {% trans "month(s)" %}</span>
-                            <span class="fw-semibold">{{ pricing.price|floatformat:0 }} {{ pricing.currency }}</span>
+            <div class="card h-100 radius-12 border">
+                <div class="card-body p-24">
+                    <!-- Badges -->
+                    <div class="d-flex justify-content-between align-items-start mb-16">
+                        <div>
+                            <h5 class="mb-4">{{ tariff.title }}</h5>
                         </div>
+                        <div class="d-flex flex-column gap-2">
+                            {% if tariff.is_trial %}
+                            <span class="badge bg-info-600 text-white px-12 py-6">
+                                <i class="ri-vip-crown-line"></i> {% trans "Trial" %}
+                            </span>
+                            {% endif %}
+                            {% if tariff.is_featured %}
+                            <span class="badge bg-warning-600 text-white px-12 py-6">
+                                <i class="ri-star-fill"></i> {% trans "Featured" %}
+                            </span>
+                            {% endif %}
+                            {% if not tariff.is_active %}
+                            <span class="badge bg-danger-600 text-white px-12 py-6">
+                                {% trans "Inactive" %}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <p class="text-secondary-light text-sm mb-20">{{ tariff.description|truncatewords:15 }}</p>
+                    
+                    <!-- Limits -->
+                    <div class="mb-20">
+                        <h6 class="text-secondary-light mb-12">{% trans "Limits" %}:</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-8">
+                                <i class="ri-building-line text-primary-600"></i> {% trans "Branches" %}: 
+                                <strong>{{ tariff.max_branches|default:"∞" }}</strong>
+                            </li>
+                            <li class="mb-8">
+                                <i class="ri-team-line text-primary-600"></i> {% trans "Staff" %}: 
+                                <strong>{{ tariff.max_staff|default:"∞" }}</strong>
+                            </li>
+                            <li class="mb-8">
+                                <i class="ri-file-list-3-line text-primary-600"></i> {% trans "Orders/Month" %}: 
+                                <strong>{{ tariff.max_monthly_orders|default:"∞" }}</strong>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Features -->
+                    {% if tariff.features.count > 0 %}
+                    <div class="mb-20">
+                        <h6 class="text-secondary-light mb-12">{% trans "Features" %}:</h6>
+                        <ul class="list-unstyled mb-0">
+                            {% for feature in tariff.features.all|slice:":4" %}
+                            <li class="text-sm mb-4">
+                                <i class="ri-checkbox-circle-fill text-success-600"></i> {{ feature.name }}
+                            </li>
+                            {% endfor %}
+                            {% if tariff.features.count > 4 %}
+                            <li class="text-sm text-secondary-light">
+                                <i class="ri-more-line"></i> +{{ tariff.features.count|add:"-4" }} {% trans "more" %}
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <!-- Pricing -->
+                    {% if not tariff.is_trial %}
+                    <div class="mb-20">
+                        <h6 class="text-secondary-light mb-12">{% trans "Pricing Options" %}:</h6>
+                        {% for pricing in tariff.pricing.all %}
+                        <div class="d-flex justify-content-between align-items-center mb-8">
+                            <span class="text-sm">{{ pricing.duration_months }} {% trans "month(s)" %}</span>
+                            <span class="fw-semibold text-primary-600">
+                                {{ pricing.price|floatformat:0 }} {{ pricing.currency }}
+                            </span>
+                        </div>
+                        {% empty %}
+                        <p class="text-sm text-warning-600 mb-0">
+                            <i class="ri-alert-line"></i> {% trans "No pricing defined" %}
+                        </p>
                         {% endfor %}
                     </div>
-
-                    <div class="mt-4">
-                        <a href="/admin/billing/tariff/{{ tariff.id }}/change/" class="btn btn-primary-600 w-100" target="_blank">
-                            <iconify-icon icon="solar:pen-bold"></iconify-icon> {% trans "Edit in Admin" %}
-                        </a>
+                    {% else %}
+                    <div class="alert alert-info-50 text-info-600 p-12 mb-20">
+                        <i class="ri-information-line"></i> 
+                        <strong>{{ tariff.trial_days }}</strong> {% trans "days free trial" %}
                     </div>
+                    {% endif %}
+
+                    <!-- Subscriptions Count -->
+                    <div class="mb-20">
+                        <span class="badge bg-neutral-200 text-secondary-light px-12 py-6">
+                            <i class="ri-user-3-line"></i> 
+                            {{ tariff.subscriptions.count }} {% trans "subscription(s)" %}
+                        </span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'billing:tariff_edit' tariff.pk %}" 
+                           class="btn btn-outline-primary-600 btn-sm flex-grow-1"
+                           title="{% trans 'Edit' %}"
+                           data-bs-toggle="tooltip">
+                            <i class="ri-edit-line"></i>
+                        </a>
+                        <button type="button" 
+                                class="btn btn-outline-danger-600 btn-sm flex-grow-1"
+                                onclick="confirmDelete({{ tariff.pk }}, '{{ tariff.title }}', {{ tariff.subscriptions.filter.count }})"
+                                title="{% trans 'Delete' %}"
+                                data-bs-toggle="tooltip">
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card border radius-12">
+                <div class="card-body text-center py-40">
+                    <i class="ri-file-list-3-line text-secondary-light" style="font-size: 48px;"></i>
+                    <h6 class="mt-16 mb-8">{% trans "No Tariffs Found" %}</h6>
+                    <p class="text-secondary-light mb-16">
+                        {% trans "Create your first tariff plan to start offering subscriptions" %}
+                    </p>
+                    <a href="{% url 'billing:tariff_create' %}" 
+                       class="btn btn-primary-600"
+                       title="{% trans 'Create Tariff' %}"
+                       data-bs-toggle="tooltip">
+                        <i class="ri-add-line"></i>
+                    </a>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<form id="deleteForm" method="post" style="display:none;">
+    {% csrf_token %}
+</form>
+
+<script>
+function confirmDelete(tariffId, tariffName, subscriptionCount) {
+    if (subscriptionCount > 0) {
+        alert('{% trans "Cannot delete this tariff. It has active subscriptions." %}');
+        return;
+    }
+    
+    if (confirm(`{% trans "Are you sure you want to delete" %} "${tariffName}"?\n\n{% trans "This action cannot be undone." %}`)) {
+        const form = document.getElementById('deleteForm');
+        form.action = `/billing/tariffs/${tariffId}/delete/`;
+        form.submit();
+    }
+}
+</script>
 {% endblock %}

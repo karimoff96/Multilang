@@ -77,6 +77,11 @@ def contact_requests_list(request):
     # Get filter parameters
     status_filter = request.GET.get('status', 'all')
     search_query = request.GET.get('search', '')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    has_company = request.GET.get('has_company')
+    has_phone = request.GET.get('has_phone')
+    sort_by = request.GET.get('sort', '-created_at')  # Default: newest first
     
     # Base queryset
     requests_qs = ContactRequest.objects.all()
@@ -95,6 +100,44 @@ def contact_requests_list(request):
             Q(message__icontains=search_query)
         )
     
+    # Apply date range filter
+    if date_from:
+        from datetime import datetime
+        try:
+            date_from_obj = datetime.strptime(date_from, '%Y-%m-%d')
+            requests_qs = requests_qs.filter(created_at__gte=date_from_obj)
+        except ValueError:
+            pass
+    
+    if date_to:
+        from datetime import datetime, timedelta
+        try:
+            date_to_obj = datetime.strptime(date_to, '%Y-%m-%d')
+            # Include the entire end date
+            date_to_obj = date_to_obj + timedelta(days=1)
+            requests_qs = requests_qs.filter(created_at__lt=date_to_obj)
+        except ValueError:
+            pass
+    
+    # Apply company filter
+    if has_company == 'yes':
+        requests_qs = requests_qs.exclude(company__isnull=True).exclude(company='')
+    elif has_company == 'no':
+        requests_qs = requests_qs.filter(Q(company__isnull=True) | Q(company=''))
+    
+    # Apply phone filter
+    if has_phone == 'yes':
+        requests_qs = requests_qs.exclude(phone__isnull=True).exclude(phone='')
+    elif has_phone == 'no':
+        requests_qs = requests_qs.filter(Q(phone__isnull=True) | Q(phone=''))
+    
+    # Apply sorting
+    valid_sorts = ['created_at', '-created_at', 'name', '-name', 'email', '-email', 'status', '-status']
+    if sort_by in valid_sorts:
+        requests_qs = requests_qs.order_by(sort_by)
+    else:
+        requests_qs = requests_qs.order_by('-created_at')
+    
     # Pagination
     paginator = Paginator(requests_qs, 20)  # 20 items per page
     page_number = request.GET.get('page')
@@ -109,9 +152,16 @@ def contact_requests_list(request):
     cancelled_requests = ContactRequest.objects.filter(status=ContactRequest.STATUS_CANCELLED).count()
     
     context = {
+        'title': _('Contact Requests from Landing Page'),
+        'subTitle': _('Contact Requests'),
         'contact_requests': contact_requests,
         'status_filter': status_filter,
         'search_query': search_query,
+        'date_from': date_from,
+        'date_to': date_to,
+        'has_company': has_company,
+        'has_phone': has_phone,
+        'sort_by': sort_by,
         'total_requests': total_requests,
         'new_requests': new_requests,
         'contacted_requests': contacted_requests,

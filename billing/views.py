@@ -3,11 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.core.paginator import Paginator
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
-from .models import Tariff, TariffPricing, Subscription, Feature, UsageTracking, SubscriptionHistory
+from .models import Tariff, TariffPricing, Subscription, Feature, UsageTracking, SubscriptionHistory, SubscriptionAnalytics
 from organizations.models import TranslationCenter
 
 
@@ -57,6 +57,8 @@ def subscription_list(request):
     subscriptions_page = paginator.get_page(page_number)
     
     context = {
+        'title': _('Subscription Management'),
+        'subTitle': _('Subscriptions'),
         'subscriptions': subscriptions_page,
         'status_filter': status_filter,
         'search_query': search_query,
@@ -92,7 +94,12 @@ def subscription_create(request, center_id):
         
         try:
             tariff = Tariff.objects.get(pk=tariff_id)
-            pricing = TariffPricing.objects.get(pk=pricing_id)
+            
+            # For trial subscriptions, pricing is not required
+            if tariff.is_trial:
+                pricing = None
+            else:
+                pricing = TariffPricing.objects.get(pk=pricing_id)
             
             # Convert string date to date object
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else date.today()
@@ -117,7 +124,7 @@ def subscription_create(request, center_id):
                 tariff=tariff,
                 pricing=pricing,
                 start_date=start_date,
-                status=status,
+                status=status if not tariff.is_trial else Subscription.STATUS_ACTIVE,
                 amount_paid=amount_paid if amount_paid else None,
                 payment_method=payment_method,
                 transaction_id=transaction_id,
@@ -162,15 +169,18 @@ def subscription_detail(request, pk):
     
     subscription = get_object_or_404(
         Subscription.objects.select_related(
-            'organization', 'tariff', 'pricing', 'created_by'
-        ).prefetch_related('history'),
+            'organization', 'tariff', 'pricing'
+        ),
         pk=pk
     )
+    
+    # Get comprehensive analytics for this center
+    org = subscription.organization
+    analytics = SubscriptionAnalytics.get_center_analytics(org)
     
     # Get usage statistics
     current_usage = {}
     if subscription.organization:
-        org = subscription.organization
         current_usage = {
             'branches': org.branches.count(),
             'branches_limit': subscription.tariff.max_branches,
@@ -183,9 +193,14 @@ def subscription_detail(request, pk):
             'orders_percent': subscription.get_usage_percentage('orders'),
         }
     
+    # Get subscription history
+    history_entries = subscription.history.all()[:20]  # Last 20 entries
+    
     context = {
         'subscription': subscription,
         'current_usage': current_usage,
+        'analytics': analytics,
+        'history_entries': history_entries,
     }
     
     return render(request, 'billing/subscription_detail.html', context)
@@ -233,10 +248,146 @@ def tariff_list(request):
     tariffs = Tariff.objects.prefetch_related('pricing', 'features').all()
     
     context = {
+        'title': _('Tariff Plans'),
+        'subTitle': _('Tariffs'),
         'tariffs': tariffs,
     }
     
     return render(request, 'billing/tariff_list.html', context)
+
+
+@login_required
+def tariff_create(request):
+    """Create new tariff - Superuser only"""
+    if not request.user.is_superuser:
+        messages.error(request, _("Access denied. This feature is only available to superusers."))
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        try:
+            title = request.POST.get('title')
+            slug = request.POST.get('slug')
+            description = request.POST.get('description', '')
+            is_active = request.POST.get('is_active') == 'on'
+            is_featured = request.POST.get('is_featured') == 'on'
+            is_trial = request.POST.get('is_trial') == 'on'
+            trial_days = request.POST.get('trial_days') or None
+            display_order = request.POST.get('display_order', 0)
+            
+            # Limits
+            max_branches = request.POST.get('max_branches') or None
+            max_staff = request.POST.get('max_staff') or None
+            max_monthly_orders = request.POST.get('max_monthly_orders') or None
+            
+            tariff = Tariff.objects.create(
+                title=title,
+                slug=slug,
+                description=description,
+                is_active=is_active,
+                is_featured=is_featured,
+                is_trial=is_trial,
+                trial_days=trial_days,
+                display_order=display_order,
+                max_branches=max_branches,
+                max_staff=max_staff,
+                max_monthly_orders=max_monthly_orders,
+            )
+            
+            # Add features
+            feature_ids = request.POST.getlist('features')
+            if feature_ids:
+                tariff.features.set(feature_ids)
+            
+            messages.success(request, _("Tariff created successfully!"))
+            return redirect('billing:tariff_list')
+            
+        except Exception as e:
+            messages.error(request, f"Error creating tariff: {str(e)}")
+    
+    features = Feature.objects.filter(is_active=True).order_by('category', 'name')
+    
+    context = {
+        'features': features,
+    }
+    
+    return render(request, 'billing/tariff_create.html', context)
+
+
+@login_required
+def tariff_edit(request, pk):
+    """Edit tariff - Superuser only"""
+    if not request.user.is_superuser:
+        messages.error(request, _("Access denied. This feature is only available to superusers."))
+        return redirect('dashboard')
+    
+    tariff = get_object_or_404(Tariff, pk=pk)
+    
+    if request.method == 'POST':
+        try:
+            tariff.title = request.POST.get('title')
+            tariff.slug = request.POST.get('slug')
+            tariff.description = request.POST.get('description', '')
+            tariff.is_active = request.POST.get('is_active') == 'on'
+            tariff.is_featured = request.POST.get('is_featured') == 'on'
+            tariff.is_trial = request.POST.get('is_trial') == 'on'
+            tariff.trial_days = request.POST.get('trial_days') or None
+            tariff.display_order = request.POST.get('display_order', 0)
+            
+            # Limits
+            max_branches = request.POST.get('max_branches')
+            max_staff = request.POST.get('max_staff')
+            max_monthly_orders = request.POST.get('max_monthly_orders')
+            
+            tariff.max_branches = int(max_branches) if max_branches else None
+            tariff.max_staff = int(max_staff) if max_staff else None
+            tariff.max_monthly_orders = int(max_monthly_orders) if max_monthly_orders else None
+            
+            tariff.save()
+            
+            # Update features
+            feature_ids = request.POST.getlist('features')
+            tariff.features.set(feature_ids if feature_ids else [])
+            
+            messages.success(request, _("Tariff updated successfully!"))
+            return redirect('billing:tariff_list')
+            
+        except Exception as e:
+            messages.error(request, f"Error updating tariff: {str(e)}")
+    
+    features = Feature.objects.filter(is_active=True).order_by('category', 'name')
+    selected_features = tariff.features.values_list('id', flat=True)
+    
+    context = {
+        'tariff': tariff,
+        'features': features,
+        'selected_features': list(selected_features),
+    }
+    
+    return render(request, 'billing/tariff_edit.html', context)
+
+
+@login_required
+def tariff_delete(request, pk):
+    """Delete tariff - Superuser only"""
+    if not request.user.is_superuser:
+        messages.error(request, _("Access denied. This feature is only available to superusers."))
+        return redirect('dashboard')
+    
+    tariff = get_object_or_404(Tariff, pk=pk)
+    
+    # Check if tariff has active subscriptions
+    active_subscriptions = tariff.subscriptions.filter(status='active').count()
+    if active_subscriptions > 0:
+        messages.error(request, _(f"Cannot delete tariff. It has {active_subscriptions} active subscription(s)."))
+        return redirect('billing:tariff_list')
+    
+    if request.method == 'POST':
+        tariff_name = tariff.title
+        tariff.delete()
+        messages.success(request, _(f"Tariff '{tariff_name}' deleted successfully!"))
+        return redirect('billing:tariff_list')
+    
+    return redirect('billing:tariff_list')
 
 
 @login_required
@@ -250,6 +401,9 @@ def usage_tracking_list(request):
     center_id = request.GET.get('center')
     year = request.GET.get('year', date.today().year)
     month = request.GET.get('month', date.today().month)
+    min_orders = request.GET.get('min_orders')
+    min_revenue = request.GET.get('min_revenue')
+    sort_by = request.GET.get('sort', '-total_revenue')  # Default: highest revenue first
     
     usage_data = UsageTracking.objects.select_related('organization').all()
     
@@ -262,7 +416,25 @@ def usage_tracking_list(request):
     if month:
         usage_data = usage_data.filter(month=month)
     
-    usage_data = usage_data.order_by('-year', '-month')
+    if min_orders:
+        try:
+            usage_data = usage_data.filter(orders_created__gte=int(min_orders))
+        except ValueError:
+            pass
+    
+    if min_revenue:
+        try:
+            usage_data = usage_data.filter(total_revenue__gte=float(min_revenue))
+        except ValueError:
+            pass
+    
+    # Apply sorting
+    valid_sorts = ['organization__name', '-organization__name', 'orders_created', '-orders_created', 
+                   'total_revenue', '-total_revenue', 'year', '-year', 'month', '-month']
+    if sort_by in valid_sorts:
+        usage_data = usage_data.order_by(sort_by, '-year', '-month')
+    else:
+        usage_data = usage_data.order_by('-total_revenue', '-year', '-month')
     
     # Pagination
     paginator = Paginator(usage_data, 20)
@@ -277,14 +449,27 @@ def usage_tracking_list(request):
     years = list(range(2024, current_year + 2))  # 2024 to current year + 1
     months = list(range(1, 13))  # 1 to 12
     
+    # Calculate summary statistics
+    total_orders = usage_data.aggregate(total=Sum('orders_created'))['total'] or 0
+    total_revenue = usage_data.aggregate(total=Sum('total_revenue'))['total'] or 0
+    total_centers = usage_data.values('organization').distinct().count()
+    
     context = {
+        'title': _('Usage Tracking'),
+        'subTitle': _('Usage Tracking'),
         'usage_data': usage_page,
         'centers': centers,
         'selected_center': center_id,
         'selected_year': year,
         'selected_month': month,
+        'min_orders': min_orders,
+        'min_revenue': min_revenue,
+        'sort_by': sort_by,
         'years': years,
         'months': months,
+        'total_orders': total_orders,
+        'total_revenue': total_revenue,
+        'total_centers': total_centers,
     }
     
     return render(request, 'billing/usage_tracking.html', context)
@@ -330,6 +515,8 @@ def centers_list(request):
     without_subscription = total_centers - with_subscription
     
     context = {
+        'title': _('All Translation Centers'),
+        'subTitle': _('Centers'),
         'centers': centers_page,
         'search_query': search_query,
         'total_centers': total_centers,
@@ -338,3 +525,213 @@ def centers_list(request):
     }
     
     return render(request, 'billing/centers_list.html', context)
+
+
+@login_required
+def convert_trial_to_paid(request, pk):
+    """Convert trial subscription to paid subscription - Superuser only"""
+    if not request.user.is_superuser:
+        messages.error(request, _("Access denied. This feature is only available to superusers."))
+        return redirect('dashboard')
+    
+    subscription = get_object_or_404(Subscription, pk=pk)
+    
+    if not subscription.is_trial:
+        messages.error(request, _("This subscription is not a trial subscription."))
+        return redirect('billing:subscription_detail', pk=pk)
+    
+    if request.method == 'POST':
+        tariff_id = request.POST.get('tariff')
+        pricing_id = request.POST.get('pricing')
+        
+        try:
+            tariff = Tariff.objects.get(pk=tariff_id, is_trial=False)
+            pricing = TariffPricing.objects.get(pk=pricing_id)
+            
+            if subscription.convert_trial_to_paid(tariff, pricing):
+                messages.success(request, _("Trial subscription converted to paid subscription successfully!"))
+                return redirect('billing:subscription_detail', pk=pk)
+            else:
+                messages.error(request, _("Failed to convert trial subscription."))
+        except Exception as e:
+            messages.error(request, f"Error converting subscription: {str(e)}")
+    
+    # Get non-trial tariffs for conversion
+    tariffs = Tariff.objects.filter(is_active=True, is_trial=False).prefetch_related('pricing')
+    
+    context = {
+        'subscription': subscription,
+        'tariffs': tariffs,
+    }
+    
+    return render(request, 'billing/convert_trial.html', context)
+
+
+@login_required
+def subscription_renew(request, pk):
+    """Renew subscription - Superuser only"""
+    if not request.user.is_superuser:
+        messages.error(request, _("Access denied. This feature is only available to superusers."))
+        return redirect('dashboard')
+    
+    subscription = get_object_or_404(Subscription, pk=pk)
+    
+    if request.method == 'POST':
+        pricing_id = request.GET.get('pricing_id') or request.POST.get('pricing')
+        payment_method = request.POST.get('payment_method', '')
+        transaction_id = request.POST.get('transaction_id', '')
+        amount_paid = request.POST.get('amount_paid')
+        notes = request.POST.get('notes', '')
+        
+        try:
+            # Get pricing (can be same or different)
+            if pricing_id:
+                pricing = TariffPricing.objects.get(pk=pricing_id)
+                tariff = pricing.tariff
+            else:
+                # Keep same pricing
+                pricing = subscription.pricing
+                tariff = subscription.tariff
+            
+            # Extend subscription
+            old_end_date = subscription.end_date
+            subscription.tariff = tariff
+            subscription.pricing = pricing
+            subscription.end_date = old_end_date + relativedelta(months=pricing.duration_months)
+            subscription.status = Subscription.STATUS_PENDING
+            subscription.payment_method = payment_method
+            subscription.transaction_id = transaction_id
+            subscription.notes = notes
+            
+            if amount_paid:
+                subscription.amount_paid = amount_paid
+                subscription.payment_date = datetime.now()
+                subscription.status = Subscription.STATUS_ACTIVE
+            
+            subscription.save()
+            
+            # Log renewal
+            SubscriptionHistory.objects.create(
+                subscription=subscription,
+                action='renewed',
+                description=f'Subscription renewed for {pricing.duration_months} month(s). Extended from {old_end_date} to {subscription.end_date}',
+                performed_by=request.user
+            )
+            
+            messages.success(request, _("Subscription renewed successfully!"))
+            return redirect('billing:subscription_detail', pk=pk)
+            
+        except Exception as e:
+            messages.error(request, f"Error renewing subscription: {str(e)}")
+    
+    # Get available pricing options for current or other tariffs
+    tariffs = Tariff.objects.filter(is_active=True, is_trial=False).prefetch_related('pricing')
+    
+    context = {
+        'subscription': subscription,
+        'tariffs': tariffs,
+    }
+    
+    return render(request, 'billing/subscription_renew.html', context)
+
+
+@login_required
+def subscription_analytics(request, center_id):
+    """Detailed subscription analytics for a specific center - Superuser only"""
+    if not request.user.is_superuser:
+        messages.error(request, _("Access denied. This feature is only available to superusers."))
+        return redirect('dashboard')
+    
+    center = get_object_or_404(TranslationCenter, pk=center_id)
+    
+    # Get comprehensive analytics
+    analytics = SubscriptionAnalytics.get_center_analytics(center)
+    
+    # Get payment history with details
+    payment_history = Subscription.objects.filter(
+        organization=center
+    ).exclude(
+        amount_paid__isnull=True
+    ).exclude(
+        amount_paid=0
+    ).order_by('-payment_date')
+    
+    # Calculate monthly breakdown
+    from django.db.models import Sum
+    from django.db.models.functions import TruncMonth
+    
+    monthly_payments = Subscription.objects.filter(
+        organization=center,
+        payment_date__isnull=False
+    ).annotate(
+        month=TruncMonth('payment_date')
+    ).values('month').annotate(
+        total=Sum('amount_paid'),
+        count=Count('id')
+    ).order_by('-month')[:12]
+    
+    context = {
+        'center': center,
+        'analytics': analytics,
+        'payment_history': payment_history,
+        'monthly_payments': monthly_payments,
+    }
+    
+    return render(request, 'billing/subscription_analytics.html', context)
+
+
+@login_required
+def centers_monitoring(request):
+    """Monitor all centers' subscription status - Superuser only"""
+    if not request.user.is_superuser:
+        messages.error(request, _("Access denied. This feature is only available to superusers."))
+        return redirect('dashboard')
+    
+    # Get sorting parameters
+    sort_by = request.GET.get('sort', 'payments')  # payments, age, subscriptions
+    search_query = request.GET.get('search', '')
+    
+    # Get all centers analytics
+    centers_data = SubscriptionAnalytics.get_all_centers_analytics()
+    
+    # Apply search filter
+    if search_query:
+        centers_data = [
+            item for item in centers_data 
+            if search_query.lower() in item['center'].name.lower() or 
+               search_query.lower() in item['center'].subdomain.lower()
+        ]
+    
+    # Apply sorting
+    if sort_by == 'age':
+        centers_data.sort(key=lambda x: x['account_age_days'], reverse=True)
+    elif sort_by == 'subscriptions':
+        centers_data.sort(key=lambda x: x['total_subscriptions'], reverse=True)
+    elif sort_by == 'name':
+        centers_data.sort(key=lambda x: x['center'].name)
+    # Default is already sorted by total_payments
+    
+    # Calculate totals
+    total_revenue = sum(item['total_payments'] for item in centers_data)
+    total_centers = len(centers_data)
+    active_centers = sum(1 for item in centers_data if item['current_subscription'] and item['current_subscription'].is_active())
+    
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(centers_data, 25)
+    page_number = request.GET.get('page')
+    centers_page = paginator.get_page(page_number)
+    
+    context = {
+        'title': _('Centers Subscription Monitoring'),
+        'subTitle': _('Monitoring'),
+        'centers_data': centers_page,
+        'sort_by': sort_by,
+        'search_query': search_query,
+        'total_revenue': total_revenue,
+        'total_centers': total_centers,
+        'active_centers': active_centers,
+    }
+    
+    return render(request, 'billing/centers_monitoring.html', context)
+

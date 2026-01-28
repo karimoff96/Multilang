@@ -173,30 +173,33 @@
     <!-- Center-Level Breakdown (Superuser) -->
     {% if is_superuser and by_center %}
     <div class="col-12">
-        <div class="card radius-8 border-0">
+        <div class="card radius-8 border">
             <div class="card-header border-bottom bg-base py-16 px-24">
-                <h6 class="mb-0 fw-semibold">
-                    <iconify-icon icon="mdi:office-building" class="me-2 text-primary-600"></iconify-icon>
-                    Expenses by Center
-                </h6>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-semibold">
+                        <iconify-icon icon="mdi:office-building" class="me-2 text-primary-600"></iconify-icon>
+                        Expenses by Center
+                    </h6>
+                    <span class="badge bg-primary-50 text-primary-600">{{ by_center.paginator.count }} centers</span>
+                </div>
             </div>
             <div class="card-body p-24">
                 {% for center_data in by_center %}
-                <div class="mb-32">
-                    <div class="d-flex justify-content-between align-items-center mb-16 pb-12 border-bottom">
-                        <h6 class="mb-0 fw-bold text-primary-600">
-                            <iconify-icon icon="mdi:domain" class="me-2"></iconify-icon>
-                            {{ center_data.center.name }}
-                        </h6>
-                        <div class="text-end">
-                            <h5 class="mb-0 fw-bold text-primary-600">{{ center_data.total|format_number }}</h5>
-                            <small class="text-secondary-light">{{ center_data.count }} expenses</small>
+                <div class="card border radius-8 mb-3">
+                    <div class="card-header bg-neutral-50 border-bottom-0">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <iconify-icon icon="mdi:domain" class="text-primary-600 text-xl"></iconify-icon>
+                                <h6 class="mb-0 fw-bold">{{ center_data.center.name }}</h6>
+                                <span class="badge bg-neutral-200 text-neutral-900">{{ center_data.count }} expenses</span>
+                            </div>
+                            <h6 class="mb-0 fw-bold text-primary-600">{{ center_data.total|format_number }} UZS</h6>
                         </div>
                     </div>
-                    
-                    {% if center_data.branches %}
-                    <div class="table-responsive">
-                        <table class="table bordered-table mb-0">
+                    <div class="card-body p-20">
+                        {% if center_data.branches %}
+                        <div class="table-responsive">
+                            <table class="table bordered-table mb-0">
                             <thead>
                                 <tr class="bg-neutral-50">
                                     <th class="text-sm" data-i18n="common.branch">Branch</th>
@@ -229,8 +232,36 @@
                     {% else %}
                     <p class="text-secondary-light mb-0"><i>No branch expenses found for this center</i></p>
                     {% endif %}
+                    </div>
                 </div>
                 {% endfor %}
+                
+                <!-- Pagination -->
+                {% if by_center.has_other_pages %}
+                <div class="d-flex justify-content-center mt-24">
+                    <nav>
+                        <ul class="pagination">
+                            {% if by_center.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?period={{ period }}&expense_type={{ expense_type_filter }}{% if selected_center %}&center={{ selected_center }}{% endif %}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}&date_from={{ date_from }}&date_to={{ date_to }}&center_page={{ by_center.previous_page_number }}">Previous</a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in by_center.paginator.page_range %}
+                            <li class="page-item {% if by_center.number == num %}active{% endif %}">
+                                <a class="page-link" href="?period={{ period }}&expense_type={{ expense_type_filter }}{% if selected_center %}&center={{ selected_center }}{% endif %}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}&date_from={{ date_from }}&date_to={{ date_to }}&center_page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if by_center.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?period={{ period }}&expense_type={{ expense_type_filter }}{% if selected_center %}&center={{ selected_center }}{% endif %}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}&date_from={{ date_from }}&date_to={{ date_to }}&center_page={{ by_center.next_page_number }}">Next</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -238,7 +269,7 @@
 
     <!-- Branch Breakdown with Stats -->
     <div class="col-12">
-        <div class="card radius-8 border-0">
+        <div class="card radius-8 border">
             <div class="card-header border-bottom bg-base py-16 px-24">
                 <h6 class="mb-0 fw-semibold">
                     <iconify-icon icon="mdi:source-branch" class="me-2 text-primary-600"></iconify-icon>

@@ -5,24 +5,11 @@
 {% block title %}{% trans "Contact Requests" %}{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-    <h6 class="fw-semibold mb-0">{% trans "Contact Requests from Landing Page" %}</h6>
-    <ul class="d-flex align-items-center gap-2">
-        <li class="fw-medium">
-            <a href="{% url 'dashboard' %}" class="d-flex align-items-center gap-1 hover-text-primary">
-                <iconify-icon icon="solar:home-smile-angle-outline" class="icon text-lg"></iconify-icon>
-                {% trans "Dashboard" %}
-            </a>
-        </li>
-        <li>-</li>
-        <li class="fw-medium">{% trans "Contact Requests" %}</li>
-    </ul>
-</div>
 
 <!-- Statistics Cards -->
 <div class="row gy-4 mb-24">
     <div class="col-xxl-2 col-md-4 col-sm-6">
-        <div class="card p-3 shadow-sm h-100">
+        <div class="card p-3 shadow-sm h-100 radius-8 border">
             <div class="card-body p-0">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
                     <div class="d-flex align-items-center gap-2">
@@ -40,7 +27,7 @@
     </div>
     
     <div class="col-xxl-2 col-md-4 col-sm-6">
-        <div class="card p-3 shadow-sm h-100">
+        <div class="card p-3 shadow-sm h-100 radius-8 border">
             <div class="card-body p-0">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
                     <div class="d-flex align-items-center gap-2">
@@ -58,7 +45,7 @@
     </div>
     
     <div class="col-xxl-2 col-md-4 col-sm-6">
-        <div class="card p-3 shadow-sm h-100">
+        <div class="card p-3 shadow-sm h-100 radius-8 border">
             <div class="card-body p-0">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
                     <div class="d-flex align-items-center gap-2">
@@ -76,7 +63,7 @@
     </div>
     
     <div class="col-xxl-2 col-md-4 col-sm-6">
-        <div class="card p-3 shadow-sm h-100">
+        <div class="card p-3 shadow-sm h-100 radius-8 border">
             <div class="card-body p-0">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
                     <div class="d-flex align-items-center gap-2">
@@ -94,7 +81,7 @@
     </div>
     
     <div class="col-xxl-2 col-md-4 col-sm-6">
-        <div class="card p-3 shadow-sm h-100">
+        <div class="card p-3 shadow-sm h-100 radius-8 border">
             <div class="card-body p-0">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
                     <div class="d-flex align-items-center gap-2">
@@ -112,7 +99,7 @@
     </div>
     
     <div class="col-xxl-2 col-md-4 col-sm-6">
-        <div class="card p-3 shadow-sm h-100">
+        <div class="card p-3 shadow-sm h-100 radius-8 border">
             <div class="card-body p-0">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
                     <div class="d-flex align-items-center gap-2">
@@ -131,12 +118,12 @@
 </div>
 
 <!-- Filters and Search -->
-<div class="card mb-24">
-    <div class="card-body">
-        <form method="GET" class="row gy-3 gx-3 align-items-center">
-            <div class="col-md-3">
+<div class="card mb-24 radius-8 border">
+    <div class="card-body p-24">
+        <form method="GET" class="row gy-3 gx-3 align-items-end">
+            <div class="col-md-2">
                 <label class="form-label">{% trans "Status" %}</label>
-                <select name="status" class="form-select" onchange="this.form.submit()">
+                <select name="status" class="form-select">
                     <option value="all" {% if status_filter == 'all' %}selected{% endif %}>{% trans "All" %}</option>
                     <option value="new" {% if status_filter == 'new' %}selected{% endif %}>{% trans "New" %}</option>
                     <option value="contacted" {% if status_filter == 'contacted' %}selected{% endif %}>{% trans "Contacted" %}</option>
@@ -145,21 +132,57 @@
                     <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>{% trans "Cancelled" %}</option>
                 </select>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-2">
+                <label class="form-label">{% trans "Date From" %}</label>
+                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "Date To" %}</label>
+                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "Has Company" %}</label>
+                <select name="has_company" class="form-select">
+                    <option value="">{% trans "All" %}</option>
+                    <option value="yes" {% if has_company == 'yes' %}selected{% endif %}>{% trans "Yes" %}</option>
+                    <option value="no" {% if has_company == 'no' %}selected{% endif %}>{% trans "No" %}</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "Has Phone" %}</label>
+                <select name="has_phone" class="form-select">
+                    <option value="">{% trans "All" %}</option>
+                    <option value="yes" {% if has_phone == 'yes' %}selected{% endif %}>{% trans "Yes" %}</option>
+                    <option value="no" {% if has_phone == 'no' %}selected{% endif %}>{% trans "No" %}</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "Sort By" %}</label>
+                <select name="sort" class="form-select">
+                    <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>{% trans "Newest First" %}</option>
+                    <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>{% trans "Oldest First" %}</option>
+                    <option value="name" {% if sort_by == 'name' %}selected{% endif %}>{% trans "Name (A-Z)" %}</option>
+                    <option value="-name" {% if sort_by == '-name' %}selected{% endif %}>{% trans "Name (Z-A)" %}</option>
+                    <option value="status" {% if sort_by == 'status' %}selected{% endif %}>{% trans "Status" %}</option>
+                </select>
+            </div>
+            <div class="col-md-8">
                 <label class="form-label">{% trans "Search" %}</label>
                 <input type="text" name="search" class="form-control" 
                        placeholder="{% trans 'Search by name, email, company, phone or message' %}" 
                        value="{{ search_query }}">
             </div>
-            <div class="col-md-3">
-                <label class="form-label">&nbsp;</label>
+            <div class="col-md-4">
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary-600 flex-grow-1">
                         <iconify-icon icon="solar:magnifer-linear" class="icon"></iconify-icon>
-                        {% trans "Search" %}
+                        {% trans "Apply Filters" %}
                     </button>
-                    <a href="{% url 'contact_requests_list' %}" class="btn btn-outline-secondary">
-                        <iconify-icon icon="solar:refresh-linear" class="icon"></iconify-icon>
+                    <a href="{% url 'contact_requests_list' %}" 
+                       class="btn btn-outline-secondary-600 no-hover-effect"
+                       title="{% trans 'Clear Filters' %}"
+                       data-bs-toggle="tooltip">
+                        <iconify-icon icon="solar:refresh-linear" class="icon text-white"></iconify-icon>
                     </a>
                 </div>
             </div>
@@ -168,8 +191,8 @@
 </div>
 
 <!-- Contact Requests Table -->
-<div class="card">
-    <div class="card-body" style="overflow: visible;">
+<div class="card radius-8 border"
+    <div class="card-body p-24" style="overflow: visible;">
         <div class="table-responsive" style="overflow-x: auto; overflow-y: visible;">
             <table class="table bordered-table mb-0">
                 <thead>
@@ -365,7 +388,7 @@
                 {% if contact_requests.has_previous %}
                 <li class="page-item">
                     <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 px-10 py-10 d-flex align-items-center justify-content-center h-32-px" 
-                       href="?page={{ contact_requests.previous_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                       href="?page={{ contact_requests.previous_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if has_company %}&has_company={{ has_company }}{% endif %}{% if has_phone %}&has_phone={{ has_phone }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
                         <iconify-icon icon="ep:d-arrow-left" class="text-xl"></iconify-icon>
                     </a>
                 </li>
@@ -380,7 +403,7 @@
                     {% elif num > contact_requests.number|add:'-3' and num < contact_requests.number|add:'3' %}
                     <li class="page-item">
                         <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 px-10 py-10 d-flex align-items-center justify-content-center h-32-px" 
-                           href="?page={{ num }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                           href="?page={{ num }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if has_company %}&has_company={{ has_company }}{% endif %}{% if has_phone %}&has_phone={{ has_phone }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">{{ num }}</a>
                     </li>
                     {% endif %}
                 {% endfor %}
@@ -388,7 +411,7 @@
                 {% if contact_requests.has_next %}
                 <li class="page-item">
                     <a class="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 px-10 py-10 d-flex align-items-center justify-content-center h-32-px" 
-                       href="?page={{ contact_requests.next_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                       href="?page={{ contact_requests.next_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if has_company %}&has_company={{ has_company }}{% endif %}{% if has_phone %}&has_phone={{ has_phone }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
                         <iconify-icon icon="ep:d-arrow-right" class="text-xl"></iconify-icon>
                     </a>
                 </li>

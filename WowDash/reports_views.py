@@ -409,7 +409,7 @@ def order_reports(request):
     language_breakdown = (
         orders.values("language__name")
         .annotate(count=Count("id"))
-        .order_by("-count")[:5]
+        .order_by("-count")[:10]
     )
 
     language_data = []
@@ -1658,6 +1658,15 @@ def expense_analytics_report(request):
                 'branches': center_branches_data
             })
     
+    # Sort by_center by total expenses (highest first)
+    by_center.sort(key=lambda x: x['total'], reverse=True)
+    
+    # Paginate by_center (5 per page)
+    from django.core.paginator import Paginator
+    center_page = request.GET.get('center_page', 1)
+    centers_paginator = Paginator(by_center, 5)
+    by_center_paginated = centers_paginator.get_page(center_page)
+    
     # Analytics by branch (for center-level and branch-level users)
     by_branch_data = []
     for branch in accessible_branches:
@@ -1847,7 +1856,7 @@ def expense_analytics_report(request):
         "avg_expense": expense_stats['avg_price'] or Decimal('0'),
         "median_expense": median_expense,
         # Breakdowns
-        "by_center": by_center,
+        "by_center": by_center_paginated if is_superuser else [],
         "by_branch": by_branch_data,
         "top_expenses": top_expenses,
         "type_distribution": type_distribution,

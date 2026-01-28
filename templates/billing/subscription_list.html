@@ -5,19 +5,6 @@
 
 {% block content %}
 <div class="dashboard-main-body">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-        <h6 class="fw-semibold mb-0">{% trans "Subscription Management" %}</h6>
-        <ul class="d-flex align-items-center gap-2">
-            <li class="fw-medium">
-                <a href="{% url 'dashboard' %}" class="d-flex align-items-center gap-1 hover-text-primary">
-                    <iconify-icon icon="solar:home-smile-angle-outline" class="icon text-lg"></iconify-icon>
-                    {% trans "Dashboard" %}
-                </a>
-            </li>
-            <li>-</li>
-            <li class="fw-medium">{% trans "Subscriptions" %}</li>
-        </ul>
-    </div>
 
     <!-- Statistics Cards -->
     <div class="row gy-4 mb-24">
@@ -138,8 +125,11 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="{% url 'billing:subscription_detail' sub.id %}" class="btn btn-sm btn-primary-600">
-                                    <iconify-icon icon="solar:eye-bold"></iconify-icon> {% trans "View" %}
+                                <a href="{% url 'billing:subscription_detail' sub.id %}" 
+                                   class="btn btn-sm btn-primary-600 no-hover-effect"
+                                   title="{% trans 'View' %}"
+                                   data-bs-toggle="tooltip">
+                                    <iconify-icon icon="solar:eye-bold" class="text-white"></iconify-icon>
                                 </a>
                             </td>
                         </tr>

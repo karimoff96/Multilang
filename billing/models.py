@@ -1,9 +1,10 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
+from decimal import Decimal
 
 
 class Feature(models.Model):
@@ -31,6 +32,8 @@ class Tariff(models.Model):
     description = models.TextField(blank=True, verbose_name=_("Description"))
     is_active = models.BooleanField(default=True, verbose_name=_("Active"))
     is_featured = models.BooleanField(default=False, verbose_name=_("Featured"))
+    is_trial = models.BooleanField(default=False, verbose_name=_("Is Trial"), help_text=_("Free trial tariff"))
+    trial_days = models.IntegerField(null=True, blank=True, verbose_name=_("Trial Days"), help_text=_("Duration of trial period in days (only for trial tariffs)"))
     display_order = models.IntegerField(default=0, verbose_name=_("Display Order"))
     
     # Limits
@@ -196,6 +199,10 @@ class Subscription(models.Model):
     start_date = models.DateField(verbose_name=_("Start Date"))
     end_date = models.DateField(verbose_name=_("End Date"))
     
+    # Trial Period
+    is_trial = models.BooleanField(default=False, verbose_name=_("Is Trial Subscription"))
+    trial_end_date = models.DateField(null=True, blank=True, verbose_name=_("Trial End Date"))
+    
     # Status
     status = models.CharField(
         max_length=20,
@@ -220,7 +227,7 @@ class Subscription(models.Model):
     # Metadata
     notes = models.TextField(blank=True, verbose_name=_("Notes"))
     created_by = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -243,8 +250,17 @@ class Subscription(models.Model):
         return f"{self.organization.name} - {self.tariff.title} ({self.start_date} - {self.end_date})"
     
     def save(self, *args, **kwargs):
-        # Auto-calculate end_date based on pricing duration
-        if not self.end_date and self.start_date and self.pricing:
+        # Handle trial subscription
+        if self.tariff.is_trial and not self.trial_end_date:
+            trial_days = self.tariff.trial_days or 10  # Default to 10 days
+            self.trial_end_date = self.start_date + timedelta(days=trial_days)
+            self.is_trial = True
+            self.end_date = self.trial_end_date
+            self.status = self.STATUS_ACTIVE  # Trial is automatically active
+            self.amount_paid = Decimal('0.00')  # Free trial
+        
+        # Auto-calculate end_date based on pricing duration for non-trial
+        elif not self.end_date and self.start_date and self.pricing:
             self.end_date = self.start_date + relativedelta(months=self.pricing.duration_months)
         
         # Auto-update status based on dates
@@ -272,6 +288,42 @@ class Subscription(models.Model):
             return 0
         return (self.end_date - date.today()).days
     
+    def is_trial_active(self):
+        """Check if trial period is currently active"""
+        if not self.is_trial:
+            return False
+        today = date.today()
+        return self.trial_end_date and self.start_date <= today <= self.trial_end_date
+    
+    def trial_days_remaining(self):
+        """Calculate days remaining in trial period"""
+        if not self.is_trial_active():
+            return 0
+        return (self.trial_end_date - date.today()).days
+    
+    def convert_trial_to_paid(self, tariff, pricing):
+        """Convert a trial subscription to a paid subscription"""
+        if not self.is_trial:
+            return False
+        
+        self.is_trial = False
+        self.tariff = tariff
+        self.pricing = pricing
+        self.start_date = date.today()
+        self.end_date = self.start_date + relativedelta(months=pricing.duration_months)
+        self.trial_end_date = None
+        self.status = self.STATUS_PENDING
+        self.save()
+        
+        # Create history entry
+        SubscriptionHistory.objects.create(
+            subscription=self,
+            action='trial_converted',
+            description=f'Trial converted to {tariff.title} - {pricing.duration_months} month(s)',
+            performed_by=None
+        )
+        return True
+    
     def get_usage_percentage(self, usage_type='orders'):
         """Get current usage percentage for orders/staff/branches"""
         if usage_type == 'orders':
@@ -295,8 +347,7 @@ class Subscription(models.Model):
             if limit is None:
                 return 0
             
-            from accounts.models import User
-            current_usage = User.objects.filter(organization=self.organization).count()
+            current_usage = self.organization.get_staff_count()
             return (current_usage / limit * 100) if limit > 0 else 0
         
         return 0
@@ -322,8 +373,7 @@ class Subscription(models.Model):
         if limit is None:
             return True
         
-        from accounts.models import User
-        current_count = User.objects.filter(organization=self.organization).count()
+        current_count = self.organization.get_staff_count()
         return current_count < limit
     
     def can_create_order(self):
@@ -449,7 +499,7 @@ class SubscriptionHistory(models.Model):
     action = models.CharField(max_length=50, verbose_name=_("Action"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
     performed_by = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -464,3 +514,113 @@ class SubscriptionHistory(models.Model):
     
     def __str__(self):
         return f"{self.subscription.organization.name} - {self.action} - {self.timestamp}"
+
+
+class SubscriptionAnalytics:
+    """Helper class for subscription analytics calculations"""
+    
+    @staticmethod
+    def get_center_analytics(organization):
+        """Get comprehensive analytics for a translation center"""
+        from django.db.models import Sum, Count, Min, Max
+        
+        # Get all subscriptions for this center (current and past)
+        all_subscriptions = Subscription.objects.filter(
+            organization=organization
+        ).order_by('created_at')
+        
+        # First subscription date
+        first_subscription = all_subscriptions.first()
+        first_subscription_date = first_subscription.created_at.date() if first_subscription else None
+        
+        # Account age in days
+        account_age_days = 0
+        if first_subscription_date:
+            account_age_days = (date.today() - first_subscription_date).days
+        
+        # Total payments received (sum of all amount_paid)
+        total_payments = all_subscriptions.aggregate(
+            total=Sum('amount_paid')
+        )['total'] or 0
+        
+        # Subscription count
+        total_subscriptions_count = all_subscriptions.count()
+        active_subscriptions = all_subscriptions.filter(status=Subscription.STATUS_ACTIVE).count()
+        
+        # Trial information
+        trial_subscriptions = all_subscriptions.filter(is_trial=True)
+        has_used_trial = trial_subscriptions.exists()
+        trial_converted = trial_subscriptions.filter(
+            history__action='trial_converted'
+        ).exists()
+        
+        # Payment history
+        paid_subscriptions = all_subscriptions.exclude(amount_paid__isnull=True).exclude(amount_paid=0)
+        payment_count = paid_subscriptions.count()
+        
+        # Average subscription duration (for completed subscriptions)
+        completed_subs = all_subscriptions.filter(
+            status__in=[Subscription.STATUS_EXPIRED, Subscription.STATUS_CANCELLED]
+        )
+        
+        avg_duration_days = 0
+        if completed_subs.exists():
+            total_days = sum([
+                (sub.end_date - sub.start_date).days 
+                for sub in completed_subs
+            ])
+            avg_duration_days = total_days / completed_subs.count() if completed_subs.count() > 0 else 0
+        
+        # Get current subscription
+        current_subscription = getattr(organization, 'subscription', None)
+        
+        # Lifetime value (total payments)
+        lifetime_value = total_payments
+        
+        # Get all history entries
+        all_history = SubscriptionHistory.objects.filter(
+            subscription__organization=organization
+        ).select_related('subscription', 'performed_by').order_by('-timestamp')
+        
+        return {
+            'first_subscription_date': first_subscription_date,
+            'account_age_days': account_age_days,
+            'account_age_months': round(account_age_days / 30.44, 1) if account_age_days > 0 else 0,
+            'account_age_years': round(account_age_days / 365.25, 1) if account_age_days > 0 else 0,
+            'total_payments': total_payments,
+            'lifetime_value': lifetime_value,
+            'total_subscriptions_count': total_subscriptions_count,
+            'active_subscriptions_count': active_subscriptions,
+            'payment_count': payment_count,
+            'has_used_trial': has_used_trial,
+            'trial_converted': trial_converted,
+            'average_subscription_days': round(avg_duration_days, 1),
+            'current_subscription': current_subscription,
+            'all_subscriptions': all_subscriptions,
+            'all_history': all_history,
+        }
+    
+    @staticmethod
+    def get_all_centers_analytics():
+        """Get analytics summary for all centers"""
+        from django.db.models import Sum, Count, Avg
+        from organizations.models import TranslationCenter
+        
+        centers_data = []
+        
+        for center in TranslationCenter.objects.all():
+            analytics = SubscriptionAnalytics.get_center_analytics(center)
+            centers_data.append({
+                'center': center,
+                'first_subscription_date': analytics['first_subscription_date'],
+                'account_age_days': analytics['account_age_days'],
+                'total_payments': analytics['total_payments'],
+                'total_subscriptions': analytics['total_subscriptions_count'],
+                'current_subscription': analytics['current_subscription'],
+                'payment_count': analytics['payment_count'],
+            })
+        
+        # Sort by total payments (highest first)
+        centers_data.sort(key=lambda x: x['total_payments'], reverse=True)
+        
+        return centers_data

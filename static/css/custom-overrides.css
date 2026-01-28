@@ -808,3 +808,213 @@ button:focus,
         padding: 0.75rem !important;
     }
 }
+
+/* ========================================
+   Keep Button Icons White and Remove Hover Effects
+   ======================================== */
+
+/* No hover effect utility class */
+.no-hover-effect:hover,
+.no-hover-effect:focus,
+.no-hover-effect:active,
+.no-hover-effect:hover:focus,
+.no-hover-effect:hover:active {
+    transform: none !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    transition: none !important;
+}
+
+.no-hover-effect.btn-primary-600:hover,
+.no-hover-effect.btn-primary-600:focus,
+.no-hover-effect.btn-primary-600:active {
+    background-color: var(--primary-600) !important;
+    border-color: var(--primary-600) !important;
+    color: #fff !important;
+}
+
+.no-hover-effect.btn-success-600:hover,
+.no-hover-effect.btn-success-600:focus,
+.no-hover-effect.btn-success-600:active {
+    background-color: var(--success-600) !important;
+    border-color: var(--success-600) !important;
+    color: #fff !important;
+}
+
+.no-hover-effect.btn-warning-600:hover,
+.no-hover-effect.btn-warning-600:focus,
+.no-hover-effect.btn-warning-600:active {
+    background-color: var(--warning-600) !important;
+    border-color: var(--warning-600) !important;
+    color: #fff !important;
+}
+
+.no-hover-effect.btn-outline-primary-600:hover,
+.no-hover-effect.btn-outline-primary-600:focus,
+.no-hover-effect.btn-outline-primary-600:active {
+    background-color: transparent !important;
+    border-color: var(--primary-600) !important;
+    color: var(--primary-600) !important;
+}
+
+.no-hover-effect.btn-outline-danger-600:hover,
+.no-hover-effect.btn-outline-danger-600:focus,
+.no-hover-effect.btn-outline-danger-600:active {
+    background-color: transparent !important;
+    border-color: var(--danger-600) !important;
+    color: var(--danger-600) !important;
+}
+
+/* Force icons to stay white in no-hover-effect buttons */
+.no-hover-effect i,
+.no-hover-effect iconify-icon,
+.no-hover-effect .text-white,
+.no-hover-effect:hover i,
+.no-hover-effect:hover iconify-icon,
+.no-hover-effect:hover .text-white,
+.no-hover-effect:focus i,
+.no-hover-effect:focus iconify-icon,
+.no-hover-effect:focus .text-white,
+.no-hover-effect:active i,
+.no-hover-effect:active iconify-icon,
+.no-hover-effect:active .text-white {
+    color: #ffffff !important;
+}
+
+/* Primary buttons - keep icons white and disable hover effects */
+.btn-primary-600:hover,
+.btn-primary-600:focus,
+.btn-primary-600:active {
+    background-color: var(--primary-600) !important;
+    border-color: var(--primary-600) !important;
+    color: #fff !important;
+}
+
+.btn-primary-600:hover i,
+.btn-primary-600:hover iconify-icon,
+.btn-primary-600:focus i,
+.btn-primary-600:focus iconify-icon,
+.btn-primary-600:active i,
+.btn-primary-600:active iconify-icon {
+    color: #fff !important;
+}
+
+/* Success buttons - keep icons white and disable hover effects */
+.btn-success-600:hover,
+.btn-success-600:focus,
+.btn-success-600:active {
+    background-color: var(--success-600) !important;
+    border-color: var(--success-600) !important;
+    color: #fff !important;
+}
+
+.btn-success-600:hover i,
+.btn-success-600:hover iconify-icon,
+.btn-success-600:focus i,
+.btn-success-600:focus iconify-icon,
+.btn-success-600:active i,
+.btn-success-600:active iconify-icon {
+    color: #fff !important;
+}
+
+/* Warning buttons - keep icons white and disable hover effects */
+.btn-warning-600:hover,
+.btn-warning-600:focus,
+.btn-warning-600:active {
+    background-color: var(--warning-600) !important;
+    border-color: var(--warning-600) !important;
+    color: #fff !important;
+}
+
+.btn-warning-600:hover i,
+.btn-warning-600:hover iconify-icon,
+.btn-warning-600:focus i,
+.btn-warning-600:focus iconify-icon,
+.btn-warning-600:active i,
+.btn-warning-600:active iconify-icon {
+    color: #fff !important;
+}
+
+/* Outline buttons - keep icons white and disable hover effects */
+.btn-outline-primary-600:hover,
+.btn-outline-primary-600:focus,
+.btn-outline-primary-600:active {
+    background-color: transparent !important;
+    border-color: var(--primary-600) !important;
+    color: var(--primary-600) !important;
+}
+
+.btn-outline-primary-600:hover i,
+.btn-outline-primary-600:hover iconify-icon,
+.btn-outline-primary-600:focus i,
+.btn-outline-primary-600:focus iconify-icon,
+.btn-outline-primary-600:active i,
+.btn-outline-primary-600:active iconify-icon {
+    color: var(--primary-600) !important;
+}
+
+.btn-outline-danger-600:hover,
+.btn-outline-danger-600:focus,
+.btn-outline-danger-600:active {
+    background-color: transparent !important;
+    border-color: var(--danger-600) !important;
+    color: var(--danger-600) !important;
+}
+
+.btn-outline-danger-600:hover i,
+.btn-outline-danger-600:hover iconify-icon,
+.btn-outline-danger-600:focus i,
+.btn-outline-danger-600:focus iconify-icon,
+.btn-outline-danger-600:active i,
+.btn-outline-danger-600:active iconify-icon {
+    color: var(--danger-600) !important;
+}
+
+/* Generic button classes - keep icons white and disable hover effects */
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--primary-600) !important;
+    border-color: var(--primary-600) !important;
+}
+
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:active {
+    background-color: var(--success-600) !important;
+    border-color: var(--success-600) !important;
+}
+
+.btn-warning:hover,
+.btn-warning:focus,
+.btn-warning:active {
+    background-color: var(--warning-600) !important;
+    border-color: var(--warning-600) !important;
+}
+
+.btn-danger:hover,
+.btn-danger:focus,
+.btn-danger:active {
+    background-color: var(--danger-600) !important;
+    border-color: var(--danger-600) !important;
+}
+
+.btn-info:hover,
+.btn-info:focus,
+.btn-info:active {
+    background-color: var(--info-600) !important;
+    border-color: var(--info-600) !important;
+}
+
+.btn-primary:hover i,
+.btn-primary:hover iconify-icon,
+.btn-success:hover i,
+.btn-success:hover iconify-icon,
+.btn-warning:hover i,
+.btn-warning:hover iconify-icon,
+.btn-danger:hover i,
+.btn-danger:hover iconify-icon,
+.btn-info:hover i,
+.btn-info:hover iconify-icon {
+    color: #fff !important;
+}
