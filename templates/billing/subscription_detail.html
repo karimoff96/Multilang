@@ -1,5 +1,6 @@
 {% extends "layout/layout.html" %}
 {% load i18n %}
+{% load billing_extras %}
 
 {% block title %}{% trans "Subscription Detail" %}{% endblock %}
 
@@ -214,7 +215,66 @@
                 </div>
             </div>
         </div>
-
+        <!-- Subscription Features -->
+        <div class="col-xxl-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">{% trans "Plan Features" %}</h6>
+                    <span class="badge bg-primary-600">{{ subscription.tariff.get_feature_count }} / 37 {% trans "Features" %}</span>
+                </div>
+                <div class="card-body">
+                    {% with features_by_category=subscription|get_category_features_in_language:request.LANGUAGE_CODE %}
+                    {% if features_by_category %}
+                    <div class="row g-4">
+                        {% for category, feature_dict in features_by_category.items %}
+                        <div class="col-md-6">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-3">
+                                    {% if category == 'orders' %}📊 {% trans "Orders" %}
+                                    {% elif category == 'analytics' %}📈 {% trans "Analytics" %}
+                                    {% elif category == 'integration' %}🔗 {% trans "Integration" %}
+                                    {% elif category == 'marketing' %}📢 {% trans "Marketing" %}
+                                    {% elif category == 'organization' %}🏢 {% trans "Organization" %}
+                                    {% elif category == 'storage' %}📦 {% trans "Storage" %}
+                                    {% elif category == 'financial' %}💰 {% trans "Financial" %}
+                                    {% elif category == 'support' %}🎯 {% trans "Support" %}
+                                    {% elif category == 'advanced' %}⚡ {% trans "Advanced" %}
+                                    {% elif category == 'services' %}🛠️ {% trans "Services" %}
+                                    {% else %}{{ category|title }}{% endif %}
+                                </h6>
+                                <ul class="list-unstyled mb-0">
+                                    {% for feature_name, is_enabled in feature_dict.items %}
+                                    <li class="mb-2 text-sm">
+                                        {% if is_enabled %}
+                                            <i class="ri-checkbox-circle-fill text-success-600"></i>
+                                            <span class="text-dark">{{ feature_name }}</span>
+                                        {% else %}
+                                            <i class="ri-close-circle-line text-secondary-light"></i>
+                                            <span class="text-secondary-light">{{ feature_name }}</span>
+                                        {% endif %}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="ri-lock-line text-secondary-light" style="font-size: 48px; opacity: 0.3;"></i>
+                        <p class="text-secondary-light mb-0 mt-2">{% trans "No features available in this plan" %}</p>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                    
+                    <div class="mt-4 pt-4 border-top text-center">
+                        <a href="{% url 'billing:tariff_list' %}" class="btn btn-outline-primary-600">
+                            <i class="ri-shopping-bag-line"></i> {% trans "Upgrade Plan" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Usage & History -->
         <div class="col-xxl-4">
             <!-- Current Usage -->

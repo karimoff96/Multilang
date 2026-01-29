@@ -1,5 +1,6 @@
 {% extends "layout/layout.html" %}
 {% load i18n %}
+{% load billing_extras %}
 
 {% block title %}{% trans "Tariff Plans - Billing" %}{% endblock %}
 
@@ -65,23 +66,25 @@
                     </div>
 
                     <!-- Features -->
-                    {% if tariff.features.count > 0 %}
+                    {% with feature_count=tariff.get_feature_count %}
+                    {% if feature_count > 0 %}
                     <div class="mb-20">
-                        <h6 class="text-secondary-light mb-12">{% trans "Features" %}:</h6>
+                        <h6 class="text-secondary-light mb-12">{% trans "Features" %}: <span class="badge bg-primary-600">{{ feature_count }}</span></h6>
                         <ul class="list-unstyled mb-0">
-                            {% for feature in tariff.features.all|slice:":4" %}
+                            {% for feature_slug, feature_name in tariff.get_enabled_features_with_names|slice:":5" %}
                             <li class="text-sm mb-4">
-                                <i class="ri-checkbox-circle-fill text-success-600"></i> {{ feature.name }}
+                                <i class="ri-checkbox-circle-fill text-success-600"></i> {{ feature_name }}
                             </li>
                             {% endfor %}
-                            {% if tariff.features.count > 4 %}
+                            {% if feature_count > 5 %}
                             <li class="text-sm text-secondary-light">
-                                <i class="ri-more-line"></i> +{{ tariff.features.count|add:"-4" }} {% trans "more" %}
+                                <i class="ri-more-line"></i> +{{ feature_count|add:"-5" }} {% trans "more" %}
                             </li>
                             {% endif %}
                         </ul>
                     </div>
                     {% endif %}
+                    {% endwith %}
 
                     <!-- Pricing -->
                     {% if not tariff.is_trial %}
@@ -125,7 +128,7 @@
                         </a>
                         <button type="button" 
                                 class="btn btn-outline-danger-600 btn-sm flex-grow-1"
-                                onclick="confirmDelete({{ tariff.pk }}, '{{ tariff.title }}', {{ tariff.subscriptions.filter.count }})"
+                                onclick="confirmDelete({{ tariff.pk }}, '{{ tariff.title }}', {{ tariff.subscriptions.count }})"
                                 title="{% trans 'Delete' %}"
                                 data-bs-toggle="tooltip">
                             <i class="ri-delete-bin-line"></i>
@@ -164,7 +167,7 @@
 <script>
 function confirmDelete(tariffId, tariffName, subscriptionCount) {
     if (subscriptionCount > 0) {
-        alert('{% trans "Cannot delete this tariff. It has active subscriptions." %}');
+        alert(`{% trans "Cannot delete this tariff. It has" %} ${subscriptionCount} {% trans "subscription(s) associated with it." %}\n\n{% trans "Please mark it as inactive instead or delete the subscriptions first." %}`);
         return;
     }
     

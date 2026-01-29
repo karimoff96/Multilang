@@ -1322,6 +1322,52 @@ class AdminUser(models.Model):
                 return True
         
         return False
+    
+    def has_subscription_feature(self, feature_code):
+        """
+        Check if user's organization subscription includes a specific feature.
+        This enables subscription-based feature gating.
+        
+        Args:
+            feature_code: String code of the feature (e.g., 'advanced_analytics', 'telegram_bot')
+        
+        Returns:
+            Boolean indicating if subscription grants access to this feature
+            
+        Example:
+            if admin_profile.has_subscription_feature('advanced_analytics'):
+                # Show analytics dashboard
+        """
+        # Superusers always have access to all features
+        if hasattr(self, 'user') and self.user and self.user.is_superuser:
+            return True
+        
+        # Check if user has a center with an active subscription
+        if not self.center:
+            return False
+        
+        try:
+            subscription = self.center.subscription
+            return subscription.has_feature(feature_code)
+        except Exception:
+            # No subscription or subscription model not available
+            return False
+    
+    def get_subscription_features(self):
+        """
+        Get all features available in user's organization subscription.
+        
+        Returns:
+            QuerySet of Feature objects or empty queryset
+        """
+        if not self.center:
+            return None
+        
+        try:
+            subscription = self.center.subscription
+            return subscription.get_features()
+        except Exception:
+            return None
 
     def get_accessible_branches(self):
         """Get branches this user can access based on their role permissions"""

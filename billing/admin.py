@@ -6,10 +6,21 @@ from .models import Feature, Tariff, TariffPricing, Subscription, UsageTracking,
 
 @admin.register(Feature)
 class FeatureAdmin(admin.ModelAdmin):
-    list_display = ['code', 'name', 'category', 'is_active']
+    list_display = ['code', 'name', 'category', 'is_active', 'tariff_count']
     list_filter = ['category', 'is_active']
     search_fields = ['code', 'name', 'description']
     ordering = ['category', 'name']
+    
+    def tariff_count(self, obj):
+        """Show how many tariffs use this feature"""
+        count = obj.tariff_set.count()
+        if count > 0:
+            return format_html(
+                '<span style="color: blue;">{} tariff(s)</span>',
+                count
+            )
+        return format_html('<span style="color: gray;">Not used</span>')
+    tariff_count.short_description = _('Used in Tariffs')
 
 
 class TariffPricingInline(admin.TabularInline):
@@ -20,7 +31,7 @@ class TariffPricingInline(admin.TabularInline):
 
 @admin.register(Tariff)
 class TariffAdmin(admin.ModelAdmin):
-    list_display = ['title', 'slug', 'is_trial', 'trial_days', 'is_active', 'is_featured', 'limits_summary', 'display_order']
+    list_display = ['title', 'slug', 'is_trial', 'trial_days', 'is_active', 'is_featured', 'feature_count_display', 'limits_summary', 'display_order']
     list_filter = ['is_active', 'is_featured', 'is_trial']
     search_fields = ['title', 'slug', 'description']
     filter_horizontal = ['features']
@@ -35,10 +46,110 @@ class TariffAdmin(admin.ModelAdmin):
             'description': _('Configure free trial period for this tariff')
         }),
         (_('Limits'), {
-            'fields': ('max_branches', 'max_staff', 'max_monthly_orders')
+            'fields': ('max_branches', 'max_staff', 'max_monthly_orders'),
+            'description': _('Set usage limits (leave empty for unlimited)')
         }),
-        (_('Features'), {
-            'fields': ('features',)
+        (_('📊 Order Management Features (5)'), {
+            'fields': (
+                'feature_orders_basic',
+                'feature_orders_advanced',
+                'feature_order_assignment',
+                'feature_bulk_payments',
+                'feature_order_templates',
+            ),
+            'classes': ('collapse',),
+            'description': _('Features for creating and managing customer orders')
+        }),
+        (_('📈 Analytics & Reports Features (6)'), {
+            'fields': (
+                'feature_analytics_basic',
+                'feature_analytics_advanced',
+                'feature_financial_reports',
+                'feature_staff_performance',
+                'feature_custom_reports',
+                'feature_export_reports',
+            ),
+            'classes': ('collapse',),
+            'description': _('Analytics dashboards and reporting capabilities')
+        }),
+        (_('🔗 Integration Features (4)'), {
+            'fields': (
+                'feature_telegram_bot',
+                'feature_webhooks',
+                'feature_api_access',
+                'feature_integrations',
+            ),
+            'classes': ('collapse',),
+            'description': _('External integrations and API access (some on request)')
+        }),
+        (_('📢 Marketing Features (2)'), {
+            'fields': (
+                'feature_marketing_basic',
+                'feature_broadcast_messages',
+            ),
+            'classes': ('collapse',),
+            'description': _('Marketing campaigns and broadcast messaging')
+        }),
+        (_('🏢 Organization & Staff Features (4)'), {
+            'fields': (
+                'feature_multi_branch',
+                'feature_custom_roles',
+                'feature_staff_scheduling',
+                'feature_branch_settings',
+            ),
+            'classes': ('collapse',),
+            'description': _('Multi-branch management and staff coordination')
+        }),
+        (_('📦 Storage & Archive Features (3)'), {
+            'fields': (
+                'feature_archive_access',
+                'feature_cloud_backup',
+                'feature_extended_storage',
+            ),
+            'classes': ('collapse',),
+            'description': _('File archiving and cloud storage')
+        }),
+        (_('💰 Financial Management Features (4)'), {
+            'fields': (
+                'feature_payment_management',
+                'feature_multi_currency',
+                'feature_invoicing',
+                'feature_expense_tracking',
+            ),
+            'classes': ('collapse',),
+            'description': _('Payment processing and financial tracking')
+        }),
+        (_('🎯 Support & Services Features (2)'), {
+            'fields': (
+                'feature_support_tickets',
+                'feature_knowledge_base',
+            ),
+            'classes': ('collapse',),
+            'description': _('Customer support tools')
+        }),
+        (_('⚡ Advanced Features (3)'), {
+            'fields': (
+                'feature_advanced_security',
+                'feature_audit_logs',
+                'feature_data_retention',
+            ),
+            'classes': ('collapse',),
+            'description': _('Security, compliance, and audit features')
+        }),
+        (_('🛠️ Services Management Features (4)'), {
+            'fields': (
+                'feature_products_basic',
+                'feature_products_advanced',
+                'feature_language_pricing',
+                'feature_dynamic_pricing',
+            ),
+            'classes': ('collapse',),
+            'description': _('Product and pricing management')
+        }),
+        (_('Legacy Features (M2M - Deprecated)'), {
+            'fields': ('features',),
+            'classes': ('collapse',),
+            'description': _('Old M2M feature relationship - will be removed')
         }),
     )
     
@@ -48,6 +159,11 @@ class TariffAdmin(admin.ModelAdmin):
     def limits_summary(self, obj):
         return f"Branches: {obj.max_branches or '∞'} | Staff: {obj.max_staff or '∞'} | Orders: {obj.max_monthly_orders or '∞'}"
     limits_summary.short_description = _('Limits')
+    
+    def feature_count_display(self, obj):
+        count = obj.get_feature_count()
+        return f"{count}/37 features"
+    feature_count_display.short_description = _('Features Enabled')
 
 
 @admin.register(TariffPricing)
@@ -186,4 +302,5 @@ class SubscriptionHistoryAdmin(admin.ModelAdmin):
         return False
     
     def has_delete_permission(self, request, obj=None):
-        return False
+        # Allow superusers to delete (enables cascade delete from Subscription)
+        return request.user.is_superuser

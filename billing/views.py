@@ -293,10 +293,39 @@ def tariff_create(request):
                 max_monthly_orders=max_monthly_orders,
             )
             
-            # Add features
-            feature_ids = request.POST.getlist('features')
-            if feature_ids:
-                tariff.features.set(feature_ids)
+            # Set feature flags (37 boolean fields)
+            feature_fields = [
+                # Orders (5)
+                'feature_orders_basic', 'feature_orders_advanced', 'feature_orders_bulk',
+                'feature_orders_archive', 'feature_bulk_payment_collection',
+                # Analytics (6)
+                'feature_analytics_basic', 'feature_analytics_advanced', 'feature_sales_reports',
+                'feature_finance_reports', 'feature_custom_reports', 'feature_export_data',
+                # Integration (4)
+                'feature_webhooks', 'feature_api_access', 'feature_third_party_integrations',
+                'feature_telegram_bot',
+                # Marketing (2)
+                'feature_marketing_campaigns', 'feature_broadcasts',
+                # Organization (4)
+                'feature_multi_branch', 'feature_staff_management', 'feature_rbac', 'feature_audit_logs',
+                # Storage (3)
+                'feature_file_uploads', 'feature_storage_basic', 'feature_storage_advanced',
+                # Financial (4)
+                'feature_payment_tracking', 'feature_expense_management', 'feature_payment_reminders',
+                'feature_invoicing',
+                # Support (2)
+                'feature_priority_support', 'feature_onboarding',
+                # Advanced (3)
+                'feature_white_label', 'feature_data_backup', 'feature_advanced_security',
+                # Services (4)
+                'feature_services_basic', 'feature_services_advanced', 'feature_service_tracking',
+                'feature_service_analytics',
+            ]
+            
+            for field in feature_fields:
+                setattr(tariff, field, request.POST.get(field) == 'on')
+            
+            tariff.save()
             
             messages.success(request, _("Tariff created successfully!"))
             return redirect('billing:tariff_list')
@@ -304,13 +333,8 @@ def tariff_create(request):
         except Exception as e:
             messages.error(request, f"Error creating tariff: {str(e)}")
     
-    features = Feature.objects.filter(is_active=True).order_by('category', 'name')
     
-    context = {
-        'features': features,
-    }
-    
-    return render(request, 'billing/tariff_create.html', context)
+    return render(request, 'billing/tariff_create.html')
 
 
 @login_required
@@ -344,9 +368,80 @@ def tariff_edit(request, pk):
             
             tariff.save()
             
-            # Update features
-            feature_ids = request.POST.getlist('features')
-            tariff.features.set(feature_ids if feature_ids else [])
+            # Update boolean feature flags (37 features)
+            feature_fields = [
+                # Orders (5)
+                'feature_orders_basic', 'feature_orders_advanced', 'feature_order_assignment',
+                'feature_bulk_payments', 'feature_order_templates',
+                # Analytics (6)
+                'feature_analytics_basic', 'feature_analytics_advanced', 'feature_financial_reports',
+                'feature_staff_performance', 'feature_custom_reports', 'feature_export_reports',
+                # Integration (4)
+                'feature_telegram_bot', 'feature_webhooks', 'feature_api_access', 'feature_integrations',
+                # Marketing (2)
+                'feature_marketing_basic', 'feature_broadcast_messages',
+                # Organization (4)
+                'feature_multi_branch', 'feature_custom_roles', 'feature_staff_scheduling', 'feature_branch_settings',
+                # Storage (3)
+                'feature_archive_access', 'feature_cloud_backup', 'feature_extended_storage',
+                # Financial (4)
+                'feature_payment_management', 'feature_multi_currency', 'feature_invoicing', 'feature_expense_tracking',
+                # Support (2)
+                'feature_support_tickets', 'feature_knowledge_base',
+                # Advanced (3)
+                'feature_advanced_security', 'feature_audit_logs', 'feature_data_retention',
+                # Services (4)
+                'feature_products_basic', 'feature_products_advanced', 'feature_language_pricing', 'feature_dynamic_pricing',
+            ]
+            
+            for field in feature_fields:
+                setattr(tariff, field, request.POST.get(field) == 'on')
+            
+            tariff.save()
+            
+            # Update pricing
+            pricing_ids = request.POST.getlist('pricing_id[]')
+            pricing_durations = request.POST.getlist('pricing_duration[]')
+            pricing_monthly = request.POST.getlist('pricing_monthly[]')
+            pricing_total = request.POST.getlist('pricing_total[]')
+            pricing_currency = request.POST.getlist('pricing_currency[]')
+            
+            # Track existing pricing IDs to know which to delete
+            existing_ids = set()
+            
+            for i in range(len(pricing_durations)):
+                pricing_id = pricing_ids[i] if i < len(pricing_ids) else ''
+                duration = int(pricing_durations[i]) if pricing_durations[i] else 1
+                monthly = float(pricing_monthly[i]) if pricing_monthly[i] else 0
+                total = float(pricing_total[i]) if pricing_total[i] else 0
+                currency = pricing_currency[i] if i < len(pricing_currency) else 'UZS'
+                
+                # Skip if no valid pricing data
+                if duration <= 0 or total <= 0:
+                    continue
+                
+                if pricing_id:
+                    # Update existing pricing
+                    pricing_obj = TariffPricing.objects.get(id=pricing_id, tariff=tariff)
+                    pricing_obj.duration_months = duration
+                    pricing_obj.monthly_price = monthly
+                    pricing_obj.price = total
+                    pricing_obj.currency = currency
+                    pricing_obj.save()
+                    existing_ids.add(int(pricing_id))
+                else:
+                    # Create new pricing
+                    new_pricing = TariffPricing.objects.create(
+                        tariff=tariff,
+                        duration_months=duration,
+                        monthly_price=monthly,
+                        price=total,
+                        currency=currency
+                    )
+                    existing_ids.add(new_pricing.id)
+            
+            # Delete pricing options that were removed
+            tariff.pricing.exclude(id__in=existing_ids).delete()
             
             messages.success(request, _("Tariff updated successfully!"))
             return redirect('billing:tariff_list')
@@ -354,13 +449,8 @@ def tariff_edit(request, pk):
         except Exception as e:
             messages.error(request, f"Error updating tariff: {str(e)}")
     
-    features = Feature.objects.filter(is_active=True).order_by('category', 'name')
-    selected_features = tariff.features.values_list('id', flat=True)
-    
     context = {
         'tariff': tariff,
-        'features': features,
-        'selected_features': list(selected_features),
     }
     
     return render(request, 'billing/tariff_edit.html', context)
@@ -375,10 +465,10 @@ def tariff_delete(request, pk):
     
     tariff = get_object_or_404(Tariff, pk=pk)
     
-    # Check if tariff has active subscriptions
-    active_subscriptions = tariff.subscriptions.filter(status='active').count()
-    if active_subscriptions > 0:
-        messages.error(request, _(f"Cannot delete tariff. It has {active_subscriptions} active subscription(s)."))
+    # Check if tariff has any subscriptions
+    subscription_count = tariff.subscriptions.count()
+    if subscription_count > 0:
+        messages.error(request, _(f"Cannot delete tariff '{tariff.title}'. It has {subscription_count} subscription(s) associated with it."))
         return redirect('billing:tariff_list')
     
     if request.method == 'POST':

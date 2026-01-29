@@ -2,9 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import activate
 from django.db.models import Q
 from django.core.paginator import Paginator
 from .models import ContactRequest
+from billing.models import Tariff
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,8 +18,18 @@ def home(request):
     # Get language from session or default to Russian
     lang = request.session.get('landing_language', 'ru')
     
+    # Activate the language for this request
+    activate(lang)
+    
+    # Get active tariffs ordered by trial first, then by price
+    tariffs = Tariff.objects.filter(is_active=True).prefetch_related('pricing', 'features').order_by(
+        '-is_trial',  # Trial tariffs first
+        'display_order'  # Then by display order
+    )
+    
     context = {
         'current_language': lang,
+        'tariffs': tariffs,
     }
     
     return render(request, 'landing/home.html', context)

@@ -4,6 +4,35 @@
 {% block title %}{% trans "Create Tariff" %}{% endblock %}
 
 {% block content %}
+<style>
+    /* Fix checkbox alignment with multi-line labels */
+    .form-check {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-check-input {
+        margin-top: 0.25rem;
+        flex-shrink: 0;
+    }
+    
+    .form-check-label {
+        margin-left: 0.5rem;
+        line-height: 1.5;
+    }
+    
+    .form-check-label strong {
+        display: block;
+        margin-bottom: 0.125rem;
+    }
+    
+    .form-check-label small {
+        display: block;
+        line-height: 1.4;
+    }
+</style>
+
 <div class="dashboard-main-body">
     <div class="d-flex justify-content-end gap-3 mb-24">
         <a href="{% url 'billing:tariff_list' %}" 
@@ -116,36 +145,452 @@
 
                 <!-- Features -->
                 <div class="row gy-3 mb-32">
-                    <div class="col-12">
-                        <h6 class="text-md text-primary-light mb-16">{% trans "Included Features" %}</h6>
+                    <div class="col-12 d-flex justify-content-between align-items-center mb-16">
+                        <h6 class="text-md text-primary-light mb-0">{% trans "Included Features" %}</h6>
+                        <span class="badge bg-primary-600" id="featureCount">0/37</span>
                     </div>
 
+                    <!-- Order Management Features -->
                     <div class="col-12">
-                        <div class="row gy-2">
-                            {% for feature in features %}
-                            <div class="col-md-6 col-lg-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" 
-                                           name="features" value="{{ feature.id }}" 
-                                           id="feature{{ feature.id }}">
-                                    <label class="form-check-label" for="feature{{ feature.id }}">
-                                        <strong>{{ feature.name }}</strong>
-                                        {% if feature.category %}
-                                        <span class="badge bg-neutral-200 text-secondary-light text-xs ms-2">
-                                            {{ feature.category }}
-                                        </span>
-                                        {% endif %}
-                                        {% if feature.description %}
-                                        <br><small class="text-secondary-light">{{ feature.description|truncatewords:10 }}</small>
-                                        {% endif %}
-                                    </label>
+                        <div class="card border bg-neutral-50">
+                            <div class="card-body p-16">
+                                <h6 class="text-sm text-primary-light mb-12">📊 {% trans "Order Management" %} (5)</h6>
+                                <div class="row gy-2">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_orders_basic" id="feature_orders_basic">
+                                            <label class="form-check-label" for="feature_orders_basic">
+                                                <strong>{% trans "Basic Orders" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Create, view, and manage customer orders" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_orders_advanced" id="feature_orders_advanced">
+                                            <label class="form-check-label" for="feature_orders_advanced">
+                                                <strong>{% trans "Advanced Orders" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Multi-step orders, custom workflows, templates" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_orders_bulk" id="feature_orders_bulk">
+                                            <label class="form-check-label" for="feature_orders_bulk">
+                                                <strong>{% trans "Bulk Operations" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Import/export orders, bulk status updates" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_orders_archive" id="feature_orders_archive">
+                                            <label class="form-check-label" for="feature_orders_archive">
+                                                <strong>{% trans "Order Archive" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Automatic archiving with retention policies" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_bulk_payment_collection" id="feature_bulk_payment_collection">
+                                            <label class="form-check-label" for="feature_bulk_payment_collection">
+                                                <strong>{% trans "Bulk Payment Collection" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Collect payments for multiple orders at once" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            {% empty %}
-                            <div class="col-12">
-                                <p class="text-secondary-light">{% trans "No features available. Create features first in the admin panel." %}</p>
+                        </div>
+                    </div>
+
+                    <!-- Analytics & Reports -->
+                    <div class="col-12">
+                        <div class="card border bg-neutral-50">
+                            <div class="card-body p-16">
+                                <h6 class="text-sm text-primary-light mb-12">📈 {% trans "Analytics & Reports" %} (6)</h6>
+                                <div class="row gy-2">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_analytics_basic" id="feature_analytics_basic">
+                                            <label class="form-check-label" for="feature_analytics_basic">
+                                                <strong>{% trans "Basic Analytics" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Dashboard with key metrics and statistics" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_analytics_advanced" id="feature_analytics_advanced">
+                                            <label class="form-check-label" for="feature_analytics_advanced">
+                                                <strong>{% trans "Advanced Analytics" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Detailed reports, trends, predictions" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_sales_reports" id="feature_sales_reports">
+                                            <label class="form-check-label" for="feature_sales_reports">
+                                                <strong>{% trans "Sales Reports" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Revenue, sales performance, trends" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_finance_reports" id="feature_finance_reports">
+                                            <label class="form-check-label" for="feature_finance_reports">
+                                                <strong>{% trans "Finance Reports" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Payments, expenses, profit analysis" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_custom_reports" id="feature_custom_reports">
+                                            <label class="form-check-label" for="feature_custom_reports">
+                                                <strong>{% trans "Custom Reports" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Build custom reports with filters" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_export_data" id="feature_export_data">
+                                            <label class="form-check-label" for="feature_export_data">
+                                                <strong>{% trans "Data Export" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Export to Excel, CSV, PDF formats" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Integration Features -->
+                    <div class="col-12">
+                        <div class="card border bg-neutral-50">
+                            <div class="card-body p-16">
+                                <h6 class="text-sm text-primary-light mb-12">🔗 {% trans "Integration" %} (4)</h6>
+                                <div class="row gy-2">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_webhooks" id="feature_webhooks">
+                                            <label class="form-check-label" for="feature_webhooks">
+                                                <strong>{% trans "Webhooks" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Receive real-time event notifications" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_api_access" id="feature_api_access">
+                                            <label class="form-check-label" for="feature_api_access">
+                                                <strong>{% trans "API Access" %}</strong>
+                                                <span class="badge bg-warning-600 text-xs ms-1">{% trans "On Request" %}</span><br>
+                                                <small class="text-secondary-light">{% trans "RESTful API for custom integrations" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_third_party_integrations" id="feature_third_party_integrations">
+                                            <label class="form-check-label" for="feature_third_party_integrations">
+                                                <strong>{% trans "Third-Party Integrations" %}</strong>
+                                                <span class="badge bg-warning-600 text-xs ms-1">{% trans "On Request" %}</span><br>
+                                                <small class="text-secondary-light">{% trans "Connect with external services" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_telegram_bot" id="feature_telegram_bot">
+                                            <label class="form-check-label" for="feature_telegram_bot">
+                                                <strong>{% trans "Telegram Bot" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Receive notifications and manage via Telegram" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Marketing & Organization (side by side) -->
+                    <div class="col-md-6">
+                        <div class="card border bg-neutral-50 h-100">
+                            <div class="card-body p-16">
+                                <h6 class="text-sm text-primary-light mb-12">📢 {% trans "Marketing" %} (2)</h6>
+                                <div class="row gy-2">
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_marketing_campaigns" id="feature_marketing_campaigns">
+                                            <label class="form-check-label" for="feature_marketing_campaigns">
+                                                <strong>{% trans "Marketing Campaigns" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Create and manage campaigns" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_broadcasts" id="feature_broadcasts">
+                                            <label class="form-check-label" for="feature_broadcasts">
+                                                <strong>{% trans "Broadcasts" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Send bulk notifications to customers" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border bg-neutral-50 h-100">
+                            <div class="card-body p-16">
+                                <h6 class="text-sm text-primary-light mb-12">🏢 {% trans "Organization" %} (4)</h6>
+                                <div class="row gy-2">
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_multi_branch" id="feature_multi_branch">
+                                            <label class="form-check-label" for="feature_multi_branch">
+                                                <strong>{% trans "Multi-Branch" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Manage multiple business locations" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_staff_management" id="feature_staff_management">
+                                            <label class="form-check-label" for="feature_staff_management">
+                                                <strong>{% trans "Staff Management" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Employee accounts and permissions" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_rbac" id="feature_rbac">
+                                            <label class="form-check-label" for="feature_rbac">
+                                                <strong>{% trans "Role-Based Access Control" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Custom roles and permissions" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_audit_logs" id="feature_audit_logs">
+                                            <label class="form-check-label" for="feature_audit_logs">
+                                                <strong>{% trans "Audit Logs" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Track all system activities" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Storage & Financial (side by side) -->
+                    <div class="col-md-6">
+                        <div class="card border bg-neutral-50 h-100">
+                            <div class="card-body p-16">
+                                <h6 class="text-sm text-primary-light mb-12">📦 {% trans "Storage" %} (3)</h6>
+                                <div class="row gy-2">
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_file_uploads" id="feature_file_uploads">
+                                            <label class="form-check-label" for="feature_file_uploads">
+                                                <strong>{% trans "File Uploads" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Attach files to orders and records" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_storage_basic" id="feature_storage_basic">
+                                            <label class="form-check-label" for="feature_storage_basic">
+                                                <strong>{% trans "Basic Storage" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Limited file storage space" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_storage_advanced" id="feature_storage_advanced">
+                                            <label class="form-check-label" for="feature_storage_advanced">
+                                                <strong>{% trans "Advanced Storage" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Expanded storage with version control" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border bg-neutral-50 h-100">
+                            <div class="card-body p-16">
+                                <h6 class="text-sm text-primary-light mb-12">💰 {% trans "Financial" %} (4)</h6>
+                                <div class="row gy-2">
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_payment_tracking" id="feature_payment_tracking">
+                                            <label class="form-check-label" for="feature_payment_tracking">
+                                                <strong>{% trans "Payment Tracking" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Track payments and outstanding amounts" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_expense_management" id="feature_expense_management">
+                                            <label class="form-check-label" for="feature_expense_management">
+                                                <strong>{% trans "Expense Management" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Record and categorize expenses" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_payment_reminders" id="feature_payment_reminders">
+                                            <label class="form-check-label" for="feature_payment_reminders">
+                                                <strong>{% trans "Payment Reminders" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Automatic payment reminder notifications" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_invoicing" id="feature_invoicing">
+                                            <label class="form-check-label" for="feature_invoicing">
+                                                <strong>{% trans "Invoicing" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Generate and send invoices" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Support & Advanced (side by side) -->
+                    <div class="col-md-6">
+                        <div class="card border bg-neutral-50 h-100">
+                            <div class="card-body p-16">
+                                <h6 class="text-sm text-primary-light mb-12">🎯 {% trans "Support" %} (2)</h6>
+                                <div class="row gy-2">
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_priority_support" id="feature_priority_support">
+                                            <label class="form-check-label" for="feature_priority_support">
+                                                <strong>{% trans "Priority Support" %}</strong>
+                                                <span class="badge bg-info-600 text-xs ms-1">{% trans "Docs" %}</span><br>
+                                                <small class="text-secondary-light">{% trans "Faster response time for issues" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_onboarding" id="feature_onboarding">
+                                            <label class="form-check-label" for="feature_onboarding">
+                                                <strong>{% trans "Onboarding" %}</strong>
+                                                <span class="badge bg-info-600 text-xs ms-1">{% trans "Docs" %}</span><br>
+                                                <small class="text-secondary-light">{% trans "Personal setup assistance" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border bg-neutral-50 h-100">
+                            <div class="card-body p-16">
+                                <h6 class="text-sm text-primary-light mb-12">⚡ {% trans "Advanced" %} (3)</h6>
+                                <div class="row gy-2">
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_white_label" id="feature_white_label">
+                                            <label class="form-check-label" for="feature_white_label">
+                                                <strong>{% trans "White Label" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Custom branding and domain" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_data_backup" id="feature_data_backup">
+                                            <label class="form-check-label" for="feature_data_backup">
+                                                <strong>{% trans "Data Backup" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Automated backup and recovery" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_advanced_security" id="feature_advanced_security">
+                                            <label class="form-check-label" for="feature_advanced_security">
+                                                <strong>{% trans "Advanced Security" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "2FA, IP restrictions, encryption" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Services Management -->
+                    <div class="col-12">
+                        <div class="card border bg-neutral-50">
+                            <div class="card-body p-16">
+                                <h6 class="text-sm text-primary-light mb-12">🛠️ {% trans "Services Management" %} (4)</h6>
+                                <div class="row gy-2">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_services_basic" id="feature_services_basic">
+                                            <label class="form-check-label" for="feature_services_basic">
+                                                <strong>{% trans "Basic Services" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Create and manage service catalog" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_services_advanced" id="feature_services_advanced">
+                                            <label class="form-check-label" for="feature_services_advanced">
+                                                <strong>{% trans "Advanced Services" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Categories, pricing tiers, variations" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_service_tracking" id="feature_service_tracking">
+                                            <label class="form-check-label" for="feature_service_tracking">
+                                                <strong>{% trans "Service Tracking" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Track service usage and statistics" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-checkbox" type="checkbox" name="feature_service_analytics" id="feature_service_analytics">
+                                            <label class="form-check-label" for="feature_service_analytics">
+                                                <strong>{% trans "Service Analytics" %}</strong><br>
+                                                <small class="text-secondary-light">{% trans "Analyze service performance metrics" %}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -171,6 +616,13 @@
 </div>
 
 <script>
+function updateFeatureCount() {
+    const checkboxes = document.querySelectorAll('.feature-checkbox');
+    const checkedCount = document.querySelectorAll('.feature-checkbox:checked').length;
+    const totalCount = checkboxes.length;
+    document.getElementById('featureCount').textContent = `${checkedCount}/${totalCount}`;
+}
+
 function toggleTrialSettings() {
     const isTrial = document.getElementById('isTrial').checked;
     const trialContainer = document.getElementById('trialDaysContainer');
@@ -184,5 +636,11 @@ function toggleTrialSettings() {
         trialDaysInput.required = false;
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.feature-checkbox');
+    checkboxes.forEach(cb => cb.addEventListener('change', updateFeatureCount));
+    updateFeatureCount();
+});
 </script>
 {% endblock %}

@@ -1,12 +1,24 @@
 {% load static %}
+{% load i18n %}
+{% load billing_extras %}
 <!DOCTYPE html>
 <html lang="{{ current_language|default:'ru' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if current_language == 'uz' %}
+    <meta name="description" content="MultiLang - Tarjima byurolarini boshqarish uchun zamonaviy SaaS platforma. Buyurtmalarni avtomatlashtirish, Telegram integratsiya, analitika va boshqalar.">
+    <meta name="keywords" content="tarjima boshqaruvi, tarjima byurosi, telegram bot, hujjatlar, tarjima, avtomatlashtirish">
+    <title>MultiLang - Tarjima Boshqaruv Platformasi</title>
+    {% elif current_language == 'en' %}
+    <meta name="description" content="MultiLang - Modern SaaS platform for translation bureau management. Order automation, Telegram integration, analytics and more.">
+    <meta name="keywords" content="translation management, translation bureau, telegram bot, documents, translation, automation">
+    <title>MultiLang - Translation Management Platform</title>
+    {% else %}
     <meta name="description" content="MultiLang - Современная SaaS платформа для управления бюро переводов. Автоматизация заказов, Telegram интеграция, аналитика и многое другое.">
     <meta name="keywords" content="translation management, бюро переводов, telegram bot, документы, перевод, автоматизация">
     <title>MultiLang - Платформа Управления Переводами</title>
+    {% endif %}
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
@@ -597,12 +609,12 @@
                     <div class="hero-images-container" style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; flex-wrap: wrap; padding: 1.5rem 1rem;">
                         <!-- Logo 1 -->
                         <div class="hero-logo-card" style="background: white; padding: 1.5rem; border-radius: 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.1); transform: rotate(-2deg); transition: all 0.3s; width: 100%; max-width: 420px;">
-                            <img src="{% static 'images/hero1.png' %}" alt="MultiLang Dashboard" style="width: 100%; height: auto; display: block; border-radius: 10px;">
+                            <img src="{% static 'images/hero1.png' %}" alt="{% if current_language == 'uz' %}MultiLang Boshqaruv Paneli{% elif current_language == 'en' %}MultiLang Dashboard{% else %}MultiLang Панель Управления{% endif %}" style="width: 100%; height: auto; display: block; border-radius: 10px;">
                         </div>
                         
                         <!-- Logo 2 -->
                         <div class="hero-logo-card" style="background: white; padding: 1.5rem; border-radius: 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.1); transform: rotate(2deg); transition: all 0.3s; width: 100%; max-width: 420px;">
-                            <img src="{% static 'images/hero2.png' %}" alt="MultiLang Analytics" style="width: 100%; height: auto; display: block; border-radius: 10px;">
+                            <img src="{% static 'images/hero2.png' %}" alt="{% if current_language == 'uz' %}MultiLang Analitika{% elif current_language == 'en' %}MultiLang Analytics{% else %}MultiLang Аналитика{% endif %}" style="width: 100%; height: auto; display: block; border-radius: 10px;">
                         </div>
                     </div>
                     
@@ -1035,7 +1047,111 @@
             </p>
             
             <div class="row g-4">
-                <!-- Starter Plan -->
+                {% for tariff in tariffs %}
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}00">
+                    <div class="pricing-card {% if tariff.is_featured %}featured{% endif %}">
+                        {% if tariff.is_trial %}
+                        <div class="pricing-badge">
+                            {% if current_language == 'uz' %}Bepul sinov{% elif current_language == 'en' %}Free Trial{% else %}Бесплатная пробная версия{% endif %}
+                        </div>
+                        {% elif tariff.is_featured %}
+                        <div class="pricing-badge">
+                            {% if current_language == 'uz' %}Ommabop{% elif current_language == 'en' %}Popular{% else %}Популярный{% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <h3 class="pricing-name">{{ tariff.title }}</h3>
+                        
+                        {% if tariff.description %}
+                        <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 1.5rem;">{{ tariff.description }}</p>
+                        {% endif %}
+                        
+                        <!-- Limits Section -->
+                        <div style="margin-bottom: 1.5rem;">
+                            <h6 style="color: #64748B; font-size: 0.9rem; margin-bottom: 0.75rem; font-weight: 600;">
+                                {% trans "Лимиты" %}:
+                            </h6>
+                            <ul class="pricing-features" style="margin-bottom: 0;">
+                                <li><i class="fas fa-building"></i>
+                                    {% trans "Филиалы" %}: {% if tariff.max_branches %}{{ tariff.max_branches }}{% else %}∞{% endif %}
+                                </li>
+                                
+                                <li><i class="fas fa-users"></i>
+                                    {% trans "Сотрудники" %}: {% if tariff.max_staff %}{{ tariff.max_staff }}{% else %}∞{% endif %}
+                                </li>
+                                
+                                <li><i class="fas fa-file-alt"></i>
+                                    {% trans "Заказов/месяц" %}: {% if tariff.max_monthly_orders %}{{ tariff.max_monthly_orders }}{% else %}∞{% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Features Section -->
+                        {% with features_with_names=tariff.get_enabled_features_with_names feature_count=tariff.get_feature_count %}
+                        {% if feature_count > 0 %}
+                        <div style="margin-bottom: 1.5rem;">
+                            <h6 style="color: #64748B; font-size: 0.9rem; margin-bottom: 0.75rem; font-weight: 600;">
+                                {% trans "Возможности" %} ({{ feature_count }}):
+                            </h6>
+                            <ul class="pricing-features" style="margin-bottom: 0;">
+                                {% for feature_slug, feature_name in features_with_names|slice:":5" %}
+                                <li><i class="fas fa-check-circle"></i> {{ feature_name }}</li>
+                                {% endfor %}
+                                {% if feature_count > 5 %}
+                                <li style="color: #64748B; position: relative; z-index: 100;">
+                                    <i class="fas fa-ellipsis-h"></i> 
+                                    <span class="more-features-trigger" style="cursor: pointer; text-decoration: underline; text-decoration-style: dotted;">
+                                        +{{ feature_count|add:"-5" }} 
+                                        {% if current_language == 'uz' %}yana{% elif current_language == 'en' %}more{% else %}еще{% endif %}
+                                    </span>
+                                    <div class="more-features-tooltip" style="display: none; position: absolute; left: 0; top: 100%; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); z-index: 9999; min-width: 250px; max-width: 300px; margin-top: 0.5rem; max-height: 300px; overflow-y: auto;">
+                                        <strong style="display: block; margin-bottom: 0.5rem; color: #334155;">
+                                            {% if current_language == 'uz' %}Boshqa imkoniyatlar:{% elif current_language == 'en' %}Additional features:{% else %}Дополнительные возможности:{% endif %}
+                                        </strong>
+                                        <ul style="list-style: none; padding: 0; margin: 0;">
+                                            {% for feature_slug, feature_name in features_with_names|slice:"5:" %}
+                                            <li style="padding: 0.25rem 0; color: #334155; font-size: 0.875rem;">
+                                                <i class="fas fa-check-circle" style="color: var(--primary-color); margin-right: 0.5rem;"></i>{{ feature_name }}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                        
+                        <!-- Pricing Options Section -->
+                        {% if tariff.pricing.exists %}
+                        <div style="margin-bottom: 1.5rem;">
+                            <h6 style="color: #64748B; font-size: 0.9rem; margin-bottom: 0.75rem; font-weight: 600;">
+                                {% trans "Варианты Цен" %}:
+                            </h6>
+                            <div style="background: rgba(72, 127, 255, 0.05); border-radius: 8px; padding: 1rem;">
+                                {% for pricing in tariff.pricing.all %}
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; {% if not forloop.last %}border-bottom: 1px solid rgba(100, 116, 139, 0.1);{% endif %}">
+                                    <span style="color: #334155; font-size: 0.9rem;">
+                                        {{ pricing.duration_months }} 
+                                        {% if current_language == 'uz' %}oy{% elif current_language == 'en' %}month{% else %}мес{% endif %}{% if pricing.duration_months > 1 %}{% if current_language == 'en' %}s{% elif current_language == 'uz' %}{% else %}{% endif %}{% endif %}
+                                    </span>
+                                    <span style="color: var(--primary-color); font-weight: 600; font-size: 1rem;">
+                                        {{ pricing.price|intspace }} {{ pricing.currency }}
+                                    </span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <a href="#contact" class="btn {% if tariff.is_featured %}btn-primary-custom{% else %}btn-outline-custom{% endif %} w-100">
+                            {% if current_language == 'uz' %}Tanlash{% elif current_language == 'en' %}Choose Plan{% else %}Выбрать План{% endif %}
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <!-- Fallback if no tariffs -->
                 <div class="col-lg-4" data-aos="fade-up" data-aos-delay="0">
                     <div class="pricing-card">
                         <h3 class="pricing-name">
@@ -1123,48 +1239,7 @@
                         </a>
                     </div>
                 </div>
-                
-                <!-- Enterprise Plan -->
-                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
-                    <div class="pricing-card">
-                        <h3 class="pricing-name">
-                            {% if current_language == 'uz' %}Enterprise{% elif current_language == 'en' %}Enterprise{% else %}Корпоративный{% endif %}
-                        </h3>
-                        <div class="pricing-price">1 999 000 UZS</div>
-                        <div class="pricing-period">
-                            {% if current_language == 'uz' %}oyiga{% elif current_language == 'en' %}per month{% else %}в месяц{% endif %}
-                        </div>
-                        <ul class="pricing-features">
-                            <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Cheksiz Markazlar{% elif current_language == 'en' %}Unlimited Centers{% else %}Безлимитные Центры{% endif %}
-                            </li>
-                            <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Cheksiz Filiallar{% elif current_language == 'en' %}Unlimited Branches{% else %}Безлимитные Филиалы{% endif %}
-                            </li>
-                            <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Cheksiz Xodimlar{% elif current_language == 'en' %}Unlimited Staff{% else %}Безлимитные Сотрудники{% endif %}
-                            </li>
-                            <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Cheksiz Buyurtmalar{% elif current_language == 'en' %}Unlimited Orders{% else %}Безлимитные Заказы{% endif %}
-                            </li>
-                            <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Barcha Imkoniyatlar{% elif current_language == 'en' %}All Features{% else %}Все Возможности{% endif %}
-                            </li>
-                            <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}API Integratsiyasi{% elif current_language == 'en' %}API Integration{% else %}API Интеграция{% endif %}
-                            </li>
-                            <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}24/7 Texnik Qo'llab-quvvatlash{% elif current_language == 'en' %}24/7 Technical Support{% else %}24/7 Техническая Поддержка{% endif %}
-                            </li>
-                            <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Shaxsiy Menejer{% elif current_language == 'en' %}Dedicated Manager{% else %}Персональный Менеджер{% endif %}
-                            </li>
-                        </ul>
-                        <a href="#contact" class="btn btn-outline-custom w-100">
-                            {% if current_language == 'uz' %}Bog'lanish{% elif current_language == 'en' %}Contact Us{% else %}Связаться{% endif %}
-                        </a>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </section>
@@ -1208,8 +1283,8 @@
                                            placeholder="{% if current_language == 'uz' %}Ismingiz{% elif current_language == 'en' %}Your name{% else %}Ваше имя{% endif %}">
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Email *</label>
-                                    <input type="email" name="email" class="form-control" placeholder="you@example.com">
+                                    <label class="form-label">Email </label>
+                                    <input type="email" name="email" class="form-control" placeholder="{% if current_language == 'uz' %}sizning@email.uz{% elif current_language == 'en' %}you@example.com{% else %}вы@example.com{% endif %}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">
@@ -1220,9 +1295,9 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">
-                                        {% if current_language == 'uz' %}Telefon{% elif current_language == 'en' %}Phone{% else %}Телефон{% endif %}
+                                        {% if current_language == 'uz' %}Telefon *{% elif current_language == 'en' %}Phone *{% else %}Телефон *{% endif %}
                                     </label>
-                                    <input type="tel" name="phone" class="form-control" placeholder="+998 XX XXX XX XX">
+                                    <input type="tel" name="phone" required class="form-control" placeholder="+998 XX XXX XX XX">
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label">
@@ -1378,6 +1453,45 @@
                         behavior: 'smooth',
                         block: 'start'
                     });
+                }
+            });
+        });
+        
+        // Handle more features tooltip
+        document.querySelectorAll('.more-features-trigger').forEach(trigger => {
+            const tooltip = trigger.nextElementSibling;
+            const pricingCard = trigger.closest('.pricing-card');
+            
+            trigger.addEventListener('mouseenter', function() {
+                tooltip.style.display = 'block';
+                if (pricingCard) {
+                    pricingCard.style.zIndex = '1000';
+                    pricingCard.style.position = 'relative';
+                }
+            });
+            
+            trigger.addEventListener('mouseleave', function() {
+                setTimeout(() => {
+                    if (!tooltip.matches(':hover')) {
+                        tooltip.style.display = 'none';
+                        if (pricingCard) {
+                            pricingCard.style.zIndex = '';
+                        }
+                    }
+                }, 100);
+            });
+            
+            tooltip.addEventListener('mouseenter', function() {
+                tooltip.style.display = 'block';
+                if (pricingCard) {
+                    pricingCard.style.zIndex = '1000';
+                }
+            });
+            
+            tooltip.addEventListener('mouseleave', function() {
+                tooltip.style.display = 'none';
+                if (pricingCard) {
+                    pricingCard.style.zIndex = '';
                 }
             });
         });

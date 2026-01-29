@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext
 from django.core.validators import MinValueValidator
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
@@ -8,7 +9,7 @@ from decimal import Decimal
 
 
 class Feature(models.Model):
-    """Individual features that can be included in tariffs"""
+    """Individual features that can be included in tariffs (legacy - being replaced by boolean fields)"""
     code = models.CharField(max_length=50, unique=True, verbose_name=_("Feature Code"))
     name = models.CharField(max_length=200, verbose_name=_("Feature Name"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
@@ -56,8 +57,215 @@ class Tariff(models.Model):
         help_text=_("Leave empty for unlimited")
     )
     
-    # Features
-    features = models.ManyToManyField(Feature, blank=True, verbose_name=_("Features"))
+    # ============ FEATURE FLAGS (37 Features) ============
+    
+    # Order Management Features (5)
+    feature_orders_basic = models.BooleanField(
+        default=False, 
+        verbose_name=_("Basic Order Management"),
+        help_text=_("Create, view, and track customer orders")
+    )
+    feature_orders_advanced = models.BooleanField(
+        default=False,
+        verbose_name=_("Advanced Order Management"),
+        help_text=_("Bulk operations, advanced filters, export")
+    )
+    feature_order_assignment = models.BooleanField(
+        default=False,
+        verbose_name=_("Order Assignment"),
+        help_text=_("Assign orders to specific staff members")
+    )
+    feature_bulk_payments = models.BooleanField(
+        default=False,
+        verbose_name=_("Bulk Payment Processing"),
+        help_text=_("Process payments across multiple orders")
+    )
+    feature_order_templates = models.BooleanField(
+        default=False,
+        verbose_name=_("Order Templates"),
+        help_text=_("Save and reuse order configurations")
+    )
+    
+    # Analytics & Reports Features (6)
+    feature_analytics_basic = models.BooleanField(
+        default=False,
+        verbose_name=_("Basic Analytics"),
+        help_text=_("View order counts and basic statistics")
+    )
+    feature_analytics_advanced = models.BooleanField(
+        default=False,
+        verbose_name=_("Advanced Analytics"),
+        help_text=_("Detailed reports, financial analytics, trends")
+    )
+    feature_financial_reports = models.BooleanField(
+        default=False,
+        verbose_name=_("Financial Reports"),
+        help_text=_("Revenue, profit, expense analysis")
+    )
+    feature_staff_performance = models.BooleanField(
+        default=False,
+        verbose_name=_("Staff Performance Reports"),
+        help_text=_("Track individual staff productivity")
+    )
+    feature_custom_reports = models.BooleanField(
+        default=False,
+        verbose_name=_("Custom Report Builder"),
+        help_text=_("Create custom reports with filters")
+    )
+    feature_export_reports = models.BooleanField(
+        default=False,
+        verbose_name=_("Export Reports"),
+        help_text=_("Export to Excel, PDF, CSV formats")
+    )
+    
+    # Integration Features (4)
+    feature_api_access = models.BooleanField(
+        default=False,
+        verbose_name=_("REST API Access"),
+        help_text=_("REST API for custom integrations (on request)")
+    )
+    feature_webhooks = models.BooleanField(
+        default=False,
+        verbose_name=_("Telegram Webhook Management"),
+        help_text=_("Configure and manage Telegram bot webhooks")
+    )
+    feature_integrations = models.BooleanField(
+        default=False,
+        verbose_name=_("Third-Party Integrations"),
+        help_text=_("Custom integrations with external services (on request)")
+    )
+    feature_telegram_bot = models.BooleanField(
+        default=False,
+        verbose_name=_("Telegram Bot Integration"),
+        help_text=_("Customer-facing bot for order placement")
+    )
+    
+    # Marketing & Communications Features (2)
+    feature_marketing_basic = models.BooleanField(
+        default=False,
+        verbose_name=_("Marketing Campaign Tools"),
+        help_text=_("Create and manage marketing posts")
+    )
+    feature_broadcast_messages = models.BooleanField(
+        default=False,
+        verbose_name=_("Mass Broadcast Messaging"),
+        help_text=_("Send targeted broadcasts to customers")
+    )
+    
+    # Organization & Staff Features (4)
+    feature_multi_branch = models.BooleanField(
+        default=False,
+        verbose_name=_("Multiple Branches"),
+        help_text=_("Manage multiple branch locations")
+    )
+    feature_custom_roles = models.BooleanField(
+        default=False,
+        verbose_name=_("Custom Roles & Permissions"),
+        help_text=_("Create custom staff roles with RBAC")
+    )
+    feature_staff_scheduling = models.BooleanField(
+        default=False,
+        verbose_name=_("Staff Scheduling"),
+        help_text=_("Schedule and manage staff shifts")
+    )
+    feature_branch_settings = models.BooleanField(
+        default=False,
+        verbose_name=_("Branch Settings"),
+        help_text=_("Customize settings per branch")
+    )
+    
+    # Storage & Archive Features (3)
+    feature_archive_access = models.BooleanField(
+        default=False,
+        verbose_name=_("Historical File Archives"),
+        help_text=_("Access compressed archives of completed orders")
+    )
+    feature_cloud_backup = models.BooleanField(
+        default=False,
+        verbose_name=_("Automated Cloud Backups"),
+        help_text=_("Database and file backups to cloud storage")
+    )
+    feature_extended_storage = models.BooleanField(
+        default=False,
+        verbose_name=_("Extended Storage Capacity"),
+        help_text=_("Additional storage for documents and media")
+    )
+    
+    # Financial Management Features (4)
+    feature_multi_currency = models.BooleanField(
+        default=False,
+        verbose_name=_("Multi-Currency Pricing"),
+        help_text=_("Support for multiple currencies (UZS, USD, RUB)")
+    )
+    feature_payment_management = models.BooleanField(
+        default=False,
+        verbose_name=_("Payment Tracking & Recording"),
+        help_text=_("Manual payment recording and receipt verification")
+    )
+    feature_invoicing = models.BooleanField(
+        default=False,
+        verbose_name=_("Automated Invoicing"),
+        help_text=_("Generate invoices for orders")
+    )
+    feature_expense_tracking = models.BooleanField(
+        default=False,
+        verbose_name=_("Expense Tracking"),
+        help_text=_("Track business expenses by branch")
+    )
+    
+    # Support & Services Features (2)
+    feature_support_tickets = models.BooleanField(
+        default=False,
+        verbose_name=_("Support Ticketing System"),
+        help_text=_("Internal ticketing for issue tracking")
+    )
+    feature_knowledge_base = models.BooleanField(
+        default=False,
+        verbose_name=_("Knowledge Base Access"),
+        help_text=_("Access to documentation and user guides")
+    )
+    
+    # Advanced Features (3)
+    feature_advanced_security = models.BooleanField(
+        default=False,
+        verbose_name=_("Advanced Security Features"),
+        help_text=_("Enhanced security (audit logs, RBAC)")
+    )
+    feature_audit_logs = models.BooleanField(
+        default=False,
+        verbose_name=_("Comprehensive Audit Logs"),
+        help_text=_("Track all system actions and changes")
+    )
+    feature_data_retention = models.BooleanField(
+        default=False,
+        verbose_name=_("Data Retention Control"),
+        help_text=_("Configure data retention policies")
+    )
+    
+    # Services Management Features (4)
+    feature_products_basic = models.BooleanField(
+        default=False,
+        verbose_name=_("Basic Product Management"),
+        help_text=_("Manage services and basic pricing")
+    )
+    feature_products_advanced = models.BooleanField(
+        default=False,
+        verbose_name=_("Advanced Product Management"),
+        help_text=_("Complex pricing, categories, customization")
+    )
+    feature_language_pricing = models.BooleanField(
+        default=False,
+        verbose_name=_("Language-Specific Pricing"),
+        help_text=_("Different pricing per language combination")
+    )
+    feature_dynamic_pricing = models.BooleanField(
+        default=False,
+        verbose_name=_("Dynamic Pricing"),
+        help_text=_("Per-page pricing calculations")
+    )
+    
+    # Legacy M2M relationship (will be deprecated)
+    features = models.ManyToManyField(Feature, blank=True, verbose_name=_("Features (Legacy)"))
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
@@ -71,9 +279,168 @@ class Tariff(models.Model):
     def __str__(self):
         return self.title
     
-    def has_feature(self, feature_code):
-        """Check if tariff includes a specific feature"""
-        return self.features.filter(code=feature_code, is_active=True).exists()
+    def has_feature(self, feature_name):
+        """
+        Check if tariff includes a specific feature by name (without 'feature_' prefix)
+        
+        Example:
+            tariff.has_feature('marketing_basic')  # Checks feature_marketing_basic
+            tariff.has_feature('api_access')       # Checks feature_api_access
+        """
+        feature_field = f"feature_{feature_name}"
+        return getattr(self, feature_field, False)
+    
+    def get_enabled_features(self):
+        """
+        Get list of all enabled feature names (without 'feature_' prefix)
+        
+        Returns:
+            list: ['orders_basic', 'analytics_basic', 'telegram_bot', ...]
+        """
+        enabled = []
+        for field in self._meta.get_fields():
+            if field.name.startswith('feature_') and getattr(self, field.name, False):
+                # Remove 'feature_' prefix
+                feature_name = field.name[8:]
+                enabled.append(feature_name)
+        return enabled
+    
+    def get_features_by_category(self, category=None):
+        """
+        Get features organized by category with display names
+        
+        Args:
+            category: Optional category name (orders, analytics, integration, etc.)
+        
+        Returns:
+            dict: {display_name: enabled_status} or nested dict if no category specified
+        """
+        categories = {
+            'orders': [
+                'orders_basic', 'orders_advanced', 'orders_bulk',
+                'orders_archive', 'bulk_payment_collection'
+            ],
+            'analytics': [
+                'analytics_basic', 'analytics_advanced', 'sales_reports',
+                'finance_reports', 'custom_reports', 'export_data'
+            ],
+            'integration': [
+                'webhooks', 'api_access', 'third_party_integrations', 'telegram_bot'
+            ],
+            'marketing': ['marketing_campaigns', 'broadcasts'],
+            'organization': [
+                'multi_branch', 'staff_management', 'rbac', 'audit_logs'
+            ],
+            'storage': [
+                'file_uploads', 'storage_basic', 'storage_advanced'
+            ],
+            'financial': [
+                'payment_tracking', 'expense_management', 'payment_reminders', 'invoicing'
+            ],
+            'support': ['priority_support', 'onboarding'],
+            'advanced': ['white_label', 'data_backup', 'advanced_security'],
+            'services': [
+                'services_basic', 'services_advanced', 'service_tracking', 'service_analytics'
+            ],
+        }
+        
+        if category:
+            # Return specific category features with display names
+            feature_slugs = categories.get(category, [])
+            return {self.get_feature_display_name(slug): self.has_feature(slug) for slug in feature_slugs}
+        else:
+            # Return all categories with display names
+            result = {}
+            for cat_name, feature_slugs in categories.items():
+                result[cat_name] = {self.get_feature_display_name(slug): self.has_feature(slug) for slug in feature_slugs}
+            return result
+    
+    def get_feature_count(self):
+        """Get total number of enabled features"""
+        return len(self.get_enabled_features())
+    
+    def get_feature_display_name(self, feature_slug):
+        """
+        Convert feature slug to display name - matches exactly with feature field names
+        
+        Args:
+            feature_slug: Feature name without 'feature_' prefix (e.g., 'orders_basic')
+            
+        Returns:
+            str: Human-readable translated feature name
+        """
+        feature_names = {
+            # Order Management Features (5)
+            'orders_basic': gettext('Basic Order Management'),
+            'orders_advanced': gettext('Advanced Order Management'),
+            'order_assignment': gettext('Order Assignment'),
+            'bulk_payments': gettext('Bulk Payment Processing'),
+            'order_templates': gettext('Order Templates'),
+            
+            # Analytics & Reports Features (6)
+            'analytics_basic': gettext('Basic Analytics'),
+            'analytics_advanced': gettext('Advanced Analytics'),
+            'financial_reports': gettext('Financial Reports'),
+            'staff_performance': gettext('Staff Performance Reports'),
+            'custom_reports': gettext('Custom Report Builder'),
+            'export_reports': gettext('Export Reports'),
+            
+            # Integration Features (4)
+            'api_access': gettext('REST API Access'),
+            'webhooks': gettext('Telegram Webhook Management'),
+            'integrations': gettext('Third-Party Integrations'),
+            'telegram_bot': gettext('Telegram Bot Integration'),
+            
+            # Marketing & Communications Features (2)
+            'marketing_basic': gettext('Marketing Campaign Tools'),
+            'broadcast_messages': gettext('Mass Broadcast Messaging'),
+            
+            # Organization & Staff Features (4)
+            'multi_branch': gettext('Multiple Branches'),
+            'custom_roles': gettext('Custom Roles & Permissions'),
+            'staff_scheduling': gettext('Staff Scheduling'),
+            'branch_settings': gettext('Branch Settings'),
+            
+            # Storage & Archive Features (3)
+            'archive_access': gettext('Historical File Archives'),
+            'cloud_backup': gettext('Automated Cloud Backups'),
+            'extended_storage': gettext('Extended Storage Capacity'),
+            
+            # Financial Management Features (4)
+            'multi_currency': gettext('Multi-Currency Pricing'),
+            'payment_management': gettext('Payment Tracking & Recording'),
+            'invoicing': gettext('Automated Invoicing'),
+            'expense_tracking': gettext('Expense Tracking'),
+            
+            # Support & Services Features (2)
+            'support_tickets': gettext('Support Ticketing System'),
+            'knowledge_base': gettext('Knowledge Base Access'),
+            
+            # Advanced Features (3)
+            'advanced_security': gettext('Advanced Security Features'),
+            'audit_logs': gettext('Comprehensive Audit Logs'),
+            'data_retention': gettext('Data Retention Control'),
+            
+            # Services Management Features (4)
+            'products_basic': gettext('Basic Product Management'),
+            'products_advanced': gettext('Advanced Product Management'),
+            'language_pricing': gettext('Language-Specific Pricing'),
+            'dynamic_pricing': gettext('Dynamic Pricing'),
+        }
+        return feature_names.get(feature_slug, feature_slug.replace('_', ' ').title())
+    
+    def get_enabled_features_with_names(self):
+        """
+        Get list of enabled features with their display names
+        
+        Returns:
+            list: [('orders_basic', 'Basic Orders'), ('analytics_basic', 'Basic Analytics'), ...]
+        """
+        features = []
+        for feature_slug in self.get_enabled_features():
+            display_name = self.get_feature_display_name(feature_slug)
+            features.append((feature_slug, display_name))
+        return features
     
     def get_pricing_options(self):
         """Get all pricing options for this tariff"""
@@ -323,6 +690,41 @@ class Subscription(models.Model):
             performed_by=None
         )
         return True
+    
+    def has_feature(self, feature_code):
+        """
+        Check if subscription includes a specific feature.
+        This is used for feature-based access control.
+        
+        Args:
+            feature_code: String code of the feature (e.g., 'advanced_analytics', 'telegram_bot')
+        
+        Returns:
+            Boolean indicating if subscription has access to this feature
+        """
+        if not self.is_active():
+            return False
+        
+        return self.tariff.has_feature(feature_code)
+    
+    def get_features(self):
+        """
+        Get all active feature names for this subscription
+        
+        Returns:
+            list: List of enabled feature names (without 'feature_' prefix)
+        """
+        if not self.is_active():
+            return []
+        
+        return self.tariff.get_enabled_features()
+    
+    def get_features_by_category(self, category=None):
+        """Get features organized by category"""
+        if not self.is_active():
+            return {} if category else {cat: {} for cat in ['orders', 'analytics', 'integration', 'marketing', 'organization', 'storage', 'financial', 'support', 'advanced', 'services']}
+        
+        return self.tariff.get_features_by_category(category)
     
     def get_usage_percentage(self, usage_type='orders'):
         """Get current usage percentage for orders/staff/branches"""
