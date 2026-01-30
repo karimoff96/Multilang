@@ -825,3 +825,83 @@ def centers_monitoring(request):
     
     return render(request, 'billing/centers_monitoring.html', context)
 
+
+@login_required
+def request_renewal(request):
+    """Request subscription renewal - Regular user view"""
+    if not hasattr(request.user, 'organization'):
+        messages.error(request, _("You don't have an organization associated with your account."))
+        return redirect('dashboard')
+    
+    org = request.user.organization
+    
+    # Check if organization has subscription
+    if not hasattr(org, 'subscription'):
+        messages.error(request, _("Your organization doesn't have an active subscription."))
+        return redirect('dashboard')
+    
+    subscription = org.subscription
+    
+    if request.method == 'POST':
+        # Handle renewal request submission
+        tariff_id = request.POST.get('tariff')
+        pricing_id = request.POST.get('pricing')
+        message = request.POST.get('message', '')
+        
+        try:
+            tariff = Tariff.objects.get(pk=tariff_id, is_active=True)
+            pricing = TariffPricing.objects.get(pk=pricing_id, tariff=tariff)
+            
+            # Create note for admins
+            renewal_request_note = f"""
+Renewal Request from {org.name}
+User: {request.user.get_full_name()} ({request.user.email})
+Current Subscription: {subscription.tariff.title} (ends {subscription.end_date})
+Requested Tariff: {tariff.title}
+Requested Duration: {pricing.duration_months} months
+Requested Price: {pricing.price:,} {pricing.currency}
+User Message: {message}
+Request Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}
+            """.strip()
+            
+            # Log the request in subscription history
+            SubscriptionHistory.objects.create(
+                subscription=subscription,
+                action='renewal_requested',
+                description=renewal_request_note,
+                performed_by=request.user
+            )
+            
+            # Send success message
+            messages.success(
+                request, 
+                _("Your renewal request has been submitted successfully! Our team will contact you shortly to process the payment.")
+            )
+            
+            # TODO: Send email/telegram notification to admins
+            
+            return redirect('billing:request_renewal')
+            
+        except Exception as e:
+            messages.error(request, f"Error submitting renewal request: {str(e)}")
+    
+    # Get available tariffs for selection
+    tariffs = Tariff.objects.filter(is_active=True, is_trial=False).prefetch_related('pricing')
+    
+    # Get current usage stats
+    current_usage = {
+        'branches': org.branches.count(),
+        'staff': org.get_staff_count(),
+        'orders': org.get_current_month_orders_count(),
+    }
+    
+    context = {
+        'title': _('Renew Subscription'),
+        'subTitle': _('Billing'),
+        'subscription': subscription,
+        'tariffs': tariffs,
+        'current_usage': current_usage,
+    }
+    
+    return render(request, 'billing/request_renewal.html', context)
+

@@ -27,4 +27,7 @@ urlpatterns = [
     
     # Centers with subscription status
     path('centers/', views.centers_list, name='centers_list'),
+    
+    # User renewal request
+    path('request-renewal/', views.request_renewal, name='request_renewal'),
 ]
