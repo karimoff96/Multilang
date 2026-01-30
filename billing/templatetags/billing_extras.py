@@ -1,4 +1,5 @@
 from django import template
+from django.utils.translation import activate, get_language
 
 register = template.Library()
 
@@ -28,3 +29,36 @@ def intspace(value):
         return "{:,}".format(value).replace(',', ' ')
     except (ValueError, TypeError):
         return value
+
+@register.filter
+def get_category_features_in_language(subscription, language_code):
+    """
+    Get features organized by category with display names in a specific language.
+    
+    Usage: 
+        {% with features=subscription|get_category_features_in_language:request.LANGUAGE_CODE %}
+    
+    Args:
+        subscription: Subscription object
+        language_code: Language code (e.g., 'en', 'ru', 'uz')
+    
+    Returns:
+        dict: Features organized by category with translated names
+    """
+    if not subscription:
+        return {}
+    
+    # Save current language
+    current_language = get_language()
+    
+    try:
+        # Activate the requested language
+        activate(language_code)
+        
+        # Get features by category (this will use gettext with the activated language)
+        features = subscription.get_features_by_category()
+        
+        return features
+    finally:
+        # Restore original language
+        activate(current_language)

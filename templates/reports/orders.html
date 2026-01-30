@@ -1,6 +1,7 @@
 {% extends 'layout/layout.html' %}
 {% load translation_filters %} 
 {% load number_filters %}
+{% load billing_extras %}
 
 {% block content %}
 <div class="row gy-4">
@@ -257,7 +258,7 @@
                                     <span class="badge bg-warning-focus text-warning-main" data-i18n="status.pending">{{ order.get_status_display }}</span>
                                     {% endif %}
                                 </td>
-                                <td class="{{ row_color }} text-end fw-medium text-secondary-light">{{ order.total_price|floatformat:0 }}</td>
+                                <td class="{{ row_color }} text-end fw-medium text-secondary-light">{{ order.total_price|intspace }}</td>
                             </tr>
                             {% empty %}
                             <tr><td colspan="6" class="text-center text-secondary-light bg-base" data-i18n="common.noOrdersFound">No orders found</td></tr>

@@ -94,7 +94,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-8">
                             <span class="text-sm">{{ pricing.duration_months }} {% trans "month(s)" %}</span>
                             <span class="fw-semibold text-primary-600">
-                                {{ pricing.price|floatformat:0 }} {{ pricing.currency }}
+                                {{ pricing.price|intspace }} {{ pricing.currency }}
                             </span>
                         </div>
                         {% empty %}

@@ -462,7 +462,7 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <input type="number" name="extra_fee" class="form-control radius-8" 
-                                       value="{{ order.extra_fee|floatformat:0 }}" min="0" step="1000" placeholder="0">
+                                       value="{{ order.extra_fee|intspace }}" min="0" step="1000" placeholder="0">
                             </div>
                             <div class="col-md-8">
                                 <input type="text" name="extra_fee_description" class="form-control radius-8" 

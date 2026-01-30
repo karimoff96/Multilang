@@ -1,6 +1,7 @@
 {% extends 'layout/layout.html' %} 
 {% load number_filters %}
 {% load i18n %}
+{% load billing_extras %}
 
 {% block content %}
 <div class="row gy-4">
@@ -318,16 +319,16 @@
                                 </td>
                                 {% endif %}
                                 <td class="text-end text-danger-main fw-semibold" data-value="{{ debtor.remaining }}">
-                                    <span class="formatted-number">{{ debtor.remaining|floatformat:0|intcomma }}</span>
+                                    <span class="formatted-number">{{ debtor.remaining|intspace }}</span>
                                 </td>
                                 <td class="text-center">
                                     <span class="badge bg-primary-600 text-white px-2 py-1 fw-medium">{{ debtor.orders_with_debt }}</span>
                                 </td>
                                 <td class="text-end" data-value="{{ debtor.total_expected }}">
-                                    <span class="formatted-number">{{ debtor.total_expected|floatformat:0|intcomma }}</span>
+                                    <span class="formatted-number">{{ debtor.total_expected|intspace }}</span>
                                 </td>
                                 <td class="text-end text-success-600 fw-semibold" data-value="{{ debtor.total_received }}">
-                                    <span class="formatted-number">{{ debtor.total_received|floatformat:0|intcomma }}</span>
+                                    <span class="formatted-number">{{ debtor.total_received|intspace }}</span>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex align-items-center justify-content-center gap-1">
@@ -353,16 +354,16 @@
                             <tr class="border-top-2 bg-neutral-50">
                                 <td colspan="{% if show_center or show_branch %}4{% else %}3{% endif %}" class="text-dark fw-bold py-3 ps-3">{% trans "TOTALS:" %}</td>
                                 <td class="text-end text-danger-main fw-bold py-3" data-value="{{ total_debt }}">
-                                    <span class="formatted-number">{{ total_debt|floatformat:0|intcomma }}</span>
+                                    <span class="formatted-number">{{ total_debt|intspace }}</span>
                                 </td>
                                 <td class="text-center py-3">
                                     <span class="badge bg-primary-600 text-white px-2 py-1">{{ total_orders_with_debt }}</span>
                                 </td>
                                 <td class="text-end text-dark fw-bold py-3" data-value="{{ total_expected }}">
-                                    <span class="formatted-number">{{ total_expected|floatformat:0|intcomma }}</span>
+                                    <span class="formatted-number">{{ total_expected|intspace }}</span>
                                 </td>
                                 <td class="text-end text-success-main fw-bold py-3" data-value="{{ total_received }}">
-                                    <span class="formatted-number">{{ total_received|floatformat:0|intcomma }}</span>
+                                    <span class="formatted-number">{{ total_received|intspace }}</span>
                                 </td>
                                 <td class="text-center py-3">
                                     <span class="badge {% if avg_collection_rate >= 80 %}bg-success-main{% elif avg_collection_rate >= 50 %}bg-warning-main{% else %}bg-danger-main{% endif %} text-white px-2 py-1">{{ avg_collection_rate }}%</span>

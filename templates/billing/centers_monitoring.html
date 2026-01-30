@@ -1,6 +1,7 @@
 {% extends 'layout/layout.html' %}
 {% load i18n %}
 {% load static %}
+{% load billing_extras %}
 
 {% block title %}{% trans "Centers Monitoring" %}{% endblock %}
 
@@ -15,7 +16,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <span class="text-gray-600 text-sm mb-4 d-block">{% trans "Total Revenue" %}</span>
-                            <h4 class="mb-0">{{ total_revenue|floatformat:2 }} UZS</h4>
+                            <h4 class="mb-0">{{ total_revenue|intspace }} UZS</h4>
                         </div>
                         <div class="w-56 h-56 bg-success-50 text-success-600 rounded-circle d-flex justify-content-center align-items-center">
                             <i class="ri-money-dollar-circle-line" style="font-size: 2.5rem;"></i>
@@ -139,7 +140,7 @@
                             </td>
                             <td>
                                 <div class="fw-semibold text-success-600">
-                                    {{ item.total_payments|floatformat:2 }} UZS
+                                    {{ item.total_payments|intspace }} UZS
                                 </div>
                                 <small class="text-gray-500">{{ item.payment_count }} {% trans "payment(s)" %}</small>
                             </td>

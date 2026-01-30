@@ -1,5 +1,6 @@
 {% extends "layout/layout.html" %}
 {% load i18n %}
+{% load billing_extras %}
 
 {% block title %}{% trans "Usage Tracking - Billing" %}{% endblock %}
 
@@ -44,7 +45,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <span class="text-gray-600 text-sm mb-4 d-block">{% trans "Total Revenue" %}</span>
-                            <h4 class="mb-0">{{ total_revenue|floatformat:0 }} UZS</h4>
+                            <h4 class="mb-0">{{ total_revenue|intspace }} UZS</h4>
                         </div>
                         <div class="w-56 h-56 bg-success-50 text-success-600 rounded-circle d-flex justify-content-center align-items-center">
                             <i class="ri-money-dollar-circle-line" style="font-size: 2rem;"></i>
@@ -74,7 +75,7 @@
                     <label class="form-label">{% trans "Year" %}</label>
                     <select name="year" class="form-select">
                         {% for y in years %}
-                        <option value="{{ y }}" {% if selected_year == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+                        <option value="{{ y }}" {% if selected_year|default:y == y or selected_year == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -168,7 +169,7 @@
                             <td class="text-center text-info-600">{{ usage.bot_orders }}</td>
                             <td class="text-center text-success-600">{{ usage.manual_orders }}</td>
                             <td class="text-end fw-semibold text-primary-600">
-                                {{ usage.total_revenue|floatformat:0 }} {% trans "UZS" %}
+                                {{ usage.total_revenue|intspace }} {% trans "UZS" %}
                             </td>
                         </tr>
                         {% empty %}

@@ -2,6 +2,7 @@
 {% load static %}
 {% load translation_filters %}
 {% load permission_tags %}
+{% load billing_extras %}
 
 {% block content %}
 <div class="row gy-4">
@@ -155,10 +156,10 @@
                                     <span class="fw-medium">{{ product|trans_name }}</span>
                                 </td>
                                 <td>
-                                    <span class="text-sm">{{ product.ordinary_first_page_price|floatformat:0 }} UZS</span>
+                                    <span class="text-sm">{{ product.ordinary_first_page_price|intspace }} UZS</span>
                                 </td>
                                 <td>
-                                    <span class="text-sm">{{ product.agency_first_page_price|floatformat:0 }} UZS</span>
+                                    <span class="text-sm">{{ product.agency_first_page_price|intspace }} UZS</span>
                                 </td>
                                 <td>
                                     {% if product.is_active %}
