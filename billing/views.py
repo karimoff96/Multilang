@@ -93,12 +93,21 @@ def subscription_create(request, center_id):
         auto_renew = request.POST.get('auto_renew') == 'on'
         
         try:
+            if not tariff_id:
+                messages.error(request, _("Please select a tariff."))
+                tariffs = Tariff.objects.filter(is_active=True).prefetch_related('pricing')
+                return render(request, 'billing/subscription_create.html', {'center': center, 'tariffs': tariffs})
+            
             tariff = Tariff.objects.get(pk=tariff_id)
             
             # For trial subscriptions, pricing is not required
             if tariff.is_trial:
                 pricing = None
             else:
+                if not pricing_id or pricing_id == 'trial':
+                    messages.error(request, _("Please select a pricing option for non-trial tariffs."))
+                    tariffs = Tariff.objects.filter(is_active=True).prefetch_related('pricing')
+                    return render(request, 'billing/subscription_create.html', {'center': center, 'tariffs': tariffs})
                 pricing = TariffPricing.objects.get(pk=pricing_id)
             
             # Convert string date to date object
@@ -649,6 +658,11 @@ def convert_trial_to_paid(request, pk):
         pricing_id = request.POST.get('pricing')
         
         try:
+            if not tariff_id or not pricing_id:
+                messages.error(request, _("Please select both tariff and pricing option."))
+                tariffs = Tariff.objects.filter(is_active=True, is_trial=False).prefetch_related('pricing')
+                return render(request, 'billing/convert_trial.html', {'subscription': subscription, 'tariffs': tariffs})
+            
             tariff = Tariff.objects.get(pk=tariff_id, is_trial=False)
             pricing = TariffPricing.objects.get(pk=pricing_id)
             
@@ -863,6 +877,11 @@ def request_renewal(request):
         message = request.POST.get('message', '')
         
         try:
+            if not tariff_id or not pricing_id:
+                messages.error(request, _("Please select both tariff and pricing option."))
+                tariffs = Tariff.objects.filter(is_active=True, is_trial=False).prefetch_related('pricing')
+                return render(request, 'billing/request_renewal.html', {'subscription': subscription, 'tariffs': tariffs})
+            
             tariff = Tariff.objects.get(pk=tariff_id, is_active=True)
             pricing = TariffPricing.objects.get(pk=pricing_id, tariff=tariff)
             

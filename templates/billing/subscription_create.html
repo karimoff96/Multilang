@@ -130,7 +130,7 @@ const tariffData = {
             {
                 id: {{ pricing.id }},
                 duration: {{ pricing.duration_months }},
-                price: {{ pricing.final_price }},
+                price: {{ pricing.price }},
                 currency: '{{ pricing.currency }}',
                 discount: {{ pricing.discount_percentage }}
             }{% if not forloop.last %},{% endif %}
@@ -153,9 +153,19 @@ document.getElementById('tariffSelect').addEventListener('change', function() {
     
     pricingSelect.innerHTML = '<option value="">{% trans "Choose duration..." %}</option>';
     
-    if (!tariffId || !tariffData[tariffId]) return;
+    if (!tariffId) {
+        pricingSelect.innerHTML = '<option value="">{% trans "Select tariff first..." %}</option>';
+        return;
+    }
+    
+    if (!tariffData[tariffId]) {
+        console.error('Tariff data not found for ID:', tariffId);
+        pricingSelect.innerHTML = '<option value="">{% trans "No pricing data available" %}</option>';
+        return;
+    }
     
     const tariff = tariffData[tariffId];
+    console.log('Selected tariff:', tariff);
     
     // Handle trial tariff
     if (tariff.isTrial) {
@@ -165,8 +175,8 @@ document.getElementById('tariffSelect').addEventListener('change', function() {
         trialNote.style.display = 'block';
         trialStatusNote.style.display = 'block';
         
-        // Set trial info
-        pricingSelect.innerHTML = `<option value="" selected>{% trans "Free Trial" %} - ${tariff.trialDays} {% trans "days" %}</option>`;
+        // Set trial info - use a placeholder value that won't be used
+        pricingSelect.innerHTML = `<option value="trial" selected>{% trans "Free Trial" %} - ${tariff.trialDays} {% trans "days" %}</option>`;
         
         // Disable payment fields
         statusSelect.value = 'active';
@@ -189,6 +199,13 @@ document.getElementById('tariffSelect').addEventListener('change', function() {
         amountPaid.disabled = false;
         paymentMethod.disabled = false;
         transactionId.disabled = false;
+        
+        // Check if pricing options exist
+        if (!tariff.pricing || tariff.pricing.length === 0) {
+            pricingSelect.innerHTML = '<option value="">{% trans "No pricing options available for this tariff" %}</option>';
+            console.warn('No pricing options for tariff:', tariffId);
+            return;
+        }
         
         // Add pricing options
         tariff.pricing.forEach(pricing => {
