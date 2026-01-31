@@ -25,7 +25,7 @@ def compile_po_to_mo(po_file, mo_file):
         return False
 
 # Compile both language files
-project_dir = r'c:\Users\Doniyorbek\Desktop\Projects\Wow-dash'
+project_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(project_dir)
 
 languages = ['uz', 'ru', 'en']

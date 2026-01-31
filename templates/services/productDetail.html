@@ -3,6 +3,7 @@
 {% load translation_filters %}
 {% load number_filters %}
 {% load permission_tags %}
+{% load billing_extras %}
 
 {% block content %}
 <div class="row gy-4">
@@ -125,7 +126,7 @@
                                         <span class="text-secondary-light text-sm" data-i18n="detail.firstPage">First Page</span>
                                         <span class="badge bg-primary-focus text-primary-600" data-i18n="detail.main">Main</span>
                                     </div>
-                                    <h4 class="mb-0 text-primary-600">{{ product.ordinary_first_page_price|floatformat:0 }} <small class="text-secondary-light text-sm">UZS</small></h4>
+                                    <h4 class="mb-0 text-primary-600">{{ product.ordinary_first_page_price|intspace }} <small class="text-secondary-light text-sm">UZS</small></h4>
                                 </div>
                             </div>
                             <div class="col-12">
@@ -136,7 +137,7 @@
                                         <span class="badge bg-info-focus text-info-600" data-i18n="detail.perPage">Per Page</span>
                                         {% endif %}
                                     </div>
-                                    <h4 class="mb-0 text-info-600">{{ product.ordinary_other_page_price|floatformat:0|default:"N/A" }} <small class="text-secondary-light text-sm">UZS</small></h4>
+                                    <h4 class="mb-0 text-info-600">{{ product.ordinary_other_page_price|intspace|default:"N/A" }} <small class="text-secondary-light text-sm">UZS</small></h4>
                                 </div>
                             </div>
                             <div class="col-12">
@@ -150,7 +151,7 @@
                                         {% endif %}
                                     </div>
                                     {% if product.user_copy_price_decimal is not None %}
-                                    <h4 class="mb-0 text-secondary-600">{{ product.user_copy_price_decimal|floatformat:0 }} <small class="text-secondary-light text-sm">UZS/copy</small></h4>
+                                    <h4 class="mb-0 text-secondary-600">{{ product.user_copy_price_decimal|intspace }} <small class="text-secondary-light text-sm">UZS/copy</small></h4>
                                     {% else %}
                                     <h4 class="mb-0 text-secondary-600">{{ product.user_copy_price_percentage|floatformat:0|default:"0" }}% <small class="text-secondary-light text-sm">of base price</small></h4>
                                     {% endif %}
@@ -178,7 +179,7 @@
                                         <span class="text-secondary-light text-sm" data-i18n="detail.firstPage">First Page</span>
                                         <span class="badge bg-success-focus text-success-600" data-i18n="detail.main">Main</span>
                                     </div>
-                                    <h4 class="mb-0 text-success-600">{{ product.agency_first_page_price|floatformat:0 }} <small class="text-secondary-light text-sm">UZS</small></h4>
+                                    <h4 class="mb-0 text-success-600">{{ product.agency_first_page_price|intspace }} <small class="text-secondary-light text-sm">UZS</small></h4>
                                 </div>
                             </div>
                             <div class="col-12">
@@ -189,7 +190,7 @@
                                         <span class="badge bg-info-focus text-info-600" data-i18n="detail.perPage">Per Page</span>
                                         {% endif %}
                                     </div>
-                                    <h4 class="mb-0 text-info-600">{{ product.agency_other_page_price|floatformat:0|default:"N/A" }} <small class="text-secondary-light text-sm">UZS</small></h4>
+                                    <h4 class="mb-0 text-info-600">{{ product.agency_other_page_price|intspace|default:"N/A" }} <small class="text-secondary-light text-sm">UZS</small></h4>
                                 </div>
                             </div>
                             <div class="col-12">
@@ -203,7 +204,7 @@
                                         {% endif %}
                                     </div>
                                     {% if product.agency_copy_price_decimal is not None %}
-                                    <h4 class="mb-0 text-secondary-600">{{ product.agency_copy_price_decimal|floatformat:0 }} <small class="text-secondary-light text-sm">UZS/copy</small></h4>
+                                    <h4 class="mb-0 text-secondary-600">{{ product.agency_copy_price_decimal|intspace }} <small class="text-secondary-light text-sm">UZS/copy</small></h4>
                                     {% else %}
                                     <h4 class="mb-0 text-secondary-600">{{ product.agency_copy_price_percentage|floatformat:0|default:"0" }}% <small class="text-secondary-light text-sm">of base price</small></h4>
                                     {% endif %}
@@ -237,14 +238,14 @@
                                 <tbody>
                                     <tr>
                                         <td class="fw-medium" data-i18n="detail.firstPage">First Page</td>
-                                        <td class="text-center">{{ product.ordinary_first_page_price|floatformat:0 }} UZS</td>
-                                        <td class="text-center">{{ product.agency_first_page_price|floatformat:0 }} UZS</td>
+                                        <td class="text-center">{{ product.ordinary_first_page_price|intspace }} UZS</td>
+                                        <td class="text-center">{{ product.agency_first_page_price|intspace }} UZS</td>
                                         <td class="text-center">
                                             {% widthratio product.agency_first_page_price product.ordinary_first_page_price 100 as ratio %}
                                             {% if product.agency_first_page_price < product.ordinary_first_page_price %}
                                             <span class="text-success-600">
                                                 <iconify-icon icon="mdi:arrow-down"></iconify-icon>
-                                                <span data-i18n="detail.agencySaves">Agency saves</span> {{ product.ordinary_first_page_price|floatformat:0 }}
+                                                <span data-i18n="detail.agencySaves">Agency saves</span> {{ product.ordinary_first_page_price|intspace }}
                                             </span>
                                             {% else %}
                                             <span class="text-secondary-light" data-i18n="detail.samePrice">Same price</span>
@@ -254,8 +255,8 @@
                                     {% if product.category.charging == 'dynamic' %}
                                     <tr>
                                         <td class="fw-medium" data-i18n="detail.otherPages">Other Pages</td>
-                                        <td class="text-center">{{ product.ordinary_other_page_price|floatformat:0|default:"0" }} UZS</td>
-                                        <td class="text-center">{{ product.agency_other_page_price|floatformat:0|default:"0" }} UZS</td>
+                                        <td class="text-center">{{ product.ordinary_other_page_price|intspace|default:"0" }} UZS</td>
+                                        <td class="text-center">{{ product.agency_other_page_price|intspace|default:"0" }} UZS</td>
                                         <td class="text-center">
                                             {% if product.agency_other_page_price < product.ordinary_other_page_price %}
                                             <span class="text-success-600">
@@ -272,14 +273,14 @@
                                         <td class="fw-medium"><span data-i18n="detail.copyPrice">Copy Price</span></td>
                                         <td class="text-center">
                                             {% if product.user_copy_price_decimal is not None %}
-                                            {{ product.user_copy_price_decimal|floatformat:0 }} UZS/copy
+                                            {{ product.user_copy_price_decimal|intspace }} UZS/copy
                                             {% else %}
                                             {{ product.user_copy_price_percentage|floatformat:0|default:"0" }}%
                                             {% endif %}
                                         </td>
                                         <td class="text-center">
                                             {% if product.agency_copy_price_decimal is not None %}
-                                            {{ product.agency_copy_price_decimal|floatformat:0 }} UZS/copy
+                                            {{ product.agency_copy_price_decimal|intspace }} UZS/copy
                                             {% else %}
                                             {{ product.agency_copy_price_percentage|floatformat:0|default:"0" }}%
                                             {% endif %}
@@ -379,7 +380,7 @@
                                     <p class="mb-0 text-secondary-light text-sm">
                                         <span data-i18n="detail.basedOnFirstPage">Based on first page price:</span>
                                         <strong class="{% if product.get_profit_margin > 0 %}text-success-600{% else %}text-danger-600{% endif %}">
-                                            {{ product.get_profit_margin|floatformat:0 }} UZS
+                                            {{ product.get_profit_margin|intspace }} UZS
                                         </strong>
                                         {% if product.ordinary_first_page_price > 0 %}
                                         ({% widthratio product.get_profit_margin product.ordinary_first_page_price 100 %}%)

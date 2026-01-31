@@ -1,6 +1,7 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
 {% load permission_tags %}
+{% load billing_extras %}
 
 {% block content %}
 <!-- View Mode Toggle -->
@@ -374,7 +375,7 @@
                         <!-- Payment: Total + Type + Status -->
                         <td>
                             <div class="d-flex flex-column">
-                                <span class="fw-semibold text-success-600 text-sm">{{ order.total_due|floatformat:0 }}</span>
+                                <span class="fw-semibold text-success-600 text-sm">{{ order.total_due|intspace }}</span>
                                 {% if order.payment_type == 'cash' %}
                                 <span class="text-xs text-success-600"><iconify-icon icon="mdi:cash" class="text-sm"></iconify-icon> Cash</span>
                                 {% else %}

@@ -88,6 +88,47 @@ class TranslationCenter(models.Model):
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         super().save(*args, **kwargs)
+    
+    # Billing helper methods
+    def get_current_month_orders_count(self):
+        """Get order count for current month"""
+        from datetime import date
+        from orders.models import Order
+        
+        today = date.today()
+        return Order.objects.filter(
+            branch__center=self,
+            created_at__year=today.year,
+            created_at__month=today.month
+        ).count()
+    
+    def get_staff_count(self):
+        """Get total staff count across all branches"""
+        # Count AdminUser (staff) that belong to this center
+        # Staff can be linked via center field OR via branch that belongs to this center
+        from organizations.models import AdminUser
+        return AdminUser.objects.filter(
+            models.Q(center=self) | models.Q(branch__center=self),
+            is_active=True
+        ).distinct().count()
+    
+    def has_active_subscription(self):
+        """Check if center has an active subscription"""
+        return hasattr(self, 'subscription') and self.subscription.is_active()
+    
+    def get_subscription_status(self):
+        """Get current subscription status"""
+        if not hasattr(self, 'subscription'):
+            return {'has_subscription': False}
+        
+        sub = self.subscription
+        return {
+            'has_subscription': True,
+            'is_active': sub.is_active(),
+            'tariff': sub.tariff.title,
+            'days_remaining': sub.days_remaining(),
+            'end_date': sub.end_date,
+        }
         # Auto-create default branch for new centers
         if is_new:
             Branch.objects.create(
@@ -1281,6 +1322,52 @@ class AdminUser(models.Model):
                 return True
         
         return False
+    
+    def has_subscription_feature(self, feature_code):
+        """
+        Check if user's organization subscription includes a specific feature.
+        This enables subscription-based feature gating.
+        
+        Args:
+            feature_code: String code of the feature (e.g., 'advanced_analytics', 'telegram_bot')
+        
+        Returns:
+            Boolean indicating if subscription grants access to this feature
+            
+        Example:
+            if admin_profile.has_subscription_feature('advanced_analytics'):
+                # Show analytics dashboard
+        """
+        # Superusers always have access to all features
+        if hasattr(self, 'user') and self.user and self.user.is_superuser:
+            return True
+        
+        # Check if user has a center with an active subscription
+        if not self.center:
+            return False
+        
+        try:
+            subscription = self.center.subscription
+            return subscription.has_feature(feature_code)
+        except Exception:
+            # No subscription or subscription model not available
+            return False
+    
+    def get_subscription_features(self):
+        """
+        Get all features available in user's organization subscription.
+        
+        Returns:
+            QuerySet of Feature objects or empty queryset
+        """
+        if not self.center:
+            return None
+        
+        try:
+            subscription = self.center.subscription
+            return subscription.get_features()
+        except Exception:
+            return None
 
     def get_accessible_branches(self):
         """Get branches this user can access based on their role permissions"""

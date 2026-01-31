@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "orders",
     "marketing",
     "landing",
+    "billing",
 ]
 
 MIDDLEWARE = [
@@ -90,6 +91,8 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "organizations.context_processors.rbac_context",
                 "organizations.context_processors.site_settings",
+                "landing.context_processors.contact_requests_count",
+                "billing.context_processors.billing_context",  # Billing & subscription context
             ],
         },
     },

@@ -3914,3 +3914,147 @@ msgstr "Не назначено"
 
 msgid "table.noRecentOrders"
 msgstr "Нет недавних заказов"
+
+# Feature Names - Orders
+# Feature Names - All 37 Features
+# Order Management Features (5)
+msgid "Basic Order Management"
+msgstr "Базовое Управление Заказами"
+
+msgid "Advanced Order Management"
+msgstr "Расширенное Управление Заказами"
+
+msgid "Order Assignment"
+msgstr "Назначение Заказов"
+
+msgid "Bulk Payment Processing"
+msgstr "Массовая Обработка Платежей"
+
+msgid "Order Templates"
+msgstr "Шаблоны Заказов"
+
+# Analytics & Reports Features (6)
+msgid "Basic Analytics"
+msgstr "Базовая Аналитика"
+
+msgid "Advanced Analytics"
+msgstr "Расширенная Аналитика"
+
+msgid "Financial Reports"
+msgstr "Финансовые Отчеты"
+
+msgid "Staff Performance Reports"
+msgstr "Отчеты по Производительности Сотрудников"
+
+msgid "Custom Report Builder"
+msgstr "Конструктор Отчетов"
+
+msgid "Export Reports"
+msgstr "Экспорт Отчетов"
+
+# Integration Features (4)
+msgid "REST API Access"
+msgstr "Доступ к REST API"
+
+msgid "Telegram Webhook Management"
+msgstr "Управление Telegram Вебхуками"
+
+msgid "Third-Party Integrations"
+msgstr "Сторонние Интеграции"
+
+msgid "Telegram Bot Integration"
+msgstr "Интеграция Telegram Бота"
+
+# Marketing & Communications Features (2)
+msgid "Marketing Campaign Tools"
+msgstr "Инструменты Маркетинговых Кампаний"
+
+msgid "Mass Broadcast Messaging"
+msgstr "Массовые Рассылки Сообщений"
+
+# Organization & Staff Features (4)
+msgid "Multiple Branches"
+msgstr "Несколько Филиалов"
+
+msgid "Custom Roles & Permissions"
+msgstr "Пользовательские Роли и Права"
+
+msgid "Staff Scheduling"
+msgstr "Планирование Сотрудников"
+
+msgid "Branch Settings"
+msgstr "Настройки Филиалов"
+
+# Storage & Archive Features (3)
+msgid "Historical File Archives"
+msgstr "Архивы Исторических Файлов"
+
+msgid "Automated Cloud Backups"
+msgstr "Автоматическое Облачное Резервирование"
+
+msgid "Extended Storage Capacity"
+msgstr "Расширенная Емкость Хранилища"
+
+# Financial Management Features (4)
+msgid "Multi-Currency Pricing"
+msgstr "Мультивалютное Ценообразование"
+
+msgid "Payment Tracking & Recording"
+msgstr "Отслеживание и Запись Платежей"
+
+msgid "Automated Invoicing"
+msgstr "Автоматическое Выставление Счетов"
+
+msgid "Expense Tracking"
+msgstr "Отслеживание Расходов"
+
+# Support & Services Features (2)
+msgid "Support Ticketing System"
+msgstr "Система Тикетов Поддержки"
+
+msgid "Knowledge Base Access"
+msgstr "Доступ к Базе Знаний"
+
+# Advanced Features (3)
+msgid "Advanced Security Features"
+msgstr "Расширенные Функции Безопасности"
+
+msgid "Comprehensive Audit Logs"
+msgstr "Полные Журналы Аудита"
+
+msgid "Data Retention Control"
+msgstr "Контроль Хранения Данных"
+
+# Services Management Features (4)
+msgid "Basic Product Management"
+msgstr "Базовое Управление Продуктами"
+
+msgid "Advanced Product Management"
+msgstr "Расширенное Управление Продуктами"
+
+msgid "Language-Specific Pricing"
+msgstr "Ценообразование по Языкам"
+
+msgid "Dynamic Pricing"
+msgstr "Динамическое Ценообразование"
+
+# Landing Page - Tariff Section Labels
+msgid "Лимиты"
+msgstr "Лимиты"
+
+msgid "Возможности"
+msgstr "Возможности"
+
+msgid "Варианты Цен"
+msgstr "Варианты Цен"
+
+msgid "Филиалы"
+msgstr "Филиалы"
+
+msgid "Сотрудники"
+msgstr "Сотрудники"
+
+msgid "Заказов/месяц"
+msgstr "Заказов/месяц"
+
+

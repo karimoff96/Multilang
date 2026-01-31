@@ -1,0 +1,320 @@
+{% extends "layout/layout.html" %}
+{% load i18n %}
+{% load billing_extras %}
+
+{% block title %}{% trans "Renew Subscription - Billing" %}{% endblock %}
+
+{% block content %}
+<div class="row gy-4">
+    <!-- Current Subscription Info -->
+    <div class="col-12">
+        <div class="card radius-12 border">
+            <div class="card-body p-24">
+                <h5 class="mb-20">{% trans "Current Subscription" %}</h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="text-secondary-light text-sm mb-1">{% trans "Tariff Plan" %}</div>
+                        <div class="fw-semibold">{{ subscription.tariff.title }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-secondary-light text-sm mb-1">{% trans "End Date" %}</div>
+                        <div class="fw-semibold text-danger-600">{{ subscription.end_date }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-secondary-light text-sm mb-1">{% trans "Days Remaining" %}</div>
+                        <div class="fw-semibold {% if subscription.days_remaining <= 7 %}text-danger-600{% elif subscription.days_remaining <= 14 %}text-warning-600{% endif %}">
+                            {{ subscription.days_remaining }} {% trans "days" %}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-secondary-light text-sm mb-1">{% trans "Status" %}</div>
+                        <span class="badge {% if subscription.is_active %}bg-success-600{% else %}bg-danger-600{% endif %} text-white px-12 py-6">
+                            {{ subscription.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Current Usage -->
+                <div class="mt-20 pt-20 border-top">
+                    <h6 class="mb-16 text-secondary-light">{% trans "Current Usage" %}</h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="ri-building-line text-primary-600"></i>
+                                <div>
+                                    <span class="fw-semibold">{{ current_usage.branches }}</span> / {{ subscription.tariff.max_branches }}
+                                    <span class="text-secondary-light text-sm">{% trans "Branches" %}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="ri-team-line text-success-600"></i>
+                                <div>
+                                    <span class="fw-semibold">{{ current_usage.staff }}</span> / {{ subscription.tariff.max_staff }}
+                                    <span class="text-secondary-light text-sm">{% trans "Staff" %}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="ri-file-list-line text-warning-600"></i>
+                                <div>
+                                    <span class="fw-semibold">{{ current_usage.orders }}</span> / {{ subscription.tariff.max_monthly_orders }}
+                                    <span class="text-secondary-light text-sm">{% trans "Orders (this month)" %}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Renewal Request Form -->
+    <div class="col-12">
+        <div class="card radius-12 border">
+            <div class="card-body p-24">
+                <div class="d-flex align-items-center gap-3 mb-20">
+                    <i class="ri-refresh-line fs-24 text-primary-600"></i>
+                    <div>
+                        <h5 class="mb-0">{% trans "Request Subscription Renewal" %}</h5>
+                        <p class="text-secondary-light text-sm mb-0">{% trans "Select a tariff plan and duration to renew your subscription. Our team will contact you to complete the payment." %}</p>
+                    </div>
+                </div>
+
+                <form method="post" id="renewalForm">
+                    {% csrf_token %}
+                    
+                    <div class="row gy-4">
+                        <!-- Tariff Selection -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">{% trans "Select Tariff Plan" %}</label>
+                            <div class="row g-3" id="tariffCards">
+                                {% for tariff in tariffs %}
+                                <div class="col-md-4">
+                                    <input type="radio" class="btn-check" name="tariff" id="tariff-{{ tariff.id }}" value="{{ tariff.id }}" data-tariff="{{ tariff.id }}" required>
+                                    <label class="card h-100 radius-8 border position-relative cursor-pointer tariff-card" for="tariff-{{ tariff.id }}">
+                                        <div class="card-body p-20">
+                                            {% if tariff.is_featured %}
+                                            <div class="position-absolute top-0 end-0 mt-2 me-2">
+                                                <span class="badge bg-warning-600 text-white">
+                                                    <i class="ri-star-fill"></i> {% trans "Popular" %}
+                                                </span>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <h6 class="mb-12">{{ tariff.title }}</h6>
+                                            <p class="text-secondary-light text-sm mb-16">{{ tariff.description|truncatewords:10 }}</p>
+                                            
+                                            <div class="d-flex flex-column gap-2 mb-16">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="ri-building-line text-sm"></i>
+                                                    <span class="text-sm">{{ tariff.max_branches }} {% trans "branches" %}</span>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="ri-team-line text-sm"></i>
+                                                    <span class="text-sm">{{ tariff.max_staff }} {% trans "staff" %}</span>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="ri-file-list-line text-sm"></i>
+                                                    <span class="text-sm">{{ tariff.max_monthly_orders|intspace }} {% trans "orders/month" %}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Pricing options for this tariff -->
+                                            <div class="pricing-container" data-tariff="{{ tariff.id }}" style="display: none;">
+                                                {% for pricing in tariff.pricing.all %}
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input" type="radio" name="pricing" id="pricing-{{ pricing.id }}" value="{{ pricing.id }}" data-price="{{ pricing.price }}" data-currency="{{ pricing.currency }}" required>
+                                                    <label class="form-check-label text-sm" for="pricing-{{ pricing.id }}">
+                                                        <strong>{{ pricing.duration_months }} {% if pricing.duration_months == 1 %}{% trans "month" %}{% else %}{% trans "months" %}{% endif %}</strong>
+                                                        - {{ pricing.price|intspace }} {{ pricing.currency }}
+                                                        <span class="text-secondary-light">({{ pricing.monthly_price|intspace }} {{ pricing.currency }}/{% trans "mo" %})</span>
+                                                    </label>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Duration/Pricing Selection (shown after tariff selected) -->
+                        <div class="col-12" id="pricingSection" style="display: none;">
+                            <label class="form-label fw-semibold">{% trans "Select Duration" %}</label>
+                            <div id="pricingOptions"></div>
+                        </div>
+
+                        <!-- Additional Message -->
+                        <div class="col-12">
+                            <label for="message" class="form-label">{% trans "Additional Message (Optional)" %}</label>
+                            <textarea class="form-control" id="message" name="message" rows="3" placeholder="{% trans 'Any special requirements or questions...' %}"></textarea>
+                        </div>
+
+                        <!-- Selected Summary -->
+                        <div class="col-12" id="summarySection" style="display: none;">
+                            <div class="alert alert-primary-100 border-primary-600">
+                                <h6 class="mb-12">{% trans "Renewal Summary" %}</h6>
+                                <div class="d-flex flex-column gap-2">
+                                    <div>
+                                        <span class="text-secondary-light">{% trans "Tariff:" %}</span>
+                                        <strong id="summaryTariff"></strong>
+                                    </div>
+                                    <div>
+                                        <span class="text-secondary-light">{% trans "Duration:" %}</span>
+                                        <strong id="summaryDuration"></strong>
+                                    </div>
+                                    <div>
+                                        <span class="text-secondary-light">{% trans "Total Price:" %}</span>
+                                        <strong id="summaryPrice" class="text-primary-600"></strong>
+                                    </div>
+                                    <div class="mt-2 pt-2 border-top">
+                                        <span class="text-secondary-light">{% trans "Current subscription ends:" %}</span>
+                                        <strong>{{ subscription.end_date }}</strong>
+                                    </div>
+                                    <div>
+                                        <span class="text-secondary-light">{% trans "New subscription will end:" %}</span>
+                                        <strong class="text-success-600" id="summaryNewEndDate"></strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="col-12">
+                            <div class="alert alert-info-100 border-info-600">
+                                <h6 class="mb-12">
+                                    <i class="ri-information-line"></i>
+                                    {% trans "How It Works" %}
+                                </h6>
+                                <ol class="mb-0 ps-3">
+                                    <li class="mb-2">{% trans "Select your preferred tariff plan and duration" %}</li>
+                                    <li class="mb-2">{% trans "Submit your renewal request" %}</li>
+                                    <li class="mb-2">{% trans "Our team will contact you via email or phone to arrange payment" %}</li>
+                                    <li>{% trans "After payment confirmation, your subscription will be extended automatically" %}</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary-600 px-40">
+                                <i class="ri-send-plane-line me-2"></i>
+                                {% trans "Submit Renewal Request" %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tariffRadios = document.querySelectorAll('input[name="tariff"]');
+    const pricingSection = document.getElementById('pricingSection');
+    const pricingOptions = document.getElementById('pricingOptions');
+    const summarySection = document.getElementById('summarySection');
+    
+    const currentEndDate = new Date('{{ subscription.end_date|date:"Y-m-d" }}');
+    
+    tariffRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            const tariffId = this.value;
+            const tariffCard = this.closest('.tariff-card');
+            const tariffName = tariffCard.querySelector('h6').textContent;
+            
+            // Remove all selected states
+            document.querySelectorAll('.tariff-card').forEach(card => {
+                card.classList.remove('border-primary-600', 'bg-primary-50');
+            });
+            
+            // Add selected state
+            tariffCard.classList.add('border-primary-600', 'bg-primary-50');
+            
+            // Show pricing container for selected tariff
+            document.querySelectorAll('.pricing-container').forEach(container => {
+                container.style.display = 'none';
+            });
+            const selectedPricingContainer = tariffCard.querySelector('.pricing-container[data-tariff="' + tariffId + '"]');
+            if (selectedPricingContainer) {
+                selectedPricingContainer.style.display = 'block';
+            }
+            
+            // Update summary tariff
+            document.getElementById('summaryTariff').textContent = tariffName;
+        });
+    });
+    
+    // Listen for pricing changes
+    document.addEventListener('change', function(e) {
+        if (e.target.name === 'pricing') {
+            const pricingLabel = e.target.closest('label');
+            const duration = pricingLabel.querySelector('strong').textContent;
+            const price = e.target.dataset.price;
+            const currency = e.target.dataset.currency;
+            const months = parseInt(duration);
+            
+            // Update summary
+            document.getElementById('summaryDuration').textContent = duration;
+            document.getElementById('summaryPrice').textContent = parseInt(price).toLocaleString() + ' ' + currency;
+            
+            // Calculate new end date
+            const newEndDate = new Date(currentEndDate);
+            newEndDate.setMonth(newEndDate.getMonth() + months);
+            document.getElementById('summaryNewEndDate').textContent = newEndDate.toLocaleDateString('ru-RU');
+            
+            // Show summary
+            summarySection.style.display = 'block';
+        }
+    });
+    
+    // Form validation
+    document.getElementById('renewalForm').addEventListener('submit', function(e) {
+        const tariffSelected = document.querySelector('input[name="tariff"]:checked');
+        const pricingSelected = document.querySelector('input[name="pricing"]:checked');
+        
+        if (!tariffSelected) {
+            e.preventDefault();
+            alert('{% trans "Please select a tariff plan" %}');
+            return false;
+        }
+        
+        if (!pricingSelected) {
+            e.preventDefault();
+            alert('{% trans "Please select a subscription duration" %}');
+            return false;
+        }
+    });
+});
+</script>
+
+<style>
+.tariff-card {
+    transition: all 0.2s ease;
+}
+
+.tariff-card:hover {
+    border-color: var(--bs-primary-600) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.tariff-card.border-primary-600 {
+    border-width: 2px !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.btn-check:checked + .tariff-card {
+    border-color: var(--bs-primary-600) !important;
+    background-color: rgba(var(--bs-primary-rgb), 0.05) !important;
+}
+</style>
+{% endblock %}

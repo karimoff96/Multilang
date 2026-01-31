@@ -92,6 +92,8 @@ urlpatterns = [
     path("marketing/", include("marketing.urls")),
     # Core utilities (notifications, etc.)
     path("core/", include("core.urls")),
+    # Billing & Subscriptions (Superuser only)
+    path("billing/", include("billing.urls")),
     # home routes
     path("index", home_views.index, name="index"),
     path("view-details", home_views.viewDetails, name="viewDetails"),

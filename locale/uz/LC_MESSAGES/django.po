@@ -3912,3 +3912,146 @@ msgstr "Tayinlanmagan"
 
 msgid "table.noRecentOrders"
 msgstr "Yaqinda buyurtmalar yo'q"
+
+# Feature Names - All 37 Features
+# Order Management Features (5)
+msgid "Basic Order Management"
+msgstr "Asosiy Buyurtmalarni Boshqarish"
+
+msgid "Advanced Order Management"
+msgstr "Kengaytirilgan Buyurtmalarni Boshqarish"
+
+msgid "Order Assignment"
+msgstr "Buyurtmalarni Tayinlash"
+
+msgid "Bulk Payment Processing"
+msgstr "Ommaviy To'lovlarni Qayta Ishlash"
+
+msgid "Order Templates"
+msgstr "Buyurtma Shablonlari"
+
+# Feature Names - Analytics & Reports (6)
+msgid "Basic Analytics"
+msgstr "Asosiy Analitika"
+
+msgid "Advanced Analytics"
+msgstr "Kengaytirilgan Analitika"
+
+msgid "Financial Reports"
+msgstr "Moliyaviy Hisobotlar"
+
+msgid "Staff Performance Reports"
+msgstr "Xodimlar Samaradorligi Hisobotlari"
+
+msgid "Custom Report Builder"
+msgstr "Maxsus Hisobot Yaratuvchi"
+
+msgid "Export Reports"
+msgstr "Hisobotlarni Eksport Qilish"
+
+# Feature Names - Integration (4)
+msgid "REST API Access"
+msgstr "REST API Kirish"
+
+msgid "Telegram Webhook Management"
+msgstr "Telegram Vebhuklar Boshqaruvi"
+
+msgid "Third-Party Integrations"
+msgstr "Uchinchi Tomon Integratsiyalari"
+
+msgid "Telegram Bot Integration"
+msgstr "Telegram Bot Integratsiyasi"
+
+# Feature Names - Marketing (2)
+msgid "Marketing Campaign Tools"
+msgstr "Marketing Kampaniyasi Vositalari"
+
+msgid "Mass Broadcast Messaging"
+msgstr "Ommaviy Xabarlar Yuborish"
+
+# Feature Names - Organization (4)
+msgid "Multiple Branches"
+msgstr "Ko'plab Filiallar"
+
+msgid "Custom Roles & Permissions"
+msgstr "Maxsus Rollar va Ruxsatlar"
+
+msgid "Staff Scheduling"
+msgstr "Xodimlar Jadvali"
+
+msgid "Branch Settings"
+msgstr "Filial Sozlamalari"
+
+# Feature Names - Storage (3)
+msgid "Historical File Archives"
+msgstr "Tarixiy Fayl Arxivlari"
+
+msgid "Automated Cloud Backups"
+msgstr "Avtomatlashtirilgan Bulutli Zaxira"
+
+msgid "Extended Storage Capacity"
+msgstr "Kengaytirilgan Xotira Sig'imi"
+
+# Feature Names - Financial (4)
+msgid "Multi-Currency Pricing"
+msgstr "Ko'p Valyutali Narxlash"
+
+msgid "Payment Tracking & Recording"
+msgstr "To'lovlarni Kuzatish va Yozib Olish"
+
+msgid "Automated Invoicing"
+msgstr "Avtomatlashtirilgan Hisob-Faktura"
+
+msgid "Expense Tracking"
+msgstr "Xarajatlarni Kuzatish"
+
+# Feature Names - Support (2)
+msgid "Support Ticketing System"
+msgstr "Qo'llab-quvvatlash Chiptlari Tizimi"
+
+msgid "Knowledge Base Access"
+msgstr "Bilimlar Bazasiga Kirish"
+
+# Feature Names - Advanced (3)
+msgid "Advanced Security Features"
+msgstr "Kengaytirilgan Xavfsizlik Funksiyalari"
+
+msgid "Comprehensive Audit Logs"
+msgstr "To'liq Audit Jurnali"
+
+msgid "Data Retention Control"
+msgstr "Ma'lumotlarni Saqlash Nazorati"
+
+# Feature Names - Products (4)
+msgid "Basic Product Management"
+msgstr "Asosiy Mahsulotlarni Boshqarish"
+
+msgid "Advanced Product Management"
+msgstr "Kengaytirilgan Mahsulotlarni Boshqarish"
+
+msgid "Language-Specific Pricing"
+msgstr "Tilga Xos Narxlash"
+
+msgid "Dynamic Pricing"
+msgstr "Dinamik Narxlash"
+
+# Landing Page - Tariff Section Labels
+msgid "Лимиты"
+msgstr "Cheklovlar"
+
+msgid "Возможности"
+msgstr "Imkoniyatlar"
+
+msgid "Варианты Цен"
+msgstr "Narx Variantlari"
+
+msgid "Филиалы"
+msgstr "Filiallar"
+
+msgid "Сотрудники"
+msgstr "Xodimlar"
+
+msgid "Заказов/месяц"
+msgstr "Buyurtmalar/oy"
+
+

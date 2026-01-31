@@ -2,6 +2,7 @@
 {% load static %}
 {% load permission_tags %}
 {% load number_filters %}
+{% load billing_extras %}
 
 {% block content %}
 <div class="row gy-4">
@@ -280,7 +281,7 @@
                                     {% for receipt in order.receipts.all %}
                                     <tr>
                                         <td>{{ forloop.counter }}</td>
-                                        <td>{{ receipt.amount|floatformat:0 }} UZS</td>
+                                        <td>{{ receipt.amount|intspace }} UZS</td>
                                         <td>
                                             {% if receipt.status == 'pending' %}
                                                 <span class="badge bg-warning-focus text-warning-600">Pending</span>
@@ -339,45 +340,45 @@
                             <tbody>
                                 <tr>
                                     <td class="fw-semibold">First Page</td>
-                                    <td class="text-end">{{ price_breakdown.product_first_page|floatformat:0 }} UZS</td>
+                                    <td class="text-end">{{ price_breakdown.product_first_page|intspace }} UZS</td>
                                     {% if price_breakdown.language_name %}
-                                    <td class="text-end text-info-600">+ {{ price_breakdown.language_first_page|floatformat:0 }} UZS</td>
+                                    <td class="text-end text-info-600">+ {{ price_breakdown.language_first_page|intspace }} UZS</td>
                                     {% endif %}
-                                    <td class="text-end fw-semibold text-primary-600">{{ price_breakdown.combined_first_page|floatformat:0 }} UZS</td>
+                                    <td class="text-end fw-semibold text-primary-600">{{ price_breakdown.combined_first_page|intspace }} UZS</td>
                                 </tr>
                                 {% if price_breakdown.total_pages > 1 %}
                                 <tr>
                                     <td class="fw-semibold">Other Pages ({{ price_breakdown.total_pages|add:"-1" }} pages)</td>
-                                    <td class="text-end">{{ price_breakdown.product_other_page|floatformat:0 }} UZS/page</td>
+                                    <td class="text-end">{{ price_breakdown.product_other_page|intspace }} UZS/page</td>
                                     {% if price_breakdown.language_name %}
-                                    <td class="text-end text-info-600">+ {{ price_breakdown.language_other_page|floatformat:0 }} UZS/page</td>
+                                    <td class="text-end text-info-600">+ {{ price_breakdown.language_other_page|intspace }} UZS/page</td>
                                     {% endif %}
-                                    <td class="text-end fw-semibold text-primary-600">{{ price_breakdown.combined_other_page|floatformat:0 }} UZS/page</td>
+                                    <td class="text-end fw-semibold text-primary-600">{{ price_breakdown.combined_other_page|intspace }} UZS/page</td>
                                 </tr>
                                 {% endif %}
                                 <tr class="bg-neutral-50">
                                     <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-semibold">Original Document Total:</td>
-                                    <td class="text-end fw-bold text-success-600">{{ price_breakdown.original_price|floatformat:0 }} UZS</td>
+                                    <td class="text-end fw-bold text-success-600">{{ price_breakdown.original_price|intspace }} UZS</td>
                                 </tr>
                                 {% if price_breakdown.copy_number > 0 %}
                                 <tr>
                                     <td class="fw-semibold">Copy Price ({{ price_breakdown.copy_number }} copies)</td>
-                                    <td class="text-end">{{ price_breakdown.product_copy_price|floatformat:0 }} UZS/copy</td>
+                                    <td class="text-end">{{ price_breakdown.product_copy_price|intspace }} UZS/copy</td>
                                     {% if price_breakdown.language_name %}
-                                    <td class="text-end text-info-600">+ {{ price_breakdown.language_copy_price|floatformat:0 }} UZS/copy</td>
+                                    <td class="text-end text-info-600">+ {{ price_breakdown.language_copy_price|intspace }} UZS/copy</td>
                                     {% endif %}
-                                    <td class="text-end fw-semibold text-warning-600">{{ price_breakdown.combined_copy_price|floatformat:0 }} UZS/copy</td>
+                                    <td class="text-end fw-semibold text-warning-600">{{ price_breakdown.combined_copy_price|intspace }} UZS/copy</td>
                                 </tr>
                                 <tr class="bg-neutral-50">
                                     <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-semibold">Copies Total:</td>
-                                    <td class="text-end fw-bold text-warning-600">{{ price_breakdown.copy_total|floatformat:0 }} UZS</td>
+                                    <td class="text-end fw-bold text-warning-600">{{ price_breakdown.copy_total|intspace }} UZS</td>
                                 </tr>
                                 {% endif %}
                             </tbody>
                             <tfoot class="bg-primary-50">
                                 <tr>
                                     <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-bold text-lg">Grand Total:</td>
-                                    <td class="text-end fw-bold text-primary-600 text-lg">{{ price_breakdown.total_price|floatformat:0 }} UZS</td>
+                                    <td class="text-end fw-bold text-primary-600 text-lg">{{ price_breakdown.total_price|intspace }} UZS</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -707,26 +708,26 @@
                     <div class="col-md-3 col-6 text-center">
                         <div class="p-12 bg-neutral-50 radius-8">
                             <small class="text-secondary-light d-block">Total Price</small>
-                            <span class="fw-bold" id="pm-total-price">{{ order.total_price|floatformat:0 }}</span> UZS
+                            <span class="fw-bold" id="pm-total-price">{{ order.total_price|intspace }}</span> UZS
                         </div>
                     </div>
                     <div class="col-md-3 col-6 text-center">
                         <div class="p-12 bg-neutral-50 radius-8">
                             <small class="text-secondary-light d-block">Extra Fee</small>
-                            <span class="fw-bold" id="pm-extra-fee">{{ order.extra_fee|floatformat:0 }}</span> UZS
+                            <span class="fw-bold" id="pm-extra-fee">{{ order.extra_fee|intspace }}</span> UZS
                         </div>
                     </div>
                     <div class="col-md-3 col-6 text-center">
                         <div class="p-12 bg-success-50 radius-8">
                             <small class="text-secondary-light d-block">Received</small>
-                            <span class="fw-bold text-success-600" id="pm-received">{{ order.received|floatformat:0 }}</span> UZS
+                            <span class="fw-bold text-success-600" id="pm-received">{{ order.received|intspace }}</span> UZS
                         </div>
                     </div>
                     <div class="col-md-3 col-6 text-center">
                         <div class="p-12 {% if order.remaining > 0 %}bg-danger-50{% else %}bg-success-50{% endif %} radius-8">
                             <small class="text-secondary-light d-block">Remaining</small>
                             <span class="fw-bold {% if order.remaining > 0 %}text-danger-600{% else %}text-success-600{% endif %}" id="pm-remaining">
-                                {{ order.remaining|floatformat:0 }}
+                                {{ order.remaining|intspace }}
                             </span> UZS
                         </div>
                     </div>
@@ -815,7 +816,7 @@
                                     Quick: 
                                     <button type="button" class="btn btn-sm btn-outline-primary ms-2" 
                                             onclick="setAmount({{ order.remaining }})">
-                                        Full ({{ order.remaining|floatformat:0 }})
+                                        Full ({{ order.remaining|intspace }})
                                     </button>
                                     <button type="button" class="btn btn-sm btn-outline-secondary ms-1" 
                                             onclick="setAmount({{ order.remaining|divisibleby:2 }})">

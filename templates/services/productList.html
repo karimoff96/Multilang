@@ -2,6 +2,7 @@
 {% load static %}
 {% load translation_filters %}
 {% load permission_tags %}
+{% load billing_extras %}
 
 {% block content %}
 <div class="card h-100 p-0 radius-12">
@@ -99,8 +100,8 @@
                         </td>
                         <td>
                             <div class="text-sm">
-                                <span class="text-secondary-light">Reg:</span> <span class="fw-medium">{{ product.ordinary_first_page_price|floatformat:0 }}</span><br>
-                                <span class="text-info-600">Agn:</span> <span class="fw-medium">{{ product.agency_first_page_price|floatformat:0 }}</span>
+                                <span class="text-secondary-light">Reg:</span> <span class="fw-medium">{{ product.ordinary_first_page_price|intspace }}</span><br>
+                                <span class="text-info-600">Agn:</span> <span class="fw-medium">{{ product.agency_first_page_price|intspace }}</span>
                             </div>
                         </td>
                         <td class="text-center">
