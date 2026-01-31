@@ -1060,10 +1060,18 @@
                         </div>
                         {% endif %}
                         
-                        <h3 class="pricing-name">{{ tariff.title }}</h3>
+                        <h3 class="pricing-name">
+                            {% if current_language == 'uz' %}{{ tariff.title_uz|default:tariff.title }}
+                            {% elif current_language == 'en' %}{{ tariff.title_en|default:tariff.title }}
+                            {% else %}{{ tariff.title_ru|default:tariff.title }}{% endif %}
+                        </h3>
                         
-                        {% if tariff.description %}
-                        <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 1.5rem;">{{ tariff.description }}</p>
+                        {% if tariff.description or tariff.description_uz or tariff.description_ru or tariff.description_en %}
+                        <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 1.5rem;">
+                            {% if current_language == 'uz' %}{{ tariff.description_uz|default:tariff.description }}
+                            {% elif current_language == 'en' %}{{ tariff.description_en|default:tariff.description }}
+                            {% else %}{{ tariff.description_ru|default:tariff.description }}{% endif %}
+                        </p>
                         {% endif %}
                         
                         <!-- Limits Section -->

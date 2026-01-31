@@ -348,9 +348,23 @@ def tariff_edit(request, pk):
     
     if request.method == 'POST':
         try:
-            tariff.title = request.POST.get('title')
+            # Set all language variants
+            tariff.title_uz = request.POST.get('title_uz', '')
+            tariff.title_ru = request.POST.get('title_ru', '')
+            tariff.title_en = request.POST.get('title_en', '')
+            
+            # Also set base title to default language (Uzbek)
+            tariff.title = request.POST.get('title_uz', '')
+            
             tariff.slug = request.POST.get('slug')
-            tariff.description = request.POST.get('description', '')
+            
+            tariff.description_uz = request.POST.get('description_uz', '')
+            tariff.description_ru = request.POST.get('description_ru', '')
+            tariff.description_en = request.POST.get('description_en', '')
+            
+            # Also set base description to default language (Uzbek)
+            tariff.description = request.POST.get('description_uz', '')
+            
             tariff.is_active = request.POST.get('is_active') == 'on'
             tariff.is_featured = request.POST.get('is_featured') == 'on'
             tariff.is_trial = request.POST.get('is_trial') == 'on'

@@ -5,6 +5,7 @@
 {% block title %}{% trans "Tariff Plans - Billing" %}{% endblock %}
 
 {% block content %}
+{% get_current_language as LANGUAGE_CODE %}
 <div class="dashboard-main-body">
     <div class="d-flex justify-content-end gap-3 mb-24">
         <a href="{% url 'billing:tariff_create' %}" 
@@ -23,7 +24,11 @@
                     <!-- Badges -->
                     <div class="d-flex justify-content-between align-items-start mb-16">
                         <div>
-                            <h5 class="mb-4">{{ tariff.title }}</h5>
+                            <h5 class="mb-4">
+                                {% if LANGUAGE_CODE == 'uz' %}{{ tariff.title_uz|default:tariff.title }}
+                                {% elif LANGUAGE_CODE == 'en' %}{{ tariff.title_en|default:tariff.title }}
+                                {% else %}{{ tariff.title_ru|default:tariff.title }}{% endif %}
+                            </h5>
                         </div>
                         <div class="d-flex flex-column gap-2">
                             {% if tariff.is_trial %}
@@ -44,7 +49,11 @@
                         </div>
                     </div>
 
-                    <p class="text-secondary-light text-sm mb-20">{{ tariff.description|truncatewords:15 }}</p>
+                    <p class="text-secondary-light text-sm mb-20">
+                        {% if LANGUAGE_CODE == 'uz' %}{{ tariff.description_uz|default:tariff.description|truncatewords:15 }}
+                        {% elif LANGUAGE_CODE == 'en' %}{{ tariff.description_en|default:tariff.description|truncatewords:15 }}
+                        {% else %}{{ tariff.description_ru|default:tariff.description|truncatewords:15 }}{% endif %}
+                    </p>
                     
                     <!-- Limits -->
                     <div class="mb-20">

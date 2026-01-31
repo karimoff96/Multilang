@@ -51,14 +51,7 @@
                         <h6 class="text-md text-primary-light mb-16">{% trans "Basic Information" %}</h6>
                     </div>
                     
-                    <div class="col-md-6">
-                        <label class="form-label">{% trans "Title" %} *</label>
-                        <input type="text" name="title" class="form-control" required 
-                               value="{{ tariff.title }}"
-                               placeholder="{% trans 'e.g., Starter, Professional, Enterprise' %}">
-                    </div>
-
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label class="form-label">{% trans "Slug" %} *</label>
                         <input type="text" name="slug" class="form-control" required 
                                value="{{ tariff.slug }}"
@@ -67,10 +60,65 @@
                         <small class="text-secondary-light">{% trans "URL-friendly identifier (lowercase, no spaces)" %}</small>
                     </div>
 
-                    <div class="col-12">
-                        <label class="form-label">{% trans "Description" %}</label>
-                        <textarea name="description" class="form-control" rows="3" 
-                                  placeholder="{% trans 'Describe this tariff plan...' %}">{{ tariff.description }}</textarea>
+                    <!-- Multilingual Title Fields -->
+                    <div class="col-12 mt-3">
+                        <h6 class="text-sm text-primary-light mb-12">{% trans "Titles" %} *</h6>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class="ri-translate-2"></i> {% trans "Title (Uzbek)" %} *
+                        </label>
+                        <input type="text" name="title_uz" class="form-control" required
+                               value="{{ tariff.title_uz|default:'' }}"
+                               placeholder="Masalan: Boshlang'ich">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class="ri-translate-2"></i> {% trans "Title (Russian)" %} *
+                        </label>
+                        <input type="text" name="title_ru" class="form-control" required
+                               value="{{ tariff.title_ru|default:'' }}"
+                               placeholder="Например: Стартовый">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class="ri-translate-2"></i> {% trans "Title (English)" %} *
+                        </label>
+                        <input type="text" name="title_en" class="form-control" required
+                               value="{{ tariff.title_en|default:'' }}"
+                               placeholder="e.g., Starter">
+                    </div>
+
+                    <!-- Multilingual Description Fields -->
+                    <div class="col-12 mt-3">
+                        <h6 class="text-sm text-primary-light mb-12">{% trans "Descriptions" %}</h6>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class="ri-translate-2"></i> {% trans "Description (Uzbek)" %}
+                        </label>
+                        <textarea name="description_uz" class="form-control" rows="3" 
+                                  placeholder="Tarif rejasi tavsifi...">{{ tariff.description_uz|default:'' }}</textarea>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class="ri-translate-2"></i> {% trans "Description (Russian)" %}
+                        </label>
+                        <textarea name="description_ru" class="form-control" rows="3" 
+                                  placeholder="Описание тарифного плана...">{{ tariff.description_ru|default:'' }}</textarea>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class="ri-translate-2"></i> {% trans "Description (English)" %}
+                        </label>
+                        <textarea name="description_en" class="form-control" rows="3" 
+                                  placeholder="Tariff plan description...">{{ tariff.description_en|default:'' }}</textarea>
                     </div>
 
                     <div class="col-md-3">
