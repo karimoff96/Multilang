@@ -882,12 +882,21 @@ button:focus,
 }
 
 /* Primary buttons - keep icons white and disable hover effects */
+.btn-primary-600 i,
+.btn-primary-600 iconify-icon {
+    color: #fff !important;
+}
+
 .btn-primary-600:hover,
 .btn-primary-600:focus,
-.btn-primary-600:active {
+.btn-primary-600:active,
+.btn-primary-600:focus-visible {
     background-color: var(--primary-600) !important;
     border-color: var(--primary-600) !important;
     color: #fff !important;
+    transform: none !important;
+    box-shadow: none !important;
+    transition: none !important;
 }
 
 .btn-primary-600:hover i,
@@ -895,7 +904,9 @@ button:focus,
 .btn-primary-600:focus i,
 .btn-primary-600:focus iconify-icon,
 .btn-primary-600:active i,
-.btn-primary-600:active iconify-icon {
+.btn-primary-600:active iconify-icon,
+.btn-primary-600:focus-visible i,
+.btn-primary-600:focus-visible iconify-icon {
     color: #fff !important;
 }
 

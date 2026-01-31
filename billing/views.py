@@ -206,6 +206,8 @@ def subscription_detail(request, pk):
     history_entries = subscription.history.all()[:20]  # Last 20 entries
     
     context = {
+        'title': _('Billing'),
+        'subTitle': _('Subscription Detail'),
         'subscription': subscription,
         'current_usage': current_usage,
         'analytics': analytics,
