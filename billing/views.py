@@ -868,18 +868,18 @@ def centers_monitoring(request):
 @login_required
 def request_renewal(request):
     """Request subscription renewal - Regular user view"""
-    if not hasattr(request.user, 'organization'):
-        messages.error(request, _("You don't have an organization associated with your account."))
+    if not hasattr(request.user, 'admin_profile') or not request.user.admin_profile:
+        messages.error(request, _("You don't have an admin profile associated with your account."))
         return redirect('dashboard')
     
-    org = request.user.organization
+    center = request.user.admin_profile.center
     
-    # Check if organization has subscription
-    if not hasattr(org, 'subscription'):
-        messages.error(request, _("Your organization doesn't have an active subscription."))
+    # Check if center has subscription
+    if not center or not hasattr(center, 'subscription'):
+        messages.error(request, _("Your center doesn't have an active subscription."))
         return redirect('dashboard')
     
-    subscription = org.subscription
+    subscription = center.subscription
     
     if request.method == 'POST':
         # Handle renewal request submission

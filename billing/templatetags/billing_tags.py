@@ -16,7 +16,7 @@ def has_feature(context, feature_code):
         {% endif %}
     
     Or directly in if statement:
-        {% if request.user.organization.subscription.tariff|has_feature:'ADVANCED_ANALYTICS' %}
+        {% if request.user.admin_profile.center.subscription.tariff|has_feature:'ADVANCED_ANALYTICS' %}
             <!-- Show content -->
         {% endif %}
     """
@@ -29,17 +29,17 @@ def has_feature(context, feature_code):
     if request.user.is_superuser:
         return True
     
-    # Check if user has an organization
-    if not hasattr(request.user, 'organization'):
+    # Check if user has an admin_profile and center
+    if not hasattr(request.user, 'admin_profile') or not request.user.admin_profile:
         return False
     
-    org = request.user.organization
+    center = request.user.admin_profile.center
     
-    # Check if organization has active subscription
-    if not hasattr(org, 'subscription'):
+    # Check if center has active subscription
+    if not center or not hasattr(center, 'subscription'):
         return False
     
-    subscription = org.subscription
+    subscription = center.subscription
     
     # Check if subscription is active
     if not subscription.is_active():
@@ -83,15 +83,15 @@ def user_has_active_subscription(context):
     if request.user.is_superuser:
         return True
     
-    if not hasattr(request.user, 'organization'):
+    if not hasattr(request.user, 'admin_profile') or not request.user.admin_profile:
         return False
     
-    org = request.user.organization
+    center = request.user.admin_profile.center
     
-    if not hasattr(org, 'subscription'):
+    if not center or not hasattr(center, 'subscription'):
         return False
     
-    return org.subscription.is_active()
+    return center.subscription.is_active()
 
 
 @register.simple_tag(takes_context=True)
@@ -108,15 +108,15 @@ def get_user_tariff(context):
     if not request or not request.user.is_authenticated:
         return None
     
-    if not hasattr(request.user, 'organization'):
+    if not hasattr(request.user, 'admin_profile') or not request.user.admin_profile:
         return None
     
-    org = request.user.organization
+    center = request.user.admin_profile.center
     
-    if not hasattr(org, 'subscription'):
+    if not center or not hasattr(center, 'subscription'):
         return None
     
-    return org.subscription.tariff
+    return center.subscription.tariff
 
 
 @register.simple_tag(takes_context=True)
@@ -140,15 +140,15 @@ def check_resource_limit(context, resource_type):
     if request.user.is_superuser:
         return True
     
-    if not hasattr(request.user, 'organization'):
+    if not hasattr(request.user, 'admin_profile') or not request.user.admin_profile:
         return False
     
-    org = request.user.organization
+    center = request.user.admin_profile.center
     
-    if not hasattr(org, 'subscription'):
+    if not center or not hasattr(center, 'subscription'):
         return False
     
-    subscription = org.subscription
+    subscription = center.subscription
     
     if resource_type == 'branches':
         return subscription.can_add_branch()

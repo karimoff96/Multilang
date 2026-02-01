@@ -13,9 +13,18 @@ def require_active_subscription(view_func):
         if not request.user.is_authenticated:
             return redirect('login')
         
-        org = request.user.organization
+        # Superusers always have access
+        if request.user.is_superuser:
+            return view_func(request, *args, **kwargs)
         
-        if not hasattr(org, 'subscription') or not org.subscription.is_active():
+        # Get center from admin_profile
+        if not hasattr(request.user, 'admin_profile') or not request.user.admin_profile:
+            messages.error(request, _("No admin profile found."))
+            return redirect('billing:subscription_status')
+        
+        center = request.user.admin_profile.center
+        
+        if not center or not hasattr(center, 'subscription') or not center.subscription.is_active():
             messages.error(
                 request,
                 _("Your subscription has expired or is not active. Please renew to continue.")
@@ -34,13 +43,22 @@ def require_feature(feature_code):
             if not request.user.is_authenticated:
                 return redirect('login')
             
-            org = request.user.organization
+            # Superusers always have access
+            if request.user.is_superuser:
+                return view_func(request, *args, **kwargs)
             
-            if not hasattr(org, 'subscription'):
+            # Get center from admin_profile
+            if not hasattr(request.user, 'admin_profile') or not request.user.admin_profile:
+                messages.error(request, _("No admin profile found."))
+                return redirect('billing:subscription_status')
+            
+            center = request.user.admin_profile.center
+            
+            if not center or not hasattr(center, 'subscription'):
                 messages.error(request, _("No active subscription found."))
                 return redirect('billing:subscription_status')
             
-            if not org.subscription.tariff.has_feature(feature_code):
+            if not center.subscription.tariff.has_feature(feature_code):
                 messages.error(
                     request,
                     _("This feature is not available in your current plan. Please upgrade.")
@@ -56,13 +74,22 @@ def check_branch_limit(view_func):
     """Check if organization can add more branches"""
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        org = request.user.organization
+        # Superusers always have access
+        if request.user.is_superuser:
+            return view_func(request, *args, **kwargs)
         
-        if not hasattr(org, 'subscription'):
+        # Get center from admin_profile
+        if not hasattr(request.user, 'admin_profile') or not request.user.admin_profile:
+            messages.error(request, _("No admin profile found."))
+            return redirect('billing:subscription_status')
+        
+        center = request.user.admin_profile.center
+        
+        if not center or not hasattr(center, 'subscription'):
             messages.error(request, _("No active subscription found."))
             return redirect('billing:subscription_status')
         
-        if not org.subscription.can_add_branch():
+        if not center.subscription.can_add_branch():
             messages.error(
                 request,
                 _("You have reached your branch limit. Upgrade your plan to add more branches.")
@@ -77,13 +104,22 @@ def check_staff_limit(view_func):
     """Check if organization can add more staff"""
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        org = request.user.organization
+        # Superusers always have access
+        if request.user.is_superuser:
+            return view_func(request, *args, **kwargs)
         
-        if not hasattr(org, 'subscription'):
+        # Get center from admin_profile
+        if not hasattr(request.user, 'admin_profile') or not request.user.admin_profile:
+            messages.error(request, _("No admin profile found."))
+            return redirect('billing:subscription_status')
+        
+        center = request.user.admin_profile.center
+        
+        if not center or not hasattr(center, 'subscription'):
             messages.error(request, _("No active subscription found."))
             return redirect('billing:subscription_status')
         
-        if not org.subscription.can_add_staff():
+        if not center.subscription.can_add_staff():
             messages.error(
                 request,
                 _("You have reached your staff limit. Upgrade your plan to add more users.")
@@ -98,13 +134,22 @@ def check_order_limit(view_func):
     """Check if organization can create more orders this month"""
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        org = request.user.organization
+        # Superusers always have access
+        if request.user.is_superuser:
+            return view_func(request, *args, **kwargs)
         
-        if not hasattr(org, 'subscription'):
+        # Get center from admin_profile
+        if not hasattr(request.user, 'admin_profile') or not request.user.admin_profile:
+            messages.error(request, _("No admin profile found."))
+            return redirect('billing:subscription_status')
+        
+        center = request.user.admin_profile.center
+        
+        if not center or not hasattr(center, 'subscription'):
             messages.error(request, _("No active subscription found."))
             return redirect('billing:subscription_status')
         
-        if not org.subscription.can_create_order():
+        if not center.subscription.can_create_order():
             messages.error(
                 request,
                 _("You have reached your monthly order limit. Upgrade your plan or wait for next month.")

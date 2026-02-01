@@ -28,12 +28,12 @@ def billing_context(request):
             context['subscription_alert'] = None
             return context
         
-        # Check organization subscription
-        if hasattr(request.user, 'organization'):
-            org = request.user.organization
+        # Check center subscription
+        if hasattr(request.user, 'admin_profile') and request.user.admin_profile:
+            center = request.user.admin_profile.center
             
-            if hasattr(org, 'subscription'):
-                subscription = org.subscription
+            if center and hasattr(center, 'subscription'):
+                subscription = center.subscription
                 days_remaining = subscription.days_remaining()
                 
                 context['has_active_subscription'] = subscription.is_active()
