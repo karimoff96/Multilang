@@ -10,13 +10,13 @@
 <div class="card radius-8 border-0 mb-24">
     <div class="card-body p-16">
         <form method="GET" class="d-flex align-items-center gap-3 flex-wrap">
-            <span class="text-md fw-semibold text-secondary-light" data-i18n="filter.period">Period:</span>
+            <span class="text-md fw-semibold text-secondary-light" data-i18n="filter.period">{% trans "Period" %}:</span>
             <select name="period" id="periodSelect" class="form-select form-select-sm w-auto">
-                <option value="today" {% if period == 'today' %}selected{% endif %} data-i18n="filter.today">Today</option>
-                <option value="week" {% if period == 'week' %}selected{% endif %} data-i18n="filter.thisWeek">This Week</option>
-                <option value="month" {% if period == 'month' %}selected{% endif %} data-i18n="filter.thisMonth">This Month</option>
-                <option value="year" {% if period == 'year' %}selected{% endif %} data-i18n="filter.thisYear">This Year</option>
-                <option value="custom" {% if period == 'custom' %}selected{% endif %} data-i18n="filter.custom">Custom Range</option>
+                <option value="today" {% if period == 'today' %}selected{% endif %} data-i18n="filter.today">{% trans "Today" %}</option>
+                <option value="week" {% if period == 'week' %}selected{% endif %} data-i18n="filter.thisWeek">{% trans "This Week" %}</option>
+                <option value="month" {% if period == 'month' %}selected{% endif %} data-i18n="filter.thisMonth">{% trans "This Month" %}</option>
+                <option value="year" {% if period == 'year' %}selected{% endif %} data-i18n="filter.thisYear">{% trans "This Year" %}</option>
+                <option value="custom" {% if period == 'custom' %}selected{% endif %} data-i18n="filter.custom">{% trans "Custom Range" %}</option>
             </select>
             
             <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
@@ -25,21 +25,21 @@
             </div>
             
             <select name="payment_method" class="form-select form-select-sm w-auto">
-                <option value="" data-i18n="filter.allPaymentMethods">All Payment Methods</option>
-                <option value="cash" {% if payment_method == 'cash' %}selected{% endif %} data-i18n="payment.cash">Cash</option>
-                <option value="card" {% if payment_method == 'card' %}selected{% endif %} data-i18n="payment.card">Card</option>
-                <option value="bank_transfer" {% if payment_method == 'bank_transfer' %}selected{% endif %} data-i18n="payment.bankTransfer">Bank Transfer</option>
+                <option value="" data-i18n="filter.allPaymentMethods">{% trans "All Payment Methods" %}</option>
+                <option value="cash" {% if payment_method == 'cash' %}selected{% endif %} data-i18n="payment.cash">{% trans "Cash" %}</option>
+                <option value="card" {% if payment_method == 'card' %}selected{% endif %} data-i18n="payment.card">{% trans "Card" %}</option>
+                <option value="bank_transfer" {% if payment_method == 'bank_transfer' %}selected{% endif %} data-i18n="payment.bankTransfer">{% trans "Bank Transfer" %}</option>
             </select>
             
             <select name="customer_type" class="form-select form-select-sm w-auto">
-                <option value="" data-i18n="filter.allCustomers">All Customers</option>
-                <option value="agency" {% if customer_type == 'agency' %}selected{% endif %} data-i18n="customer.agency">Agency (B2B)</option>
-                <option value="individual" {% if customer_type == 'individual' %}selected{% endif %} data-i18n="customer.individual">Individual (B2C)</option>
+                <option value="" data-i18n="filter.allCustomers">{% trans "All Customers" %}</option>
+                <option value="agency" {% if customer_type == 'agency' %}selected{% endif %} data-i18n="customer.agency">{% trans "Agency (B2B)" %}</option>
+                <option value="individual" {% if customer_type == 'individual' %}selected{% endif %} data-i18n="customer.individual">{% trans "Individual (B2C)" %}</option>
             </select>
             
             <button type="submit" class="btn btn-primary btn-sm px-16 d-inline-flex align-items-center gap-2">
                 <iconify-icon icon="solar:filter-bold" class="icon"></iconify-icon>
-                <span data-i18n="common.apply">Apply</span>
+                <span data-i18n="common.apply">{% trans "Apply" %}</span>
             </button>
             
             {% if period_label %}
@@ -63,13 +63,13 @@
                             <iconify-icon icon="solar:wallet-bold" class="icon"></iconify-icon>
                         </span>
                         <div>
-                            <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="stats.totalPayments">Total Payments</span>
+                            <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="stats.totalPayments">{% trans "Total Payments" %}</span>
                             <h6 class="fw-semibold">{{ stats.total_count }}</h6>
                         </div>
                     </div>
                 </div>
                 <p class="text-sm mb-0">
-                    <span class="text-secondary-light" data-i18n="stats.transactionsProcessed">transactions processed</span>
+                    <span class="text-secondary-light" data-i18n="stats.transactionsProcessed">{% trans "transactions processed" %}</span>
                 </p>
             </div>
         </div>
@@ -84,13 +84,13 @@
                             <iconify-icon icon="solar:dollar-bold" class="icon"></iconify-icon>
                         </span>
                         <div>
-                            <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="stats.totalAmount">Total Amount</span>
+                            <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="stats.totalAmount">{% trans "Total Amount" %}</span>
                             <h6 class="fw-semibold">{{ stats.total_amount|floatformat:0|format_number }} <small class="text-xs fw-normal">UZS</small></h6>
                         </div>
                     </div>
                 </div>
                 <p class="text-sm mb-0">
-                    <span class="text-secondary-light">{{ stats.average_amount|floatformat:0|format_number }} UZS/<span data-i18n="common.avgPayment">avg payment</span></span>
+                    <span class="text-secondary-light">{{ stats.average_amount|floatformat:0|format_number }} UZS/<span data-i18n="common.avgPayment">{% trans "avg payment" %}</span></span>
                 </p>
             </div>
         </div>
@@ -105,14 +105,14 @@
                             <iconify-icon icon="solar:bag-4-bold" class="icon"></iconify-icon>
                         </span>
                         <div>
-                            <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="stats.ordersPaid">Orders Paid</span>
+                            <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="stats.ordersPaid">{% trans "Orders Paid" %}</span>
                             <h6 class="fw-semibold">{{ stats.total_orders }}</h6>
                         </div>
                     </div>
                 </div>
                 <p class="text-sm mb-0">
                     <span class="bg-success-focus px-1 rounded-2 fw-medium text-success-main text-sm">{{ stats.fully_paid_orders }}</span>
-                    <span class="text-secondary-light" data-i18n="stats.fullyPaid">fully paid</span>
+                    <span class="text-secondary-light" data-i18n="stats.fullyPaid">{% trans "fully paid" %}</span>
                 </p>
             </div>
         </div>
@@ -127,13 +127,13 @@
                             <iconify-icon icon="solar:users-group-rounded-bold" class="icon"></iconify-icon>
                         </span>
                         <div>
-                            <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="stats.uniqueCustomers">Unique Customers</span>
+                            <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="stats.uniqueCustomers">{% trans "Unique Customers" %}</span>
                             <h6 class="fw-semibold">{{ stats.unique_customers }}</h6>
                         </div>
                     </div>
                 </div>
                 <p class="text-sm mb-0">
-                    <span class="text-secondary-light" data-i18n="stats.customersServed">customers served</span>
+                    <span class="text-secondary-light" data-i18n="stats.customersServed">{% trans "customers served" %}</span>
                 </p>
             </div>
         </div>
@@ -146,7 +146,7 @@
                 <h6 class="text-lg fw-semibold mb-0" data-i18n="payment.paymentHistory">Payment History</h6>
                 <a href="{% url 'orders:bulk_payment_page' %}" class="text-primary-600 hover-text-primary d-flex align-items-center gap-1">
                     <iconify-icon icon="solar:add-circle-bold" class="icon"></iconify-icon>
-                    <span data-i18n="payment.newPayment">New Payment</span>
+                    <span data-i18n="payment.newPayment">{% trans "New Payment" %}</span>
                 </a>
             </div>
             <div class="card-body p-24">
@@ -156,14 +156,14 @@
                         <thead>
                             <tr>
                                 <th scope="col" class="col-id" data-i18n="table.id">#</th>
-                                <th scope="col" data-i18n="table.customer">Customer</th>
-                                <th scope="col" data-i18n="table.paymentMethod">Payment Method</th>
-                                <th scope="col" class="col-amount" data-i18n="table.amount">Amount</th>
-                                <th scope="col" class="text-center col-id" data-i18n="table.orders">Orders</th>
-                                <th scope="col" class="text-center col-id" data-i18n="table.fullyPaid">Fully Paid</th>
-                                <th scope="col" class="col-date" data-i18n="table.date">Date</th>
-                                <th scope="col" data-i18n="table.processedBy">Processed By</th>
-                                <th scope="col" class="text-center" data-i18n="table.actions">Actions</th>
+                                <th scope="col" data-i18n="table.customer">{% trans "Customer" %}</th>
+                                <th scope="col" data-i18n="table.paymentMethod">{% trans "Payment Method" %}</th>
+                                <th scope="col" class="col-amount" data-i18n="table.amount">{% trans "Amount" %}</th>
+                                <th scope="col" class="text-center col-id" data-i18n="table.orders">{% trans "Orders" %}</th>
+                                <th scope="col" class="text-center col-id" data-i18n="table.fullyPaid">{% trans "Fully Paid" %}</th>
+                                <th scope="col" class="col-date" data-i18n="table.date">{% trans "Date" %}</th>
+                                <th scope="col" data-i18n="table.processedBy">{% trans "Processed By" %}</th>
+                                <th scope="col" class="text-center" data-i18n="table.actions">{% trans "Actions" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -187,13 +187,13 @@
                                 </td>
                                 <td>
                                     {% if payment.payment_method == 'cash' %}
-                                    <span class="bg-success-focus text-success-main status-badge-sm rounded-pill fw-medium" data-i18n="payment.cash">Cash</span>
+                                    <span class="bg-success-focus text-success-main status-badge-sm rounded-pill fw-medium" data-i18n="payment.cash">{% trans "Cash" %}</span>
                                     {% elif payment.payment_method == 'card' %}
-                                    <span class="bg-primary-focus text-primary-main status-badge-sm rounded-pill fw-medium" data-i18n="payment.card">Card</span>
+                                    <span class="bg-primary-focus text-primary-main status-badge-sm rounded-pill fw-medium" data-i18n="payment.card">{% trans "Card" %}</span>
                                     {% elif payment.payment_method == 'bank_transfer' %}
-                                    <span class="bg-info-focus text-info-main status-badge-sm rounded-pill fw-medium" data-i18n="payment.bankTransfer">Bank</span>
+                                    <span class="bg-info-focus text-info-main status-badge-sm rounded-pill fw-medium" data-i18n="payment.bankTransfer">{% trans "Bank Transfer" %}</span>
                                     {% else %}
-                                    <span class="bg-secondary-focus text-secondary-main status-badge-sm rounded-pill fw-medium" data-i18n="payment.other">Other</span>
+                                    <span class="bg-secondary-focus text-secondary-main status-badge-sm rounded-pill fw-medium" data-i18n="payment.other">{% trans "Other" %}</span>
                                     {% endif %}
                                 </td>
                                 <td class="col-amount"><span class="fw-medium nowrap">{{ payment.amount|format_number }}</span></td>

@@ -7613,6 +7613,213 @@ const translations = {
         uz: 'Keyingi',
         ru: 'Следующая',
         en: 'Next'
+    },
+
+    // ========== PAYMENT ==========
+    'payment.paymentHistory': {
+        uz: 'To\'lovlar tarixi',
+        ru: 'История платежей',
+        en: 'Payment History'
+    },
+    'payment.fullReport': {
+        uz: 'To\'liq hisobot',
+        ru: 'Полный отчет',
+        en: 'Full Report'
+    },
+    'payment.cash': {
+        uz: 'Naqd',
+        ru: 'Наличные',
+        en: 'Cash'
+    },
+    'payment.card': {
+        uz: 'Karta',
+        ru: 'Карта',
+        en: 'Card'
+    },
+    'payment.bankTransfer': {
+        uz: 'Bank o\'tkazmasi',
+        ru: 'Банковский перевод',
+        en: 'Bank Transfer'
+    },
+    'payment.other': {
+        uz: 'Boshqa',
+        ru: 'Другое',
+        en: 'Other'
+    },
+    'payment.paymentMethod': {
+        uz: 'To\'lov usuli',
+        ru: 'Способ оплаты',
+        en: 'Payment Method'
+    },
+    'payment.paymentDetails': {
+        uz: 'To\'lov tafsilotlari',
+        ru: 'Детали платежа',
+        en: 'Payment Details'
+    },
+    'payment.noPaymentsFound': {
+        uz: 'To\'lovlar topilmadi',
+        ru: 'Платежи не найдены',
+        en: 'No payments found'
+    },
+    'payment.tryDifferentFilters': {
+        uz: 'Boshqa filtrlar yoki sana oralig\'ini sinab ko\'ring',
+        ru: 'Попробуйте изменить фильтры или диапазон дат',
+        en: 'Try adjusting your filters or date range'
+    },
+    'payment.processPayment': {
+        uz: 'To\'lovni qayta ishlash',
+        ru: 'Обработать платеж',
+        en: 'Process Payment'
+    },
+
+    // ========== STATS ==========
+    'stats.totalPayments': {
+        uz: 'Jami to\'lovlar',
+        ru: 'Всего платежей',
+        en: 'Total Payments'
+    },
+    'stats.transactionsProcessed': {
+        uz: 'qayta ishlangan tranzaksiyalar',
+        ru: 'обработанных транзакций',
+        en: 'transactions processed'
+    },
+    'stats.totalAmount': {
+        uz: 'Jami summa',
+        ru: 'Общая сумма',
+        en: 'Total Amount'
+    },
+    'stats.totalOrders': {
+        uz: 'Jami buyurtmalar',
+        ru: 'Всего заказов',
+        en: 'Total Orders'
+    },
+    'stats.uniqueCustomers': {
+        uz: 'Noyob mijozlar',
+        ru: 'Уникальных клиентов',
+        en: 'Unique Customers'
+    },
+    'stats.fullyPaidOrders': {
+        uz: 'To\'liq to\'langan',
+        ru: 'Полностью оплачено',
+        en: 'Fully Paid'
+    },
+    'stats.ordersProcessed': {
+        uz: 'buyurtmalar qayta ishlangan',
+        ru: 'заказов обработано',
+        en: 'orders processed'
+    },
+
+    // ========== FILTER ==========
+    'filter.period': {
+        uz: 'Davr',
+        ru: 'Период',
+        en: 'Period'
+    },
+    'filter.today': {
+        uz: 'Bugun',
+        ru: 'Сегодня',
+        en: 'Today'
+    },
+    'filter.thisWeek': {
+        uz: 'Shu hafta',
+        ru: 'На этой неделе',
+        en: 'This Week'
+    },
+    'filter.thisMonth': {
+        uz: 'Shu oy',
+        ru: 'В этом месяце',
+        en: 'This Month'
+    },
+    'filter.thisYear': {
+        uz: 'Shu yil',
+        ru: 'В этом году',
+        en: 'This Year'
+    },
+    'filter.custom': {
+        uz: 'Maxsus oraliq',
+        ru: 'Произвольный период',
+        en: 'Custom Range'
+    },
+    'filter.allPaymentMethods': {
+        uz: 'Barcha to\'lov usullari',
+        ru: 'Все способы оплаты',
+        en: 'All Payment Methods'
+    },
+    'filter.allCustomers': {
+        uz: 'Barcha mijozlar',
+        ru: 'Все клиенты',
+        en: 'All Customers'
+    },
+
+    // ========== CUSTOMER ==========
+    'customer.agency': {
+        uz: 'Agentlik (B2B)',
+        ru: 'Агентство (B2B)',
+        en: 'Agency (B2B)'
+    },
+    'customer.individual': {
+        uz: 'Shaxsiy (B2C)',
+        ru: 'Физическое лицо (B2C)',
+        en: 'Individual (B2C)'
+    },
+
+    // ========== TABLE ==========
+    'table.id': {
+        uz: '№',
+        ru: '№',
+        en: '#'
+    },
+    'table.customer': {
+        uz: 'Mijoz',
+        ru: 'Клиент',
+        en: 'Customer'
+    },
+    'table.paymentMethod': {
+        uz: 'To\'lov usuli',
+        ru: 'Способ оплаты',
+        en: 'Payment Method'
+    },
+    'table.amount': {
+        uz: 'Summa',
+        ru: 'Сумма',
+        en: 'Amount'
+    },
+    'table.orders': {
+        uz: 'Buyurtmalar',
+        ru: 'Заказы',
+        en: 'Orders'
+    },
+    'table.fullyPaid': {
+        uz: 'To\'liq to\'langan',
+        ru: 'Полностью оплачено',
+        en: 'Fully Paid'
+    },
+    'table.date': {
+        uz: 'Sana',
+        ru: 'Дата',
+        en: 'Date'
+    },
+    'table.processedBy': {
+        uz: 'Kim tomonidan',
+        ru: 'Обработал',
+        en: 'Processed By'
+    },
+    'table.actions': {
+        uz: 'Amallar',
+        ru: 'Действия',
+        en: 'Actions'
+    },
+
+    // ========== COMMON ==========
+    'common.apply': {
+        uz: 'Qo\'llash',
+        ru: 'Применить',
+        en: 'Apply'
+    },
+    'common.avgPayment': {
+        uz: 'o\'rtacha to\'lov',
+        ru: 'средний платеж',
+        en: 'avg payment'
     }
 };
 

@@ -1121,7 +1121,6 @@ def get_branch_staff(request, branch_id):
 
 
 @login_required(login_url="admin_login")
-@permission_required('can_manage_system_settings')
 def create_region(request):
     """API endpoint to create a new region (superuser only)"""
     if not request.user.is_superuser:
@@ -1153,7 +1152,6 @@ def create_region(request):
 
 
 @login_required(login_url="admin_login")
-@permission_required('can_manage_system_settings')
 def create_district(request):
     """API endpoint to create a new district (superuser only)"""
     if not request.user.is_superuser:
@@ -1256,7 +1254,6 @@ def api_create_user(request):
 
 
 @login_required(login_url="admin_login")
-@permission_required('can_manage_system_settings')
 def role_list(request):
     """List all roles - superuser only"""
     if not request.user.is_superuser:
@@ -1279,7 +1276,6 @@ def role_list(request):
 
 
 @login_required(login_url="admin_login")
-@permission_required('can_manage_system_settings')
 def role_create(request):
     """Create a new role - superuser only"""
     if not request.user.is_superuser:
@@ -1329,7 +1325,6 @@ def role_create(request):
 
 
 @login_required(login_url="admin_login")
-@permission_required('can_manage_system_settings')
 def role_edit(request, role_id):
     """Edit a role - superuser only"""
     if not request.user.is_superuser:
@@ -1385,7 +1380,6 @@ def role_edit(request, role_id):
 
 
 @login_required(login_url="admin_login")
-@permission_required('can_manage_system_settings')
 def role_delete(request, role_id):
     """Delete a role - superuser only, cannot delete system roles"""
     if not request.user.is_superuser:

@@ -6,34 +6,26 @@
 
 {% block content %}
 <div class="dashboard-main-body">
-    <div class="d-flex justify-content-end gap-2 mb-24">
-        <ul class="d-flex align-items-center gap-2">
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-24">
+        <div class="flex-grow-1">
             {% if subscription.is_trial %}
-            <li>
-                <a href="{% url 'billing:convert_trial_to_paid' subscription.pk %}" 
-                   class="btn btn-warning-600 text-white"
-                   title="{% trans 'Convert to Paid' %}"
-                   data-bs-toggle="tooltip">
-                    <i class="ri-vip-crown-2-line"></i>
-                </a>
-            </li>
+            <a href="{% url 'billing:convert_trial_to_paid' subscription.pk %}" 
+               class="btn btn-warning-600 text-white px-24 py-12 d-inline-flex align-items-center gap-2">
+                <iconify-icon icon="solar:crown-bold" class="icon text-xl"></iconify-icon>
+                <span class="fw-semibold">{% trans "Convert to Paid Subscription" %}</span>
+            </a>
             {% else %}
-            <li>
-                <a href="{% url 'billing:subscription_renew' subscription.pk %}" 
-                   class="btn btn-success-600 text-white"
-                   title="{% trans 'Renew Subscription' %}"
-                   data-bs-toggle="tooltip">
-                    <i class="ri-refresh-line"></i>
-                </a>
-            </li>
+            <a href="{% url 'billing:subscription_renew' subscription.pk %}" 
+               class="btn btn-success-600 text-white px-24 py-12 d-inline-flex align-items-center gap-2 btn-lg">
+                <iconify-icon icon="solar:refresh-bold" class="icon text-xl"></iconify-icon>
+                <span class="fw-semibold">{% trans "Renew Subscription" %}</span>
+            </a>
             {% endif %}
-            <li class="fw-medium">
-                <a href="{% url 'billing:subscription_list' %}" class="d-flex align-items-center gap-1 hover-text-primary">
-                    <iconify-icon icon="solar:arrow-left-bold" class="icon text-lg"></iconify-icon>
-                    {% trans "Back to List" %}
-                </a>
-            </li>
-        </ul>
+        </div>
+        <a href="{% url 'billing:subscription_list' %}" class="btn btn-outline-primary-600 d-inline-flex align-items-center gap-2">
+            <iconify-icon icon="solar:arrow-left-bold" class="icon text-lg"></iconify-icon>
+            <span>{% trans "Back to List" %}</span>
+        </a>
     </div>
 
     <div class="row gy-4">
@@ -56,7 +48,7 @@
                                 <div class="text-primary-600 mb-2">
                                     <i class="ri-calendar-check-line" style="font-size: 32px;"></i>
                                 </div>
-                                <h6 class="mb-1">
+                                <h6 class="mb-1 text-neutral-900">
                                     {% if analytics.account_age_years >= 1 %}
                                         {{ analytics.account_age_years }} {% trans "years" %}
                                     {% else %}
@@ -71,7 +63,7 @@
                                 <div class="text-success-600 mb-2">
                                     <i class="ri-money-dollar-circle-line" style="font-size: 32px;"></i>
                                 </div>
-                                <h6 class="mb-1">{{ analytics.lifetime_value|floatformat:2 }} UZS</h6>
+                                <h6 class="mb-1 text-neutral-900">{{ analytics.lifetime_value|floatformat:2 }} UZS</h6>
                                 <small class="text-secondary-light">{% trans "Lifetime Value" %}</small>
                             </div>
                         </div>
@@ -80,7 +72,7 @@
                                 <div class="text-info-600 mb-2">
                                     <i class="ri-file-list-3-line" style="font-size: 32px;"></i>
                                 </div>
-                                <h6 class="mb-1">{{ analytics.total_subscriptions_count }}</h6>
+                                <h6 class="mb-1 text-neutral-900">{{ analytics.total_subscriptions_count }}</h6>
                                 <small class="text-secondary-light">{% trans "Total Subscriptions" %}</small>
                             </div>
                         </div>
@@ -89,7 +81,7 @@
                                 <div class="text-warning-600 mb-2">
                                     <i class="ri-calendar-todo-line" style="font-size: 32px;"></i>
                                 </div>
-                                <h6 class="mb-1">{{ analytics.first_subscription_date|date:"d M Y" }}</h6>
+                                <h6 class="mb-1 text-neutral-900">{{ analytics.first_subscription_date|date:"d M Y" }}</h6>
                                 <small class="text-secondary-light">{% trans "First Subscription" %}</small>
                             </div>
                         </div>
@@ -108,15 +100,15 @@
                     <div class="row gy-3">
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Organization" %}</label>
-                            <p class="fw-semibold">{{ subscription.organization.name }}</p>
+                            <p class="fw-semibold text-neutral-900">{{ subscription.organization.name }}</p>
                         </div>
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Tariff Plan" %}</label>
-                            <p class="fw-semibold">{{ subscription.tariff.title }}</p>
+                            <p class="fw-semibold text-neutral-900">{{ subscription.tariff.title }}</p>
                         </div>
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Duration" %}</label>
-                            <p class="fw-semibold">{{ subscription.pricing.duration_months }} {% trans "month(s)" %}</p>
+                            <p class="fw-semibold text-neutral-900">{{ subscription.pricing.duration_months }} {% trans "month(s)" %}</p>
                         </div>
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Status" %}</label>
@@ -140,7 +132,7 @@
                         {% if subscription.is_trial %}
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Trial End Date" %}</label>
-                            <p class="fw-semibold">{{ subscription.trial_end_date|date:"F d, Y" }}</p>
+                            <p class="fw-semibold text-neutral-900">{{ subscription.trial_end_date|date:"F d, Y" }}</p>
                         </div>
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Trial Days Remaining" %}</label>
@@ -151,11 +143,11 @@
                         {% endif %}
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Start Date" %}</label>
-                            <p class="fw-semibold">{{ subscription.start_date|date:"F d, Y" }}</p>
+                            <p class="fw-semibold text-neutral-900">{{ subscription.start_date|date:"F d, Y" }}</p>
                         </div>
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "End Date" %}</label>
-                            <p class="fw-semibold">{{ subscription.end_date|date:"F d, Y" }}</p>
+                            <p class="fw-semibold text-neutral-900">{{ subscription.end_date|date:"F d, Y" }}</p>
                         </div>
                         {% if not subscription.is_trial %}
                         <div class="col-md-6">
@@ -178,20 +170,20 @@
                         {% if subscription.amount_paid %}
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Amount Paid" %}</label>
-                            <p class="fw-semibold">{{ subscription.amount_paid|floatformat:0 }} {{ subscription.pricing.currency }}</p>
+                            <p class="fw-semibold text-neutral-900">{{ subscription.amount_paid|floatformat:0 }} {{ subscription.pricing.currency }}</p>
                         </div>
                         {% endif %}
                         {% if subscription.payment_method %}
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Payment Method" %}</label>
-                            <p class="fw-semibold">{{ subscription.payment_method }}</p>
+                            <p class="fw-semibold text-neutral-900">{{ subscription.payment_method }}</p>
                         </div>
                         {% endif %}
                     </div>
 
                     <!-- Update Status Form -->
                     <div class="mt-4 pt-4 border-top">
-                        <h6 class="mb-3">{% trans "Update Status" %}</h6>
+                        <h6 class="mb-3 text-neutral-900">{% trans "Update Status" %}</h6>
                         <form method="post" action="{% url 'billing:subscription_update_status' subscription.id %}">
                             {% csrf_token %}
                             <div class="row gy-3">
@@ -229,7 +221,7 @@
                         {% for category, feature_dict in features_by_category.items %}
                         <div class="col-md-6">
                             <div class="border rounded p-3">
-                                <h6 class="mb-3">
+                                <h6 class="mb-3 text-neutral-900">
                                     {% if category == 'orders' %}📊 {% trans "Orders" %}
                                     {% elif category == 'analytics' %}📈 {% trans "Analytics" %}
                                     {% elif category == 'integration' %}🔗 {% trans "Integration" %}
@@ -247,7 +239,7 @@
                                     <li class="mb-2 text-sm">
                                         {% if is_enabled %}
                                             <i class="ri-checkbox-circle-fill text-success-600"></i>
-                                            <span class="text-dark">{{ feature_name }}</span>
+                                            <span class="text-neutral-900 fw-medium">{{ feature_name }}</span>
                                         {% else %}
                                             <i class="ri-close-circle-line text-secondary-light"></i>
                                             <span class="text-secondary-light">{{ feature_name }}</span>
@@ -285,8 +277,8 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <div class="d-flex justify-content-between mb-2">
-                            <span>{% trans "Branches" %}</span>
-                            <span>{{ current_usage.branches }} / {% if current_usage.branches_limit %}{{ current_usage.branches_limit }}{% else %}∞{% endif %}</span>
+                            <span class="text-neutral-900">{% trans "Branches" %}</span>
+                            <span class="text-neutral-900">{{ current_usage.branches }} / {% if current_usage.branches_limit %}{{ current_usage.branches_limit }}{% else %}∞{% endif %}</span>
                         </div>
                         {% if current_usage.branches_limit %}
                         <div class="progress">
@@ -298,8 +290,8 @@
                     
                     <div class="mb-3">
                         <div class="d-flex justify-content-between mb-2">
-                            <span>{% trans "Staff" %}</span>
-                            <span>{{ current_usage.staff }} / {% if current_usage.staff_limit %}{{ current_usage.staff_limit }}{% else %}∞{% endif %}</span>
+                            <span class="text-neutral-900">{% trans "Staff" %}</span>
+                            <span class="text-neutral-900">{{ current_usage.staff }} / {% if current_usage.staff_limit %}{{ current_usage.staff_limit }}{% else %}∞{% endif %}</span>
                         </div>
                         {% if current_usage.staff_limit %}
                         <div class="progress">
@@ -311,8 +303,8 @@
                     
                     <div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span>{% trans "Orders (This Month)" %}</span>
-                            <span>{{ current_usage.orders }} / {% if current_usage.orders_limit %}{{ current_usage.orders_limit }}{% else %}∞{% endif %}</span>
+                            <span class="text-neutral-900">{% trans "Orders (This Month)" %}</span>
+                            <span class="text-neutral-900">{{ current_usage.orders }} / {% if current_usage.orders_limit %}{{ current_usage.orders_limit }}{% else %}∞{% endif %}</span>
                         </div>
                         {% if current_usage.orders_limit %}
                         <div class="progress">
@@ -349,7 +341,7 @@
                                     <i class="ri-history-line text-secondary-600 mt-1" style="font-size: 20px;"></i>
                                 {% endif %}
                                 <div class="flex-grow-1">
-                                    <p class="mb-1 fw-semibold">{{ history.action|title }}</p>
+                                    <p class="mb-1 fw-semibold text-neutral-900">{{ history.action|title }}</p>
                                     <p class="mb-1 text-secondary-light text-sm">{{ history.description }}</p>
                                     <p class="mb-0 text-secondary-light text-xs">
                                         <i class="ri-time-line"></i> {{ history.timestamp|date:"M d, Y H:i" }}

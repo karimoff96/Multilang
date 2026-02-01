@@ -749,9 +749,9 @@ def branch_comparison(request):
 
 
 @login_required(login_url="admin_login")
-@any_permission_required('can_view_analytics', 'can_view_customer_details')
+@any_permission_required('can_view_analytics', 'can_view_customers')
 def customer_analytics(request):
-    """Customer analytics - requires can_view_analytics or can_view_customer_details permission"""
+    """Customer analytics - requires can_view_analytics or can_view_customers permission"""
     # Period filter
     period = request.GET.get("period", "month")
     custom_from = request.GET.get("date_from")
@@ -1122,7 +1122,7 @@ def my_statistics(request):
 # ============ UNIT ECONOMY ANALYTICS ============
 
 @login_required(login_url="admin_login")
-@permission_required('can_view_financial_reports')
+@any_permission_required('can_view_financial_reports', 'can_manage_financial')
 def unit_economy(request):
     """
     Unit Economy Analytics View

@@ -14,6 +14,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
+from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 from django.utils.translation import gettext as _
 from django.utils import timezone
@@ -741,6 +742,16 @@ def payment_history(request):
             elif admin_profile.is_manager:
                 # Manager sees branch payments
                 payments = payments.filter(branch=admin_profile.branch)
+            else:
+                # Staff members see payments from their assigned branch
+                if admin_profile.branch:
+                    payments = payments.filter(branch=admin_profile.branch)
+                else:
+                    # If no branch assigned, return empty queryset
+                    payments = payments.none()
+        else:
+            # If no admin profile, return empty queryset
+            payments = payments.none()
     
     # Apply filters from query params
     customer_id = request.GET.get('customer_id')
@@ -864,6 +875,16 @@ def payment_history_full(request):
             elif admin_profile.is_manager:
                 # Manager sees branch payments
                 payments = payments.filter(branch=admin_profile.branch)
+            else:
+                # Staff members see payments from their assigned branch
+                if admin_profile.branch:
+                    payments = payments.filter(branch=admin_profile.branch)
+                else:
+                    # If no branch assigned, return empty queryset
+                    payments = payments.none()
+        else:
+            # If no admin profile, return empty queryset
+            payments = payments.none()
     
     # Apply date range filter
     payments = payments.filter(created_at__gte=date_from, created_at__lte=date_to)
@@ -926,6 +947,12 @@ def payment_history_full(request):
     
     context = {
         'page_title': _('Payment History - Full Report'),
+        'title': _('Payment History'),
+        'title_i18n': 'payment.paymentHistory',
+        'breadcrumb_items': [
+            {'url': reverse('orders:bulk_payment_page'), 'label': _('Bulk Payment'), 'i18n': 'sidebar.bulkPayment'},
+            {'label': _('Full Report'), 'i18n': 'payment.fullReport'},
+        ],
         'payments': payments_page,
         'stats': stats,
         'period': period,

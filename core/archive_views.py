@@ -53,9 +53,11 @@ def archive_detail(request, archive_id):
 
 
 @login_required
-@permission_required('can_manage_settings')
 def trigger_archive(request):
-    """Manually trigger archiving process"""
+    """Manually trigger archiving process - superuser only"""
+    if not request.user.is_superuser:
+        return JsonResponse({'success': False, 'error': _('Superuser access required')}, status=403)
+    
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
     

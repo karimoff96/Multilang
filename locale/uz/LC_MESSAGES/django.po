@@ -578,7 +578,7 @@ msgstr "Admin bildirisnomalari"
 
 #: core/views.py:88
 msgid "Today"
-msgstr ""
+msgstr "Bugun"
 
 #: core/views.py:89
 msgid "Yesterday"
@@ -586,15 +586,15 @@ msgstr "Kecha"
 
 #: core/views.py:90
 msgid "This Week"
-msgstr ""
+msgstr "Shu hafta"
 
 #: core/views.py:91
 msgid "This Month"
-msgstr ""
+msgstr "Shu oy"
 
 #: core/views.py:92
 msgid "Custom Range"
-msgstr ""
+msgstr "Maxsus davr"
 
 #: core/views.py:220
 msgid "System activity and audit trail"
@@ -4054,4 +4054,177 @@ msgstr "Xodimlar"
 msgid "Заказов/месяц"
 msgstr "Buyurtmalar/oy"
 
+msgid "This Year"
+msgstr "Shu yil"
+
+msgid "All Payment Methods"
+msgstr "Barcha to'lov usullari"
+
+msgid "Bank Transfer"
+msgstr "Bank o'tkazmasi"
+
+msgid "All Customers"
+msgstr "Barcha mijozlar"
+
+msgid "Agency (B2B)"
+msgstr "Agentlik (B2B)"
+
+msgid "Individual (B2C)"
+msgstr "Jismoniy shaxs (B2C)"
+
+msgid "Apply"
+msgstr "Qo'llash"
+
+msgid "Total Payments"
+msgstr "Jami to'lovlar"
+
+msgid "transactions processed"
+msgstr "tranzaksiyalar qayta ishlandi"
+
+msgid "Total Amount"
+msgstr "Umumiy summa"
+
+msgid "avg payment"
+msgstr "o'rtacha to'lov"
+
+msgid "Orders Paid"
+msgstr "To'langan buyurtmalar"
+
+msgid "fully paid"
+msgstr "to'liq to'langan"
+
+msgid "Unique Customers"
+msgstr "Noyob mijozlar"
+
+msgid "customers served"
+msgstr "mijozlarga xizmat ko'rsatildi"
+
+msgid "New Payment"
+msgstr "Yangi to'lov"
+
+msgid "Customer"
+msgstr "Mijoz"
+
+msgid "Payment Method"
+msgstr "To'lov usuli"
+
+msgid "Amount"
+msgstr "Summa"
+
+msgid "Orders"
+msgstr "Buyurtmalar"
+
+msgid "Fully Paid"
+msgstr "To'liq to'langan"
+
+msgid "Date"
+msgstr "Sana"
+
+msgid "Processed By"
+msgstr "Qayta ishlagan"
+
+msgid "Actions"
+msgstr "Harakatlar"
+
+msgid "Cash"
+msgstr "Naqd"
+
+msgid "Card"
+msgstr "Karta"
+
+msgid "Other"
+msgstr "Boshqa"
+
+msgid "Payment History - Full Report"
+msgstr "To'lov tarixi - To'liq hisobot"
+
+msgid "Full Report"
+msgstr "To'liq hisobot"
+
+msgid "Custom Range"
+msgstr "Maxsus davr"
+
+msgid "All Payment Methods"
+msgstr "Barcha to'lov usullari"
+
+msgid "Bank Transfer"
+msgstr "Bank o'tkazmasi"
+
+msgid "All Customers"
+msgstr "Barcha mijozlar"
+
+msgid "Agency (B2B)"
+msgstr "Agentlik (B2B)"
+
+msgid "Individual (B2C)"
+msgstr "Jismoniy shaxs (B2C)"
+
+msgid "Apply"
+msgstr "Qo'llash"
+
+msgid "Total Payments"
+msgstr "Jami to'lovlar"
+
+msgid "transactions processed"
+msgstr "tranzaksiyalar qayta ishlandi"
+
+msgid "Total Amount"
+msgstr "Umumiy summa"
+
+msgid "avg payment"
+msgstr "o'rtacha to'lov"
+
+msgid "Orders Paid"
+msgstr "To'langan buyurtmalar"
+
+msgid "fully paid"
+msgstr "to'liq to'langan"
+
+msgid "Unique Customers"
+msgstr "Noyob mijozlar"
+
+msgid "customers served"
+msgstr "mijozlarga xizmat ko'rsatildi"
+
+msgid "New Payment"
+msgstr "Yangi to'lov"
+
+msgid "Customer"
+msgstr "Mijoz"
+
+msgid "Payment Method"
+msgstr "To'lov usuli"
+
+msgid "Amount"
+msgstr "Summa"
+
+msgid "Orders"
+msgstr "Buyurtmalar"
+
+msgid "Fully Paid"
+msgstr "To'liq to'langan"
+
+msgid "Date"
+msgstr "Sana"
+
+msgid "Processed By"
+msgstr "Qayta ishlagan"
+
+msgid "Actions"
+msgstr "Harakatlar"
+
+msgid "Cash"
+msgstr "Naqd"
+
+msgid "Card"
+msgstr "Karta"
+
+msgid "Other"
+msgstr "Boshqa"
+
+msgid "Payment History - Full Report"
+msgstr "To'lov tarixi - To'liq hisobot"
+
+msgid "Full Report"
+msgstr "To'liq hisobot"
 

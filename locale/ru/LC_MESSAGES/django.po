@@ -580,7 +580,7 @@ msgstr ""
 
 #: core/views.py:88
 msgid "Today"
-msgstr ""
+msgstr "Сегодня"
 
 #: core/views.py:89
 msgid "Yesterday"
@@ -588,11 +588,11 @@ msgstr ""
 
 #: core/views.py:90
 msgid "This Week"
-msgstr ""
+msgstr "На этой неделе"
 
 #: core/views.py:91
 msgid "This Month"
-msgstr ""
+msgstr "В этом месяце"
 
 #: core/views.py:92
 msgid "Custom Range"
@@ -4057,4 +4057,93 @@ msgstr "Сотрудники"
 msgid "Заказов/месяц"
 msgstr "Заказов/месяц"
 
+msgid "This Year"
+msgstr "В этом году"
+
+msgid "Custom Range"
+msgstr "Пользовательский период"
+
+msgid "All Payment Methods"
+msgstr "Все методы оплаты"
+
+msgid "Bank Transfer"
+msgstr "Банковский перевод"
+
+msgid "All Customers"
+msgstr "Все клиенты"
+
+msgid "Agency (B2B)"
+msgstr "Агентство (B2B)"
+
+msgid "Individual (B2C)"
+msgstr "Частное лицо (B2C)"
+
+msgid "Apply"
+msgstr "Применить"
+
+msgid "Total Payments"
+msgstr "Всего платежей"
+
+msgid "transactions processed"
+msgstr "транзакций обработано"
+
+msgid "Total Amount"
+msgstr "Общая сумма"
+
+msgid "avg payment"
+msgstr "средний платеж"
+
+msgid "Orders Paid"
+msgstr "Оплаченные заказы"
+
+msgid "fully paid"
+msgstr "полностью оплачены"
+
+msgid "Unique Customers"
+msgstr "Уникальных клиентов"
+
+msgid "customers served"
+msgstr "обслужено клиентов"
+
+msgid "New Payment"
+msgstr "Новый платеж"
+
+msgid "Customer"
+msgstr "Клиент"
+
+msgid "Payment Method"
+msgstr "Метод оплаты"
+
+msgid "Amount"
+msgstr "Сумма"
+
+msgid "Orders"
+msgstr "Заказы"
+
+msgid "Fully Paid"
+msgstr "Полностью оплачено"
+
+msgid "Date"
+msgstr "Дата"
+
+msgid "Processed By"
+msgstr "Обработал"
+
+msgid "Actions"
+msgstr "Действия"
+
+msgid "Cash"
+msgstr "Наличные"
+
+msgid "Card"
+msgstr "Карта"
+
+msgid "Other"
+msgstr "Другое"
+
+msgid "Payment History - Full Report"
+msgstr "История платежей - Полный отчет"
+
+msgid "Full Report"
+msgstr "Полный отчет"
 

@@ -1,13 +1,27 @@
+{% load i18n %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-    <h6 class="fw-semibold mb-0" {% if title_i18n %}data-i18n="{{ title_i18n }}"{% endif %}>{{title}}</h6>
+    <h6 class="fw-semibold mb-0" {% if title_i18n %}data-i18n="{{ title_i18n }}"{% endif %}>{% if title %}{{ title }}{% endif %}</h6>
     <ul class="d-flex align-items-center gap-2">
         <li class="fw-medium">
             <a href="{% url 'index' %}" class="d-flex align-items-center gap-1 hover-text-primary">
                 <iconify-icon icon="solar:home-smile-angle-outline" class="icon text-lg"></iconify-icon>
-                Dashboard
+                <span data-i18n="sidebar.dashboard">{% trans "Dashboard" %}</span>
             </a>
         </li>
+        {% if breadcrumb_items %}
+            {% for item in breadcrumb_items %}
+            <li>-</li>
+            {% if item.url %}
+            <li class="fw-medium">
+                <a href="{{ item.url }}" class="hover-text-primary" {% if item.i18n %}data-i18n="{{ item.i18n }}"{% endif %}>{% if item.label %}{{ item.label }}{% endif %}</a>
+            </li>
+            {% else %}
+            <li class="fw-medium" {% if item.i18n %}data-i18n="{{ item.i18n }}"{% endif %}>{% if item.label %}{{ item.label }}{% endif %}</li>
+            {% endif %}
+            {% endfor %}
+        {% elif subTitle %}
         <li>-</li>
         <li class="fw-medium" {% if subTitle_i18n %}data-i18n="{{ subTitle_i18n }}"{% endif %}>{{subTitle}}</li>
+        {% endif %}
     </ul>
 </div>

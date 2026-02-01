@@ -13,7 +13,7 @@
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                 <div>
                     <h4 class="mb-8">{{ center.name }}</h4>
-                    <p class="text-gray-600 mb-0">
+                    <p class="text-secondary-light mb-0">
                         <i class="ri-global-line"></i> {{ center.subdomain }}.wowdash.uz
                         {% if center.phone %}
                         | <i class="ri-phone-line"></i> {{ center.phone }}
@@ -36,7 +36,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-gray-600 text-sm mb-4 d-block">{% trans "Account Age" %}</span>
+                            <span class="text-secondary-light text-sm mb-4 d-block">{% trans "Account Age" %}</span>
                             <h5 class="mb-0">
                                 {% if analytics.account_age_years >= 1 %}
                                     {{ analytics.account_age_years }} {% trans "years" %}
@@ -44,7 +44,7 @@
                                     {{ analytics.account_age_days }} {% trans "days" %}
                                 {% endif %}
                             </h5>
-                            <span class="text-gray-500 text-xs">
+                            <span class="text-secondary-light text-xs">
                                 {% trans "Since" %} {{ analytics.first_subscription_date|date:"d M Y" }}
                             </span>
                         </div>
@@ -61,9 +61,9 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-gray-600 text-sm mb-4 d-block">{% trans "Lifetime Value" %}</span>
+                            <span class="text-secondary-light text-sm mb-4 d-block">{% trans "Lifetime Value" %}</span>
                             <h5 class="mb-0">{{ analytics.lifetime_value|floatformat:2 }} UZS</h5>
-                            <span class="text-gray-500 text-xs">
+                            <span class="text-secondary-light text-xs">
                                 {{ analytics.payment_count }} {% trans "payments" %}
                             </span>
                         </div>
@@ -80,17 +80,17 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-gray-600 text-sm mb-4 d-block">{% trans "Total Subscriptions" %}</span>
+                            <span class="text-secondary-light text-sm mb-4 d-block">{% trans "Total Subscriptions" %}</span>
                             <h5 class="mb-0">{{ analytics.total_subscriptions_count }}</h5>
-                            <span class="text-gray-500 text-xs">
+                            <span class="text-secondary-light text-xs">
                                 {% if analytics.has_used_trial %}
                                     {% if analytics.trial_converted %}
-                                        <span class="badge bg-success-50 text-success-600">{% trans "Trial Converted" %}</span>
+                                        <span class="badge bg-success-focus text-success-main">{% trans "Trial Converted" %}</span>
                                     {% else %}
-                                        <span class="badge bg-warning-50 text-warning-600">{% trans "Used Trial" %}</span>
+                                        <span class="badge bg-warning-focus text-warning-main">{% trans "Used Trial" %}</span>
                                     {% endif %}
                                 {% else %}
-                                    <span class="badge bg-gray-50 text-gray-600">{% trans "No Trial" %}</span>
+                                    <span class="badge bg-secondary-focus text-secondary-main">{% trans "No Trial" %}</span>
                                 {% endif %}
                             </span>
                         </div>
@@ -107,9 +107,9 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-gray-600 text-sm mb-4 d-block">{% trans "Avg. Subscription" %}</span>
+                            <span class="text-secondary-light text-sm mb-4 d-block">{% trans "Avg. Subscription" %}</span>
                             <h5 class="mb-0">{{ analytics.average_subscription_days }} {% trans "days" %}</h5>
-                            <span class="text-gray-500 text-xs">
+                            <span class="text-secondary-light text-xs">
                                 {% trans "Average duration" %}
                             </span>
                         </div>
@@ -151,26 +151,26 @@
                                     <td class="fw-semibold">{{ payment.amount_paid|floatformat:2 }} {{ payment.pricing.currency }}</td>
                                     <td>
                                         {% if payment.payment_method %}
-                                            <span class="badge bg-info-50 text-info-600">{{ payment.payment_method }}</span>
+                                            <span class="badge bg-info-focus text-info-main">{{ payment.payment_method }}</span>
                                         {% else %}
                                             -
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if payment.status == 'active' %}
-                                            <span class="badge bg-success-50 text-success-600">{% trans "Active" %}</span>
+                                            <span class="badge bg-success-focus text-success-main">{% trans "Active" %}</span>
                                         {% elif payment.status == 'expired' %}
-                                            <span class="badge bg-gray-50 text-gray-600">{% trans "Expired" %}</span>
+                                            <span class="badge bg-secondary-focus text-secondary-main">{% trans "Expired" %}</span>
                                         {% elif payment.status == 'pending' %}
-                                            <span class="badge bg-warning-50 text-warning-600">{% trans "Pending" %}</span>
+                                            <span class="badge bg-warning-focus text-warning-main">{% trans "Pending" %}</span>
                                         {% else %}
-                                            <span class="badge bg-danger-50 text-danger-600">{% trans "Cancelled" %}</span>
+                                            <span class="badge bg-danger-focus text-danger-main">{% trans "Cancelled" %}</span>
                                         {% endif %}
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="6" class="text-center text-gray-500">{% trans "No payment history" %}</td>
+                                    <td colspan="6" class="text-center text-secondary-light">{% trans "No payment history" %}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -189,14 +189,14 @@
                     <ul class="list-group list-group-flush">
                         {% for month_data in monthly_payments %}
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span class="text-gray-700">{{ month_data.month|date:"M Y" }}</span>
+                            <span class="text-neutral-900 fw-medium">{{ month_data.month|date:"M Y" }}</span>
                             <div class="text-end">
                                 <div class="fw-semibold">{{ month_data.total|floatformat:2 }} UZS</div>
-                                <small class="text-gray-500">{{ month_data.count }} {% trans "payment(s)" %}</small>
+                                <small class="text-secondary-light">{{ month_data.count }} {% trans "payment(s)" %}</small>
                             </div>
                         </li>
                         {% empty %}
-                        <li class="list-group-item text-center text-gray-500">{% trans "No monthly data" %}</li>
+                        <li class="list-group-item text-center text-secondary-light">{% trans "No monthly data" %}</li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -229,7 +229,7 @@
                             <td>
                                 {{ sub.start_date|date:"d M Y" }} - {{ sub.end_date|date:"d M Y" }}
                                 {% if sub.is_trial %}
-                                    <span class="badge bg-info-50 text-info-600 ms-1">{% trans "Trial" %}</span>
+                                    <span class="badge bg-info-focus text-info-main ms-1">{% trans "Trial" %}</span>
                                 {% endif %}
                             </td>
                             <td>{{ sub.tariff.title }}</td>
@@ -242,20 +242,20 @@
                             </td>
                             <td>
                                 {% if sub.status == 'active' %}
-                                    <span class="badge bg-success-50 text-success-600">{% trans "Active" %}</span>
+                                    <span class="badge bg-success-focus text-success-main">{% trans "Active" %}</span>
                                 {% elif sub.status == 'expired' %}
-                                    <span class="badge bg-gray-50 text-gray-600">{% trans "Expired" %}</span>
+                                    <span class="badge bg-secondary-focus text-secondary-main">{% trans "Expired" %}</span>
                                 {% elif sub.status == 'pending' %}
-                                    <span class="badge bg-warning-50 text-warning-600">{% trans "Pending" %}</span>
+                                    <span class="badge bg-warning-focus text-warning-main">{% trans "Pending" %}</span>
                                 {% else %}
-                                    <span class="badge bg-danger-50 text-danger-600">{% trans "Cancelled" %}</span>
+                                    <span class="badge bg-danger-focus text-danger-main">{% trans "Cancelled" %}</span>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if sub.amount_paid %}
                                     {{ sub.amount_paid|floatformat:2 }} UZS
                                 {% else %}
-                                    <span class="text-gray-500">{% trans "Free" %}</span>
+                                    <span class="text-secondary-light">{% trans "Free" %}</span>
                                 {% endif %}
                             </td>
                             <td>{{ sub.created_at|date:"d M Y" }}</td>
@@ -304,7 +304,7 @@
                                     <i class="ri-pencil-line"></i>
                                 </div>
                             {% else %}
-                                <div class="w-40 h-40 bg-gray-50 text-gray-600 rounded-circle d-flex justify-content-center align-items-center">
+                                <div class="w-40 h-40 bg-secondary-focus text-secondary-light rounded-circle d-flex justify-content-center align-items-center">
                                     <i class="ri-information-line"></i>
                                 </div>
                             {% endif %}
@@ -312,11 +312,11 @@
                         <div class="flex-grow-1">
                             <div class="d-flex justify-content-between align-items-start mb-1">
                                 <h6 class="mb-0">{{ entry.action|title }}</h6>
-                                <span class="text-gray-500 text-sm">{{ entry.timestamp|date:"d M Y H:i" }}</span>
+                                <span class="text-secondary-light text-sm">{{ entry.timestamp|date:"d M Y H:i" }}</span>
                             </div>
-                            <p class="text-gray-600 mb-1">{{ entry.description }}</p>
+                            <p class="text-secondary-light mb-1">{{ entry.description }}</p>
                             {% if entry.performed_by %}
-                                <small class="text-gray-500">
+                                <small class="text-secondary-light">
                                     <i class="ri-user-line"></i> {{ entry.performed_by.get_full_name|default:entry.performed_by.username }}
                                 </small>
                             {% endif %}
@@ -324,7 +324,7 @@
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-center text-gray-500">{% trans "No history available" %}</p>
+                <p class="text-center text-secondary-light">{% trans "No history available" %}</p>
                 {% endfor %}
             </div>
         </div>
