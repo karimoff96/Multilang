@@ -1,6 +1,5 @@
 {% extends 'layout/layout.html' %}
-{% load i18n %}
-
+{% load i18n %}{% load l10n %}
 {% block title %}{% trans "Renew Subscription" %} - {{ subscription.organization.name }}{% endblock %}
 
 {% block content %}
@@ -134,7 +133,7 @@
                         <div class="text-xs">
                             <strong>{% trans "Pricing" %}:</strong>
                             <ul class="list-unstyled mb-0 mt-4">
-                                {% for pricing in tariff.pricing.all %}
+                                {% for pricing in tariff.active_pricing %}
                                 <li>{{ pricing.duration_months }}mo - {{ pricing.price|floatformat:0 }} {{ pricing.currency }}</li>
                                 {% endfor %}
                             </ul>
@@ -153,11 +152,11 @@ const tariffData = {
     {% for tariff in tariffs %}
     {{ tariff.id }}: {
         pricing: [
-            {% for pricing in tariff.pricing.all %}
+            {% for pricing in tariff.active_pricing %}
             {
-                id: {{ pricing.id }},
-                duration: {{ pricing.duration_months }},
-                price: {{ pricing.price }},
+                id: {{ pricing.id|safe }},
+                duration: {{ pricing.duration_months|safe }},
+                price: {{ pricing.price|unlocalize }},
                 currency: '{{ pricing.currency }}'
             }{% if not forloop.last %},{% endif %}
             {% endfor %}
@@ -168,20 +167,42 @@ const tariffData = {
 
 const currentEndDate = new Date('{{ subscription.end_date|date:"Y-m-d" }}');
 
+console.log('Tariff Data:', tariffData);
+console.log('Tariff Data Keys:', Object.keys(tariffData));
+
+// Alert to make it visible
+if (Object.keys(tariffData).length === 0) {
+    alert('WARNING: tariffData is empty!');
+} else {
+    console.log('SUCCESS: tariffData has ' + Object.keys(tariffData).length + ' tariffs');
+}
+
 document.getElementById('tariffSelect').addEventListener('change', function() {
     const tariffId = parseInt(this.value);
     const pricingSelect = document.getElementById('pricingSelect');
     const newEndDateInfo = document.getElementById('newEndDateInfo');
     
+    console.log('Selected Tariff ID:', tariffId);
+    console.log('Tariff Data for ID:', tariffData[tariffId]);
+    
     pricingSelect.innerHTML = '<option value="">{% trans "Choose duration..." %}</option>';
     newEndDateInfo.style.display = 'none';
     
-    if (!tariffId || !tariffData[tariffId]) return;
+    if (!tariffId || !tariffData[tariffId]) {
+        console.log('No tariff data found');
+        return;
+    }
     
     const tariff = tariffData[tariffId];
+    console.log('Pricing array:', tariff.pricing);
+    console.log('Pricing count:', tariff.pricing.length);
+    
     tariff.pricing.forEach(pricing => {
+        console.log('Adding pricing option:', pricing);
         pricingSelect.innerHTML += `<option value="${pricing.id}" data-duration="${pricing.duration}" data-price="${pricing.price}" data-currency="${pricing.currency}">${pricing.duration} month(s) - ${pricing.price.toFixed(0)} ${pricing.currency}</option>`;
     });
+    
+    console.log('Final pricing select HTML:', pricingSelect.innerHTML);
 });
 
 document.getElementById('pricingSelect').addEventListener('change', function() {
@@ -207,18 +228,37 @@ document.getElementById('pricingSelect').addEventListener('change', function() {
 
 // Pre-select current tariff's pricing on page load
 window.addEventListener('load', function() {
+    console.log('Page loaded, initializing...');
     const tariffSelect = document.getElementById('tariffSelect');
-    if (tariffSelect.value) {
-        tariffSelect.dispatchEvent(new Event('change'));
+    const currentTariffId = tariffSelect.value;
+    
+    console.log('Current tariff selected:', currentTariffId);
+    
+    if (currentTariffId) {
+        // Manually trigger the population of pricing options
+        const tariffId = parseInt(currentTariffId);
+        const pricingSelect = document.getElementById('pricingSelect');
         
-        // Select current pricing if available
-        setTimeout(() => {
-            const pricingSelect = document.getElementById('pricingSelect');
-            pricingSelect.value = '{{ subscription.pricing.id }}';
-            if (pricingSelect.value) {
-                pricingSelect.dispatchEvent(new Event('change'));
-            }
-        }, 100);
+        console.log('Looking for tariff data:', tariffId, tariffData[tariffId]);
+        
+        if (tariffData[tariffId]) {
+            pricingSelect.innerHTML = '<option value="">{% trans "Choose duration..." %}</option>';
+            
+            const tariff = tariffData[tariffId];
+            tariff.pricing.forEach(pricing => {
+                pricingSelect.innerHTML += `<option value="${pricing.id}" data-duration="${pricing.duration}" data-price="${pricing.price}" data-currency="${pricing.currency}">${pricing.duration} month(s) - ${pricing.price.toFixed(0)} ${pricing.currency}</option>`;
+            });
+            
+            // Select current pricing if available
+            setTimeout(() => {
+                pricingSelect.value = '{{ subscription.pricing.id }}';
+                if (pricingSelect.value) {
+                    pricingSelect.dispatchEvent(new Event('change'));
+                }
+            }, 100);
+        } else {
+            console.error('No tariff data found for ID:', tariffId);
+        }
     }
 });
 </script>

@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.core.paginator import Paginator
-from django.db.models import Q, Count, Sum
+from django.db.models import Q, Count, Sum, Prefetch
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
@@ -745,11 +745,20 @@ def subscription_renew(request, pk):
             messages.error(request, f"Error renewing subscription: {str(e)}")
     
     # Get available pricing options for current or other tariffs
+    # Get all active tariffs
     tariffs = Tariff.objects.filter(is_active=True, is_trial=False).prefetch_related('pricing')
+    
+    # Filter pricing in template or here
+    # Since we're passing to template, let's create a list with filtered pricing
+    tariffs_with_pricing = []
+    for tariff in tariffs:
+        # Convert to list so template can iterate properly
+        tariff.active_pricing = list(tariff.pricing.filter(is_active=True))
+        tariffs_with_pricing.append(tariff)
     
     context = {
         'subscription': subscription,
-        'tariffs': tariffs,
+        'tariffs': tariffs_with_pricing,
     }
     
     return render(request, 'billing/subscription_renew.html', context)

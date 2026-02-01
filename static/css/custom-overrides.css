@@ -75,6 +75,7 @@
     background-color: var(--neutral-500) !important;
     color: var(--white) !important;
 }
+
 .badge.bg-primary-subtle {
     background-color: var(--primary-50) !important;
     color: var(--primary-700) !important;
@@ -105,46 +106,166 @@
    ======================================== */
 
 /* Light mode: black text on gradient backgrounds */
-.bg-gradient-end-1 h1, .bg-gradient-end-1 h2, .bg-gradient-end-1 h3, .bg-gradient-end-1 h4, .bg-gradient-end-1 h5, .bg-gradient-end-1 h6,
-.bg-gradient-end-1 p, .bg-gradient-end-1 span, .bg-gradient-end-1 small, .bg-gradient-end-1 div,
-.bg-gradient-end-1 .fw-bold, .bg-gradient-end-1 .fw-semibold, .bg-gradient-end-1 .fw-medium,
-.bg-gradient-end-2 h1, .bg-gradient-end-2 h2, .bg-gradient-end-2 h3, .bg-gradient-end-2 h4, .bg-gradient-end-2 h5, .bg-gradient-end-2 h6,
-.bg-gradient-end-2 p, .bg-gradient-end-2 span, .bg-gradient-end-2 small, .bg-gradient-end-2 div,
-.bg-gradient-end-2 .fw-bold, .bg-gradient-end-2 .fw-semibold, .bg-gradient-end-2 .fw-medium,
-.bg-gradient-end-3 h1, .bg-gradient-end-3 h2, .bg-gradient-end-3 h3, .bg-gradient-end-3 h4, .bg-gradient-end-3 h5, .bg-gradient-end-3 h6,
-.bg-gradient-end-3 p, .bg-gradient-end-3 span, .bg-gradient-end-3 small, .bg-gradient-end-3 div,
-.bg-gradient-end-3 .fw-bold, .bg-gradient-end-3 .fw-semibold, .bg-gradient-end-3 .fw-medium,
-.bg-gradient-end-4 h1, .bg-gradient-end-4 h2, .bg-gradient-end-4 h3, .bg-gradient-end-4 h4, .bg-gradient-end-4 h5, .bg-gradient-end-4 h6,
-.bg-gradient-end-4 p, .bg-gradient-end-4 span, .bg-gradient-end-4 small, .bg-gradient-end-4 div,
-.bg-gradient-end-4 .fw-bold, .bg-gradient-end-4 .fw-semibold, .bg-gradient-end-4 .fw-medium,
-.bg-gradient-end-5 h1, .bg-gradient-end-5 h2, .bg-gradient-end-5 h3, .bg-gradient-end-5 h4, .bg-gradient-end-5 h5, .bg-gradient-end-5 h6,
-.bg-gradient-end-5 p, .bg-gradient-end-5 span, .bg-gradient-end-5 small, .bg-gradient-end-5 div,
-.bg-gradient-end-5 .fw-bold, .bg-gradient-end-5 .fw-semibold, .bg-gradient-end-5 .fw-medium,
-.bg-gradient-end-6 h1, .bg-gradient-end-6 h2, .bg-gradient-end-6 h3, .bg-gradient-end-6 h4, .bg-gradient-end-6 h5, .bg-gradient-end-6 h6,
-.bg-gradient-end-6 p, .bg-gradient-end-6 span, .bg-gradient-end-6 small, .bg-gradient-end-6 div,
-.bg-gradient-end-6 .fw-bold, .bg-gradient-end-6 .fw-semibold, .bg-gradient-end-6 .fw-medium {
+.bg-gradient-end-1 h1,
+.bg-gradient-end-1 h2,
+.bg-gradient-end-1 h3,
+.bg-gradient-end-1 h4,
+.bg-gradient-end-1 h5,
+.bg-gradient-end-1 h6,
+.bg-gradient-end-1 p,
+.bg-gradient-end-1 span,
+.bg-gradient-end-1 small,
+.bg-gradient-end-1 div,
+.bg-gradient-end-1 .fw-bold,
+.bg-gradient-end-1 .fw-semibold,
+.bg-gradient-end-1 .fw-medium,
+.bg-gradient-end-2 h1,
+.bg-gradient-end-2 h2,
+.bg-gradient-end-2 h3,
+.bg-gradient-end-2 h4,
+.bg-gradient-end-2 h5,
+.bg-gradient-end-2 h6,
+.bg-gradient-end-2 p,
+.bg-gradient-end-2 span,
+.bg-gradient-end-2 small,
+.bg-gradient-end-2 div,
+.bg-gradient-end-2 .fw-bold,
+.bg-gradient-end-2 .fw-semibold,
+.bg-gradient-end-2 .fw-medium,
+.bg-gradient-end-3 h1,
+.bg-gradient-end-3 h2,
+.bg-gradient-end-3 h3,
+.bg-gradient-end-3 h4,
+.bg-gradient-end-3 h5,
+.bg-gradient-end-3 h6,
+.bg-gradient-end-3 p,
+.bg-gradient-end-3 span,
+.bg-gradient-end-3 small,
+.bg-gradient-end-3 div,
+.bg-gradient-end-3 .fw-bold,
+.bg-gradient-end-3 .fw-semibold,
+.bg-gradient-end-3 .fw-medium,
+.bg-gradient-end-4 h1,
+.bg-gradient-end-4 h2,
+.bg-gradient-end-4 h3,
+.bg-gradient-end-4 h4,
+.bg-gradient-end-4 h5,
+.bg-gradient-end-4 h6,
+.bg-gradient-end-4 p,
+.bg-gradient-end-4 span,
+.bg-gradient-end-4 small,
+.bg-gradient-end-4 div,
+.bg-gradient-end-4 .fw-bold,
+.bg-gradient-end-4 .fw-semibold,
+.bg-gradient-end-4 .fw-medium,
+.bg-gradient-end-5 h1,
+.bg-gradient-end-5 h2,
+.bg-gradient-end-5 h3,
+.bg-gradient-end-5 h4,
+.bg-gradient-end-5 h5,
+.bg-gradient-end-5 h6,
+.bg-gradient-end-5 p,
+.bg-gradient-end-5 span,
+.bg-gradient-end-5 small,
+.bg-gradient-end-5 div,
+.bg-gradient-end-5 .fw-bold,
+.bg-gradient-end-5 .fw-semibold,
+.bg-gradient-end-5 .fw-medium,
+.bg-gradient-end-6 h1,
+.bg-gradient-end-6 h2,
+.bg-gradient-end-6 h3,
+.bg-gradient-end-6 h4,
+.bg-gradient-end-6 h5,
+.bg-gradient-end-6 h6,
+.bg-gradient-end-6 p,
+.bg-gradient-end-6 span,
+.bg-gradient-end-6 small,
+.bg-gradient-end-6 div,
+.bg-gradient-end-6 .fw-bold,
+.bg-gradient-end-6 .fw-semibold,
+.bg-gradient-end-6 .fw-medium {
     color: #000000 !important;
 }
 
 /* Dark mode: white text on gradient backgrounds */
-html[data-theme="dark"] .bg-gradient-end-1 h1, html[data-theme="dark"] .bg-gradient-end-1 h2, html[data-theme="dark"] .bg-gradient-end-1 h3, html[data-theme="dark"] .bg-gradient-end-1 h4, html[data-theme="dark"] .bg-gradient-end-1 h5, html[data-theme="dark"] .bg-gradient-end-1 h6,
-html[data-theme="dark"] .bg-gradient-end-1 p, html[data-theme="dark"] .bg-gradient-end-1 span, html[data-theme="dark"] .bg-gradient-end-1 small, html[data-theme="dark"] .bg-gradient-end-1 div,
-html[data-theme="dark"] .bg-gradient-end-1 .fw-bold, html[data-theme="dark"] .bg-gradient-end-1 .fw-semibold, html[data-theme="dark"] .bg-gradient-end-1 .fw-medium,
-html[data-theme="dark"] .bg-gradient-end-2 h1, html[data-theme="dark"] .bg-gradient-end-2 h2, html[data-theme="dark"] .bg-gradient-end-2 h3, html[data-theme="dark"] .bg-gradient-end-2 h4, html[data-theme="dark"] .bg-gradient-end-2 h5, html[data-theme="dark"] .bg-gradient-end-2 h6,
-html[data-theme="dark"] .bg-gradient-end-2 p, html[data-theme="dark"] .bg-gradient-end-2 span, html[data-theme="dark"] .bg-gradient-end-2 small, html[data-theme="dark"] .bg-gradient-end-2 div,
-html[data-theme="dark"] .bg-gradient-end-2 .fw-bold, html[data-theme="dark"] .bg-gradient-end-2 .fw-semibold, html[data-theme="dark"] .bg-gradient-end-2 .fw-medium,
-html[data-theme="dark"] .bg-gradient-end-3 h1, html[data-theme="dark"] .bg-gradient-end-3 h2, html[data-theme="dark"] .bg-gradient-end-3 h3, html[data-theme="dark"] .bg-gradient-end-3 h4, html[data-theme="dark"] .bg-gradient-end-3 h5, html[data-theme="dark"] .bg-gradient-end-3 h6,
-html[data-theme="dark"] .bg-gradient-end-3 p, html[data-theme="dark"] .bg-gradient-end-3 span, html[data-theme="dark"] .bg-gradient-end-3 small, html[data-theme="dark"] .bg-gradient-end-3 div,
-html[data-theme="dark"] .bg-gradient-end-3 .fw-bold, html[data-theme="dark"] .bg-gradient-end-3 .fw-semibold, html[data-theme="dark"] .bg-gradient-end-3 .fw-medium,
-html[data-theme="dark"] .bg-gradient-end-4 h1, html[data-theme="dark"] .bg-gradient-end-4 h2, html[data-theme="dark"] .bg-gradient-end-4 h3, html[data-theme="dark"] .bg-gradient-end-4 h4, html[data-theme="dark"] .bg-gradient-end-4 h5, html[data-theme="dark"] .bg-gradient-end-4 h6,
-html[data-theme="dark"] .bg-gradient-end-4 p, html[data-theme="dark"] .bg-gradient-end-4 span, html[data-theme="dark"] .bg-gradient-end-4 small, html[data-theme="dark"] .bg-gradient-end-4 div,
-html[data-theme="dark"] .bg-gradient-end-4 .fw-bold, html[data-theme="dark"] .bg-gradient-end-4 .fw-semibold, html[data-theme="dark"] .bg-gradient-end-4 .fw-medium,
-html[data-theme="dark"] .bg-gradient-end-5 h1, html[data-theme="dark"] .bg-gradient-end-5 h2, html[data-theme="dark"] .bg-gradient-end-5 h3, html[data-theme="dark"] .bg-gradient-end-5 h4, html[data-theme="dark"] .bg-gradient-end-5 h5, html[data-theme="dark"] .bg-gradient-end-5 h6,
-html[data-theme="dark"] .bg-gradient-end-5 p, html[data-theme="dark"] .bg-gradient-end-5 span, html[data-theme="dark"] .bg-gradient-end-5 small, html[data-theme="dark"] .bg-gradient-end-5 div,
-html[data-theme="dark"] .bg-gradient-end-5 .fw-bold, html[data-theme="dark"] .bg-gradient-end-5 .fw-semibold, html[data-theme="dark"] .bg-gradient-end-5 .fw-medium,
-html[data-theme="dark"] .bg-gradient-end-6 h1, html[data-theme="dark"] .bg-gradient-end-6 h2, html[data-theme="dark"] .bg-gradient-end-6 h3, html[data-theme="dark"] .bg-gradient-end-6 h4, html[data-theme="dark"] .bg-gradient-end-6 h5, html[data-theme="dark"] .bg-gradient-end-6 h6,
-html[data-theme="dark"] .bg-gradient-end-6 p, html[data-theme="dark"] .bg-gradient-end-6 span, html[data-theme="dark"] .bg-gradient-end-6 small, html[data-theme="dark"] .bg-gradient-end-6 div,
-html[data-theme="dark"] .bg-gradient-end-6 .fw-bold, html[data-theme="dark"] .bg-gradient-end-6 .fw-semibold, html[data-theme="dark"] .bg-gradient-end-6 .fw-medium {
+html[data-theme="dark"] .bg-gradient-end-1 h1,
+html[data-theme="dark"] .bg-gradient-end-1 h2,
+html[data-theme="dark"] .bg-gradient-end-1 h3,
+html[data-theme="dark"] .bg-gradient-end-1 h4,
+html[data-theme="dark"] .bg-gradient-end-1 h5,
+html[data-theme="dark"] .bg-gradient-end-1 h6,
+html[data-theme="dark"] .bg-gradient-end-1 p,
+html[data-theme="dark"] .bg-gradient-end-1 span,
+html[data-theme="dark"] .bg-gradient-end-1 small,
+html[data-theme="dark"] .bg-gradient-end-1 div,
+html[data-theme="dark"] .bg-gradient-end-1 .fw-bold,
+html[data-theme="dark"] .bg-gradient-end-1 .fw-semibold,
+html[data-theme="dark"] .bg-gradient-end-1 .fw-medium,
+html[data-theme="dark"] .bg-gradient-end-2 h1,
+html[data-theme="dark"] .bg-gradient-end-2 h2,
+html[data-theme="dark"] .bg-gradient-end-2 h3,
+html[data-theme="dark"] .bg-gradient-end-2 h4,
+html[data-theme="dark"] .bg-gradient-end-2 h5,
+html[data-theme="dark"] .bg-gradient-end-2 h6,
+html[data-theme="dark"] .bg-gradient-end-2 p,
+html[data-theme="dark"] .bg-gradient-end-2 span,
+html[data-theme="dark"] .bg-gradient-end-2 small,
+html[data-theme="dark"] .bg-gradient-end-2 div,
+html[data-theme="dark"] .bg-gradient-end-2 .fw-bold,
+html[data-theme="dark"] .bg-gradient-end-2 .fw-semibold,
+html[data-theme="dark"] .bg-gradient-end-2 .fw-medium,
+html[data-theme="dark"] .bg-gradient-end-3 h1,
+html[data-theme="dark"] .bg-gradient-end-3 h2,
+html[data-theme="dark"] .bg-gradient-end-3 h3,
+html[data-theme="dark"] .bg-gradient-end-3 h4,
+html[data-theme="dark"] .bg-gradient-end-3 h5,
+html[data-theme="dark"] .bg-gradient-end-3 h6,
+html[data-theme="dark"] .bg-gradient-end-3 p,
+html[data-theme="dark"] .bg-gradient-end-3 span,
+html[data-theme="dark"] .bg-gradient-end-3 small,
+html[data-theme="dark"] .bg-gradient-end-3 div,
+html[data-theme="dark"] .bg-gradient-end-3 .fw-bold,
+html[data-theme="dark"] .bg-gradient-end-3 .fw-semibold,
+html[data-theme="dark"] .bg-gradient-end-3 .fw-medium,
+html[data-theme="dark"] .bg-gradient-end-4 h1,
+html[data-theme="dark"] .bg-gradient-end-4 h2,
+html[data-theme="dark"] .bg-gradient-end-4 h3,
+html[data-theme="dark"] .bg-gradient-end-4 h4,
+html[data-theme="dark"] .bg-gradient-end-4 h5,
+html[data-theme="dark"] .bg-gradient-end-4 h6,
+html[data-theme="dark"] .bg-gradient-end-4 p,
+html[data-theme="dark"] .bg-gradient-end-4 span,
+html[data-theme="dark"] .bg-gradient-end-4 small,
+html[data-theme="dark"] .bg-gradient-end-4 div,
+html[data-theme="dark"] .bg-gradient-end-4 .fw-bold,
+html[data-theme="dark"] .bg-gradient-end-4 .fw-semibold,
+html[data-theme="dark"] .bg-gradient-end-4 .fw-medium,
+html[data-theme="dark"] .bg-gradient-end-5 h1,
+html[data-theme="dark"] .bg-gradient-end-5 h2,
+html[data-theme="dark"] .bg-gradient-end-5 h3,
+html[data-theme="dark"] .bg-gradient-end-5 h4,
+html[data-theme="dark"] .bg-gradient-end-5 h5,
+html[data-theme="dark"] .bg-gradient-end-5 h6,
+html[data-theme="dark"] .bg-gradient-end-5 p,
+html[data-theme="dark"] .bg-gradient-end-5 span,
+html[data-theme="dark"] .bg-gradient-end-5 small,
+html[data-theme="dark"] .bg-gradient-end-5 div,
+html[data-theme="dark"] .bg-gradient-end-5 .fw-bold,
+html[data-theme="dark"] .bg-gradient-end-5 .fw-semibold,
+html[data-theme="dark"] .bg-gradient-end-5 .fw-medium,
+html[data-theme="dark"] .bg-gradient-end-6 h1,
+html[data-theme="dark"] .bg-gradient-end-6 h2,
+html[data-theme="dark"] .bg-gradient-end-6 h3,
+html[data-theme="dark"] .bg-gradient-end-6 h4,
+html[data-theme="dark"] .bg-gradient-end-6 h5,
+html[data-theme="dark"] .bg-gradient-end-6 h6,
+html[data-theme="dark"] .bg-gradient-end-6 p,
+html[data-theme="dark"] .bg-gradient-end-6 span,
+html[data-theme="dark"] .bg-gradient-end-6 small,
+html[data-theme="dark"] .bg-gradient-end-6 div,
+html[data-theme="dark"] .bg-gradient-end-6 .fw-bold,
+html[data-theme="dark"] .bg-gradient-end-6 .fw-semibold,
+html[data-theme="dark"] .bg-gradient-end-6 .fw-medium {
     color: #FFFFFF !important;
 }
 
@@ -295,7 +416,8 @@ html[data-theme="dark"] .bg-gradient-end-6 .fw-bold, html[data-theme="dark"] .bg
 }
 
 .text-warning {
-    color: var(--warning-700) !important; /* Darker for readability */
+    color: var(--warning-700) !important;
+    /* Darker for readability */
 }
 
 .text-info {
@@ -336,6 +458,125 @@ html[data-theme="dark"] .bg-gradient-end-6 .fw-bold, html[data-theme="dark"] .bg
 }
 
 [data-theme="dark"] .table tbody tr {
+    color: #FFFFFF !important;
+}
+
+/* Dark mode primary buttons - white text */
+[data-theme="dark"] .btn-primary-600 {
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .btn-primary-600 i,
+[data-theme="dark"] .btn-primary-600 iconify-icon,
+[data-theme="dark"] .btn-primary-600 span {
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .table {
+    background-color: var(--dark-2) !important;
+}
+
+[data-theme="dark"] .table tbody td {
+    background-color: var(--dark-2) !important;
+    color: #FFFFFF !important;
+    border-color: var(--dark-3) !important;
+}
+
+[data-theme="dark"] .table-striped tbody tr:nth-of-type(odd) {
+    background-color: var(--dark-3) !important;
+}
+
+[data-theme="dark"] .table-striped tbody tr:nth-of-type(odd) td {
+    background-color: var(--dark-3) !important;
+}
+
+/* Dark mode table-primary highlighted row */
+[data-theme="dark"] .table-primary,
+[data-theme="dark"] .table-primary td,
+[data-theme="dark"] tr.table-primary,
+[data-theme="dark"] tr.table-primary td {
+    background-color: rgba(72, 127, 255, 0.25) !important;
+    color: #FFFFFF !important;
+}
+
+/* Dark mode outline buttons - white text, no hover effects */
+[data-theme="dark"] .btn-outline-primary-600 {
+    border-color: var(--primary-400) !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .btn-outline-primary-600 i,
+[data-theme="dark"] .btn-outline-primary-600 iconify-icon {
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .btn-outline-primary-600:hover,
+[data-theme="dark"] .btn-outline-primary-600:focus,
+[data-theme="dark"] .btn-outline-primary-600:active {
+    background-color: transparent !important;
+    border-color: var(--primary-400) !important;
+    color: #FFFFFF !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .btn-outline-primary-600:hover i,
+[data-theme="dark"] .btn-outline-primary-600:hover iconify-icon {
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .btn-outline-danger-600 {
+    border-color: var(--danger-400) !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .btn-outline-danger-600 i,
+[data-theme="dark"] .btn-outline-danger-600 iconify-icon {
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .btn-outline-danger-600:hover,
+[data-theme="dark"] .btn-outline-danger-600:focus,
+[data-theme="dark"] .btn-outline-danger-600:active {
+    background-color: transparent !important;
+    border-color: var(--danger-400) !important;
+    color: #FFFFFF !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .btn-outline-danger-600:hover i,
+[data-theme="dark"] .btn-outline-danger-600:hover iconify-icon {
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .btn-sm.btn-outline-primary-600 i,
+[data-theme="dark"] .btn-sm.btn-outline-danger-600 i {
+    color: #FFFFFF !important;
+}
+
+/* Dark mode list-group items */
+[data-theme="dark"] .list-group-item {
+    background-color: var(--dark-2) !important;
+    border-color: var(--dark-3) !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .list-group-item .text-neutral-900 {
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .list-group-item .fw-semibold {
+    color: #FFFFFF !important;
+}
+
+/* Dark mode card body text */
+[data-theme="dark"] .card-body {
+    color: var(--text-primary-light) !important;
+}
+
+[data-theme="dark"] .card-body h5,
+[data-theme="dark"] .card-body h6 {
     color: #FFFFFF !important;
 }
 
@@ -400,12 +641,12 @@ button:focus,
     .hide-mobile {
         display: none !important;
     }
-    
+
     .card-header,
     .card-footer {
         padding: 0.75rem;
     }
-    
+
     .badge {
         font-size: 0.75rem;
         padding: 0.25rem 0.5rem;
@@ -414,73 +655,74 @@ button:focus,
 
 /* Mobile & Tablet Responsive (max-width: 991px) */
 @media (max-width: 991px) {
+
     /* Table responsive improvements */
     .table-responsive {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         border-radius: 8px;
     }
-    
+
     .table {
         min-width: 600px;
         font-size: 0.85rem;
     }
-    
+
     .table th,
     .table td {
         padding: 0.5rem !important;
         white-space: nowrap;
     }
-    
+
     /* Card body padding */
     .card-body {
         padding: 1rem !important;
     }
-    
+
     /* Button groups stack vertically */
     .btn-group {
         flex-direction: column !important;
         width: 100%;
     }
-    
+
     .btn-group .btn {
         width: 100%;
         border-radius: 0.375rem !important;
         margin-bottom: 0.5rem;
     }
-    
+
     /* Filter form improvements */
     .d-flex.align-items-center.gap-3 {
         flex-wrap: wrap !important;
         gap: 0.75rem !important;
     }
-    
+
     .form-select-sm,
     .form-control-sm {
         font-size: 0.875rem !important;
     }
-    
+
     /* Stats cards - 2 per row on tablet */
     .col-xxl-2.col-lg-4.col-sm-6 {
         flex: 0 0 auto;
         width: 50% !important;
     }
-    
+
     .col-xxl-3.col-sm-6 {
         flex: 0 0 auto;
         width: 100% !important;
     }
-    
+
     /* Modal adjustments */
     .modal-dialog {
         margin: 0.5rem;
         max-width: calc(100% - 1rem);
     }
-    
+
     .modal-body {
         padding: 1rem;
     }
-    
+
     /* Sidebar improvements */
     .sidebar {
         width: 260px !important;
@@ -489,31 +731,38 @@ button:focus,
 
 /* Mobile Only Responsive (max-width: 576px) */
 @media (max-width: 576px) {
+
     /* Typography adjustments */
-    h1, .h1 {
+    h1,
+    .h1 {
         font-size: 1.75rem !important;
     }
-    
-    h2, .h2 {
+
+    h2,
+    .h2 {
         font-size: 1.5rem !important;
     }
-    
-    h3, .h3 {
+
+    h3,
+    .h3 {
         font-size: 1.25rem !important;
     }
-    
-    h4, .h4 {
+
+    h4,
+    .h4 {
         font-size: 1.1rem !important;
     }
-    
-    h5, .h5 {
+
+    h5,
+    .h5 {
         font-size: 1rem !important;
     }
-    
-    h6, .h6 {
+
+    h6,
+    .h6 {
         font-size: 0.9rem !important;
     }
-    
+
     /* All cards take full width */
     .col-xxl-2,
     .col-xxl-3,
@@ -528,105 +777,105 @@ button:focus,
         flex: 0 0 auto;
         width: 100% !important;
     }
-    
+
     /* Card padding reduction */
     .card {
         margin-bottom: 1rem;
     }
-    
+
     .card-body {
         padding: 0.75rem !important;
     }
-    
+
     .p-24 {
         padding: 1rem !important;
     }
-    
+
     .p-16 {
         padding: 0.75rem !important;
     }
-    
+
     /* Button adjustments */
     .btn {
         padding: 0.5rem 0.75rem;
         font-size: 0.875rem;
     }
-    
+
     .btn-sm {
         padding: 0.375rem 0.5rem;
         font-size: 0.8125rem;
     }
-    
+
     /* Table mobile optimization */
     .table {
         font-size: 0.75rem;
         min-width: 500px;
     }
-    
+
     .table th,
     .table td {
         padding: 0.375rem !important;
     }
-    
+
     /* Header actions */
     .d-flex.align-items-center.justify-content-between {
         flex-direction: column !important;
         align-items: flex-start !important;
         gap: 1rem !important;
     }
-    
-    .d-flex.align-items-center.justify-content-between > div {
+
+    .d-flex.align-items-center.justify-content-between>div {
         width: 100%;
     }
-    
+
     /* Filter bar */
     .card.radius-8.border-0.mb-24 .card-body {
         padding: 0.75rem !important;
     }
-    
+
     .card.radius-8.border-0.mb-24 form {
         flex-direction: column !important;
         align-items: flex-start !important;
     }
-    
+
     .card.radius-8.border-0.mb-24 .form-select,
     .card.radius-8.border-0.mb-24 .form-control {
         width: 100% !important;
         margin-bottom: 0.5rem;
     }
-    
+
     /* Badge adjustments */
     .badge {
         font-size: 0.7rem !important;
         padding: 0.2rem 0.4rem !important;
     }
-    
+
     /* Iconify icon sizes */
     iconify-icon {
         font-size: 1rem;
     }
-    
+
     .text-xl iconify-icon,
     iconify-icon.text-xl {
         font-size: 1.25rem !important;
     }
-    
+
     /* Stat card icons */
     .w-48-px {
         width: 40px !important;
         height: 40px !important;
     }
-    
+
     .w-32-px {
         width: 28px !important;
         height: 28px !important;
     }
-    
+
     .w-24-px {
         width: 20px !important;
         height: 20px !important;
     }
-    
+
     /* Search and filter inputs */
     input[type="search"],
     input[type="text"],
@@ -634,38 +883,38 @@ button:focus,
     select {
         font-size: 0.875rem !important;
     }
-    
+
     /* Pagination */
     .pagination {
         font-size: 0.875rem;
     }
-    
+
     .pagination .page-link {
         padding: 0.375rem 0.5rem;
     }
-    
+
     /* Modal full screen on mobile */
     .modal-dialog {
         margin: 0;
         max-width: 100%;
         height: 100%;
     }
-    
+
     .modal-content {
         height: 100%;
         border-radius: 0;
     }
-    
+
     /* Navbar mobile adjustments */
     .navbar {
         padding: 0.5rem 1rem;
     }
-    
+
     /* Sidebar mobile */
     .sidebar {
         width: 100% !important;
     }
-    
+
     /* Overflow scroll for wide content */
     .table-responsive {
         margin-left: -0.75rem;
@@ -673,19 +922,19 @@ button:focus,
         padding-left: 0.75rem;
         padding-right: 0.75rem;
     }
-    
+
     /* Stats grid - 1 per row */
-    .row.gy-4 > [class*="col-"] {
+    .row.gy-4>[class*="col-"] {
         padding-top: 0.75rem !important;
         padding-bottom: 0.75rem !important;
     }
-    
+
     /* Compact badges in table */
     .badge-compact {
         font-size: 0.65rem !important;
         padding: 0.15rem 0.3rem !important;
     }
-    
+
     /* Text truncation helpers */
     .truncate-120 {
         max-width: 80px !important;
@@ -693,20 +942,20 @@ button:focus,
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    
+
     /* Hide unnecessary gaps */
     .gap-12 {
         gap: 0.5rem !important;
     }
-    
+
     .gap-16 {
         gap: 0.75rem !important;
     }
-    
+
     .gap-24 {
         gap: 1rem !important;
     }
-    
+
     /* Action buttons in table */
     .btn-icon {
         width: 32px !important;
@@ -714,33 +963,33 @@ button:focus,
         padding: 0 !important;
         font-size: 1rem !important;
     }
-    
+
     /* Dropdown menus */
     .dropdown-menu {
         font-size: 0.875rem;
         min-width: 150px;
     }
-    
+
     .dropdown-item {
         padding: 0.5rem 0.75rem;
     }
-    
+
     /* Form groups stack */
-    .row > [class*="col-"] {
+    .row>[class*="col-"] {
         margin-bottom: 0.75rem;
     }
-    
+
     /* Chart containers */
     .apexcharts-canvas {
         max-width: 100% !important;
     }
-    
+
     /* Date range picker */
     #customDateRange {
         flex-direction: column !important;
         width: 100%;
     }
-    
+
     #customDateRange input {
         width: 100% !important;
         margin-bottom: 0.5rem;
@@ -749,6 +998,7 @@ button:focus,
 
 /* Tablet Specific (768px - 991px) */
 @media (min-width: 768px) and (max-width: 991px) {
+
     /* 2 columns for stats */
     .col-xxl-2.col-lg-4.col-sm-6,
     .col-xxl-3.col-sm-6,
@@ -756,12 +1006,12 @@ button:focus,
         flex: 0 0 auto;
         width: 50% !important;
     }
-    
+
     .col-xxl-6 {
         flex: 0 0 auto;
         width: 100% !important;
     }
-    
+
     .table {
         font-size: 0.875rem;
     }
@@ -773,7 +1023,7 @@ button:focus,
         flex: 0 0 auto;
         width: 50% !important;
     }
-    
+
     .table {
         font-size: 0.8rem;
     }
@@ -781,17 +1031,18 @@ button:focus,
 
 /* Print styles */
 @media print {
+
     .sidebar,
     .navbar,
     .btn,
     .hide-mobile {
         display: none !important;
     }
-    
+
     .card {
         break-inside: avoid;
     }
-    
+
     .table {
         font-size: 0.75rem;
     }
@@ -803,7 +1054,7 @@ button:focus,
         max-height: 90vh;
         overflow-y: auto;
     }
-    
+
     .card-body {
         padding: 0.75rem !important;
     }

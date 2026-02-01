@@ -16,9 +16,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
-"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+
 #: accounts/models.py:25 accounts/models.py:217 core/models.py:52
 #: core/models.py:143 core/models.py:224 orders/models.py:52
 #: organizations/models.py:151 organizations/models.py:955
@@ -265,7 +264,7 @@ msgstr ""
 #: organizations/models.py:146 organizations/models.py:173
 #: organizations/models.py:960
 msgid "Active"
-msgstr ""
+msgstr "Активна"
 
 #: core/models.py:12 core/models.py:26 organizations/models.py:106
 msgid "Region"
@@ -668,7 +667,7 @@ msgstr ""
 
 #: marketing/models.py:49 orders/models.py:39
 msgid "Cancelled"
-msgstr ""
+msgstr "Отменена"
 
 #: marketing/models.py:59
 msgid "Text Only"
@@ -753,7 +752,7 @@ msgstr ""
 #: marketing/models.py:137 marketing/models.py:264 orders/models.py:70
 #: orders/models.py:451
 msgid "Status"
-msgstr ""
+msgstr "Статус"
 
 #: marketing/models.py:145
 msgid "Total Recipients"
@@ -801,7 +800,7 @@ msgstr ""
 
 #: marketing/models.py:243 orders/models.py:32
 msgid "Pending"
-msgstr ""
+msgstr "Ожидание"
 
 #: marketing/models.py:245
 msgid "Delivered"
@@ -1189,7 +1188,8 @@ msgid "Payment Accepted Fully"
 msgstr ""
 
 #: orders/models.py:165
-msgid "Mark as True to consider payment complete regardless of received amount"
+msgid ""
+"Mark as True to consider payment complete regardless of received amount"
 msgstr ""
 
 #: orders/models.py:175
@@ -1306,8 +1306,8 @@ msgstr ""
 
 #: organizations/models.py:17
 msgid ""
-"Unique subdomain for this center (e.g., 'center1' for center1.alltranslation."
-"uz)"
+"Unique subdomain for this center (e.g., 'center1' for "
+"center1.alltranslation.uz)"
 msgstr ""
 
 #: organizations/models.py:23
@@ -1360,7 +1360,8 @@ msgid "Translation Centers"
 msgstr ""
 
 #: organizations/models.py:77
-msgid "Cannot delete center with active bot token. Remove the bot token first."
+msgid ""
+"Cannot delete center with active bot token. Remove the bot token first."
 msgstr ""
 
 #: organizations/models.py:125
@@ -1393,7 +1394,7 @@ msgstr ""
 
 #: organizations/models.py:152
 msgid "Branches"
-msgstr ""
+msgstr "Филиалы"
 
 #: organizations/models.py:171
 msgid "Display Name"
@@ -1769,7 +1770,7 @@ msgstr ""
 
 #: organizations/models.py:520
 msgid "Financial"
-msgstr ""
+msgstr "Финансы"
 
 #: organizations/models.py:532
 msgid "Reports & Analytics"
@@ -1781,7 +1782,7 @@ msgstr ""
 
 #: organizations/models.py:555
 msgid "Customers"
-msgstr ""
+msgstr "Клиенты"
 
 #: organizations/models.py:566
 msgid "Marketing & Broadcasts"
@@ -2121,7 +2122,8 @@ msgstr ""
 
 #: organizations/models.py:706
 msgid ""
-"Full control over all financial operations - overrides individual permissions"
+"Full control over all financial operations - overrides individual "
+"permissions"
 msgstr ""
 
 #: organizations/models.py:707
@@ -2197,7 +2199,8 @@ msgstr ""
 
 #: organizations/models.py:728
 msgid ""
-"Full control over all marketing operations - overrides individual permissions"
+"Full control over all marketing operations - overrides individual "
+"permissions"
 msgstr ""
 
 #: organizations/models.py:729
@@ -2319,7 +2322,7 @@ msgstr ""
 
 #: services/models.py:53 services/models.py:255
 msgid "Expenses"
-msgstr ""
+msgstr "Расходы"
 
 #: services/models.py:145
 msgid "Language Name"
@@ -2423,7 +2426,7 @@ msgstr ""
 
 #: templates/reports/audit_logs.html:98
 msgid "All Centers"
-msgstr ""
+msgstr "Все центры"
 
 #: templates/reports/audit_logs.html:114
 msgid "All Branches"
@@ -2511,7 +2514,7 @@ msgstr ""
 
 #: templates/reports/audit_logs.html:340
 msgid "entries"
-msgstr ""
+msgstr "записей"
 
 #: templates/reports/audit_logs.html:385
 msgid "No Audit Logs Found"
@@ -2850,7 +2853,7 @@ msgstr "Категории"
 
 #: templates/partials/sidebar.html
 msgid "Products"
-msgstr "Продукты"
+msgstr "Товары"
 
 #: templates/partials/sidebar.html
 msgid "Languages"
@@ -2866,7 +2869,7 @@ msgstr "Моя статистика"
 
 #: templates/partials/sidebar.html
 msgid "Dashboards"
-msgstr "Панели управления"
+msgstr "Дашборды"
 
 #: templates/partials/sidebar.html
 msgid "Sales Overview"
@@ -2898,7 +2901,7 @@ msgstr "Отчеты по заказам"
 
 #: templates/partials/sidebar.html
 msgid "Staff Performance"
-msgstr "Производительность персонала"
+msgstr "Эффективность сотрудников"
 
 #: templates/partials/sidebar.html
 msgid "Branch Comparison"
@@ -2920,7 +2923,9 @@ msgid "auth.forgotPassword"
 msgstr "Забыли пароль"
 
 msgid "auth.forgotPasswordDesc"
-msgstr "Введите адрес электронной почты, связанный с вашей учетной записью, и мы отправим вам ссылку для сброса пароля"
+msgstr ""
+"Введите адрес электронной почты, связанный с вашей учетной записью, и мы "
+"отправим вам ссылку для сброса пароля"
 
 msgid "auth.enterEmail"
 msgstr "Введите Email"
@@ -3941,7 +3946,7 @@ msgid "Advanced Analytics"
 msgstr "Расширенная Аналитика"
 
 msgid "Financial Reports"
-msgstr "Финансовые Отчеты"
+msgstr "Финансовые отчеты"
 
 msgid "Staff Performance Reports"
 msgstr "Отчеты по Производительности Сотрудников"
@@ -4112,7 +4117,7 @@ msgid "Customer"
 msgstr "Клиент"
 
 msgid "Payment Method"
-msgstr "Метод оплаты"
+msgstr "Способ оплаты"
 
 msgid "Amount"
 msgstr "Сумма"
@@ -4147,3 +4152,223 @@ msgstr "История платежей - Полный отчет"
 msgid "Full Report"
 msgstr "Полный отчет"
 
+msgid "Billing & Subscriptions"
+msgstr "Биллинг и подписки"
+
+msgid "Centers Monitoring"
+msgstr "Мониторинг центров"
+
+msgid "Subscriptions"
+msgstr "Подписки"
+
+msgid "Tariff Plans"
+msgstr "Тарифные планы"
+
+msgid "Usage Tracking"
+msgstr "Отслеживание использования"
+
+msgid "Contact Requests"
+msgstr "Запросы на контакт"
+
+msgid "Renew Subscription"
+msgstr "Продлить подписку"
+
+msgid "Current Subscription"
+msgstr "Текущая подписка"
+
+msgid "Renewal Options"
+msgstr "Варианты продления"
+
+msgid "Select Tariff & Duration"
+msgstr "Выберите тариф и срок"
+
+msgid "Choose tariff plan..."
+msgstr "Выберите тарифный план..."
+
+msgid "Select Pricing Duration"
+msgstr "Выберите продолжительность"
+
+msgid "Select tariff first..."
+msgstr "Сначала выберите тариф..."
+
+msgid "Choose duration..."
+msgstr "Выберите продолжительность..."
+
+msgid ""
+"The subscription will be extended from current end date by selected duration"
+msgstr "Подписка будет продлена с текущей даты окончания на выбранный срок"
+
+msgid "New End Date"
+msgstr "Новая дата окончания"
+
+msgid "Payment Information"
+msgstr "Информация об оплате"
+
+msgid "Amount Paid"
+msgstr "Сумма оплаты"
+
+msgid "Leave empty if payment not yet received"
+msgstr "Оставьте пустым, если оплата еще не получена"
+
+msgid "Not specified"
+msgstr "Не указано"
+
+msgid "Transaction ID"
+msgstr "ID транзакции"
+
+msgid "Optional"
+msgstr "Необязательно"
+
+msgid "Notes"
+msgstr "Примечания"
+
+msgid "Optional notes about this renewal..."
+msgstr "Необязательные примечания об этом продлении..."
+
+msgid ""
+"Renewing will extend the subscription period. Status will be set to "
+"'Pending' until payment is confirmed."
+msgstr ""
+"Продление увеличит срок подписки. Статус будет установлен как 'Ожидание' до "
+"подтверждения оплаты."
+
+msgid "Cancel"
+msgstr "Отмена"
+
+msgid "Available Tariffs"
+msgstr "Доступные тарифы"
+
+msgid "Pricing"
+msgstr "Стоимость"
+
+msgid "Subscription Detail"
+msgstr "Детали подписки"
+
+msgid "Convert to Paid Subscription"
+msgstr "Преобразовать в платную подписку"
+
+msgid "Back to List"
+msgstr "Вернуться к списку"
+
+msgid "Center Analytics Summary"
+msgstr "Сводка аналитики центра"
+
+msgid "View Full Analytics"
+msgstr "Посмотреть полную аналитику"
+
+msgid "Account Age"
+msgstr "Возраст аккаунта"
+
+msgid "years"
+msgstr "лет"
+
+msgid "days"
+msgstr "дней"
+
+msgid "Lifetime Value"
+msgstr "Пожизненная ценность"
+
+msgid "Total Subscriptions"
+msgstr "Всего подписок"
+
+msgid "First Subscription"
+msgstr "Первая подписка"
+
+msgid "Subscription Information"
+msgstr "Информация о подписке"
+
+msgid "Tariff Plan"
+msgstr "Тарифный план"
+
+msgid "Duration"
+msgstr "Продолжительность"
+
+msgid "month(s)"
+msgstr "месяц(ев)"
+
+msgid "Free Trial"
+msgstr "Пробная версия"
+
+msgid "Expired"
+msgstr "Истекла"
+
+msgid "Trial End Date"
+msgstr "Дата окончания пробной версии"
+
+msgid "Trial Days Remaining"
+msgstr "Осталось дней пробной версии"
+
+msgid "Start Date"
+msgstr "Дата начала"
+
+msgid "End Date"
+msgstr "Дата окончания"
+
+msgid "Days Remaining"
+msgstr "Осталось дней"
+
+msgid "Auto-Renew"
+msgstr "Автопродление"
+
+msgid "Yes"
+msgstr "Да"
+
+msgid "No"
+msgstr "Нет"
+
+msgid "Update Status"
+msgstr "Обновить статус"
+
+msgid "Plan Features"
+msgstr "Возможности плана"
+
+msgid "Features"
+msgstr "Возможности"
+
+msgid "Analytics"
+msgstr "Аналитика"
+
+msgid "Integration"
+msgstr "Интеграция"
+
+msgid "Storage"
+msgstr "Хранилище"
+
+msgid "Support"
+msgstr "Поддержка"
+
+msgid "Advanced"
+msgstr "Расширенные"
+
+msgid "No features available in this plan"
+msgstr "В этом плане нет доступных функций"
+
+msgid "Upgrade Plan"
+msgstr "Улучшить план"
+
+msgid "Current Usage"
+msgstr "Текущее использование"
+
+msgid "Staff"
+msgstr "Сотрудники"
+
+msgid "Orders (This Month)"
+msgstr "Заказы (этот месяц)"
+
+msgid "Recent History"
+msgstr "Недавняя история"
+
+msgid "View Complete History"
+msgstr "Посмотреть полную историю"
+
+msgid "No history available"
+msgstr "История недоступна"
+
+msgid "Superuser Tools"
+msgstr "Инструменты суперпользователя"
+
+msgid "Reports"
+msgstr "Отчеты"
+
+msgid "Debtors Report"
+msgstr "Отчет о должниках"
