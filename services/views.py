@@ -10,6 +10,7 @@ from decimal import Decimal, InvalidOperation
 from .models import Category, Product, Language, Expense
 from organizations.rbac import get_user_categories, get_user_products, get_user_branches, get_user_expenses, permission_required, any_permission_required
 from organizations.models import TranslationCenter, Branch
+from billing.decorators import require_feature, require_active_subscription
 
 logger = logging.getLogger(__name__)
 audit_logger = logging.getLogger('audit')
@@ -18,6 +19,8 @@ audit_logger = logging.getLogger('audit')
 # ============ Category Views ============
 
 @login_required(login_url='admin_login')
+@require_active_subscription
+@require_feature('products_basic')
 @any_permission_required('can_view_products', 'can_manage_products')
 def categoryList(request):
     """List all categories with search and filter"""
@@ -113,6 +116,8 @@ def categoryDetail(request, category_id):
 
 
 @login_required(login_url='admin_login')
+@require_active_subscription
+@require_feature('products_basic')
 @any_permission_required('can_create_products', 'can_manage_products')
 def addCategory(request):
     """Add a new category"""
@@ -266,6 +271,8 @@ def deleteCategory(request, category_id):
 # ============ Product Views ============
 
 @login_required(login_url='admin_login')
+@require_active_subscription
+@require_feature('products_basic')
 @any_permission_required('can_view_products', 'can_manage_products')
 def productList(request):
     """List all products with search and filter"""
@@ -370,6 +377,8 @@ def productDetail(request, product_id):
 
 
 @login_required(login_url='admin_login')
+@require_active_subscription
+@require_feature('products_advanced')
 @any_permission_required('can_create_products', 'can_manage_products')
 def addProduct(request):
     """Add a new product"""
@@ -615,6 +624,8 @@ def deleteProduct(request, product_id):
 # ============ Expense Views ============
 
 @login_required(login_url='admin_login')
+@require_active_subscription
+@require_feature('expense_tracking')
 @any_permission_required('can_view_expenses', 'can_manage_expenses', 'can_view_financial_reports', 'can_manage_financial')
 def expenseList(request):
     """List all expenses with search and filter"""
@@ -722,6 +733,8 @@ def expenseDetail(request, expense_id):
 
 
 @login_required(login_url='admin_login')
+@require_active_subscription
+@require_feature('expense_tracking')
 @any_permission_required('can_create_expenses', 'can_manage_expenses', 'can_manage_financial')
 def addExpense(request):
     """Add a new expense"""

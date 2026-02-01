@@ -18,6 +18,7 @@ from organizations.rbac import get_user_branches, permission_required, any_permi
 from core.audit import log_action
 from .models import MarketingPost, BroadcastRecipient
 from .broadcast_service import send_broadcast, get_recipient_count, BroadcastService
+from billing.decorators import require_feature, require_active_subscription
 
 logger = logging.getLogger(__name__)
 audit_logger = logging.getLogger('audit')
@@ -96,6 +97,8 @@ def get_user_scope_permissions(request):
 
 
 @login_required
+@require_active_subscription
+@require_feature('marketing_basic')
 @any_permission_required('can_manage_marketing', 'can_create_marketing_posts', 'can_send_branch_broadcasts', 'can_send_center_broadcasts', 'can_view_broadcast_stats')
 def marketing_list(request):
     """List marketing posts based on user permissions"""
@@ -147,6 +150,8 @@ def marketing_list(request):
 
 
 @login_required
+@require_active_subscription
+@require_feature('marketing_basic')
 @any_permission_required('can_create_marketing_posts', 'can_manage_marketing')
 def marketing_create(request):
     """Create a new marketing post"""
@@ -580,6 +585,8 @@ def marketing_preview(request, post_id):
 
 @login_required
 @any_permission_required('can_send_branch_broadcasts', 'can_send_center_broadcasts', 'can_manage_marketing')
+@require_active_subscription
+@require_feature('broadcast_messages')
 @require_POST
 def marketing_send(request, post_id):
     """Start sending a broadcast"""

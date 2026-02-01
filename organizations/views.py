@@ -23,6 +23,7 @@ from .rbac import (
     can_view_staff_required,
 )
 from core.audit import log_create, log_update, log_delete
+from billing.decorators import require_feature, require_active_subscription
 
 logger = logging.getLogger(__name__)
 audit_logger = logging.getLogger('audit')
@@ -363,6 +364,8 @@ def branch_list(request):
 
 
 @login_required(login_url="admin_login")
+@require_active_subscription
+@require_feature('multi_branch')
 @permission_required("can_manage_branches")
 def branch_create(request, center_id=None):
     """Create a new branch"""
@@ -1276,6 +1279,8 @@ def role_list(request):
 
 
 @login_required(login_url="admin_login")
+@require_active_subscription
+@require_feature('custom_roles')
 def role_create(request):
     """Create a new role - superuser only"""
     if not request.user.is_superuser:
@@ -1417,6 +1422,8 @@ from django.views.decorators.http import require_POST
 
 @login_required(login_url="admin_login")
 @permission_required('can_edit_centers')
+@require_active_subscription
+@require_feature('webhooks')
 @require_POST
 def setup_center_webhook(request, center_id):
     """Set up Telegram webhook for a center - superuser only"""
@@ -1488,6 +1495,8 @@ def get_center_webhook_info(request, center_id):
 
 
 @login_required(login_url="admin_login")
+@require_active_subscription
+@require_feature('branch_settings')
 @any_permission_required('can_view_branch_settings', 'can_manage_branch_settings', 'can_manage_branches')
 def branch_settings(request, branch_id):
     """

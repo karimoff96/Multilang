@@ -11,6 +11,7 @@ from datetime import timedelta
 
 from core.models import AdminNotification, AuditLog
 from organizations.rbac import permission_required
+from billing.decorators import require_feature, require_active_subscription
 
 logger = logging.getLogger(__name__)
 
@@ -128,6 +129,8 @@ def get_period_dates(period, custom_from=None, custom_to=None):
 
 
 @login_required
+@require_active_subscription
+@require_feature('audit_logs')
 @permission_required('can_view_audit_logs')
 def audit_logs(request):
     """View audit logs with filtering and pagination."""

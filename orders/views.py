@@ -19,6 +19,7 @@ from organizations.rbac import (
 from organizations.models import AdminUser, Branch, TranslationCenter
 from core.audit import log_action, log_order_assign, log_status_change
 from bot.notification_service import send_order_notification
+from billing.decorators import require_feature, require_active_subscription
 
 
 def has_order_permission(request, permission_name, order=None):
@@ -97,6 +98,8 @@ def get_user_order_permissions(request, order=None):
 
 
 @login_required(login_url='admin_login')
+@require_active_subscription
+@require_feature('orders_basic')
 @any_permission_required('can_view_all_orders', 'can_view_own_orders', 'can_manage_orders')
 def ordersList(request):
     """List orders with search and filter - Permission-based access"""
@@ -302,6 +305,8 @@ def ordersList(request):
 
 
 @login_required(login_url='admin_login')
+@require_active_subscription
+@require_feature('orders_basic')
 @any_permission_required('can_view_all_orders', 'can_view_own_orders', 'can_manage_orders')
 def orderDetail(request, order_id):
     """View order details with permission-based access control"""
@@ -386,6 +391,8 @@ def orderDetail(request, order_id):
 
 
 @login_required(login_url='admin_login')
+@require_active_subscription
+@require_feature('orders_advanced')
 @any_permission_required('can_edit_orders', 'can_manage_orders')
 def orderEdit(request, order_id):
     """Edit an order - permission-based access control"""
@@ -702,6 +709,8 @@ def updateOrderStatus(request, order_id):
 
 @login_required(login_url='admin_login')
 @require_POST
+@require_active_subscription
+@require_feature('orders_advanced')
 @any_permission_required('can_delete_orders', 'can_manage_orders')
 def deleteOrder(request, order_id):
     """Delete an order - permission-based access control"""
@@ -848,6 +857,8 @@ def unassignOrder(request, order_id):
 
 @login_required(login_url='admin_login')
 @require_POST
+@require_active_subscription
+@require_feature('orders_advanced')
 def bulk_delete_orders(request):
     """Bulk delete multiple orders - permission-based access control"""
     # Try both formats: order_ids[] and order_ids
@@ -1085,6 +1096,8 @@ def myOrders(request):
 
 
 @login_required(login_url='admin_login')
+@require_active_subscription
+@require_feature('orders_basic')
 @permission_required('can_create_orders')
 def orderCreate(request):
     """Create a new order - requires can_create_orders permission"""
@@ -1252,6 +1265,8 @@ from orders.payment_service import PaymentService, PaymentError
 
 @login_required(login_url="admin_login")
 @require_POST
+@require_active_subscription
+@require_feature('payment_management')
 @any_permission_required('can_receive_payments', 'can_manage_financial', 'can_manage_orders')
 def record_order_payment(request, order_id):
     """

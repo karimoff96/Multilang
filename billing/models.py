@@ -57,9 +57,9 @@ class Tariff(models.Model):
         help_text=_("Leave empty for unlimited")
     )
     
-    # ============ FEATURE FLAGS (37 Features) ============
+    # ============ FEATURE FLAGS (31 Features) ============
     
-    # Order Management Features (5)
+    # Order Management Features (4)
     feature_orders_basic = models.BooleanField(
         default=False, 
         verbose_name=_("Basic Order Management"),
@@ -79,11 +79,6 @@ class Tariff(models.Model):
         default=False,
         verbose_name=_("Bulk Payment Processing"),
         help_text=_("Process payments across multiple orders")
-    )
-    feature_order_templates = models.BooleanField(
-        default=False,
-        verbose_name=_("Order Templates"),
-        help_text=_("Save and reuse order configurations")
     )
     
     # Analytics & Reports Features (6)
@@ -163,11 +158,6 @@ class Tariff(models.Model):
         verbose_name=_("Custom Roles & Permissions"),
         help_text=_("Create custom staff roles with RBAC")
     )
-    feature_staff_scheduling = models.BooleanField(
-        default=False,
-        verbose_name=_("Staff Scheduling"),
-        help_text=_("Schedule and manage staff shifts")
-    )
     feature_branch_settings = models.BooleanField(
         default=False,
         verbose_name=_("Branch Settings"),
@@ -202,30 +192,13 @@ class Tariff(models.Model):
         verbose_name=_("Payment Tracking & Recording"),
         help_text=_("Manual payment recording and receipt verification")
     )
-    feature_invoicing = models.BooleanField(
-        default=False,
-        verbose_name=_("Automated Invoicing"),
-        help_text=_("Generate invoices for orders")
-    )
     feature_expense_tracking = models.BooleanField(
         default=False,
         verbose_name=_("Expense Tracking"),
         help_text=_("Track business expenses by branch")
     )
     
-    # Support & Services Features (2)
-    feature_support_tickets = models.BooleanField(
-        default=False,
-        verbose_name=_("Support Ticketing System"),
-        help_text=_("Internal ticketing for issue tracking")
-    )
-    feature_knowledge_base = models.BooleanField(
-        default=False,
-        verbose_name=_("Knowledge Base Access"),
-        help_text=_("Access to documentation and user guides")
-    )
-    
-    # Advanced Features (3)
+    # Advanced Features (2)
     feature_advanced_security = models.BooleanField(
         default=False,
         verbose_name=_("Advanced Security Features"),
@@ -235,11 +208,6 @@ class Tariff(models.Model):
         default=False,
         verbose_name=_("Comprehensive Audit Logs"),
         help_text=_("Track all system actions and changes")
-    )
-    feature_data_retention = models.BooleanField(
-        default=False,
-        verbose_name=_("Data Retention Control"),
-        help_text=_("Configure data retention policies")
     )
     
     # Services Management Features (4)
@@ -370,12 +338,11 @@ class Tariff(models.Model):
             str: Human-readable translated feature name
         """
         feature_names = {
-            # Order Management Features (5)
+            # Order Management Features (4)
             'orders_basic': gettext('Basic Order Management'),
             'orders_advanced': gettext('Advanced Order Management'),
             'order_assignment': gettext('Order Assignment'),
             'bulk_payments': gettext('Bulk Payment Processing'),
-            'order_templates': gettext('Order Templates'),
             
             # Analytics & Reports Features (6)
             'analytics_basic': gettext('Basic Analytics'),
@@ -395,10 +362,9 @@ class Tariff(models.Model):
             'marketing_basic': gettext('Marketing Campaign Tools'),
             'broadcast_messages': gettext('Mass Broadcast Messaging'),
             
-            # Organization & Staff Features (4)
+            # Organization & Staff Features (2)
             'multi_branch': gettext('Multiple Branches'),
             'custom_roles': gettext('Custom Roles & Permissions'),
-            'staff_scheduling': gettext('Staff Scheduling'),
             'branch_settings': gettext('Branch Settings'),
             
             # Storage & Archive Features (3)
@@ -406,20 +372,14 @@ class Tariff(models.Model):
             'cloud_backup': gettext('Automated Cloud Backups'),
             'extended_storage': gettext('Extended Storage Capacity'),
             
-            # Financial Management Features (4)
+            # Financial Management Features (2)
             'multi_currency': gettext('Multi-Currency Pricing'),
             'payment_management': gettext('Payment Tracking & Recording'),
-            'invoicing': gettext('Automated Invoicing'),
             'expense_tracking': gettext('Expense Tracking'),
             
-            # Support & Services Features (2)
-            'support_tickets': gettext('Support Ticketing System'),
-            'knowledge_base': gettext('Knowledge Base Access'),
-            
-            # Advanced Features (3)
+            # Advanced Features (2)
             'advanced_security': gettext('Advanced Security Features'),
             'audit_logs': gettext('Comprehensive Audit Logs'),
-            'data_retention': gettext('Data Retention Control'),
             
             # Services Management Features (4)
             'products_basic': gettext('Basic Product Management'),

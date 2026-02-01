@@ -49,13 +49,12 @@ class TariffAdmin(admin.ModelAdmin):
             'fields': ('max_branches', 'max_staff', 'max_monthly_orders'),
             'description': _('Set usage limits (leave empty for unlimited)')
         }),
-        (_('📊 Order Management Features (5)'), {
+        (_('📊 Order Management Features (4)'), {
             'fields': (
                 'feature_orders_basic',
                 'feature_orders_advanced',
                 'feature_order_assignment',
                 'feature_bulk_payments',
-                'feature_order_templates',
             ),
             'classes': ('collapse',),
             'description': _('Features for creating and managing customer orders')
@@ -90,11 +89,10 @@ class TariffAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'description': _('Marketing campaigns and broadcast messaging')
         }),
-        (_('🏢 Organization & Staff Features (4)'), {
+        (_('🏢 Organization & Staff Features (2)'), {
             'fields': (
                 'feature_multi_branch',
                 'feature_custom_roles',
-                'feature_staff_scheduling',
                 'feature_branch_settings',
             ),
             'classes': ('collapse',),
@@ -109,29 +107,19 @@ class TariffAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'description': _('File archiving and cloud storage')
         }),
-        (_('💰 Financial Management Features (4)'), {
+        (_('💰 Financial Management Features (2)'), {
             'fields': (
                 'feature_payment_management',
                 'feature_multi_currency',
-                'feature_invoicing',
                 'feature_expense_tracking',
             ),
             'classes': ('collapse',),
             'description': _('Payment processing and financial tracking')
         }),
-        (_('🎯 Support & Services Features (2)'), {
-            'fields': (
-                'feature_support_tickets',
-                'feature_knowledge_base',
-            ),
-            'classes': ('collapse',),
-            'description': _('Customer support tools')
-        }),
-        (_('⚡ Advanced Features (3)'), {
+        (_('⚡ Advanced Features (2)'), {
             'fields': (
                 'feature_advanced_security',
                 'feature_audit_logs',
-                'feature_data_retention',
             ),
             'classes': ('collapse',),
             'description': _('Security, compliance, and audit features')
