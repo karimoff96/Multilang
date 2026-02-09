@@ -988,19 +988,36 @@ def staff_detail(request, staff_id):
     # Determine if user can edit this staff member
     user_can_edit = can_edit_staff(request.user, staff_member)
 
-    # Get assigned orders for this staff member (exclude completed)
-    assigned_orders = Order.objects.filter(
+    # Base querysets
+    assigned_qs = Order.objects.filter(
         assigned_to=staff_member
     ).exclude(
         status='completed'
-    ).select_related("bot_user", "product", "branch").order_by("-created_at")[:10]
+    ).select_related("bot_user", "product", "branch")
 
-    # Get orders completed by this staff member (either completed_by is set OR assigned and status=completed)
-    completed_orders = Order.objects.filter(
+    completed_qs = Order.objects.filter(
         Q(completed_by=staff_member) | Q(assigned_to=staff_member, status='completed')
     ).filter(
         status='completed'
-    ).select_related("bot_user", "product", "branch").order_by("-completed_at")[:10]
+    ).select_related("bot_user", "product", "branch")
+
+    created_qs = Order.objects.filter(
+        created_by=staff_member
+    ).select_related("bot_user", "product", "branch")
+
+    # Pagination
+    per_page = int(request.GET.get("per_page", 10) or 10)
+    assigned_page = request.GET.get("assigned_page", 1)
+    completed_page = request.GET.get("completed_page", 1)
+    created_page = request.GET.get("created_page", 1)
+
+    assigned_paginator = Paginator(assigned_qs.order_by("-created_at"), per_page)
+    completed_paginator = Paginator(completed_qs.order_by("-completed_at", "-created_at"), per_page)
+    created_paginator = Paginator(created_qs.order_by("-created_at"), per_page)
+
+    assigned_orders = assigned_paginator.get_page(assigned_page)
+    completed_orders = completed_paginator.get_page(completed_page)
+    created_orders = created_paginator.get_page(created_page)
 
     # Calculate total received payments from completed orders
     completed_payments_sum = Order.objects.filter(
@@ -1068,6 +1085,8 @@ def staff_detail(request, staff_id):
         "staff_member": staff_member,
         "assigned_orders": assigned_orders,
         "completed_orders": completed_orders,
+        "created_orders": created_orders,
+        "per_page": per_page,
         "stats": stats,
         "permission_categories": role_permission_categories,
         "can_edit": user_can_edit,

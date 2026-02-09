@@ -1818,6 +1818,7 @@ def show_main_menu(message, language):
         btn3 = types.KeyboardButton("👤 Profil")
         btn4 = types.KeyboardButton("ℹ️ Biz haqimizda")
         btn5 = types.KeyboardButton("❓ Yordam")
+        btn_other = types.KeyboardButton("🧾 Boshqa xizmatlar")
         btn_pricelist = types.KeyboardButton("💰 Narxlar ro'yxati")
     elif language == "ru":
         btn1 = types.KeyboardButton("🛍️ Воспользоваться услугой")
@@ -1825,6 +1826,7 @@ def show_main_menu(message, language):
         btn3 = types.KeyboardButton("👤 Профиль")
         btn4 = types.KeyboardButton("ℹ️ О нас")
         btn5 = types.KeyboardButton("❓ Помощь")
+        btn_other = types.KeyboardButton("🧾 Другие услуги")
         btn_pricelist = types.KeyboardButton("💰 Прайс-лист")
     else:  # English
         btn1 = types.KeyboardButton("🛍️ Use Service")
@@ -1832,13 +1834,15 @@ def show_main_menu(message, language):
         btn3 = types.KeyboardButton("👤 Profile")
         btn4 = types.KeyboardButton("ℹ️ About Us")
         btn5 = types.KeyboardButton("❓ Help")
+        btn_other = types.KeyboardButton("🧾 Other Services")
         btn_pricelist = types.KeyboardButton("💰 Price List")
     markup.add(btn1, btn2)
     markup.add(btn3, btn4)
     if should_show_pricelist:
-        markup.add(btn5, btn_pricelist)
+        markup.add(btn5, btn_other)
+        markup.add(btn_pricelist)
     else:
-        markup.add(btn5)
+        markup.add(btn5, btn_other)
     welcome_text = get_text("main_menu_welcome", language)
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
 @bot.message_handler(
@@ -1862,6 +1866,9 @@ def show_main_menu(message, language):
         "💰 Narxlar ro'yxati",
         "💰 Прайс-лист",
         "💰 Price List",
+        "🧾 Boshqa xizmatlar",
+        "🧾 Другие услуги",
+        "🧾 Other Services",
     ]
 )
 def handle_main_menu(message):
@@ -1954,6 +1961,33 @@ def handle_main_menu(message):
 
         send_message(message.chat.id, help_text, parse_mode="HTML")
         show_main_menu(message, language)
+
+    elif (
+        "Boshqa xizmatlar" in message.text
+        or "Другие услуги" in message.text
+        or "Other Services" in message.text
+    ):
+        other_content = additional_info.get_translated_field("description", language) if additional_info else ""
+
+        if language == "uz":
+            title = "🧾 <b>Boshqa xizmatlar</b>\n\n"
+            default_text = "Qo'shimcha xizmatlar haqida ma'lumot hozircha mavjud emas."
+        elif language == "ru":
+            title = "🧾 <b>Другие услуги</b>\n\n"
+            default_text = "Информация о дополнительных услугах пока не добавлена."
+        else:
+            title = "🧾 <b>Other Services</b>\n\n"
+            default_text = "Additional services info is not available yet."
+
+        response_text = title + (other_content or default_text)
+        back_markup = types.InlineKeyboardMarkup()
+        back_markup.add(
+            types.InlineKeyboardButton(
+                text=get_text("back_to_menu", language), callback_data="main_menu"
+            )
+        )
+
+        send_message(message.chat.id, response_text, reply_markup=back_markup, parse_mode="HTML")
 
     elif (
         "Narxlar ro'yxati" in message.text

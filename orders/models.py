@@ -239,6 +239,15 @@ class Order(models.Model):
         null=True, blank=True, verbose_name=_("Assigned At")
     )
 
+    created_by = models.ForeignKey(
+        AdminUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="orders_created",
+        verbose_name=_("Created By"),
+    )
+
     # Payment tracking
     payment_received_by = models.ForeignKey(
         AdminUser,

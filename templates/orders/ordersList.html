@@ -19,12 +19,12 @@
     {% else %}
     <!-- Other users with view_all permission: Show toggle buttons -->
     <div class="btn-group" role="group">
-        <a href="?view=all{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}" 
+        <a href="?view=all{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}" 
            class="btn {% if view_mode == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm px-16">
             <iconify-icon icon="solar:documents-bold" class="me-4"></iconify-icon>
             <span data-i18n="orders.allOrders">All Orders</span> <span class="badge {% if view_mode == 'all' %}bg-white text-primary-600{% else %}bg-primary-100 text-primary-600{% endif %} ms-4">{{ stats.total }}</span>
         </a>
-        <a href="?view=mine{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}" 
+        <a href="?view=mine{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}" 
            class="btn {% if view_mode == 'mine' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm px-16">
             <iconify-icon icon="solar:user-bold" class="me-4"></iconify-icon>
             <span data-i18n="orders.myOrders">My Orders</span> {% if my_stats %}<span class="badge {% if view_mode == 'mine' %}bg-white text-primary-600{% else %}bg-primary-100 text-primary-600{% endif %} ms-4">{{ my_stats.total }}</span>{% endif %}
@@ -145,7 +145,7 @@
     <!-- Pending Receipts Card -->
     {% if pending_receipts_count > 0 or has_pending_receipts == 'true' %}
     <div class="col-xxl-2 col-lg-4 col-sm-6">
-        <a href="{% if has_pending_receipts == 'true' %}?view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}{% else %}?has_pending_receipts=true&view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}{% endif %}" class="text-decoration-none">
+        <a href="{% if has_pending_receipts == 'true' %}?view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% else %}?has_pending_receipts=true&view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% endif %}" class="text-decoration-none">
             <div class="card px-16 py-12 shadow-none radius-8 border h-100 {% if has_pending_receipts == 'true' %}border-warning{% endif %}">
                 <div class="d-flex align-items-center gap-2">
                     <div class="w-48-px h-48-px radius-8 bg-warning-100 d-flex justify-content-center align-items-center">
@@ -165,72 +165,108 @@
 <div class="card h-100 p-0 radius-12">
     <div class="card-header border-bottom bg-base py-16 px-24">
         <form method="get" id="filterForm">
-            <div class="d-flex align-items-center flex-wrap gap-3">
-                <span class="text-md fw-medium text-secondary-light mb-0" data-i18n="orders.show">Show</span>
-                <select name="per_page" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
-                    <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
-                    <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
-                    <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
-                </select>
-                <div class="navbar-search">
-                    <input type="text" class="bg-base h-40-px w-auto" name="search" data-i18n-placeholder="orders.searchPlaceholder" placeholder="Search order or customer" value="{{ search_query }}">
-                    <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+            <!-- Row 1: Basic filters in grid -->
+            <div class="row g-2 align-items-stretch mb-2">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex align-items-center gap-2">
+                    <span class="text-md fw-medium text-secondary-light mb-0" data-i18n="orders.show">Show</span>
+                    <select name="per_page" class="form-select form-select-sm h-40-px" onchange="this.form.submit()" style="min-width: 90px; max-width: 120px;">
+                        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                        <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                        <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                    </select>
                 </div>
-                <select name="status" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="" data-i18n="orders.allStatus">All Status</option>
-                    {% for value, label in status_choices %}
-                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-                <select name="payment" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="" data-i18n="orders.allPayment">All Payments</option>
-                    {% for value, label in payment_choices %}
-                    <option value="{{ value }}" {% if payment_filter == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="navbar-search w-100">
+                        <input type="text" class="bg-base h-40-px w-100" name="search" data-i18n-placeholder="orders.searchPlaceholder" placeholder="Search order or customer" value="{{ search_query }}">
+                        <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                    <select name="status" class="form-select form-select-sm h-40-px w-100" onchange="this.form.submit()">
+                        <option value="" data-i18n="orders.allStatus">All Status</option>
+                        {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                    <select name="payment" class="form-select form-select-sm h-40-px w-100" onchange="this.form.submit()">
+                        <option value="" data-i18n="orders.allPayment">All Payments</option>
+                        {% for value, label in payment_choices %}
+                        <option value="{{ value }}" {% if payment_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
                 {% if user.is_superuser and centers %}
-                <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="" data-i18n="common.allCenters">All Centers</option>
-                    {% for center in centers %}
-                    <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
-                    {% endfor %}
-                </select>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <select name="center" class="form-select form-select-sm h-40-px w-100" onchange="this.form.submit()">
+                        <option value="" data-i18n="common.allCenters">All Centers</option>
+                        {% for center in centers %}
+                        <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
                 {% endif %}
                 {% if branches %}
-                <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="" data-i18n="orders.allBranches">All Branches</option>
-                    {% for branch in branches %}
-                    <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.name }}</option>
-                    {% endfor %}
-                </select>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <select name="branch" class="form-select form-select-sm h-40-px w-100" onchange="this.form.submit()">
+                        <option value="" data-i18n="orders.allBranches">All Branches</option>
+                        {% for branch in branches %}
+                        <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
                 {% endif %}
                 {% if staff_members %}
-                <select name="staff" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="" data-i18n="orders.allStaff">All Staff</option>
-                    {% for staff in staff_members %}
-                    <option value="{{ staff.id }}" {% if staff_filter == staff.id|stringformat:"i" %}selected{% endif %}>
-                        {{ staff.user.get_full_name|default:staff.user.username }}{% if staff.role %} ({{ staff.role.name }}){% endif %}
-                    </option>
-                    {% endfor %}
-                </select>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <select name="staff" class="form-select form-select-sm h-40-px w-100" onchange="this.form.submit()">
+                        <option value="" data-i18n="orders.allStaff">All Staff</option>
+                        {% for staff in staff_members %}
+                        <option value="{{ staff.id }}" {% if staff_filter == staff.id|stringformat:"i" %}selected{% endif %}>
+                            {{ staff.user.get_full_name|default:staff.user.username }}{% if staff.role %} ({{ staff.role.name }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
                 {% endif %}
                 {% if can_view_all %}
-                <select name="assignment" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="" data-i18n="orders.allOrders">All Orders</option>
-                    <option value="unassigned" {% if assignment_filter == 'unassigned' %}selected{% endif %} data-i18n="orders.unassigned">Unassigned</option>
-                    <option value="assigned" {% if assignment_filter == 'assigned' %}selected{% endif %} data-i18n="common.assigned">Assigned</option>
-                </select>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <select name="assignment" class="form-select form-select-sm h-40-px w-100" onchange="this.form.submit()">
+                        <option value="" data-i18n="orders.allOrders">All Orders</option>
+                        <option value="unassigned" {% if assignment_filter == 'unassigned' %}selected{% endif %} data-i18n="orders.unassigned">Unassigned</option>
+                        <option value="assigned" {% if assignment_filter == 'assigned' %}selected{% endif %} data-i18n="common.assigned">Assigned</option>
+                    </select>
+                </div>
                 {% endif %}
-                
-                <!-- Hidden field to preserve view mode -->
-                <input type="hidden" name="view" value="{{ view_mode }}">
-                
-                <!-- Actions Dropdown -->
+            </div>
+
+            <!-- Row 2: Date filters and actions -->
+            <div class="row g-2 align-items-stretch">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                    <select name="date_field" class="form-select form-select-sm h-40-px w-100">
+                        <option value="created_at" {% if date_field == 'created_at' %}selected{% endif %}>Created date</option>
+                        <option value="updated_at" {% if date_field == 'updated_at' %}selected{% endif %}>Updated date</option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                    <input type="date" name="date_from" class="form-control form-control-sm h-40-px w-100" value="{{ date_from }}" placeholder="From">
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                    <input type="date" name="date_to" class="form-control form-control-sm h-40-px w-100" value="{{ date_to }}" placeholder="To">
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="d-flex flex-wrap gap-2 w-100">
+                        <button type="button" class="btn btn-outline-secondary btn-sm h-40-px flex-grow-1 flex-md-grow-0 px-10{% if date_preset == 'today' %} active{% endif %}" data-date-preset="today">Today</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm h-40-px flex-grow-1 flex-md-grow-0 px-10{% if date_preset == 'last7' %} active{% endif %}" data-date-preset="last7">Last 7d</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm h-40-px flex-grow-1 flex-md-grow-0 px-10{% if date_preset == 'last30' %} active{% endif %}" data-date-preset="last30">Last 30d</button>
+                    </div>
+                </div>
+
                 {% can_do 'orders.delete' as can_delete_orders_perm %}
                 {% if can_delete_orders_perm or can_delete_orders %}
-                <div class="d-flex align-items-center gap-2">
-                    <select id="bulkActionSelect" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px">
+                <div class="col-12 col-md-6 col-lg-2 d-flex justify-content-md-end align-items-center gap-2">
+                    <select id="bulkActionSelect" class="form-select form-select-sm h-40-px w-100" style="min-width: 140px;">
                         <option value="" data-i18n="common.actions">Actions</option>
                         <option value="delete" data-i18n="common.deleteSelected">Delete selected</option>
                     </select>
@@ -240,6 +276,10 @@
                 </div>
                 {% endif %}
             </div>
+                
+            <!-- Hidden field to preserve view mode -->
+            <input type="hidden" name="view" value="{{ view_mode }}">
+            <input type="hidden" name="date_preset" value="{{ date_preset }}">
         </form>
     </div>
     
@@ -488,12 +528,12 @@
             <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                 {% if orders.has_previous %}
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page=1&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page=1&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}&date_field={{ date_field }}&date_from={{ date_from }}&date_to={{ date_to }}&date_preset={{ date_preset }}">
                         <iconify-icon icon="ep:d-arrow-left"></iconify-icon>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.previous_page_number }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}&date_field={{ date_field }}&date_from={{ date_from }}&date_to={{ date_to }}&date_preset={{ date_preset }}">
                         <iconify-icon icon="ep:arrow-left"></iconify-icon>
                     </a>
                 </li>
@@ -506,19 +546,19 @@
                     </li>
                     {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
                     <li class="page-item">
-                        <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" href="?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">{{ num }}</a>
+                        <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px" href="?page={{ num }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}&date_field={{ date_field }}&date_from={{ date_from }}&date_to={{ date_to }}&date_preset={{ date_preset }}">{{ num }}</a>
                     </li>
                     {% endif %}
                 {% endfor %}
                 
                 {% if orders.has_next %}
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.next_page_number }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.next_page_number }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}&date_field={{ date_field }}&date_from={{ date_from }}&date_to={{ date_to }}&date_preset={{ date_preset }}">
                         <iconify-icon icon="ep:arrow-right"></iconify-icon>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.paginator.num_pages }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}">
+                    <a class="page-link bg-neutral-300 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px text-md" href="?page={{ orders.paginator.num_pages }}&search={{ search_query }}&status={{ status_filter }}&payment={{ payment_filter }}&center={{ center_filter }}&branch={{ branch_filter }}&assignment={{ assignment_filter }}&per_page={{ per_page }}&date_field={{ date_field }}&date_from={{ date_from }}&date_to={{ date_to }}&date_preset={{ date_preset }}">
                         <iconify-icon icon="ep:d-arrow-right"></iconify-icon>
                     </a>
                 </li>
@@ -534,6 +574,54 @@
 {% block script %}
 <script>
 $(document).ready(function() {
+    const $filterForm = $('#filterForm');
+    const $datePresetInput = $filterForm.find('input[name="date_preset"]');
+
+    function formatDateInput(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function debounce(fn, delay) {
+        let timer;
+        return function(...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
+
+    const debouncedSubmit = debounce(() => $filterForm.trigger('submit'), 400);
+
+    $filterForm.on('input', 'input[name="search"]', function() {
+        debouncedSubmit();
+    });
+
+    $filterForm.on('change', 'input[name="date_from"], input[name="date_to"], select[name="date_field"]', function() {
+        $datePresetInput.val('');
+        $filterForm.trigger('submit');
+    });
+
+    $filterForm.on('click', 'button[data-date-preset]', function() {
+        const preset = $(this).data('date-preset');
+        const today = new Date();
+        let fromDate = new Date(today);
+
+        if (preset === 'today') {
+            fromDate = new Date(today);
+        } else if (preset === 'last7') {
+            fromDate.setDate(today.getDate() - 6);
+        } else if (preset === 'last30') {
+            fromDate.setDate(today.getDate() - 29);
+        }
+
+        $filterForm.find('input[name="date_from"]').val(formatDateInput(fromDate));
+        $filterForm.find('input[name="date_to"]').val(formatDateInput(today));
+        $datePresetInput.val(preset);
+        $filterForm.trigger('submit');
+    });
+
     console.log('Bulk delete script loaded');
     
     // Select all checkbox functionality

@@ -334,6 +334,7 @@ def order_reports(request):
     branch_id = request.GET.get("branch")
     status_filter = request.GET.get("status")
     center_id = request.GET.get("center")
+    customer_query = request.GET.get("customer", "").strip()
 
     # Get period dates
     period_data = get_period_dates(period, custom_from, custom_to)
@@ -362,6 +363,16 @@ def order_reports(request):
         orders = orders.filter(branch_id=branch_id)
     if status_filter:
         orders = orders.filter(status=status_filter)
+    if customer_query:
+        orders = orders.filter(
+            Q(bot_user__name__icontains=customer_query)
+            | Q(bot_user__username__icontains=customer_query)
+            | Q(bot_user__phone__icontains=customer_query)
+            | Q(bot_user__id__icontains=customer_query)
+            | Q(manual_first_name__icontains=customer_query)
+            | Q(manual_last_name__icontains=customer_query)
+            | Q(manual_phone__icontains=customer_query)
+        )
 
     # Order metrics
     total_orders = orders.count()
@@ -443,6 +454,7 @@ def order_reports(request):
         "status_choices": Order.STATUS_CHOICES,
         "centers": centers,
         "selected_center": center_id,
+        "customer_query": customer_query,
         # Metrics
         "total_orders": total_orders,
         "completed": completed,
@@ -905,6 +917,7 @@ def export_report(request, report_type):
         'staff_id': request.GET.get('staff'),
         'language': request.GET.get('language'),
         'expense_type': request.GET.get('expense_type'),
+        'customer': request.GET.get('customer'),
     }
     
     # Validate report type

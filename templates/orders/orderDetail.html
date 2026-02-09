@@ -35,7 +35,7 @@
                 <!-- Order Details -->
                 <div class="row gy-3">
                     <div class="col-sm-4">
-                        <div class="p-16 bg-neutral-50 radius-8">
+                        <div class="p-16 bg-neutral-50 radius-8 border border-neutral-200">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.category">Category</span>
                             <h6 class="text-lg fw-semibold mb-0">
                                 {% if order.category %}
@@ -56,7 +56,7 @@
                         </div>
                     </div>
                     <div class="col-sm-4">
-                        <div class="p-16 bg-neutral-50 radius-8">
+                        <div class="p-16 bg-neutral-50 radius-8 border border-neutral-200">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.productService">Product / Service</span>
                             <h6 class="text-lg fw-semibold mb-0">{{ order.product.name }}</h6>
                             {% if order.language %}
@@ -65,26 +65,26 @@
                         </div>
                     </div>
                     <div class="col-sm-4">
-                        <div class="p-16 bg-neutral-50 radius-8">
+                        <div class="p-16 bg-neutral-50 radius-8 border border-neutral-200">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.orderDate">Order Date</span>
                             <h6 class="text-lg fw-semibold mb-0">{{ order.created_at|date:"d M Y" }}</h6>
                             <small class="text-primary-light">{{ order.created_at|time:"H:i" }}</small>
                         </div>
                     </div>
                     <div class="col-sm-4">
-                        <div class="p-16 bg-neutral-50 radius-8 text-center">
+                        <div class="p-16 bg-neutral-50 radius-8 border border-neutral-200 text-center">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.totalPages">Total Pages</span>
                             <h4 class="text-primary-600 fw-bold mb-0">{{ order.total_pages }}</h4>
                         </div>
                     </div>
                     <div class="col-sm-4">
-                        <div class="p-16 bg-neutral-50 radius-8 text-center">
+                        <div class="p-16 bg-neutral-50 radius-8 border border-neutral-200 text-center">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.copies">Copies</span>
                             <h4 class="text-warning-600 fw-bold mb-0">{{ order.copy_number }}</h4>
                         </div>
                     </div>
                     <div class="col-sm-4">
-                        <div class="p-16 bg-success-50 radius-8 text-center">
+                        <div class="p-16 bg-success-50 radius-8 border border-success-200 text-center">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.totalPrice">Total Price</span>
                             <h4 class="text-success-600 fw-bold mb-0">{{ order.total_price|format_number }} UZS</h4>
                         </div>
@@ -208,8 +208,8 @@
                 <div class="mt-24">
                     <h6 class="text-md fw-semibold mb-16">Branch & Assignment</h6>
                     <div class="row gy-3">
-                        <div class="col-sm-6">
-                            <div class="p-16 bg-neutral-50 radius-8">
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="p-16 bg-neutral-50 radius-8 border border-neutral-200">
                                 <span class="text-secondary-light text-sm d-block mb-8">Branch</span>
                                 <h6 class="text-md fw-semibold mb-0">
                                     {% if order.branch %}
@@ -221,8 +221,8 @@
                                 </h6>
                             </div>
                         </div>
-                        <div class="col-sm-6">
-                            <div class="p-16 bg-neutral-50 radius-8">
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="p-16 bg-neutral-50 radius-8 border border-neutral-200">
                                 <span class="text-secondary-light text-sm d-block mb-8">Assigned To</span>
                                 <h6 class="text-md fw-semibold mb-0">
                                     {% if order.assigned_to %}
@@ -233,6 +233,20 @@
                                         </small>
                                     {% else %}
                                         <span class="text-warning-600">Unassigned</span>
+                                    {% endif %}
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-4">
+                            <div class="p-16 bg-neutral-50 radius-8 border border-neutral-200">
+                                <span class="text-secondary-light text-sm d-block mb-8">Created By</span>
+                                <h6 class="text-md fw-semibold mb-0">
+                                    {% if order.created_by %}
+                                        {{ order.created_by.user.get_full_name|default:order.created_by.user.username }}
+                                        <small class="text-primary-light d-block">{{ order.created_at|date:"d M Y H:i" }}</small>
+                                    {% else %}
+                                        <span class="text-primary-light">Unknown</span>
+                                        <small class="text-secondary-light d-block">{{ order.created_at|date:"d M Y H:i" }}</small>
                                     {% endif %}
                                 </h6>
                             </div>
@@ -375,7 +389,7 @@
                                 </tr>
                                 {% endif %}
                             </tbody>
-                            <tfoot class="bg-primary-50">
+                            <tfoot class="bg-neutral-100">
                                 <tr>
                                     <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-bold text-lg">Grand Total:</td>
                                     <td class="text-end fw-bold text-primary-600 text-lg">{{ price_breakdown.total_price|intspace }} UZS</td>

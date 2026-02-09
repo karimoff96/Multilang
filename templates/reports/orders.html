@@ -58,6 +58,13 @@
                         </div>
                         {% endif %}
                         <div>
+                            <label class="form-label text-sm mb-1">Customer</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><iconify-icon icon="ion:search-outline"></iconify-icon></span>
+                                <input type="text" name="customer" class="form-control" placeholder="Name / phone / ID" value="{{ customer_query }}">
+                            </div>
+                        </div>
+                        <div>
                             <label class="form-label text-sm mb-1" data-i18n="table.status">Status</label>
                             <select name="status" class="form-select">
                                 <option value="" data-i18n="common.allStatuses">All Statuses</option>
@@ -70,7 +77,7 @@
                             <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
                             <span data-i18n="common.apply">Apply</span>
                         </button>
-                        <a href="{% url 'export_report' 'orders' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
+                        <a href="{% url 'export_report' 'orders' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if customer_query %}&customer={{ customer_query|urlencode }}{% endif %}" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
                             <iconify-icon icon="vscode-icons:file-type-excel" class="icon line-height-1"></iconify-icon>
                             <span data-i18n="common.exportExcel">Export Excel</span>
                         </a>

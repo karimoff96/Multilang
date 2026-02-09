@@ -305,11 +305,12 @@ class ReportExporter:
             branch_id = filters.get('branch_id')
             center_id = filters.get('center_id')
             status_filter = filters.get('status')
+            customer_query = filters.get('customer', '')
             
             # Call appropriate export function
             if report_type == 'orders':
                 response = export_orders_report(
-                    self.user, date_from, date_to, branch_id, center_id, status_filter
+                    self.user, date_from, date_to, branch_id, center_id, status_filter, customer_query
                 )
             elif report_type == 'financial':
                 response = export_financial_report(
@@ -387,6 +388,7 @@ def export_orders_report(
     branch_id: Optional[str] = None,
     center_id: Optional[str] = None,
     status_filter: Optional[str] = None,
+    customer_query: Optional[str] = None,
 ) -> HttpResponse:
     """
     Export Orders Report with multiple sheets:
@@ -412,6 +414,16 @@ def export_orders_report(
         orders = orders.filter(branch_id=branch_id)
     if status_filter:
         orders = orders.filter(status=status_filter)
+    if customer_query:
+        orders = orders.filter(
+            Q(bot_user__name__icontains=customer_query)
+            | Q(bot_user__username__icontains=customer_query)
+            | Q(bot_user__phone__icontains=customer_query)
+            | Q(bot_user__id__icontains=customer_query)
+            | Q(manual_first_name__icontains=customer_query)
+            | Q(manual_last_name__icontains=customer_query)
+            | Q(manual_phone__icontains=customer_query)
+        )
     
     # Calculate overall statistics
     total_orders = orders.count()
@@ -467,19 +479,22 @@ def export_orders_report(
         orders_data.append([
             order.id,
             order.created_at,
-            order.bot_user.name if order.bot_user else "N/A",
-            order.bot_user.phone if order.bot_user else "N/A",
+            order.updated_at,
+            order.bot_user.id if order.bot_user else "-",
+            order.bot_user.name if order.bot_user else (f"{order.manual_first_name or ''} {order.manual_last_name or ''}".strip() or "Manual"),
+            order.bot_user.phone if order.bot_user else (order.manual_phone or "N/A"),
             "B2B" if (order.bot_user and order.bot_user.is_agency) else "B2C",
             order.product.name if order.product else "N/A",
             order.product.category.name if (order.product and order.product.category) else "N/A",
             order.language.name if order.language else "N/A",
             order.total_pages or 0,
             order.copy_number or 0,
-            order.total_price or 0,
-            order.received or 0,
-            (order.total_price or 0) - (order.received or 0),
+            float(order.total_price or 0),
+            float(order.received or 0),
+            float((order.total_price or 0) - (order.received or 0)),
             STATUS_LABELS.get(order.status, order.status),
             PAYMENT_TYPE_LABELS.get(order.payment_type, order.payment_type or "N/A"),
+            order.branch.center.name if (order.branch and order.branch.center) else "N/A",
             order.branch.name if order.branch else "N/A",
             order.assigned_to.user.get_full_name() if order.assigned_to else "Unassigned",
             order.completed_at if order.completed_at else None,
@@ -488,10 +503,10 @@ def export_orders_report(
     exporter.add_sheet(SheetConfig(
         name="Orders (Detailed)",
         headers=[
-            "Order ID", "Created At", "Customer Name", "Phone", "Customer Type",
+            "Order ID", "Created At", "Updated At", "Customer ID", "Customer Name", "Phone", "Customer Type",
             "Product", "Category", "Language", "Pages", "Copies",
             "Total Price", "Paid Amount", "Remaining", "Status", "Payment Type",
-            "Branch", "Assigned To", "Completed At"
+            "Center", "Branch", "Assigned To", "Completed At"
         ],
         data=orders_data
     ))

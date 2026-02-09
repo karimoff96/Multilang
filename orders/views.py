@@ -6,6 +6,9 @@ from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
+from django.utils.dateparse import parse_date
+from datetime import datetime, time
 from decimal import Decimal, InvalidOperation
 import logging
 from .models import Order, OrderMedia
@@ -204,6 +207,28 @@ def ordersList(request):
     has_pending_receipts = request.GET.get('has_pending_receipts', '')
     if has_pending_receipts == 'true':
         orders = orders.filter(receipts__status='pending').distinct()
+
+    # Date range filters
+    date_field = request.GET.get('date_field', 'created_at')
+    if date_field not in ['created_at', 'updated_at']:
+        date_field = 'created_at'
+
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    date_preset = request.GET.get('date_preset', '')
+    tz = timezone.get_current_timezone()
+
+    if date_from:
+        parsed_from = parse_date(date_from)
+        if parsed_from:
+            start_dt = timezone.make_aware(datetime.combine(parsed_from, time.min), tz)
+            orders = orders.filter(**{f"{date_field}__gte": start_dt})
+
+    if date_to:
+        parsed_to = parse_date(date_to)
+        if parsed_to:
+            end_dt = timezone.make_aware(datetime.combine(parsed_to, time.max), tz)
+            orders = orders.filter(**{f"{date_field}__lte": end_dt})
     
     # Pagination
     per_page = request.GET.get('per_page', 10)
@@ -287,6 +312,10 @@ def ordersList(request):
         "staff_filter": staff_filter,
         "has_pending_receipts": has_pending_receipts,
         "pending_receipts_count": pending_receipts_count,
+        "date_field": date_field,
+        "date_from": date_from,
+        "date_to": date_to,
+        "date_preset": date_preset,
         "per_page": per_page,
         "total_orders": paginator.count,
         "status_choices": status_choices,
@@ -315,7 +344,8 @@ def orderDetail(request, order_id):
             'bot_user', 'product', 'language', 'branch', 'branch__center',
             'assigned_to', 'assigned_to__user', 'assigned_by', 'assigned_by__user',
             'payment_received_by', 'payment_received_by__user',
-            'completed_by', 'completed_by__user'
+            'completed_by', 'completed_by__user',
+            'created_by', 'created_by__user'
         ), 
         id=order_id
     )
@@ -1202,6 +1232,7 @@ def orderCreate(request):
                 total_price=total_price,
                 status='pending',
                 is_active=True,
+                created_by=getattr(request, 'admin_profile', None),
             )
             
             # Handle receipt upload for card payments
