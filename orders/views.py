@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal, InvalidOperation
+from datetime import datetime
 import logging
 from .models import Order, OrderMedia
 
@@ -211,7 +212,6 @@ def ordersList(request):
     
     if date_from:
         try:
-            from datetime import datetime
             date_from_obj = datetime.strptime(date_from, '%Y-%m-%d')
             orders = orders.filter(created_at__date__gte=date_from_obj.date())
         except ValueError:
@@ -219,7 +219,6 @@ def ordersList(request):
     
     if date_to:
         try:
-            from datetime import datetime
             date_to_obj = datetime.strptime(date_to, '%Y-%m-%d')
             orders = orders.filter(created_at__date__lte=date_to_obj.date())
         except ValueError:
