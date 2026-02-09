@@ -429,6 +429,13 @@
                 </div>
                 {% endif %}
 
+                {% if order.name_clarifications %}
+                <div class="mt-24">
+                    <h6 class="text-md fw-semibold mb-16">Name Clarifications</h6>
+                    <p class="text-secondary-light mb-0">{{ order.name_clarifications|linebreaksbr }}</p>
+                </div>
+                {% endif %}
+
                 <!-- Description -->
                 {% if order.description %}
                 <div class="mt-24">

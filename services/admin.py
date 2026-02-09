@@ -153,10 +153,11 @@ class ProductAdmin(TranslationAdmin):
         "min_pages",
         "estimated_days",
         "expense_count",
+        "written_verification_required",
         "total_expenses_display",
         "is_active",
     )
-    list_filter = ("category", "is_active", "created_at")
+    list_filter = ("category", "is_active", "written_verification_required", "created_at")
     search_fields = (
         "name",
         "name_uz",
@@ -212,6 +213,7 @@ class ProductAdmin(TranslationAdmin):
                 "fields": (
                     "min_pages",
                     "estimated_days",
+                    "written_verification_required",
                 )
             },
         ),

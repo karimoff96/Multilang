@@ -214,6 +214,12 @@ class Order(models.Model):
         verbose_name=_("Number of Copies"),
         help_text=_("Additional copies needed (0 means only original)"),
     )
+    name_clarifications = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Name Clarifications"),
+        help_text=_("Full names typed by the user to avoid misreading handwriting"),
+    )
     files = models.ManyToManyField(OrderMedia, verbose_name=_("Files"))
 
     # Staff assignment fields

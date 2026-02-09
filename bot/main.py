@@ -112,6 +112,7 @@ STEP_PAYMENT_METHOD = 14
 STEP_AWAITING_PAYMENT = 15
 STEP_UPLOADING_RECEIPT = 16
 STEP_AWAITING_RECEIPT = 17  # For additional payment receipts on existing orders
+STEP_COLLECTING_NAMES = 18
 def is_valid_file_format(file_name):
     """Check if file has allowed extension"""
     if not file_name:
@@ -3743,6 +3744,7 @@ def handle_document_selection(call):
             "service_id": service_id,
             "lang_id": lang_id,
             "files": {},
+            "name_clarifications": None,
         }
 
         # Get document type and language names for the message
@@ -5109,6 +5111,29 @@ def handle_text_messages(message):
             handle_back_to_documents_message(message, language)
             return
 
+    # Handle manual name clarifications step
+    if current_step == STEP_COLLECTING_NAMES:
+        names_text = (message.text or "").strip()
+
+        if not names_text:
+            bot.send_message(message.chat.id, get_text("names_required_prompt", language))
+            return
+
+        user_upload = uploaded_files.get(user_id)
+        if not user_upload or not user_upload.get("files") or "doc_type_id" not in user_upload:
+            bot.send_message(message.chat.id, get_text("upload_files_first", language))
+            update_user_step(user_id, STEP_REGISTERED)
+            show_categorys(message, language)
+            return
+
+        user_upload["name_clarifications"] = names_text
+        bot.send_message(message.chat.id, get_text("names_received", language))
+
+        # Return to upload step and finalize automatically
+        update_user_step(user_id, STEP_UPLOADING_FILES)
+        handle_finish_upload_message(message, language)
+        return
+
     # Handle name input during registration
     if current_step == STEP_NAME_REQUESTED:
         center = get_current_center()
@@ -5396,6 +5421,18 @@ def handle_finish_upload_message(message, language):
             logger.error(f"Product {user_data.get('doc_type_id')} not found")
             return
 
+        # If this product requires written name verification, collect names first
+        if doc_type.written_verification_required and not user_data.get("name_clarifications"):
+            prompt = get_text("names_required_prompt", language)
+            reason = get_text("names_required_reason", language)
+            bot.send_message(
+                message.chat.id,
+                f"{prompt}\n\n{reason}",
+                reply_markup=types.ReplyKeyboardRemove(),
+            )
+            update_user_step(user_id, STEP_COLLECTING_NAMES)
+            return
+
         logger.debug(f" Creating order for user {user_id} with doc_type {doc_type.id}")
 
         # Get language ID from user data if available
@@ -5423,6 +5460,7 @@ def handle_finish_upload_message(message, language):
                 copy_number=copy_number,
                 is_active=False,
                 description="",
+                name_clarifications=user_data.get("name_clarifications", ""),
                 payment_type="cash",  # Default, will be updated based on user choice
                 total_price=0,  # Will be calculated based on pages, user type, and copies
             )

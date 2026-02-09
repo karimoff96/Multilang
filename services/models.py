@@ -246,6 +246,11 @@ class Category(models.Model):
     )
     name = models.CharField(max_length=100, verbose_name=_("Service Name"))
     description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
+    written_verification_required = models.BooleanField(
+        default=False,
+        verbose_name=_("Written Verification Required"),
+        help_text=_("If enabled, the bot will ask users to type full names from their documents to avoid misspelling handwritten names."),
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
     is_active = models.BooleanField(default=True, verbose_name=_("Is Active"))
