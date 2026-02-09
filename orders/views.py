@@ -205,6 +205,26 @@ def ordersList(request):
     if has_pending_receipts == 'true':
         orders = orders.filter(receipts__status='pending').distinct()
     
+    # Date filters
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    
+    if date_from:
+        try:
+            from datetime import datetime
+            date_from_obj = datetime.strptime(date_from, '%Y-%m-%d')
+            orders = orders.filter(created_at__date__gte=date_from_obj.date())
+        except ValueError:
+            pass  # Invalid date format, ignore filter
+    
+    if date_to:
+        try:
+            from datetime import datetime
+            date_to_obj = datetime.strptime(date_to, '%Y-%m-%d')
+            orders = orders.filter(created_at__date__lte=date_to_obj.date())
+        except ValueError:
+            pass  # Invalid date format, ignore filter
+    
     # Pagination
     per_page = request.GET.get('per_page', 10)
     try:
@@ -300,6 +320,8 @@ def ordersList(request):
         "can_view_own_only": can_view_own_only,
         "view_mode": view_mode,
         "can_create_orders": can_create_orders,
+        "date_from": date_from,
+        "date_to": date_to,
     }
     return render(request, "orders/ordersList.html", context)
 
