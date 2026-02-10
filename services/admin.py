@@ -153,13 +153,11 @@ class ProductAdmin(TranslationAdmin):
         "min_pages",
         "estimated_days",
         "expense_count",
-        # "written_verification_required",
+        "category_verification_required",
         "total_expenses_display",
         "is_active",
     )
-    list_filter = ("category", "is_active", 
-                #    "written_verification_required", 
-                   "created_at")
+    list_filter = ("category", "is_active", "category__written_verification_required", "created_at")
     search_fields = (
         "name",
         "name_uz",
@@ -215,7 +213,6 @@ class ProductAdmin(TranslationAdmin):
                 "fields": (
                     "min_pages",
                     "estimated_days",
-                    "written_verification_required",
                 )
             },
         ),
@@ -235,6 +232,13 @@ class ProductAdmin(TranslationAdmin):
         return obj.service_category.title()
 
     service_category.short_description = "Service Category"
+    
+    def category_verification_required(self, obj):
+        """Display written_verification_required from the category."""
+        return obj.category.written_verification_required
+    category_verification_required.short_description = "Verification Required"
+    category_verification_required.boolean = True
+    category_verification_required.admin_order_field = "category__written_verification_required"
     
     def expense_count(self, obj):
         count = obj.expenses.count()
