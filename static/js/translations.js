@@ -6130,6 +6130,11 @@ const translations = {
         ru: 'Сотрудник',
         en: 'Staff'
     },
+    'common.customers': {
+        uz: 'Mijozlar',
+        ru: 'Клиенты',
+        en: 'Customers'
+    },
     'common.clearAll': {
         uz: 'Hammasini tozalash',
         ru: 'Очистить все',
@@ -6507,6 +6512,12 @@ const translations = {
         uz: 'Tayinlanmagan',
         ru: 'Не назначено',
         en: 'Unassigned'
+    },
+    
+    'orders.pendingReceipts': {
+        uz: 'Kutilmoqda',
+        ru: 'Ожидание',
+        en: 'Pending'
     },
     'orders.show': {
         uz: 'Ko\'rsatish',

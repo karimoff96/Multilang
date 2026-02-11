@@ -11,67 +11,100 @@
         width: 100% !important;
         table-layout: auto;
     }
-    .card-body {
-        overflow-x: auto;
+    .card-body { overflow-x: auto; }
+    /* Filters: detailed balanced layout */
+    .users-header { flex-direction: column; align-items: stretch; gap: 16px; }
+    .filters-main-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; width: 100%; }
+    .show-section { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .filter-per-page { width: 110px; flex-shrink: 0; }
+    .search-wrapper { flex: 1 1 300px; min-width: 250px; max-width: 400px; }
+    .search-wrapper .navbar-search { width: 100%; }
+    .search-wrapper .navbar-search input { width: 100%; }
+    .filter-status { width: 160px; flex-shrink: 0; }
+    .filter-user-type { width: 180px; flex-shrink: 0; }
+    .filter-center { width: 200px; flex-shrink: 0; }
+    .filter-branch { width: 220px; flex-shrink: 0; }
+    .header-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .header-actions .btn { height: 40px; white-space: nowrap; }
+    .bulk-actions-group { display: flex; gap: 8px; align-items: center; }
+    @media (max-width: 1600px) {
+        .filters-main-row { gap: 10px; }
+        .search-wrapper { flex: 1 1 250px; min-width: 200px; }
+        .filter-status { width: 150px; }
+        .filter-user-type { width: 170px; }
+        .filter-center { width: 180px; }
+        .filter-branch { width: 200px; }
+    }
+    @media (max-width: 1200px) {
+        .search-wrapper { flex: 1 1 100%; max-width: none; }
+        .filter-status, .filter-user-type, .filter-center, .filter-branch { flex: 1 1 calc(50% - 6px); min-width: 160px; }
+    }
+    @media (max-width: 768px) {
+        .show-section { width: 100%; }
+        .filter-per-page { width: 100%; }
+        .filter-status, .filter-user-type, .filter-center, .filter-branch { flex: 1 1 100%; width: 100%; }
     }
 </style>
 <div class="card h-100 p-0 radius-12">
-    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
-        <div class="d-flex align-items-center flex-wrap gap-3">
-            <span class="text-md fw-medium text-secondary-light mb-0" data-i18n="common.show">Show</span>
-            <form method="get" class="d-flex align-items-center gap-3">
-                <select name="per_page" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+    <div class="card-header border-bottom bg-base py-16 px-24 d-flex users-header">
+        <form method="get" class="filters-main-row">
+            <div class="show-section">
+                <span class="text-md fw-medium text-secondary-light mb-0" data-i18n="common.show">Show</span>
+                <select name="per_page" class="form-select form-select-sm filter-per-page ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
                     <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
                     <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
                     <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
                     <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
                 </select>
+            </div>
+            <div class="search-wrapper">
                 <div class="navbar-search">
-                    <input type="text" class="bg-base h-40-px w-auto" name="search" data-i18n-placeholder="common.search" placeholder="Search" value="{{ search_query }}">
+                    <input type="text" class="bg-base h-40-px" name="search" data-i18n-placeholder="common.search" placeholder="Search" value="{{ search_query }}">
                     <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
                 </div>
-                <select name="status" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="" data-i18n="common.allStatus">All Status</option>
-                    <option value="active" {% if status_filter == 'active' %}selected{% endif %} data-i18n="common.active">Active</option>
-                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %} data-i18n="common.inactive">Inactive</option>
-                </select>
-                <select name="user_type" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="" data-i18n="common.allUserTypes">All User Types</option>
-                    <option value="ordinary" {% if user_type_filter == 'ordinary' %}selected{% endif %} data-i18n="common.ordinaryUsers">Ordinary Users</option>
-                    <option value="agency" {% if user_type_filter == 'agency' %}selected{% endif %} data-i18n="common.agencies">Agencies</option>
-                </select>
-                {% if user.is_superuser and centers %}
-                <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="" data-i18n="common.allCenters">All Centers</option>
-                    {% for center in centers %}
-                    <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
-                    {% endfor %}
-                </select>
-                {% endif %}
-                {% if branches %}
-                <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="" data-i18n="common.allBranches">All Branches</option>
-                    {% for branch in branches %}
-                    <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.center.name }} - {{ branch.name }}</option>
-                    {% endfor %}
-                </select>
-                {% endif %}
-            </form>
-        </div>
-        <a href="{% url 'addUser' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
-            <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
-            <span data-i18n="common.addUser">Add New User</span>
-        </a>
-        
-        <!-- Actions Dropdown -->
-        <div class="d-flex align-items-center gap-2" style="margin-left: 10px;">
-            <select id="bulkActionSelect" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px">
-                <option value="" data-i18n="common.actions">Actions</option>
-                <option value="delete" data-i18n="common.deleteSelected">Delete selected</option>
+            </div>
+            <select name="status" class="form-select form-select-sm filter-status ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                <option value="" data-i18n="common.allStatus">All Status</option>
+                <option value="active" {% if status_filter == 'active' %}selected{% endif %} data-i18n="common.active">Active</option>
+                <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %} data-i18n="common.inactive">Inactive</option>
             </select>
-            <button id="applyBulkAction" class="btn btn-primary btn-sm px-16 h-40-px" disabled>
-                <span data-i18n="common.apply">Apply</span>
-            </button>
+            <select name="user_type" class="form-select form-select-sm filter-user-type ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                <option value="" data-i18n="common.allUserTypes">All User Types</option>
+                <option value="ordinary" {% if user_type_filter == 'ordinary' %}selected{% endif %} data-i18n="common.ordinaryUsers">Ordinary Users</option>
+                <option value="agency" {% if user_type_filter == 'agency' %}selected{% endif %} data-i18n="common.agencies">Agencies</option>
+            </select>
+            {% if user.is_superuser and centers %}
+            <select name="center" class="form-select form-select-sm filter-center ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                <option value="" data-i18n="common.allCenters">All Centers</option>
+                {% for center in centers %}
+                <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+            {% if branches %}
+            <select name="branch" class="form-select form-select-sm filter-branch ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                <option value="" data-i18n="common.allBranches">All Branches</option>
+                {% for branch in branches %}
+                <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.center.name }} - {{ branch.name }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+        </form>
+        <div class="header-actions">
+            <a href="{% url 'addUser' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
+                <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+                <span data-i18n="common.addUser">Add New User</span>
+            </a>
+            <!-- Actions Dropdown -->
+            <div class="bulk-actions-group">
+                <select id="bulkActionSelect" class="form-select form-select-sm ps-12 py-6 radius-12 h-40-px" style="min-width: 140px;">
+                    <option value="" data-i18n="common.actions">Actions</option>
+                    <option value="delete" data-i18n="common.deleteSelected">Delete selected</option>
+                </select>
+                <button id="applyBulkAction" class="btn btn-primary btn-sm px-16 h-40-px" disabled>
+                    <span data-i18n="common.apply">Apply</span>
+                </button>
+            </div>
         </div>
     </div>
     
