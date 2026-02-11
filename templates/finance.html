@@ -237,8 +237,13 @@
                 </select>
             </div>
             <div class="card-body p-24">
+                <style>
+                .compact-table { table-layout: auto; width: 100%; }
+                .compact-table th, .compact-table td { padding: 12px 16px; font-size: 14px; white-space: normal; vertical-align: middle; }
+                .truncate-label { white-space: normal; overflow: visible; text-overflow: clip; max-width: none; }
+                </style>
                 <div class="table-responsive">
-                    <table class="table bordered-table mb-0">
+                    <table class="table bordered-table mb-0 compact-table">
                         <thead>
                             <tr>
                                 <th scope="col" class="col-id">#</th>

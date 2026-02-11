@@ -1,4 +1,5 @@
 {% extends '../layout/layout.html' %}
+{% load i18n %}
 {% load static %}
 {% load permission_tags %}
 
@@ -6,27 +7,27 @@
 <div class="card h-100 p-0 radius-12">
     <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
         <div class="d-flex align-items-center flex-wrap gap-3">
-            <form method="get" class="d-flex align-items-center gap-3">
+            <form method="get" class="d-flex align-items-center gap-2 flex-wrap">
                 <div class="navbar-search">
-                    <input type="text" class="bg-base h-40-px w-auto" name="search" data-i18n-placeholder="common.searchStaff" placeholder="Search staff..." value="{{ search }}">
+                    <input type="text" class="bg-base h-40-px w-auto" name="search" data-i18n-placeholder="common.searchStaff" placeholder="{% trans 'Search staff...' %}" value="{{ search }}">
                     <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
                 </div>
                 <select name="role" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="" data-i18n="common.allRoles">All Roles</option>
+                    <option value="" data-i18n="common.allRoles">{% trans "All Roles" %}</option>
                     {% for role in roles %}
                     <option value="{{ role.name }}" {% if role_filter == role.name %}selected{% endif %}>{{ role.get_name_display }}</option>
                     {% endfor %}
                 </select>
                 {% if user.is_superuser and centers %}
                 <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="" data-i18n="common.allCenters">All Centers</option>
+                    <option value="" data-i18n="common.allCenters">{% trans "All Centers" %}</option>
                     {% for center in centers %}
                     <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
                     {% endfor %}
                 </select>
                 {% endif %}
                 <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
-                    <option value="" data-i18n="common.allBranches">All Branches</option>
+                    <option value="" data-i18n="common.allBranches">{% trans "All Branches" %}</option>
                     {% for branch in branches %}
                     <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.name }}</option>
                     {% endfor %}
@@ -46,12 +47,12 @@
             <table class="table bordered-table sm-table mb-0">
                 <thead>
                     <tr>
-                        <th scope="col" data-i18n="table.staffMember">Staff Member</th>
-                        <th scope="col" data-i18n="table.role">Role</th>
-                        <th scope="col" class="hide-tablet" data-i18n="table.location">Location</th>
-                        <th scope="col" class="hide-mobile" data-i18n="table.orders">Orders</th>
-                        <th scope="col" class="hide-mobile" data-i18n="table.contact">Contact</th>
-                        <th scope="col" class="text-center col-action" data-i18n="table.action">Action</th>
+                        <th scope="col" data-i18n="table.staffMember">{% trans "Staff Member" %}</th>
+                        <th scope="col" data-i18n="table.role">{% trans "Role" %}</th>
+                        <th scope="col" class="hide-tablet" data-i18n="table.location">{% trans "Location" %}</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.orders">{% trans "Orders" %}</th>
+                        <th scope="col" class="hide-mobile" data-i18n="table.contact">{% trans "Contact" %}</th>
+                        <th scope="col" class="text-center col-action" data-i18n="table.action">{% trans "Action" %}</th>
                     </tr>
                 </thead>
                 <tbody>

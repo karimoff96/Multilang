@@ -68,8 +68,16 @@
             </div>
         </div>
         <div class="card-body">
+            <style>
+            .table-compact { table-layout: fixed; width: 100%; }
+            .table-compact th, .table-compact td { padding: 8px 10px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .truncate-cell { max-width: 170px; display: inline-flex; align-items: center; gap: 6px; }
+            .truncate-label { max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .info-icon { color: #9CA3AF; font-size: 14px; }
+            .nowrap { white-space: nowrap; }
+            </style>
             <div class="table-responsive">
-                <table class="table bordered-table mb-0">
+                <table class="table bordered-table mb-0 table-compact">
                     <thead>
                         <tr>
                             <th>{% trans "ID" %}</th>
@@ -91,11 +99,11 @@
                                     {% if center.logo %}
                                     <img src="{{ center.logo.url }}" alt="" class="w-40-px h-40-px rounded-circle me-12 flex-shrink-0">
                                     {% endif %}
-                                    <span class="text-md fw-medium">{{ center.name }}</span>
+                                    <span class="text-md fw-medium" title="{{ center.name }}">{{ center.name }}</span>
                                 </div>
                             </td>
                             <td>
-                                <code>{{ center.subdomain }}.multilang.uz</code>
+                                <code title="{{ center.subdomain }}.multilang.uz">{{ center.subdomain }}.multilang.uz</code>
                             </td>
                             <td>{{ center.owner.get_full_name|default:center.owner.username }}</td>
                             <td>

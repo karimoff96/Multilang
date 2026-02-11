@@ -152,9 +152,14 @@
     <div class="col-12">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
+                <style>
+                .compact-table { table-layout: auto; width: 100%; }
+                .compact-table th, .compact-table td { padding: 12px 16px; font-size: 14px; white-space: normal; vertical-align: middle; }
+                .truncate-label { white-space: normal; overflow: visible; text-overflow: clip; max-width: none; }
+                </style>
                 <h6 class="fw-bold text-lg mb-4" data-i18n="report.branchPerformanceDetails">Branch Performance Details</h6>
                 <div class="table-responsive">
-                    <table class="table colored-row-table mb-0">
+                    <table class="table colored-row-table mb-0 compact-table">
                         <thead>
                             <tr>
                                 <th scope="col" class="bg-base text-secondary-light" data-i18n="common.branch">Branch</th>
@@ -177,10 +182,12 @@
                                         <div class="w-36-px h-36-px rounded-circle bg-primary-100 text-primary-600 d-flex justify-content-center align-items-center">
                                             <iconify-icon icon="solar:building-bold"></iconify-icon>
                                         </div>
-                                        <span class="fw-medium text-secondary-light">{{ branch.name }}</span>
+                                        <span class="truncate-label fw-medium text-secondary-light" title="{{ branch.name }}">{{ branch.name }}</span>
                                     </div>
                                 </td>
-                                <td class="{{ row_color }} text-secondary-light">{{ branch.center }}</td>
+                                <td class="{{ row_color }} text-secondary-light">
+                                    <span class="truncate-label" title="{{ branch.center }}">{{ branch.center }}</span>
+                                </td>
                                 <td class="{{ row_color }} text-center fw-semibold text-secondary-light">{{ branch.total_orders }}</td>
                                 <td class="{{ row_color }} text-center text-success-main">{{ branch.completed }}</td>
                                 <td class="{{ row_color }} text-center">

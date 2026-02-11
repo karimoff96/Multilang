@@ -1,4 +1,5 @@
 {% extends 'layout/layout.html' %} 
+{% load i18n %}
 {% load number_filters %}
 
 {% block content %}
@@ -10,27 +11,27 @@
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                     <div>
                         <h5 class="fw-bold mb-0" data-i18n="report.staffPerformance">{{ title }}</h5>
-                        <p class="text-secondary-light mb-0" data-i18n="report.staffPerformanceDesc">Track and analyze staff performance metrics</p>
+                        <p class="text-secondary-light mb-0" data-i18n="report.staffPerformanceDesc">{% trans "Track and analyze staff performance metrics" %}</p>
                     </div>
-                    <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                    <form method="GET" class="d-flex flex-wrap gap-2 align-items-end">
                         <!-- Period Filter -->
                         <div>
-                            <label class="form-label text-sm mb-1" data-i18n="filter.period">Period</label>
-                            <select name="period" id="periodSelect" class="form-select" style="min-width: 140px;">
+                            <label class="form-label text-sm mb-1" data-i18n="filter.period">{% trans "Period" %}</label>
+                            <select name="period" id="periodSelect" class="form-select form-select-sm" style="min-width: 120px;">
                                 {% for value, label in period_choices %}
                                 <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <!-- Custom Date Range -->
-                        <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                        <div id="customDateRange" class="d-flex gap-2 flex-wrap" style="{% if period != 'custom' %}display: none;{% endif %}">
                             <div>
-                                <label class="form-label text-sm mb-1" data-i18n="filter.from">From</label>
-                                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                                <label class="form-label text-sm mb-1" data-i18n="filter.from">{% trans "From" %}</label>
+                                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}">
                             </div>
                             <div>
-                                <label class="form-label text-sm mb-1" data-i18n="filter.to">To</label>
-                                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                                <label class="form-label text-sm mb-1" data-i18n="filter.to">{% trans "To" %}</label>
+                                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}">
                             </div>
                         </div>
                         {% if user.is_superuser and centers %}
@@ -55,13 +56,13 @@
                             </select>
                         </div>
                         {% endif %}
-                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1">
                             <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
-                            <span data-i18n="common.apply">Apply</span>
+                            <span data-i18n="common.apply">{% trans "Apply" %}</span>
                         </button>
-                        <a href="{% url 'export_report' 'staff_performance' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
+                        <a href="{% url 'export_report' 'staff_performance' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}" class="btn btn-outline-success btn-sm d-inline-flex align-items-center gap-1">
                             <iconify-icon icon="vscode-icons:file-type-excel" class="icon line-height-1"></iconify-icon>
-                            <span data-i18n="common.exportExcel">Export Excel</span>
+                            <span data-i18n="common.exportExcel">{% trans "Export Excel" %}</span>
                         </a>
                     </form>
                 </div>
@@ -138,9 +139,14 @@
     <div class="col-12">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
+                <style>
+                .compact-table { table-layout: auto; width: 100%; }
+                .compact-table th, .compact-table td { padding: 12px 16px; font-size: 14px; white-space: normal; vertical-align: middle; }
+                .truncate-label { white-space: normal; overflow: visible; text-overflow: clip; max-width: none; }
+                </style>
                 <h6 class="fw-bold text-lg mb-4" data-i18n="report.allStaffPerformance">All Staff Performance</h6>
                 <div class="table-responsive">
-                    <table class="table colored-row-table mb-0">
+                    <table class="table colored-row-table mb-0 compact-table">
                         <thead>
                             <tr>
                                 <th scope="col" class="bg-base text-secondary-light" data-i18n="table.staffMember">Staff Member</th>
@@ -164,14 +170,20 @@
                                         <div class="w-36-px h-36-px rounded-circle bg-primary-100 text-primary-600 d-flex justify-content-center align-items-center">
                                             <iconify-icon icon="solar:user-bold"></iconify-icon>
                                         </div>
-                                        <span class="fw-medium text-secondary-light">{{ staff.name }}</span>
+                                        <span class="truncate-label fw-medium text-secondary-light" title="{{ staff.name }}">{{ staff.name }}</span>
                                     </div>
                                 </td>
                                 {% if user.is_superuser %}
-                                <td class="{{ row_color }}"><span class="fw-medium text-primary-light">{{ staff.center }}</span></td>
+                                <td class="{{ row_color }}">
+                                    <span class="truncate-label fw-medium text-primary-light" title="{{ staff.center }}">{{ staff.center }}</span>
+                                </td>
                                 {% endif %}
-                                <td class="{{ row_color }} text-secondary-light">{{ staff.branch }}</td>
-                                <td class="{{ row_color }}"><span class="badge bg-light text-dark">{{ staff.role }}</span></td>
+                                <td class="{{ row_color }} text-secondary-light">
+                                    <span class="truncate-label" title="{{ staff.branch }}">{{ staff.branch }}</span>
+                                </td>
+                                <td class="{{ row_color }}">
+                                    <span class="badge bg-light text-dark" title="{{ staff.role }}">{{ staff.role }}</span>
+                                </td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ staff.total_assigned }}</td>
                                 <td class="{{ row_color }} text-center">
                                     <span class="text-success-main fw-semibold">{{ staff.completed }}</span>

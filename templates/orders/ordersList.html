@@ -1,4 +1,5 @@
 {% extends '../layout/layout.html' %}
+{% load i18n %}
 {% load static %}
 {% load permission_tags %}
 {% load billing_extras %}
@@ -328,18 +329,18 @@
                                 <div class="form-check style-check d-flex align-items-center">
                                     <input class="form-check-input radius-4 border input-form-dark" type="checkbox" name="checkbox" id="selectAllOrders">
                                 </div>
-                                <span data-i18n="orders.orderNumber">Order</span>
+                                <span data-i18n="orders.orderNumber">{% trans "Order" %}</span>
                             </div>
                         </th>
                         {% if user.is_superuser or is_owner %}
-                        <th scope="col" class="hide-mobile" data-i18n="common.location">Location</th>
+                        <th scope="col" class="hide-mobile" data-i18n="common.location">{% trans "Location" %}</th>
                         {% endif %}
-                        <th scope="col" data-i18n="orders.customer">Customer</th>
-                        <th scope="col" class="hide-mobile" data-i18n="common.details">Details</th>
-                        <th scope="col" data-i18n="common.payment">Payment</th>
-                        <th scope="col" class="hide-mobile" data-i18n="orders.assignedTo">Assigned</th>
-                        <th scope="col" class="text-center col-status" data-i18n="orders.status">Status</th>
-                        <th scope="col" class="text-center col-action" data-i18n="orders.actions">Action</th>
+                        <th scope="col" data-i18n="orders.customer">{% trans "Customer" %}</th>
+                        <th scope="col" class="hide-mobile" data-i18n="common.details">{% trans "Details" %}</th>
+                        <th scope="col" data-i18n="common.payment">{% trans "Payment" %}</th>
+                        <th scope="col" class="hide-mobile" data-i18n="orders.assignedTo">{% trans "Assigned" %}</th>
+                        <th scope="col" class="text-center col-status" data-i18n="orders.status">{% trans "Status" %}</th>
+                        <th scope="col" class="text-center col-action" data-i18n="orders.actions">{% trans "Action" %}</th>
                     </tr>
                 </thead>
                 <tbody>

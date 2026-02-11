@@ -1,4 +1,5 @@
 {% extends '../layout/layout.html' %}
+{% load i18n %}
 {% load static %}
 
 {% block content %}
@@ -415,11 +416,14 @@ async function setupWebhook() {
     updateStatus('Setting up webhook...', 'info');
     
     // Prompt for ngrok URL if using local development
+    const centerSubdomain = '{{ center.subdomain|default_if_none:""|escapejs }}';
+    const suggestedUrl = centerSubdomain ? `https://${centerSubdomain}.{{ main_domain|escapejs }}` : '';
+
     const baseUrl = prompt(
-        'Enter your public HTTPS URL (ngrok/production):\n\n' +
-        'Example: https://your-domain.ngrok-free.app\n' +
+        'Enter your public HTTPS URL (center subdomain):\n\n' +
+        'Example: https://your-center.{{ main_domain|escapejs }}\n' +
         'Leave empty to use current domain.',
-        'https://9bdc8df0d38f.ngrok-free.app'
+        suggestedUrl
     );
     
     if (baseUrl === null) {

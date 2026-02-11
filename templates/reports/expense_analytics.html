@@ -1,6 +1,7 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
 {% load number_filters %}
+{% load i18n %}
 
 {% block content %}
 <div class="row gy-4">
@@ -9,16 +10,16 @@
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
             <h6 class="fw-semibold mb-0">
                 <iconify-icon icon="solar:chart-linear" class="me-8 text-primary-600"></iconify-icon>
-                <span data-i18n="reports.expenseAnalytics">Expense Analytics Report</span>
+                <span data-i18n="reports.expenseAnalyticsTitle">{% trans "Expense Analytics Report" %}</span>
             </h6>
             <div class="d-flex align-items-center gap-2">
-                <a href="{% url 'export_report' 'expense_analytics' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if expense_type_filter %}&expense_type={{ expense_type_filter }}{% endif %}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
+                <a href="{% url 'export_report' 'expense_analytics' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if expense_type_filter %}&expense_type={{ expense_type_filter }}{% endif %}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}" class="btn btn-outline-success d-inline-flex align-items-center gap-2" data-i18n="common.exportExcel">
                     <iconify-icon icon="solar:download-bold" class="icon"></iconify-icon>
-                    Export to Excel
+                    {% trans "Export to Excel" %}
                 </a>
-                <a href="{% url 'expenseList' %}" class="btn btn-outline-secondary btn-sm">
+                <a href="{% url 'expenseList' %}" class="btn btn-outline-secondary btn-sm" data-i18n="expenses.manage">
                     <iconify-icon icon="solar:wallet-bold" class="me-1"></iconify-icon>
-                    Manage Expenses
+                    {% trans "Manage Expenses" %}
                 </a>
             </div>
         </div>
@@ -36,7 +37,7 @@
                     <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
                         <!-- Period Filter -->
                         <div>
-                            <label class="form-label text-sm mb-1">Period</label>
+                            <label class="form-label text-sm mb-1" data-i18n="filter.period">{% trans "Period" %}</label>
                             <select name="period" id="periodSelect" class="form-select" style="min-width: 140px;">
                                 {% for value, label in period_choices %}
                                 <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
@@ -46,28 +47,28 @@
                         <!-- Custom Date Range -->
                         <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
                             <div>
-                                <label class="form-label text-sm mb-1">From</label>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.from">{% trans "From" %}</label>
                                 <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
                             </div>
                             <div>
-                                <label class="form-label text-sm mb-1">To</label>
+                                <label class="form-label text-sm mb-1" data-i18n="filter.to">{% trans "To" %}</label>
                                 <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
                             </div>
                         </div>
                         <!-- Expense Type -->
                         <div>
-                            <label class="form-label text-sm mb-1">Type</label>
+                            <label class="form-label text-sm mb-1" data-i18n="filter.type">{% trans "Type" %}</label>
                             <select name="expense_type" class="form-select">
-                                <option value="">All Types</option>
-                                <option value="b2b" {% if expense_type_filter == 'b2b' %}selected{% endif %}>B2B Only</option>
-                                <option value="b2c" {% if expense_type_filter == 'b2c' %}selected{% endif %}>B2C Only</option>
+                                <option value="" data-i18n="filter.allTypes">{% trans "All Types" %}</option>
+                                <option value="b2b" {% if expense_type_filter == 'b2b' %}selected{% endif %} data-i18n="filter.b2bOnly">{% trans "B2B Only" %}</option>
+                                <option value="b2c" {% if expense_type_filter == 'b2c' %}selected{% endif %} data-i18n="filter.b2cOnly">{% trans "B2C Only" %}</option>
                             </select>
                         </div>
                         {% if is_superuser and centers %}
                         <div>
-                            <label class="form-label text-sm mb-1">Center</label>
+                            <label class="form-label text-sm mb-1" data-i18n="table.center">{% trans "Center" %}</label>
                             <select name="center" class="form-select">
-                                <option value="">All Centers</option>
+                                <option value="" data-i18n="common.allCenters">{% trans "All Centers" %}</option>
                                 {% for center in centers %}
                                 <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
                                 {% endfor %}
@@ -76,18 +77,18 @@
                         {% endif %}
                         {% if branches and not is_branch_level %}
                         <div>
-                            <label class="form-label text-sm mb-1">Branch</label>
+                            <label class="form-label text-sm mb-1" data-i18n="table.branch">{% trans "Branch" %}</label>
                             <select name="branch" class="form-select">
-                                <option value="">All Branches</option>
+                                <option value="" data-i18n="common.allBranches">{% trans "All Branches" %}</option>
                                 {% for branch in branches %}
                                 <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         {% endif %}
-                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2" data-i18n="common.apply">
                             <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
-                            <span>Apply</span>
+                            <span>{% trans "Apply" %}</span>
                         </button>
                     </form>
                 </div>
@@ -112,9 +113,9 @@
                         <iconify-icon icon="solar:wallet-bold" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">Total Expenses</span>
+                        <span class="text-secondary-light text-sm" data-i18n="expense.totalExpenses">{% trans "Total Expenses" %}</span>
                         <h4 class="fw-bold mb-0">{{ total_expenses|format_number }} <small class="text-sm fw-normal">UZS</small></h4>
-                        <small class="text-secondary-light">{{ total_count }} items</small>
+                        <small class="text-secondary-light" data-i18n="expense.itemsCount">{% trans "items" %}</small>
                     </div>
                 </div>
             </div>
@@ -129,9 +130,9 @@
                         <iconify-icon icon="mdi:office-building" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">B2B Expenses</span>
+                        <span class="text-secondary-light text-sm" data-i18n="expense.b2bExpenses">{% trans "B2B Expenses" %}</span>
                         <h4 class="fw-bold mb-0">{{ b2b_total|format_number }} <small class="text-sm fw-normal">UZS</small></h4>
-                        <small class="text-secondary-light">{{ b2b_count }} items</small>
+                        <small class="text-secondary-light" data-i18n="expense.itemsCount">{% trans "items" %}</small>
                     </div>
                 </div>
             </div>
@@ -146,9 +147,9 @@
                         <iconify-icon icon="mdi:account-group" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">B2C Expenses</span>
+                        <span class="text-secondary-light text-sm" data-i18n="expense.b2cExpenses">{% trans "B2C Expenses" %}</span>
                         <h4 class="fw-bold mb-0">{{ b2c_total|format_number }} <small class="text-sm fw-normal">UZS</small></h4>
-                        <small class="text-secondary-light">{{ b2c_count }} items</small>
+                        <small class="text-secondary-light" data-i18n="expense.itemsCount">{% trans "items" %}</small>
                     </div>
                 </div>
             </div>
@@ -230,7 +231,7 @@
                         </table>
                     </div>
                     {% else %}
-                    <p class="text-secondary-light mb-0"><i>No branch expenses found for this center</i></p>
+                    <p class="text-secondary-light mb-0" data-i18n="expense.noBranchData"><i>{% trans "No branch expenses found for this center" %}</i></p>
                     {% endif %}
                     </div>
                 </div>
@@ -243,7 +244,7 @@
                         <ul class="pagination">
                             {% if by_center.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?period={{ period }}&expense_type={{ expense_type_filter }}{% if selected_center %}&center={{ selected_center }}{% endif %}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}&date_from={{ date_from }}&date_to={{ date_to }}&center_page={{ by_center.previous_page_number }}">Previous</a>
+                                <a class="page-link" href="?period={{ period }}&expense_type={{ expense_type_filter }}{% if selected_center %}&center={{ selected_center }}{% endif %}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}&date_from={{ date_from }}&date_to={{ date_to }}&center_page={{ by_center.previous_page_number }}" data-i18n="common.previous">{% trans "Previous" %}</a>
                             </li>
                             {% endif %}
                             
@@ -255,7 +256,7 @@
                             
                             {% if by_center.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?period={{ period }}&expense_type={{ expense_type_filter }}{% if selected_center %}&center={{ selected_center }}{% endif %}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}&date_from={{ date_from }}&date_to={{ date_to }}&center_page={{ by_center.next_page_number }}">Next</a>
+                                <a class="page-link" href="?period={{ period }}&expense_type={{ expense_type_filter }}{% if selected_center %}&center={{ selected_center }}{% endif %}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}&date_from={{ date_from }}&date_to={{ date_to }}&center_page={{ by_center.next_page_number }}" data-i18n="common.next">{% trans "Next" %}</a>
                             </li>
                             {% endif %}
                         </ul>
@@ -271,10 +272,10 @@
     <div class="col-12">
         <div class="card radius-8 border">
             <div class="card-header border-bottom bg-base py-16 px-24">
-                <h6 class="mb-0 fw-semibold">
-                    <iconify-icon icon="mdi:source-branch" class="me-2 text-primary-600"></iconify-icon>
-                    Expenses by Branch
-                </h6>
+                    <h6 class="mb-0 fw-semibold">
+                        <iconify-icon icon="mdi:source-branch" class="me-2 text-primary-600"></iconify-icon>
+                        <span data-i18n="expense.byBranch">{% trans "Expenses by Branch" %}</span>
+                    </h6>
             </div>
             <div class="card-body p-24">
                 {% if by_branch %}
@@ -289,8 +290,8 @@
                                 <th class="text-end" data-i18n="expense.both">Both</th>
                                 <th class="text-end" data-i18n="common.total">Total</th>
                                 <th class="text-center" data-i18n="common.count">Count</th>
-                                <th class="text-end">Avg</th>
-                                <th class="text-end">% of Total</th>
+                                <th class="text-end" data-i18n="common.average">{% trans "Avg" %}</th>
+                                <th class="text-end" data-i18n="expense.percentTotal">{% trans "% of Total" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -328,7 +329,7 @@
                 {% else %}
                 <div class="text-center py-5">
                     <iconify-icon icon="solar:inbox-bold-duotone" class="text-secondary-light" style="font-size: 64px;"></iconify-icon>
-                    <p class="text-secondary-light mt-3">No expense data available for the selected period</p>
+                    <p class="text-secondary-light mt-3" data-i18n="expense.noDataPeriod">{% trans "No expense data available for the selected period" %}</p>
                 </div>
                 {% endif %}
             </div>
@@ -343,9 +344,9 @@
                     <div class="card-header border-bottom bg-base py-16 px-24">
                         <h6 class="mb-0 fw-semibold">
                             <iconify-icon icon="mdi:chart-pie" class="me-2 text-primary-600"></iconify-icon>
-                            Expense Type Distribution
+                            <span data-i18n="expense.typeDistribution">{% trans "Expense Type Distribution" %}</span>
                         </h6>
-                        <p class="text-sm text-secondary-light mb-0 mt-1">Breakdown by customer type (B2B, B2C, Both)</p>
+                        <p class="text-sm text-secondary-light mb-0 mt-1" data-i18n="expense.typeSubtitle">{% trans "Breakdown by customer type (B2B, B2C, Both)" %}</p>
                     </div>
             <div class="card-body p-24">
                 {% if type_distribution %}
@@ -382,7 +383,7 @@
                 {% else %}
                 <div class="text-center py-4">
                     <iconify-icon icon="solar:inbox-bold-duotone" class="text-secondary-light" style="font-size: 48px;"></iconify-icon>
-                    <p class="text-secondary-light mb-0 mt-2">No data available</p>
+                        <p class="text-secondary-light mb-0 mt-2" data-i18n="common.noData">{% trans "No data available" %}</p>
                 </div>
                 {% endif %}
                 </div>
@@ -395,9 +396,9 @@
                     <div class="card-header border-bottom bg-base py-16 px-24">
                         <h6 class="mb-0 fw-semibold">
                             <iconify-icon icon="solar:chart-2-bold" class="me-2 text-primary-600"></iconify-icon>
-                            Expense Statistics
+                            <span data-i18n="expense.statistics">{% trans "Expense Statistics" %}</span>
                         </h6>
-                        <p class="text-sm text-secondary-light mb-0 mt-1">Min, Max, Average & Median values</p>
+                        <p class="text-sm text-secondary-light mb-0 mt-1" data-i18n="expense.statisticsSubtitle">{% trans "Min, Max, Average & Median values" %}</p>
                     </div>
             <div class="card-body p-24">
                 <div class="row g-3">
@@ -406,9 +407,9 @@
                             <div class="d-flex align-items-start gap-2">
                                 <iconify-icon icon="solar:arrow-up-bold" class="text-success-600 text-xl"></iconify-icon>
                                 <div>
-                                    <span class="text-sm text-secondary-light d-block">Highest Expense</span>
+                                    <span class="text-sm text-secondary-light d-block" data-i18n="expense.highest">{% trans "Highest Expense" %}</span>
                                     <h5 class="fw-bold mb-0 text-success-600">{{ highest_expense|format_number }}</h5>
-                                    <small class="text-secondary-light">UZS</small>
+                                    <small class="text-secondary-light" data-i18n="common.currencyUzs">{% trans "UZS" %}</small>
                                 </div>
                             </div>
                         </div>
@@ -418,7 +419,7 @@
                             <div class="d-flex align-items-start gap-2">
                                 <iconify-icon icon="solar:arrow-down-bold" class="text-danger-600 text-xl"></iconify-icon>
                                 <div>
-                                    <span class="text-sm text-secondary-light d-block">Lowest Expense</span>
+                                    <span class="text-sm text-secondary-light d-block" data-i18n="expense.lowest">{% trans "Lowest Expense" %}</span>
                                     <h5 class="fw-bold mb-0 text-danger-600">{{ lowest_expense|format_number }}</h5>
                                     <small class="text-secondary-light">UZS</small>
                                 </div>

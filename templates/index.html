@@ -223,8 +223,16 @@
                 </div>
                 {% if staff_performance %}
                 <h6 class="text-sm fw-semibold mb-2" data-i18n="dashboard.staffPerformance">Staff Performance</h6>
+                <style>
+                .table-compact { table-layout: auto; width: 100%; }
+                .table-compact th, .table-compact td { padding: 12px 14px; font-size: 14px; white-space: normal; vertical-align: middle; }
+                .truncate-cell { max-width: none; display: inline-flex; align-items: center; gap: 6px; }
+                .truncate-label { max-width: none; white-space: normal; overflow: visible; text-overflow: clip; }
+                .info-icon { color: #9CA3AF; font-size: 14px; }
+                .nowrap { white-space: nowrap; }
+                </style>
                 <div class="table-responsive performance-table">
-                    <table class="table bordered-table sm-table mb-0">
+                    <table class="table bordered-table sm-table mb-0 table-compact">
                         <thead>
                             <tr>
                                 <th data-i18n="common.staff">Staff</th>
@@ -272,7 +280,7 @@
                 {% if branch_performance %}
                 <h6 class="text-sm fw-semibold mb-2" data-i18n="dashboard.branchPerformanceThisMonth">Branch Performance (This Month)</h6>
                 <div class="table-responsive performance-table">
-                    <table class="table bordered-table sm-table mb-0">
+                    <table class="table bordered-table sm-table mb-0 table-compact">
                         <thead>
                             <tr>
                                 <th data-i18n="table.branch">Branch</th>
@@ -510,7 +518,7 @@
             </div>
             <div class="card-body p-24">
                 <div class="table-responsive">
-                    <table class="table bordered-table mb-0">
+                    <table class="table bordered-table mb-0 table-compact">
                         <thead>
                             <tr>
                                 <th scope="col">#</th>
@@ -557,14 +565,14 @@
                                     <span class="text-secondary-light">-</span>
                                     {% endif %}
                                 </td>
-                                <td class="text-end fw-semibold">{{ order.total_price|format_number }} <small class="text-xs fw-normal text-secondary-light">UZS</small></td>
+                                <td class="text-end fw-semibold nowrap">{{ order.total_price|format_number }} <small class="text-xs fw-normal text-secondary-light">UZS</small></td>
                                 <td>
                                     {% if order.payment_method == 'cash' %}
-                                    <span class="badge bg-success-100 text-success-600"><iconify-icon icon="solar:wallet-bold" class="me-1"></iconify-icon data-i18n="payment.cash">Cash</span>
+                                    <span class="badge bg-success-100 text-success-600" data-i18n="payment.cash">Cash</span>
                                     {% elif order.payment_method == 'card' %}
-                                    <span class="badge bg-info-100 text-info-600"><iconify-icon icon="solar:card-bold" class="me-1"></iconify-icon data-i18n="payment.card">Card</span>
+                                    <span class="badge bg-info-100 text-info-600" data-i18n="payment.card">Card</span>
                                     {% elif order.payment_method == 'transfer' %}
-                                    <span class="badge bg-primary-100 text-primary-600"><iconify-icon icon="solar:transfer-bold" class="me-1"></iconify-icon><span data-i18n="payment.transfer">Transfer</span></span>
+                                    <span class="badge bg-primary-100 text-primary-600" data-i18n="payment.transfer">Transfer</span>
                                     {% else %}
                                     <span class="text-secondary-light">-</span>
                                     {% endif %}

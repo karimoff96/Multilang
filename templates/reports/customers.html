@@ -1,4 +1,5 @@
 {% extends 'layout/layout.html' %} 
+{% load i18n %}
 {% load number_filters %}
 
 {% block content %}
@@ -10,34 +11,34 @@
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                     <div>
                         <h5 class="fw-bold mb-0" data-i18n="report.customerAnalytics">{{ title }}</h5>
-                        <p class="text-secondary-light mb-0" data-i18n="report.customerAnalyticsDesc">Customer acquisition and behavior analytics</p>
+                        <p class="text-secondary-light mb-0" data-i18n="report.customerAnalyticsDesc">{% trans "Customer acquisition and behavior analytics" %}</p>
                     </div>
-                    <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                    <form method="GET" class="d-flex flex-wrap gap-2 align-items-end">
                         <!-- Period Filter -->
                         <div>
-                            <label class="form-label text-sm mb-1" data-i18n="filter.period">Period</label>
-                            <select name="period" id="periodSelect" class="form-select" style="min-width: 140px;">
+                            <label class="form-label text-sm mb-1" data-i18n="filter.period">{% trans "Period" %}</label>
+                            <select name="period" id="periodSelect" class="form-select form-select-sm" style="min-width: 120px;">
                                 {% for value, label in period_choices %}
                                 <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <!-- Custom Date Range -->
-                        <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                        <div id="customDateRange" class="d-flex gap-2 flex-wrap" style="{% if period != 'custom' %}display: none;{% endif %}">
                             <div>
-                                <label class="form-label text-sm mb-1" data-i18n="filter.from">From</label>
-                                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                                <label class="form-label text-sm mb-1" data-i18n="filter.from">{% trans "From" %}</label>
+                                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}">
                             </div>
                             <div>
-                                <label class="form-label text-sm mb-1" data-i18n="filter.to">To</label>
-                                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                                <label class="form-label text-sm mb-1" data-i18n="filter.to">{% trans "To" %}</label>
+                                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}">
                             </div>
                         </div>
                         {% if user.is_superuser and centers %}
                         <div>
-                            <label class="form-label text-sm mb-1" data-i18n="common.center">Center</label>
-                            <select name="center" class="form-select" onchange="this.form.submit()">
-                                <option value="" data-i18n="common.allCenters">All Centers</option>
+                            <label class="form-label text-sm mb-1" data-i18n="common.center">{% trans "Center" %}</label>
+                            <select name="center" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="" data-i18n="common.allCenters">{% trans "All Centers" %}</option>
                                 {% for center in centers %}
                                 <option value="{{ center.id }}" {% if selected_center == center.id|stringformat:"s" %}selected{% endif %}>{{ center.name }}</option>
                                 {% endfor %}
@@ -46,22 +47,22 @@
                         {% endif %}
                         {% if branches %}
                         <div>
-                            <label class="form-label text-sm mb-1" data-i18n="common.branch">Branch</label>
-                            <select name="branch" class="form-select">
-                                <option value="" data-i18n="common.allBranches">All Branches</option>
+                            <label class="form-label text-sm mb-1" data-i18n="common.branch">{% trans "Branch" %}</label>
+                            <select name="branch" class="form-select form-select-sm">
+                                <option value="" data-i18n="common.allBranches">{% trans "All Branches" %}</option>
                                 {% for branch in branches %}
                                 <option value="{{ branch.id }}" {% if selected_branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         {% endif %}
-                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1">
                             <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
-                            <span data-i18n="common.apply">Apply</span>
+                            <span data-i18n="common.apply">{% trans "Apply" %}</span>
                         </button>
-                        <a href="{% url 'export_report' 'customers' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
+                        <a href="{% url 'export_report' 'customers' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}" class="btn btn-outline-success btn-sm d-inline-flex align-items-center gap-1">
                             <iconify-icon icon="vscode-icons:file-type-excel" class="icon line-height-1"></iconify-icon>
-                            <span data-i18n="common.exportExcel">Export Excel</span>
+                            <span data-i18n="common.exportExcel">{% trans "Export Excel" %}</span>
                         </a>
                     </form>
                 </div>
@@ -176,16 +177,16 @@
     <div class="col-12">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
-                <h6 class="fw-bold text-lg mb-4" data-i18n="report.topCustomersByRevenue">Top Customers by Revenue</h6>
+                <h6 class="fw-bold text-lg mb-4" data-i18n="report.topCustomersByRevenue">{% trans "Top Customers by Revenue" %}</h6>
                 <div class="table-responsive">
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base text-secondary-light">#</th>
-                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.customer">Customer</th>
-                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.type">Type</th>
-                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.orders">Orders</th>
-                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="report.totalSpent">Total Spent</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.number">#</th>
+                                <th scope="col" class="bg-base text-secondary-light" data-i18n="table.customer">{% trans "Customer" %}</th>
+                                <th scope="col" class="bg-base text-secondary-light hide-mobile" data-i18n="table.type">{% trans "Type" %}</th>
+                                <th scope="col" class="bg-base text-secondary-light text-center" data-i18n="table.orders">{% trans "Orders" %}</th>
+                                <th scope="col" class="bg-base text-secondary-light text-end" data-i18n="report.totalSpent">{% trans "Total Spent" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -203,21 +204,21 @@
                                 </td>
                                 <td class="{{ row_color }}">
                                     <div class="d-flex align-items-center gap-2">
-                                        <div class="w-36-px h-36-px rounded-circle bg-{% if customer.is_agency %}primary{% else %}success{% endif %}-100 text-{% if customer.is_agency %}primary{% else %}success{% endif %}-600 d-flex justify-content-center align-items-center">
+                                        <div class="w-36-px h-36-px rounded-circle bg-{% if customer.is_agency %}primary{% else %}success{% endif %}-100 text-{% if customer.is_agency %}primary{% else %}success{% endif %}-600 d-flex justify-content-center align-items-center flex-shrink-0">
                                             <iconify-icon icon="{% if customer.is_agency %}solar:buildings-bold{% else %}solar:user-bold{% endif %}"></iconify-icon>
                                         </div>
-                                        <span class="fw-medium text-secondary-light">{{ customer.name }}</span>
+                                        <span class="fw-medium text-secondary-light text-truncate-cell">{{ customer.name }}</span>
                                     </div>
                                 </td>
-                                <td class="{{ row_color }}">
+                                <td class="{{ row_color }} hide-mobile">
                                     {% if customer.is_agency %}
-                                    <span class="badge bg-primary-focus text-primary-main" data-i18n="common.agency">Agency</span>
+                                    <span class="badge bg-primary-focus text-primary-main badge-compact" data-i18n="common.agency">{% trans "Agency" %}</span>
                                     {% else %}
-                                    <span class="badge bg-success-focus text-success-main" data-i18n="table.customer">Customer</span>
+                                    <span class="badge bg-success-focus text-success-main badge-compact" data-i18n="table.customer">{% trans "Customer" %}</span>
                                     {% endif %}
                                 </td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ customer.order_count }}</td>
-                                <td class="{{ row_color }} text-end">
+                                <td class="{{ row_color }} text-end nowrap">
                                     <span class="fw-bold text-success-main">{{ customer.total_spent|short_number }}</span>
                                     <small class="text-secondary-light">UZS</small>
                                 </td>

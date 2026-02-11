@@ -791,7 +791,7 @@ def customer_analytics(request):
             # Filter customers who have orders in branches of this center
             customer_ids = (
                 orders.filter(branch__center_id=center_id)
-                .values_list("customer_id", flat=True)
+                .values_list("bot_user_id", flat=True)
                 .distinct()
             )
             customers = customers.filter(id__in=customer_ids)

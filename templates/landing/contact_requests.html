@@ -17,7 +17,7 @@
                             <iconify-icon icon="solar:inbox-line-bold" class="icon"></iconify-icon>
                         </span>
                         <div>
-                            <span class="mb-0 fw-medium text-secondary-light">{% trans "Total" %}</span>
+                            <span class="mb-0 fw-medium text-secondary-light" data-i18n="contact.total">{% trans "Total" %}</span>
                             <h6 class="fw-semibold mb-0">{{ total_requests }}</h6>
                         </div>
                     </div>
@@ -35,7 +35,7 @@
                             <iconify-icon icon="solar:hourglass-line-bold" class="icon"></iconify-icon>
                         </span>
                         <div>
-                            <span class="mb-0 fw-medium text-secondary-light">{% trans "New" %}</span>
+                            <span class="mb-0 fw-medium text-secondary-light" data-i18n="status.new">{% trans "New" %}</span>
                             <h6 class="fw-semibold mb-0">{{ new_requests }}</h6>
                         </div>
                     </div>
@@ -53,7 +53,7 @@
                             <iconify-icon icon="solar:phone-calling-bold" class="icon"></iconify-icon>
                         </span>
                         <div>
-                            <span class="mb-0 fw-medium text-secondary-light">{% trans "Contacted" %}</span>
+                            <span class="mb-0 fw-medium text-secondary-light" data-i18n="status.contacted">{% trans "Contacted" %}</span>
                             <h6 class="fw-semibold mb-0">{{ contacted_requests }}</h6>
                         </div>
                     </div>
@@ -71,7 +71,7 @@
                             <iconify-icon icon="solar:clock-circle-bold" class="icon"></iconify-icon>
                         </span>
                         <div>
-                            <span class="mb-0 fw-medium text-secondary-light">{% trans "Pending" %}</span>
+                            <span class="mb-0 fw-medium text-secondary-light" data-i18n="status.pending">{% trans "Pending" %}</span>
                             <h6 class="fw-semibold mb-0">{{ pending_requests }}</h6>
                         </div>
                     </div>
@@ -89,7 +89,7 @@
                             <iconify-icon icon="solar:check-circle-bold" class="icon"></iconify-icon>
                         </span>
                         <div>
-                            <span class="mb-0 fw-medium text-secondary-light">{% trans "Converted" %}</span>
+                            <span class="mb-0 fw-medium text-secondary-light" data-i18n="status.converted">{% trans "Converted" %}</span>
                             <h6 class="fw-semibold mb-0">{{ converted_requests }}</h6>
                         </div>
                     </div>
@@ -107,7 +107,7 @@
                             <iconify-icon icon="solar:close-circle-bold" class="icon"></iconify-icon>
                         </span>
                         <div>
-                            <span class="mb-0 fw-medium text-secondary-light">{% trans "Cancelled" %}</span>
+                            <span class="mb-0 fw-medium text-secondary-light" data-i18n="status.cancelled">{% trans "Cancelled" %}</span>
                             <h6 class="fw-semibold mb-0">{{ cancelled_requests }}</h6>
                         </div>
                     </div>
@@ -122,65 +122,67 @@
     <div class="card-body p-24">
         <form method="GET" class="row gy-3 gx-3 align-items-end">
             <div class="col-md-2">
-                <label class="form-label">{% trans "Status" %}</label>
+                <label class="form-label" data-i18n="table.status">{% trans "Status" %}</label>
                 <select name="status" class="form-select">
-                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>{% trans "All" %}</option>
-                    <option value="new" {% if status_filter == 'new' %}selected{% endif %}>{% trans "New" %}</option>
-                    <option value="contacted" {% if status_filter == 'contacted' %}selected{% endif %}>{% trans "Contacted" %}</option>
-                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>{% trans "Pending" %}</option>
-                    <option value="converted" {% if status_filter == 'converted' %}selected{% endif %}>{% trans "Converted" %}</option>
-                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>{% trans "Cancelled" %}</option>
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %} data-i18n="common.all">{% trans "All" %}</option>
+                    <option value="new" {% if status_filter == 'new' %}selected{% endif %} data-i18n="status.new">{% trans "New" %}</option>
+                    <option value="contacted" {% if status_filter == 'contacted' %}selected{% endif %} data-i18n="status.contacted">{% trans "Contacted" %}</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %} data-i18n="status.pending">{% trans "Pending" %}</option>
+                    <option value="converted" {% if status_filter == 'converted' %}selected{% endif %} data-i18n="status.converted">{% trans "Converted" %}</option>
+                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %} data-i18n="status.cancelled">{% trans "Cancelled" %}</option>
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">{% trans "Date From" %}</label>
+                <label class="form-label" data-i18n="filters.dateFrom">{% trans "Date From" %}</label>
                 <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
             </div>
             <div class="col-md-2">
-                <label class="form-label">{% trans "Date To" %}</label>
+                <label class="form-label" data-i18n="filters.dateTo">{% trans "Date To" %}</label>
                 <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
             </div>
             <div class="col-md-2">
-                <label class="form-label">{% trans "Has Company" %}</label>
+                <label class="form-label" data-i18n="contact.hasCompany">{% trans "Has Company" %}</label>
                 <select name="has_company" class="form-select">
-                    <option value="">{% trans "All" %}</option>
-                    <option value="yes" {% if has_company == 'yes' %}selected{% endif %}>{% trans "Yes" %}</option>
-                    <option value="no" {% if has_company == 'no' %}selected{% endif %}>{% trans "No" %}</option>
+                    <option value="" data-i18n="common.all">{% trans "All" %}</option>
+                    <option value="yes" {% if has_company == 'yes' %}selected{% endif %} data-i18n="common.yes">{% trans "Yes" %}</option>
+                    <option value="no" {% if has_company == 'no' %}selected{% endif %} data-i18n="common.no">{% trans "No" %}</option>
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">{% trans "Has Phone" %}</label>
+                <label class="form-label" data-i18n="contact.hasPhone">{% trans "Has Phone" %}</label>
                 <select name="has_phone" class="form-select">
-                    <option value="">{% trans "All" %}</option>
-                    <option value="yes" {% if has_phone == 'yes' %}selected{% endif %}>{% trans "Yes" %}</option>
-                    <option value="no" {% if has_phone == 'no' %}selected{% endif %}>{% trans "No" %}</option>
+                    <option value="" data-i18n="common.all">{% trans "All" %}</option>
+                    <option value="yes" {% if has_phone == 'yes' %}selected{% endif %} data-i18n="common.yes">{% trans "Yes" %}</option>
+                    <option value="no" {% if has_phone == 'no' %}selected{% endif %} data-i18n="common.no">{% trans "No" %}</option>
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">{% trans "Sort By" %}</label>
+                <label class="form-label" data-i18n="filters.sortBy">{% trans "Sort By" %}</label>
                 <select name="sort" class="form-select">
-                    <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>{% trans "Newest First" %}</option>
-                    <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>{% trans "Oldest First" %}</option>
-                    <option value="name" {% if sort_by == 'name' %}selected{% endif %}>{% trans "Name (A-Z)" %}</option>
-                    <option value="-name" {% if sort_by == '-name' %}selected{% endif %}>{% trans "Name (Z-A)" %}</option>
-                    <option value="status" {% if sort_by == 'status' %}selected{% endif %}>{% trans "Status" %}</option>
+                    <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %} data-i18n="filters.newestFirst">{% trans "Newest First" %}</option>
+                    <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %} data-i18n="filters.oldestFirst">{% trans "Oldest First" %}</option>
+                    <option value="name" {% if sort_by == 'name' %}selected{% endif %} data-i18n="filters.nameAZ">{% trans "Name (A-Z)" %}</option>
+                    <option value="-name" {% if sort_by == '-name' %}selected{% endif %} data-i18n="filters.nameZA">{% trans "Name (Z-A)" %}</option>
+                    <option value="status" {% if sort_by == 'status' %}selected{% endif %} data-i18n="table.status">{% trans "Status" %}</option>
                 </select>
             </div>
             <div class="col-md-8">
-                <label class="form-label">{% trans "Search" %}</label>
+                <label class="form-label" data-i18n="common.search">{% trans "Search" %}</label>
                 <input type="text" name="search" class="form-control" 
-                       placeholder="{% trans 'Search by name, email, company, phone or message' %}" 
+                       placeholder="{% trans 'Search by name, email, company, phone or message' %}"
+                       data-i18n-placeholder="contact.searchPlaceholder" 
                        value="{{ search_query }}">
             </div>
             <div class="col-md-4">
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary-600 flex-grow-1">
                         <iconify-icon icon="solar:magnifer-linear" class="icon"></iconify-icon>
-                        {% trans "Apply Filters" %}
+                        <span data-i18n="filters.apply">{% trans "Apply Filters" %}</span>
                     </button>
                     <a href="{% url 'contact_requests_list' %}" 
                        class="btn btn-outline-secondary-600 no-hover-effect"
                        title="{% trans 'Clear Filters' %}"
+                       data-i18n-title="filters.clear"
                        data-bs-toggle="tooltip">
                         <iconify-icon icon="solar:refresh-linear" class="icon text-white"></iconify-icon>
                     </a>
@@ -191,20 +193,20 @@
 </div>
 
 <!-- Contact Requests Table -->
-<div class="card radius-8 border"
+<div class="card radius-8 border">
     <div class="card-body p-24" style="overflow: visible;">
         <div class="table-responsive" style="overflow-x: auto; overflow-y: visible;">
             <table class="table bordered-table mb-0">
                 <thead>
                     <tr>
-                        <th scope="col">{% trans "Date" %}</th>
-                        <th scope="col">{% trans "Name" %}</th>
-                        <th scope="col">{% trans "Email" %}</th>
-                        <th scope="col">{% trans "Company" %}</th>
-                        <th scope="col">{% trans "Phone" %}</th>
-                        <th scope="col">{% trans "Message" %}</th>
-                        <th scope="col">{% trans "Status" %}</th>
-                        <th scope="col" class="text-center">{% trans "Actions" %}</th>
+                        <th scope="col" data-i18n="table.date">{% trans "Date" %}</th>
+                        <th scope="col" data-i18n="table.name">{% trans "Name" %}</th>
+                        <th scope="col" data-i18n="table.email">{% trans "Email" %}</th>
+                        <th scope="col" data-i18n="table.company">{% trans "Company" %}</th>
+                        <th scope="col" data-i18n="table.phone">{% trans "Phone" %}</th>
+                        <th scope="col" data-i18n="table.message">{% trans "Message" %}</th>
+                        <th scope="col" data-i18n="table.status">{% trans "Status" %}</th>
+                        <th scope="col" class="text-center" data-i18n="table.actions">{% trans "Actions" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -238,7 +240,7 @@
                             <button type="button" class="btn btn-sm btn-outline-primary-600" 
                                     data-bs-toggle="modal" data-bs-target="#messageModal{{ request.id }}">
                                 <iconify-icon icon="solar:eye-linear" class="icon"></iconify-icon>
-                                {% trans "View" %}
+                                <span data-i18n="common.view">{% trans "View" %}</span>
                             </button>
                             
                             <!-- Message Modal -->
@@ -246,12 +248,12 @@
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title">{% trans "Message from" %} {{ request.name }}</h5>
+                                            <h5 class="modal-title"><span data-i18n="contact.messageFrom">{% trans "Message from" %}</span> {{ request.name }}</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
                                             <div class="mb-3">
-                                                <strong>{% trans "Message:" %}</strong>
+                                                <strong data-i18n="table.message">{% trans "Message:" %}</strong>
                                                 <p class="mt-2">{{ request.message }}</p>
                                             </div>
                                             
@@ -260,15 +262,16 @@
                                             <form method="POST" action="{% url 'contact_request_add_note' request.id %}">
                                                 {% csrf_token %}
                                                 <div class="mb-3">
-                                                    <label class="form-label"><strong>{% trans "Internal Notes:" %}</strong></label>
+                                                    <label class="form-label"><strong data-i18n="contact.internalNotes">{% trans "Internal Notes:" %}</strong></label>
                                                     <textarea name="notes" class="form-control" rows="3" 
-                                                              placeholder="{% trans 'Add notes about this contact request...' %}">{{ request.notes }}</textarea>
+                                                              placeholder="{% trans 'Add notes about this contact request...' %}"
+                                                              data-i18n-placeholder="contact.addNotesPlaceholder">{{ request.notes }}</textarea>
                                                 </div>
                                                 <div class="d-flex justify-content-end gap-2">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.close">{% trans "Close" %}</button>
                                                     <button type="submit" class="btn btn-primary-600">
                                                         <iconify-icon icon="solar:diskette-bold" class="icon"></iconify-icon>
-                                                        {% trans "Save Notes" %}
+                                                        <span data-i18n="contact.saveNotes">{% trans "Save Notes" %}</span>
                                                     </button>
                                                 </div>
                                             </form>
@@ -281,27 +284,27 @@
                             {% if request.status == 'new' %}
                                 <span class="badge text-sm fw-semibold text-warning-600 bg-warning-100 px-20 py-9 radius-4">
                                     <iconify-icon icon="solar:hourglass-line-bold" class="icon"></iconify-icon>
-                                    {% trans "New" %}
+                                    <span data-i18n="status.new">{% trans "New" %}</span>
                                 </span>
                             {% elif request.status == 'contacted' %}
                                 <span class="badge text-sm fw-semibold text-info-600 bg-info-100 px-20 py-9 radius-4">
                                     <iconify-icon icon="solar:phone-calling-bold" class="icon"></iconify-icon>
-                                    {% trans "Contacted" %}
+                                    <span data-i18n="status.contacted">{% trans "Contacted" %}</span>
                                 </span>
                             {% elif request.status == 'pending' %}
                                 <span class="badge text-sm fw-semibold text-purple-600 bg-purple-100 px-20 py-9 radius-4">
                                     <iconify-icon icon="solar:clock-circle-bold" class="icon"></iconify-icon>
-                                    {% trans "Pending" %}
+                                    <span data-i18n="status.pending">{% trans "Pending" %}</span>
                                 </span>
                             {% elif request.status == 'converted' %}
                                 <span class="badge text-sm fw-semibold text-success-600 bg-success-100 px-20 py-9 radius-4">
                                     <iconify-icon icon="solar:check-circle-bold" class="icon"></iconify-icon>
-                                    {% trans "Converted" %}
+                                    <span data-i18n="status.converted">{% trans "Converted" %}</span>
                                 </span>
                             {% elif request.status == 'cancelled' %}
                                 <span class="badge text-sm fw-semibold text-danger-600 bg-danger-100 px-20 py-9 radius-4">
                                     <iconify-icon icon="solar:close-circle-bold" class="icon"></iconify-icon>
-                                    {% trans "Cancelled" %}
+                                    <span data-i18n="status.cancelled">{% trans "Cancelled" %}</span>
                                 </span>
                             {% endif %}
                         </td>
@@ -309,7 +312,7 @@
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-outline-primary-600 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-boundary="viewport">
                                     <iconify-icon icon="solar:settings-linear" class="icon"></iconify-icon>
-                                    {% trans "Change Status" %}
+                                    <span data-i18n="contact.changeStatus">{% trans "Change Status" %}</span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
@@ -318,7 +321,7 @@
                                             <input type="hidden" name="status" value="new">
                                             <button type="submit" class="dropdown-item{% if request.status == 'new' %} active{% endif %}">
                                                 <iconify-icon icon="solar:hourglass-line-bold" class="icon"></iconify-icon>
-                                                {% trans "New" %}
+                                                <span data-i18n="status.new">{% trans "New" %}</span>
                                             </button>
                                         </form>
                                     </li>
@@ -328,7 +331,7 @@
                                             <input type="hidden" name="status" value="contacted">
                                             <button type="submit" class="dropdown-item{% if request.status == 'contacted' %} active{% endif %}">
                                                 <iconify-icon icon="solar:phone-calling-bold" class="icon"></iconify-icon>
-                                                {% trans "Contacted" %}
+                                                <span data-i18n="status.contacted">{% trans "Contacted" %}</span>
                                             </button>
                                         </form>
                                     </li>
@@ -338,7 +341,7 @@
                                             <input type="hidden" name="status" value="pending">
                                             <button type="submit" class="dropdown-item{% if request.status == 'pending' %} active{% endif %}">
                                                 <iconify-icon icon="solar:clock-circle-bold" class="icon"></iconify-icon>
-                                                {% trans "Pending" %}
+                                                <span data-i18n="status.pending">{% trans "Pending" %}</span>
                                             </button>
                                         </form>
                                     </li>
@@ -348,7 +351,7 @@
                                             <input type="hidden" name="status" value="converted">
                                             <button type="submit" class="dropdown-item{% if request.status == 'converted' %} active{% endif %}">
                                                 <iconify-icon icon="solar:check-circle-bold" class="icon"></iconify-icon>
-                                                {% trans "Converted" %}
+                                                <span data-i18n="status.converted">{% trans "Converted" %}</span>
                                             </button>
                                         </form>
                                     </li>
@@ -358,7 +361,7 @@
                                             <input type="hidden" name="status" value="cancelled">
                                             <button type="submit" class="dropdown-item{% if request.status == 'cancelled' %} active{% endif %}">
                                                 <iconify-icon icon="solar:close-circle-bold" class="icon"></iconify-icon>
-                                                {% trans "Cancelled" %}
+                                                <span data-i18n="status.cancelled">{% trans "Cancelled" %}</span>
                                             </button>
                                         </form>
                                     </li>

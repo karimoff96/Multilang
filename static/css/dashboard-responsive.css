@@ -618,3 +618,385 @@
         overflow: visible !important;
     }
 }
+
+/* ============================================
+   11. ENHANCED MOBILE RESPONSIVENESS
+   ============================================ */
+
+/* Mobile-specific table handling */
+@media (max-width: 767px) {
+    /* Remove table horizontal scroll by making it stack-friendly */
+    .table-responsive {
+        border: 0;
+    }
+    
+    /* Action button groups responsive */
+    .btn-group-vertical-mobile {
+        flex-direction: column !important;
+        width: 100%;
+    }
+    
+    .btn-group-vertical-mobile .btn {
+        width: 100% !important;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Filter forms responsive */
+    form.d-flex.flex-wrap,
+    .filter-form {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
+    form.d-flex.flex-wrap > div,
+    .filter-form > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 0.75rem;
+    }
+    
+    form.d-flex.flex-wrap button,
+    form.d-flex.flex-wrap a.btn,
+    .filter-form button,
+    .filter-form a.btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+    
+    /* Card headers responsive */
+    .card-header .d-flex,
+    .card-body > .d-flex.justify-content-between,
+    .d-flex.align-items-center.justify-content-between {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+    }
+    
+    .card-header .d-flex > *,
+    .card-body > .d-flex.justify-content-between > * {
+        width: 100% !important;
+    }
+    
+    /* Stats cards mobile optimization */
+    .col-sm-6 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* Table action column - always visible on mobile */
+    .col-action .dropdown {
+        position: static;
+    }
+    
+    .col-action .dropdown-menu {
+        right: 0 !important;
+        left: auto !important;
+    }
+    
+    /* Badge text wrapping on mobile */
+    .badge {
+        white-space: normal !important;
+        line-height: 1.3;
+    }
+    
+    /* Chart responsive heights */
+    #acquisitionChart,
+    #revenueChart,
+    [id$="Chart"] {
+        min-height: 250px !important;
+    }
+}
+
+/* Very small mobile devices */
+@media (max-width: 375px) {
+    .dashboard-main-body {
+        padding: 8px !important;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .card-body {
+        padding: 10px !important;
+    }
+    
+    h5, .h5 {
+        font-size: 1rem !important;
+    }
+    
+    h6, .h6 {
+        font-size: 0.9rem !important;
+    }
+    
+    /* Ultra-compact action buttons */
+    .action-btn-sm {
+        width: 24px !important;
+        height: 24px !important;
+        padding: 0 !important;
+    }
+    
+    /* Compact table on very small screens */
+    .bordered-table th,
+    .bordered-table td {
+        padding: 6px 8px !important;
+        font-size: 0.7rem !important;
+    }
+}
+
+/* ============================================
+   12. TABLE IMPROVEMENTS FOR ALL SCREENS
+   ============================================ */
+
+/* Prevent table column header wrapping */
+.table thead th {
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+/* Better table cell padding */
+.table th,
+.table td {
+    vertical-align: middle;
+}
+
+/* Table hover effect */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Striped tables */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.015);
+}
+
+/* Bordered tables without horizontal scroll */
+.bordered-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.bordered-table th,
+.bordered-table td {
+    border: 1px solid #e4e7ec;
+}
+
+/* Table with colored rows - responsive */
+.colored-row-table tbody tr td {
+    padding: 12px !important;
+}
+
+@media (max-width: 575px) {
+    .colored-row-table tbody tr td {
+        padding: 8px !important;
+    }
+}
+
+/* ============================================
+   13. FORM IMPROVEMENTS
+   ============================================ */
+
+/* Form labels mobile */
+@media (max-width: 575px) {
+    .form-label {
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .form-control,
+    .form-select {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Modal forms */
+    .modal-body .form-group,
+    .modal-body .mb-3 {
+        margin-bottom: 1rem !important;
+    }
+}
+
+/* ============================================
+   14. BREADCRUMB RESPONSIVE
+   ============================================ */
+
+@media (max-width: 575px) {
+    .breadcrumb {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+    
+    .breadcrumb-item + .breadcrumb-item::before {
+        padding-right: 0.25rem;
+        padding-left: 0.25rem;
+    }
+}
+
+/* ============================================
+   15. EXPORT BUTTONS RESPONSIVE
+   ============================================ */
+
+@media (max-width: 767px) {
+    /* Export button group */
+    .d-flex.gap-3 {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+    }
+    
+    .btn.d-inline-flex {
+        display: flex !important;
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ============================================
+   16. PAGINATION IMPROVEMENTS
+   ============================================ */
+
+/* Pagination responsive */
+@media (max-width: 575px) {
+    .pagination {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .pagination .page-item {
+        margin: 2px;
+    }
+    
+    .pagination .page-link {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        min-width: 32px;
+        text-align: center;
+    }
+    
+    /* Hide page numbers on very small screens, keep prev/next */
+    .pagination .page-item:not(.disabled):not(.active):not(:first-child):not(:last-child) {
+        display: none;
+    }
+    
+    .pagination .page-item.active {
+        display: inline-block;
+    }
+}
+
+/* ============================================
+   17. DROPDOWN MENU IMPROVEMENTS
+   ============================================ */
+
+/* Dropdown menus on mobile */
+@media (max-width: 575px) {
+    .dropdown-menu {
+        min-width: 200px !important;
+        max-width: 90vw;
+    }
+    
+    .dropdown-item {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        white-space: normal;
+    }
+}
+
+/* ============================================
+   18. ALERT & MESSAGE RESPONSIVE
+   ============================================ */
+
+@media (max-width: 575px) {
+    .messages-container {
+        right: 10px !important;
+        left: 10px !important;
+        top: 70px !important;
+        min-width: auto !important;
+        max-width: none !important;
+    }
+    
+    .alert {
+        font-size: 0.875rem;
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* ============================================
+   19. CHART RESPONSIVE CONTAINERS
+   ============================================ */
+
+/* All chart containers should be responsive */
+.chart-container,
+[id$="Chart"],
+[class*="chart"] {
+    width: 100%;
+    overflow: hidden;
+}
+
+@media (max-width: 767px) {
+    .apexcharts-toolbar {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   20. UTILITY CLASSES - RESPONSIVE TEXT
+   ============================================ */
+
+/* Responsive text utilities */
+.text-responsive {
+    font-size: clamp(0.875rem, 2vw, 1rem);
+}
+
+.text-responsive-sm {
+    font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+}
+
+.text-responsive-lg {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+}
+
+/* Hide text on mobile, show icon only */
+@media (max-width: 575px) {
+    .hide-text-mobile span:not(.badge) {
+        display: none !important;
+    }
+    
+    .hide-text-mobile iconify-icon {
+        margin: 0 !important;
+    }
+}
+
+/* ============================================
+   21. SPECIFIC FIX FOR WIDE TABLES
+   ============================================ */
+
+/* Force tables to fit container without horizontal scroll */
+.table-fit {
+    width: 100% !important;
+    max-width: 100%;
+    table-layout: fixed;
+}
+
+.table-fit th,
+.table-fit td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Allow specific columns to wrap */
+.table-fit .allow-wrap {
+    white-space: normal !important;
+}
+
+/* Responsive table wrapper improvement */
+.table-responsive-custom {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 992px) {
+    .table-responsive-custom {
+        overflow-x: visible;
+    }
+}

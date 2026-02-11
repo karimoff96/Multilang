@@ -1,4 +1,5 @@
 {% extends 'layout/layout.html' %}
+{% load i18n %}
 {% load translation_filters %} 
 {% load number_filters %}
 {% load billing_extras %}
@@ -11,28 +12,28 @@
             <div class="card-body p-24">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                     <div>
-                        <h5 class="fw-bold mb-0">{{ title }}</h5>
-                        <p class="text-secondary-light mb-0" data-i18n="report.orderStatistics">Order statistics and analytics</p>
+                        <h5 class="fw-bold mb-0" data-i18n="report.ordersReport">{{ title }}</h5>
+                        <p class="text-secondary-light mb-0" data-i18n="report.orderStatistics">{% trans "Order statistics and analytics" %}</p>
                     </div>
-                    <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
+                    <form method="GET" class="d-flex flex-wrap gap-2 align-items-end">
                         <!-- Period Filter -->
                         <div>
-                            <label class="form-label text-sm mb-1" data-i18n="filter.period">Period</label>
-                            <select name="period" id="periodSelect" class="form-select" style="min-width: 140px;">
+                            <label class="form-label text-sm mb-1" data-i18n="filter.period">{% trans "Period" %}</label>
+                            <select name="period" id="periodSelect" class="form-select form-select-sm" style="min-width: 120px;">
                                 {% for value, label in period_choices %}
                                 <option value="{{ value }}" {% if period == value %}selected{% endif %}>{{ label }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <!-- Custom Date Range -->
-                        <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                        <div id="customDateRange" class="d-flex gap-2 flex-wrap" style="{% if period != 'custom' %}display: none;{% endif %}">
                             <div>
-                                <label class="form-label text-sm mb-1" data-i18n="filter.from">From</label>
-                                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                                <label class="form-label text-sm mb-1" data-i18n="filter.from">{% trans "From" %}</label>
+                                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}">
                             </div>
                             <div>
-                                <label class="form-label text-sm mb-1" data-i18n="filter.to">To</label>
-                                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                                <label class="form-label text-sm mb-1" data-i18n="filter.to">{% trans "To" %}</label>
+                                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}">
                             </div>
                         </div>
                         {% if user.is_superuser and centers %}
@@ -58,28 +59,28 @@
                         </div>
                         {% endif %}
                         <div>
-                            <label class="form-label text-sm mb-1">Customer</label>
-                            <div class="input-group">
+                            <label class="form-label text-sm mb-1" data-i18n="table.customer">{% trans "Customer" %}</label>
+                            <div class="input-group input-group-sm">
                                 <span class="input-group-text"><iconify-icon icon="ion:search-outline"></iconify-icon></span>
-                                <input type="text" name="customer" class="form-control" placeholder="Name / phone / ID" value="{{ customer_query }}">
+                                <input type="text" name="customer" class="form-control" placeholder="{% trans 'Name / phone / ID' %}" value="{{ customer_query }}">
                             </div>
                         </div>
                         <div>
-                            <label class="form-label text-sm mb-1" data-i18n="table.status">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="" data-i18n="common.allStatuses">All Statuses</option>
+                            <label class="form-label text-sm mb-1" data-i18n="table.status">{% trans "Status" %}</label>
+                            <select name="status" class="form-select form-select-sm">
+                                <option value="" data-i18n="common.allStatuses">{% trans "All Statuses" %}</option>
                                 {% for value, label in status_choices %}
                                 <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1">
                             <iconify-icon icon="solar:filter-bold" class="icon line-height-1"></iconify-icon>
-                            <span data-i18n="common.apply">Apply</span>
+                            <span data-i18n="common.apply">{% trans "Apply" %}</span>
                         </button>
-                        <a href="{% url 'export_report' 'orders' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if customer_query %}&customer={{ customer_query|urlencode }}{% endif %}" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
+                        <a href="{% url 'export_report' 'orders' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if customer_query %}&customer={{ customer_query|urlencode }}{% endif %}" class="btn btn-outline-success btn-sm d-inline-flex align-items-center gap-1">
                             <iconify-icon icon="vscode-icons:file-type-excel" class="icon line-height-1"></iconify-icon>
-                            <span data-i18n="common.exportExcel">Export Excel</span>
+                            <span data-i18n="common.exportExcel">{% trans "Export Excel" %}</span>
                         </a>
                     </form>
                 </div>

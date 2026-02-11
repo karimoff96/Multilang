@@ -95,8 +95,16 @@
             <span class="badge bg-primary-50 text-primary-600">{{ centers_data.paginator.count }} {% trans "centers" %}</span>
         </div>
         <div class="card-body">
+            <style>
+            .table-compact { table-layout: fixed; width: 100%; }
+            .table-compact th, .table-compact td { padding: 8px 10px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .truncate-cell { max-width: 180px; display: inline-flex; align-items: center; gap: 6px; }
+            .truncate-label { max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .info-icon { color: #9CA3AF; font-size: 14px; }
+            .nowrap { white-space: nowrap; }
+            </style>
             <div class="table-responsive">
-                <table class="table bordered-table mb-0">
+                <table class="table bordered-table mb-0 table-compact">
                     <thead>
                         <tr>
                             <th>{% trans "Center" %}</th>
@@ -113,8 +121,8 @@
                         <tr>
                             <td>
                                 <div>
-                                    <div class="fw-semibold mb-1">{{ item.center.name }}</div>
-                                    <small class="text-gray-500">{{ item.center.subdomain }}.wowdash.uz</small>
+                                    <div class="fw-semibold mb-1" title="{{ item.center.name }}">{{ item.center.name }}</div>
+                                    <small class="text-gray-500" title="{{ item.center.subdomain }}.wowdash.uz">{{ item.center.subdomain }}.wowdash.uz</small>
                                 </div>
                             </td>
                             <td>

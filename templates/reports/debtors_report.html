@@ -230,12 +230,12 @@
     <div class="col-12">
         <div class="card radius-8 border-0">
             <div class="card-body p-24">
-                <div class="row align-items-center mb-20">
-                    <div class="col-md-3">
-                        <h6 class="fw-bold text-lg mb-0">{% trans "All Debtors" %} ({{ total_count }})</h6>
+                <div class="row align-items-center mb-20 g-3">
+                    <div class="col-lg-3 col-md-12">
+                        <h6 class="fw-bold text-lg mb-0" data-i18n="report.allDebtors">{% trans "All Debtors" %} ({{ total_count }})</h6>
                     </div>
-                    <div class="col-md-6">
-                        <form method="GET" class="d-flex gap-2">
+                    <div class="col-lg-6 col-md-12">
+                        <form method="GET" class="d-flex gap-2 flex-wrap flex-md-nowrap">
                             <!-- Preserve existing filters -->
                             <input type="hidden" name="period" value="{{ period }}">
                             <input type="hidden" name="client_type" value="{{ client_type }}">
@@ -246,37 +246,37 @@
                             <input type="hidden" name="orders_count" value="{{ orders_count_filter }}">
                             <input type="hidden" name="sort_by" value="{{ sort_by }}">
                             <div class="flex-grow-1">
-                                <input type="text" name="search" class="form-control form-control-sm" placeholder="{% trans 'Quick search by name or phone...' %}" value="{{ search }}">
+                                <input type="text" name="search" class="form-control form-control-sm" data-i18n-placeholder="reports.quickSearchDebtors" placeholder="{% trans 'Quick search by name or phone...' %}" value="{{ search }}">
                             </div>
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                <iconify-icon icon="solar:magnifer-bold" class="me-1"></iconify-icon>
-                                {% trans "Search" %}
+                            <button type="submit" class="btn btn-sm btn-primary d-flex align-items-center gap-1">
+                                <iconify-icon icon="solar:magnifer-bold" class="hide-text-mobile"></iconify-icon>
+                                <span data-i18n="common.search">{% trans "Search" %}</span>
                             </button>
                         </form>
                     </div>
-                    <div class="col-md-3 text-end">
-                        <button type="button" class="btn btn-success btn-sm" onclick="exportToExcel()">
-                            <iconify-icon icon="vscode-icons:file-type-excel" class="me-1"></iconify-icon>
-                            {% trans "Export to Excel" %}
+                    <div class="col-lg-3 col-md-12 text-lg-end">
+                        <button type="button" class="btn btn-success btn-sm w-100 w-lg-auto d-flex align-items-center justify-content-center gap-1" onclick="exportToExcel()">
+                            <iconify-icon icon="vscode-icons:file-type-excel"></iconify-icon>
+                            <span data-i18n="common.exportExcel">{% trans "Export to Excel" %}</span>
                         </button>
                     </div>
                 </div>
 
                 {% if debtors %}
                 <div class="table-responsive">
-                    <table class="table basic-table mb-0" id="debtorsTable" style="table-layout: fixed; width: 100%;">
+                    <table class="table basic-table mb-0" id="debtorsTable">
                         <thead>
                             <tr>
-                                <th class="text-center" style="width: 5%; white-space: nowrap;">#</th>
-                                <th style="width: 18%; white-space: nowrap;" data-i18n="table.customer">{% trans "Customer" %}</th>
-                                <th class="text-center" style="width: 6%; white-space: nowrap;" data-i18n="table.type">{% trans "Type" %}</th>
-                                {% if show_center or show_branch %}<th class="text-center" style="width: 10%; white-space: nowrap;" data-i18n="common.location">{% trans "Location" %}</th>{% endif %}
-                                <th class="text-end" style="width: 11%; white-space: nowrap;" data-i18n="report.debt">{% trans "Debt" %}</th>
-                                <th class="text-center" style="width: 6%; white-space: nowrap;"data-i18n="report.countt">{% trans "Count" %}</th>
-                                <th class="text-end" style="width: 11%; white-space: nowrap;" data-i18n="report.expected">{% trans "Expected" %}</th>
-                                <th class="text-end" style="width: 11%; white-space: nowrap;" data-i18n="report.received">{% trans "Received" %}</th>
-                                <th class="text-center" style="width: 11%; white-space: nowrap;" data-i18n="table.rate">{% trans "Rate" %}</th>
-                                <th class="text-center" style="width: 13%; white-space: nowrap;" data-i18n="table.action">{% trans "Action" %}</th>
+                                <th class="text-center" data-i18n="table.number">#</th>
+                                <th data-i18n="table.customer">{% trans "Customer" %}</th>
+                                <th class="text-center hide-mobile" data-i18n="table.type">{% trans "Type" %}</th>
+                                {% if show_center or show_branch %}<th class="text-center hide-mobile" data-i18n="common.location">{% trans "Location" %}</th>{% endif %}
+                                <th class="text-end" data-i18n="report.debt">{% trans "Debt" %}</th>
+                                <th class="text-center hide-mobile" data-i18n="report.ordersCount">{% trans "Count" %}</th>
+                                <th class="text-end hide-mobile" data-i18n="report.expected">{% trans "Expected" %}</th>
+                                <th class="text-end hide-mobile" data-i18n="report.received">{% trans "Received" %}</th>
+                                <th class="text-center hide-mobile" data-i18n="table.rate">{% trans "Rate" %}</th>
+                                <th class="text-center" data-i18n="table.action">{% trans "Action" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -288,29 +288,29 @@
                                         <span class="w-32-px h-32-px bg-neutral-200 text-secondary-light d-flex justify-content-center align-items-center rounded-circle fw-semibold flex-shrink-0">
                                             {{ debtor.customer_name|slice:":1"|upper }}
                                         </span>
-                                        <div class="d-flex flex-column" style="min-width: 0;">
-                                            <span class="fw-medium text-truncate" title="{{ debtor.customer_name }}">{{ debtor.customer_name }}</span>
+                                        <div class="d-flex flex-column" style="min-width: 0; flex: 1;">
+                                            <span class="fw-medium text-truncate-cell" title="{{ debtor.customer_name }}">{{ debtor.customer_name }}</span>
                                             {% if debtor.customer_phone %}
                                             <small class="text-secondary-light">{{ debtor.customer_phone }}</small>
                                             {% endif %}
                                         </div>
                                     </div>
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center hide-mobile">
                                     {% if debtor.is_agency %}
-                                        <span class="badge bg-primary-focus text-primary-main px-2 py-1">B2B</span>
+                                        <span class="badge bg-primary-focus text-primary-main badge-compact" data-i18n="common.b2b">B2B</span>
                                     {% else %}
-                                        <span class="badge bg-warning-focus text-warning-main px-2 py-1">B2C</span>
+                                        <span class="badge bg-warning-focus text-warning-main badge-compact" data-i18n="common.b2c">B2C</span>
                                     {% endif %}
                                 </td>
                                 {% if show_center or show_branch %}
-                                <td class="text-center">
+                                <td class="text-center hide-mobile">
                                     <div class="d-flex flex-column gap-1 align-items-center">
                                         {% if show_center and debtor.center_name %}
-                                        <span class="badge bg-info-focus text-info-main px-2 py-1 text-truncate" style="max-width: 100%;" title="Center: {{ debtor.center_name }}">{{ debtor.center_name }}</span>
+                                        <span class="badge bg-info-focus text-info-main badge-compact text-truncate" style="max-width: 100%;" title="{% trans 'Center' %}: {{ debtor.center_name }}">{{ debtor.center_name }}</span>
                                         {% endif %}
                                         {% if show_branch and debtor.branch_name %}
-                                        <span class="badge bg-purple-focus text-purple-main px-2 py-1 text-truncate" style="max-width: 100%;" title="Branch: {{ debtor.branch_name }}">{{ debtor.branch_name }}</span>
+                                        <span class="badge bg-purple-focus text-purple-main badge-compact text-truncate" style="max-width: 100%;" title="{% trans 'Branch' %}: {{ debtor.branch_name }}">{{ debtor.branch_name }}</span>
                                         {% endif %}
                                         {% if not debtor.center_name and not debtor.branch_name %}
                                         <span class="text-muted">—</span>
@@ -318,19 +318,19 @@
                                     </div>
                                 </td>
                                 {% endif %}
-                                <td class="text-end text-danger-main fw-semibold" data-value="{{ debtor.remaining }}">
+                                <td class="text-end text-danger-main fw-semibold nowrap" data-value="{{ debtor.remaining }}">
                                     <span class="formatted-number">{{ debtor.remaining|intspace }}</span>
                                 </td>
-                                <td class="text-center">
-                                    <span class="badge bg-primary-600 text-white px-2 py-1 fw-medium">{{ debtor.orders_with_debt }}</span>
+                                <td class="text-center hide-mobile">
+                                    <span class="badge bg-primary-600 text-white badge-compact fw-medium">{{ debtor.orders_with_debt }}</span>
                                 </td>
-                                <td class="text-end" data-value="{{ debtor.total_expected }}">
+                                <td class="text-end hide-mobile nowrap" data-value="{{ debtor.total_expected }}">
                                     <span class="formatted-number">{{ debtor.total_expected|intspace }}</span>
                                 </td>
-                                <td class="text-end text-success-600 fw-semibold" data-value="{{ debtor.total_received }}">
+                                <td class="text-end text-success-600 fw-semibold hide-mobile nowrap" data-value="{{ debtor.total_received }}">
                                     <span class="formatted-number">{{ debtor.total_received|intspace }}</span>
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center hide-mobile">
                                     <div class="d-flex align-items-center justify-content-center gap-1">
                                         <div class="progress" style="width: 45px; height: 8px;">
                                             <div class="progress-bar {% if debtor.collection_rate >= 70 %}bg-success-600{% elif debtor.collection_rate >= 40 %}bg-warning-600{% else %}bg-danger-600{% endif %}" 
@@ -341,10 +341,10 @@
                                 </td>
                                 <td class="text-center">
                                     <a href="{% url 'orders:bulk_payment_page' %}?customer_id={{ debtor.customer_id }}" 
-                                       class="btn btn-primary-600 text-white radius-8 px-4 py-3 fw-semibold d-inline-flex align-items-center gap-2"
-                                       title="{% trans 'Pay debt for' %} {{ debtor.customer_name }}">
-                                        <iconify-icon icon="solar:wallet-money-bold" class="text-xl"></iconify-icon>
-                                        <span>{% trans "Pay" %}</span>
+                                       class="btn btn-primary-600 text-white radius-8 px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1"
+                                       title="{% trans 'Pay debt for' %} {{ debtor.customer_name }}" data-i18n="common.pay">
+                                        <iconify-icon icon="solar:wallet-money-bold" class="text-lg"></iconify-icon>
+                                        <span class="d-none d-md-inline">{% trans "Pay" %}</span>
                                     </a>
                                 </td>
                             </tr>
@@ -352,21 +352,21 @@
                         </tbody>
                         <tfoot>
                             <tr class="border-top-2 bg-neutral-50">
-                                <td colspan="{% if show_center or show_branch %}4{% else %}3{% endif %}" class="text-dark fw-bold py-3 ps-3">{% trans "TOTALS:" %}</td>
-                                <td class="text-end text-danger-main fw-bold py-3" data-value="{{ total_debt }}">
+                                <td colspan="{% if show_center or show_branch %}4{% else %}3{% endif %}" class="text-dark fw-bold py-3 ps-3" data-i18n="common.totals">{% trans "TOTALS:" %}</td>
+                                <td class="text-end text-danger-main fw-bold py-3 nowrap" data-value="{{ total_debt }}">
                                     <span class="formatted-number">{{ total_debt|intspace }}</span>
                                 </td>
-                                <td class="text-center py-3">
-                                    <span class="badge bg-primary-600 text-white px-2 py-1">{{ total_orders_with_debt }}</span>
+                                <td class="text-center py-3 hide-mobile">
+                                    <span class="badge bg-primary-600 text-white badge-compact">{{ total_orders_with_debt }}</span>
                                 </td>
-                                <td class="text-end text-dark fw-bold py-3" data-value="{{ total_expected }}">
+                                <td class="text-end text-dark fw-bold py-3 hide-mobile nowrap" data-value="{{ total_expected }}">
                                     <span class="formatted-number">{{ total_expected|intspace }}</span>
                                 </td>
-                                <td class="text-end text-success-main fw-bold py-3" data-value="{{ total_received }}">
+                                <td class="text-end text-success-main fw-bold py-3 hide-mobile nowrap" data-value="{{ total_received }}">
                                     <span class="formatted-number">{{ total_received|intspace }}</span>
                                 </td>
-                                <td class="text-center py-3">
-                                    <span class="badge {% if avg_collection_rate >= 80 %}bg-success-main{% elif avg_collection_rate >= 50 %}bg-warning-main{% else %}bg-danger-main{% endif %} text-white px-2 py-1">{{ avg_collection_rate }}%</span>
+                                <td class="text-center py-3 hide-mobile">
+                                    <span class="badge {% if avg_collection_rate >= 80 %}bg-success-main{% elif avg_collection_rate >= 50 %}bg-warning-main{% else %}bg-danger-main{% endif %} text-white badge-compact">{{ avg_collection_rate }}%</span>
                                 </td>
                                 <td class="py-3"></td>
                             </tr>
@@ -439,7 +439,7 @@
                     </nav>
                     
                     <div class="d-flex align-items-center gap-2">
-                        <label class="mb-0 text-secondary-light">{% trans "Show:" %}</label>
+                        <label class="mb-0 text-secondary-light" data-i18n="common.show">{% trans "Show:" %}</label>
                         <form method="GET" id="perPageForm" class="d-inline">
                             <input type="hidden" name="period" value="{{ period }}">
                             <input type="hidden" name="date_from" value="{{ date_from }}">
@@ -592,9 +592,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function exportToExcel() {
+    const noDataMsg = "{{ _('No data to export') }}";
+    const sheetName = "{{ _('Debtors Report') }}";
     const table = document.getElementById('debtorsTable');
     if (!table) {
-        alert('No data to export');
+        alert(noDataMsg);
         return;
     }
     
@@ -673,7 +675,7 @@ function exportToExcel() {
     ws['!cols'] = colWidths;
     
     // Add worksheet to workbook
-    XLSX.utils.book_append_sheet(wb, ws, 'Debtors Report');
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
     
     // Generate XLSX file and download
     const fileName = `debtors_report_${new Date().toISOString().split('T')[0]}.xlsx`;

@@ -178,6 +178,46 @@ const translations = {
         ru: 'Аналитика клиентов',
         en: 'Customer Analytics'
     },
+    'sidebar.superuserTools': {
+        uz: 'Superuser vositalari',
+        ru: 'Инструменты суперпользователя',
+        en: 'Superuser Tools'
+    },
+    'sidebar.billing': {
+        uz: 'Hisob-kitob va obunalar',
+        ru: 'Биллинг и подписки',
+        en: 'Billing & Subscriptions'
+    },
+    'sidebar.centersMonitoring': {
+        uz: 'Markazlarni monitoring qilish',
+        ru: 'Мониторинг центров',
+        en: 'Centers Monitoring'
+    },
+    'sidebar.allCenters': {
+        uz: 'Barcha markazlar',
+        ru: 'Все центры',
+        en: 'All Centers'
+    },
+    'sidebar.subscriptions': {
+        uz: 'Obunalar',
+        ru: 'Подписки',
+        en: 'Subscriptions'
+    },
+    'sidebar.tariffs': {
+        uz: 'Tarif rejalar',
+        ru: 'Тарифные планы',
+        en: 'Tariff Plans'
+    },
+    'sidebar.usageTracking': {
+        uz: 'Foydalanishni kuzatish',
+        ru: 'Отслеживание использования',
+        en: 'Usage Tracking'
+    },
+    'sidebar.contactRequests': {
+        uz: "Aloqa so'rovlari",
+        ru: 'Запросы на контакт',
+        en: 'Contact Requests'
+    },
     'sidebar.unitEconomy': {
         uz: 'Birlik iqtisodiyoti',
         ru: 'Юнит-экономика',
@@ -409,6 +449,11 @@ const translations = {
         uz: 'Miqdor',
         ru: 'Сумма',
         en: 'Amount'
+    },
+    'common.currencyUzs': {
+        uz: 'UZS',
+        ru: 'UZS',
+        en: 'UZS'
     },
     'common.description': {
         uz: 'Tavsif',
@@ -5057,6 +5102,16 @@ const translations = {
         ru: 'B2B',
         en: 'B2B'
     },
+    'reports.expenseAnalyticsTitle': {
+        uz: 'Chiqimlar tahlili hisobotı',
+        ru: 'Отчет по аналитике расходов',
+        en: 'Expense Analytics Report'
+    },
+    'expenses.manage': {
+        uz: 'Chiqimlarni boshqarish',
+        ru: 'Управление расходами',
+        en: 'Manage Expenses'
+    },
     'expense.b2c': {
         uz: 'B2C',
         ru: 'B2C',
@@ -5066,6 +5121,76 @@ const translations = {
         uz: 'Ikkalasi',
         ru: 'Оба',
         en: 'Both'
+    },
+    'expense.totalExpenses': {
+        uz: 'Jami chiqimlar',
+        ru: 'Общие расходы',
+        en: 'Total Expenses'
+    },
+    'expense.itemsCount': {
+        uz: 'ta yozuv',
+        ru: 'записей',
+        en: 'items'
+    },
+    'expense.b2bExpenses': {
+        uz: 'B2B chiqimlari',
+        ru: 'B2B расходы',
+        en: 'B2B Expenses'
+    },
+    'expense.b2cExpenses': {
+        uz: 'B2C chiqimlari',
+        ru: 'B2C расходы',
+        en: 'B2C Expenses'
+    },
+    'expense.noBranchData': {
+        uz: 'Bu markaz uchun filial chiqimlari topilmadi',
+        ru: 'Нет данных по расходам филиалов для этого центра',
+        en: 'No branch expenses found for this center'
+    },
+    'expense.byBranch': {
+        uz: 'Filiallar bo‘yicha chiqimlar',
+        ru: 'Расходы по филиалам',
+        en: 'Expenses by Branch'
+    },
+    'expense.percentTotal': {
+        uz: 'Umumiydan %',
+        ru: '% от общего',
+        en: '% of Total'
+    },
+    'expense.noDataPeriod': {
+        uz: 'Tanlangan davr uchun chiqimlar topilmadi',
+        ru: 'Нет данных о расходах за выбранный период',
+        en: 'No expense data available for the selected period'
+    },
+    'expense.typeDistribution': {
+        uz: 'Chiqim turlari taqsimoti',
+        ru: 'Распределение типов расходов',
+        en: 'Expense Type Distribution'
+    },
+    'expense.typeSubtitle': {
+        uz: 'Mijoz turi bo‘yicha taqsimot (B2B, B2C, Ikkalasi)',
+        ru: 'Разбивка по типу клиента (B2B, B2C, оба)',
+        en: 'Breakdown by customer type (B2B, B2C, Both)'
+    },
+    'expense.statistics': {
+        uz: 'Chiqimlar statistikasi',
+        ru: 'Статистика расходов',
+        en: 'Expense Statistics'
+    },
+    'expense.statisticsSubtitle': {
+        uz: 'Min, Maks, O‘rtacha va Median qiymatlar',
+        ru: 'Мин, Макс, Среднее и Медиана',
+        en: 'Min, Max, Average & Median values'
+    },
+    'expense.highest': {
+        uz: 'Eng yuqori chiqim',
+        ru: 'Наибольший расход',
+        en: 'Highest Expense'
+    },
+    'expense.lowest': {
+        uz: 'Eng past chiqim',
+        ru: 'Наименьший расход',
+        en: 'Lowest Expense'
     },
 
     // ========== PRICING KEYS ==========
@@ -7195,6 +7320,11 @@ const translations = {
         ru: 'Отчеты',
         en: 'Reports'
     },
+    'reports.quickSearchDebtors': {
+        uz: 'Ism yoki telefon bo\'yicha tezkor qidiruv...',
+        ru: 'Быстрый поиск по имени или телефону...',
+        en: 'Quick search by name or phone...'
+    },
     'reports.expenseAnalytics': {
         uz: 'Chiqimlar analitikasi',
         ru: 'Аналитика расходов',
@@ -7739,6 +7869,26 @@ const translations = {
         uz: 'Maxsus oraliq',
         ru: 'Произвольный период',
         en: 'Custom Range'
+    },
+    'filter.type': {
+        uz: 'Turi',
+        ru: 'Тип',
+        en: 'Type'
+    },
+    'filter.allTypes': {
+        uz: 'Barcha turlar',
+        ru: 'Все типы',
+        en: 'All Types'
+    },
+    'filter.b2bOnly': {
+        uz: 'Faqat B2B',
+        ru: 'Только B2B',
+        en: 'B2B Only'
+    },
+    'filter.b2cOnly': {
+        uz: 'Faqat B2C',
+        ru: 'Только B2C',
+        en: 'B2C Only'
     },
     'filter.allPaymentMethods': {
         uz: 'Barcha to\'lov usullari',
