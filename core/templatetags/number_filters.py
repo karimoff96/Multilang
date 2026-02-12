@@ -138,6 +138,28 @@ def intcomma(value):
 
 
 @register.filter
+def intspace(value):
+    """
+    Add spaces as thousand separators; mirrors intcomma but with spaces.
+    Examples:
+        1234 -> 1 234
+        1234567 -> 1 234 567
+    """
+    if value is None:
+        return "0"
+    try:
+        if isinstance(value, Decimal):
+            value = float(value)
+        else:
+            value = float(value)
+        if value == int(value):
+            return f"{int(value):,}".replace(',', ' ')
+        return f"{value:,.2f}".replace(',', ' ')
+    except (TypeError, ValueError, InvalidOperation):
+        return "0"
+
+
+@register.filter
 def percentage(value, total):
     """Calculate percentage of value from total"""
     try:
