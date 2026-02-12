@@ -5421,8 +5421,8 @@ def handle_finish_upload_message(message, language):
             logger.error(f"Product {user_data.get('doc_type_id')} not found")
             return
 
-        # If this product requires written name verification, collect names first
-        if doc_type.written_verification_required and not user_data.get("name_clarifications"):
+        # If this product's category requires written name verification, collect names first
+        if doc_type.category.written_verification_required and not user_data.get("name_clarifications"):
             prompt = get_text("names_required_prompt", language)
             reason = get_text("names_required_reason", language)
             bot.send_message(

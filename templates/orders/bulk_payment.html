@@ -640,13 +640,13 @@
     
     // Translation strings for JavaScript
     const translations = {
-        paidBy: "{% trans 'Paid by' %}",
-        order: "{% trans 'Order' %}",
-        days: "{% trans 'days' %}",
-        total: "{% trans 'Total' %}",
-        paid: "{% trans 'Paid' %}",
-        remaining: "{% trans 'Remaining' %}",
-        uzs: "{% trans 'UZS' %}"
+        paidBy: "{% trans 'Paid by'|escapejs %}",
+        order: "{% trans 'Order'|escapejs %}",
+        days: "{% trans 'days'|escapejs %}",
+        total: "{% trans 'Total'|escapejs %}",
+        paid: "{% trans 'Paid'|escapejs %}",
+        remaining: "{% trans 'Remaining'|escapejs %}",
+        uzs: "{% trans 'UZS'|escapejs %}"
     };
 
     let selectedCustomerId = null;
@@ -903,8 +903,21 @@
     function loadCustomerDebt(customerId) {
         const url = '{% url "orders:get_customer_debt_details" 0 %}'.replace('/0/', `/${customerId}/`);
         fetch(url)
-            .then(response => response.json())
+            .then(response => {
+                console.log('Load customer debt response status:', response.status);
+                if (!response.ok) {
+                    if (response.status === 403) {
+                        throw new Error("Permission denied - you do not have access to view this customer's orders");
+                    } else if (response.status === 404) {
+                        throw new Error("Customer not found");
+                    } else {
+                        throw new Error("HTTP error! status: " + response.status);
+                    }
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Customer debt data loaded:', data);
                 customerDebtData = data;
                 displayCustomerDebt(data);
                 // Hide search section and show payment section
@@ -919,7 +932,7 @@
             })
             .catch(error => {
                 console.error('Error loading customer debt:', error);
-                showError('{% trans "Failed to load customer debt details" %}');
+                showError(error.message || '{% trans "Failed to load customer debt details" %}');
             });
     }
 
@@ -1017,14 +1030,25 @@
             method: 'POST',
             body: formData
         })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Preview payment response status:', response.status);
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || 'HTTP error! status: ' + response.status);
+                    }).catch(() => {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Preview payment data:', data);
                 paymentPreviewData = data;
                 displayPaymentPreview(data);
             })
             .catch(error => {
                 console.error('Error previewing payment:', error);
-                showError('{% trans "Failed to preview payment" %}');
+                showError(error.message || '{% trans "Failed to preview payment" %}');
             });
     }
 
@@ -1035,40 +1059,40 @@
         // Summary
         let summaryHtml = `
             <div class="alert alert-info">
-                <h6><i class="fas fa-info-circle me-2"></i>{% trans "Payment Summary" %}</h6>
+                <h6><i class="fas fa-info-circle me-2"></i>{% trans "Payment Summary"|escapejs %}</h6>
                 <ul class="mb-0">
-                    <li><strong>{% trans "Payment Amount" %}:</strong> $${data.summary.payment_amount.toFixed(2)}</li>
-                    <li><strong>{% trans "Orders Affected" %}:</strong> ${data.summary.orders_affected}</li>
-                    <li><strong>{% trans "Fully Paid Orders" %}:</strong> ${data.summary.fully_paid_orders}</li>
-                    <li><strong>{% trans "Remaining Debt After" %}:</strong> $${data.summary.remaining_debt_after.toFixed(2)}</li>
-                    ${data.summary.unused_amount > 0 ? `<li class="text-warning"><strong>{% trans "Unused Amount" %}:</strong> $${data.summary.unused_amount.toFixed(2)}</li>` : ''}
+                    <li><strong>{% trans "Payment Amount"|escapejs %}:</strong> $${data.summary.payment_amount.toFixed(2)}</li>
+                    <li><strong>{% trans "Orders Affected"|escapejs %}:</strong> ${data.summary.orders_affected}</li>
+                    <li><strong>{% trans "Fully Paid Orders"|escapejs %}:</strong> ${data.summary.fully_paid_orders}</li>
+                    <li><strong>{% trans "Remaining Debt After"|escapejs %}:</strong> $${data.summary.remaining_debt_after.toFixed(2)}</li>
+                    ${data.summary.unused_amount > 0 ? `<li class="text-warning"><strong>{% trans "Unused Amount"|escapejs %}:</strong> $${data.summary.unused_amount.toFixed(2)}</li>` : ''}
                 </ul>
             </div>
         `;
         
         // Distribution details
-        let distributionHtml = '<h6 class="mt-3"><i class="fas fa-list me-2"></i>{% trans "FIFO Distribution" %}</h6>';
+        let distributionHtml = '<h6 class="mt-3"><i class="fas fa-list me-2"></i>{% trans "FIFO Distribution"|escapejs %}</h6>';
         
         data.distribution.forEach((item, index) => {
             const fullyPaidClass = item.fully_paid ? 'fully-paid' : '';
-            const fullyPaidBadge = item.fully_paid ? '<span class="badge bg-success ms-2">{% trans "Fully Paid" %}</span>' : '';
+            const fullyPaidBadge = item.fully_paid ? '<span class="badge bg-success ms-2">{% trans "Fully Paid"|escapejs %}</span>' : '';
             
             distributionHtml += `
                 <div class="fifo-order-item ${fullyPaidClass} p-3 mb-2 rounded">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <strong>${index + 1}. {% trans "Order" %} #${item.order_number}</strong>
+                            <strong>${index + 1}. {% trans "Order"|escapejs %} #${item.order_number}</strong>
                             ${fullyPaidBadge}
                             <br>
                             <small class="text-muted">
-                                {% trans "Current Remaining" %}: $${item.current_remaining.toFixed(2)}
+                                {% trans "Current Remaining"|escapejs %}: $${item.current_remaining.toFixed(2)}
                             </small>
                         </div>
                         <div class="text-end">
                             <strong class="text-success">-$${item.amount_applied.toFixed(2)}</strong>
                             <br>
                             <small class="text-muted">
-                                {% trans "New Remaining" %}: $${item.new_remaining.toFixed(2)}
+                                {% trans "New Remaining"|escapejs %}: $${item.new_remaining.toFixed(2)}
                             </small>
                         </div>
                     </div>
@@ -1107,15 +1131,26 @@
             method: 'POST',
             body: formData
         })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Process payment response status:', response.status);
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || 'HTTP error! status: ' + response.status);
+                    }).catch(() => {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Payment processed successfully:', data);
                 displaySuccessModal(data);
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-check-circle me-2"></i>{% trans "Process Payment" %}';
             })
             .catch(error => {
                 console.error('Error processing payment:', error);
-                showError('{% trans "Failed to process payment" %}');
+                showError(error.message || '{% trans "Failed to process payment" %}');
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-check-circle me-2"></i>{% trans "Process Payment" %}';
             });

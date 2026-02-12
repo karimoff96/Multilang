@@ -553,6 +553,7 @@ def get_user_orders(user):
 def get_user_customers(user):
     """Get all customers (BotUsers) accessible by this user."""
     from accounts.models import BotUser
+    from django.db.models import Q
     
     if user.is_superuser:
         return BotUser.objects.all()
@@ -562,7 +563,14 @@ def get_user_customers(user):
         return BotUser.objects.none()
     
     accessible_branches = admin_profile.get_accessible_branches()
-    return BotUser.objects.filter(branch__in=accessible_branches)
+    
+    # Include customers who:
+    # 1. Are assigned to one of the accessible branches
+    # 2. Have orders in one of the accessible branches (even if customer.branch is None)
+    return BotUser.objects.filter(
+        Q(branch__in=accessible_branches) | 
+        Q(order__branch__in=accessible_branches)
+    ).distinct()
 
 
 def get_user_staff(user):
