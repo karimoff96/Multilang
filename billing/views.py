@@ -900,7 +900,7 @@ def request_renewal(request):
             
             # Create note for admins
             renewal_request_note = f"""
-Renewal Request from {org.name}
+Renewal Request from {center.name}
 User: {request.user.get_full_name()} ({request.user.email})
 Current Subscription: {subscription.tariff.title} (ends {subscription.end_date})
 Requested Tariff: {tariff.title}
@@ -936,9 +936,9 @@ Request Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}
     
     # Get current usage stats
     current_usage = {
-        'branches': org.branches.count(),
-        'staff': org.get_staff_count(),
-        'orders': org.get_current_month_orders_count(),
+        'branches': center.branches.count(),
+        'staff': center.get_staff_count(),
+        'orders': center.get_current_month_orders_count(),
     }
     
     context = {

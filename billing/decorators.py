@@ -63,7 +63,7 @@ def require_feature(feature_code):
                     request,
                     _("This feature is not available in your current plan. Please upgrade.")
                 )
-                return redirect('billing:upgrade')
+                return redirect('billing:tariff_list')
             
             return view_func(request, *args, **kwargs)
         return wrapper
