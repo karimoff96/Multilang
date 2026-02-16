@@ -519,6 +519,8 @@ class Subscription(models.Model):
         TariffPricing,
         on_delete=models.PROTECT,
         related_name='subscriptions',
+        null=True,
+        blank=True,
         verbose_name=_("Pricing Plan")
     )
     
@@ -779,6 +781,8 @@ class Subscription(models.Model):
             start_date=self.end_date + timedelta(days=1),
             status=self.STATUS_PENDING,
             auto_renew=self.auto_renew,
+            payment_method='',
+            transaction_id='',
         )
         
         return new_subscription

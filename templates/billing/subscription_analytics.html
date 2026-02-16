@@ -14,16 +14,20 @@
                 <div>
                     <h4 class="mb-8">{{ center.name }}</h4>
                     <p class="text-secondary-light mb-0">
-                        <i class="ri-global-line"></i> {{ center.subdomain }}.wowdash.uz
+                        <i class="ri-global-line"></i> {{ center.subdomain }}.multilang.uz
                         {% if center.phone %}
                         | <i class="ri-phone-line"></i> {{ center.phone }}
                         {% endif %}
                     </p>
                 </div>
                 <div class="d-flex gap-2">
+                    {% if analytics.current_subscription %}
                     <a href="{% url 'billing:subscription_detail' analytics.current_subscription.id %}" class="btn btn-primary-600">
                         <i class="ri-eye-line"></i> {% trans "View Current Subscription" %}
                     </a>
+                    {% else %}
+                    <span class="badge bg-secondary text-sm">{% trans "No Active Subscription" %}</span>
+                    {% endif %}
                 </div>
             </div>
         </div>

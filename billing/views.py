@@ -135,8 +135,8 @@ def subscription_create(request, center_id):
                 start_date=start_date,
                 status=status if not tariff.is_trial else Subscription.STATUS_ACTIVE,
                 amount_paid=amount_paid if amount_paid else None,
-                payment_method=payment_method,
-                transaction_id=transaction_id,
+                payment_method=payment_method or '',
+                transaction_id=transaction_id or '',
                 notes=notes,
                 auto_renew=auto_renew,
                 created_by=request.user
