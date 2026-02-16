@@ -427,6 +427,7 @@ def tariff_edit(request, pk):
             # Update pricing
             pricing_ids = request.POST.getlist('pricing_id[]')
             pricing_durations = request.POST.getlist('pricing_duration[]')
+            pricing_discounts = request.POST.getlist('pricing_discount[]')
             pricing_monthly = request.POST.getlist('pricing_monthly[]')
             pricing_total = request.POST.getlist('pricing_total[]')
             pricing_currency = request.POST.getlist('pricing_currency[]')
@@ -437,6 +438,7 @@ def tariff_edit(request, pk):
             for i in range(len(pricing_durations)):
                 pricing_id = pricing_ids[i] if i < len(pricing_ids) else ''
                 duration = int(pricing_durations[i]) if pricing_durations[i] else 1
+                discount = float(pricing_discounts[i]) if i < len(pricing_discounts) and pricing_discounts[i] else 0
                 monthly = float(pricing_monthly[i]) if pricing_monthly[i] else 0
                 total = float(pricing_total[i]) if pricing_total[i] else 0
                 currency = pricing_currency[i] if i < len(pricing_currency) else 'UZS'
@@ -449,7 +451,7 @@ def tariff_edit(request, pk):
                     # Update existing pricing
                     pricing_obj = TariffPricing.objects.get(id=pricing_id, tariff=tariff)
                     pricing_obj.duration_months = duration
-                    pricing_obj.monthly_price = monthly
+                    pricing_obj.discount_percentage = discount
                     pricing_obj.price = total
                     pricing_obj.currency = currency
                     pricing_obj.save()
@@ -459,7 +461,7 @@ def tariff_edit(request, pk):
                     new_pricing = TariffPricing.objects.create(
                         tariff=tariff,
                         duration_months=duration,
-                        monthly_price=monthly,
+                        discount_percentage=discount,
                         price=total,
                         currency=currency
                     )

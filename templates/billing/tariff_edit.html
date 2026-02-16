@@ -70,7 +70,7 @@
                             <i class="ri-translate-2"></i> {% trans "Title (Uzbek)" %} *
                         </label>
                         <input type="text" name="title_uz" class="form-control" required
-                               value="{{ tariff.title_uz|default:'' }}"
+                               value="{{ tariff.title_uz }}"
                                placeholder="Masalan: Boshlang'ich">
                     </div>
 
@@ -79,7 +79,7 @@
                             <i class="ri-translate-2"></i> {% trans "Title (Russian)" %} *
                         </label>
                         <input type="text" name="title_ru" class="form-control" required
-                               value="{{ tariff.title_ru|default:'' }}"
+                               value="{{ tariff.title_ru }}"
                                placeholder="Например: Стартовый">
                     </div>
 
@@ -88,7 +88,7 @@
                             <i class="ri-translate-2"></i> {% trans "Title (English)" %} *
                         </label>
                         <input type="text" name="title_en" class="form-control" required
-                               value="{{ tariff.title_en|default:'' }}"
+                               value="{{ tariff.title_en }}"
                                placeholder="e.g., Starter">
                     </div>
 
@@ -102,7 +102,7 @@
                             <i class="ri-translate-2"></i> {% trans "Description (Uzbek)" %}
                         </label>
                         <textarea name="description_uz" class="form-control" rows="3" 
-                                  placeholder="Tarif rejasi tavsifi...">{{ tariff.description_uz|default:'' }}</textarea>
+                                  placeholder="Tarif rejasi tavsifi...">{{ tariff.description_uz }}</textarea>
                     </div>
 
                     <div class="col-md-4">
@@ -110,7 +110,7 @@
                             <i class="ri-translate-2"></i> {% trans "Description (Russian)" %}
                         </label>
                         <textarea name="description_ru" class="form-control" rows="3" 
-                                  placeholder="Описание тарифного плана...">{{ tariff.description_ru|default:'' }}</textarea>
+                                  placeholder="Описание тарифного плана...">{{ tariff.description_ru }}</textarea>
                     </div>
 
                     <div class="col-md-4">
@@ -118,7 +118,7 @@
                             <i class="ri-translate-2"></i> {% trans "Description (English)" %}
                         </label>
                         <textarea name="description_en" class="form-control" rows="3" 
-                                  placeholder="Tariff plan description...">{{ tariff.description_en|default:'' }}</textarea>
+                                  placeholder="Tariff plan description...">{{ tariff.description_en }}</textarea>
                     </div>
 
                     <div class="col-md-3">
@@ -775,13 +775,13 @@
                                 <div class="col-md-2">
                                     <label class="form-label">{% trans "Discount %" %}</label>
                                     <input type="number" name="pricing_discount[]" class="form-control discount-input" 
-                                           value="{{ pricing.discount_percent|default:0 }}" min="0" max="100" step="0.1" 
+                                           value="{{ pricing.discount_percentage }}" min="0" max="100" step="0.1" 
                                            onchange="calculatePrice(this)" placeholder="0">
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">{% trans "Monthly Price" %}</label>
                                     <input type="number" name="pricing_monthly[]" class="form-control monthly-price" 
-                                           value="{{ pricing.monthly_price|floatformat:2 }}" step="0.01" min="0" required readonly>
+                                           value="{{ pricing.get_monthly_price|floatformat:2 }}" step="0.01" min="0" required readonly>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">{% trans "Total Price" %}</label>

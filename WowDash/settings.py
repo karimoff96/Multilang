@@ -212,6 +212,7 @@ MODELTRANSLATION_DEFAULT_LANGUAGE = "uz"
 MODELTRANSLATION_LANGUAGES = ("uz", "ru", "en")
 MODELTRANSLATION_TRANSLATION_FILES = (
     "accounts.translations",
+    "billing.translations",
     "core.translations",
     "services.translations",
 )
