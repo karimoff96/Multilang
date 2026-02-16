@@ -8,4 +8,6 @@ urlpatterns = [
     path('contact-requests/', views.contact_requests_list, name='contact_requests_list'),
     path('contact-requests/<int:pk>/change-status/', views.contact_request_change_status, name='contact_request_change_status'),
     path('contact-requests/<int:pk>/add-note/', views.contact_request_add_note, name='contact_request_add_note'),
+    # Unified requests management (contact + renewal)
+    path('requests/', views.requests_management, name='requests_management'),
 ]

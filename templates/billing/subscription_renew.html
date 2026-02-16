@@ -20,7 +20,13 @@
                         <ul class="mb-0">
                             <li><strong>{% trans "Organization" %}:</strong> {{ subscription.organization.name }}</li>
                             <li><strong>{% trans "Tariff" %}:</strong> {{ subscription.tariff.title }}</li>
-                            <li><strong>{% trans "Pricing" %}:</strong> {{ subscription.pricing.duration_months }} {% trans "month(s)" %} - {{ subscription.pricing.price }} {{ subscription.pricing.currency }}</li>
+                            <li><strong>{% trans "Pricing" %}:</strong> 
+                                {% if subscription.is_trial %}
+                                    {{ subscription.tariff.trial_days }} {% trans "day(s) trial" %} - {% trans "Free" %}
+                                {% else %}
+                                    {{ subscription.pricing.duration_months }} {% trans "month(s)" %} - {{ subscription.pricing.price }} {{ subscription.pricing.currency }}
+                                {% endif %}
+                            </li>
                             <li><strong>{% trans "Current End Date" %}:</strong> {{ subscription.end_date|date:"F d, Y" }}</li>
                             <li><strong>{% trans "Status" %}:</strong> 
                                 <span class="badge bg-{% if subscription.status == 'active' %}success{% elif subscription.status == 'expired' %}danger{% else %}warning{% endif %}-600 text-white">

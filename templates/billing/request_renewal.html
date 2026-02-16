@@ -122,20 +122,6 @@
                                                     <span class="text-sm">{{ tariff.max_monthly_orders|intspace }} {% trans "orders/month" %}</span>
                                                 </div>
                                             </div>
-                                            
-                                            <!-- Pricing options for this tariff -->
-                                            <div class="pricing-container" data-tariff="{{ tariff.id }}" style="display: none;">
-                                                {% for pricing in tariff.pricing.all %}
-                                                <div class="form-check mb-2">
-                                                    <input class="form-check-input" type="radio" name="pricing" id="pricing-{{ pricing.id }}" value="{{ pricing.id }}" data-price="{{ pricing.price }}" data-currency="{{ pricing.currency }}" required>
-                                                    <label class="form-check-label text-sm" for="pricing-{{ pricing.id }}">
-                                                        <strong>{{ pricing.duration_months }} {% if pricing.duration_months == 1 %}{% trans "month" %}{% else %}{% trans "months" %}{% endif %}</strong>
-                                                        - {{ pricing.price|intspace }} {{ pricing.currency }}
-                                                        <span class="text-secondary-light">({{ pricing.monthly_price|intspace }} {{ pricing.currency }}/{% trans "mo" %})</span>
-                                                    </label>
-                                                </div>
-                                                {% endfor %}
-                                            </div>
                                         </div>
                                     </label>
                                 </div>
@@ -145,8 +131,45 @@
 
                         <!-- Duration/Pricing Selection (shown after tariff selected) -->
                         <div class="col-12" id="pricingSection" style="display: none;">
-                            <label class="form-label fw-semibold">{% trans "Select Duration" %}</label>
-                            <div id="pricingOptions"></div>
+                            <label class="form-label fw-semibold">
+                                <i class="ri-time-line me-2"></i>
+                                {% trans "Select Subscription Duration" %} <span class="text-danger">*</span>
+                            </label>
+                            <div class="alert alert-info-50 border-info-600 mb-16">
+                                <small>
+                                    <i class="ri-information-line"></i>
+                                    {% trans "Choose how long you want to extend your subscription. Longer durations often have better rates." %}
+                                </small>
+                            </div>
+                            
+                            {% for tariff in tariffs %}
+                            <div class="row g-3 pricing-options-group" data-tariff="{{ tariff.id }}" style="display: none;">
+                                {% for pricing in tariff.pricing.all %}
+                                <div class="col-md-4 col-sm-6">
+                                    <input type="radio" class="btn-check" name="pricing" id="pricing-{{ pricing.id }}" 
+                                           value="{{ pricing.id }}" 
+                                           data-price="{{ pricing.price|floatformat:0 }}" 
+                                           data-currency="{{ pricing.currency }}" 
+                                           data-duration="{{ pricing.duration_months }}"
+                                           data-tariff="{{ tariff.id }}">
+                                    <label class="card radius-8 border cursor-pointer h-100 pricing-option" for="pricing-{{ pricing.id }}">
+                                        <div class="card-body p-16 text-center">
+                                            <div class="mb-8">
+                                                <i class="ri-calendar-check-line text-primary-600" style="font-size: 32px;"></i>
+                                            </div>
+                                            <h5 class="mb-8">{{ pricing.duration_months }} {% if pricing.duration_months == 1 %}{% trans "month" %}{% else %}{% trans "months" %}{% endif %}</h5>
+                                            <div class="text-primary-600 fw-bold fs-20 mb-8">
+                                                {{ pricing.price|floatformat:0 }} {{ pricing.currency }}
+                                            </div>
+                                            <small class="text-secondary-light">
+                                                {% widthratio pricing.price pricing.duration_months 1 %} {{ pricing.currency }}/{% trans "mo" %}
+                                            </small>
+                                        </div>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
                         </div>
 
                         <!-- Additional Message -->
@@ -218,7 +241,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const tariffRadios = document.querySelectorAll('input[name="tariff"]');
     const pricingSection = document.getElementById('pricingSection');
-    const pricingOptions = document.getElementById('pricingOptions');
     const summarySection = document.getElementById('summarySection');
     
     const currentEndDate = new Date('{{ subscription.end_date|date:"Y-m-d" }}');
@@ -226,8 +248,11 @@ document.addEventListener('DOMContentLoaded', function() {
     tariffRadios.forEach(radio => {
         radio.addEventListener('change', function() {
             const tariffId = this.value;
-            const tariffCard = this.closest('.tariff-card');
-            const tariffName = tariffCard.querySelector('h6').textContent;
+            // Find the label using the for attribute (label is sibling, not parent)
+            const tariffCard = document.querySelector('label[for="' + this.id + '"]');
+            const tariffName = tariffCard ? tariffCard.querySelector('h6').textContent : '';
+            
+            console.log('Tariff selected:', tariffId, 'Name:', tariffName);
             
             // Remove all selected states
             document.querySelectorAll('.tariff-card').forEach(card => {
@@ -235,33 +260,74 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             // Add selected state
-            tariffCard.classList.add('border-primary-600', 'bg-primary-50');
-            
-            // Show pricing container for selected tariff
-            document.querySelectorAll('.pricing-container').forEach(container => {
-                container.style.display = 'none';
-            });
-            const selectedPricingContainer = tariffCard.querySelector('.pricing-container[data-tariff="' + tariffId + '"]');
-            if (selectedPricingContainer) {
-                selectedPricingContainer.style.display = 'block';
+            if (tariffCard) {
+                tariffCard.classList.add('border-primary-600', 'bg-primary-50');
             }
             
             // Update summary tariff
-            document.getElementById('summaryTariff').textContent = tariffName;
+            const summaryTariffElement = document.getElementById('summaryTariff');
+            if (summaryTariffElement) {
+                summaryTariffElement.textContent = tariffName;
+            }
+            
+            // Hide summary until pricing is selected
+            summarySection.style.display = 'none';
+            
+            // Hide all pricing option groups first
+            document.querySelectorAll('.pricing-options-group').forEach(function(group) {
+                group.style.display = 'none';
+            });
+            
+            // Clear any previously selected pricing
+            document.querySelectorAll('input[name="pricing"]').forEach(function(pricingInput) {
+                pricingInput.checked = false;
+            });
+            
+            // Show the pricing options for the selected tariff
+            const selectedGroup = document.querySelector('.pricing-options-group[data-tariff="' + tariffId + '"]');
+            if (selectedGroup) {
+                selectedGroup.style.display = 'flex';
+                
+                // Show pricing section
+                pricingSection.style.display = 'block';
+                
+                // Scroll to pricing section
+                setTimeout(() => {
+                    pricingSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+                
+                console.log('Showing pricing options for tariff:', tariffId);
+            } else {
+                console.warn('No pricing options found for tariff:', tariffId);
+            }
         });
     });
     
     // Listen for pricing changes
     document.addEventListener('change', function(e) {
         if (e.target.name === 'pricing') {
-            const pricingLabel = e.target.closest('label');
-            const duration = pricingLabel.querySelector('strong').textContent;
+            e.stopPropagation(); // Prevent bubbling
+            
+            // Update selected state for pricing cards
+            document.querySelectorAll('.pricing-option').forEach(card => {
+                card.classList.remove('border-primary-600', 'bg-primary-50');
+            });
+            
+            // Find the associated label (sibling)
+            const label = document.querySelector(`label[for="${e.target.id}"]`);
+            if (label) {
+                label.classList.add('border-primary-600', 'bg-primary-50');
+            }
+            
+            const duration = e.target.dataset.duration;
             const price = e.target.dataset.price;
             const currency = e.target.dataset.currency;
             const months = parseInt(duration);
             
+            const monthText = months === 1 ? '{% trans "month" %}' : '{% trans "months" %}';
+            
             // Update summary
-            document.getElementById('summaryDuration').textContent = duration;
+            document.getElementById('summaryDuration').textContent = `${duration} ${monthText}`;
             document.getElementById('summaryPrice').textContent = parseInt(price).toLocaleString() + ' ' + currency;
             
             // Calculate new end date
@@ -271,6 +337,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Show summary
             summarySection.style.display = 'block';
+            
+            // Scroll to summary
+            setTimeout(() => {
+                summarySection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
         }
     });
     
@@ -279,17 +350,55 @@ document.addEventListener('DOMContentLoaded', function() {
         const tariffSelected = document.querySelector('input[name="tariff"]:checked');
         const pricingSelected = document.querySelector('input[name="pricing"]:checked');
         
+        // Debug logging
+        console.log('=== Form Submission Debug ===');
+        console.log('Tariff selected:', tariffSelected ? tariffSelected.value : 'NONE');
+        console.log('Pricing selected:', pricingSelected ? pricingSelected.value : 'NONE');
+        console.log('All tariff inputs:', document.querySelectorAll('input[name="tariff"]').length);
+        console.log('All pricing inputs:', document.querySelectorAll('input[name="pricing"]').length);
+        
+        // Log all pricing inputs for debugging
+        const allPricingInputs = document.querySelectorAll('input[name="pricing"]');
+        allPricingInputs.forEach((input, index) => {
+            console.log(`Pricing input ${index}:`, {
+                id: input.id,
+                value: input.value,
+                checked: input.checked,
+                name: input.name,
+                inForm: input.form !== null
+            });
+        });
+        
         if (!tariffSelected) {
             e.preventDefault();
             alert('{% trans "Please select a tariff plan" %}');
+            document.getElementById('tariffCards').scrollIntoView({ behavior: 'smooth', block: 'center' });
             return false;
         }
         
         if (!pricingSelected) {
             e.preventDefault();
-            alert('{% trans "Please select a subscription duration" %}');
+            alert('{% trans "Please select a subscription duration from the options below the tariff cards" %}');
+            document.getElementById('pricingSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
             return false;
         }
+        
+        // Verify form data
+        const formData = new FormData(this);
+        console.log('Form data entries:');
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+        
+        // Show loading state on submit button
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Submitting..." %}';
+        }
+        
+        // Allow form to submit
+        return true;
     });
 });
 </script>
@@ -308,11 +417,26 @@ document.addEventListener('DOMContentLoaded', function() {
     border-width: 2px !important;
 }
 
+.pricing-option {
+    transition: all 0.2s ease;
+}
+
+.pricing-option:hover {
+    border-color: var(--bs-primary-600) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.pricing-option.border-primary-600 {
+    border-width: 2px !important;
+}
+
 .cursor-pointer {
     cursor: pointer;
 }
 
-.btn-check:checked + .tariff-card {
+.btn-check:checked + .tariff-card,
+.btn-check:checked + .pricing-option {
     border-color: var(--bs-primary-600) !important;
     background-color: rgba(var(--bs-primary-rgb), 0.05) !important;
 }

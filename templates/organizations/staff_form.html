@@ -156,7 +156,7 @@
                                                                 {% with has_perm=staff_member.role|has_effective_permission:perm %}
                                                                 <iconify-icon icon="{% if has_perm %}solar:check-circle-bold{% else %}solar:close-circle-bold{% endif %}" 
                                                                               class="{% if has_perm %}text-success-600{% else %}text-neutral-400{% endif %} text-lg perm-icon"></iconify-icon>
-                                                                <span class="text-sm {% if has_perm %}fw-medium text-dark{% else %}text-secondary-light{% endif %} perm-label">
+                                                                <span class="text-sm {% if has_perm %}fw-medium text-neutral-900{% else %}text-secondary-light{% endif %} perm-label">
                                                                     {{ permission_labels|default_if_none:""|get_item:perm|default:perm }}
                                                                 </span>
                                                                 {% endwith %}
@@ -242,7 +242,7 @@ function updatePermissionDisplay() {
             icon.classList.add('text-success-600');
             if (label) {
                 label.classList.remove('text-secondary-light');
-                label.classList.add('fw-medium', 'text-dark');
+                label.classList.add('fw-medium', 'text-neutral-900');
             }
         } else {
             icon.setAttribute('icon', 'solar:close-circle-bold');
@@ -250,7 +250,7 @@ function updatePermissionDisplay() {
             icon.classList.add('text-neutral-400');
             if (label) {
                 label.classList.add('text-secondary-light');
-                label.classList.remove('fw-medium', 'text-dark');
+                label.classList.remove('fw-medium', 'text-neutral-900');
             }
         }
     });

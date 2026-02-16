@@ -110,7 +110,13 @@
                             <td>{{ sub.id }}</td>
                             <td>{{ sub.organization.name }}</td>
                             <td>{{ sub.tariff.title }}</td>
-                            <td>{{ sub.pricing.duration_months }} {% trans "month(s)" %}</td>
+                            <td>
+                                {% if sub.is_trial %}
+                                    {{ sub.tariff.trial_days }} {% trans "day(s) trial" %}
+                                {% else %}
+                                    {{ sub.pricing.duration_months }} {% trans "month(s)" %}
+                                {% endif %}
+                            </td>
                             <td>{{ sub.start_date|date:"Y-m-d" }}</td>
                             <td>{{ sub.end_date|date:"Y-m-d" }}</td>
                             <td>

@@ -151,7 +151,13 @@
                                 <tr>
                                     <td>{{ payment.payment_date|date:"d M Y" }}</td>
                                     <td>{{ payment.tariff.title }}</td>
-                                    <td>{{ payment.pricing.duration_months }} {% trans "months" %}</td>
+                                    <td>
+                                        {% if payment.is_trial %}
+                                            {{ payment.tariff.trial_days }} {% trans "days trial" %}
+                                        {% else %}
+                                            {{ payment.pricing.duration_months }} {% trans "months" %}
+                                        {% endif %}
+                                    </td>
                                     <td class="fw-semibold">{{ payment.amount_paid|floatformat:2 }} {{ payment.pricing.currency }}</td>
                                     <td>
                                         {% if payment.payment_method %}
@@ -238,10 +244,10 @@
                             </td>
                             <td>{{ sub.tariff.title }}</td>
                             <td>
-                                {% if sub.pricing %}
-                                    {{ sub.pricing.duration_months }} {% trans "months" %}
-                                {% else %}
+                                {% if sub.is_trial %}
                                     {{ sub.tariff.trial_days }} {% trans "days trial" %}
+                                {% else %}
+                                    {{ sub.pricing.duration_months }} {% trans "months" %}
                                 {% endif %}
                             </td>
                             <td>

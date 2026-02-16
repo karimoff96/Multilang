@@ -107,7 +107,13 @@
                         </div>
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Duration" %}</label>
-                            <p class="fw-semibold text-neutral-900">{{ subscription.pricing.duration_months }} {% trans "month(s)" %}</p>
+                            <p class="fw-semibold text-neutral-900">
+                                {% if subscription.is_trial %}
+                                    {{ subscription.tariff.trial_days }} {% trans "day(s) trial" %}
+                                {% else %}
+                                    {{ subscription.pricing.duration_months }} {% trans "month(s)" %}
+                                {% endif %}
+                            </p>
                         </div>
                         <div class="col-md-6">
                             <label class="text-secondary-light">{% trans "Status" %}</label>
@@ -259,7 +265,7 @@
                     {% endwith %}
                     
                     <div class="mt-4 pt-4 border-top text-center">
-                        <a href="{% url 'billing:tariff_list' %}" class="btn btn-outline-primary-600">
+                        <a href="{% url 'billing:subscription_renew' subscription.pk %}" class="btn btn-outline-primary-600">
                             <i class="ri-shopping-bag-line"></i> {% trans "Upgrade Plan" %}
                         </a>
                     </div>

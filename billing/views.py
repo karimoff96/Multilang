@@ -100,9 +100,19 @@ def subscription_create(request, center_id):
             
             tariff = Tariff.objects.get(pk=tariff_id)
             
-            # For trial subscriptions, pricing is not required
+            # For trial subscriptions, get first available pricing or create one
             if tariff.is_trial:
-                pricing = None
+                # Get or create a trial pricing
+                pricing, created = TariffPricing.objects.get_or_create(
+                    tariff=tariff,
+                    duration_months=1,
+                    defaults={
+                        'price': 0,
+                        'currency': 'UZS',
+                        'discount_percentage': 0,
+                        'is_active': True
+                    }
+                )
             else:
                 if not pricing_id or pricing_id == 'trial':
                     messages.error(request, _("Please select a pricing option for non-trial tariffs."))
@@ -890,10 +900,38 @@ def request_renewal(request):
         message = request.POST.get('message', '')
         
         try:
-            if not tariff_id or not pricing_id:
-                messages.error(request, _("Please select both tariff and pricing option."))
+            # More specific error messages
+            if not tariff_id:
+                messages.error(request, _("Please select a tariff plan."))
                 tariffs = Tariff.objects.filter(is_active=True, is_trial=False).prefetch_related('pricing')
-                return render(request, 'billing/request_renewal.html', {'subscription': subscription, 'tariffs': tariffs})
+                context = {
+                    'title': _('Renew Subscription'),
+                    'subTitle': _('Billing'),
+                    'subscription': subscription,
+                    'tariffs': tariffs,
+                    'current_usage': {
+                        'branches': center.branches.count(),
+                        'staff': center.get_staff_count(),
+                        'orders': center.get_current_month_orders_count(),
+                    }
+                }
+                return render(request, 'billing/request_renewal.html', context)
+            
+            if not pricing_id:
+                messages.error(request, _("Please select a subscription duration."))
+                tariffs = Tariff.objects.filter(is_active=True, is_trial=False).prefetch_related('pricing')
+                context = {
+                    'title': _('Renew Subscription'),
+                    'subTitle': _('Billing'),
+                    'subscription': subscription,
+                    'tariffs': tariffs,
+                    'current_usage': {
+                        'branches': center.branches.count(),
+                        'staff': center.get_staff_count(),
+                        'orders': center.get_current_month_orders_count(),
+                    }
+                }
+                return render(request, 'billing/request_renewal.html', context)
             
             tariff = Tariff.objects.get(pk=tariff_id, is_active=True)
             pricing = TariffPricing.objects.get(pk=pricing_id, tariff=tariff)
