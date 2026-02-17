@@ -29,6 +29,7 @@ import os
 import telebot
 from telebot.apihelper import ApiTelegramException
 from django.conf import settings
+from django.utils import timezone
 import psutil
 import time
 
@@ -196,7 +197,7 @@ def send_contact_request_notification(contact_request):
 💬 <b>Message:</b>
 {contact_request.message}
 
-⏰ <b>Received:</b> {contact_request.created_at.strftime('%Y-%m-%d %H:%M')}
+⏰ <b>Received:</b> {timezone.localtime(contact_request.created_at).strftime('%Y-%m-%d %H:%M')} (Tashkent)
 📊 <b>Status:</b> {contact_request.get_status_display()}
 
 <i>View in admin panel to respond.</i>
@@ -275,7 +276,7 @@ def send_renewal_request_notification(subscription_history):
 📝 <b>Request Details:</b>
 {subscription_history.description}
 
-⏰ <b>Requested:</b> {subscription_history.timestamp.strftime('%Y-%m-%d %H:%M')}
+⏰ <b>Requested:</b> {timezone.localtime(subscription_history.timestamp).strftime('%Y-%m-%d %H:%M')} (Tashkent)
 
 <i>View in admin panel to approve or reject.</i>
         """.strip()
