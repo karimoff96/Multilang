@@ -54,7 +54,7 @@
     }
 </style>
 <div class="row gy-4">
-    <div class="col-lg-8">
+    <div class="col-lg-8 col-md-12 col-12">
         <div class="card radius-8 border-0">
             <div class="card-header py-16 px-24 border-bottom bg-base">
                 <h6 class="mb-0 fw-bold text-lg">{% if role %}<span data-i18n="form.editRole">Edit Role</span>{% else %}<span data-i18n="form.createRole">Create Role</span>{% endif %}</h6>
@@ -65,7 +65,7 @@
                     
                     <!-- Role Name and Display Name -->
                     <div class="row mb-20">
-                        <div class="col-md-6">
+                        <div class="col-md-6 col-12">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                                 <span data-i18n="form.roleNameId">Role Name (ID)</span> <span class="text-danger">*</span>
                             </label>
@@ -79,7 +79,7 @@
                                    required>
                             <small class="text-secondary-light" data-i18n="form.roleNameHint">Lowercase, underscores instead of spaces</small>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 col-12">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.displayName">
                                 Display Name
                             </label>

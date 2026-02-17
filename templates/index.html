@@ -5,10 +5,10 @@
 {% block content %}
 <div class="row gy-4">
     <!-- Row 1: Quick Stats Cards (using index2 gradient style) -->
-    <div class="col-xxl-8">
+    <div class="col-xxl-8 col-xl-12">
         <div class="row gy-4">
             <!-- Today's Orders -->
-            <div class="col-xxl-4 col-sm-6">
+            <div class="col-xxl-4 col-lg-4 col-md-6 col-sm-6 col-12">
                 <div class="card p-3 shadow-2 radius-8 border input-form-light h-100 bg-gradient-end-1">
                     <div class="card-body p-0">
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
@@ -36,7 +36,7 @@
             </div>
 
             <!-- Today's Revenue -->
-            <div class="col-xxl-4 col-sm-6">
+            <div class="col-xxl-4 col-lg-4 col-md-6 col-sm-6 col-12">
                 <div class="card p-3 shadow-2 radius-8 border input-form-light h-100 bg-gradient-end-2">
                     <div class="card-body p-0">
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
@@ -64,7 +64,7 @@
             </div>
 
             <!-- Completion Rate -->
-            <div class="col-xxl-4 col-sm-6">
+            <div class="col-xxl-4 col-lg-4 col-md-6 col-sm-6 col-12">
                 <div class="card p-3 shadow-2 radius-8 border input-form-light h-100 bg-gradient-end-3">
                     <div class="card-body p-0">
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
@@ -88,7 +88,7 @@
             </div>
 
             <!-- Pending Orders (Alert) -->
-            <div class="col-xxl-4 col-sm-6">
+            <div class="col-xxl-4 col-lg-4 col-md-6 col-sm-6 col-12">
                 <div class="card p-3 shadow-2 radius-8 border input-form-light h-100 bg-gradient-end-4">
                     <div class="card-body p-0">
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
@@ -112,7 +112,7 @@
             </div>
 
             <!-- In Progress -->
-            <div class="col-xxl-4 col-sm-6">
+            <div class="col-xxl-4 col-lg-4 col-md-6 col-sm-6 col-12">
                 <div class="card p-3 shadow-2 radius-8 border input-form-light h-100 bg-gradient-end-5">
                     <div class="card-body p-0">
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
@@ -134,7 +134,7 @@
             </div>
 
             <!-- Cancelled (Alert) -->
-            <div class="col-xxl-4 col-sm-6">
+            <div class="col-xxl-4 col-lg-4 col-md-6 col-sm-6 col-12">
                 <div class="card p-3 shadow-2 radius-8 border input-form-light h-100 bg-gradient-end-6">
                     <div class="card-body p-0">
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-8">
@@ -163,7 +163,7 @@
 
     <!-- Role-Specific Dashboard Section -->
     {% if role_title %}
-    <div class="col-xxl-4">
+    <div class="col-xxl-4 col-xl-12 col-lg-12">
         <div class="card h-100 radius-8 border">
             <div class="card-header border-bottom bg-base py-16 px-24">
                 <h6 class="text-lg fw-semibold mb-0">{{ role_title }}</h6>
@@ -172,7 +172,7 @@
                 {% if my_total_assigned is not None %}
                 <!-- Staff View -->
                 <div class="row g-3">
-                    <div class="col-6">
+                    <div class="col-6 col-sm-6">
                         <div class="bg-primary-50 p-3 rounded-3 text-center">
                             <span class="text-primary-600 d-block mb-1">
                                 <iconify-icon icon="solar:inbox-line-bold" class="text-xxl"></iconify-icon>
@@ -255,7 +255,7 @@
                 {% elif total_centers is not None %}
                 <!-- Owner/Superuser View -->
                 <div class="row g-3 mb-3">
-                    <div class="col-4">
+                    <div class="col-4 col-sm-4">
                         <div class="bg-primary-50 p-3 rounded-3 text-center">
                             <iconify-icon icon="solar:buildings-bold" class="text-xxl text-primary-600 d-block mb-1"></iconify-icon>
                             <h5 class="fw-bold mb-0">{{ total_centers }}</h5>
@@ -370,7 +370,7 @@
     </div>
 
     <!-- Revenue Growth Chart (Right side) -->
-    <div class="col-xxl-4">
+    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-12">
         <div class="card h-100 radius-8 border">
             <div class="card-body p-24">
                 <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
@@ -389,7 +389,7 @@
     </div>
 
     <!-- Quick Status Overview -->
-    <div class="col-xxl-4">
+    <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-12">
         <div class="card h-100 radius-8 border">
             <div class="card-body p-24">
                 <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
@@ -474,7 +474,7 @@
     </div>
 
     <!-- User Overview -->
-    <div class="col-xxl-4">
+    <div class="col-xxl-4 col-xl-12 col-lg-12 col-md-12">
         <div class="card h-100 radius-8 border overflow-hidden">
             <div class="card-body p-24">
                 <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
@@ -517,8 +517,8 @@
                 </a>
             </div>
             <div class="card-body p-24">
-                <div class="table-responsive">
-                    <table class="table bordered-table mb-0 table-compact">
+                <div class="table-responsive" style="overflow-x: auto;">
+                    <table class="table bordered-table mb-0 table-compact" style="min-width: 900px;">
                         <thead>
                             <tr>
                                 <th scope="col">#</th>
