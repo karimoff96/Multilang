@@ -15,6 +15,8 @@ import time
 import signal
 import sys
 import os
+import subprocess
+import psutil
 from django.core.management.base import BaseCommand
 from organizations.models import TranslationCenter
 from bot.webhook_manager import get_ssl_session
@@ -24,6 +26,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# PID file directory
+PID_DIR = '/tmp/wowdash_bots'
+
 # Try to import watchdog for auto-reload functionality
 try:
     from watchdog.observers import Observer
@@ -32,6 +37,106 @@ try:
 except ImportError:
     WATCHDOG_AVAILABLE = False
     logger.warning("watchdog not installed. Auto-reload won't be available. Run: pip install watchdog")
+
+
+# Process Management Functions
+
+def ensure_pid_dir():
+    """Ensure PID directory exists"""
+    os.makedirs(PID_DIR, exist_ok=True)
+
+
+def get_pid_file(center_id=None):
+    """Get PID file path for a center or all bots"""
+    ensure_pid_dir()
+    if center_id:
+        return os.path.join(PID_DIR, f'bot_center_{center_id}.pid')
+    return os.path.join(PID_DIR, 'bot_all.pid')
+
+
+def write_pid_file(center_id=None):
+    """Write current process PID to file"""
+    pid_file = get_pid_file(center_id)
+    with open(pid_file, 'w') as f:
+        f.write(str(os.getpid()))
+    logger.info(f"Created PID file: {pid_file} with PID {os.getpid()}")
+
+
+def remove_pid_file(center_id=None):
+    """Remove PID file"""
+    pid_file = get_pid_file(center_id)
+    try:
+        if os.path.exists(pid_file):
+            os.remove(pid_file)
+            logger.info(f"Removed PID file: {pid_file}")
+    except Exception as e:
+        logger.error(f"Error removing PID file {pid_file}: {e}")
+
+
+def kill_duplicate_processes(center_id=None, current_pid=None):
+    """
+    Kill duplicate bot processes for the same center.
+    Returns number of processes killed.
+    """
+    if current_pid is None:
+        current_pid = os.getpid()
+    
+    killed_count = 0
+    pattern = f"run_bots --center-id={center_id}" if center_id else "run_bots"
+    
+    try:
+        # Find all matching processes
+        for proc in psutil.process_iter(['pid', 'cmdline']):
+            try:
+                cmdline = ' '.join(proc.info['cmdline'] or [])
+                # Match the pattern and exclude current process
+                if pattern in cmdline and proc.info['pid'] != current_pid:
+                    logger.warning(f"Killing duplicate process: PID {proc.info['pid']}, CMD: {cmdline}")
+                    proc.kill()
+                    killed_count += 1
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+    except Exception as e:
+        logger.error(f"Error detecting duplicate processes: {e}")
+    
+    if killed_count > 0:
+        logger.info(f"Killed {killed_count} duplicate bot process(es)")
+        time.sleep(1)  # Wait for processes to fully terminate
+    
+    return killed_count
+
+
+def check_existing_process(center_id=None):
+    """
+    Check if a bot process is already running for this center.
+    Returns (is_running, pid) tuple.
+    """
+    pid_file = get_pid_file(center_id)
+    
+    if not os.path.exists(pid_file):
+        return False, None
+    
+    try:
+        with open(pid_file, 'r') as f:
+            pid = int(f.read().strip())
+        
+        # Check if process is actually running
+        if psutil.pid_exists(pid):
+            try:
+                proc = psutil.Process(pid)
+                cmdline = ' '.join(proc.cmdline())
+                if 'run_bots' in cmdline:
+                    return True, pid
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+        
+        # PID file exists but process is dead - clean up
+        remove_pid_file(center_id)
+        return False, None
+        
+    except Exception as e:
+        logger.error(f"Error checking existing process: {e}")
+        return False, None
 
 
 def copy_handlers_from_template(template_bot, target_bot):
@@ -393,6 +498,45 @@ class Command(BaseCommand):
         center_id = options.get('center_id')
         use_reload = options.get('reload', False)
         no_reload = options.get('no_reload', False)
+        
+        # ===== AUTOMATED DUPLICATE PREVENTION =====
+        # Check if a bot is already running for this center (or all bots)
+        is_running, existing_pid = check_existing_process(center_id)
+        
+        if is_running and existing_pid:
+            self.stdout.write(self.style.WARNING(
+                f'\n⚠️  Bot already running (PID: {existing_pid})\n'
+            ))
+            # Try to verify it's actually responding
+            try:
+                proc = psutil.Process(existing_pid)
+                if proc.is_running():
+                    self.stdout.write(self.style.ERROR(
+                        f'❌ Another instance is already running. Exiting.\n'
+                        f'   To force restart: kill {existing_pid}\n'
+                    ))
+                    return
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+        
+        # Kill any duplicate/zombie processes before starting
+        self.stdout.write(self.style.WARNING('🔍 Checking for duplicate processes...\n'))
+        killed = kill_duplicate_processes(center_id, os.getpid())
+        
+        if killed > 0:
+            self.stdout.write(self.style.SUCCESS(
+                f'✅ Cleaned up {killed} duplicate process(es)\n'
+            ))
+        else:
+            self.stdout.write('✓ No duplicates found\n')
+        
+        # Write PID file for this process
+        write_pid_file(center_id)
+        
+        # Register cleanup on exit
+        import atexit
+        atexit.register(lambda: remove_pid_file(center_id))
+        # ===== END DUPLICATE PREVENTION =====
         
         # If --reload flag is used, start the auto-reload wrapper
         if use_reload and not no_reload:

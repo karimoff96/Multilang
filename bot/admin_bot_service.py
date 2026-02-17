@@ -29,8 +29,94 @@ import os
 import telebot
 from telebot.apihelper import ApiTelegramException
 from django.conf import settings
+import psutil
+import time
 
 logger = logging.getLogger(__name__)
+
+# Admin bot PID file
+ADMIN_BOT_PID_FILE = '/tmp/wowdash_admin_bot.pid'
+
+
+# Duplicate Prevention Utilities
+
+def write_admin_bot_pid():
+    """Write current process PID to file"""
+    try:
+        with open(ADMIN_BOT_PID_FILE, 'w') as f:
+            f.write(str(os.getpid()))
+        logger.info(f"Created admin bot PID file with PID {os.getpid()}")
+    except Exception as e:
+        logger.error(f"Error writing PID file: {e}")
+
+
+def remove_admin_bot_pid():
+    """Remove admin bot PID file"""
+    try:
+        if os.path.exists(ADMIN_BOT_PID_FILE):
+            os.remove(ADMIN_BOT_PID_FILE)
+            logger.info("Removed admin bot PID file")
+    except Exception as e:
+        logger.error(f"Error removing PID file: {e}")
+
+
+def kill_duplicate_admin_bots():
+    """
+    Kill duplicate admin bot processes.
+    Returns number of processes killed.
+    """
+    current_pid = os.getpid()
+    killed_count = 0
+    
+    try:
+        for proc in psutil.process_iter(['pid', 'cmdline']):
+            try:
+                cmdline = ' '.join(proc.info['cmdline'] or [])
+                # Match admin_bot command and exclude current process
+                if 'manage.py admin_bot' in cmdline and proc.info['pid'] != current_pid:
+                    logger.warning(f"Killing duplicate admin bot: PID {proc.info['pid']}")
+                    proc.kill()
+                    killed_count += 1
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+    except Exception as e:
+        logger.error(f"Error detecting duplicate admin bot processes: {e}")
+    
+    if killed_count > 0:
+        logger.info(f"Killed {killed_count} duplicate admin bot process(es)")
+        time.sleep(1)
+    
+    return killed_count
+
+
+def check_admin_bot_running():
+    """
+    Check if admin bot is already running.
+    Returns (is_running, pid) tuple.
+    """
+    if not os.path.exists(ADMIN_BOT_PID_FILE):
+        return False, None
+    
+    try:
+        with open(ADMIN_BOT_PID_FILE, 'r') as f:
+            pid = int(f.read().strip())
+        
+        if psutil.pid_exists(pid):
+            try:
+                proc = psutil.Process(pid)
+                cmdline = ' '.join(proc.cmdline())
+                if 'admin_bot' in cmdline:
+                    return True, pid
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+        
+        # PID file exists but process is dead
+        remove_admin_bot_pid()
+        return False, None
+        
+    except Exception as e:
+        logger.error(f"Error checking admin bot process: {e}")
+        return False, None
 
 # Admin bot token - separate from customer bot
 ADMIN_BOT_TOKEN = getattr(settings, 'ADMIN_BOT_TOKEN', None) or os.getenv('ADMIN_BOT_TOKEN')
@@ -376,9 +462,38 @@ def start_bot_polling():
     Start the bot polling to listen for incoming messages.
     This is a blocking call - runs indefinitely until interrupted.
     """
+    # ===== AUTOMATED DUPLICATE PREVENTION =====
+    is_running, existing_pid = check_admin_bot_running()
+    
+    if is_running and existing_pid:
+        logger.warning(f"Admin bot already running (PID: {existing_pid})")
+        try:
+            proc = psutil.Process(existing_pid)
+            if proc.is_running():
+                logger.error(f"Another instance is already running. Exiting to prevent 409 conflicts.")
+                return
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            pass
+    
+    # Kill any duplicate/zombie processes
+    logger.info("Checking for duplicate admin bot processes...")
+    killed = kill_duplicate_admin_bots()
+    
+    if killed > 0:
+        logger.info(f"Cleaned up {killed} duplicate admin bot process(es)")
+    
+    # Write PID file for this process
+    write_admin_bot_pid()
+    
+    # Register cleanup on exit
+    import atexit
+    atexit.register(remove_admin_bot_pid)
+    # ===== END DUPLICATE PREVENTION =====
+    
     bot = setup_bot_handlers()
     if not bot:
         logger.error("Cannot start polling - bot setup failed")
+        remove_admin_bot_pid()
         return
     
     logger.info("🤖 Starting admin bot polling...")
@@ -399,6 +514,8 @@ def start_bot_polling():
         )
     except KeyboardInterrupt:
         logger.info("Admin bot polling stopped by user")
+        remove_admin_bot_pid()
     except Exception as e:
         logger.error(f"Error during bot polling: {e}")
+        remove_admin_bot_pid()
         raise
