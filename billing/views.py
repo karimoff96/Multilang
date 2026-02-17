@@ -9,6 +9,10 @@ from dateutil.relativedelta import relativedelta
 
 from .models import Tariff, TariffPricing, Subscription, Feature, UsageTracking, SubscriptionHistory, SubscriptionAnalytics
 from organizations.models import TranslationCenter
+from bot.admin_bot_service import send_renewal_request_notification
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -949,20 +953,24 @@ Request Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}
             """.strip()
             
             # Log the request in subscription history
-            SubscriptionHistory.objects.create(
+            history_entry = SubscriptionHistory.objects.create(
                 subscription=subscription,
                 action='renewal_requested',
                 description=renewal_request_note,
                 performed_by=request.user
             )
             
+            # Send telegram notification to admin
+            try:
+                send_renewal_request_notification(history_entry)
+            except Exception as e:
+                logger.error(f"Failed to send admin notification for renewal request: {e}")
+            
             # Send success message
             messages.success(
                 request, 
                 _("Your renewal request has been submitted successfully! Our team will contact you shortly to process the payment.")
             )
-            
-            # TODO: Send email/telegram notification to admins
             
             return redirect('billing:request_renewal')
             

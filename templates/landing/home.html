@@ -1291,8 +1291,8 @@
                                            placeholder="{% if current_language == 'uz' %}Ismingiz{% elif current_language == 'en' %}Your name{% else %}Ваше имя{% endif %}">
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Email </label>
-                                    <input type="email" name="email" class="form-control" placeholder="{% if current_language == 'uz' %}sizning@email.uz{% elif current_language == 'en' %}you@example.com{% else %}вы@example.com{% endif %}">
+                                    <label class="form-label">Email *</label>
+                                    <input type="email" name="email" class="form-control" required placeholder="{% if current_language == 'uz' %}sizning@email.uz{% elif current_language == 'en' %}you@example.com{% else %}вы@example.com{% endif %}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">
@@ -1303,9 +1303,10 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">
-                                        {% if current_language == 'uz' %}Telefon *{% elif current_language == 'en' %}Phone *{% else %}Телефон *{% endif %}
+                                        {% if current_language == 'uz' %}Telefon / Telegram *{% elif current_language == 'en' %}Phone / Telegram *{% else %}Телефон / Telegram *{% endif %}
                                     </label>
-                                    <input type="tel" name="phone" required class="form-control" placeholder="+998 XX XXX XX XX">
+                                    <input type="text" name="phone" required class="form-control" 
+                                           placeholder="{% if current_language == 'uz' %}+998 XX XXX XX XX yoki @username{% elif current_language == 'en' %}+998 XX XXX XX XX or @username{% else %}+998 XX XXX XX XX или @username{% endif %}">
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label">

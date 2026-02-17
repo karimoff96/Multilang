@@ -8,6 +8,10 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from .models import ContactRequest
 from billing.models import Tariff, SubscriptionHistory
+from bot.admin_bot_service import send_contact_request_notification
+import logging
+
+logger = logging.getLogger(__name__)
 import logging
 
 logger = logging.getLogger(__name__)
@@ -60,13 +64,26 @@ def contact_form(request):
                 return redirect('landing_home')
             
             # Create contact request
-            ContactRequest.objects.create(
+            contact_request = ContactRequest.objects.create(
                 name=name,
                 email=email,
                 company=company,
                 phone=phone,
                 message=message
             )
+            
+            # Send notification to admin via Telegram
+            logger.info(f"About to send admin notification for contact request from {name}")
+            try:
+                notification_sent = send_contact_request_notification(contact_request)
+                if notification_sent:
+                    logger.info(f"✅ Admin notification sent successfully for contact request from {name}")
+                else:
+                    logger.warning(f"⚠️ Admin notification was not sent for contact request from {name}")
+            except Exception as e:
+                logger.error(f"❌ Exception while sending admin notification for contact request: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
             
             messages.success(request, _("Thank you! We will contact you soon."))
             logger.info(f"New contact request from {name} ({email})")
