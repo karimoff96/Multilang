@@ -5,6 +5,66 @@
 {% load billing_extras %}
 
 {% block content %}
+<style>
+/* Fix tooltip z-index and overflow clipping */
+#orderTrendChart .apexcharts-tooltip,
+#statusPieChart .apexcharts-tooltip {
+    background: #1e1e1e !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+    padding: 0 !important;
+    min-width: auto !important;
+    max-width: 180px !important;
+    width: auto !important;
+    overflow: visible !important;
+    z-index: 9999 !important;
+}
+#orderTrendChart .apexcharts-tooltip .apexcharts-tooltip-title,
+#statusPieChart .apexcharts-tooltip .apexcharts-tooltip-title {
+    background: #111 !important;
+    border-bottom: 1px solid #333 !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+    color: #fff !important;
+}
+#orderTrendChart .apexcharts-tooltip .apexcharts-tooltip-series-group,
+#statusPieChart .apexcharts-tooltip .apexcharts-tooltip-series-group {
+    padding: 4px 10px !important;
+    background: transparent !important;
+}
+#orderTrendChart .apexcharts-tooltip .apexcharts-tooltip-y-group,
+#statusPieChart .apexcharts-tooltip .apexcharts-tooltip-y-group {
+    padding: 0 !important;
+}
+/* Ensure tooltip text values are visible */
+#orderTrendChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#statusPieChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#orderTrendChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#statusPieChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#orderTrendChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value,
+#statusPieChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value {
+    color: #fff !important;
+    display: inline !important;
+    visibility: visible !important;
+}
+/* Prevent parent cards from clipping the tooltip */
+#orderTrendChart,
+#statusPieChart {
+    overflow: visible !important;
+}
+#orderTrendChart .apexcharts-canvas,
+#statusPieChart .apexcharts-canvas {
+    overflow: visible !important;
+}
+.col-xxl-8 > .card,
+.col-xxl-4 > .card,
+.col-xxl-8 > .card > .card-body,
+.col-xxl-4 > .card > .card-body {
+    overflow: visible !important;
+}
+</style>
 <div class="row gy-4">
     <!-- Report Header with Filters -->
     <div class="col-12">
@@ -369,6 +429,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 yaxis: {
                     labels: { style: { colors: '#9CA3AF', fontSize: '12px' } }
                 },
+                tooltip: {
+                    theme: 'dark',
+                    x: { show: true },
+                    y: {
+                        formatter: function(val) { return val + ' orders'; },
+                        title: { formatter: function() { return ''; } }
+                    },
+                    marker: { show: false },
+                    fixed: { enabled: false }
+                },
                 grid: { borderColor: '#E4E7EC', strokeDashArray: 3 }
             });
             orderChart.render();
@@ -407,6 +477,16 @@ document.addEventListener('DOMContentLoaded', function() {
                                     }
                                 }
                             }
+                        }
+                    }
+                },
+                tooltip: {
+                    enabled: true,
+                    theme: 'dark',
+                    fillSeriesColor: false,
+                    y: {
+                        formatter: function(val) {
+                            return val + ' orders';
                         }
                     }
                 }

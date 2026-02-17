@@ -28,28 +28,28 @@
                         <form method="post" action="{% url 'contact_request_change_status' req.pk %}">
                             {% csrf_token %}
                             <input type="hidden" name="status" value="contacted">
-                            <button class="btn btn-sm btn-outline-primary" title="{% trans 'Mark contacted' %}">
+                            <button class="btn btn-sm {% if req.status == 'contacted' %}btn-primary text-white{% else %}btn-outline-primary{% endif %}" title="{% trans 'Mark contacted' %}">
                                 <i class="ri-phone-line"></i>
                             </button>
                         </form>
                         <form method="post" action="{% url 'contact_request_change_status' req.pk %}">
                             {% csrf_token %}
                             <input type="hidden" name="status" value="converted">
-                            <button class="btn btn-sm btn-outline-success" title="{% trans 'Mark converted' %}">
+                            <button class="btn btn-sm {% if req.status == 'converted' %}btn-success text-white{% else %}btn-outline-success{% endif %}" title="{% trans 'Mark converted' %}">
                                 <i class="ri-checkbox-circle-line"></i>
                             </button>
                         </form>
                         <form method="post" action="{% url 'contact_request_change_status' req.pk %}">
                             {% csrf_token %}
                             <input type="hidden" name="status" value="pending">
-                            <button class="btn btn-sm btn-outline-warning" title="{% trans 'Mark pending' %}">
+                            <button class="btn btn-sm {% if req.status == 'pending' %}btn-warning text-white{% else %}btn-outline-warning{% endif %}" title="{% trans 'Mark pending' %}">
                                 <i class="ri-time-line"></i>
                             </button>
                         </form>
                         <form method="post" action="{% url 'contact_request_change_status' req.pk %}">
                             {% csrf_token %}
                             <input type="hidden" name="status" value="cancelled">
-                            <button class="btn btn-sm btn-outline-danger" title="{% trans 'Cancel' %}">
+                            <button class="btn btn-sm {% if req.status == 'cancelled' %}btn-danger text-white{% else %}btn-outline-danger{% endif %}" title="{% trans 'Cancel' %}">
                                 <i class="ri-close-circle-line"></i>
                             </button>
                         </form>
