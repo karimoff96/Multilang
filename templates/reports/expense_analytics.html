@@ -45,7 +45,7 @@
                             </select>
                         </div>
                         <!-- Custom Date Range -->
-                        <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                        <div id="customDateRange" class="d-flex flex-wrap gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
                             <div>
                                 <label class="form-label text-sm mb-1" data-i18n="filter.from">{% trans "From" %}</label>
                                 <input type="date" name="date_from" class="form-control" value="{{ date_from }}">

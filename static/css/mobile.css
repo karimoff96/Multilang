@@ -1,0 +1,1030 @@
+/* ================================================
+   MOBILE.CSS — Smartphone-First Responsive Fixes
+   Targets: max-width 767px (phones)
+   Secondary targets: max-width 991px (tablets)
+   ================================================ */
+
+/* ================================================
+   1. SIDEBAR — Mobile overlay behavior
+   ================================================ */
+
+@media (max-width: 1199px) {
+    /* Ensure sidebar is off-screen by default via inset only (no transform conflict) */
+    .sidebar {
+        inset-inline-start: -100% !important;
+        transition: inset-inline-start 0.3s ease, box-shadow 0.3s ease !important;
+        transform: none !important;  /* kill any translateX from other CSS */
+        z-index: 1050 !important;    /* above backdrop (1040) and navbar */
+        width: 260px !important;
+    }
+
+    /* Slide in when open */
+    .sidebar.sidebar-open {
+        inset-inline-start: 0 !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    /* Prevent body scroll when sidebar is open */
+    body.overlay-active {
+        overflow: hidden !important;
+    }
+}
+
+/* ================================================
+   2. NAVBAR — Compact & Touch-Friendly
+   ================================================ */
+
+@media (max-width: 767px) {
+    .navbar-header {
+        padding: 0 12px !important;
+        min-height: 56px;
+    }
+
+    .navbar-header .row {
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
+    /* Notification dropdown — prevent overflow off screen */
+    .navbar-header .dropdown-menu.to-top {
+        right: 0 !important;
+        left: auto !important;
+        max-width: calc(100vw - 20px);
+        width: 320px !important;
+    }
+
+    /* Keep dropdown from cutting off at edges */
+    .navbar-header .dropdown-menu {
+        max-width: calc(100vw - 24px);
+    }
+
+    /* Profile dropdown */
+    .navbar-header .dropdown-menu.to-top.dropdown-menu-sm {
+        width: 260px !important;
+    }
+
+    /* Reduce gaps */
+    .navbar-header .d-flex.gap-3 {
+        gap: 6px !important;
+    }
+
+    .navbar-header .d-flex.gap-4 {
+        gap: 8px !important;
+    }
+
+    /* Smaller action buttons in navbar */
+    .navbar-header .w-40-px.h-40-px {
+        width: 36px !important;
+        height: 36px !important;
+    }
+}
+
+/* ================================================
+   3. DASHBOARD BODY — Padding & Spacing
+   ================================================ */
+
+@media (max-width: 767px) {
+    .dashboard-main-body {
+        padding: 12px 10px !important;
+    }
+
+    /* Row gutters reduced */
+    .row.gy-4 {
+        --bs-gutter-y: 0.75rem;
+    }
+
+    .mb-24 {
+        margin-bottom: 16px !important;
+    }
+
+    .mb-16 {
+        margin-bottom: 12px !important;
+    }
+}
+
+@media (max-width: 575px) {
+    .dashboard-main-body {
+        padding: 10px 8px !important;
+    }
+}
+
+/* ================================================
+   4. STAT CARDS — Grid Layout
+   ================================================ */
+
+@media (max-width: 575px) {
+    /* 2-column stat cards on small phones */
+    .col-xxl-4.col-lg-4.col-md-6.col-sm-6.col-12,
+    .col-xxl-3.col-xl-6.col-lg-6.col-md-6.col-sm-6,
+    .col-xxl-3.col-sm-6,
+    .col-xxl-2.col-lg-4.col-md-6.col-sm-6.col-12 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 375px) {
+    /* 1-column on very small phones */
+    .col-xxl-4.col-lg-4.col-md-6.col-sm-6.col-12,
+    .col-xxl-3.col-xl-6.col-lg-6.col-md-6.col-sm-6,
+    .col-xxl-3.col-sm-6,
+    .col-xxl-2.col-lg-4.col-md-6.col-sm-6.col-12 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* ================================================
+   5. CARD HEADERS — Responsive Stacking
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Card headers with actions — wrap gracefully */
+    .card-header.d-flex.justify-content-between,
+    .card-header.d-flex.align-items-center.justify-content-between {
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+
+    /* Card body padding */
+    .card-body.p-24 {
+        padding: 14px !important;
+    }
+
+    /* Reduce inner padding on cards */
+    .px-24 {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+
+    .py-24 {
+        padding-top: 14px !important;
+        padding-bottom: 14px !important;
+    }
+}
+
+/* ================================================
+   6. ORDERS LIST — Filter Bar & Stats
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Orders top row — title + create button */
+    .d-flex.flex-column.flex-md-row.align-items-md-center.justify-content-between.mb-16 {
+        gap: 12px !important;
+    }
+
+    /* The quick-stats badges row */
+    .d-flex.flex-wrap.align-items-center.gap-12 {
+        gap: 8px !important;
+    }
+
+    /* Orders filter area */
+    .card .row.gy-3 .col-12.col-sm-6.col-md-4.col-lg-3,
+    .card .row.gy-3 .col-12.col-md-6.col-lg-4,
+    .card .row.gy-3 .col-12.col-sm-6.col-md-4.col-lg-2 {
+        /* Already Bootstrap col-12 on mobile, ensure full width */
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    /* Date filter section */
+    .date-filter-section {
+        flex-wrap: wrap !important;
+    }
+
+    /* Orders date preset buttons */
+    .btn-group.flex-wrap {
+        flex-wrap: wrap !important;
+        gap: 4px;
+    }
+
+    .btn-group.flex-wrap .btn {
+        border-radius: 6px !important;
+        margin-bottom: 0 !important;
+    }
+}
+
+/* ================================================
+   7. ORDER DETAIL — Two-Column Layout
+   ================================================ */
+
+@media (max-width: 991px) {
+    /* Stack order detail columns */
+    .col-lg-8,
+    .col-lg-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    /* Detail info cards - 2 per row on tablet */
+    .col-sm-4 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 575px) {
+    /* Stack detail info cards fully on phone */
+    .col-sm-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    /* Order header - status badge wraps */
+    .card-header.d-flex.align-items-center.justify-content-between {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    /* Archive info flex wrap */
+    .d-flex.flex-wrap.gap-2.align-items-center {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    .d-flex.flex-wrap.gap-2.align-items-center .btn,
+    .d-flex.flex-wrap.gap-2.align-items-center .text-sm {
+        width: auto !important;
+    }
+}
+
+/* ================================================
+   8. ORDER CREATE / EDIT FORMS
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Two-column form rows stack on mobile */
+    .row.g-3 > .col-md-6,
+    .row.g-4 > .col-md-6,
+    .row.gy-3 > .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    /* Form section headers */
+    .form-section-header {
+        font-size: 1rem !important;
+    }
+
+    /* File upload area */
+    .upload-area {
+        padding: 20px 10px !important;
+    }
+
+    /* Price calculator section */
+    .price-calculator {
+        flex-direction: column !important;
+    }
+}
+
+/* ================================================
+   9. USERS LIST — Filter Bar
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Users header filter row */
+    .users-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    .filters-main-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+
+    /* All filter selects full width */
+    .filter-per-page,
+    .filter-status,
+    .filter-user-type,
+    .filter-center,
+    .filter-branch,
+    .search-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 1 1 100% !important;
+        min-width: auto !important;
+    }
+
+    /* Header actions row */
+    .header-actions {
+        flex-direction: column !important;
+        width: 100%;
+    }
+
+    .header-actions .btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* Bulk actions group */
+    .bulk-actions-group {
+        width: 100%;
+    }
+
+    .bulk-actions-group select,
+    .bulk-actions-group .btn {
+        flex: 1;
+    }
+}
+
+/* ================================================
+   10. ORGANIZATIONS — Staff / Branch Pages
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Filter + add button header */
+    .card-header.d-flex.flex-column.flex-md-row {
+        gap: 10px !important;
+    }
+
+    /* Add button full width */
+    .card-header > a.btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Search input full width in card headers */
+    .card-header .navbar-search {
+        width: 100%;
+    }
+
+    .card-header .navbar-search input {
+        width: 100% !important;
+    }
+
+    /* Filter selects in header */
+    .card-header .form-select.w-auto {
+        width: 100% !important;
+    }
+
+    /* Staff form */
+    .row.gy-3 > .col-sm-6,
+    .row.g-3 > .col-sm-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* ================================================
+   11. SERVICES PAGES — Product/Category Lists
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Language price table */
+    .table.bordered-table.sm-table {
+        font-size: 0.75rem !important;
+    }
+
+    /* Service category cards */
+    .col-lg-3.col-sm-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 480px) {
+    .col-lg-3.col-sm-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* ================================================
+   12. REPORTS & ANALYTICS PAGES
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Report filter form */
+    .card-body.p-24 > .d-flex.flex-wrap.align-items-center.justify-content-between {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px;
+    }
+
+    /* Filter form in reports */
+    .card-body form.d-flex.flex-wrap.gap-2.align-items-end {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100%;
+    }
+
+    .card-body form.d-flex.flex-wrap.gap-2.align-items-end > div {
+        width: 100%;
+    }
+
+    .card-body form.d-flex.flex-wrap.gap-2.align-items-end .form-select,
+    .card-body form.d-flex.flex-wrap.gap-2.align-items-end .form-control,
+    .card-body form.d-flex.flex-wrap.gap-2.align-items-end input {
+        width: 100% !important;
+    }
+
+    .card-body form.d-flex.flex-wrap.gap-2.align-items-end button,
+    .card-body form.d-flex.flex-wrap.gap-2.align-items-end a.btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* Chart height adjustments */
+    #revenueChart,
+    #dailyRevenueChart,
+    #expenseChart,
+    #financialChart,
+    [id$="Chart"] {
+        min-height: 220px !important;
+        max-height: 280px;
+    }
+
+    /* Report summary cards */
+    .col-xxl-3.col-xl-6.col-lg-6.col-md-6.col-sm-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 480px) {
+    .col-xxl-3.col-xl-6.col-lg-6.col-md-6.col-sm-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* ================================================
+   13. BILLING PAGES
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Billing filter — search + select row */
+    .card-header .d-flex.flex-wrap.align-items-center.justify-content-between {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+
+    .card-header form.d-flex,
+    .card-header .d-flex form {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    /* Form selects/inputs inside card-header forms go full-width on mobile */
+    .card-header form .form-select,
+    .card-header form .form-control,
+    .card-header form .navbar-search {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    .card-header form .navbar-search input {
+        width: 100% !important;
+    }
+
+    .card-header form button[type="submit"] {
+        width: 100%;
+    }
+
+    /* Billing stat cards */
+    .col-xxl-3.col-sm-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 480px) {
+    .col-xxl-3.col-sm-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* ================================================
+   14. AUTHENTICATION PAGES
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Auth layout — left panel hidden, right panel full width */
+    .auth {
+        min-height: 100vh;
+    }
+
+    .auth-right {
+        width: 100% !important;
+        padding: 24px 20px !important;
+    }
+
+    .auth-right .max-w-464-px {
+        max-width: 100% !important;
+        width: 100%;
+        padding: 0;
+    }
+
+    /* Logo sizing */
+    .auth-right .max-w-290-px {
+        max-width: 160px !important;
+    }
+
+    /* Form inputs larger touch area */
+    .auth-right .form-control.h-56-px {
+        height: 50px !important;
+        font-size: 16px !important; /* prevents iOS zoom */
+    }
+
+    /* Sign in button */
+    .auth-right .btn.w-100 {
+        height: 50px !important;
+        font-size: 1rem !important;
+    }
+}
+
+/* ================================================
+   15. EMAIL / VIEW DETAILS (viewDetails.html)
+   ================================================ */
+
+@media (max-width: 991px) {
+    /* Stack email sidebar and content - col-lg-3/9 already handles this */
+}
+
+@media (max-width: 767px) {
+    /* Email card — remove min-width constraint */
+    .email-card .min-w-450-px,
+    .email-card-inner {
+        min-width: 0 !important;
+        width: 100%;
+    }
+
+    /* Email list items */
+    .email-list-item {
+        flex-wrap: wrap;
+    }
+
+    /* Email card compose button */
+    .email-card .card-header.d-flex {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+}
+
+/* ================================================
+   16. TABLES — Smart Horizontal Scroll
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* All table wrappers scroll horizontally */
+    .table-responsive {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+    }
+
+    /* Tables keep min width so columns don't collapse too much */
+    .table-responsive > table.bordered-table,
+    .table-responsive > .table {
+        min-width: 600px;
+    }
+
+    /* But if explicitly set with scroll-sm, allow smaller */
+    .table-responsive.scroll-sm > table {
+        min-width: 500px;
+    }
+
+    /* Action column dropdown — position correctly in scroll */
+    .col-action .dropdown-menu {
+        position: fixed !important;
+        z-index: 9999 !important;
+    }
+
+    /* Compact table cells */
+    .bordered-table th,
+    .bordered-table td {
+        padding: 8px 10px !important;
+        font-size: 0.8rem;
+    }
+
+    /* Smaller action buttons */
+    .action-btn-sm {
+        width: 28px !important;
+        height: 28px !important;
+    }
+
+    /* Smaller avatar circles in tables */
+    .w-40-px.h-40-px.rounded-circle {
+        width: 32px !important;
+        height: 32px !important;
+    }
+}
+
+/* ================================================
+   17. MODALS — Full-Screen on Mobile
+   ================================================ */
+
+@media (max-width: 575px) {
+    /* Full screen modals on phones */
+    .modal-dialog:not(.modal-sm) {
+        margin: 0 !important;
+        max-width: 100% !important;
+        min-height: 100%;
+    }
+
+    .modal-dialog:not(.modal-sm) .modal-content {
+        border-radius: 0 !important;
+        min-height: 100vh;
+    }
+
+    /* Modal header padding */
+    .modal-header {
+        padding: 14px 16px !important;
+    }
+
+    .modal-body {
+        padding: 16px !important;
+    }
+
+    .modal-footer {
+        padding: 12px 16px !important;
+        flex-direction: column !important;
+        gap: 8px;
+    }
+
+    .modal-footer .btn {
+        width: 100% !important;
+        justify-content: center;
+    }
+}
+
+/* ================================================
+   18. PAGINATION — Compact on Mobile
+   ================================================ */
+
+@media (max-width: 575px) {
+    /* Pagination row — stack count + pages */
+    .d-flex.align-items-center.justify-content-between.flex-wrap {
+        flex-direction: column !important;
+        gap: 10px !important;
+        align-items: center !important;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-link {
+        padding: 0.3rem 0.5rem !important;
+        font-size: 0.813rem !important;
+        min-width: 32px;
+        text-align: center;
+    }
+}
+
+/* ================================================
+   19. BREADCRUMB — Compact
+   ================================================ */
+
+@media (max-width: 575px) {
+    .breadcrumb-two {
+        flex-wrap: wrap;
+        font-size: 0.75rem;
+    }
+
+    .breadcrumb-two h6 {
+        font-size: 1rem !important;
+        margin-bottom: 4px;
+    }
+}
+
+/* ================================================
+   20. MESSAGES / TOAST NOTIFICATIONS
+   ================================================ */
+
+@media (max-width: 575px) {
+    .messages-container {
+        top: 60px !important;
+        right: 8px !important;
+        left: 8px !important;
+        min-width: auto !important;
+        max-width: 100% !important;
+        width: auto !important;
+        z-index: 10000 !important;
+    }
+
+    .messages-container .alert {
+        font-size: 0.875rem;
+        padding: 10px 12px;
+    }
+}
+
+/* ================================================
+   21. FORMS — Prevent iOS Zoom
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Prevent auto-zoom on iOS when input is focused */
+    .form-control,
+    .form-select,
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="date"],
+    input[type="datetime-local"],
+    select,
+    textarea {
+        font-size: 16px !important; /* iOS requires >= 16px to prevent zoom */
+    }
+
+    /* But small form variants can stay compact on larger phones */
+    @supports (font-size: max(1px, 14px)) {
+        .form-control,
+        .form-select {
+            font-size: max(16px, 0.875rem) !important;
+        }
+    }
+}
+
+/* ================================================
+   22. SCROLLBARS — Thin on mobile
+   ================================================ */
+
+@media (max-width: 767px) {
+    .table-responsive::-webkit-scrollbar {
+        height: 3px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+    }
+
+    /* Sidebar scrollbar */
+    .sidebar-menu-area::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    .scroll-sm::-webkit-scrollbar {
+        width: 3px;
+        height: 3px;
+    }
+}
+
+/* ================================================
+   23. USER DETAIL / PROFILE PAGES
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Profile avatar */
+    .w-120-px.h-120-px.rounded-circle {
+        width: 80px !important;
+        height: 80px !important;
+    }
+
+    /* Profile card — col-lg-4 already stacks, ensure padding ok */
+    .col-lg-4 > .card .card-body.p-24 {
+        padding: 16px !important;
+    }
+
+    /* Profile page tabs / sections */
+    .nav-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .nav-tabs .nav-link {
+        white-space: nowrap;
+    }
+}
+
+/* ================================================
+   24. MARKETING / BROADCAST PAGES
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Marketing list page — top filter bar */
+    .d-flex.flex-wrap.align-items-center.gap-3 > .form-select.w-auto,
+    .d-flex.flex-wrap.align-items-center.gap-2 > .form-select.w-auto {
+        flex: 1 1 140px;
+        min-width: 120px;
+    }
+
+    .col-lg-8,
+    .col-lg-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* ================================================
+   25. SALES / FINANCE PAGES
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Finance page two-column layout */
+    .col-xxl-8,
+    .col-xxl-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* ================================================
+   26. SIDEBAR MOBILE — JavaScript Helper Classes
+   ================================================ */
+
+/* Backdrop overlay injected by JS on mobile */
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1040;   /* below sidebar (1050), above page content */
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-backdrop.show {
+    display: block;
+    animation: backdropFadeIn 0.25s ease forwards;
+}
+
+@keyframes backdropFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@media (min-width: 1200px) {
+    .sidebar-backdrop {
+        display: none !important;
+    }
+}
+
+/* Sidebar scroll on mobile */
+@media (max-width: 1199px) {
+    .sidebar {
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .sidebar-menu-area {
+        max-height: calc(100vh - 5rem);
+        overflow-y: auto;
+    }
+}
+
+/* ================================================
+   27. LANDING PAGE
+   ================================================ */
+
+@media (max-width: 767px) {
+    .landing-hero {
+        padding: 40px 0 !important;
+    }
+
+    .landing-hero h1 {
+        font-size: 1.75rem !important;
+    }
+
+    /* Landing features grid */
+    .col-md-4.col-sm-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-bottom: 1rem;
+    }
+}
+
+/* ================================================
+   28. SUBSCRIPTION / TARIFF PAGES
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Tariff list cards */
+    .col-xl-4.col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    /* Subscription detail table */
+    .subscription-detail-table th,
+    .subscription-detail-table td {
+        font-size: 0.8rem;
+        padding: 8px !important;
+    }
+}
+
+/* ================================================
+   29. PAYMENT HISTORY / BULK PAYMENT
+   ================================================ */
+
+@media (max-width: 767px) {
+    /* Payment filter row */
+    .d-flex.gap-2.flex-wrap {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .d-flex.gap-2.flex-wrap .form-select,
+    .d-flex.gap-2.flex-wrap .form-control,
+    .d-flex.gap-2.flex-wrap input {
+        width: 100% !important;
+    }
+
+    .d-flex.gap-2.flex-wrap .btn {
+        width: 100% !important;
+        justify-content: center;
+    }
+}
+
+/* ================================================
+   30. GENERAL UTILITY — Mobile-First Helpers
+   ================================================ */
+
+/* Ensure images never overflow */
+@media (max-width: 767px) {
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Prevent overflow from fixed-width elements */
+    [style*="min-width: 450"],
+    [style*="min-width: 500"],
+    [style*="min-width: 600"],
+    [style*="min-width: 700"],
+    [style*="min-width: 800"] {
+        min-width: 0 !important;
+    }
+
+    /* Action dropdown menus — open leftward near right edge */
+    .dropdown-menu-end {
+        right: 0 !important;
+        left: auto !important;
+    }
+
+    /* Prevent very long words from overflowing */
+    .card-body,
+    .card-header,
+    td,
+    th {
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* But keep table cell no-wrap classes working */
+    .nowrap,
+    .col-date,
+    .col-id,
+    .col-amount,
+    .col-action,
+    .col-status {
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+        white-space: nowrap;
+    }
+}
+
+/* Hide elements on mobile with utility class */
+@media (max-width: 575px) {
+    .hide-xs {
+        display: none !important;
+    }
+}
+
+/* Full-width utility for mobile */
+@media (max-width: 767px) {
+    .w-100-mobile {
+        width: 100% !important;
+    }
+
+    .text-center-mobile {
+        text-align: center !important;
+    }
+}
+
+/* ================================================
+   31. FIX: Prevent col-sm overrides on tablets
+   ================================================ */
+
+/* Remove the incorrect responsive-fixes.css section 9 
+   that forces col-sm-6 to 100% on <=575px 
+   Bootstrap already handles col-12 on xs */
+@media (max-width: 575px) {
+    /* Stats cards: 2 per row is better UX than 1 per row */
+    .col-sm-6 {
+        /* Do NOT force 100% — Bootstrap col-12 handles xs 
+           col-sm-6 = 50% at 576px+ which is correct */
+    }
+}
+
+/* ================================================
+   32. DARK THEME MOBILE COMPATIBILITY
+   ================================================ */
+
+[data-theme="dark"] .sidebar-backdrop {
+    background: rgba(0, 0, 0, 0.7);
+}

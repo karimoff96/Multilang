@@ -663,19 +663,13 @@
         justify-content: center !important;
     }
     
-    /* Card headers responsive */
-    .card-header .d-flex,
-    .card-body > .d-flex.justify-content-between,
-    .d-flex.align-items-center.justify-content-between {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 0.75rem !important;
+    /* Card headers - only stack if they contain a header + action group pattern */
+    .card-header.flex-wrap {
+        flex-wrap: wrap !important;
     }
     
-    .card-header .d-flex > *,
-    .card-body > .d-flex.justify-content-between > * {
-        width: 100% !important;
-    }
+    /* Header-level justify-between only stacks explicitly */
+    /* Do NOT force-stack all card-header d-flex elements */
     
     /* Stats cards mobile optimization */
     .col-sm-6 {
@@ -837,16 +831,10 @@
    ============================================ */
 
 @media (max-width: 767px) {
-    /* Export button group */
-    .d-flex.gap-3 {
+    /* Export button group - only stack when they're action groups, not all flex+gap3 */
+    .btn-export-group {
         flex-direction: column !important;
         gap: 0.5rem !important;
-    }
-    
-    .btn.d-inline-flex {
-        display: flex !important;
-        width: 100%;
-        justify-content: center;
     }
 }
 

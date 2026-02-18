@@ -2,7 +2,7 @@
     
 {% block content %}
 <div class="row gy-4">
-    <div class="col-xxl-3">
+    <div class="col-xxl-3 col-lg-3 col-md-12">
         <div class="card h-100 p-0">
             <div class="card-body p-24">
                 <button type="button" class="btn btn-primary text-sm btn-sm px-12 py-12 w-100 radius-8 d-flex align-items-center gap-2 mb-16" data-bs-toggle="modal" data-bs-target="#exampleModal">
@@ -125,11 +125,11 @@
             </div>
         </div>
     </div>
-    <div class="col-xxl-9">
+    <div class="col-xxl-9 col-lg-9 col-md-12">
         <div class="card h-100 p-0 email-card overflow-x-auto d-block">
-            <div class="min-w-450-px d-flex flex-column justify-content-between h-100">
+            <div class="email-card-inner d-flex flex-column justify-content-between h-100">
                 <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center gap-3 justify-content-between flex-wrap">
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
                         <button class="text-secondary-light d-flex me-8">
                             <iconify-icon icon="mingcute:arrow-left-line" class="icon fs-3 line-height-1"></iconify-icon>
                         </button>
@@ -182,9 +182,9 @@
                 </div>
                 <div class="card-footer py-16 px-24 bg-base shadow-top">
                     <form action="#">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <textarea class="textarea-max-height form-control p-0 border-0 py-8 pe-16 resize-none scroll-sm" oninput="adjustHeight(this)" placeholder="Write massage"></textarea>
-                            <div class="d-flex align-items-center gap-4 ms-16">
+                        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                            <textarea class="textarea-max-height form-control p-0 border-0 py-8 pe-16 resize-none scroll-sm flex-grow-1" oninput="adjustHeight(this)" placeholder="Write massage"></textarea>
+                            <div class="d-flex align-items-center gap-4 flex-shrink-0">
                                 <div class="">
                                     <label for="attatchment" class="text-secondary-light text-xl">
                                         <iconify-icon icon="octicon:link-16" class="icon line-height-1"></iconify-icon>
@@ -197,9 +197,9 @@
                                     </label>
                                     <input type="file" id="gallery" hidden>
                                 </div>
-                                <button type="submit" class="btn btn-primary text-sm btn-sm px-12 py-12 w-100 radius-8 d-flex align-items-center justify-content-center gap-1 h-44-px">
+                                <button type="submit" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center justify-content-center gap-1 h-44-px">
                                     <iconify-icon icon="ion:paper-plane-outline" class="icon text-lg line-height-1"></iconify-icon>
-                                    Send
+                                    <span class="d-none d-sm-inline">Send</span>
                                 </button>
                             </div>
                         </div>

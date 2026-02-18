@@ -715,7 +715,7 @@ document.addEventListener('DOMContentLoaded', function() {
     new ApexCharts(document.querySelector("#userDonutChart"), {
         series: [totalAgencies, totalUsers - totalAgencies],
         chart: { type: 'donut', height: 150 },
-        labels: [getTranslation('dashboard.agencies'), getTranslation('dashboard.customers')],
+        labels: [window.t('dashboard.agencies'), window.t('dashboard.customers')],
         colors: ['#45B369', '#F59E0B'],
         legend: { show: false },
         dataLabels: { enabled: false },
@@ -727,7 +727,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         show: true,
                         name: { show: true, fontSize: '12px', color: colors.textColor },
                         value: { show: true, fontSize: '16px', fontWeight: 600, color: colors.textColor },
-                        total: { show: true, label: getTranslation('dashboard.total'), color: colors.textColor, formatter: function(w) { return w.globals.seriesTotals.reduce((a, b) => a + b, 0); } }
+                        total: { show: true, label: window.t('dashboard.total'), color: colors.textColor, formatter: function(w) { return w.globals.seriesTotals.reduce((a, b) => a + b, 0); } }
                     }
                 }
             }

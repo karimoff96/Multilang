@@ -74,8 +74,8 @@
     <div class="card">
         <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3">
             <div class="d-flex flex-wrap align-items-center gap-3">
-                <form method="get" class="d-flex align-items-center gap-2">
-                    <select name="status" class="form-select" onchange="this.form.submit()">
+                <form method="get" class="d-flex flex-wrap align-items-center gap-2">
+                    <select name="status" class="form-select" style="min-width: 130px;" onchange="this.form.submit()">
                         <option value="all" {% if status_filter == 'all' %}selected{% endif %}>{% trans "All Status" %}</option>
                         <option value="active" {% if status_filter == 'active' %}selected{% endif %}>{% trans "Active" %}</option>
                         <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>{% trans "Expired" %}</option>

@@ -4,18 +4,18 @@
 <!-- Filter Bar -->
 <div class="card radius-8 border-0 mb-24">
     <div class="card-body p-16">
-        <form method="GET" class="d-flex align-items-center gap-3">
+        <form method="GET" class="d-flex flex-wrap align-items-center gap-3">
             <span class="text-md fw-semibold text-secondary-light" data-i18n="filter.defaultPeriod">Default Period:</span>
-            <select name="period" id="mainPeriodSelect" class="form-select form-select-sm w-auto">
+            <select name="period" id="mainPeriodSelect" class="form-select form-select-sm" style="min-width: 140px; max-width: 180px;">
                 <option value="today" {% if period == 'today' %}selected{% endif %} data-i18n="filter.today">Today</option>
                 <option value="week" {% if period == 'week' %}selected{% endif %} data-i18n="filter.thisWeek">This Week</option>
                 <option value="month" {% if period == 'month' %}selected{% endif %} data-i18n="filter.thisMonth">This Month</option>
                 <option value="year" {% if period == 'year' %}selected{% endif %} data-i18n="filter.thisYear">This Year</option>
                 <option value="custom" {% if period == 'custom' %}selected{% endif %} data-i18n="filter.custom">Custom Range</option>
             </select>
-            <div id="customDateRange" class="d-flex gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
-                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}" style="width: 150px;">
-                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}" style="width: 150px;">
+            <div id="customDateRange" class="d-flex flex-wrap gap-2" style="{% if period != 'custom' %}display: none;{% endif %}">
+                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}" style="min-width: 130px;">
+                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}" style="min-width: 130px;">
             </div>
             <button type="submit" class="btn btn-primary btn-sm px-16 d-inline-flex align-items-center gap-2">
                 <iconify-icon icon="solar:filter-bold" class="icon"></iconify-icon>

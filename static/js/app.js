@@ -35,11 +35,26 @@
   $(".sidebar-mobile-toggle").on("click", function(){
     $(".sidebar").addClass("sidebar-open");
     $("body").addClass("overlay-active");
+    if (!$("#sidebarBackdrop").length) {
+      $("body").append('<div id="sidebarBackdrop" class="sidebar-backdrop show"></div>');
+    } else {
+      $("#sidebarBackdrop").addClass("show");
+    }
   });
 
-  $(".sidebar-close-btn").on("click", function(){
+  function closeMobileSidebar() {
     $(".sidebar").removeClass("sidebar-open");
     $("body").removeClass("overlay-active");
+    $("#sidebarBackdrop").removeClass("show");
+  }
+
+  $(".sidebar-close-btn").on("click", function(){
+    closeMobileSidebar();
+  });
+
+  // Close sidebar when backdrop is clicked
+  $(document).on("click", "#sidebarBackdrop", function(){
+    closeMobileSidebar();
   });
 
   //to keep the current page active
