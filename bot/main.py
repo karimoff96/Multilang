@@ -200,7 +200,7 @@ def send_order_status_notification(order, old_status, new_status):
             if language == "uz":
                 notification_text = (
                     f"💳 <b>TO'LOV KUTILMOQDA</b>\n"
-                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"📋 <b>Buyurtma:</b> #{order.get_order_number()}\n"
                     f"💰 <b>To'lov summasi:</b> {order.total_price:,.0f} so'm\n\n"
                     f"📱 To'lov chekini yuborishingizni kutmoqdamiz.\n"
                     f"💳 Karta orqali to'lovdan so'ng chek rasmini yuboring."
@@ -208,7 +208,7 @@ def send_order_status_notification(order, old_status, new_status):
             elif language == "ru":
                 notification_text = (
                     f"💳 <b>ОЖИДАНИЕ ОПЛАТЫ</b>\n"
-                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"📋 <b>Заказ:</b> #{order.get_order_number()}\n"
                     f"💰 <b>Сумма к оплате:</b> {order.total_price:,.0f} сум\n\n"
                     f"📱 Ожидаем квитанцию об оплате.\n"
                     f"💳 После оплаты картой отправьте фото чека."
@@ -216,7 +216,7 @@ def send_order_status_notification(order, old_status, new_status):
             else:
                 notification_text = (
                     f"💳 <b>PAYMENT PENDING</b>\n"
-                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"📋 <b>Order:</b> #{order.get_order_number()}\n"
                     f"💰 <b>Amount:</b> {order.total_price:,.0f} sum\n\n"
                     f"📱 Waiting for your payment receipt.\n"
                     f"💳 After card payment, send the receipt photo."
@@ -226,7 +226,7 @@ def send_order_status_notification(order, old_status, new_status):
             if language == "uz":
                 notification_text = (
                     f"📨 <b>CHEK QABUL QILINDI</b>\n"
-                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"📋 <b>Buyurtma:</b> #{order.get_order_number()}\n"
                     f"💰 <b>Summa:</b> {order.total_price:,.0f} so'm\n"
                     f"🧾 <b>Status:</b> Chek tekshirilmoqda ✅\n\n"
                     f"⏳ To'lovingiz tekshirilmoqda.\n"
@@ -235,7 +235,7 @@ def send_order_status_notification(order, old_status, new_status):
             elif language == "ru":
                 notification_text = (
                     f"📨 <b>ЧЕК ПОЛУЧЕН</b>\n"
-                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"📋 <b>Заказ:</b> #{order.get_order_number()}\n"
                     f"💰 <b>Сумма:</b> {order.total_price:,.0f} сум\n"
                     f"🧾 <b>Статус:</b> Чек проверяется ✅\n\n"
                     f"⏳ Ваша оплата проверяется.\n"
@@ -244,7 +244,7 @@ def send_order_status_notification(order, old_status, new_status):
             else:
                 notification_text = (
                     f"📨 <b>RECEIPT RECEIVED</b>\n"
-                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"📋 <b>Order:</b> #{order.get_order_number()}\n"
                     f"💰 <b>Amount:</b> {order.total_price:,.0f} sum\n"
                     f"🧾 <b>Status:</b> Receipt being verified ✅\n\n"
                     f"⏳ Your payment is being verified.\n"
@@ -255,7 +255,7 @@ def send_order_status_notification(order, old_status, new_status):
             if language == "uz":
                 notification_text = (
                     f"✅ <b>TO'LOV TASDIQLANDI!</b>\n"
-                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"📋 <b>Buyurtma:</b> #{order.get_order_number()}\n"
                     f"💰 <b>Summa:</b> {order.total_price:,.0f} so'm ✅\n"
                     f"📊 <b>Progress:</b> ▰▰▱▱▱▱▱ 30%\n\n"
                     f"🔄 Buyurtmangiz jarayonga qo'shildi.\n"
@@ -264,7 +264,7 @@ def send_order_status_notification(order, old_status, new_status):
             elif language == "ru":
                 notification_text = (
                     f"✅ <b>ОПЛАТА ПОДТВЕРЖДЕНА!</b>\n"
-                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"📋 <b>Заказ:</b> #{order.get_order_number()}\n"
                     f"💰 <b>Сумма:</b> {order.total_price:,.0f} сум ✅\n"
                     f"📊 <b>Прогресс:</b> ▰▰▱▱▱▱▱ 30%\n\n"
                     f"🔄 Ваш заказ добавлен в обработку.\n"
@@ -273,7 +273,7 @@ def send_order_status_notification(order, old_status, new_status):
             else:
                 notification_text = (
                     f"✅ <b>PAYMENT CONFIRMED!</b>\n"
-                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"📋 <b>Order:</b> #{order.get_order_number()}\n"
                     f"💰 <b>Amount:</b> {order.total_price:,.0f} sum ✅\n"
                     f"📊 <b>Progress:</b> ▰▰▱▱▱▱▱ 30%\n\n"
                     f"🔄 Your order is now being processed.\n"
@@ -285,7 +285,7 @@ def send_order_status_notification(order, old_status, new_status):
             if language == "uz":
                 notification_text = (
                     f"🔄 <b>BUYURTMA JARAYONDA!</b>\n"
-                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"📋 <b>Buyurtma:</b> #{order.get_order_number()}\n"
                     f"⏱️ <b>Taxminiy muddat:</b> {estimated_days} kun\n"
                     f"📊 <b>Progress:</b> ▰▰▰▰▱▱▱ 60%\n\n"
                     f"✅ Sizga tayyor bo'lganda xabar beramiz.\n"
@@ -294,7 +294,7 @@ def send_order_status_notification(order, old_status, new_status):
             elif language == "ru":
                 notification_text = (
                     f"🔄 <b>ЗАКАЗ В ПРОЦЕССЕ!</b>\n"
-                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"📋 <b>Заказ:</b> #{order.get_order_number()}\n"
                     f"⏱️ <b>Примерный срок:</b> {estimated_days} дней\n"
                     f"📊 <b>Прогресс:</b> ▰▰▰▰▱▱▱ 60%\n\n"
                     f"✅ Мы сообщим вам, когда будет готово.\n"
@@ -303,7 +303,7 @@ def send_order_status_notification(order, old_status, new_status):
             else:
                 notification_text = (
                     f"🔄 <b>ORDER IN PROGRESS!</b>\n"
-                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"📋 <b>Order:</b> #{order.get_order_number()}\n"
                     f"⏱️ <b>Estimated time:</b> {estimated_days} days\n"
                     f"📊 <b>Progress:</b> ▰▰▰▰▱▱▱ 60%\n\n"
                     f"✅ We'll notify you when it's ready.\n"
@@ -314,7 +314,7 @@ def send_order_status_notification(order, old_status, new_status):
             if language == "uz":
                 notification_text = (
                     f"✅ <b>BUYURTMA TAYYOR!</b>\n"
-                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"📋 <b>Buyurtma:</b> #{order.get_order_number()}\n"
                     f"📦 <b>Status:</b> Olib ketishingiz mumkin!\n"
                     f"📊 <b>Progress:</b> ▰▰▰▰▰▰▱ 85%\n\n"
                     f"🏢 <b>Filial:</b> {branch_name}\n"
@@ -327,7 +327,7 @@ def send_order_status_notification(order, old_status, new_status):
             elif language == "ru":
                 notification_text = (
                     f"✅ <b>ЗАКАЗ ГОТОВ!</b>\n"
-                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"📋 <b>Заказ:</b> #{order.get_order_number()}\n"
                     f"📦 <b>Статус:</b> Можно забрать!\n"
                     f"📊 <b>Прогресс:</b> ▰▰▰▰▰▰▱ 85%\n\n"
                     f"🏢 <b>Филиал:</b> {branch_name}\n"
@@ -340,7 +340,7 @@ def send_order_status_notification(order, old_status, new_status):
             else:
                 notification_text = (
                     f"✅ <b>ORDER READY!</b>\n"
-                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"📋 <b>Order:</b> #{order.get_order_number()}\n"
                     f"📦 <b>Status:</b> Ready for pickup!\n"
                     f"📊 <b>Progress:</b> ▰▰▰▰▰▰▱ 85%\n\n"
                     f"🏢 <b>Branch:</b> {branch_name}\n"
@@ -355,7 +355,7 @@ def send_order_status_notification(order, old_status, new_status):
             if language == "uz":
                 notification_text = (
                     f"🎉 <b>BUYURTMA YAKUNLANDI!</b>\n"
-                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"📋 <b>Buyurtma:</b> #{order.get_order_number()}\n"
                     f"📊 <b>Progress:</b> ▰▰▰▰▰▰▰ 100% ✅\n\n"
                     f"🙏 Xizmatlarimizdan foydalanganingiz uchun rahmat!\n"
                     f"⭐ Fikr-mulohazangizni kutamiz.\n\n"
@@ -365,7 +365,7 @@ def send_order_status_notification(order, old_status, new_status):
             elif language == "ru":
                 notification_text = (
                     f"🎉 <b>ЗАКАЗ ЗАВЕРШЕН!</b>\n"
-                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"📋 <b>Заказ:</b> #{order.get_order_number()}\n"
                     f"📊 <b>Прогресс:</b> ▰▰▰▰▰▰▰ 100% ✅\n\n"
                     f"🙏 Спасибо за использование наших услуг!\n"
                     f"⭐ Ждем ваших отзывов.\n\n"
@@ -375,7 +375,7 @@ def send_order_status_notification(order, old_status, new_status):
             else:
                 notification_text = (
                     f"🎉 <b>ORDER COMPLETED!</b>\n"
-                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"📋 <b>Order:</b> #{order.get_order_number()}\n"
                     f"📊 <b>Progress:</b> ▰▰▰▰▰▰▰ 100% ✅\n\n"
                     f"🙏 Thank you for using our services!\n"
                     f"⭐ We look forward to your feedback.\n\n"
@@ -387,7 +387,7 @@ def send_order_status_notification(order, old_status, new_status):
             if language == "uz":
                 notification_text = (
                     f"❌ <b>BUYURTMA BEKOR QILINDI</b>\n"
-                    f"📋 <b>Buyurtma:</b> #{order.id}\n"
+                    f"📋 <b>Buyurtma:</b> #{order.get_order_number()}\n"
                     f"📊 <b>Status:</b> Bekor qilingan\n\n"
                     f"📞 Savollaringiz bo'lsa, biz bilan bog'laning.\n"
                 )
@@ -397,7 +397,7 @@ def send_order_status_notification(order, old_status, new_status):
             elif language == "ru":
                 notification_text = (
                     f"❌ <b>ЗАКАЗ ОТМЕНЕН</b>\n"
-                    f"📋 <b>Заказ:</b> #{order.id}\n"
+                    f"📋 <b>Заказ:</b> #{order.get_order_number()}\n"
                     f"📊 <b>Статус:</b> Отменен\n\n"
                     f"📞 Если есть вопросы, свяжитесь с нами.\n"
                 )
@@ -407,7 +407,7 @@ def send_order_status_notification(order, old_status, new_status):
             else:
                 notification_text = (
                     f"❌ <b>ORDER CANCELLED</b>\n"
-                    f"📋 <b>Order:</b> #{order.id}\n"
+                    f"📋 <b>Order:</b> #{order.get_order_number()}\n"
                     f"📊 <b>Status:</b> Cancelled\n\n"
                     f"📞 Contact us if you have questions.\n"
                 )
@@ -477,7 +477,7 @@ def send_payment_received_notification(order, amount_received, total_received):
             if language == "uz":
                 notification_text = (
                     f"✅ <b>To'lov to'liq qabul qilindi!</b>\n\n"
-                    f"📋 Buyurtma raqami: #{order.id}\n"
+                    f"📋 Buyurtma raqami: #{order.get_order_number()}\n"
                     f"💰 Qabul qilingan summa: {amount_received:,.0f} so'm\n"
                     f"💵 Jami to'langan: {total_received:,.0f} / {total_due:,.0f} so'm\n\n"
                     f"🎉 Rahmat! Buyurtmangiz tez orada bajariladi."
@@ -485,7 +485,7 @@ def send_payment_received_notification(order, amount_received, total_received):
             elif language == "ru":
                 notification_text = (
                     f"✅ <b>Оплата полностью получена!</b>\n\n"
-                    f"📋 Номер заказа: #{order.id}\n"
+                    f"📋 Номер заказа: #{order.get_order_number()}\n"
                     f"💰 Полученная сумма: {amount_received:,.0f} сум\n"
                     f"💵 Всего оплачено: {total_received:,.0f} / {total_due:,.0f} сум\n\n"
                     f"🎉 Спасибо! Ваш заказ скоро будет выполнен."
@@ -493,7 +493,7 @@ def send_payment_received_notification(order, amount_received, total_received):
             else:
                 notification_text = (
                     f"✅ <b>Payment Fully Received!</b>\n\n"
-                    f"📋 Order #: #{order.id}\n"
+                    f"📋 Order #: #{order.get_order_number()}\n"
                     f"💰 Amount received: {amount_received:,.0f} sum\n"
                     f"💵 Total paid: {total_received:,.0f} / {total_due:,.0f} sum\n\n"
                     f"🎉 Thank you! Your order will be processed soon."
@@ -503,7 +503,7 @@ def send_payment_received_notification(order, amount_received, total_received):
             if language == "uz":
                 notification_text = (
                     f"💳 <b>Qisman to'lov qabul qilindi</b>\n\n"
-                    f"📋 Buyurtma raqami: #{order.id}\n"
+                    f"📋 Buyurtma raqami: #{order.get_order_number()}\n"
                     f"💰 Qabul qilingan summa: {amount_received:,.0f} so'm\n"
                     f"💵 Jami to'langan: {total_received:,.0f} / {total_due:,.0f} so'm\n"
                     f"📊 Qolgan summa: {remaining:,.0f} so'm\n\n"
@@ -512,7 +512,7 @@ def send_payment_received_notification(order, amount_received, total_received):
             elif language == "ru":
                 notification_text = (
                     f"💳 <b>Частичная оплата получена</b>\n\n"
-                    f"📋 Номер заказа: #{order.id}\n"
+                    f"📋 Номер заказа: #{order.get_order_number()}\n"
                     f"💰 Полученная сумма: {amount_received:,.0f} сум\n"
                     f"💵 Всего оплачено: {total_received:,.0f} / {total_due:,.0f} сум\n"
                     f"📊 Остаток: {remaining:,.0f} сум\n\n"
@@ -521,7 +521,7 @@ def send_payment_received_notification(order, amount_received, total_received):
             else:
                 notification_text = (
                     f"💳 <b>Partial Payment Received</b>\n\n"
-                    f"📋 Order #: #{order.id}\n"
+                    f"📋 Order #: #{order.get_order_number()}\n"
                     f"💰 Amount received: {amount_received:,.0f} sum\n"
                     f"💵 Total paid: {total_received:,.0f} / {total_due:,.0f} sum\n"
                     f"📊 Remaining: {remaining:,.0f} sum\n\n"
@@ -630,7 +630,7 @@ def generate_order_summary_caption(order, language):
     # Create summary
     if language == "uz":
         caption = "📋 <b>YANGI BUYURTMA</b>\n\n"
-        caption += f"🆔 Buyurtma raqami: #{order.id}\n"
+        caption += f"🆔 Buyurtma raqami: #{order.get_order_number()}\n"
         caption += f"👤 Mijoz: {user_display}\n"
         caption += f"📞 Telefon: {user.phone}\n"
         caption += f"🏢 Foydalanuvchi turi: {user_type}\n"
@@ -653,7 +653,7 @@ def generate_order_summary_caption(order, language):
         caption += f"📅 Buyurtma sanasi: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
     elif language == "ru":
         caption = "📋 <b>НОВЫЙ ЗАКАЗ</b>\n\n"
-        caption += f"🆔 Номер заказа: #{order.id}\n"
+        caption += f"🆔 Номер заказа: #{order.get_order_number()}\n"
         caption += f"👤 Клиент: {user_display}\n"
         caption += f"📞 Телефон: {user.phone}\n"
         caption += f"🏢 Тип пользователя: {user_type}\n"
@@ -676,7 +676,7 @@ def generate_order_summary_caption(order, language):
         caption += f"📅 Дата заказа: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
     else:  # English
         caption = "📋 <b>NEW ORDER</b>\n\n"
-        caption += f"🆔 Order number: #{order.id}\n"
+        caption += f"🆔 Order number: #{order.get_order_number()}\n"
         caption += f"👤 Client: {user_display}\n"
         caption += f"📞 Phone: {user.phone}\n"
         caption += f"🏢 User type: {user_type}\n"
@@ -2390,7 +2390,7 @@ def show_user_orders(message, language):
 
             # Create order text
             if language == "uz":
-                order_text = f"📄 <b>Buyurtma #{order.id}</b>\n\n"
+                order_text = f"📄 <b>Buyurtma #{order.get_order_number()}</b>\n\n"
                 order_text += f"📊 Xizmat: {get_translated_field(order.product.category, 'name', 'uz')}\n"
                 order_text += (
                     f"📄 Hujjat: {get_translated_field(order.product, 'name', 'uz')}\n"
@@ -2406,7 +2406,7 @@ def show_user_orders(message, language):
                 order_text += f"{status_emoji} Holat: {status_text}\n"
                 order_text += f"📅 Sana: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
             elif language == "ru":
-                order_text = f"📄 <b>Заказ #{order.id}</b>\n\n"
+                order_text = f"📄 <b>Заказ #{order.get_order_number()}</b>\n\n"
                 order_text += f"📊 Услуга: {get_translated_field(order.product.category, 'name', 'ru')}\n"
                 order_text += f"📄 Документ: {get_translated_field(order.product, 'name', 'ru')}\n"
                 order_text += f"📑 Страниц: {order.total_pages}\n"
@@ -2420,7 +2420,7 @@ def show_user_orders(message, language):
                 order_text += f"{status_emoji} Статус: {status_text}\n"
                 order_text += f"📅 Дата: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
             else:  # English
-                order_text = f"📄 <b>Order #{order.id}</b>\n\n"
+                order_text = f"📄 <b>Order #{order.get_order_number()}</b>\n\n"
                 order_text += f"📊 Service: {get_translated_field(order.product.category, 'name', 'en')}\n"
                 order_text += f"📄 Document: {get_translated_field(order.product, 'name', 'en')}\n"
                 order_text += f"📑 Pages: {order.total_pages}\n"
@@ -2514,7 +2514,7 @@ def handle_pay_order(call):
         
         # Build text using translation keys
         text = get_text("payment_title", language) + "\n\n"
-        text += f"{get_text('payment_order', language)}: #{order.id}\n"
+        text += f"{get_text('payment_order', language)}: #{order.get_order_number()}\n"
         text += f"{get_text('payment_total_price', language)}: {total_due:,.0f} so'm\n"
         text += f"{get_text('payment_paid', language)}: {received:,.0f} so'm\n"
         text += f"{get_text('payment_remaining', language)}: <b>{remaining:,.0f} so'm</b>\n\n"
@@ -3859,7 +3859,7 @@ def show_payment_options(message, language, order):
     # Create summary text with detailed breakdown
     if language == "uz":
         summary_text = "📋 <b>Buyurtma xulosasi</b>\n\n"
-        summary_text += f"📄 Buyurtma raqami: #{order.id}\n"
+        summary_text += f"📄 Buyurtma raqami: #{order.get_order_number()}\n"
         summary_text += f"📦 Xizmat: {order.product.name_uz}\n"
         summary_text += f"📎 Jami fayllar: {order.files.count()}\n"
         summary_text += f"📄 Jami sahifalar: {order.total_pages}\n"
@@ -3907,7 +3907,7 @@ def show_payment_options(message, language, order):
             summary_text += "💳 <b>To'lov usulini tanlang:</b>\n📌 Eslatma: Naqd to‘lov faqat ofisimizda qabul qilinadi 💵. \nOfisdan tashqarida hujjat yuborsangiz, karta orqali to‘lovni amalga oshiring 💳. \nAgar to‘liq to‘lov qilolmasangiz, “Qisman” (50 000 so‘m) to‘lovni tanlang — shunda ishlaringiz muvaffaqiyatli tasdiqlanadi ✅."
     elif language == "ru":
         summary_text = "📋 <b>Сводка заказа</b>\n\n"
-        summary_text += f"📄 Номер заказа: #{order.id}\n"
+        summary_text += f"📄 Номер заказа: #{order.get_order_number()}\n"
         summary_text += f"📦 Услуга: {order.product.name_ru}\n"
         summary_text += f"📎 Всего файлов: {order.files.count()}\n"
         summary_text += f"📄 Всего страниц: {order.total_pages}\n"
@@ -3957,7 +3957,7 @@ def show_payment_options(message, language, order):
             summary_text += "💳 <b>Выберите способ оплаты:</b>\n📌 Напоминание: Наличный расчет возможен только в нашем офисе 💵. \nЕсли вы отправляете документы вне офиса, необходимо выбрать оплату картой 💳. \nЕсли вы не можете оплатить полную сумму, выберите «Частичную» оплату (50 000 сум) — тогда ваша работа будет успешно подтверждена ✅."
     else:  # English
         summary_text = "📋 <b>Order Summary</b>\n\n"
-        summary_text += f"📄 Order number: #{order.id}\n"
+        summary_text += f"📄 Order number: #{order.get_order_number()}\n"
         summary_text += f"📦 Service: {order.product.name_en}\n"
         summary_text += f"📎 Total files: {order.files.count()}\n"
         summary_text += f"📄 Total pages: {order.total_pages}\n"
@@ -4179,7 +4179,7 @@ def handle_file_upload(message):
                     completion_text += "📋 <b>Buyurtma ma'lumotlari:</b>\n"
                     completion_text += f"👤 Mijoz: {user_display}\n"
                     completion_text += f"📞 Telefon: {user.phone}\n"
-                    completion_text += f"📄 Buyurtma raqami: #{order.id}\n"
+                    completion_text += f"📄 Buyurtma raqami: #{order.get_order_number()}\n"
                     completion_text += f"📦 Xizmat: {order.product.name}\n"
                     completion_text += f"📊 Sahifalar: {order.total_pages}\n"
                     if lang_name:
@@ -4213,7 +4213,7 @@ def handle_file_upload(message):
                     completion_text += "📋 <b>Информация о заказе:</b>\n"
                     completion_text += f"👤 Клиент: {user_display}\n"
                     completion_text += f"📞 Телефон: {user.phone}\n"
-                    completion_text += f"📄 Номер заказа: #{order.id}\n"
+                    completion_text += f"📄 Номер заказа: #{order.get_order_number()}\n"
                     completion_text += f"📦 Услуга: {order.product.name}\n"
                     completion_text += f"📊 Страниц: {order.total_pages}\n"
                     if lang_name:
@@ -4388,19 +4388,19 @@ def handle_file_upload(message):
                 # Send success message
                 if language == "uz":
                     success_text = f"✅ <b>Chek yuklandi!</b>\n\n"
-                    success_text += f"📋 Buyurtma #{order.id}\n"
+                    success_text += f"📋 Buyurtma #{order.get_order_number()}\n"
                     success_text += f"💰 Qoldiq: {order.remaining:,.0f} so'm\n\n"
                     success_text += "⏳ To'lov tekshiruvga yuborildi.\n"
                     success_text += "📞 Tasdiqlanganidan keyin sizga xabar beramiz."
                 elif language == "ru":
                     success_text = f"✅ <b>Чек загружен!</b>\n\n"
-                    success_text += f"📋 Заказ #{order.id}\n"
+                    success_text += f"📋 Заказ #{order.get_order_number()}\n"
                     success_text += f"💰 Остаток: {order.remaining:,.0f} сум\n\n"
                     success_text += "⏳ Оплата отправлена на проверку.\n"
                     success_text += "📞 Мы уведомим вас после подтверждения."
                 else:
                     success_text = f"✅ <b>Receipt uploaded!</b>\n\n"
-                    success_text += f"📋 Order #{order.id}\n"
+                    success_text += f"📋 Order #{order.get_order_number()}\n"
                     success_text += f"💰 Remaining: {order.remaining:,.0f} sum\n\n"
                     success_text += "⏳ Payment sent for verification.\n"
                     success_text += "📞 We will notify you after confirmation."
@@ -4514,19 +4514,19 @@ def handle_file_upload(message):
                 # Send confirmation message
                 if language == "uz":
                     confirm_text = "✅ <b>To'lov cheki qabul qilindi!</b>\n\n"
-                    confirm_text += f"📋 Buyurtma #{order.id}\n"
+                    confirm_text += f"📋 Buyurtma #{order.get_order_number()}\n"
                     confirm_text += f"💰 Summa: {order.total_price:,} so'm\n\n"
                     confirm_text += "⏳ To'lov tekshiruvga yuborildi.\n"
                     confirm_text += "📞 Tasdiqlanganidan keyin sizga xabar beramiz."
                 elif language == "ru":
                     confirm_text = "✅ <b>Чек об оплате получен!</b>\n\n"
-                    confirm_text += f"📋 Заказ #{order.id}\n"
+                    confirm_text += f"📋 Заказ #{order.get_order_number()}\n"
                     confirm_text += f"💰 Сумма: {order.total_price:,} сум\n\n"
                     confirm_text += "⏳ Оплата отправлена на проверку.\n"
                     confirm_text += "📞 Мы уведомим вас после подтверждения."
                 else:
                     confirm_text = "✅ <b>Payment receipt received!</b>\n\n"
-                    confirm_text += f"📋 Order #{order.id}\n"
+                    confirm_text += f"📋 Order #{order.get_order_number()}\n"
                     confirm_text += f"💰 Amount: {order.total_price:,} sum\n\n"
                     confirm_text += "⏳ Payment sent for verification.\n"
                     confirm_text += "📞 We will notify you after confirmation."
@@ -4781,7 +4781,7 @@ def handle_payment_cash_selection(call):
         # Show final summary
         total_files = order.files.count()
         summary_text = f"📋 <b>{get_text('order_summary', language)}</b>\n\n"
-        summary_text += f"📄 {get_text('order_number', language)}: #{order.id}\n"
+        summary_text += f"📄 {get_text('order_number', language)}: #{order.get_order_number()}\n"
         summary_text += f"📎 {get_text('total_files', language)}: {total_files}\n"
         summary_text += f"📄 {get_text('total_pages', language)}: {order.total_pages}\n"
         summary_text += (
@@ -4831,7 +4831,7 @@ def handle_payment_receipt_upload(call):
         # Show final summary for card payment
         total_files = order.files.count()
         summary_text = f"📋 <b>{get_text('order_summary', language)}</b>\n\n"
-        summary_text += f"📄 {get_text('order_number', language)}: #{order.id}\n"
+        summary_text += f"📄 {get_text('order_number', language)}: #{order.get_order_number()}\n"
         summary_text += f"📎 {get_text('total_files', language)}: {total_files}\n"
         summary_text += f"📄 {get_text('total_pages', language)}: {order.total_pages}\n"
         summary_text += (
@@ -4995,7 +4995,7 @@ def handle_text_messages(message):
                     )
                     completion_text += "📋 <b>Buyurtma ma'lumotlari:</b>\n"
                     completion_text += f"👤 Mijoz: {user_display}\n"
-                    completion_text += f"📄 Buyurtma raqami: #{order.id}\n"
+                    completion_text += f"📄 Buyurtma raqami: #{order.get_order_number()}\n"
                     completion_text += f"📊 Jami sahifalar: {order.total_pages}\n"
                     completion_text += f"💰 Jami summa: {order.total_price:,.0f} so'm\n"
                     completion_text += (
@@ -5010,7 +5010,7 @@ def handle_text_messages(message):
                     )
                     completion_text += "📋 <b>Информация о заказе:</b>\n"
                     completion_text += f"👤 Клиент: {user_display}\n"
-                    completion_text += f"📄 Номер заказа: #{order.id}\n"
+                    completion_text += f"📄 Номер заказа: #{order.get_order_number()}\n"
                     completion_text += f"📊 Всего страниц: {order.total_pages}\n"
                     completion_text += f"💰 Общая сумма: {order.total_price:,.0f} сум\n"
                     completion_text += (
@@ -5027,7 +5027,7 @@ def handle_text_messages(message):
                     )
                     completion_text += "📋 <b>Order information:</b>\n"
                     completion_text += f"👤 Client: {user_display}\n"
-                    completion_text += f"📄 Order number: #{order.id}\n"
+                    completion_text += f"📄 Order number: #{order.get_order_number()}\n"
                     completion_text += f"📊 Total pages: {order.total_pages}\n"
                     completion_text += (
                         f"💰 Total amount: {order.total_price:,.0f} sum\n"
@@ -5245,7 +5245,7 @@ def handle_card_payment_message(message, language):
         # Create order summary with card payment info
         if language == "uz":
             summary_text = "📋 <b>Buyurtma xulosasi</b>\n\n"
-            summary_text += f"📄 Buyurtma raqami: #{order.id}\n"
+            summary_text += f"📄 Buyurtma raqami: #{order.get_order_number()}\n"
             summary_text += f"📎 Jami fayllar: {order.files.count()}\n"
             summary_text += f"📄 Jami sahifalar: {order.total_pages}\n"
             if lang_name:
@@ -5276,7 +5276,7 @@ def handle_card_payment_message(message, language):
             )
         elif language == "ru":
             summary_text = "📋 <b>Сводка заказа</b>\n\n"
-            summary_text += f"📄 Номер заказа: #{order.id}\n"
+            summary_text += f"📄 Номер заказа: #{order.get_order_number()}\n"
             summary_text += f"📎 Всего файлов: {order.files.count()}\n"
             summary_text += f"📄 Всего страниц: {order.total_pages}\n"
             if lang_name:
@@ -5305,7 +5305,7 @@ def handle_card_payment_message(message, language):
             summary_text += "📎 Разрешенные форматы: JPG, PNG, PDF, DOC, DOCX, HEIC, HEIF"
         else:  # English
             summary_text = "📋 <b>Order Summary</b>\n\n"
-            summary_text += f"📄 Order number: #{order.id}\n"
+            summary_text += f"📄 Order number: #{order.get_order_number()}\n"
             summary_text += f"📎 Total files: {order.files.count()}\n"
             summary_text += f"📄 Total pages: {order.total_pages}\n"
             if lang_name:
@@ -5697,7 +5697,7 @@ def handle_cash_payment_message(message, language):
             cash_text += "📋 <b>Buyurtma ma'lumotlari:</b>\n"
             cash_text += f"👤 Mijoz: {user_display}\n"
             cash_text += f"📞 Telefon: {user.phone}\n"
-            cash_text += f"📄 Buyurtma raqami: #{order.id}\n"
+            cash_text += f"📄 Buyurtma raqami: #{order.get_order_number()}\n"
             cash_text += f"📦 Xizmat: {order.product.name}\n"
             cash_text += f"📊 Sahifalar: {order.total_pages}\n"
             if lang_name:
@@ -5723,7 +5723,7 @@ def handle_cash_payment_message(message, language):
             cash_text += "📋 <b>Информация о заказе:</b>\n"
             cash_text += f"👤 Клиент: {user_display}\n"
             cash_text += f"📞 Телефон: {user.phone}\n"
-            cash_text += f"📄 Номер заказа: #{order.id}\n"
+            cash_text += f"📄 Номер заказа: #{order.get_order_number()}\n"
             cash_text += f"📦 Услуга: {order.product.name}\n"
             cash_text += f"📊 Страниц: {order.total_pages}\n"
             if lang_name:
@@ -5749,7 +5749,7 @@ def handle_cash_payment_message(message, language):
             cash_text += "📋 <b>Order information:</b>\n"
             cash_text += f"👤 Client: {user_display}\n"
             cash_text += f"📞 Phone: {user.phone}\n"
-            cash_text += f"📄 Order number: #{order.id}\n"
+            cash_text += f"📄 Order number: #{order.get_order_number()}\n"
             cash_text += f"📦 Service: {order.product.name}\n"
             cash_text += f"📊 Pages: {order.total_pages}\n"
             if lang_name:

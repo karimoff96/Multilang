@@ -1280,3 +1280,78 @@ button:focus,
 .btn-info:hover iconify-icon {
     color: #fff !important;
 }
+
+/* ========================================
+   17. Select2 Dropdown Dark Mode Support
+   ======================================== */
+
+/* Select2 Dropdown Dark Mode */
+html[data-theme="dark"] .select2-dropdown {
+    background-color: var(--dark-2, #273142) !important;
+    border-color: var(--neutral-600, #4B5563) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-theme="dark"] .select2-results {
+    background-color: var(--dark-2, #273142) !important;
+}
+
+/* Select2 options - visible text in dark mode */
+html[data-theme="dark"] .select2-container--default .select2-results__option {
+    color: #FFFFFF !important;
+    background-color: var(--dark-2, #273142) !important;
+}
+
+/* Highlighted option */
+html[data-theme="dark"] .select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--primary-600, #487fff) !important;
+    color: #FFFFFF !important;
+}
+
+/* Selected option */
+html[data-theme="dark"] .select2-container--default .select2-results__option[aria-selected="true"] {
+    background-color: var(--dark-3, #323D4E) !important;
+    color: #FFFFFF !important;
+}
+
+/* Search box in dropdown */
+html[data-theme="dark"] .select2-search--dropdown {
+    background-color: var(--dark-2, #273142) !important;
+}
+
+html[data-theme="dark"] .select2-search--dropdown .select2-search__field {
+    background-color: var(--dark-3, #323D4E) !important;
+    border-color: var(--neutral-600, #4B5563) !important;
+    color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .select2-search--dropdown .select2-search__field::placeholder {
+    color: var(--neutral-400, #9CA3AF) !important;
+}
+
+html[data-theme="dark"] .select2-search--dropdown .select2-search__field:focus {
+    border-color: var(--primary-600, #487fff) !important;
+}
+
+/* No results message */
+html[data-theme="dark"] .select2-container--default .select2-results__message {
+    color: var(--neutral-400, #9CA3AF) !important;
+}
+
+/* Select2 Selection (the main select box) in dark mode */
+html[data-theme="dark"] .select2-container--default .select2-selection--single {
+    background-color: var(--dark-2, #273142) !important;
+    border-color: var(--neutral-600, #4B5563) !important;
+}
+
+html[data-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: var(--neutral-400, #9CA3AF) !important;
+}
+
+html[data-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: var(--neutral-400, #9CA3AF) transparent transparent transparent !important;
+}

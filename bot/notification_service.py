@@ -156,7 +156,7 @@ def format_order_message(order, include_details=True):
     created_str = local_time.strftime('%d.%m.%Y %H:%M')
     
     # Build message
-    message = f"🎯 <b>НОВЫЙ ЗАКАЗ #{order.id}</b>\n"
+    message = f"🎯 <b>НОВЫЙ ЗАКАЗ #{order.get_order_number()}</b>\n"
     message += f"{customer_type} • {status_icon} {status_name}\n\n"
     
     # Customer info
@@ -558,7 +558,7 @@ def send_order_status_update(order_id, old_status=None):
     
     # Build message
     message = f"🔄 <b>ОБНОВЛЕНИЕ СТАТУСА</b>\n"
-    message += f"🆔 Заказ #{order.id}\n\n"
+    message += f"🆔 Заказ #{order.get_order_number()}\n\n"
     
     # Show status change
     if old_status:

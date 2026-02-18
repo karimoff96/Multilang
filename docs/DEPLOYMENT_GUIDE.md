@@ -66,7 +66,7 @@ You have **7 new migrations** that MUST be run:
 ssh user@your-server.com
 
 # Create backup
-cd /home/wemard/app
+cd /home/Wow-dash
 ./backup_db.sh
 
 # Verify backup exists
@@ -74,14 +74,14 @@ ls -lh backups/
 
 # Download backup to local machine (optional but recommended)
 # From your local machine:
-scp user@your-server.com:/home/wemard/app/backups/backup_*.sql.gz ./local-backup/
+scp user@your-server.com:/home/Wow-dash/backups/backup_*.sql.gz ./local-backup/
 ```
 
 ### 2. Check Current Production State
 
 ```bash
 # On production server
-cd /home/wemard/app
+cd /home/Wow-dash
 source venv/bin/activate
 
 # Check current commit
@@ -114,7 +114,7 @@ diff .env.example .env
 
 ```bash
 # On production server
-cd /home/wemard/app
+cd /home/Wow-dash
 source venv/bin/activate
 
 # Fetch latest changes
@@ -188,26 +188,26 @@ ls -lh staticfiles/js/translations.js
 
 ```bash
 # Restart Gunicorn
-sudo supervisorctl restart wemard
+sudo supervisorctl restart wowdash
 
 # Check status
-sudo supervisorctl status wemard
+sudo supervisorctl status wowdash
 
 # If using systemd instead
-sudo systemctl restart wemard
+sudo systemctl restart wowdash
 
-# Restart Celery workers (if running)
-sudo supervisorctl restart wemard-celery
+# Restart all services (application + bots)
+sudo supervisorctl restart wowdash wowdash-admin-bot wowdash-bot-watcher wowdash-bots
 ```
 
 ### Step 7: Verify Deployment
 
 ```bash
 # Check application logs
-tail -f /home/wemard/app/logs/error.log
+tail -f /home/Wow-dash/logs/error.log
 
 # Check Gunicorn logs
-sudo tail -f /var/log/supervisor/wemard-stderr.log
+sudo tail -f /var/log/supervisor/wowdash-stderr.log
 
 # Test application
 curl -I https://yourdomain.com
@@ -265,26 +265,26 @@ curl -I https://yourdomain.com
 
 ```bash
 # Stop application
-sudo supervisorctl stop wemard
+sudo supervisorctl stop wowdash wowdash-admin-bot wowdash-bot-watcher wowdash-bots
 
 # Rollback code
 git reset --hard e4ca45a5f49ec2ddfaf04e537fdf99b5626ce0ad
 
 # Restart application
-sudo supervisorctl start wemard
+sudo supervisorctl start wowdash wowdash-admin-bot wowdash-bot-watcher wowdash-bots
 ```
 
 ### Database Rollback (ONLY IF NEEDED)
 
 ```bash
 # Stop application
-sudo supervisorctl stop wemard
+sudo supervisorctl stop wowdash wowdash-admin-bot wowdash-bot-watcher wowdash-bots
 
 # Restore database from backup
 # For PostgreSQL:
-dropdb wemard_db
-createdb wemard_db
-gunzip -c backups/backup_YYYYMMDD_HHMMSS.sql.gz | psql wemard_db
+dropdb wowdash_db
+creatdb wowdash_db
+gunzip -c backups/backup_YYYYMMDD_HHMMSS.sql.gz | psql wowdash_db
 
 # For SQLite:
 gunzip -c backups/database/backup_sqlite_*.db.gz > db.sqlite3
@@ -293,7 +293,7 @@ gunzip -c backups/database/backup_sqlite_*.db.gz > db.sqlite3
 git reset --hard e4ca45a5f49ec2ddfaf04e537fdf99b5626ce0ad
 
 # Restart application
-sudo supervisorctl start wemard
+sudo supervisorctl start wowdash wowdash-admin-bot wowdash-bot-watcher wowdash-bots
 ```
 
 ---
@@ -381,13 +381,13 @@ python manage.py collectstatic --noinput
 **Solution:**
 ```bash
 # Check Gunicorn is running
-sudo supervisorctl status wemard
+sudo supervisorctl status wowdash
 
 # Check Gunicorn logs
-sudo tail -f /var/log/supervisor/wemard-stderr.log
+sudo tail -f /var/log/supervisor/wowdash-stderr.log
 
 # Restart everything
-sudo supervisorctl restart wemard
+sudo supervisorctl restart wowdash wowdash-admin-bot wowdash-bot-watcher wowdash-bots
 sudo systemctl restart nginx
 ```
 

@@ -12520,10 +12520,6 @@ div.dt-container .dt-paging .dt-paging-button:hover:hover, div.dt-container .dt-
   padding-inline-start: 4.375rem;
 }
 
-select option {
-  background-color: var(--white);
-}
-
 .was-validated .form-mobile-field .form-control {
   padding-inline-start: 5.9375rem;
 }
