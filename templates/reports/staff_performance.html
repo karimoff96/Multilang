@@ -3,6 +3,33 @@
 {% load number_filters %}
 
 {% block content %}
+<style>
+#performanceChart .apexcharts-tooltip {
+    background: #1e1e1e !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    z-index: 9999 !important;
+}
+#performanceChart .apexcharts-tooltip .apexcharts-tooltip-title {
+    background: #111 !important;
+    border-bottom: 1px solid #333 !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+    color: #fff !important;
+}
+#performanceChart .apexcharts-tooltip .apexcharts-tooltip-series-group { padding: 4px 10px !important; background: transparent !important; }
+#performanceChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#performanceChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#performanceChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value {
+    color: #fff !important; display: inline !important; visibility: visible !important;
+}
+#performanceChart { overflow: visible !important; }
+#performanceChart .apexcharts-canvas { overflow: visible !important; }
+</style>
 <div class="row gy-4">
     <!-- Report Header with Filters -->
     <div class="col-12">
@@ -310,13 +337,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 categories: staffLabels,
                 labels: { style: { colors: colors.textColor, fontSize: '11px' } },
                 axisBorder: { show: false },
-                axisTicks: { show: false }
+                axisTicks: { show: false },
+                tooltip: { enabled: false },
+                crosshairs: { show: false }
             },
             yaxis: {
                 labels: { style: { colors: colors.textColor, fontSize: '12px' } }
             },
             grid: { borderColor: colors.gridColor, strokeDashArray: 3 },
-            tooltip: { y: { formatter: function(val) { return val + ' orders'; } } }
+            tooltip: { theme: 'dark', y: { formatter: function(val) { return val + ' orders'; }, title: { formatter: function() { return ''; } } }, marker: { show: false } }
         }).render();
     }
 });

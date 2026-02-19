@@ -1,6 +1,72 @@
 {% extends './layout/layout.html' %} 
 
 {% block content %}
+<style>
+#revenueChart .apexcharts-tooltip,
+#paymentDonutChart .apexcharts-tooltip,
+#userTypeDonutChart .apexcharts-tooltip,
+#aovChart .apexcharts-tooltip {
+    background: #1e1e1e !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+    padding: 0 !important;
+    min-width: auto !important;
+    max-width: 180px !important;
+    width: auto !important;
+    overflow: visible !important;
+    z-index: 9999 !important;
+}
+#revenueChart .apexcharts-tooltip .apexcharts-tooltip-title,
+#paymentDonutChart .apexcharts-tooltip .apexcharts-tooltip-title,
+#userTypeDonutChart .apexcharts-tooltip .apexcharts-tooltip-title,
+#aovChart .apexcharts-tooltip .apexcharts-tooltip-title {
+    background: #111 !important;
+    border-bottom: 1px solid #333 !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+    color: #fff !important;
+}
+#revenueChart .apexcharts-tooltip .apexcharts-tooltip-series-group,
+#paymentDonutChart .apexcharts-tooltip .apexcharts-tooltip-series-group,
+#userTypeDonutChart .apexcharts-tooltip .apexcharts-tooltip-series-group,
+#aovChart .apexcharts-tooltip .apexcharts-tooltip-series-group {
+    padding: 4px 10px !important;
+    background: transparent !important;
+}
+#revenueChart .apexcharts-tooltip .apexcharts-tooltip-y-group,
+#paymentDonutChart .apexcharts-tooltip .apexcharts-tooltip-y-group,
+#userTypeDonutChart .apexcharts-tooltip .apexcharts-tooltip-y-group,
+#aovChart .apexcharts-tooltip .apexcharts-tooltip-y-group {
+    padding: 0 !important;
+}
+#revenueChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#paymentDonutChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#userTypeDonutChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#aovChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#revenueChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#paymentDonutChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#userTypeDonutChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#aovChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#revenueChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value,
+#paymentDonutChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value,
+#userTypeDonutChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value,
+#aovChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value {
+    color: #fff !important;
+    display: inline !important;
+    visibility: visible !important;
+}
+#revenueChart, #paymentDonutChart, #userTypeDonutChart, #aovChart {
+    overflow: visible !important;
+}
+#revenueChart .apexcharts-canvas,
+#paymentDonutChart .apexcharts-canvas,
+#userTypeDonutChart .apexcharts-canvas,
+#aovChart .apexcharts-canvas {
+    overflow: visible !important;
+}
+</style>
 <!-- Filter Bar -->
 <div class="card radius-8 border-0 mb-24">
     <div class="card-body p-16">
@@ -126,7 +192,7 @@
                         <span class="text-sm fw-medium text-secondary-light" data-i18n="finance.last12Months">Last 12 months</span>
                     </div>
                 </div>
-                <div id="revenueChart" class="mt-28"></div>
+                <div id="revenueChart" class="mt-28 apexcharts-tooltip-style-1"></div>
             </div>
         </div>
     </div>
@@ -144,7 +210,7 @@
                         <option value="today" data-i18n="common.today">Today</option>
                     </select>
                 </div>
-                <div id="paymentDonutChart" class="mt-16"></div>
+                <div id="paymentDonutChart" class="mt-16 apexcharts-tooltip-style-1"></div>
                 <div class="mt-20 d-flex flex-column gap-12">
                     <div class="d-flex align-items-center justify-content-between p-12 radius-8 bg-success-focus">
                         <div class="d-flex align-items-center gap-2">
@@ -184,7 +250,7 @@
                         <option value="today" data-i18n="common.today">Today</option>
                     </select>
                 </div>
-                <div id="userTypeDonutChart" class="mt-16"></div>
+                <div id="userTypeDonutChart" class="mt-16 apexcharts-tooltip-style-1"></div>
                 <div class="mt-20 d-flex flex-column gap-12">
                     <div class="d-flex align-items-center justify-content-between p-12 radius-8 bg-info-focus">
                         <div class="d-flex align-items-center gap-2">
@@ -219,7 +285,7 @@
                     <h6 class="mb-2 fw-bold text-lg" data-i18n="finance.avgOrderValueTrend">Avg Order Value Trend</h6>
                     <span class="text-sm fw-medium text-secondary-light px-12 py-4 bg-base radius-8" data-i18n="finance.last7Days">Last 7 days</span>
                 </div>
-                <div id="aovChart" class="mt-20"></div>
+                <div id="aovChart" class="mt-20 apexcharts-tooltip-style-1"></div>
             </div>
         </div>
     </div>
@@ -300,7 +366,7 @@ function formatShort(num) {
 }
 function getThemeColors() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    return { textColor: isDark ? '#9CA3AF' : '#6C757D', gridColor: isDark ? '#374151' : '#E4E7EC', bgColor: isDark ? '#1F2937' : '#ffffff' };
+    return { textColor: isDark ? '#9CA3AF' : '#6C757D', gridColor: isDark ? '#374151' : '#E4E7EC', bgColor: isDark ? '#1F2937' : '#ffffff', tooltipTheme: isDark ? 'dark' : 'light' };
 }
 
 // Revenue Chart
@@ -313,10 +379,15 @@ function initRevenueChart() {
         fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1 } },
         stroke: { curve: 'smooth', width: 2 },
         dataLabels: { enabled: false },
-        xaxis: { categories: monthlyRevenueLabels, labels: { style: { colors: colors.textColor, fontSize: '12px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
+        xaxis: { categories: monthlyRevenueLabels, labels: { style: { colors: colors.textColor, fontSize: '12px' } }, axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false } },
         yaxis: { labels: { formatter: val => val >= 1000000 ? (val/1000000).toFixed(1)+'M' : val >= 1000 ? (val/1000).toFixed(0)+'K' : val, style: { colors: colors.textColor, fontSize: '12px' } } },
         grid: { borderColor: colors.gridColor, strokeDashArray: 3 },
-        tooltip: { y: { formatter: val => formatNumber(val) + ' UZS' } }
+        tooltip: {
+            theme: 'dark',
+            x: { show: true },
+            y: { formatter: val => formatNumber(val) + ' UZS', title: { formatter: () => '' } },
+            marker: { show: false }
+        }
     }).render();
 }
 
@@ -340,6 +411,7 @@ function initPaymentDonutChart() {
         colors: ['#45B369', '#487FFF'],
         legend: { show: false },
         dataLabels: { enabled: false },
+        tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: val => formatNumber(val) + ' UZS', title: { formatter: series => series } }, marker: { show: true } },
         plotOptions: { pie: { donut: { size: '70%', labels: { show: true, name: { show: true, fontSize: '12px', color: colors.textColor }, value: { show: true, fontSize: '14px', fontWeight: 600, color: colors.textColor, formatter: val => formatShort(val) }, total: { show: true, label: 'Total', color: colors.textColor, formatter: w => formatShort(w.globals.seriesTotals.reduce((a,b) => a+b, 0)) } } } } }
     });
     paymentDonutChart.render();
@@ -366,6 +438,7 @@ function initUserTypeDonutChart() {
         colors: ['#06B6D4', '#F59E0B'],
         legend: { show: false },
         dataLabels: { enabled: false },
+        tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: val => formatNumber(val) + ' UZS', title: { formatter: series => series } }, marker: { show: true } },
         plotOptions: { pie: { donut: { size: '70%', labels: { show: true, name: { show: true, fontSize: '12px', color: colors.textColor }, value: { show: true, fontSize: '14px', fontWeight: 600, color: colors.textColor, formatter: val => formatShort(val) }, total: { show: true, label: 'Total', color: colors.textColor, formatter: w => formatShort(w.globals.seriesTotals.reduce((a,b) => a+b, 0)) } } } } }
     });
     userTypeDonutChart.render();
@@ -381,10 +454,15 @@ function initAovChart() {
         colors: ['#487FFF'],
         plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
         dataLabels: { enabled: false },
-        xaxis: { categories: aovTrendLabels, labels: { style: { colors: colors.textColor, fontSize: '11px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
+        xaxis: { categories: aovTrendLabels, labels: { style: { colors: colors.textColor, fontSize: '11px' } }, axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false } },
         yaxis: { labels: { formatter: val => val >= 1000 ? (val/1000).toFixed(0)+'K' : val, style: { colors: colors.textColor, fontSize: '11px' } } },
         grid: { borderColor: colors.gridColor, strokeDashArray: 3 },
-        tooltip: { y: { formatter: val => formatNumber(val) + ' UZS' } }
+        tooltip: {
+            theme: 'dark',
+            x: { show: true },
+            y: { formatter: val => formatNumber(val) + ' UZS', title: { formatter: () => '' } },
+            marker: { show: false }
+        }
     }).render();
 }
 

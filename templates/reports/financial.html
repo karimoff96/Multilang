@@ -3,6 +3,44 @@
 {% load number_filters %}
 
 {% block content %}
+<style>
+#dailyRevenueChart .apexcharts-tooltip,
+#branchRevenueChart .apexcharts-tooltip {
+    background: #1e1e1e !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    z-index: 9999 !important;
+}
+#dailyRevenueChart .apexcharts-tooltip .apexcharts-tooltip-title,
+#branchRevenueChart .apexcharts-tooltip .apexcharts-tooltip-title {
+    background: #111 !important;
+    border-bottom: 1px solid #333 !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+    color: #fff !important;
+}
+#dailyRevenueChart .apexcharts-tooltip .apexcharts-tooltip-series-group,
+#branchRevenueChart .apexcharts-tooltip .apexcharts-tooltip-series-group {
+    padding: 4px 10px !important;
+    background: transparent !important;
+}
+#dailyRevenueChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#branchRevenueChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#dailyRevenueChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#branchRevenueChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#dailyRevenueChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value,
+#branchRevenueChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value {
+    color: #fff !important;
+    display: inline !important;
+    visibility: visible !important;
+}
+#dailyRevenueChart, #branchRevenueChart { overflow: visible !important; }
+#dailyRevenueChart .apexcharts-canvas, #branchRevenueChart .apexcharts-canvas { overflow: visible !important; }
+</style>
 <div class="row gy-4">
     <!-- Report Header with Filters -->
     <div class="col-12">
@@ -337,7 +375,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     categories: dailyLabels,
                     labels: {
                         style: { colors: '#9CA3AF', fontSize: '12px' }
-                    }
+                    },
+                    tooltip: { enabled: false },
+                    crosshairs: { show: false }
                 },
                 yaxis: {
                     labels: {
@@ -348,11 +388,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 },
                 tooltip: {
+                    theme: 'dark',
+                    x: { show: true },
                     y: {
                         formatter: function(val) {
                             return val.toLocaleString() + ' UZS';
-                        }
-                    }
+                        },
+                        title: { formatter: function() { return ''; } }
+                    },
+                    marker: { show: false }
                 },
                 grid: {
                     borderColor: '#E4E7EC',
@@ -399,16 +443,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     labels: {
                         formatter: function(val) { return formatShortNumber(val); },
                         style: { colors: '#9CA3AF', fontSize: '11px' }
-                    }
+                    },
+                    tooltip: { enabled: false },
+                    crosshairs: { show: false }
                 },
                 yaxis: {
                     labels: { style: { colors: '#9CA3AF', fontSize: '11px' } }
                 },
                 grid: { borderColor: '#E4E7EC', strokeDashArray: 3 },
                 tooltip: {
+                    theme: 'dark',
                     y: {
-                        formatter: function(val) { return val.toLocaleString() + ' UZS'; }
-                    }
+                        formatter: function(val) { return val.toLocaleString() + ' UZS'; },
+                        title: { formatter: function() { return ''; } }
+                    },
+                    marker: { show: false }
                 }
             });
             branchChart.render();

@@ -2,6 +2,44 @@
 {% load translation_filters %} 
 
 {% block content %}
+<style>
+#dailyPerformanceChart .apexcharts-tooltip,
+#statusDonutChart .apexcharts-tooltip {
+    background: #1e1e1e !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    z-index: 9999 !important;
+}
+#dailyPerformanceChart .apexcharts-tooltip .apexcharts-tooltip-title,
+#statusDonutChart .apexcharts-tooltip .apexcharts-tooltip-title {
+    background: #111 !important;
+    border-bottom: 1px solid #333 !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+    color: #fff !important;
+}
+#dailyPerformanceChart .apexcharts-tooltip .apexcharts-tooltip-series-group,
+#statusDonutChart .apexcharts-tooltip .apexcharts-tooltip-series-group {
+    padding: 4px 10px !important;
+    background: transparent !important;
+}
+#dailyPerformanceChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#statusDonutChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#dailyPerformanceChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#statusDonutChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#dailyPerformanceChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value,
+#statusDonutChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value {
+    color: #fff !important;
+    display: inline !important;
+    visibility: visible !important;
+}
+#dailyPerformanceChart, #statusDonutChart { overflow: visible !important; }
+#dailyPerformanceChart .apexcharts-canvas, #statusDonutChart .apexcharts-canvas { overflow: visible !important; }
+</style>
 <div class="row gy-4">
     <!-- Row 1: Quick Stats Cards (matching index.html gradient style) -->
     <div class="col-xxl-8">
@@ -364,7 +402,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 categories: dailyLabels,
                 labels: { style: { colors: colors.textColor, fontSize: '11px' } },
                 axisBorder: { show: false },
-                axisTicks: { show: false }
+                axisTicks: { show: false },
+                tooltip: { enabled: false },
+                crosshairs: { show: false }
             },
             yaxis: {
                 labels: {
@@ -373,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             },
             grid: { borderColor: colors.gridColor, strokeDashArray: 3 },
-            tooltip: { y: { formatter: function(val) { return val + ' orders'; } } }
+            tooltip: { theme: 'dark', x: { show: true }, y: { formatter: function(val) { return val + ' orders'; }, title: { formatter: function() { return ''; } } }, marker: { show: false } }
         };
         new ApexCharts(document.querySelector("#dailyPerformanceChart"), dailyOptions).render();
     } else {
@@ -425,6 +465,7 @@ document.addEventListener('DOMContentLoaded', function() {
             colors: statusColors,
             legend: { show: false },
             dataLabels: { enabled: false },
+            tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: function(val) { return val + ' orders'; }, title: { formatter: function(series) { return series; } } }, marker: { show: true } },
             plotOptions: {
                 pie: {
                     donut: {

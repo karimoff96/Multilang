@@ -3,6 +3,56 @@
 {% load static %}
 
 {% block content %}
+<style>
+#ordersChart .apexcharts-tooltip,
+#statusDonutChart .apexcharts-tooltip {
+    background: #1e1e1e !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+    padding: 0 !important;
+    min-width: auto !important;
+    max-width: 180px !important;
+    width: auto !important;
+    overflow: visible !important;
+    z-index: 9999 !important;
+}
+#ordersChart .apexcharts-tooltip .apexcharts-tooltip-title,
+#statusDonutChart .apexcharts-tooltip .apexcharts-tooltip-title {
+    background: #111 !important;
+    border-bottom: 1px solid #333 !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+    color: #fff !important;
+}
+#ordersChart .apexcharts-tooltip .apexcharts-tooltip-series-group,
+#statusDonutChart .apexcharts-tooltip .apexcharts-tooltip-series-group {
+    padding: 4px 10px !important;
+    background: transparent !important;
+}
+#ordersChart .apexcharts-tooltip .apexcharts-tooltip-y-group,
+#statusDonutChart .apexcharts-tooltip .apexcharts-tooltip-y-group {
+    padding: 0 !important;
+}
+#ordersChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#statusDonutChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#ordersChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#statusDonutChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#ordersChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value,
+#statusDonutChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value {
+    color: #fff !important;
+    display: inline !important;
+    visibility: visible !important;
+}
+#ordersChart, #statusDonutChart {
+    overflow: visible !important;
+}
+#ordersChart .apexcharts-canvas,
+#statusDonutChart .apexcharts-canvas {
+    overflow: visible !important;
+}
+</style>
 <!-- Filter Bar -->
 <div class="card radius-8 border-0 mb-24">
     <div class="card-body p-16">
@@ -157,7 +207,7 @@
                         <option value="today" data-i18n="common.today">Today</option>
                     </select>
                 </div>
-                <div id="statusDonutChart" class="mt-16"></div>
+                <div id="statusDonutChart" class="mt-16 apexcharts-tooltip-style-1"></div>
                 <div class="mt-16" id="statusLegend"></div>
             </div>
         </div>
@@ -387,7 +437,7 @@ function formatShort(num) {
 }
 function getThemeColors() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    return { textColor: isDark ? '#9CA3AF' : '#6C757D', gridColor: isDark ? '#374151' : '#E4E7EC', bgColor: isDark ? '#1F2937' : '#ffffff' };
+    return { textColor: isDark ? '#9CA3AF' : '#6C757D', gridColor: isDark ? '#374151' : '#E4E7EC', bgColor: isDark ? '#1F2937' : '#ffffff', tooltipTheme: isDark ? 'dark' : 'light' };
 }
 
 // Update stat cards
@@ -426,10 +476,15 @@ function initOrdersChart(initialPeriod = 'yearly') {
         fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1 } },
         stroke: { curve: 'smooth', width: 2 },
         dataLabels: { enabled: false },
-        xaxis: { categories: data.chartLabels, labels: { style: { colors: colors.textColor, fontSize: '12px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
+        xaxis: { categories: data.chartLabels, labels: { style: { colors: colors.textColor, fontSize: '12px' } }, axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false } },
         yaxis: { labels: { style: { colors: colors.textColor, fontSize: '12px' } } },
         grid: { borderColor: colors.gridColor, strokeDashArray: 3 },
-        tooltip: { y: { formatter: val => formatNumber(val) + ' orders' } }
+        tooltip: {
+            theme: 'dark',
+            x: { show: true },
+            y: { formatter: val => formatNumber(val) + ' orders', title: { formatter: () => '' } },
+            marker: { show: false }
+        }
     });
     ordersChart.render();
 }
@@ -475,6 +530,7 @@ function initStatusDonutChart(initialPeriod = 'yearly') {
         colors: data.colors,
         legend: { show: false },
         dataLabels: { enabled: false },
+        tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: val => formatNumber(val) + ' orders', title: { formatter: series => series } }, marker: { show: true } },
         plotOptions: { pie: { donut: { size: '70%', labels: { show: true, name: { show: true, fontSize: '12px', color: colors.textColor }, value: { show: true, fontSize: '14px', fontWeight: 600, color: colors.textColor, formatter: val => formatShort(val) }, total: { show: true, label: 'Total', color: colors.textColor, formatter: w => w.globals.seriesTotals.reduce((a,b) => a+b, 0) } } } } }
     });
     statusDonutChart.render();

@@ -71,7 +71,7 @@
                     {% endif %}
                     {% if can_settings_section %}
                     <li>
-                        <a href="{% url 'branch_list' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.branchSettings">{% trans "Bot Settings" %}</span></a>
+                        <a href="{% if current_branch %}{% url 'branch_settings' branch_id=current_branch.id %}{% else %}{% url 'branch_list' %}{% endif %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.branchSettings">{% trans "Bot Settings" %}</span></a>
                     </li>
                     {% endif %}
                 </ul>

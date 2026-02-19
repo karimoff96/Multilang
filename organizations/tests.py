@@ -511,6 +511,40 @@ class AssignableRolesTests(TestCase):
         self.assertNotIn('manager', role_names)
         self.assertIn('staff', role_names)
 
+    def test_custom_staff_manager_role_gets_assignable_roles(self):
+        """Custom role names with can_manage_staff should still get assignable roles"""
+        custom_supervisor_role = Role.objects.create(
+            name='supervisor_custom',
+            display_name='Supervisor',
+            is_active=True,
+            can_manage_staff=True,
+        )
+
+        custom_staff_role = Role.objects.create(
+            name='assistant_custom',
+            display_name='Assistant',
+            is_active=True,
+        )
+
+        custom_user = User.objects.create_user(
+            username='supervisor_user',
+            email='supervisor@test.com',
+            password='testpass123'
+        )
+
+        AdminUser.objects.create(
+            user=custom_user,
+            role=custom_supervisor_role,
+            center=self.center,
+            branch=self.branch,
+        )
+
+        roles = get_assignable_roles(custom_user)
+        role_names = [r.name for r in roles]
+
+        self.assertIn('assistant_custom', role_names)
+        self.assertNotIn('owner', role_names)
+
 
 class RoleValidationTests(TestCase):
     """Tests for AdminUser.validate_role_assignment"""

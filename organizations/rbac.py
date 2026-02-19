@@ -379,27 +379,43 @@ def can_edit_staff(user, staff_member=None):
 
 def get_assignable_roles(user):
     """
-    Get roles that the user can assign to others.
-    - Superusers can assign all roles including Owner
-    - Owners can assign Manager and Staff roles
-    - Managers can only assign Staff role
+    Get active roles that the user can assign to others.
+
+    Rules:
+    - Superusers can assign all active roles (including Owner)
+    - Non-superusers can never assign Owner
+    - Role-name hierarchy is preserved for system Manager (cannot assign Manager)
+    - Users with `can_manage_staff` can assign remaining active roles
+    - Users with only `can_create_staff` can assign low-privilege roles
     """
     from organizations.models import Role
     
+    roles = Role.objects.filter(is_active=True)
+
     if user.is_superuser:
-        return Role.objects.filter(is_active=True)
+        return roles
     
     admin_profile = get_admin_profile(user)
     if not admin_profile:
         return Role.objects.none()
     
-    if admin_profile.is_owner:
-        # Owners can assign any role EXCEPT owner
-        return Role.objects.filter(is_active=True).exclude(name=Role.OWNER)
-    elif admin_profile.is_manager:
-        # Managers can only assign staff role
-        return Role.objects.filter(name=Role.STAFF, is_active=True)
-    
+    if not admin_profile.role:
+        return Role.objects.none()
+
+    # Non-superusers can never assign Owner
+    roles = roles.exclude(name=Role.OWNER)
+
+    # Preserve legacy manager restriction by system role name
+    if admin_profile.role.name == Role.MANAGER:
+        roles = roles.exclude(name=Role.MANAGER)
+
+    if admin_profile.has_permission('can_manage_staff'):
+        return roles
+
+    if admin_profile.has_permission('can_create_staff'):
+        # Allow creation only into low-privilege roles
+        return roles.exclude(can_manage_staff=True).exclude(can_create_staff=True).exclude(can_edit_staff=True).exclude(can_delete_staff=True)
+
     return Role.objects.none()
 
 

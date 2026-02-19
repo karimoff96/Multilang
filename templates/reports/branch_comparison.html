@@ -2,6 +2,44 @@
 {% load number_filters %}
 
 {% block content %}
+<style>
+#revenueChart .apexcharts-tooltip,
+#ordersChart .apexcharts-tooltip {
+    background: #1e1e1e !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    z-index: 9999 !important;
+}
+#revenueChart .apexcharts-tooltip .apexcharts-tooltip-title,
+#ordersChart .apexcharts-tooltip .apexcharts-tooltip-title {
+    background: #111 !important;
+    border-bottom: 1px solid #333 !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+    color: #fff !important;
+}
+#revenueChart .apexcharts-tooltip .apexcharts-tooltip-series-group,
+#ordersChart .apexcharts-tooltip .apexcharts-tooltip-series-group {
+    padding: 4px 10px !important;
+    background: transparent !important;
+}
+#revenueChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#ordersChart .apexcharts-tooltip .apexcharts-tooltip-text,
+#revenueChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#ordersChart .apexcharts-tooltip .apexcharts-tooltip-text-y-label,
+#revenueChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value,
+#ordersChart .apexcharts-tooltip .apexcharts-tooltip-text-y-value {
+    color: #fff !important;
+    display: inline !important;
+    visibility: visible !important;
+}
+#revenueChart, #ordersChart { overflow: visible !important; }
+#revenueChart .apexcharts-canvas, #ordersChart .apexcharts-canvas { overflow: visible !important; }
+</style>
 <div class="row gy-4">
     <!-- Report Header with Filters -->
     <div class="col-12">
@@ -271,11 +309,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: {
                     formatter: function(val) { return formatShortNumber(val); },
                     style: { colors: '#9CA3AF', fontSize: '11px' }
-                }
+                },
+                tooltip: { enabled: false },
+                crosshairs: { show: false }
             },
             yaxis: { labels: { style: { colors: '#374151', fontSize: '12px' } } },
             grid: { borderColor: '#E4E7EC', strokeDashArray: 3 },
-            tooltip: { y: { formatter: function(val) { return val.toLocaleString() + ' UZS'; } } }
+            tooltip: { theme: 'dark', y: { formatter: function(val) { return val.toLocaleString() + ' UZS'; }, title: { formatter: function() { return ''; } } }, marker: { show: false } }
         }).render();
         
         // Orders chart
@@ -290,10 +330,13 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             xaxis: {
                 categories: branchLabels,
-                labels: { style: { colors: '#9CA3AF', fontSize: '11px' } }
+                labels: { style: { colors: '#9CA3AF', fontSize: '11px' } },
+                tooltip: { enabled: false },
+                crosshairs: { show: false }
             },
             yaxis: { labels: { style: { colors: '#374151', fontSize: '12px' } } },
-            grid: { borderColor: '#E4E7EC', strokeDashArray: 3 }
+            grid: { borderColor: '#E4E7EC', strokeDashArray: 3 },
+            tooltip: { theme: 'dark', y: { formatter: function(val) { return val + ' orders'; }, title: { formatter: function() { return ''; } } }, marker: { show: false } }
         }).render();
     } else {
         document.querySelector("#revenueChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:chart-square-line-duotone" class="text-4xl mb-2"></iconify-icon><span>No branch revenue data</span></div>';
