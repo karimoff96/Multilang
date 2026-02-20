@@ -155,13 +155,12 @@ def addUser(request):
     """Add a new BotUser (Telegram user) - requires can_create_customers permission"""
     from organizations.models import TranslationCenter, Branch
     
-    # Get all agencies for the dropdown
-    agencies = BotUser.objects.filter(is_agency=True).order_by("name")
-    
     # Get centers and branches based on user permissions
     if request.user.is_superuser:
         centers = TranslationCenter.objects.filter(is_active=True).order_by('name')
         branches = Branch.objects.filter(is_active=True).select_related('center').order_by('center__name', 'name')
+        # Superuser sees all agencies
+        agencies = BotUser.objects.filter(is_agency=True).order_by("name")
     elif request.admin_profile:
         # Get accessible centers and branches for this user
         accessible_branches = request.admin_profile.get_accessible_branches()
@@ -169,9 +168,13 @@ def addUser(request):
         # Get unique centers from accessible branches
         center_ids = branches.values_list('center_id', flat=True).distinct()
         centers = TranslationCenter.objects.filter(id__in=center_ids, is_active=True).order_by('name')
+        # Filter agencies by accessible branches
+        branch_ids = branches.values_list('id', flat=True)
+        agencies = BotUser.objects.filter(is_agency=True, branch_id__in=branch_ids).order_by("name")
     else:
         centers = TranslationCenter.objects.none()
         branches = Branch.objects.none()
+        agencies = BotUser.objects.none()
 
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
@@ -362,14 +365,13 @@ def editUser(request, user_id):
     from organizations.models import TranslationCenter, Branch
 
     user = get_object_or_404(BotUser, id=user_id)
-    agencies = (
-        BotUser.objects.filter(is_agency=True).exclude(id=user_id).order_by("name")
-    )
     
     # Get centers and branches based on user permissions
     if request.user.is_superuser:
         centers = TranslationCenter.objects.filter(is_active=True).order_by('name')
         branches = Branch.objects.filter(is_active=True).select_related('center').order_by('center__name', 'name')
+        # Superuser sees all agencies
+        agencies = BotUser.objects.filter(is_agency=True).exclude(id=user_id).order_by("name")
     elif request.admin_profile:
         # Get accessible centers and branches for this user
         accessible_branches = request.admin_profile.get_accessible_branches()
@@ -377,9 +379,13 @@ def editUser(request, user_id):
         # Get unique centers from accessible branches
         center_ids = branches.values_list('center_id', flat=True).distinct()
         centers = TranslationCenter.objects.filter(id__in=center_ids, is_active=True).order_by('name')
+        # Filter agencies by accessible branches
+        branch_ids = branches.values_list('id', flat=True)
+        agencies = BotUser.objects.filter(is_agency=True, branch_id__in=branch_ids).exclude(id=user_id).order_by("name")
     else:
         centers = TranslationCenter.objects.none()
         branches = Branch.objects.none()
+        agencies = BotUser.objects.none()
 
     if request.method == "POST":
         name = request.POST.get("name", "").strip()

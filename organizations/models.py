@@ -1224,12 +1224,30 @@ class AdminUser(models.Model):
         return self.role and self.role.name == Role.STAFF
 
     def has_permission(self, permission):
-        """Check if user has a specific permission with alias support"""
+        """
+        Check if user has a specific permission with alias support.
+        
+        This method checks:
+        1. If user has no role -> only superusers have permissions
+        2. If role has the direct permission -> True
+        3. If role has a master permission that grants this -> True
+        4. Otherwise -> False
+        
+        Args:
+            permission: String name of the permission (e.g., 'can_create_staff')
+            
+        Returns:
+            Boolean indicating if user has this permission
+        """
         # If user has no role, they have no permissions (unless they're superuser)
         if not self.role:
             # Check if the underlying Django user is a superuser
             if hasattr(self, 'user') and self.user and self.user.is_superuser:
                 return True
+            return False
+        
+        # Check if role is active
+        if not self.role.is_active:
             return False
         
         # Permission aliases for backward compatibility
@@ -1240,8 +1258,9 @@ class AdminUser(models.Model):
         # Check if permission is an alias
         actual_permission = PERMISSION_ALIASES.get(permission, permission)
         
-        # Check direct permission
-        if getattr(self.role, actual_permission, False):
+        # Check direct permission on role
+        direct_permission = getattr(self.role, actual_permission, None)
+        if direct_permission is True:
             return True
         
         # Check master permissions that grant this permission
@@ -1318,7 +1337,8 @@ class AdminUser(models.Model):
         # Check if any master permission grants this permission
         master_permissions = MASTER_PERMISSION_MAP.get(actual_permission, [])
         for master_perm in master_permissions:
-            if getattr(self.role, master_perm, False):
+            master_value = getattr(self.role, master_perm, None)
+            if master_value is True:
                 return True
         
         return False

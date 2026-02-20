@@ -448,23 +448,20 @@ def orderEdit(request, order_id):
     if request.user.is_superuser:
         centers = TranslationCenter.objects.filter(is_active=True)
         branches = Branch.objects.filter(is_active=True).select_related('center')
-    elif request.admin_profile:
-        branches = request.admin_profile.get_accessible_branches()
-    else:
-        branches = Branch.objects.none()
-    
-    # Get available products and languages
-    products = Product.objects.filter(is_active=True)
-    languages = Language.objects.all()  # Language model doesn't have is_active field
-    
-    # Get bot users based on user's role and permissions
-    if request.user.is_superuser:
+        # Superuser sees all products
+        products = Product.objects.filter(is_active=True)
         # Superuser sees all customers
         bot_users = BotUser.objects.all().order_by('-created_at')
     elif request.admin_profile:
-        # Get accessible branches for this user
-        accessible_branches = request.admin_profile.get_accessible_branches()
+        branches = request.admin_profile.get_accessible_branches()
+        # Filter products by accessible branches (Product -> Category -> Branch)
+        branch_ids = branches.values_list('id', flat=True)
+        products = Product.objects.filter(
+            is_active=True,
+            category__branch_id__in=branch_ids
+        ).select_related('category', 'category__branch')
         
+        # Get bot users based on accessible branches
         # Check if user can access center-level customers
         if request.admin_profile.has_permission('can_view_centers') or request.admin_profile.has_permission('can_manage_centers'):
             # Center owner/manager - get all customers from their center
@@ -475,10 +472,14 @@ def orderEdit(request, order_id):
                 bot_users = BotUser.objects.none()
         else:
             # Branch-level staff - get customers from accessible branches
-            bot_users = BotUser.objects.filter(branch__in=accessible_branches).order_by('-created_at')
+            bot_users = BotUser.objects.filter(branch_id__in=branch_ids).order_by('-created_at')
     else:
-        # No admin profile - no access to customers
+        branches = Branch.objects.none()
+        products = Product.objects.none()
         bot_users = BotUser.objects.none()
+    
+    # Languages are global - no filtering needed
+    languages = Language.objects.all()  # Language model doesn't have is_active field
     
     if request.method == 'POST':
         # Get form data
@@ -1139,17 +1140,27 @@ def orderCreate(request):
     if request.user.is_superuser:
         centers = TranslationCenter.objects.filter(is_active=True)
         branches = Branch.objects.filter(is_active=True).select_related('center')
+        # Superuser sees all bot users
+        bot_users = BotUser.objects.all().order_by('-created_at')[:100]
+        # Superuser sees all products
+        products = Product.objects.filter(is_active=True)
     elif request.admin_profile:
         branches = request.admin_profile.get_accessible_branches()
+        # Filter bot users by accessible branches
+        branch_ids = branches.values_list('id', flat=True)
+        bot_users = BotUser.objects.filter(branch_id__in=branch_ids).order_by('-created_at')[:100]
+        # Filter products by accessible branches (Product -> Category -> Branch)
+        products = Product.objects.filter(
+            is_active=True,
+            category__branch_id__in=branch_ids
+        ).select_related('category', 'category__branch')
     else:
         branches = Branch.objects.none()
+        bot_users = BotUser.objects.none()
+        products = Product.objects.none()
     
-    # Get products and languages
-    products = Product.objects.filter(is_active=True)
+    # Get languages (global - no filtering needed)
     languages = Language.objects.all()  # Language model doesn't have is_active field
-    
-    # Get bot users for selection (recent 100)
-    bot_users = BotUser.objects.all().order_by('-created_at')[:100]
     
     if request.method == 'POST':
         try:
@@ -1492,13 +1503,20 @@ def search_customers(request):
     # Get search query parameter
     search = request.GET.get('q', '').strip()
     
-    # Get accessible branches using RBAC
-    accessible_branches = get_user_branches(request.user)
-    
-    # Filter customers by accessible branches
-    customers = BotUser.objects.filter(
-        Q(branch__in=accessible_branches) | Q(branch__isnull=True)
-    )
+    # Filter customers based on user permissions
+    if request.user.is_superuser:
+        # Superuser sees all customers
+        customers = BotUser.objects.all()
+    elif request.admin_profile:
+        # Get accessible branches using RBAC
+        accessible_branches = get_user_branches(request.user)
+        branch_ids = accessible_branches.values_list('id', flat=True)
+        
+        # Filter customers by accessible branches only (no null branches)
+        customers = BotUser.objects.filter(branch_id__in=branch_ids)
+    else:
+        # No access if no admin profile
+        customers = BotUser.objects.none()
     
     # Apply search filter if search query provided
     if search:
@@ -1509,7 +1527,7 @@ def search_customers(request):
         )
     
     # Limit results to 50 most recent matches
-    customers = customers.select_related('branch').order_by('-created_at')[:50]
+    customers = customers.select_related('branch', 'branch__center').order_by('-created_at')[:50]
     
     # Format response as Select2 expects
     results = []

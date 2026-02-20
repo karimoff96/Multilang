@@ -7,11 +7,14 @@ This module provides:
 - Helper functions for role checking
 """
 
+import logging
 from functools import wraps
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.core.exceptions import PermissionDenied
+
+logger = logging.getLogger(__name__)
 
 
 def get_admin_profile(user):
@@ -134,18 +137,64 @@ def permission_required(*permissions):
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
+            # Superusers always have access
             if request.user.is_superuser:
                 return view_func(request, *args, **kwargs)
             
+            # Check for admin profile
             if not request.admin_profile:
-                messages.error(request, "You need an admin profile to access this page.")
+                logger.warning(
+                    f"User {request.user.username} tried to access {view_func.__name__} "
+                    f"but has no AdminUser profile"
+                )
+                messages.error(request, "You need an admin profile to access this page. Contact your administrator.")
+                return redirect('index')
+            
+            # Check for active admin profile
+            if not request.admin_profile.is_active:
+                logger.warning(
+                    f"User {request.user.username} tried to access {view_func.__name__} "
+                    f"but their AdminUser profile is inactive"
+                )
+                messages.error(request, "Your admin profile is inactive. Contact your administrator.")
+                return redirect('index')
+            
+            # Check for role assignment
+            if not request.admin_profile.role:
+                logger.warning(
+                    f"User {request.user.username} tried to access {view_func.__name__} "
+                    f"but has no role assigned"
+                )
+                messages.error(request, "You have no role assigned. Contact your administrator to assign you a role.")
+                return redirect('index')
+            
+            # Check if role is active
+            if not request.admin_profile.role.is_active:
+                logger.warning(
+                    f"User {request.user.username} tried to access {view_func.__name__} "
+                    f"but their role is inactive"
+                )
+                messages.error(request, "Your role is inactive. Contact your administrator.")
                 return redirect('index')
             
             # Check all required permissions
+            missing_perms = []
             for perm in permissions:
                 if not request.admin_profile.has_permission(perm):
-                    messages.error(request, "You don't have permission to perform this action.")
-                    return redirect('index')
+                    missing_perms.append(perm)
+            
+            if missing_perms:
+                perm_names = ', '.join(missing_perms)
+                logger.warning(
+                    f"User {request.user.username} (role: {request.admin_profile.role.name}) "
+                    f"tried to access {view_func.__name__} but lacks permissions: {perm_names}"
+                )
+                messages.error(
+                    request, 
+                    f"You don't have permission to perform this action. "
+                    f"Missing: {perm_names}. Contact your administrator to grant these permissions."
+                )
+                return redirect('index')
             
             return view_func(request, *args, **kwargs)
         return wrapper
@@ -287,17 +336,60 @@ def any_permission_required(*permissions):
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
+            # Superusers always have access
             if request.user.is_superuser:
                 return view_func(request, *args, **kwargs)
             
+            # Check for admin profile
             if not request.admin_profile:
-                messages.error(request, "You need an admin profile to access this page.")
+                logger.warning(
+                    f"User {request.user.username} tried to access {view_func.__name__} "
+                    f"but has no AdminUser profile"
+                )
+                messages.error(request, "You need an admin profile to access this page. Contact your administrator.")
+                return redirect('index')
+            
+            # Check for active admin profile
+            if not request.admin_profile.is_active:
+                logger.warning(
+                    f"User {request.user.username} tried to access {view_func.__name__} "
+                    f"but their AdminUser profile is inactive"
+                )
+                messages.error(request, "Your admin profile is inactive. Contact your administrator.")
+                return redirect('index')
+            
+            # Check for role assignment
+            if not request.admin_profile.role:
+                logger.warning(
+                    f"User {request.user.username} tried to access {view_func.__name__} "
+                    f"but has no role assigned"
+                )
+                messages.error(request, "You have no role assigned. Contact your administrator to assign you a role.")
+                return redirect('index')
+            
+            # Check if role is active
+            if not request.admin_profile.role.is_active:
+                logger.warning(
+                    f"User {request.user.username} tried to access {view_func.__name__} "
+                    f"but their role is inactive"
+                )
+                messages.error(request, "Your role is inactive. Contact your administrator.")
                 return redirect('index')
             
             # Check if user has ANY of the permissions
             has_any = any(request.admin_profile.has_permission(perm) for perm in permissions)
             if not has_any:
-                messages.error(request, "You don't have permission to access this page.")
+                # More helpful error message
+                perm_names = ', '.join(permissions)
+                logger.warning(
+                    f"User {request.user.username} (role: {request.admin_profile.role.name}) "
+                    f"tried to access {view_func.__name__} but lacks permissions: {perm_names}"
+                )
+                messages.error(
+                    request, 
+                    f"You don't have permission to perform this action. "
+                    f"Required: {perm_names}. Contact your administrator to grant these permissions."
+                )
                 return redirect('index')
             
             return view_func(request, *args, **kwargs)
