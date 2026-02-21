@@ -299,8 +299,9 @@ def ordersList(request):
         can_create_orders = request.admin_profile.has_permission('can_create_orders')
     
     context = {
-        "title": "Orders with Pending Receipts" if has_pending_receipts == 'true' else ("My Orders" if (can_view_own_only or view_mode == 'mine') else "Orders"),
-        "subTitle": "Review uploaded payment receipts" if has_pending_receipts == 'true' else ("Orders assigned to me" if (can_view_own_only or view_mode == 'mine') else "All Orders"),
+        "title": _("Orders with Pending Receipts") if has_pending_receipts == 'true' else (_("My Orders") if (can_view_own_only or view_mode == 'mine') else _("Orders")),
+        "subTitle": _("Review uploaded payment receipts") if has_pending_receipts == 'true' else (_("Orders assigned to me") if (can_view_own_only or view_mode == 'mine') else _("All Orders")),
+        "title_i18n": "orders.pendingReceipts" if has_pending_receipts == 'true' else ("orders.myOrders" if (can_view_own_only or view_mode == 'mine') else "orders.allOrders"),
         "orders": page_obj,
         "paginator": paginator,
         "search_query": search_query,
@@ -400,7 +401,8 @@ def orderDetail(request, order_id):
     
     context = {
         "title": f"Order #{order.id}",
-        "subTitle": "Order Details",
+        "subTitle": _("Order Details"),
+        "title_i18n": "detail.orderDetails",
         "order": order,
         "price_breakdown": price_breakdown,
         "available_staff": available_staff,
@@ -644,7 +646,8 @@ def orderEdit(request, order_id):
     
     context = {
         "title": f"Edit Order #{order.id}",
-        "subTitle": "Edit Order",
+        "subTitle": _("Edit Order"),
+        "title_i18n": "orders.editOrderTitle",
         "order": order,
         "centers": centers,
         "branches": branches,
@@ -1113,8 +1116,9 @@ def myOrders(request):
     }
     
     context = {
-        "title": "My Orders",
-        "subTitle": "Orders Assigned to Me",
+        "title": _("My Orders"),
+        "subTitle": _("Orders Assigned to Me"),
+        "title_i18n": "orders.myOrders",
         "orders": page_obj,
         "paginator": paginator,
         "status_filter": status_filter,

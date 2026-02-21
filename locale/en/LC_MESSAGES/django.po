@@ -6484,8 +6484,10 @@ msgid ""
 "продлите подписку для продолжения работы.\n"
 "                            "
 msgstr ""
+"\n"
 "Your subscription ended on %(date)s. Please renew your subscription to "
-"continue working."
+"continue working.\n"
+"                            "
 
 #: templates/partials/subscription_alert.html:22
 msgid "Подписка заканчивается сегодня!"
@@ -6499,8 +6501,10 @@ msgid ""
 "Продлите подписку, чтобы избежать перерыва в работе.\n"
 "                            "
 msgstr ""
+"\n"
 "Your subscription expires today (%(date)s). Renew your subscription to avoid "
-"service interruption."
+"service interruption.\n"
+"                            "
 
 #: templates/partials/subscription_alert.html:29
 msgid "Подписка заканчивается завтра!"
@@ -6514,8 +6518,10 @@ msgid ""
 "Рекомендуем продлить подписку заранее.\n"
 "                            "
 msgstr ""
+"\n"
 "Your subscription expires tomorrow (%(date)s). We recommend renewing your "
-"subscription in advance."
+"subscription in advance.\n"
+"                            "
 
 #: templates/partials/subscription_alert.html:36
 msgid "Подписка заканчивается"
@@ -6533,8 +6539,8 @@ msgid_plural ""
 "                            Ваша подписка заканчивается через %(days)s дня "
 "(%(date)s).\n"
 "                            "
-msgstr[0] "Your subscription expires in %(days)s day (%(date)s)."
-msgstr[1] "Your subscription expires in %(days)s days (%(date)s)."
+msgstr[0] "\nYour subscription expires in %(days)s day (%(date)s).\n                            "
+msgstr[1] "\nYour subscription expires in %(days)s days (%(date)s).\n                            "
 
 #: templates/partials/subscription_alert.html:47
 msgid "Управление тарифами"
@@ -6943,11 +6949,129 @@ msgstr ""
 msgid "Track and analyze staff performance metrics"
 msgstr ""
 
+# Reports Views Translations
+#: WowDash/reports_views.py
+msgid "Reports / Financial"
+msgstr ""
+
+#: WowDash/reports_views.py
+msgid "Reports / Orders"
+msgstr ""
+
+#: WowDash/reports_views.py
+msgid "Reports / Staff Performance"
+msgstr ""
+
+#: WowDash/reports_views.py
+msgid "Reports / Branch Comparison"
+msgstr ""
+
+#: WowDash/reports_views.py
+msgid "Reports / Customers"
+msgstr ""
+
+#: WowDash/reports_views.py
+msgid "Your Personal Performance"
+msgstr ""
+
+#: WowDash/reports_views.py
+msgid "Reports / Unit Economy"
+msgstr ""
+
+#: WowDash/reports_views.py
+msgid "Debtors Management"
+msgstr ""
+
+#: WowDash/reports_views.py
+msgid "Detailed expense analysis by center, branch, and type"
+msgstr ""
+
+# Services/Orders/Organizations Views Translations
+#: services/views.py
+msgid "Category Details"
+msgstr ""
+
+#: services/views.py
+msgid "Add Category"
+msgstr ""
+
+#: services/views.py
+msgid "Edit Category"
+msgstr ""
+
+#: services/views.py
+msgid "Product Details"
+msgstr ""
+
+#: services/views.py
+msgid "Add Product"
+msgstr ""
+
+#: services/views.py
+msgid "Edit Product"
+msgstr ""
+
+#: services/views.py
+msgid "Expense Details"
+msgstr ""
+
+#: services/views.py
+msgid "Add Expense"
+msgstr ""
+
+#: services/views.py
+msgid "Edit Expense"
+msgstr ""
+
+#: services/views.py
+msgid "Manage Languages"
+msgstr ""
+
+#: services/views.py
+msgid "Edit Language"
+msgstr ""
+
+#: organizations/views.py
+msgid "Edit Branch Settings"
+msgstr ""
+
+#: organizations/views.py
+msgid "Settings for %(name)s"
+msgstr ""
+
+#: organizations/views.py
+msgid "Edit settings for %(name)s"
+msgstr ""
+
+#: orders/views.py
+msgid "My Orders"
+msgstr ""
+
+#: orders/views.py
+msgid "Orders with Pending Receipts"
+msgstr ""
+
+#: orders/views.py
+msgid "Review uploaded payment receipts"
+msgstr ""
+
+#: orders/views.py
+msgid "Orders assigned to me"
+msgstr ""
+
+#: orders/views.py
+msgid "Orders Assigned to Me"
+msgstr ""
+
+#: orders/views.py
+msgid "Order Details"
+msgstr ""
+
+#: orders/views.py
+msgid "Edit Order"
+msgstr ""
+
 #: venv/lib/python3.10/site-packages/django/contrib/messages/apps.py:16
-#, fuzzy
-#| msgid "message.success"
-msgid "Messages"
-msgstr "Success"
 
 #: venv/lib/python3.10/site-packages/django/contrib/sitemaps/apps.py:8
 msgid "Site Maps"

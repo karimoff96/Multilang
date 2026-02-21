@@ -166,13 +166,32 @@ def rbac_context(request):
             # No role assigned - no permissions
             permissions = all_permissions.copy()
         
+        # Determine access level purely from permissions — role name is irrelevant.
+        # Any role (owner, founder, worker, or any future custom role) gets the
+        # same UI capabilities as long as it has the matching permissions.
+        # is_owner  → has financial management access (the broadest indicator)
+        # is_manager → has order management access but not financial
+        # is_staff_member → everything else
+        computed_is_owner = (
+            permissions.get('can_manage_financial', False)
+            or permissions.get('can_view_financial_reports', False)
+        )
+        computed_is_manager = (
+            not computed_is_owner
+            and (
+                permissions.get('can_manage_orders', False)
+                or permissions.get('can_view_all_orders', False)
+            )
+        )
+        computed_is_staff = not computed_is_owner and not computed_is_manager
+
         context.update({
             'admin_profile': admin_profile,
             'user_role': role.name if role else None,
             'user_role_display': role.get_name_display() if role else 'No Role',
-            'is_owner': admin_profile.is_owner,
-            'is_manager': admin_profile.is_manager,
-            'is_staff_member': admin_profile.is_staff_role,
+            'is_owner': computed_is_owner,
+            'is_manager': computed_is_manager,
+            'is_staff_member': computed_is_staff,
             'current_center': admin_profile.center,
             'current_branch': admin_profile.branch,
             'permissions': permissions,

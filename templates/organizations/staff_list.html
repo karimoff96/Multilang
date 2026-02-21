@@ -84,13 +84,21 @@
                             <span class="bg-primary-50 text-primary-600 px-8 py-4 radius-4 fw-medium text-xs d-inline-flex align-items-center">
                                 <iconify-icon icon="solar:crown-bold" class="me-4"></iconify-icon><span data-i18n="role.owner">Owner</span>
                             </span>
+                            {% elif member.role.name == 'founder' %}
+                            <span class="bg-warning-focus text-warning-600 px-8 py-4 radius-4 fw-medium text-xs d-inline-flex align-items-center">
+                                <iconify-icon icon="solar:star-bold" class="me-4"></iconify-icon>{{ member.role.get_name_display }}
+                            </span>
                             {% elif member.role.name == 'manager' %}
                             <span class="bg-info-50 text-info-600 px-8 py-4 radius-4 fw-medium text-xs d-inline-flex align-items-center">
                                 <iconify-icon icon="solar:user-check-bold" class="me-4"></iconify-icon><span data-i18n="role.manager">Manager</span>
                             </span>
-                            {% else %}
+                            {% elif member.role.name == 'staff' or not member.role %}
                             <span class="bg-secondary-50 text-secondary-600 px-8 py-4 radius-4 fw-medium text-xs d-inline-flex align-items-center">
                                 <iconify-icon icon="solar:user-bold" class="me-4"></iconify-icon><span data-i18n="role.staff">Staff</span>
+                            </span>
+                            {% else %}
+                            <span class="bg-success-focus text-success-600 px-8 py-4 radius-4 fw-medium text-xs d-inline-flex align-items-center">
+                                <iconify-icon icon="solar:user-id-bold" class="me-4"></iconify-icon>{{ member.role.get_name_display }}
                             </span>
                             {% endif %}
                         </td>

@@ -31,8 +31,8 @@
             <div class="card-body p-24">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                     <div>
-                        <h5 class="fw-bold mb-0">{{ title }}</h5>
-                        <p class="text-secondary-light mb-0">{{ subTitle }}</p>
+                        <h5 class="fw-bold mb-0" {% if title_i18n %}data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</h5>
+                        <p class="text-secondary-light mb-0" {% if subTitle_i18n %}data-i18n="{{ subTitle_i18n }}"{% endif %}>{{ subTitle }}</p>
                     </div>
                     <form method="GET" class="d-flex flex-wrap gap-3 align-items-end">
                         <!-- Period Filter -->
@@ -162,9 +162,9 @@
                         <iconify-icon icon="mdi:account-multiple" class="text-xl"></iconify-icon>
                     </span>
                     <div>
-                        <span class="text-secondary-light text-sm">Both Types</span>
+                        <span class="text-secondary-light text-sm" data-i18n="expense.bothTypes">{% trans "Both Types" %}</span>
                         <h4 class="fw-bold mb-0">{{ both_total|format_number }} <small class="text-sm fw-normal">UZS</small></h4>
-                        <small class="text-secondary-light">{{ both_count }} items</small>
+                        <small class="text-secondary-light" data-i18n="expense.itemsCount">{% trans "items" %}</small>
                     </div>
                 </div>
             </div>
@@ -179,9 +179,9 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 fw-semibold">
                         <iconify-icon icon="mdi:office-building" class="me-2 text-primary-600"></iconify-icon>
-                        Expenses by Center
+                        <span data-i18n="expense.expensesByCenter">{% trans "Expenses by Center" %}</span>
                     </h6>
-                    <span class="badge bg-primary-50 text-primary-600">{{ by_center.paginator.count }} centers</span>
+                    <span class="badge bg-primary-50 text-primary-600">{{ by_center.paginator.count }} {% trans "centers" %}</span>
                 </div>
             </div>
             <div class="card-body p-24">
@@ -192,7 +192,7 @@
                             <div class="d-flex align-items-center gap-2">
                                 <iconify-icon icon="mdi:domain" class="text-primary-600 text-xl"></iconify-icon>
                                 <h6 class="mb-0 fw-bold">{{ center_data.center.name }}</h6>
-                                <span class="badge bg-neutral-200 text-neutral-900">{{ center_data.count }} expenses</span>
+                                <span class="badge bg-neutral-200 text-neutral-900">{{ center_data.count }} {% trans "expenses" %}</span>
                             </div>
                             <h6 class="mb-0 fw-bold text-primary-600">{{ center_data.total|format_number }} UZS</h6>
                         </div>
@@ -359,19 +359,19 @@
                         <div class="d-flex justify-content-between align-items-center mb-8">
                             <div>
                                 {% if item.expense_type == 'b2b' %}
-                                <span class="badge bg-info-600 text-white px-12 py-6">B2B - Business</span>
+                                <span class="badge bg-info-600 text-white px-12 py-6" data-i18n="expense.b2bBusiness">B2B - {% trans "Business" %}</span>
                                 {% elif item.expense_type == 'b2c' %}
-                                <span class="badge bg-success-600 text-white px-12 py-6">B2C - Individual</span>
+                                <span class="badge bg-success-600 text-white px-12 py-6" data-i18n="expense.b2cIndividual">B2C - {% trans "Individual" %}</span>
                                 {% else %}
-                                <span class="badge bg-warning-600 text-white px-12 py-6">Both Types</span>
+                                <span class="badge bg-warning-600 text-white px-12 py-6" data-i18n="expense.bothTypes">{% trans "Both Types" %}</span>
                                 {% endif %}
                             </div>
                             <span class="fw-bold text-lg">{{ item.total|format_number }} UZS</span>
                         </div>
                         <div class="d-flex justify-content-between text-sm text-secondary-light mb-2">
-                            <span><i class="ri-file-list-3-line me-1"></i>{{ item.count }} expenses</span>
+                            <span><i class="ri-file-list-3-line me-1"></i>{{ item.count }} {% trans "expenses" %}</span>
                             {% widthratio item.total total_expenses 100 as type_pct %}
-                            <span class="fw-semibold">{{ type_pct }}% of total</span>
+                            <span class="fw-semibold">{{ type_pct }}% {% trans "of total" %}</span>
                         </div>
                         <div class="progress" style="height: 8px;">
                             {% widthratio item.total total_expenses 100 as type_percentage %}
@@ -431,7 +431,7 @@
                             <div class="d-flex align-items-start gap-2">
                                 <iconify-icon icon="solar:chart-bold" class="text-warning-600 text-xl"></iconify-icon>
                                 <div>
-                                    <span class="text-sm text-secondary-light d-block">Average Expense</span>
+                                    <span class="text-sm text-secondary-light d-block" data-i18n="expense.averageExpense">{% trans "Average Expense" %}</span>
                                     <h5 class="fw-bold mb-0 text-warning-600">{{ avg_expense|format_number }}</h5>
                                     <small class="text-secondary-light">UZS</small>
                                 </div>
@@ -443,7 +443,7 @@
                             <div class="d-flex align-items-start gap-2">
                                 <iconify-icon icon="solar:calculator-minimalistic-bold" class="text-info-600 text-xl"></iconify-icon>
                                 <div>
-                                    <span class="text-sm text-secondary-light d-block">Median Expense</span>
+                                    <span class="text-sm text-secondary-light d-block" data-i18n="expense.medianExpense">{% trans "Median Expense" %}</span>
                                     <h5 class="fw-bold mb-0 text-info-600">{{ median_expense|format_number }}</h5>
                                     <small class="text-secondary-light">UZS</small>
                                 </div>
@@ -454,8 +454,8 @@
                 {% if monthly_trend %}
                 <div class="mt-4 pt-4 border-top">
                     <div class="d-flex align-items-center justify-content-between mb-3">
-                        <h6 class="text-sm fw-semibold mb-0">Monthly Trend</h6>
-                        <span class="badge bg-primary-100 text-primary-600">{{ monthly_trend|length }} months</span>
+                        <h6 class="text-sm fw-semibold mb-0" data-i18n="expense.monthlyTrend">{% trans "Monthly Trend" %}</h6>
+                        <span class="badge bg-primary-100 text-primary-600">{{ monthly_trend|length }} {% trans "months" %}</span>
                     </div>
                     <canvas id="monthlyTrendChart" height="140"></canvas>
                 </div>
@@ -472,7 +472,7 @@
             <div class="card-header border-bottom bg-base py-16 px-24">
                 <h6 class="mb-0 fw-semibold">
                     <iconify-icon icon="mdi:chart-bar" class="me-2 text-primary-600"></iconify-icon>
-                    Branch Comparison (Top 10)
+                    <span data-i18n="expense.branchComparisonTop10">{% trans "Branch Comparison (Top 10)" %}</span>
                 </h6>
             </div>
             <div class="card-body p-24">
@@ -481,7 +481,7 @@
                 {% else %}
                 <div class="text-center py-5">
                     <iconify-icon icon="solar:inbox-bold-duotone" class="text-secondary-light" style="font-size: 64px;"></iconify-icon>
-                    <p class="text-secondary-light mt-3 mb-0">No data available yet</p>
+                    <p class="text-secondary-light mt-3 mb-0" data-i18n="common.noData">{% trans "No data available" %}</p>
                 </div>
                 {% endif %}
             </div>
@@ -494,7 +494,7 @@
             <div class="card-header border-bottom bg-base py-16 px-24">
                 <h6 class="mb-0 fw-semibold">
                     <iconify-icon icon="solar:medal-star-bold" class="me-2 text-warning-600"></iconify-icon>
-                    Top 10 Highest Expenses
+                    <span data-i18n="expense.top10Highest">{% trans "Top 10 Highest Expenses" %}</span>
                 </h6>
             </div>
             <div class="card-body p-24">
@@ -504,12 +504,12 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Expense Name</th>
-                                <th>Type</th>
-                                <th>Branch</th>
-                                <th class="text-end">Unit Price</th>
-                                <th class="text-end">Orders</th>
-                                <th class="text-end">Total Cost</th>
+                                <th data-i18n="expense.expenseName">{% trans "Expense Name" %}</th>
+                                <th data-i18n="filter.type">{% trans "Type" %}</th>
+                                <th data-i18n="table.branch">{% trans "Branch" %}</th>
+                                <th class="text-end" data-i18n="expense.unitPrice">{% trans "Unit Price" %}</th>
+                                <th class="text-end" data-i18n="sidebar.orders">{% trans "Orders" %}</th>
+                                <th class="text-end" data-i18n="expense.totalCost">{% trans "Total Cost" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -519,18 +519,18 @@
                                 <td class="fw-medium">{{ item.expense.name }}</td>
                                 <td>
                                     {% if item.expense.expense_type == 'b2b' %}
-                                    <span class="badge bg-info-100 text-info-600">B2B</span>
+                                    <span class="badge bg-info-100 text-info-600" data-i18n="expense.b2b">B2B</span>
                                     {% elif item.expense.expense_type == 'b2c' %}
-                                    <span class="badge bg-success-100 text-success-600">B2C</span>
+                                    <span class="badge bg-success-100 text-success-600" data-i18n="expense.b2c">B2C</span>
                                     {% else %}
-                                    <span class="badge bg-warning-100 text-warning-600">Both</span>
+                                    <span class="badge bg-warning-100 text-warning-600" data-i18n="expense.both">{% trans "Both" %}</span>
                                     {% endif %}
                                 </td>
                                 <td class="text-secondary-light">{{ item.expense.branch.name }}</td>
                                 <td class="text-end">
                                     <div class="d-flex flex-column align-items-end">
                                         <span class="text-success-600">{{ item.expense.price_for_original|format_number }}</span>
-                                        <small class="text-info-600">{{ item.expense.price_for_copy|format_number }}/copy</small>
+                                        <small class="text-info-600">{{ item.expense.price_for_copy|format_number }}/{% trans "copy" %}</small>
                                     </div>
                                 </td>
                                 <td class="text-end">
@@ -544,7 +544,7 @@
                 </div>
                 {% else %}
                 <div class="text-center py-4">
-                    <p class="text-secondary-light mb-0">No expenses found</p>
+                    <p class="text-secondary-light mb-0" data-i18n="expense.noExpensesFound">{% trans "No expenses found" %}</p>
                 </div>
                 {% endif %}
             </div>

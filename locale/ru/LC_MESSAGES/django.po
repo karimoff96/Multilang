@@ -6983,8 +6983,10 @@ msgid ""
 "продлите подписку для продолжения работы.\n"
 "                            "
 msgstr ""
+"\n"
 "Ваша подписка завершилась %(date)s. Пожалуйста, продлите подписку для "
-"продолжения работы."
+"продолжения работы.\n"
+"                            "
 
 #: templates/partials/subscription_alert.html:22
 msgid "Подписка заканчивается сегодня!"
@@ -6998,8 +7000,10 @@ msgid ""
 "Продлите подписку, чтобы избежать перерыва в работе.\n"
 "                            "
 msgstr ""
+"\n"
 "Ваша подписка истекает сегодня (%(date)s). Продлите подписку, чтобы избежать "
-"перерыва в работе."
+"перерыва в работе.\n"
+"                            "
 
 #: templates/partials/subscription_alert.html:29
 msgid "Подписка заканчивается завтра!"
@@ -7013,8 +7017,10 @@ msgid ""
 "Рекомендуем продлить подписку заранее.\n"
 "                            "
 msgstr ""
+"\n"
 "Ваша подписка истекает завтра (%(date)s). Рекомендуем продлить подписку "
-"заранее."
+"заранее.\n"
+"                            "
 
 #: templates/partials/subscription_alert.html:36
 msgid "Подписка заканчивается"
@@ -7032,10 +7038,10 @@ msgid_plural ""
 "                            Ваша подписка заканчивается через %(days)s дня "
 "(%(date)s).\n"
 "                            "
-msgstr[0] "Ваша подписка заканчивается через %(days)s день (%(date)s)."
-msgstr[1] "Ваша подписка заканчивается через %(days)s дня (%(date)s)."
-msgstr[2] "Ваша подписка заканчивается через %(days)s дней (%(date)s)."
-msgstr[3] "Ваша подписка заканчивается через %(days)s дней (%(date)s)."
+msgstr[0] "\nВаша подписка заканчивается через %(days)s день (%(date)s).\n                            "
+msgstr[1] "\nВаша подписка заканчивается через %(days)s дня (%(date)s).\n                            "
+msgstr[2] "\nВаша подписка заканчивается через %(days)s дней (%(date)s).\n                            "
+msgstr[3] "\nВаша подписка заканчивается через %(days)s дней (%(date)s).\n                            "
 
 #: templates/partials/subscription_alert.html:47
 msgid "Управление тарифами"
@@ -7476,6 +7482,130 @@ msgstr "Все коэффициенты"
 #| msgid "Track and manage outstanding customer debts"
 msgid "Track and analyze staff performance metrics"
 msgstr "Отслеживайте и управляйте непогашенными долгами клиентов"
+
+# Reports Views Translations
+#: WowDash/reports_views.py
+msgid "Reports / Financial"
+msgstr "Отчеты / Финансы"
+
+#: WowDash/reports_views.py
+msgid "Reports / Orders"
+msgstr "Отчеты / Заказы"
+
+#: WowDash/reports_views.py
+msgid "Reports / Staff Performance"
+msgstr "Отчеты / Эффективность сотрудников"
+
+#: WowDash/reports_views.py
+msgid "Reports / Branch Comparison"
+msgstr "Отчеты / Сравнение филиалов"
+
+#: WowDash/reports_views.py
+msgid "Reports / Customers"
+msgstr "Отчеты / Клиенты"
+
+#: WowDash/reports_views.py
+msgid "Your Personal Performance"
+msgstr "Ваша личная эффективность"
+
+#: WowDash/reports_views.py
+msgid "Reports / Unit Economy"
+msgstr "Отчеты / Юнит-экономика"
+
+#: WowDash/reports_views.py
+msgid "Debtors Management"
+msgstr "Управление должниками"
+
+#: WowDash/reports_views.py
+msgid "Detailed expense analysis by center, branch, and type"
+msgstr "Детальный анализ расходов по центру, филиалу и типу"
+
+# Services/Orders/Organizations Views Translations
+#: services/views.py
+msgid "Category Details"
+msgstr "Детали категории"
+
+#: services/views.py
+msgid "Add Category"
+msgstr "Добавить категорию"
+
+#: services/views.py
+msgid "Edit Category"
+msgstr "Редактировать категорию"
+
+#: services/views.py
+msgid "Product Details"
+msgstr "Детали продукта"
+
+#: services/views.py
+msgid "Add Product"
+msgstr "Добавить продукт"
+
+#: services/views.py
+msgid "Edit Product"
+msgstr "Редактировать продукт"
+
+#: services/views.py
+msgid "Expense Details"
+msgstr "Детали расхода"
+
+#: services/views.py
+msgid "Add Expense"
+msgstr "Добавить расход"
+
+#: services/views.py
+msgid "Edit Expense"
+msgstr "Редактировать расход"
+
+#: services/views.py
+msgid "Manage Languages"
+msgstr "Управление языками"
+
+#: services/views.py
+msgid "Edit Language"
+msgstr "Редактировать язык"
+
+#: organizations/views.py
+msgid "Edit Branch Settings"
+msgstr "Редактировать настройки филиала"
+
+#: organizations/views.py
+#, python-format
+msgid "Settings for %(name)s"
+msgstr "Настройки для %(name)s"
+
+#: organizations/views.py
+#, python-format
+msgid "Edit settings for %(name)s"
+msgstr "Редактировать настройки для %(name)s"
+
+#: orders/views.py
+msgid "My Orders"
+msgstr "Мои заказы"
+
+#: orders/views.py
+msgid "Orders with Pending Receipts"
+msgstr "Заказы с ожидающими квитанциями"
+
+#: orders/views.py
+msgid "Review uploaded payment receipts"
+msgstr "Проверить загруженные квитанции"
+
+#: orders/views.py
+msgid "Orders assigned to me"
+msgstr "Заказы, назначенные мне"
+
+#: orders/views.py
+msgid "Orders Assigned to Me"
+msgstr "Заказы, назначенные мне"
+
+#: orders/views.py
+msgid "Order Details"
+msgstr "Детали заказа"
+
+#: orders/views.py
+msgid "Edit Order"
+msgstr "Редактировать заказ"
 
 #: venv/lib/python3.10/site-packages/django/contrib/messages/apps.py:16
 #, fuzzy

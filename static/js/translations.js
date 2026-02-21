@@ -7981,6 +7981,160 @@ const translations = {
         uz: 'o\'rtacha to\'lov',
         ru: 'средний платеж',
         en: 'avg payment'
+    },
+
+    // ========== CATEGORIES ==========
+    'categories.addCategory': {
+        uz: 'Kategoriya qo\'shish',
+        ru: 'Добавить категорию',
+        en: 'Add Category'
+    },
+    'categories.editCategory': {
+        uz: 'Kategoriyani tahrirlash',
+        ru: 'Редактировать категорию',
+        en: 'Edit Category'
+    },
+
+    // ========== PRODUCTS ==========
+    'products.addProduct': {
+        uz: 'Mahsulot qo\'shish',
+        ru: 'Добавить продукт',
+        en: 'Add Product'
+    },
+    'products.editProduct': {
+        uz: 'Mahsulotni tahrirlash',
+        ru: 'Редактировать продукт',
+        en: 'Edit Product'
+    },
+
+    // ========== EXPENSES ==========
+    'expenses.expenseDetails': {
+        uz: 'Xarajat tafsilotlari',
+        ru: 'Детали расхода',
+        en: 'Expense Details'
+    },
+    'expenses.addExpense': {
+        uz: 'Xarajat qo\'shish',
+        ru: 'Добавить расход',
+        en: 'Add Expense'
+    },
+    'expenses.editExpense': {
+        uz: 'Xarajatni tahrirlash',
+        ru: 'Редактировать расход',
+        en: 'Edit Expense'
+    },
+
+    // ========== LANGUAGES ==========
+    'languages.pageTitle': {
+        uz: 'Tillar',
+        ru: 'Языки',
+        en: 'Languages'
+    },
+    'languages.manageLanguages': {
+        uz: 'Tillarni boshqarish',
+        ru: 'Управление языками',
+        en: 'Manage Languages'
+    },
+    'languages.editLanguage': {
+        uz: 'Tilni tahrirlash',
+        ru: 'Редактировать язык',
+        en: 'Edit Language'
+    },
+
+    // ========== BRANCH SETTINGS ==========
+    'branch.settingsTitle': {
+        uz: 'Filial sozlamalari',
+        ru: 'Настройки филиала',
+        en: 'Branch Settings'
+    },
+    'branch.editSettingsTitle': {
+        uz: 'Filial sozlamalarini tahrirlash',
+        ru: 'Редактировать настройки филиала',
+        en: 'Edit Branch Settings'
+    },
+
+    // ========== ORDERS ==========
+    'orders.editOrderTitle': {
+        uz: 'Buyurtmani tahrirlash',
+        ru: 'Редактировать заказ',
+        en: 'Edit Order'
+    },
+
+    // ========== REPORTS ==========
+    'reports.debtorsManagement': {
+        uz: 'Qarzdorlarni boshqarish',
+        ru: 'Управление должниками',
+        en: 'Debtors Management'
+    },
+    'reports.expenseAnalyticsDesc': {
+        uz: 'Markaz, filial va tur bo\'yicha batafsil xarajatlar tahlili',
+        ru: 'Детальный анализ расходов по центру, филиалу и типу',
+        en: 'Detailed expense analysis by center, branch, and type'
+    },
+    'expense.bothTypes': {
+        uz: 'Ikkala tur',
+        ru: 'Оба типа',
+        en: 'Both Types'
+    },
+    'expense.expensesByCenter': {
+        uz: 'Markazlar bo\'yicha xarajatlar',
+        ru: 'Расходы по центрам',
+        en: 'Expenses by Center'
+    },
+    'expense.averageExpense': {
+        uz: 'O\'rtacha xarajat',
+        ru: 'Средний расход',
+        en: 'Average Expense'
+    },
+    'expense.medianExpense': {
+        uz: 'Median xarajat',
+        ru: 'Медианный расход',
+        en: 'Median Expense'
+    },
+    'expense.monthlyTrend': {
+        uz: 'Oylik tendentsiya',
+        ru: 'Месячный тренд',
+        en: 'Monthly Trend'
+    },
+    'expense.branchComparisonTop10': {
+        uz: 'Filiallar taqqosi (Top 10)',
+        ru: 'Сравнение филиалов (Топ 10)',
+        en: 'Branch Comparison (Top 10)'
+    },
+    'expense.top10Highest': {
+        uz: 'Top 10 eng yuqori xarajatlar',
+        ru: 'Топ 10 наибольших расходов',
+        en: 'Top 10 Highest Expenses'
+    },
+    'expense.expenseName': {
+        uz: 'Xarajat nomi',
+        ru: 'Название расхода',
+        en: 'Expense Name'
+    },
+    'expense.unitPrice': {
+        uz: 'Birlik narxi',
+        ru: 'Цена за единицу',
+        en: 'Unit Price'
+    },
+    'expense.totalCost': {
+        uz: 'Umumiy narx',
+        ru: 'Общая стоимость',
+        en: 'Total Cost'
+    },
+    'expense.noExpensesFound': {
+        uz: 'Xarajatlar topilmadi',
+        ru: 'Расходы не найдены',
+        en: 'No expenses found'
+    },
+    'expense.b2bBusiness': {
+        uz: 'B2B - Biznes',
+        ru: 'B2B - Бизнес',
+        en: 'B2B - Business'
+    },
+    'expense.b2cIndividual': {
+        uz: 'B2C - Shaxsiy',
+        ru: 'B2C - Физлицо',
+        en: 'B2C - Individual'
     }
 };
 

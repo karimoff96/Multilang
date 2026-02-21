@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.http import JsonResponse
@@ -1560,8 +1561,9 @@ def branch_settings(request, branch_id):
     )
     
     context = {
-        "title": "Branch Settings",
-        "subTitle": f"Settings for {branch.name}",
+        "title": _("Branch Settings"),
+        "subTitle": _("Settings for %(name)s") % {"name": branch.name},
+        "title_i18n": "branch.settingsTitle",
         "branch": branch,
         "info": additional_info,
         "can_edit": can_edit,
@@ -1657,8 +1659,9 @@ def branch_settings_edit(request, branch_id):
         return redirect('branch_settings', branch_id=branch_id)
     
     context = {
-        "title": "Edit Branch Settings",
-        "subTitle": f"Edit settings for {branch.name}",
+        "title": _("Edit Branch Settings"),
+        "subTitle": _("Edit settings for %(name)s") % {"name": branch.name},
+        "title_i18n": "branch.editSettingsTitle",
         "branch": branch,
         "info": additional_info,
     }

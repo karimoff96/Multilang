@@ -2,6 +2,7 @@ import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from django.core.paginator import Paginator
 from django.db.models import Q, Count, Sum
 from django.http import JsonResponse
@@ -74,14 +75,11 @@ def categoryList(request):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     
-    # Check if user is owner
-    is_owner = False
-    if hasattr(request.user, 'staff_profile') and request.user.staff_profile.role:
-        is_owner = request.user.staff_profile.role.name == 'owner'
-    
     context = {
-        "title": "Categories",
-        "subTitle": "Categories",
+        "title": _("Categories"),
+        "subTitle": _("Categories"),
+        "title_i18n": "sidebar.categories",
+        "subTitle_i18n": "categories.allCategories",
         "categories": page_obj,
         "branches": branches,
         "branch_filter": branch_filter,
@@ -91,7 +89,6 @@ def categoryList(request):
         "status_filter": status_filter,
         "per_page": per_page,
         "total_categories": paginator.count,
-        "is_owner": is_owner,
     }
     return render(request, "services/categoryList.html", context)
 
@@ -107,7 +104,8 @@ def categoryDetail(request, category_id):
     
     context = {
         "title": f"Category: {category.name}",
-        "subTitle": "Category Details",
+        "subTitle": _("Category Details"),
+        "title_i18n": "detail.categoryDetails",
         "category": category,
         "products": products,
         "product_count": products.count(),
@@ -174,8 +172,9 @@ def addCategory(request):
                 messages.error(request, f'Error creating category: {str(e)}')
     
     context = {
-        "title": "Add Category",
-        "subTitle": "Add Category",
+        "title": _("Add Category"),
+        "subTitle": _("Add Category"),
+        "title_i18n": "categories.addCategory",
         "languages": languages,
         "branches": branches,
         "charge_types": Category.CHARGE_TYPE,
@@ -242,8 +241,9 @@ def editCategory(request, category_id):
                 messages.error(request, f'Error updating category: {str(e)}')
     
     context = {
-        "title": "Edit Category",
-        "subTitle": "Edit Category",
+        "title": _("Edit Category"),
+        "subTitle": _("Edit Category"),
+        "title_i18n": "categories.editCategory",
         "category": category,
         "languages": languages,
         "branches": branches,
@@ -333,14 +333,11 @@ def productList(request):
     # Get RBAC-filtered categories for filter dropdown
     categories = get_user_categories(request.user).filter(is_active=True).order_by('name')
     
-    # Check if user is owner
-    is_owner = False
-    if hasattr(request.user, 'staff_profile') and request.user.staff_profile.role:
-        is_owner = request.user.staff_profile.role.name == 'owner'
-    
     context = {
-        "title": "Products",
-        "subTitle": "Products",
+        "title": _("Products"),
+        "subTitle": _("Products"),
+        "title_i18n": "sidebar.products",
+        "subTitle_i18n": "products.allProducts",
         "products": page_obj,
         "categories": categories,
         "branches": branches,
@@ -352,7 +349,6 @@ def productList(request):
         "status_filter": status_filter,
         "per_page": per_page,
         "total_products": paginator.count,
-        "is_owner": is_owner,
     }
     return render(request, "services/productList.html", context)
 
@@ -370,7 +366,8 @@ def productDetail(request, product_id):
     
     context = {
         "title": f"Product: {product.name}",
-        "subTitle": "Product Details",
+        "subTitle": _("Product Details"),
+        "title_i18n": "detail.productDetails",
         "product": product,
     }
     return render(request, "services/productDetail.html", context)
@@ -469,8 +466,9 @@ def addProduct(request):
         centers = TranslationCenter.objects.filter(is_active=True).order_by('name')
     
     context = {
-        "title": "Add Product",
-        "subTitle": "Add Product",
+        "title": _("Add Product"),
+        "subTitle": _("Add Product"),
+        "title_i18n": "products.addProduct",
         "categories": categories,
         "expenses": expenses,
         "expense_types": Expense.EXPENSE_TYPE_CHOICES,
@@ -591,8 +589,9 @@ def editProduct(request, product_id):
         centers = TranslationCenter.objects.filter(is_active=True).order_by('name')
     
     context = {
-        "title": "Edit Product",
-        "subTitle": "Edit Product",
+        "title": _("Edit Product"),
+        "subTitle": _("Edit Product"),
+        "title_i18n": "products.editProduct",
         "product": product,
         "categories": categories,
         "expenses": expenses,
@@ -692,8 +691,10 @@ def expenseList(request):
     page_obj = paginator.get_page(page_number)
     
     context = {
-        "title": "Expenses",
-        "subTitle": "Expenses",
+        "title": _("Expenses"),
+        "subTitle": _("Expenses"),
+        "title_i18n": "sidebar.expenses",
+        "subTitle_i18n": "expenses.allExpenses",
         "expenses": page_obj,
         "branches": branches,
         "branch_filter": branch_filter,
@@ -725,7 +726,8 @@ def expenseDetail(request, expense_id):
     
     context = {
         "title": f"Expense: {expense.name}",
-        "subTitle": "Expense Details",
+        "subTitle": _("Expense Details"),
+        "title_i18n": "expenses.expenseDetails",
         "expense": expense,
         "linked_products": expense.products.all(),
     }
@@ -804,8 +806,9 @@ def addExpense(request):
                 messages.error(request, f'Error creating expense: {str(e)}')
     
     context = {
-        "title": "Add Expense",
-        "subTitle": "Add Expense",
+        "title": _("Add Expense"),
+        "subTitle": _("Add Expense"),
+        "title_i18n": "expenses.addExpense",
         "branches": branches,
         "centers": centers,
         "expense_types": Expense.EXPENSE_TYPE_CHOICES,
@@ -879,8 +882,9 @@ def editExpense(request, expense_id):
                 messages.error(request, f'Error updating expense: {str(e)}')
     
     context = {
-        "title": "Edit Expense",
-        "subTitle": "Edit Expense",
+        "title": _("Edit Expense"),
+        "subTitle": _("Edit Expense"),
+        "title_i18n": "expenses.editExpense",
         "expense": expense,
         "branches": branches,
         "expense_types": Expense.EXPENSE_TYPE_CHOICES,
@@ -945,8 +949,9 @@ def expenseAnalytics(request):
     ).order_by('expense_type'))
     
     context = {
-        "title": "Expense Analytics",
-        "subTitle": "Expense Analytics",
+        "title": _("Expense Analytics"),
+        "subTitle": _("Expense Analytics"),
+        "title_i18n": "reports.expenseAnalytics",
         "analytics": analytics,
         "expense_breakdown": expense_breakdown,
         "branch": branch,
@@ -1116,8 +1121,10 @@ def languageList(request):
     page_obj = paginator.get_page(page_number)
     
     context = {
-        "title": "Languages",
-        "subTitle": "Manage Languages",
+        "title": _("Languages"),
+        "subTitle": _("Manage Languages"),
+        "title_i18n": "languages.pageTitle",
+        "subTitle_i18n": "languages.manageLanguages",
         "languages": page_obj,
         "search_query": search_query,
         "per_page": per_page,
@@ -1175,7 +1182,8 @@ def editLanguage(request, language_id):
     
     context = {
         "title": f"Edit {language.name}",
-        "subTitle": "Edit Language",
+        "subTitle": _("Edit Language"),
+        "title_i18n": "languages.editLanguage",
         "language": language,
     }
     return render(request, "services/editLanguage.html", context)

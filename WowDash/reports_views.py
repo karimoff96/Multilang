@@ -12,6 +12,7 @@ from django.core.paginator import Paginator
 from datetime import timedelta
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.utils.translation import gettext_lazy as _
 import json
 
 from orders.models import Order
@@ -239,13 +240,15 @@ def financial_reports(request):
             }
         )
 
-    # Revenue by branch (if owner/superuser)
+    # Revenue by branch (if user has financial management permission)
     branch_revenue = []
-    is_owner = False
-    if hasattr(request.user, "admin_profile") and request.user.admin_profile:
-        is_owner = request.user.admin_profile.is_owner
+    has_financial_access = request.user.is_superuser or (
+        hasattr(request.user, "admin_profile")
+        and request.user.admin_profile
+        and request.user.admin_profile.has_permission("can_manage_financial")
+    )
 
-    if is_owner or request.user.is_superuser:
+    if has_financial_access:
         branch_data = (
             orders.values("branch__id", "branch__name")
             .annotate(revenue=Sum("total_price"), count=Count("id"))
@@ -286,8 +289,10 @@ def financial_reports(request):
     branch_order_counts = [b["count"] for b in branch_revenue]
 
     context = {
-        "title": "Financial Reports",
-        "subTitle": "Reports / Financial",
+        "title": _("Financial Reports"),
+        "subTitle": _("Reports / Financial"),
+        "title_i18n": "report.financialReport",
+        "subTitle_i18n": "report.revenueAnalytics",
         # Filters
         "date_from": date_from,
         "date_to": date_to,
@@ -295,8 +300,6 @@ def financial_reports(request):
         "selected_branch": branch_id,
         "centers": centers,
         "selected_center": center_id,
-        # User role
-        "is_owner": is_owner,
         # Metrics
         "total_revenue": total_revenue,
         "total_orders": total_orders,
@@ -439,8 +442,10 @@ def order_reports(request):
     recent_orders = paginator.get_page(page)
 
     context = {
-        "title": "Order Reports",
-        "subTitle": "Reports / Orders",
+        "title": _("Order Reports"),
+        "subTitle": _("Reports / Orders"),
+        "title_i18n": "reports.ordersReport",
+        "subTitle_i18n": "sidebar.orderReports",
         # Period filter
         "period": period_data["period"],
         "period_label": period_data["label"],
@@ -628,8 +633,10 @@ def staff_performance(request):
     staff_page = paginator.get_page(page)
 
     context = {
-        "title": "Staff Performance",
-        "subTitle": "Reports / Staff Performance",
+        "title": _("Staff Performance"),
+        "subTitle": _("Reports / Staff Performance"),
+        "title_i18n": "report.staffPerformance",
+        "subTitle_i18n": "report.staffPerformanceDesc",
         # Period filter
         "period": period_data["period"],
         "period_label": period_data["label"],
@@ -734,8 +741,10 @@ def branch_comparison(request):
     total_customers = sum(b["customer_count"] for b in branch_data)
 
     context = {
-        "title": "Branch Comparison",
-        "subTitle": "Reports / Branch Comparison",
+        "title": _("Branch Comparison"),
+        "subTitle": _("Reports / Branch Comparison"),
+        "title_i18n": "report.branchComparison",
+        "subTitle_i18n": "report.branchComparisonDesc",
         # Period filter
         "period": period_data["period"],
         "period_label": period_data["label"],
@@ -856,8 +865,10 @@ def customer_analytics(request):
     ]
 
     context = {
-        "title": "Customer Analytics",
-        "subTitle": "Reports / Customers",
+        "title": _("Customer Analytics"),
+        "subTitle": _("Reports / Customers"),
+        "title_i18n": "report.customerAnalytics",
+        "subTitle_i18n": "report.customerAnalyticsDesc",
         # Period filter
         "period": period_data["period"],
         "period_label": period_data["label"],
@@ -1091,8 +1102,10 @@ def my_statistics(request):
     )[:10]
 
     context = {
-        "title": "My Statistics",
-        "subTitle": "Your Personal Performance",
+        "title": _("My Statistics"),
+        "subTitle": _("Your Personal Performance"),
+        "title_i18n": "report.myStatistics",
+        "subTitle_i18n": "report.myStatisticsDesc",
         # Period filter
         "period": period_data["period"],
         "period_label": period_data["label"],
@@ -1173,11 +1186,6 @@ def unit_economy(request):
         if center_id:
             branches = branches.filter(center_id=center_id)
     
-    # Check if user is owner
-    is_owner = False
-    if hasattr(request.user, "admin_profile") and request.user.admin_profile:
-        is_owner = request.user.admin_profile.is_owner
-    
     # Get analytics data with date filtering
     summary = get_remaining_balance_summary(request.user, date_from=date_from, date_to=date_to)
     by_branch = get_remaining_by_branch(request.user, date_from=date_from, date_to=date_to)
@@ -1198,8 +1206,10 @@ def unit_economy(request):
     center_remaining_values = [c['remaining'] for c in by_center]
     
     context = {
-        "title": "Unit Economy",
-        "subTitle": "Reports / Unit Economy",
+        "title": _("Unit Economy"),
+        "subTitle": _("Reports / Unit Economy"),
+        "title_i18n": "unitEconomy.title",
+        "subTitle_i18n": "unitEconomy.subtitle",
         # Period filter
         "period": period_data["period"],
         "period_label": period_data["label"],
@@ -1211,8 +1221,6 @@ def unit_economy(request):
         "selected_branch": branch_id,
         "centers": centers,
         "selected_center": center_id,
-        # User role
-        "is_owner": is_owner,
         # Summary
         "total_remaining": summary['total_remaining'],
         "total_orders_with_debt": summary['total_orders_with_debt'],
@@ -1283,11 +1291,12 @@ def unit_economy_api(request):
     if request.user.is_superuser:
         centers = TranslationCenter.objects.filter(is_active=True)
     
-    # Check if user is owner
-    is_owner = False
-    if hasattr(request.user, "admin_profile") and request.user.admin_profile:
-        is_owner = request.user.admin_profile.is_owner
-    
+    has_financial_access = request.user.is_superuser or (
+        hasattr(request.user, "admin_profile")
+        and request.user.admin_profile
+        and request.user.admin_profile.has_permission("can_manage_financial")
+    )
+
     centers_data = [{'id': c.id, 'name': c.name} for c in centers] if centers else []
     branches_data = [{'id': b.id, 'name': b.name, 'center_id': b.center_id} for b in branches]
     
@@ -1297,7 +1306,7 @@ def unit_economy_api(request):
         'centers': centers_data,
         'branches': branches_data,
         'is_superuser': request.user.is_superuser,
-        'show_center': request.user.is_superuser or is_owner,
+        'show_center': has_financial_access,
         'show_branch': True
     })
 
@@ -1410,16 +1419,17 @@ def debtors_report(request):
     if request.user.is_superuser:
         centers = TranslationCenter.objects.filter(is_active=True)
     
-    # Check user permissions for showing center/branch columns
-    is_owner = False
-    if hasattr(request.user, "admin_profile") and request.user.admin_profile:
-        is_owner = request.user.admin_profile.is_owner
-    
-    show_center = request.user.is_superuser or is_owner
+    # Show center column if user has financial management access (permission-based, not role-based)
+    show_center = request.user.is_superuser or (
+        hasattr(request.user, "admin_profile")
+        and request.user.admin_profile
+        and request.user.admin_profile.has_permission("can_manage_financial")
+    )
     show_branch = True
     
     context = {
-        'title': 'Debtors Management',
+        'title': _('Debtors Management'),
+        'title_i18n': 'reports.debtorsManagement',
         'debtors': page_obj,
         'page_obj': page_obj,
         'paginator': paginator,
@@ -1836,8 +1846,10 @@ def expense_analytics_report(request):
         type_values.append(float(item['total'] or 0))
     
     context = {
-        "title": "Expense Analytics Report",
-        "subTitle": "Detailed expense analysis by center, branch, and type",
+        "title": _("Expense Analytics Report"),
+        "subTitle": _("Detailed expense analysis by center, branch, and type"),
+        "title_i18n": "reports.expenseAnalytics",
+        "subTitle_i18n": "reports.expenseAnalyticsDesc",
         # Date filter
         "period": period,
         "period_choices": PERIOD_CHOICES,

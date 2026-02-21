@@ -11,7 +11,7 @@
             <div class="card-body p-24">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-20">
                     <div>
-                        <h5 class="fw-bold mb-8">
+                        <h5 class="fw-bold mb-8" {% if title_i18n %}data-i18n="{{ title_i18n }}"{% endif %}>
                             <iconify-icon icon="solar:users-group-two-rounded-bold" class="text-primary-600 me-2"></iconify-icon>
                             {{ title }}
                         </h5>

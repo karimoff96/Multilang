@@ -163,6 +163,10 @@ def bulk_payment_page(request):
     top_10_debtors = top_debtors[:10] if len(top_debtors) > 10 else top_debtors
     
     context = {
+        'title': _('Bulk Payment'),
+        'subTitle': _('Bulk Payment Management'),
+        'title_i18n': 'sidebar.bulkPayments',
+        'subTitle_i18n': 'sidebar.bulkPayment',
         'page_title': _('Bulk Payment Management'),
         'active_nav': 'bulk_payments',
         'page_obj': page_obj,
@@ -943,11 +947,6 @@ def payment_history_full(request):
     except:
         payments_page = paginator.page(1)
     
-    # Check if user is owner
-    is_owner = False
-    if hasattr(request.user, 'admin_profile') and request.user.admin_profile:
-        is_owner = request.user.admin_profile.is_owner
-    
     context = {
         'page_title': _('Payment History - Full Report'),
         'title': _('Payment History'),
@@ -965,7 +964,6 @@ def payment_history_full(request):
         'payment_method': payment_method,
         'customer_type': customer_type,
         'active_nav': 'payment_history',
-        'is_owner': is_owner,
     }
     
     return render(request, 'orders/payment_history_full.html', context)

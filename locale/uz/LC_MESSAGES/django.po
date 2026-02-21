@@ -6936,8 +6936,10 @@ msgid ""
 "продлите подписку для продолжения работы.\n"
 "                            "
 msgstr ""
+"\n"
 "Obunangiz %(date)s sanasida tugadi. Iltimos, ish davom ettirish uchun "
-"obunani uzaytiring."
+"obunani uzaytiring.\n"
+"                            "
 
 #: templates/partials/subscription_alert.html:22
 msgid "Подписка заканчивается сегодня!"
@@ -6951,8 +6953,10 @@ msgid ""
 "Продлите подписку, чтобы избежать перерыва в работе.\n"
 "                            "
 msgstr ""
+"\n"
 "Obunangiz bugun tugaydi (%(date)s). Ish jarayonida uzilish bo'lmasligi uchun "
-"obunani uzaytiring."
+"obunani uzaytiring.\n"
+"                            "
 
 #: templates/partials/subscription_alert.html:29
 msgid "Подписка заканчивается завтра!"
@@ -6966,8 +6970,10 @@ msgid ""
 "Рекомендуем продлить подписку заранее.\n"
 "                            "
 msgstr ""
+"\n"
 "Obunangiz ertaga tugaydi (%(date)s). Obunani oldindan uzaytirishni tavsiya "
-"qilamiz."
+"qilamiz.\n"
+"                            "
 
 #: templates/partials/subscription_alert.html:36
 msgid "Подписка заканчивается"
@@ -6985,7 +6991,7 @@ msgid_plural ""
 "                            Ваша подписка заканчивается через %(days)s дня "
 "(%(date)s).\n"
 "                            "
-msgstr[0] "Obunangiz %(days)s kun ichida tugaydi (%(date)s)."
+msgstr[0] "\nObunangiz %(days)s kun ichida tugaydi (%(date)s).\n                            "
 
 #: templates/partials/subscription_alert.html:47
 msgid "Управление тарифами"
@@ -7436,6 +7442,130 @@ msgstr "Barcha darajalar"
 #| msgid "Track and manage outstanding customer debts"
 msgid "Track and analyze staff performance metrics"
 msgstr "Mijozlarning to'lanmagan qarzlarini kuzatish va boshqarish"
+
+# Reports Views Translations
+#: WowDash/reports_views.py
+msgid "Reports / Financial"
+msgstr "Hisobotlar / Moliya"
+
+#: WowDash/reports_views.py
+msgid "Reports / Orders"
+msgstr "Hisobotlar / Buyurtmalar"
+
+#: WowDash/reports_views.py
+msgid "Reports / Staff Performance"
+msgstr "Hisobotlar / Xodimlar samaradorligi"
+
+#: WowDash/reports_views.py
+msgid "Reports / Branch Comparison"
+msgstr "Hisobotlar / Filiallarni solishtirish"
+
+#: WowDash/reports_views.py
+msgid "Reports / Customers"
+msgstr "Hisobotlar / Mijozlar"
+
+#: WowDash/reports_views.py
+msgid "Your Personal Performance"
+msgstr "Sizning shaxsiy samaradorligingiz"
+
+#: WowDash/reports_views.py
+msgid "Reports / Unit Economy"
+msgstr "Hisobotlar / Birlik iqtisodiyoti"
+
+#: WowDash/reports_views.py
+msgid "Debtors Management"
+msgstr "Qarzdorlarni boshqarish"
+
+#: WowDash/reports_views.py
+msgid "Detailed expense analysis by center, branch, and type"
+msgstr "Markaz, filial va tur bo'yicha batafsil xarajatlar tahlili"
+
+# Services/Orders/Organizations Views Translations
+#: services/views.py
+msgid "Category Details"
+msgstr "Kategoriya tafsilotlari"
+
+#: services/views.py
+msgid "Add Category"
+msgstr "Kategoriya qo'shish"
+
+#: services/views.py
+msgid "Edit Category"
+msgstr "Kategoriyani tahrirlash"
+
+#: services/views.py
+msgid "Product Details"
+msgstr "Mahsulot tafsilotlari"
+
+#: services/views.py
+msgid "Add Product"
+msgstr "Mahsulot qo'shish"
+
+#: services/views.py
+msgid "Edit Product"
+msgstr "Mahsulotni tahrirlash"
+
+#: services/views.py
+msgid "Expense Details"
+msgstr "Xarajat tafsilotlari"
+
+#: services/views.py
+msgid "Add Expense"
+msgstr "Xarajat qo'shish"
+
+#: services/views.py
+msgid "Edit Expense"
+msgstr "Xarajatni tahrirlash"
+
+#: services/views.py
+msgid "Manage Languages"
+msgstr "Tillarni boshqarish"
+
+#: services/views.py
+msgid "Edit Language"
+msgstr "Tilni tahrirlash"
+
+#: organizations/views.py
+msgid "Edit Branch Settings"
+msgstr "Filial sozlamalarini tahrirlash"
+
+#: organizations/views.py
+#, python-format
+msgid "Settings for %(name)s"
+msgstr "%(name)s uchun sozlamalar"
+
+#: organizations/views.py
+#, python-format
+msgid "Edit settings for %(name)s"
+msgstr "%(name)s uchun sozlamalarni tahrirlash"
+
+#: orders/views.py
+msgid "My Orders"
+msgstr "Mening buyurtmalarim"
+
+#: orders/views.py
+msgid "Orders with Pending Receipts"
+msgstr "Kutilayotgan kvitansiyali buyurtmalar"
+
+#: orders/views.py
+msgid "Review uploaded payment receipts"
+msgstr "Yuklangan to'lov kvitansiyalarini ko'rib chiqish"
+
+#: orders/views.py
+msgid "Orders assigned to me"
+msgstr "Menga tayinlangan buyurtmalar"
+
+#: orders/views.py
+msgid "Orders Assigned to Me"
+msgstr "Menga tayinlangan buyurtmalar"
+
+#: orders/views.py
+msgid "Order Details"
+msgstr "Buyurtma tafsilotlari"
+
+#: orders/views.py
+msgid "Edit Order"
+msgstr "Buyurtmani tahrirlash"
 
 #: venv/lib/python3.10/site-packages/django/contrib/messages/apps.py:16
 #, fuzzy
