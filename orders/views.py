@@ -22,7 +22,7 @@ from organizations.rbac import (
 from organizations.models import AdminUser, Branch, TranslationCenter
 from core.audit import log_action, log_order_assign, log_status_change
 from bot.notification_service import send_order_notification
-from billing.decorators import require_feature, require_active_subscription
+from billing.decorators import require_feature, require_active_subscription, check_order_limit
 
 
 def has_order_permission(request, permission_name, order=None):
@@ -1133,6 +1133,7 @@ def myOrders(request):
 @login_required(login_url='admin_login')
 @require_active_subscription
 @require_feature('orders_basic')
+@check_order_limit
 @permission_required('can_create_orders')
 def orderCreate(request):
     """Create a new order - requires can_create_orders permission"""

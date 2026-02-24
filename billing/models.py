@@ -688,34 +688,6 @@ class Subscription(models.Model):
         
         return self.tariff.get_features_by_category(category)
     
-    def get_usage_percentage(self, usage_type='orders'):
-        """Get current usage percentage for orders/staff/branches"""
-        if usage_type == 'orders':
-            limit = self.tariff.max_monthly_orders
-            if limit is None:
-                return 0  # Unlimited
-            
-            current_usage = self.organization.get_current_month_orders_count()
-            return (current_usage / limit * 100) if limit > 0 else 0
-        
-        elif usage_type == 'branches':
-            limit = self.tariff.max_branches
-            if limit is None:
-                return 0
-            
-            current_usage = self.organization.branches.count()
-            return (current_usage / limit * 100) if limit > 0 else 0
-        
-        elif usage_type == 'staff':
-            limit = self.tariff.max_staff
-            if limit is None:
-                return 0
-            
-            current_usage = self.organization.get_staff_count()
-            return (current_usage / limit * 100) if limit > 0 else 0
-        
-        return 0
-    
     def can_add_branch(self):
         """Check if organization can add more branches"""
         if not self.is_active():

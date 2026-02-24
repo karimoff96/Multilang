@@ -24,7 +24,7 @@ from .rbac import (
     can_view_staff_required,
 )
 from core.audit import log_create, log_update, log_delete
-from billing.decorators import require_feature, require_active_subscription
+from billing.decorators import require_feature, require_active_subscription, check_branch_limit, check_staff_limit
 
 logger = logging.getLogger(__name__)
 audit_logger = logging.getLogger('audit')
@@ -367,6 +367,7 @@ def branch_list(request):
 @login_required(login_url="admin_login")
 @require_active_subscription
 @require_feature('multi_branch')
+@check_branch_limit
 @permission_required("can_manage_branches")
 def branch_create(request, center_id=None):
     """Create a new branch"""
@@ -650,6 +651,7 @@ def staff_list(request):
 
 
 @login_required(login_url="admin_login")
+@check_staff_limit
 @any_permission_required("can_create_staff", "can_manage_staff")
 def staff_create(request):
     """Create a new staff member"""
