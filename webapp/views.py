@@ -177,7 +177,7 @@ def api_init(request):
     from organizations.models import Branch
     branches = list(
         Branch.objects.filter(center=center, is_active=True)
-        .values("id", "name", "address", "phone", "is_main")
+        .values("id", "name", "address", "phone", "is_main", "show_pricelist")
     )
 
     # ------------------------------------------------------------------
@@ -733,3 +733,242 @@ def api_upload_receipt(request, order_id: int):
         logger.warning(f"WebApp: receipt notification failed for order {order.pk}: {e}")
 
     return _ok({"status": "payment_received"})
+
+
+# ---------------------------------------------------------------------------
+# API: /webapp/api/profile/
+# ---------------------------------------------------------------------------
+
+@csrf_exempt
+def api_profile(request):
+    """
+    GET or POST  — view / update the current user's profile.
+
+    GET  {init_data, center_id}  → returns full profile info.
+    POST {init_data, center_id, name?, phone?, language?, branch_id?}
+         → updates any supplied fields and returns the updated profile.
+    """
+    if request.method not in ("GET", "POST"):
+        return _err("Method not allowed", 405)
+
+    import json as json_module
+
+    # Support both query params (GET) and JSON body (POST)
+    if request.method == "GET":
+        body = request.GET.dict()
+    else:
+        try:
+            body = json_module.loads(request.body)
+        except Exception:
+            body = request.POST.dict()
+
+    tg_id, _, center = _auth(body)
+    if tg_id is None:
+        return _err("Invalid or expired initData", 401)
+
+    from accounts.models import BotUser
+    from organizations.models import Branch
+
+    bot_user = BotUser.objects.filter(user_id=tg_id, center=center, is_active=True).first()
+    if not bot_user:
+        return _err("User not found", 403)
+
+    if request.method == "POST":
+        # Update allowed fields
+        name = body.get("name", "").strip()
+        phone = body.get("phone", "").strip()
+        language = body.get("language", "").strip()
+        branch_id = body.get("branch_id")
+
+        update_fields = []
+        if name:
+            bot_user.name = name
+            update_fields.append("name")
+        if phone:
+            bot_user.phone = phone
+            update_fields.append("phone")
+        if language in ("uz", "ru", "en"):
+            bot_user.language = language
+            update_fields.append("language")
+        if branch_id:
+            try:
+                branch = Branch.objects.get(pk=int(branch_id), center=center, is_active=True)
+                bot_user.branch = branch
+                update_fields.append("branch")
+            except (Branch.DoesNotExist, ValueError):
+                return _err("Branch not found", 404)
+        if update_fields:
+            bot_user.save(update_fields=update_fields)
+
+    # Build branches list for front-end
+    branches = list(
+        Branch.objects.filter(center=center, is_active=True)
+        .values("id", "name", "address", "phone", "is_main")
+    )
+
+    return _ok({
+        "profile": {
+            "id": bot_user.id,
+            "name": bot_user.name,
+            "phone": bot_user.phone,
+            "language": bot_user.language,
+            "is_agency": bot_user.is_agency,
+            "branch_id": bot_user.branch_id,
+            "branch_name": bot_user.branch.name if bot_user.branch else None,
+            "branch_address": bot_user.branch.address if bot_user.branch else None,
+            "joined": bot_user.created_at.strftime("%d.%m.%Y") if bot_user.created_at else "",
+        },
+        "branches": branches,
+    })
+
+
+# ---------------------------------------------------------------------------
+# API: /webapp/api/center-info/
+# ---------------------------------------------------------------------------
+
+@csrf_exempt
+def api_center_info(request):
+    """
+    POST {init_data, center_id}
+
+    Returns about_us, help_text, other_services (description), support
+    phone and branch info from AdditionalInfo for the user's branch.
+    """
+    if request.method != "POST":
+        return _err("Method not allowed", 405)
+
+    import json as json_module
+    try:
+        body = json_module.loads(request.body)
+    except Exception:
+        body = request.POST.dict()
+
+    tg_id, _, center = _auth(body)
+    if tg_id is None:
+        return _err("Invalid or expired initData", 401)
+
+    from accounts.models import BotUser, AdditionalInfo
+
+    bot_user = BotUser.objects.filter(user_id=tg_id, center=center, is_active=True).first()
+    if not bot_user:
+        return _err("User not found", 403)
+
+    info = AdditionalInfo.get_for_user(bot_user) if bot_user else AdditionalInfo.get_for_branch(None)
+
+    def _translated(obj, field, lang):
+        """Return lang-specific field, fallback to uz then any non-empty."""
+        if not obj:
+            return ""
+        for suffix in (lang, "uz", "ru", "en"):
+            val = getattr(obj, f"{field}_{suffix}", None)
+            if val:
+                return val
+        return ""
+
+    lang = (bot_user.language or "uz") if bot_user else "uz"
+
+    return _ok({
+        "about_us": _translated(info, "about_us", lang),
+        "help_text": _translated(info, "help_text", lang),
+        "description": _translated(info, "description", lang),
+        "support_phone": info.support_phone if info else "",
+        "support_telegram": info.support_telegram if info else "",
+        "branch": {
+            "name": bot_user.branch.name if bot_user and bot_user.branch else "",
+            "address": bot_user.branch.address if bot_user and bot_user.branch else "",
+            "phone": bot_user.branch.phone if bot_user and bot_user.branch else "",
+        } if bot_user else {},
+    })
+
+
+# ---------------------------------------------------------------------------
+# API: /webapp/api/pricelist/
+# ---------------------------------------------------------------------------
+
+@csrf_exempt
+def api_pricelist(request):
+    """
+    POST {init_data, center_id}
+
+    Returns the price list for the user's branch (if show_pricelist=True).
+    Structure: [{category, charging, products: [{name, prices}]}]
+    """
+    if request.method != "POST":
+        return _err("Method not allowed", 405)
+
+    import json as json_module
+    try:
+        body = json_module.loads(request.body)
+    except Exception:
+        body = request.POST.dict()
+
+    tg_id, _, center = _auth(body)
+    if tg_id is None:
+        return _err("Invalid or expired initData", 401)
+
+    from accounts.models import BotUser
+    from services.models import Category
+
+    bot_user = BotUser.objects.filter(user_id=tg_id, center=center, is_active=True).first()
+    if not bot_user:
+        return _err("User not found", 403)
+
+    lang = bot_user.language or "uz"
+    is_agency = bot_user.is_agency
+
+    # Pricelist requires branch with show_pricelist flag
+    if not bot_user.branch:
+        return _ok({"available": False, "categories": []})
+    if not bot_user.branch.show_pricelist:
+        return _ok({"available": False, "categories": []})
+
+    categories_qs = Category.objects.filter(
+        branch=bot_user.branch, is_active=True
+    ).prefetch_related("product_set").order_by("name_uz")
+
+    def _name(obj, l):
+        for suffix in (l, "uz", "ru", "en"):
+            v = getattr(obj, f"name_{suffix}", None)
+            if v:
+                return v
+        return str(obj)
+
+    result = []
+    for cat in categories_qs:
+        products_qs = cat.product_set.filter(is_active=True).order_by("name_uz")
+        products = []
+        for p in products_qs:
+            if is_agency:
+                first_price = float(p.agency_first_page_price or 0)
+                other_price = float(p.agency_other_page_price or 0)
+                copy_price_dec = float(p.agency_copy_price_decimal or 0)
+                copy_price_pct = float(p.agency_copy_price_percentage or 0)
+            else:
+                first_price = float(p.ordinary_first_page_price or 0)
+                other_price = float(p.ordinary_other_page_price or 0)
+                copy_price_dec = float(p.user_copy_price_decimal or 0)
+                copy_price_pct = float(p.user_copy_price_percentage or 0)
+
+            products.append({
+                "id": p.id,
+                "name": _name(p, lang),
+                "estimated_days": p.estimated_days,
+                "first_price": first_price,
+                "other_price": other_price,
+                "copy_price_decimal": copy_price_dec,
+                "copy_price_percentage": copy_price_pct,
+            })
+        if products:
+            result.append({
+                "id": cat.id,
+                "name": _name(cat, lang),
+                "charging": cat.charging,
+                "products": products,
+            })
+
+    return _ok({
+        "available": True,
+        "branch_name": bot_user.branch.name,
+        "is_agency": is_agency,
+        "categories": result,
+    })

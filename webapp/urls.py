@@ -14,4 +14,13 @@ urlpatterns = [
     path("api/orders/", views.api_my_orders, name="api_my_orders"),
     path("api/orders/<int:order_id>/", views.api_order_detail, name="api_order_detail"),
     path("api/orders/<int:order_id>/receipt/", views.api_upload_receipt, name="api_upload_receipt"),
+
+    # Profile view / update
+    path("api/profile/", views.api_profile, name="api_profile"),
+
+    # Center / branch info (about us, help, other services)
+    path("api/center-info/", views.api_center_info, name="api_center_info"),
+
+    # Price list for user's branch
+    path("api/pricelist/", views.api_pricelist, name="api_pricelist"),
 ]

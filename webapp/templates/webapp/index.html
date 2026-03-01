@@ -257,6 +257,24 @@ textarea { resize: none; height: 80px; }
 
 /* ── Bottom safe area padding ─────────────────────────────────────────────── */
 .bottom-pad { height: max(env(safe-area-inset-bottom), 80px); flex-shrink: 0; }
+
+/* ── Primary button ──────────────────────────────────────────────────────── */
+.btn-primary {
+  background: var(--btn);
+  color: var(--btn-text);
+  border: none;
+  border-radius: 10px;
+  padding: 13px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: block;
+  text-align: center;
+}
+.btn-primary:active { opacity: .8; }
+
+/* ── Field input (profile edit) ─────────────────────────────────────────── */
+.field-input { width: 100%; box-sizing: border-box; }
 </style>
 </head>
 <body>
@@ -342,6 +360,32 @@ textarea { resize: none; height: 80px; }
       <div class="card-right">›</div>
       <div class="card-title" id="menu-my-orders">📦 My Orders</div>
       <div class="card-sub" id="menu-my-orders-sub">View your order history and status</div>
+    </div>
+    <div class="card" onclick="loadProfile()">
+      <div class="card-right">›</div>
+      <div class="card-title" id="menu-profile">👤 My Profile</div>
+      <div class="card-sub" id="menu-profile-sub">View and edit your details</div>
+    </div>
+    <div class="card" onclick="loadAbout()">
+      <div class="card-right">›</div>
+      <div class="card-title" id="menu-about">ℹ️ About Us</div>
+      <div class="card-sub" id="menu-about-sub">Company information</div>
+    </div>
+    <div class="card" onclick="loadHelp()">
+      <div class="card-right">›</div>
+      <div class="card-title" id="menu-help">❓ Help</div>
+      <div class="card-sub" id="menu-help-sub">Questions and support</div>
+    </div>
+    <div class="card" onclick="loadOtherServices()">
+      <div class="card-right">›</div>
+      <div class="card-title" id="menu-other">🧾 Other Services</div>
+      <div class="card-sub" id="menu-other-sub">Additional services</div>
+    </div>
+    <!-- Price list — shown/hidden dynamically based on branch.show_pricelist -->
+    <div class="card" id="menu-pricelist-card" onclick="loadPricelist()" style="display:none">
+      <div class="card-right">›</div>
+      <div class="card-title" id="menu-pricelist">💰 Price List</div>
+      <div class="card-sub" id="menu-pricelist-sub">Service prices</div>
     </div>
   </div>
   <div class="bottom-pad"></div>
@@ -651,6 +695,154 @@ textarea { resize: none; height: 80px; }
   <div class="bottom-pad"></div>
 </section>
 
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: profile
+═══════════════════════════════════════════════════════ -->
+<section id="screen-profile" class="screen">
+  <div class="page-header" id="prof-header">My Profile</div>
+  <div class="page-sub" id="prof-sub">Personal details</div>
+  <div class="section" id="prof-loading-wrap">
+    <div style="text-align:center;padding:40px;color:var(--hint)" id="prof-loading-text">Loading…</div>
+  </div>
+  <div class="section" id="prof-content" style="display:none">
+
+    <!-- Agency badge (shown if user.is_agency) -->
+    <div id="prof-agency-badge" style="display:none;margin-bottom:12px">
+      <div style="background:rgba(255,184,0,.15);border:1.5px solid rgba(255,184,0,.4);border-radius:var(--radius);padding:10px 14px;font-size:13px;color:#c8900a;font-weight:600" id="prof-agency-text">💼 Agency</div>
+    </div>
+
+    <!-- Profile info card -->
+    <div class="price-box" style="margin-bottom:16px">
+      <div class="price-row"><span class="price-label" id="prof-lbl-name">NAME</span><span class="price-value" id="prof-val-name" style="font-weight:600">—</span></div>
+      <div class="price-row"><span class="price-label" id="prof-lbl-phone">PHONE</span><span class="price-value" id="prof-val-phone">—</span></div>
+      <div class="price-row"><span class="price-label" id="prof-lbl-branch">BRANCH</span><span class="price-value" id="prof-val-branch">—</span></div>
+      <div class="price-row"><span class="price-label" id="prof-lbl-lang">LANGUAGE</span><span class="price-value" id="prof-val-lang">—</span></div>
+      <div class="price-row"><span class="price-label" id="prof-lbl-joined">Joined</span><span class="price-value" id="prof-val-joined">—</span></div>
+    </div>
+
+    <!-- Edit Name -->
+    <div class="card" onclick="toggleEditSection('prof-edit-name-wrap')" style="margin-bottom:2px">
+      <div class="card-right" id="prof-edit-name-arrow">›</div>
+      <div class="card-title" id="prof-edit-name-btn">✏️ Edit Name</div>
+    </div>
+    <div id="prof-edit-name-wrap" style="display:none;background:var(--bg2);border-radius:0 0 var(--radius) var(--radius);padding:12px 14px 14px;margin-bottom:12px">
+      <div class="field-wrap" style="margin-bottom:8px">
+        <input type="text" id="prof-name-input" class="field-input" placeholder="Full Name" style="width:100%;box-sizing:border-box">
+      </div>
+      <button onclick="saveProfileField('name')" class="btn-primary" id="prof-save-name" style="width:100%">Save</button>
+    </div>
+
+    <!-- Edit Phone -->
+    <div class="card" onclick="toggleEditSection('prof-edit-phone-wrap')" style="margin-bottom:2px">
+      <div class="card-right" id="prof-edit-phone-arrow">›</div>
+      <div class="card-title" id="prof-edit-phone-btn">📞 Edit Phone</div>
+    </div>
+    <div id="prof-edit-phone-wrap" style="display:none;background:var(--bg2);border-radius:0 0 var(--radius) var(--radius);padding:12px 14px 14px;margin-bottom:12px">
+      <div class="field-wrap" style="margin-bottom:8px">
+        <input type="tel" id="prof-phone-input" class="field-input" placeholder="+998 90 123 45 67" style="width:100%;box-sizing:border-box">
+      </div>
+      <button onclick="saveProfileField('phone')" class="btn-primary" id="prof-save-phone" style="width:100%">Save</button>
+    </div>
+
+    <!-- Change Language -->
+    <div class="card" onclick="toggleEditSection('prof-edit-lang-wrap')" style="margin-bottom:2px">
+      <div class="card-right" id="prof-edit-lang-arrow">›</div>
+      <div class="card-title" id="prof-edit-lang-btn">🌐 Change Language</div>
+    </div>
+    <div id="prof-edit-lang-wrap" style="display:none;background:var(--bg2);border-radius:0 0 var(--radius) var(--radius);padding:12px 14px 14px;margin-bottom:12px">
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <div class="lang-btn" data-lang="uz" onclick="selProfLang(this)" style="flex:1;text-align:center;padding:10px;border-radius:10px;cursor:pointer;border:2px solid transparent">🇺🇿 O'zbek</div>
+        <div class="lang-btn" data-lang="ru" onclick="selProfLang(this)" style="flex:1;text-align:center;padding:10px;border-radius:10px;cursor:pointer;border:2px solid transparent">🇷🇺 Рус</div>
+        <div class="lang-btn" data-lang="en" onclick="selProfLang(this)" style="flex:1;text-align:center;padding:10px;border-radius:10px;cursor:pointer;border:2px solid transparent">🇬🇧 Eng</div>
+      </div>
+      <button onclick="saveProfileField('language')" class="btn-primary" id="prof-save-lang" style="width:100%">Save</button>
+    </div>
+
+    <!-- Change Branch -->
+    <div class="card" onclick="toggleEditSection('prof-edit-branch-wrap')" style="margin-bottom:2px">
+      <div class="card-right" id="prof-edit-branch-arrow">›</div>
+      <div class="card-title" id="prof-edit-branch-btn">🏢 Change Branch</div>
+    </div>
+    <div id="prof-edit-branch-wrap" style="display:none;background:var(--bg2);border-radius:0 0 var(--radius) var(--radius);padding:12px 14px 14px;margin-bottom:12px">
+      <div id="prof-branch-list" style="margin-bottom:10px"></div>
+      <button onclick="saveProfileField('branch')" class="btn-primary" id="prof-save-branch" style="width:100%">Save</button>
+    </div>
+
+    <!-- Save confirmation toast (invisible initially) -->
+    <div id="prof-toast" style="display:none;background:rgba(44,207,110,.15);border:1.5px solid rgba(44,207,110,.4);border-radius:var(--radius);padding:12px 14px;font-size:14px;color:var(--text);text-align:center;margin-top:8px" id="prof-toast-text">✅ Saved!</div>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: about
+═══════════════════════════════════════════════════════ -->
+<section id="screen-about" class="screen">
+  <div class="page-header" id="about-header">About Us</div>
+  <div class="page-sub" id="about-sub">Company information</div>
+  <div class="section">
+    <div id="about-content" style="line-height:1.7;font-size:14px;color:var(--text);white-space:pre-wrap;padding:4px 0"></div>
+    <!-- Branch contact info -->
+    <div id="about-branch-box" style="display:none;margin-top:16px">
+      <div class="price-box">
+        <div class="price-row" id="about-branch-name-row" style="display:none">
+          <span class="price-label">🏢</span><span class="price-value" id="about-branch-name">—</span>
+        </div>
+        <div class="price-row" id="about-branch-addr-row" style="display:none">
+          <span class="price-label">📍</span><span class="price-value" id="about-branch-addr">—</span>
+        </div>
+        <div class="price-row" id="about-branch-phone-row" style="display:none">
+          <span class="price-label">📞</span><span class="price-value" id="about-branch-phone">—</span>
+        </div>
+        <div class="price-row" id="about-support-phone-row" style="display:none">
+          <span class="price-label">☎️</span><span class="price-value" id="about-support-phone">—</span>
+        </div>
+        <div class="price-row" id="about-support-tg-row" style="display:none">
+          <span class="price-label">✈️</span><span class="price-value" id="about-support-tg">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: help
+═══════════════════════════════════════════════════════ -->
+<section id="screen-help" class="screen">
+  <div class="page-header" id="help-header">Help</div>
+  <div class="page-sub" id="help-sub">Support</div>
+  <div class="section">
+    <div id="help-content" style="line-height:1.7;font-size:14px;color:var(--text);white-space:pre-wrap;padding:4px 0"></div>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: other-services
+═══════════════════════════════════════════════════════ -->
+<section id="screen-other-services" class="screen">
+  <div class="page-header" id="other-header">Other Services</div>
+  <div class="page-sub" id="other-sub">Additional services</div>
+  <div class="section">
+    <div id="other-content" style="line-height:1.7;font-size:14px;color:var(--text);white-space:pre-wrap;padding:4px 0"></div>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: pricelist
+═══════════════════════════════════════════════════════ -->
+<section id="screen-pricelist" class="screen">
+  <div class="page-header" id="pl-header">Price List</div>
+  <div class="page-sub" id="pl-sub">Service prices</div>
+  <div class="section">
+    <div id="pl-type-badge" style="margin-bottom:14px;font-size:13px;color:var(--hint);text-align:center"></div>
+    <div id="pl-list"></div>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
 <script>
 // ── Telegram WebApp init ─────────────────────────────────────────────────────
 // Mock used only when real SDK is unavailable
@@ -783,6 +975,26 @@ const T = {
     detReceiptNote: "Chek yuborildi — tekshirilmoqda",
     ordClickHint: "Tafsilotlarni ko'rish uchun bosing",
     copied: "Nusxalandi!",
+    menuProfile: "👤 Profilim", menuProfileSub: "Ma'lumotlaringizni ko'ring va o'zgartiring",
+    menuAbout: "ℹ️ Biz haqimizda", menuAboutSub: "Kompaniya haqida ma'lumot",
+    menuHelp: "❓ Yordam", menuHelpSub: "Savollar va qo'llab-quvvatlash",
+    menuOther: "🧾 Boshqa xizmatlar", menuOtherSub: "Qo'shimcha xizmatlarimiz",
+    menuPricelist: "💰 Narxlar ro'yxati", menuPricelistSub: "Xizmatlar narxlari",
+    profHeader: "Mening profilim", profSub: "Shaxsiy ma'lumotlar",
+    profName: "ISM", profPhone: "TELEFON", profLang: "TIL", profBranch: "FILIAL",
+    profJoined: "Ro'yxatdan o'tgan", profAgency: "💼 Agentlik",
+    profEditName: "✏️ Ismni o'zgartirish", profEditPhone: "📞 Telefonni o'zgartirish",
+    profEditLang: "🌐 Tilni o'zgartirish", profEditBranch: "🏢 Filialni o'zgartirish",
+    profSaveBtn: "Saqlash", profCancelBtn: "Bekor qilish",
+    profSaved: "✅ Saqlandi!", profNamePh: "Ism Familiya", profPhonePh: "+998 90 123 45 67",
+    aboutHeader: "Biz haqimizda", aboutSub: "Kompaniya haqida",
+    helpHeader: "Yordam", helpSub: "Qo'llab-quvvatlash",
+    otherHeader: "Boshqa xizmatlar", otherSub: "Qo'shimcha xizmatlar",
+    plHeader: "Narxlar ro'yxati", plSub: "Xizmatlar narxlari",
+    plFirstPage: "1-sahifa", plOtherPage: "Keyingi sahifalar",
+    plPrice: "Narx", plCopyPrice: "Nusxa narxi",
+    plEmpty: "Narxlar ro'yxati mavjud emas yoki yoqilmagan.",
+    plIsAgency: "Agentlik narxlari 💼", plIsUser: "Mijoz narxlari 👤",
   },
   ru: {
     loading: "Загрузка…",
@@ -839,6 +1051,26 @@ const T = {
     detReceiptNote: "Чек отправлен — проверяется",
     ordClickHint: "Нажмите для подробностей",
     copied: "Скопировано!",
+    menuProfile: "👤 Мой профиль", menuProfileSub: "Просмотр и редактирование данных",
+    menuAbout: "ℹ️ О нас", menuAboutSub: "Информация о компании",
+    menuHelp: "❓ Помощь", menuHelpSub: "Вопросы и поддержка",
+    menuOther: "🧾 Другие услуги", menuOtherSub: "Дополнительные услуги",
+    menuPricelist: "💰 Прайс-лист", menuPricelistSub: "Цены на услуги",
+    profHeader: "Мой профиль", profSub: "Личные данные",
+    profName: "ИМЯ", profPhone: "ТЕЛЕФОН", profLang: "ЯЗЫК", profBranch: "ФИЛИАЛ",
+    profJoined: "Зарегистрирован", profAgency: "💼 Агентство",
+    profEditName: "✏️ Изменить имя", profEditPhone: "📞 Изменить телефон",
+    profEditLang: "🌐 Изменить язык", profEditBranch: "🏢 Изменить филиал",
+    profSaveBtn: "Сохранить", profCancelBtn: "Отмена",
+    profSaved: "✅ Сохранено!", profNamePh: "Иванов Иван", profPhonePh: "+998 90 123 45 67",
+    aboutHeader: "О нас", aboutSub: "Информация о компании",
+    helpHeader: "Помощь", helpSub: "Поддержка",
+    otherHeader: "Другие услуги", otherSub: "Дополнительные услуги",
+    plHeader: "Прайс-лист", plSub: "Цены на услуги",
+    plFirstPage: "1-я страница", plOtherPage: "Следующие страницы",
+    plPrice: "Цена", plCopyPrice: "Цена копии",
+    plEmpty: "Прайс-лист недоступен или не включён.",
+    plIsAgency: "Цены для агентств 💼", plIsUser: "Цены для клиентов 👤",
   },
   en: {
     loading: "Loading…",
@@ -895,6 +1127,26 @@ const T = {
     detReceiptNote: "Receipt submitted — awaiting verification",
     ordClickHint: "Tap for details",
     copied: "Copied!",
+    menuProfile: "👤 My Profile", menuProfileSub: "View and edit your details",
+    menuAbout: "ℹ️ About Us", menuAboutSub: "Company information",
+    menuHelp: "❓ Help", menuHelpSub: "Questions and support",
+    menuOther: "🧾 Other Services", menuOtherSub: "Additional services",
+    menuPricelist: "💰 Price List", menuPricelistSub: "Service prices",
+    profHeader: "My Profile", profSub: "Personal details",
+    profName: "NAME", profPhone: "PHONE", profLang: "LANGUAGE", profBranch: "BRANCH",
+    profJoined: "Joined", profAgency: "💼 Agency",
+    profEditName: "✏️ Edit Name", profEditPhone: "📞 Edit Phone",
+    profEditLang: "🌐 Change Language", profEditBranch: "🏢 Change Branch",
+    profSaveBtn: "Save", profCancelBtn: "Cancel",
+    profSaved: "✅ Saved!", profNamePh: "John Doe", profPhonePh: "+998 90 123 45 67",
+    aboutHeader: "About Us", aboutSub: "Company information",
+    helpHeader: "Help", helpSub: "Support",
+    otherHeader: "Other Services", otherSub: "Additional services",
+    plHeader: "Price List", plSub: "Service prices",
+    plFirstPage: "1st page", plOtherPage: "Next pages",
+    plPrice: "Price", plCopyPrice: "Copy price",
+    plEmpty: "Price list is not available or not enabled.",
+    plIsAgency: "Agency prices 💼", plIsUser: "Customer prices 👤",
   },
 };
 
@@ -1106,6 +1358,19 @@ function applyTranslations() {
   T2("det-btn-upload-receipt","detBtnUploadReceipt");
   T2("det-btn-upload-receipt-sub","detBtnUploadReceiptSub");
   T2("det-receipt-note","detReceiptNote");
+  // menu extra buttons
+  T2("menu-profile","menuProfile"); T2("menu-profile-sub","menuProfileSub");
+  T2("menu-about","menuAbout"); T2("menu-about-sub","menuAboutSub");
+  T2("menu-help","menuHelp"); T2("menu-help-sub","menuHelpSub");
+  T2("menu-other","menuOther"); T2("menu-other-sub","menuOtherSub");
+  T2("menu-pricelist","menuPricelist"); T2("menu-pricelist-sub","menuPricelistSub");
+  // profile screen
+  T2("prof-header","profHeader"); T2("prof-sub","profSub");
+  // about / help / other / pricelist headers (static labels — updated dynamically too)
+  T2("about-header","aboutHeader"); T2("about-sub","aboutSub");
+  T2("help-header","helpHeader"); T2("help-sub","helpSub");
+  T2("other-header","otherHeader"); T2("other-sub","otherSub");
+  T2("pl-header","plHeader"); T2("pl-sub","plSub");
   document.getElementById("conf-desc").placeholder = t("confDescPh");
   document.getElementById("conf-names").placeholder = t("confNamesPh");
   document.getElementById("reg-name").placeholder = t("regNamePh");
@@ -1186,6 +1451,18 @@ function showMenuScreen() {
   document.getElementById("menu-new-order-sub").textContent = t("menuNewOrderSub");
   document.getElementById("menu-my-orders").textContent     = t("menuMyOrders");
   document.getElementById("menu-my-orders-sub").textContent = t("menuMyOrdersSub");
+
+  // Show/hide pricelist button based on branch.show_pricelist
+  const plCard = document.getElementById("menu-pricelist-card");
+  if (plCard) {
+    let showPricelist = false;
+    if (u && u.branch_id && S.branches) {
+      const br = S.branches.find(b => b.id === u.branch_id);
+      showPricelist = br && br.show_pricelist;
+    }
+    plCard.style.display = showPricelist ? "" : "none";
+  }
+
   S.history = [];
   showScreen("menu", false);
 }
@@ -1804,6 +2081,316 @@ function statusBadgeStyle(status) {
     "cancelled":         "background:#f8d7da;color:#721c24;",
   };
   return colorMap[status] || "background:rgba(36,129,204,.15);color:#2481cc;";
+}
+
+// ── Profile ───────────────────────────────────────────────────────────────────
+let _profData = null; // cached profile + branches
+let _profSelectedLang = null;
+let _profSelectedBranchId = null;
+
+async function loadProfile() {
+  showScreen("profile");
+  document.getElementById("prof-loading-wrap").style.display = "";
+  document.getElementById("prof-content").style.display = "none";
+
+  try {
+    const resp = await api("/api/profile/", {
+      init_data: INIT_DATA, center_id: CENTER_ID
+    });
+    if (!resp.ok) throw new Error(resp.error || "error");
+    _profData = resp;
+    renderProfile(resp.profile, resp.branches || []);
+  } catch(e) {
+    document.getElementById("prof-loading-wrap").innerHTML =
+      `<div style="text-align:center;padding:40px;color:var(--hint)">${escHtml(e.message)}</div>`;
+  }
+}
+
+function renderProfile(p, branches) {
+  document.getElementById("prof-loading-wrap").style.display = "none";
+  document.getElementById("prof-content").style.display = "";
+
+  // Agency badge
+  const agBadge = document.getElementById("prof-agency-badge");
+  const agText  = document.getElementById("prof-agency-text");
+  if (p.is_agency) {
+    agText.textContent = t("profAgency");
+    agBadge.style.display = "";
+  } else {
+    agBadge.style.display = "none";
+  }
+
+  // Info rows
+  document.getElementById("prof-lbl-name").textContent   = t("profName");
+  document.getElementById("prof-lbl-phone").textContent  = t("profPhone");
+  document.getElementById("prof-lbl-branch").textContent = t("profBranch");
+  document.getElementById("prof-lbl-lang").textContent   = t("profLang");
+  document.getElementById("prof-lbl-joined").textContent = t("profJoined");
+
+  document.getElementById("prof-val-name").textContent   = p.name || "—";
+  document.getElementById("prof-val-phone").textContent  = p.phone || "—";
+  document.getElementById("prof-val-branch").textContent = p.branch_name || "—";
+  const langNames = {uz:"🇺🇿 O'zbek", ru:"🇷🇺 Русский", en:"🇬🇧 English"};
+  document.getElementById("prof-val-lang").textContent   = langNames[p.language] || p.language || "—";
+  document.getElementById("prof-val-joined").textContent = p.joined || "—";
+
+  // Edit buttons labels
+  document.getElementById("prof-edit-name-btn").textContent   = t("profEditName");
+  document.getElementById("prof-edit-phone-btn").textContent  = t("profEditPhone");
+  document.getElementById("prof-edit-lang-btn").textContent   = t("profEditLang");
+  document.getElementById("prof-edit-branch-btn").textContent = t("profEditBranch");
+
+  // Pre-fill inputs
+  document.getElementById("prof-name-input").value  = p.name || "";
+  document.getElementById("prof-name-input").placeholder = t("profNamePh");
+  document.getElementById("prof-phone-input").value = p.phone || "";
+  document.getElementById("prof-phone-input").placeholder = t("profPhonePh");
+
+  // Pre-select current language
+  _profSelectedLang = p.language || "uz";
+  document.querySelectorAll("#prof-edit-lang-wrap .lang-btn").forEach(b => {
+    b.style.background = (b.dataset.lang === _profSelectedLang) ? "var(--btn)" : "var(--bg)";
+    b.style.color = (b.dataset.lang === _profSelectedLang) ? "#fff" : "var(--text)";
+    b.style.border = (b.dataset.lang === _profSelectedLang) ? "2px solid var(--btn)" : "2px solid var(--bg2)";
+  });
+
+  // Build branch list
+  _profSelectedBranchId = p.branch_id;
+  const branchListEl = document.getElementById("prof-branch-list");
+  if (branches.length) {
+    branchListEl.innerHTML = branches.map(b => {
+      const sel = b.id === p.branch_id;
+      return `<div onclick="selProfBranch(this, ${b.id})"
+        data-branch-id="${b.id}"
+        style="padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:4px;
+               background:${sel ? 'var(--btn)' : 'var(--bg)'};
+               color:${sel ? '#fff' : 'var(--text)'};
+               border:2px solid ${sel ? 'var(--btn)' : 'var(--bg2)'}">
+        ${sel ? '✅ ' : '📍 '}${escHtml(b.name)}${b.address ? `<div style="font-size:12px;opacity:.7;margin-top:2px">${escHtml(b.address)}</div>` : ''}
+      </div>`;
+    }).join('');
+  } else {
+    branchListEl.innerHTML = '<div style="color:var(--hint);font-size:13px">No branches available</div>';
+  }
+
+  // Save button labels
+  document.getElementById("prof-save-name").textContent   = t("profSaveBtn");
+  document.getElementById("prof-save-phone").textContent  = t("profSaveBtn");
+  document.getElementById("prof-save-lang").textContent   = t("profSaveBtn");
+  document.getElementById("prof-save-branch").textContent = t("profSaveBtn");
+}
+
+function toggleEditSection(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = el.style.display === "none" ? "" : "none";
+}
+
+function selProfLang(btn) {
+  _profSelectedLang = btn.dataset.lang;
+  document.querySelectorAll("#prof-edit-lang-wrap .lang-btn").forEach(b => {
+    const sel = b.dataset.lang === _profSelectedLang;
+    b.style.background = sel ? "var(--btn)" : "var(--bg)";
+    b.style.color = sel ? "#fff" : "var(--text)";
+    b.style.border = sel ? "2px solid var(--btn)" : "2px solid var(--bg2)";
+  });
+}
+
+function selProfBranch(el, branchId) {
+  _profSelectedBranchId = branchId;
+  document.querySelectorAll("#prof-branch-list [data-branch-id]").forEach(b => {
+    const sel = parseInt(b.dataset.branchId) === branchId;
+    b.style.background = sel ? "var(--btn)" : "var(--bg)";
+    b.style.color = sel ? "#fff" : "var(--text)";
+    b.style.border = sel ? "2px solid var(--btn)" : "2px solid var(--bg2)";
+    const txt = b.innerHTML;
+    // update checkmark
+  });
+}
+
+async function saveProfileField(field) {
+  const body = {init_data: INIT_DATA, center_id: CENTER_ID};
+  if (field === "name") {
+    const v = document.getElementById("prof-name-input").value.trim();
+    if (!v) { alert(t("profNamePh")); return; }
+    body.name = v;
+  } else if (field === "phone") {
+    const v = document.getElementById("prof-phone-input").value.trim();
+    if (!v) { alert(t("profPhonePh")); return; }
+    body.phone = v;
+  } else if (field === "language") {
+    if (!_profSelectedLang) return;
+    body.language = _profSelectedLang;
+  } else if (field === "branch") {
+    if (!_profSelectedBranchId) return;
+    body.branch_id = _profSelectedBranchId;
+  }
+
+  try {
+    const resp = await api("/api/profile/", body);
+    if (!resp.ok) throw new Error(resp.error || "error");
+    _profData = resp;
+
+    // If language changed, update app language and retranslate
+    if (field === "language" && resp.profile.language) {
+      S.lang = resp.profile.language;
+      applyTranslations();
+    }
+
+    // Close that section & re-render
+    const sectionMap = {name:"prof-edit-name-wrap", phone:"prof-edit-phone-wrap",
+                        language:"prof-edit-lang-wrap", branch:"prof-edit-branch-wrap"};
+    const wrap = document.getElementById(sectionMap[field]);
+    if (wrap) wrap.style.display = "none";
+
+    renderProfile(resp.profile, resp.branches || []);
+
+    // Show toast
+    const toast = document.getElementById("prof-toast");
+    if (toast) {
+      toast.textContent = t("profSaved");
+      toast.style.display = "";
+      setTimeout(() => { toast.style.display = "none"; }, 2500);
+    }
+  } catch(e) {
+    alert(t("errServer") + " " + e.message);
+  }
+}
+
+// ── About / Help / Other Services ────────────────────────────────────────────
+let _centerInfo = null; // cached
+
+async function _loadCenterInfo() {
+  if (_centerInfo) return _centerInfo;
+  const resp = await api("/api/center-info/", {
+    init_data: INIT_DATA, center_id: CENTER_ID
+  });
+  if (!resp.ok) throw new Error(resp.error || "error");
+  _centerInfo = resp;
+  return resp;
+}
+
+async function loadAbout() {
+  showScreen("about");
+  document.getElementById("about-header").textContent = t("aboutHeader");
+  document.getElementById("about-sub").textContent    = t("aboutSub");
+  try {
+    const info = await _loadCenterInfo();
+    const content = info.about_us || "";
+    document.getElementById("about-content").textContent = content ||
+      (S.lang === "uz" ? "Ma'lumot hozircha mavjud emas." :
+       S.lang === "ru" ? "Информация пока недоступна." :
+       "Information not available yet.");
+
+    // Branch contact block
+    const b = info.branch || {};
+    const box = document.getElementById("about-branch-box");
+    let hasAny = false;
+    function setRow(rowId, valId, val) {
+      const rowEl = document.getElementById(rowId);
+      const valEl = document.getElementById(valId);
+      if (val && rowEl && valEl) { valEl.textContent = val; rowEl.style.display = ""; hasAny = true; }
+      else if (rowEl) rowEl.style.display = "none";
+    }
+    setRow("about-branch-name-row",  "about-branch-name",  b.name);
+    setRow("about-branch-addr-row",  "about-branch-addr",  b.address);
+    setRow("about-branch-phone-row", "about-branch-phone", b.phone);
+    setRow("about-support-phone-row","about-support-phone",info.support_phone);
+    setRow("about-support-tg-row",   "about-support-tg",   info.support_telegram);
+    if (box) box.style.display = hasAny ? "" : "none";
+  } catch(e) {
+    document.getElementById("about-content").textContent = t("errServer");
+  }
+}
+
+async function loadHelp() {
+  showScreen("help");
+  document.getElementById("help-header").textContent = t("helpHeader");
+  document.getElementById("help-sub").textContent    = t("helpSub");
+  try {
+    const info = await _loadCenterInfo();
+    const content = info.help_text || "";
+    document.getElementById("help-content").textContent = content ||
+      (S.lang === "uz" ? "Yordam ma'lumoti hozircha mavjud emas." :
+       S.lang === "ru" ? "Справочная информация пока недоступна." :
+       "Help information not available yet.");
+  } catch(e) {
+    document.getElementById("help-content").textContent = t("errServer");
+  }
+}
+
+async function loadOtherServices() {
+  showScreen("other-services");
+  document.getElementById("other-header").textContent = t("otherHeader");
+  document.getElementById("other-sub").textContent    = t("otherSub");
+  try {
+    const info = await _loadCenterInfo();
+    const content = info.description || "";
+    document.getElementById("other-content").textContent = content ||
+      (S.lang === "uz" ? "Qo'shimcha xizmatlar haqida ma'lumot hozircha mavjud emas." :
+       S.lang === "ru" ? "Информация о дополнительных услугах пока недоступна." :
+       "Additional services information not available yet.");
+  } catch(e) {
+    document.getElementById("other-content").textContent = t("errServer");
+  }
+}
+
+// ── Price List ────────────────────────────────────────────────────────────────
+async function loadPricelist() {
+  showScreen("pricelist");
+  document.getElementById("pl-header").textContent = t("plHeader");
+  document.getElementById("pl-sub").textContent    = t("plSub");
+  const listEl = document.getElementById("pl-list");
+  const badgeEl = document.getElementById("pl-type-badge");
+  listEl.innerHTML = `<div style="text-align:center;padding:30px;color:var(--hint)">${t("loading")}</div>`;
+  badgeEl.textContent = "";
+  try {
+    const resp = await api("/api/pricelist/", {
+      init_data: INIT_DATA, center_id: CENTER_ID
+    });
+    if (!resp.ok) throw new Error(resp.error || "error");
+    if (!resp.available || !resp.categories || !resp.categories.length) {
+      listEl.innerHTML = `<div class="empty-state"><div class="empty-icon">💰</div><div class="empty-title">${t("plEmpty")}</div></div>`;
+      return;
+    }
+    badgeEl.textContent = resp.is_agency ? t("plIsAgency") : t("plIsUser");
+    listEl.innerHTML = resp.categories.map(cat => {
+      const isDynamic = cat.charging === "dynamic";
+      const prods = cat.products.map(p => {
+        let priceHtml = "";
+        if (isDynamic) {
+          priceHtml = `
+            <div style="font-size:13px;color:var(--hint);margin-top:4px">
+              <span>${t("plFirstPage")}: <b style="color:var(--text)">${fmt(p.first_price)}</b></span>
+              ${p.other_price ? `<span style="margin-left:10px">${t("plOtherPage")}: <b style="color:var(--text)">${fmt(p.other_price)}</b></span>` : ""}
+            </div>`;
+        } else {
+          priceHtml = `<div style="font-size:13px;color:var(--hint);margin-top:4px">
+            ${t("plPrice")}: <b style="color:var(--text)">${fmt(p.first_price)}</b></div>`;
+        }
+        const copyHtml = p.copy_price_decimal > 0
+          ? `<div style="font-size:12px;color:var(--hint);margin-top:2px">${t("plCopyPrice")}: ${fmt(p.copy_price_decimal)}</div>`
+          : (p.copy_price_percentage > 0
+              ? `<div style="font-size:12px;color:var(--hint);margin-top:2px">${t("plCopyPrice")}: ${p.copy_price_percentage}%</div>`
+              : "");
+        const daysHtml = p.estimated_days
+          ? `<div style="font-size:12px;color:var(--hint);margin-top:2px">${t("days", p.estimated_days)}</div>` : "";
+        return `<div style="padding:10px 14px;border-bottom:1px solid var(--separator)">
+          <div style="font-weight:600;font-size:14px">📄 ${escHtml(p.name)}</div>
+          ${priceHtml}${copyHtml}${daysHtml}
+        </div>`;
+      }).join("");
+      return `
+        <div style="margin-bottom:14px;border-radius:var(--radius);overflow:hidden;background:var(--bg2)">
+          <div style="padding:12px 14px;background:var(--btn);color:#fff;font-weight:700;font-size:15px">
+            📁 ${escHtml(cat.name)}
+          </div>
+          ${prods}
+        </div>`;
+    }).join("");
+  } catch(e) {
+    listEl.innerHTML = `<div style="text-align:center;padding:30px;color:var(--hint)">${t("errServer")}</div>`;
+  }
 }
 
 // ── Boot ────────────────────────────────────────────────────────────────────
