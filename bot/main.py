@@ -1796,112 +1796,93 @@ def handle_contact(message):
                 "translation:error_processing_contact",
             )
 def show_main_menu(message, language):
+    """
+    Burger-King style: remove any reply keyboard, then send a single
+    inline Web App button.  All functionality lives inside the mini app.
+    """
     # Handle both direct messages and callback messages
     if hasattr(message, 'from_user') and message.from_user:
         user_id = message.from_user.id
     else:
         user_id = message.chat.id
-    
+
     update_user_step(user_id, STEP_REGISTERED)
-    
-    # Check if branch has pricelist enabled
+
     user = get_bot_user(user_id)
-    should_show_pricelist = False
-    if user and user.branch and user.branch.show_pricelist:
-        should_show_pricelist = True
-    
-    markup = types.ReplyKeyboardMarkup(
-        resize_keyboard=True, row_width=2, one_time_keyboard=True
-    )
-    if language == "uz":
-        btn1 = types.KeyboardButton("🛍️ Hizmatdan foydalanish")
-        btn2 = types.KeyboardButton("📋 Arizalarim")
-        btn3 = types.KeyboardButton("👤 Profil")
-        btn4 = types.KeyboardButton("ℹ️ Biz haqimizda")
-        btn5 = types.KeyboardButton("❓ Yordam")
-        btn_other = types.KeyboardButton("🧾 Boshqa xizmatlar")
-        btn_pricelist = types.KeyboardButton("💰 Narxlar ro'yxati")
-    elif language == "ru":
-        btn1 = types.KeyboardButton("🛍️ Воспользоваться услугой")
-        btn2 = types.KeyboardButton("📋 Мои заявки")
-        btn3 = types.KeyboardButton("👤 Профиль")
-        btn4 = types.KeyboardButton("ℹ️ О нас")
-        btn5 = types.KeyboardButton("❓ Помощь")
-        btn_other = types.KeyboardButton("🧾 Другие услуги")
-        btn_pricelist = types.KeyboardButton("💰 Прайс-лист")
-    else:  # English
-        btn1 = types.KeyboardButton("🛍️ Use Service")
-        btn2 = types.KeyboardButton("📋 My Orders")
-        btn3 = types.KeyboardButton("👤 Profile")
-        btn4 = types.KeyboardButton("ℹ️ About Us")
-        btn5 = types.KeyboardButton("❓ Help")
-        btn_other = types.KeyboardButton("🧾 Other Services")
-        btn_pricelist = types.KeyboardButton("💰 Price List")
-    markup.add(btn1, btn2)
-    markup.add(btn3, btn4)
-    if should_show_pricelist:
-        markup.add(btn5, btn_other)
-        markup.add(btn_pricelist)
-    else:
-        markup.add(btn5, btn_other)
-    # Web App button — resolve center via 3 methods in priority order:
-    # 1) message._center injected by webhook_handler (most reliable for messages)
-    # 2) user.center_id FK from get_bot_user() (works when bot.token is correct)
-    # 3) Direct BotUser DB lookup (fallback for callback context / race conditions)
+
+    # ── Step 1: remove the old reply keyboard (if any user still has it) ──
+    # Send an invisible message carrying ReplyKeyboardRemove, then delete it
+    # so the chat looks clean with no leftover keyboard buttons.
+    try:
+        _rm = bot.send_message(
+            message.chat.id, "​",  # zero-width space — invisible text
+            reply_markup=types.ReplyKeyboardRemove(),
+        )
+        bot.delete_message(message.chat.id, _rm.message_id)
+    except Exception:
+        pass
+
+    # ── Step 2: resolve center_id ──────────────────────────────────────────
+    _center_id = None
     try:
         _msg_center = getattr(message, '_center', None)
-        _center_id = None
         if _msg_center:
             _center_id = _msg_center.id
         elif user and user.center_id:
             _center_id = user.center_id
         else:
-            # Fallback: query BotUser directly, bypassing center-from-token logic
             from accounts.models import BotUser as _BU
             _center_id = _BU.objects.filter(
                 user_id=user_id, is_active=True
             ).values_list('center_id', flat=True).first()
-        if _center_id:
-            webapp_url = f"https://admin.multilang.uz/webapp/{_center_id}/"
-            btn_webapp = types.KeyboardButton(
-                text="🌐 Web App",
-                web_app=types.WebAppInfo(url=webapp_url),
-            )
-            markup.add(btn_webapp)
-        else:
-            logger.warning(f"Web App button skipped: no center_id for user_id={user_id}")
     except Exception as _e:
-        logger.error(f"Could not add Web App button: {_e}")
-    welcome_text = get_text("main_menu_welcome", language)
-    bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
+        logger.error(f"Could not resolve center_id in show_main_menu: {_e}")
 
-    # Also send an inline web_app button for clients where the reply-keyboard
-    # web_app button does not inject initData (older Android / some Telegram builds).
+    if not _center_id:
+        logger.warning(f"Web App button skipped: no center_id for user_id={user_id}")
+        return
+
+    # ── Step 3: send the single Web App launch button ─────────────────────
+    webapp_url = f"https://admin.multilang.uz/webapp/{_center_id}/"
+
+    _welcome = {
+        "uz": (
+            "🌐 <b>Xizmatlarimizdan foydalanish uchun ilovani oching!</b>\n\n"
+            "Buyurtma berish, narxlarni ko'rish, buyurtmalaringizni kuzatish — "
+            "barchasi ilovada."
+        ),
+        "ru": (
+            "🌐 <b>Откройте приложение, чтобы воспользоваться услугами!</b>\n\n"
+            "Оформление заказов, просмотр цен, отслеживание заявок — "
+            "всё в одном приложении."
+        ),
+        "en": (
+            "🌐 <b>Open the app to use our services!</b>\n\n"
+            "Place orders, view prices, track your requests — "
+            "everything is inside the app."
+        ),
+    }
+    _btn_label = {
+        "uz": "🚀 Ilovani ochish",
+        "ru": "🚀 Открыть приложение",
+        "en": "🚀 Open App",
+    }
+
+    _il = types.InlineKeyboardMarkup()
+    _il.add(types.InlineKeyboardButton(
+        text=_btn_label.get(language, _btn_label["uz"]),
+        web_app=types.WebAppInfo(url=webapp_url),
+    ))
+
     try:
-        if _center_id:
-            webapp_url = f"https://admin.multilang.uz/webapp/{_center_id}/"
-            _inline_labels = {
-                "uz": "🚀 Web App orqali buyurtma berish",
-                "ru": "🚀 Оформить заказ через Web App",
-                "en": "🚀 Order via Web App",
-            }
-            _inline_text = {
-                "uz": "👇 Buyurtma berish uchun pastdagi tugmani bosing:",
-                "ru": "👇 Нажмите кнопку ниже для оформления заказа:",
-                "en": "👇 Tap the button below to place your order:",
-            }
-            _il = types.InlineKeyboardMarkup()
-            _il.add(types.InlineKeyboardButton(
-                text=_inline_labels.get(language, _inline_labels["uz"]),
-                web_app=types.WebAppInfo(url=webapp_url),
-            ))
-            bot.send_message(
-                message.chat.id,
-                _inline_text.get(language, _inline_text["uz"]),
-                reply_markup=_il,
-            )
-    except Exception as _e2:
-        logger.warning(f"Could not send inline Web App button: {_e2}")
+        bot.send_message(
+            message.chat.id,
+            _welcome.get(language, _welcome["uz"]),
+            reply_markup=_il,
+            parse_mode="HTML",
+        )
+    except Exception as _e3:
+        logger.error(f"Could not send Web App launch button: {_e3}")
 
 @bot.message_handler(
     func=lambda message: message.text
