@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Translation Order</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+/* ── Reset & base ──────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         var(--tg-theme-bg-color,         #ffffff);
+  --bg2:        var(--tg-theme-secondary-bg-color,#f1f1f1);
+  --text:       var(--tg-theme-text-color,        #000000);
+  --hint:       var(--tg-theme-hint-color,        #999999);
+  --link:       var(--tg-theme-link-color,        #2481cc);
+  --btn:        var(--tg-theme-button-color,      #2481cc);
+  --btn-text:   var(--tg-theme-button-text-color, #ffffff);
+  --border:     rgba(128,128,128,.15);
+  --radius:     14px;
+  --gap:        16px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+html, body { height: 100%; background: var(--bg); color: var(--text); overflow: hidden; }
+
+/* ── Screens ───────────────────────────────────────────────────────────── */
+.screen {
+  position: absolute; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transform: translateX(30px);
+  transition: opacity .22s ease, transform .22s ease;
+}
+.screen.active {
+  opacity: 1; pointer-events: auto;
+  transform: translateX(0);
+}
+
+/* ── Global layout ─────────────────────────────────────────────────────── */
+.page-header {
+  padding: 18px var(--gap) 10px;
+  font-size: 22px; font-weight: 700; line-height: 1.2;
+}
+.page-sub {
+  padding: 0 var(--gap) 16px;
+  font-size: 14px; color: var(--hint); line-height: 1.5;
+}
+.section { padding: 0 var(--gap); }
+.gap { height: var(--gap); }
+.gap-sm { height: 8px; }
+.gap-lg { height: 28px; }
+
+/* ── Cards / list items ─────────────────────────────────────────────────── */
+.card {
+  background: var(--bg2); border-radius: var(--radius);
+  padding: 14px 16px; margin-bottom: 10px; cursor: pointer;
+  transition: opacity .15s; -webkit-tap-highlight-color: transparent;
+  border: 1px solid var(--border);
+}
+.card:active { opacity: .7; }
+.card-title { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+.card-sub { font-size: 13px; color: var(--hint); line-height: 1.4; }
+.card-right { float: right; color: var(--hint); margin-top: 2px; }
+.card.selected { border-color: var(--btn); background: color-mix(in srgb, var(--btn) 8%, var(--bg2)); }
+.card.selected .card-title { color: var(--btn); }
+
+/* ── Form fields ───────────────────────────────────────────────────────── */
+.field-label {
+  font-size: 13px; font-weight: 600; color: var(--hint);
+  margin-bottom: 6px; text-transform: uppercase; letter-spacing: .03em;
+}
+.field-wrap { margin-bottom: 16px; }
+input[type=text], input[type=tel], select, textarea {
+  width: 100%;
+  background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 12px 14px;
+  font-size: 15px; color: var(--text);
+  outline: none; transition: border-color .15s;
+  -webkit-appearance: none; appearance: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--btn); }
+textarea { resize: none; height: 80px; }
+
+/* ── Steps / breadcrumb ─────────────────────────────────────────────────── */
+.steps {
+  display: flex; gap: 6px; padding: 0 var(--gap) 18px;
+  align-items: center;
+}
+.step {
+  height: 4px; border-radius: 2px;
+  background: var(--border); flex: 1;
+  transition: background .3s;
+}
+.step.done { background: var(--btn); }
+.step.active { background: var(--hint); }
+
+/* ── Loading / overlay ──────────────────────────────────────────────────── */
+#screen-loading {
+  justify-content: center; align-items: center;
+  gap: 18px; background: var(--bg);
+}
+.spinner {
+  width: 40px; height: 40px;
+  border: 3.5px solid var(--border);
+  border-top-color: var(--btn);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 15px; color: var(--hint); }
+
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.35); backdrop-filter: blur(2px);
+  z-index: 100; display: flex; align-items: center; justify-content: center;
+  display: none;
+}
+.overlay.show { display: flex; }
+.overlay-spinner { width: 44px; height: 44px; border: 4px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; }
+
+/* ── File upload zone ───────────────────────────────────────────────────── */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius); padding: 28px 20px;
+  text-align: center; cursor: pointer;
+  transition: border-color .15s, background .15s;
+  background: var(--bg2);
+}
+.upload-zone:active, .upload-zone.drag-over { border-color: var(--btn); background: color-mix(in srgb, var(--btn) 6%, var(--bg2)); }
+.upload-zone svg { display: block; margin: 0 auto 10px; }
+.upload-zone-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.upload-zone-hint { font-size: 13px; color: var(--hint); }
+
+.file-list { margin-top: 14px; }
+.file-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; background: var(--bg2);
+  border-radius: 10px; margin-bottom: 8px;
+  border: 1px solid var(--border);
+}
+.file-icon { font-size: 22px; flex-shrink: 0; }
+.file-info { flex: 1; min-width: 0; }
+.file-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-meta { font-size: 12px; color: var(--hint); margin-top: 2px; }
+.file-remove { color: var(--hint); cursor: pointer; padding: 4px; font-size: 18px; line-height: 1; flex-shrink: 0; }
+.file-remove:active { color: #e03131; }
+
+/* ── Price box ──────────────────────────────────────────────────────────── */
+.price-box {
+  background: var(--bg2); border-radius: var(--radius);
+  padding: 16px; border: 1px solid var(--border);
+}
+.price-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 14px; }
+.price-row.total { font-size: 17px; font-weight: 700; border-top: 1px solid var(--border); margin-top: 8px; padding-top: 10px; }
+.price-label { color: var(--hint); }
+.price-value { font-weight: 600; }
+
+/* ── Payment options ─────────────────────────────────────────────────────── */
+.pay-option {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+  margin-bottom: 10px; cursor: pointer;
+  transition: border-color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.pay-option:active { opacity: .75; }
+.pay-option.selected { border-color: var(--btn); }
+.pay-option-icon { font-size: 30px; }
+.pay-option-title { font-size: 16px; font-weight: 600; }
+.pay-option-sub { font-size: 13px; color: var(--hint); margin-top: 2px; }
+.pay-radio {
+  width: 22px; height: 22px; border-radius: 11px;
+  border: 2px solid var(--hint); margin-left: auto;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.pay-option.selected .pay-radio { border-color: var(--btn); }
+.pay-radio-dot { width: 11px; height: 11px; border-radius: 6px; background: var(--btn); display: none; }
+.pay-option.selected .pay-radio-dot { display: block; }
+
+/* ── Card info ───────────────────────────────────────────────────────────── */
+.card-info-box {
+  background: color-mix(in srgb, var(--btn) 10%, var(--bg));
+  border: 1.5px solid color-mix(in srgb, var(--btn) 35%, var(--bg));
+  border-radius: var(--radius); padding: 16px;
+}
+.card-info-label { font-size: 12px; color: var(--hint); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+.card-number { font-size: 20px; font-weight: 700; letter-spacing: .1em; }
+.card-holder { font-size: 14px; color: var(--hint); margin-top: 4px; }
+
+/* ── Success screen ──────────────────────────────────────────────────────── */
+#screen-success {
+  justify-content: center; align-items: center;
+  text-align: center; padding: 24px;
+}
+.success-icon { font-size: 72px; margin-bottom: 18px; }
+.success-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+.success-sub { font-size: 15px; color: var(--hint); line-height: 1.55; }
+.success-detail { margin-top: 24px; background: var(--bg2); border-radius: var(--radius); padding: 16px; text-align: left; width: 100%; max-width: 380px; }
+.detail-row { display: flex; justify-content: space-between; font-size: 14px; padding: 5px 0; }
+.detail-label { color: var(--hint); }
+.detail-value { font-weight: 600; max-width: 55%; text-align: right; }
+
+/* ── Orders list ─────────────────────────────────────────────────────────── */
+.order-card {
+  background: var(--bg2); border-radius: var(--radius);
+  padding: 14px 16px; margin-bottom: 10px;
+  border: 1px solid var(--border);
+}
+.order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.order-num { font-size: 13px; color: var(--hint); }
+.order-status-badge {
+  font-size: 12px; font-weight: 600; padding: 3px 8px;
+  border-radius: 20px; background: color-mix(in srgb, var(--btn) 15%, var(--bg));
+  color: var(--btn);
+}
+.order-product { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+.order-meta { font-size: 13px; color: var(--hint); }
+.order-price { font-size: 16px; font-weight: 700; margin-top: 8px; }
+
+/* ── Language selector on register screen ────────────────────────────────── */
+.lang-row { display: flex; gap: 10px; margin-bottom: 16px; }
+.lang-btn {
+  flex: 1; padding: 10px 6px; border-radius: 10px; text-align: center;
+  background: var(--bg2); border: 1.5px solid var(--border);
+  cursor: pointer; font-size: 18px; transition: border-color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.lang-btn .lang-name { font-size: 12px; font-weight: 600; color: var(--hint); display: block; margin-top: 3px; }
+.lang-btn.selected { border-color: var(--btn); background: color-mix(in srgb, var(--btn) 8%, var(--bg2)); }
+.lang-btn.selected .lang-name { color: var(--btn); }
+
+/* ── Counter +/- ─────────────────────────────────────────────────────────── */
+.counter { display: flex; align-items: center; gap: 0; }
+.counter-btn {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: var(--bg2); border: 1.5px solid var(--border);
+  cursor: pointer; font-size: 22px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity .1s;
+}
+.counter-btn:active { opacity: .6; }
+.counter-val {
+  min-width: 56px; text-align: center;
+  font-size: 18px; font-weight: 700;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.empty-state { text-align: center; padding: 48px 24px; }
+.empty-icon { font-size: 52px; margin-bottom: 14px; }
+.empty-title { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.empty-sub { font-size: 14px; color: var(--hint); }
+
+/* ── Bottom safe area padding ─────────────────────────────────────────────── */
+.bottom-pad { height: max(env(safe-area-inset-bottom), 80px); flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- Overlay spinner for API calls -->
+<div id="overlay" class="overlay"><div class="overlay-spinner"></div></div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: loading
+═══════════════════════════════════════════════════════ -->
+<section id="screen-loading" class="screen active">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Loading…</div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: error
+═══════════════════════════════════════════════════════ -->
+<section id="screen-error" class="screen">
+  <div class="empty-state" style="margin-top:60px">
+    <div class="empty-icon">⚠️</div>
+    <div class="empty-title" id="error-title">Something went wrong</div>
+    <div class="empty-sub" id="error-sub"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: register
+═══════════════════════════════════════════════════════ -->
+<section id="screen-register" class="screen">
+  <div class="page-header" id="reg-header">Registration</div>
+  <div class="page-sub" id="reg-sub">Please fill in your details to continue.</div>
+
+  <div class="section">
+    <!-- language -->
+    <div class="field-wrap">
+      <div class="field-label" id="reg-lang-label">Language</div>
+      <div class="lang-row">
+        <div class="lang-btn selected" data-lang="uz" onclick="selectLang(this)">🇺🇿 <span class="lang-name">O'zbek</span></div>
+        <div class="lang-btn" data-lang="ru" onclick="selectLang(this)">🇷🇺 <span class="lang-name">Русский</span></div>
+        <div class="lang-btn" data-lang="en" onclick="selectLang(this)">🇬🇧 <span class="lang-name">English</span></div>
+      </div>
+    </div>
+
+    <!-- name -->
+    <div class="field-wrap">
+      <div class="field-label" id="reg-name-label">Full Name</div>
+      <input type="text" id="reg-name" placeholder="John Doe" autocomplete="name" />
+    </div>
+
+    <!-- phone -->
+    <div class="field-wrap">
+      <div class="field-label" id="reg-phone-label">Phone Number</div>
+      <input type="tel" id="reg-phone" placeholder="+998 90 123 45 67" autocomplete="tel" />
+    </div>
+
+    <!-- branch (shown only if multiple branches) -->
+    <div class="field-wrap" id="reg-branch-wrap" style="display:none">
+      <div class="field-label" id="reg-branch-label">Branch</div>
+      <select id="reg-branch"></select>
+    </div>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: menu
+═══════════════════════════════════════════════════════ -->
+<section id="screen-menu" class="screen">
+  <div class="page-header" id="menu-hello">Hello!</div>
+  <div class="page-sub" id="menu-center-name"></div>
+
+  <div class="section">
+    <div class="card" onclick="goTo('categories')">
+      <div class="card-right">›</div>
+      <div class="card-title" id="menu-new-order">📋 New Order</div>
+      <div class="card-sub" id="menu-new-order-sub">Select service and upload documents</div>
+    </div>
+    <div class="card" onclick="loadMyOrders()">
+      <div class="card-right">›</div>
+      <div class="card-title" id="menu-my-orders">📦 My Orders</div>
+      <div class="card-sub" id="menu-my-orders-sub">View your order history and status</div>
+    </div>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: categories
+═══════════════════════════════════════════════════════ -->
+<section id="screen-categories" class="screen">
+  <div class="page-header" id="cat-header">Services</div>
+  <div class="page-sub" id="cat-sub">Choose the service you need</div>
+  <div class="section">
+    <div id="cat-list"></div>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: products
+═══════════════════════════════════════════════════════ -->
+<section id="screen-products" class="screen">
+  <div class="page-header" id="prod-header">Document Type</div>
+  <div class="page-sub" id="prod-sub">Select the document you want to translate</div>
+  <div class="section">
+    <div id="prod-list"></div>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: config  (language, copy count, description)
+═══════════════════════════════════════════════════════ -->
+<section id="screen-config" class="screen">
+  <div class="page-header" id="conf-header">Order Details</div>
+  <div class="steps" id="conf-steps"></div>
+  <div class="section">
+
+    <!-- Translation language (only shown if category has languages) -->
+    <div id="conf-lang-wrap">
+      <div class="field-wrap">
+        <div class="field-label" id="conf-lang-label">Translation Language</div>
+        <select id="conf-lang"></select>
+      </div>
+    </div>
+
+    <!-- Copy count -->
+    <div class="field-wrap">
+      <div class="field-label" id="conf-copies-label">Extra Copies</div>
+      <div class="counter">
+        <div class="counter-btn" onclick="changeCopies(-1)">−</div>
+        <div class="counter-val" id="conf-copies-val">0</div>
+        <div class="counter-btn" onclick="changeCopies(1)">+</div>
+      </div>
+      <div style="font-size:13px;color:var(--hint);margin-top:6px" id="conf-copies-hint">0 means original only, no extra copies</div>
+    </div>
+
+    <!-- Description (optional) -->
+    <div class="field-wrap">
+      <div class="field-label" id="conf-desc-label">Notes (optional)</div>
+      <textarea id="conf-desc" placeholder="Any special instructions…"></textarea>
+    </div>
+
+    <!-- Price preview -->
+    <div class="price-box" id="conf-price-box">
+      <div class="price-row"><span class="price-label" id="conf-price-label-base">Base price</span><span class="price-value" id="conf-price-base">—</span></div>
+      <div class="price-row" id="conf-copies-row" style="display:none"><span class="price-label" id="conf-price-label-copies">Copies</span><span class="price-value" id="conf-price-copies">—</span></div>
+      <div class="price-row total"><span class="price-label" id="conf-price-label-total">Total (estimated)</span><span class="price-value" id="conf-price-total">—</span></div>
+    </div>
+
+    <div class="gap"></div>
+    <p style="font-size:12px;color:var(--hint);line-height:1.5" id="conf-pages-note">
+      Page count will be detected automatically from your uploaded files.
+    </p>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: upload
+═══════════════════════════════════════════════════════ -->
+<section id="screen-upload" class="screen">
+  <div class="page-header" id="upl-header">Upload Documents</div>
+  <div class="page-sub" id="upl-sub">Add your document files (PDF, Word, images)</div>
+  <div class="section">
+
+    <input type="file" id="file-input" multiple
+      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.tif,.webp,.heic,.heif"
+      style="display:none" onchange="onFilesSelected(this.files)" />
+
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--btn)" stroke-width="1.8" stroke-linecap="round">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <div class="upload-zone-title" id="upl-zone-title">Tap to select files</div>
+      <div class="upload-zone-hint" id="upl-zone-hint">PDF, Word, JPG, PNG • max 25 MB each</div>
+    </div>
+
+    <div class="file-list" id="file-list"></div>
+
+    <div class="gap-sm"></div>
+    <p id="upl-formats" style="font-size:12px;color:var(--hint);line-height:1.5">
+      Supported: .pdf, .doc, .docx, .jpg, .jpeg, .png, .gif, .bmp, .tiff, .webp, .heic, .heif
+    </p>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: payment
+═══════════════════════════════════════════════════════ -->
+<section id="screen-payment" class="screen">
+  <div class="page-header" id="pay-header">Payment Method</div>
+  <div class="page-sub" id="pay-sub">How would you like to pay?</div>
+  <div class="section">
+
+    <div class="pay-option selected" id="pay-cash" onclick="selectPayment('cash')">
+      <div class="pay-option-icon">💵</div>
+      <div>
+        <div class="pay-option-title" id="pay-cash-title">Cash</div>
+        <div class="pay-option-sub" id="pay-cash-sub">Pay at the branch when you pick up</div>
+      </div>
+      <div class="pay-radio"><div class="pay-radio-dot"></div></div>
+    </div>
+
+    <div class="pay-option" id="pay-card" onclick="selectPayment('card')">
+      <div class="pay-option-icon">💳</div>
+      <div>
+        <div class="pay-option-title" id="pay-card-title">Card</div>
+        <div class="pay-option-sub" id="pay-card-sub">Transfer to our card and upload receipt</div>
+      </div>
+      <div class="pay-radio"><div class="pay-radio-dot"></div></div>
+    </div>
+
+    <!-- Card info (shown when card is selected) -->
+    <div id="card-info-block" style="display:none">
+      <div class="gap-sm"></div>
+      <div class="card-info-box">
+        <div class="card-info-label" id="pay-card-info-label">Transfer to this card</div>
+        <div class="card-number" id="pay-card-number">—</div>
+        <div class="card-holder" id="pay-card-holder"></div>
+      </div>
+    </div>
+
+    <div class="gap"></div>
+    <div class="price-box">
+      <div class="price-row total">
+        <span class="price-label" id="pay-total-label">Amount to pay</span>
+        <span class="price-value" id="pay-total">—</span>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: receipt
+═══════════════════════════════════════════════════════ -->
+<section id="screen-receipt" class="screen">
+  <div class="page-header" id="rec-header">Upload Receipt</div>
+  <div class="page-sub" id="rec-sub">Take a photo of your payment receipt and upload it below.</div>
+  <div class="section">
+
+    <div class="card-info-box" id="rec-card-info" style="margin-bottom:16px">
+      <div class="card-info-label" id="rec-card-label">Transfer to</div>
+      <div class="card-number" id="rec-card-number">—</div>
+      <div class="card-holder" id="rec-card-holder"></div>
+    </div>
+
+    <input type="file" id="receipt-input" accept="image/*" style="display:none" onchange="onReceiptSelected(this.files)" />
+
+    <div class="upload-zone" id="receipt-zone" onclick="document.getElementById('receipt-input').click()">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--btn)" stroke-width="1.8" stroke-linecap="round">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <div class="upload-zone-title" id="rec-zone-title">Tap to select receipt photo</div>
+      <div class="upload-zone-hint" id="rec-zone-hint">JPG, PNG • photo of bank receipt</div>
+    </div>
+
+    <div id="receipt-preview" style="margin-top:14px;display:none">
+      <img id="receipt-img" src="" alt="receipt" style="width:100%;border-radius:var(--radius);max-height:260px;object-fit:cover" />
+      <div style="margin-top:8px;font-size:13px;color:var(--hint);text-align:center" id="rec-preview-hint">Receipt selected. Press Submit to send.</div>
+    </div>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: success
+═══════════════════════════════════════════════════════ -->
+<section id="screen-success" class="screen">
+  <div class="success-icon">🎉</div>
+  <div class="success-title" id="suc-title">Order Submitted!</div>
+  <div class="success-sub" id="suc-sub">Your order has been received.<br>We'll notify you via Telegram when it's ready.</div>
+  <div class="success-detail" id="suc-detail">
+    <div class="detail-row"><span class="detail-label" id="suc-num-label">Order #</span><span class="detail-value" id="suc-num">—</span></div>
+    <div class="detail-row"><span class="detail-label" id="suc-pages-label">Pages</span><span class="detail-value" id="suc-pages">—</span></div>
+    <div class="detail-row"><span class="detail-label" id="suc-pay-label">Payment</span><span class="detail-value" id="suc-pay">—</span></div>
+    <div class="detail-row"><span class="detail-label" id="suc-price-label">Total</span><span class="detail-value" id="suc-price">—</span></div>
+  </div>
+  <div class="gap"></div>
+  <div style="display:flex;gap:10px;width:100%;max-width:380px">
+    <div class="card" style="flex:1;text-align:center;margin:0" onclick="goTo('menu')">
+      <div style="font-size:28px;margin-bottom:4px">🏠</div>
+      <div class="card-title" id="suc-btn-menu">Home</div>
+    </div>
+    <div class="card" style="flex:1;text-align:center;margin:0" onclick="loadMyOrders()">
+      <div style="font-size:28px;margin-bottom:4px">📦</div>
+      <div class="card-title" id="suc-btn-orders">My Orders</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCREEN: my-orders
+═══════════════════════════════════════════════════════ -->
+<section id="screen-orders" class="screen">
+  <div class="page-header" id="orders-header">My Orders</div>
+  <div class="page-sub" id="orders-sub">Recent 20 orders</div>
+  <div class="section">
+    <div id="orders-list"></div>
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════ -->
+<script>
+// ── Telegram WebApp init ─────────────────────────────────────────────────────
+// Safe Telegram SDK accessor — works even if SDK hasn't loaded yet
+const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : {
+  ready: () => {}, expand: () => {}, close: () => {},
+  initData: "", initDataUnsafe: {},
+  MainButton: { setText:()=>{}, show:()=>{}, hide:()=>{}, onClick:()=>{},
+                offClick:()=>{}, showProgress:()=>{}, hideProgress:()=>{},
+                isVisible: false, _lastHandler: null },
+  BackButton:  { show:()=>{}, hide:()=>{}, onClick:()=>{}, offClick:()=>{}, isVisible:false },
+  HapticFeedback: { impactOccurred:()=>{}, notificationOccurred:()=>{}, selectionChanged:()=>{} },
+  showAlert: (msg) => alert(msg),
+  showConfirm: (msg, cb) => cb(confirm(msg)),
+};
+try { tg.ready(); tg.expand(); } catch(e) {}
+
+const INIT_DATA = tg.initData || "";
+const CENTER_ID = {{ center_id }};
+const BASE_URL  = window.location.origin;
+
+// ── State ────────────────────────────────────────────────────────────────────
+const S = {
+  user:       null,   // BotUser dict from server
+  center:     null,   // center dict
+  branches:   [],
+  categories: [],
+  cardInfo:   null,
+  lang:       tg.initDataUnsafe?.user?.language_code?.slice(0,2) || "uz",
+
+  // Order flow
+  selectedCategory: null,
+  selectedProduct:  null,
+  selectedLanguage: null,
+  copies: 0,
+  description: "",
+  files: [],          // File objects
+  paymentType: "cash",
+  receiptFile: null,
+  submitResult: null, // {order_id, order_number, total_price, total_pages, status}
+
+  // history stack for Back button
+  history: [],
+};
+
+// ── Translations ─────────────────────────────────────────────────────────────
+const T = {
+  uz: {
+    loading: "Yuklanmoqda…",
+    regHeader: "Ro'yxatdan o'tish",
+    regSub: "Davom etish uchun ma'lumotlaringizni kiriting.",
+    regLang: "TIL",
+    regName: "TO'LIQ ISM", regNamePh: "Ism Familiya",
+    regPhone: "TELEFON", regPhonePh: "+998 90 123 45 67",
+    regBranch: "FILIAL",
+    menuHello: name => `Salom, ${name}! 👋`,
+    menuNewOrder: "📋 Yangi buyurtma", menuNewOrderSub: "Xizmat tanlang va hujjat yuklang",
+    menuMyOrders: "📦 Buyurtmalarim", menuMyOrdersSub: "Buyurtma tarixi va holati",
+    catHeader: "Xizmatlar", catSub: "Kerakli xizmatni tanlang",
+    prodHeader: "Hujjat turi", prodSub: "Qaysi hujjatni tarjima qilmoqchisiz?",
+    confHeader: "Buyurtma tafsilotlari",
+    confLang: "TARJIMA TILI",
+    confCopies: "QOʻSHIMCHA NUSXALAR",
+    confCopiesHint: c => c === 0 ? "0 – faqat asl nusxa" : `${c} ta qoʻshimcha nusxa`,
+    confDesc: "IZOH (ixtiyoriy)", confDescPh: "Qoʻshimcha ko'rsatmalar…",
+    confBase: "Asosiy narx", confCopiesLbl: "Nusxalar", confTotal: "Jami (taxminiy)",
+    confNote: "Sahifa soni yuklangan fayllardan avtomatik aniqlanadi.",
+    uplHeader: "Hujjatlarni yuklang", uplSub: "PDF, Word yoki rasm fayllarini qo'shing",
+    uplZoneTitle: "Fayllarni tanlash uchun bosing", uplZoneHint: "PDF, Word, JPG, PNG • har biri maks 25 MB",
+    payHeader: "To'lov usuli", paySub: "Qanday to'lamoqchisiz?",
+    payCash: "Naqd pul", payCashSub: "Olib ketishda ofisda to'lash",
+    payCard: "Plastik karta", payCardSub: "Kartamizga o'tkazing va chek yuboring",
+    payCardInfoLbl: "Shu kartaga o'tkazing",
+    payTotalLbl: "To'lov summasi",
+    recHeader: "Chekni yuklang", recSub: "To'lov chekini suratga oling va yuklang.",
+    recCardLbl: "O'tkazma manzili",
+    recZoneTitle: "Chek rasmini tanlang", recZoneHint: "JPG, PNG • bank chekining surati",
+    recPreviewHint: "Chek tanlandi. Yuborish uchun "Yuborish" tugmasini bosing.",
+    sucTitle: "Buyurtma yuborildi! 🎉",
+    sucSub: "Buyurtmangiz qabul qilindi.\nTayyor bo'lganda Telegram orqali xabar beramiz.",
+    sucNumLbl: "Buyurtma №", sucPagesLbl: "Sahifalar", sucPayLbl: "To'lov", sucPriceLbl: "Summa",
+    sucBtnMenu: "Asosiy", sucBtnOrders: "Buyurtmalar",
+    ordHeader: "Buyurtmalarim", ordSub: "Oxirgi 20 ta buyurtma",
+    btnRegister: "Ro'yxatdan o'tish",
+    btnNext: "Davom etish",
+    btnUpload: "Fayllarni yuklash",
+    btnConfirmOrder: "Buyurtmani tasdiqlash",
+    btnSubmitReceipt: "Chekni yuborish",
+    errNoFiles: "Kamida bitta fayl yuklang.",
+    errServer: "Serverda xatolik yuz berdi. Qayta urinib ko'ring.",
+    sum: "so'm",
+    days: d => `~${d} kun`,
+  },
+  ru: {
+    loading: "Загрузка…",
+    regHeader: "Регистрация", regSub: "Заполните данные, чтобы продолжить.",
+    regLang: "ЯЗЫК", regName: "ПОЛНОЕ ИМЯ", regNamePh: "Иванов Иван",
+    regPhone: "ТЕЛЕФОН", regPhonePh: "+998 90 123 45 67",
+    regBranch: "ФИЛИАЛ",
+    menuHello: name => `Привет, ${name}! 👋`,
+    menuNewOrder: "📋 Новый заказ", menuNewOrderSub: "Выберите услугу и загрузите документы",
+    menuMyOrders: "📦 Мои заказы", menuMyOrdersSub: "История заказов и статусы",
+    catHeader: "Услуги", catSub: "Выберите нужную услугу",
+    prodHeader: "Тип документа", prodSub: "Выберите документ для перевода",
+    confHeader: "Детали заказа",
+    confLang: "ЯЗЫК ПЕРЕВОДА",
+    confCopies: "ДОПОЛНИТЕЛЬНЫЕ КОПИИ",
+    confCopiesHint: c => c === 0 ? "0 — только оригинал" : `${c} додп. копий`,
+    confDesc: "ПРИМЕЧАНИЕ (необяз.)", confDescPh: "Особые инструкции…",
+    confBase: "Базовая цена", confCopiesLbl: "Копии", confTotal: "Итого (ориент.)",
+    confNote: "Количество страниц будет определено автоматически из загруженных файлов.",
+    uplHeader: "Загрузите документы", uplSub: "Добавьте файлы PDF, Word или изображения",
+    uplZoneTitle: "Нажмите для выбора файлов", uplZoneHint: "PDF, Word, JPG, PNG • до 25 МБ каждый",
+    payHeader: "Способ оплаты", paySub: "Как хотите оплатить?",
+    payCash: "Наличные", payCashSub: "Оплата при получении в офисе",
+    payCard: "Карта", payCardSub: "Переведите на нашу карту и пришлите чек",
+    payCardInfoLbl: "Переведите на эту карту",
+    payTotalLbl: "Сумма к оплате",
+    recHeader: "Загрузить чек", recSub: "Сфотографируйте чек об оплате и загрузите.",
+    recCardLbl: "Реквизиты",
+    recZoneTitle: "Выбрать фото чека", recZoneHint: "JPG, PNG • фото банковского чека",
+    recPreviewHint: "Чек выбран. Нажмите «Отправить» для отправки.",
+    sucTitle: "Заказ отправлен! 🎉",
+    sucSub: "Ваш заказ принят.\nМы уведомим вас в Telegram когда будет готово.",
+    sucNumLbl: "Заказ №", sucPagesLbl: "Страницы", sucPayLbl: "Оплата", sucPriceLbl: "Сумма",
+    sucBtnMenu: "Главная", sucBtnOrders: "Заказы",
+    ordHeader: "Мои заказы", ordSub: "Последние 20 заказов",
+    btnRegister: "Зарегистрироваться",
+    btnNext: "Продолжить",
+    btnUpload: "Загрузить файлы",
+    btnConfirmOrder: "Подтвердить заказ",
+    btnSubmitReceipt: "Отправить чек",
+    errNoFiles: "Загрузите хотя бы один файл.",
+    errServer: "Ошибка сервера. Попробуйте ещё раз.",
+    sum: "сум",
+    days: d => `~${d} дней`,
+  },
+  en: {
+    loading: "Loading…",
+    regHeader: "Registration", regSub: "Fill in your details to continue.",
+    regLang: "LANGUAGE", regName: "FULL NAME", regNamePh: "John Doe",
+    regPhone: "PHONE", regPhonePh: "+998 90 123 45 67",
+    regBranch: "BRANCH",
+    menuHello: name => `Hello, ${name}! 👋`,
+    menuNewOrder: "📋 New Order", menuNewOrderSub: "Select service and upload documents",
+    menuMyOrders: "📦 My Orders", menuMyOrdersSub: "View order history and status",
+    catHeader: "Services", catSub: "Choose the service you need",
+    prodHeader: "Document Type", prodSub: "Select the document you want to translate",
+    confHeader: "Order Details",
+    confLang: "TRANSLATION LANGUAGE",
+    confCopies: "EXTRA COPIES",
+    confCopiesHint: c => c === 0 ? "0 — original only, no extra copies" : `${c} extra cop${c===1?'y':'ies'}`,
+    confDesc: "NOTES (optional)", confDescPh: "Any special instructions…",
+    confBase: "Base price", confCopiesLbl: "Copies", confTotal: "Total (estimated)",
+    confNote: "Page count will be detected automatically from your uploaded files.",
+    uplHeader: "Upload Documents", uplSub: "Add your document files (PDF, Word, images)",
+    uplZoneTitle: "Tap to select files", uplZoneHint: "PDF, Word, JPG, PNG • max 25 MB each",
+    payHeader: "Payment Method", paySub: "How would you like to pay?",
+    payCash: "Cash", payCashSub: "Pay at the branch when you pick up",
+    payCard: "Card", payCardSub: "Transfer to our card and upload receipt",
+    payCardInfoLbl: "Transfer to this card",
+    payTotalLbl: "Amount to pay",
+    recHeader: "Upload Receipt", recSub: "Take a photo of your payment receipt and upload it.",
+    recCardLbl: "Transfer to",
+    recZoneTitle: "Tap to select receipt photo", recZoneHint: "JPG, PNG • photo of bank receipt",
+    recPreviewHint: "Receipt selected. Press Submit to send.",
+    sucTitle: "Order Submitted! 🎉",
+    sucSub: "Your order has been received.\nWe'll notify you via Telegram when it's ready.",
+    sucNumLbl: "Order #", sucPagesLbl: "Pages", sucPayLbl: "Payment", sucPriceLbl: "Total",
+    sucBtnMenu: "Home", sucBtnOrders: "My Orders",
+    ordHeader: "My Orders", ordSub: "Recent 20 orders",
+    btnRegister: "Register",
+    btnNext: "Continue",
+    btnUpload: "Upload Files",
+    btnConfirmOrder: "Confirm Order",
+    btnSubmitReceipt: "Submit Receipt",
+    errNoFiles: "Please upload at least one file.",
+    errServer: "Server error. Please try again.",
+    sum: "sum",
+    days: d => `~${d} days`,
+  },
+};
+
+function t(key, ...args) {
+  const lang = S.lang in T ? S.lang : "uz";
+  const val = T[lang][key];
+  if (typeof val === "function") return val(...args);
+  return val || key;
+}
+
+function fmt(n) {
+  return Number(n).toLocaleString("ru", {maximumFractionDigits:0}) + " " + t("sum");
+}
+
+// ── Screen navigation ─────────────────────────────────────────────────────────
+let currentScreen = "loading";
+
+function showScreen(name, pushHistory = true) {
+  try {
+    if (pushHistory && name !== currentScreen) S.history.push(currentScreen);
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    const el = document.getElementById("screen-" + name);
+    if (el) el.classList.add("active");
+    currentScreen = name;
+    try { updateButtons(name); } catch(e) { /* non-critical */ }
+  } catch(e) {
+    console.error("showScreen error:", e);
+  }
+}
+
+function goBack() {
+  if (S.history.length) {
+    const prev = S.history.pop();
+    showScreen(prev, false);
+  } else {
+    tg.close();
+  }
+}
+
+function updateButtons(screen) {
+  const MB = tg.MainButton;
+  const BB = tg.BackButton;
+
+  // Back button: show everywhere except loading/error/menu/success
+  const noBack = ["loading","error","menu","success"];
+  try { if (noBack.includes(screen)) BB.hide(); else BB.show(); } catch(e) {}
+
+  // Main button per screen
+  if (MB._lastHandler) { try { MB.offClick(MB._lastHandler); } catch(e) {} }
+  try { MB.hide(); } catch(e) {}
+
+  function main(text, cb) {
+    MB._lastHandler = cb;
+    try { MB.setText(text); MB.onClick(cb); MB.show(); } catch(e) {}
+  }
+
+  if (screen === "register")   main(t("btnRegister"),    submitRegistration);
+  if (screen === "categories") { /* selected by tap */ }
+  if (screen === "products")   { /* selected by tap */ }
+  if (screen === "config")     main(t("btnNext"),        goToUpload);
+  if (screen === "upload")     main(t("btnUpload"),      goToPayment);
+  if (screen === "payment")    main(t("btnConfirmOrder"),submitOrder);
+  if (screen === "receipt")    main(t("btnSubmitReceipt"),submitReceipt);
+}
+
+// ── API helper ───────────────────────────────────────────────────────────────
+function showOverlay(v) { document.getElementById("overlay").classList.toggle("show", v); }
+
+async function api(path, data, isMultipart = false) {
+  const url = BASE_URL + "/webapp" + path;
+  let body;
+  let headers = {};
+  if (isMultipart) {
+    body = data; // FormData
+  } else {
+    body = JSON.stringify(data);
+    headers["Content-Type"] = "application/json";
+  }
+  const r = await fetch(url, { method: "POST", headers, body });
+  return r.json();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  document.getElementById("loading-text").textContent = t("loading");
+
+  if (!INIT_DATA) {
+    showError("Please open this app from Telegram.", "initData is empty — not inside Telegram?");
+    return;
+  }
+
+  try {
+    const res = await api("/api/init/", { init_data: INIT_DATA, center_id: CENTER_ID });
+    if (!res.ok) {
+      showError(res.error || "Failed to initialise");
+      return;
+    }
+
+    S.center     = res.center;
+    S.branches   = res.branches;
+    S.categories = res.categories;
+    S.cardInfo   = res.card_info;
+    S.user       = res.user;
+
+    // Use language from user profile if available
+    if (res.user?.language && res.user.language in T) S.lang = res.user.language;
+
+    applyTranslations();
+
+    if (!res.user || !res.user.registered) {
+      prefillRegister(res.user);
+      showScreen("register", false);
+    } else {
+      showMenuScreen();
+    }
+  } catch (e) {
+    showError("Network error. Please try again.");
+  }
+}
+
+function showError(msg, sub = "") {
+  // Fallback: always update loading screen text so user sees something
+  // even if screen transition fails
+  const lt = document.getElementById("loading-text");
+  if (lt) lt.textContent = "⚠️ " + msg;
+  const sp = document.querySelector("#screen-loading .spinner");
+  if (sp) sp.style.display = "none";
+
+  // Proper error screen
+  document.getElementById("error-title").textContent = msg;
+  document.getElementById("error-sub").textContent = sub || "";
+  showScreen("error", false);
+}
+
+// ── Apply translations to static DOM text ────────────────────────────────────
+function applyTranslations() {
+  const T2 = (id, key, ...a) => { const el = document.getElementById(id); if(el) el.textContent = t(key,...a); };
+  T2("reg-header","regHeader"); T2("reg-sub","regSub");
+  T2("reg-lang-label","regLang"); T2("reg-name-label","regName");
+  T2("reg-phone-label","regPhone"); T2("reg-branch-label","regBranch");
+  T2("cat-header","catHeader"); T2("cat-sub","catSub");
+  T2("prod-header","prodHeader"); T2("prod-sub","prodSub");
+  T2("conf-header","confHeader");
+  T2("conf-lang-label","confLang"); T2("conf-copies-label","confCopies");
+  T2("conf-desc-label","confDesc"); T2("conf-pages-note","confNote");
+  T2("conf-price-label-base","confBase"); T2("conf-price-label-copies","confCopiesLbl");
+  T2("conf-price-label-total","confTotal");
+  T2("upl-header","uplHeader"); T2("upl-sub","uplSub");
+  T2("upl-zone-title","uplZoneTitle"); T2("upl-zone-hint","uplZoneHint");
+  T2("pay-header","payHeader"); T2("pay-sub","paySub");
+  T2("pay-cash-title","payCash"); T2("pay-cash-sub","payCashSub");
+  T2("pay-card-title","payCard"); T2("pay-card-sub","payCardSub");
+  T2("pay-card-info-label","payCardInfoLbl"); T2("pay-total-label","payTotalLbl");
+  T2("rec-header","recHeader"); T2("rec-sub","recSub");
+  T2("rec-card-label","recCardLbl");
+  T2("rec-zone-title","recZoneTitle"); T2("rec-zone-hint","recZoneHint");
+  T2("rec-preview-hint","recPreviewHint");
+  T2("suc-title","sucTitle"); T2("suc-sub","sucSub");
+  T2("suc-num-label","sucNumLbl"); T2("suc-pages-label","sucPagesLbl");
+  T2("suc-pay-label","sucPayLbl"); T2("suc-price-label","sucPriceLbl");
+  T2("suc-btn-menu","sucBtnMenu"); T2("suc-btn-orders","sucBtnOrders");
+  T2("orders-header","ordHeader"); T2("orders-sub","ordSub");
+  document.getElementById("conf-desc").placeholder = t("confDescPh");
+  document.getElementById("reg-name").placeholder = t("regNamePh");
+  document.getElementById("reg-phone").placeholder = t("regPhonePh");
+}
+
+// ── Registration ─────────────────────────────────────────────────────────────
+function selectLang(btn) {
+  document.querySelectorAll(".lang-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  S.lang = btn.dataset.lang;
+  applyTranslations();
+  updateButtons("register");
+}
+
+function prefillRegister(user) {
+  if (!user) return;
+  const nameEl = document.getElementById("reg-name");
+  if (user.tg_first_name && !nameEl.value) nameEl.value = user.tg_first_name;
+
+  // Set language selector
+  const lg = user.language || S.lang;
+  document.querySelectorAll(".lang-btn").forEach(b => {
+    b.classList.toggle("selected", b.dataset.lang === lg);
+  });
+  S.lang = lg;
+
+  // Branches
+  if (S.branches.length > 1) {
+    const sel = document.getElementById("reg-branch");
+    sel.innerHTML = S.branches.map(br => `<option value="${br.id}">${br.name}</option>`).join("");
+    document.getElementById("reg-branch-wrap").style.display = "";
+  }
+}
+
+async function submitRegistration() {
+  const name  = document.getElementById("reg-name").value.trim();
+  const phone = document.getElementById("reg-phone").value.trim();
+  const branchEl = document.getElementById("reg-branch");
+  const branch_id = branchEl.parentElement.style.display !== "none" ? branchEl.value : null;
+
+  if (!name || !phone) {
+    tg.showAlert(t("regNamePh")); return;
+  }
+
+  showOverlay(true);
+  try {
+    const res = await api("/api/register/", {
+      init_data: INIT_DATA, center_id: CENTER_ID,
+      name, phone, language: S.lang, branch_id,
+    });
+    if (res.ok) {
+      S.user = res.user;
+      if (res.user.language in T) S.lang = res.user.language;
+      applyTranslations();
+
+      // Re-fetch categories scoped to user's branch
+      const initRes = await api("/api/init/", { init_data: INIT_DATA, center_id: CENTER_ID });
+      if (initRes.ok) {
+        S.categories = initRes.categories;
+        S.cardInfo   = initRes.card_info;
+      }
+      showMenuScreen();
+    } else {
+      tg.showAlert(res.error || t("errServer"));
+    }
+  } finally {
+    showOverlay(false);
+  }
+}
+
+// ── Main menu ─────────────────────────────────────────────────────────────────
+function showMenuScreen() {
+  const u = S.user;
+  document.getElementById("menu-hello").textContent = t("menuHello", u?.name || "");
+  document.getElementById("menu-center-name").textContent = S.center?.name || "";
+  document.getElementById("menu-new-order").textContent     = t("menuNewOrder");
+  document.getElementById("menu-new-order-sub").textContent = t("menuNewOrderSub");
+  document.getElementById("menu-my-orders").textContent     = t("menuMyOrders");
+  document.getElementById("menu-my-orders-sub").textContent = t("menuMyOrdersSub");
+  S.history = [];
+  showScreen("menu", false);
+}
+
+// ── Categories ────────────────────────────────────────────────────────────────
+function goTo(name) {
+  if (name === "categories") buildCategories();
+  showScreen(name);
+}
+
+function buildCategories() {
+  const list = document.getElementById("cat-list");
+  const cats = S.categories;
+  if (!cats || !cats.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-title">No services available</div></div>`;
+    return;
+  }
+  list.innerHTML = cats.map(c => `
+    <div class="card" onclick="selectCategory(${c.id})">
+      <div class="card-right">›</div>
+      <div class="card-title">${escHtml(c.name)}</div>
+      ${c.description ? `<div class="card-sub">${escHtml(c.description)}</div>` : ""}
+    </div>
+  `).join("");
+}
+
+function selectCategory(id) {
+  S.selectedCategory = S.categories.find(c => c.id === id);
+  if (!S.selectedCategory) return;
+  buildProducts();
+  showScreen("products");
+}
+
+// ── Products ──────────────────────────────────────────────────────────────────
+function buildProducts() {
+  const cat = S.selectedCategory;
+  document.getElementById("prod-header").textContent = escHtml(cat.name);
+  const list = document.getElementById("prod-list");
+  const prods = cat.products;
+  if (!prods || !prods.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-title">No products</div></div>`;
+    return;
+  }
+  const u = S.user;
+  const agency = u?.is_agency || false;
+  list.innerHTML = prods.map(p => {
+    const price = agency ? p.agency_first_page_price : p.ordinary_first_page_price;
+    const priceStr = cat.charging === "dynamic"
+      ? `${fmt(price)} / ${t("days", p.estimated_days)}`
+      : `${fmt(price)}`;
+    return `
+      <div class="card" onclick="selectProduct(${p.id})">
+        <div class="card-right" style="font-size:13px;color:var(--link);font-weight:600">${priceStr}</div>
+        <div class="card-title">${escHtml(p.name)}</div>
+        ${p.estimated_days ? `<div class="card-sub">${t("days", p.estimated_days)}</div>` : ""}
+      </div>
+    `;
+  }).join("");
+}
+
+function selectProduct(id) {
+  const cat = S.selectedCategory;
+  S.selectedProduct = cat.products.find(p => p.id === id);
+  if (!S.selectedProduct) return;
+  S.copies = 0;
+  S.selectedLanguage = null;
+  buildConfig();
+  showScreen("config");
+}
+
+// ── Config ─────────────────────────────────────────────────────────────────────
+function buildConfig() {
+  const cat  = S.selectedCategory;
+  const prod = S.selectedProduct;
+
+  // Languages
+  const langWrap = document.getElementById("conf-lang-wrap");
+  const langSel  = document.getElementById("conf-lang");
+  if (cat.languages && cat.languages.length > 0) {
+    langSel.innerHTML = cat.languages.map(l =>
+      `<option value="${l.id}">${escHtml(l.name)}</option>`
+    ).join("");
+    S.selectedLanguage = cat.languages[0].id;
+    langSel.value = S.selectedLanguage;
+    langSel.onchange = () => { S.selectedLanguage = langSel.value; updatePrice(); };
+    langWrap.style.display = "";
+  } else {
+    langWrap.style.display = "none";
+    S.selectedLanguage = null;
+  }
+
+  document.getElementById("conf-copies-val").textContent = S.copies;
+  document.getElementById("conf-copies-hint").textContent = t("confCopiesHint", S.copies);
+  document.getElementById("conf-desc").value = S.description;
+  updatePrice();
+}
+
+function changeCopies(delta) {
+  S.copies = Math.max(0, S.copies + delta);
+  document.getElementById("conf-copies-val").textContent = S.copies;
+  document.getElementById("conf-copies-hint").textContent = t("confCopiesHint", S.copies);
+  updatePrice();
+  tg.HapticFeedback.selectionChanged();
+}
+
+function updatePrice() {
+  const cat  = S.selectedCategory;
+  const prod = S.selectedProduct;
+  if (!prod) return;
+  const agency = S.user?.is_agency || false;
+  const fp = agency ? prod.agency_first_page_price : prod.ordinary_first_page_price;
+  // For dynamic, assume 1 page for preview. Actual count from files.
+  const base = fp;
+  const copyPrice = agency ? prod.agency_copy_price : prod.user_copy_price;
+  const copying = copyPrice * S.copies;
+  const total = base + copying;
+
+  document.getElementById("conf-price-base").textContent  = fmt(base);
+  document.getElementById("conf-price-total").textContent = fmt(total);
+
+  const copiesRow = document.getElementById("conf-copies-row");
+  if (S.copies > 0 && copyPrice > 0) {
+    document.getElementById("conf-price-copies").textContent = `${S.copies} × ${fmt(copyPrice)} = ${fmt(copying)}`;
+    copiesRow.style.display = "";
+  } else {
+    copiesRow.style.display = "none";
+  }
+}
+
+function goToUpload() {
+  S.description = document.getElementById("conf-desc").value.trim();
+  buildUpload();
+  showScreen("upload");
+}
+
+// ── Upload ─────────────────────────────────────────────────────────────────────
+function buildUpload() {
+  renderFileList();
+  updateButtons("upload");
+}
+
+function onFilesSelected(fileList) {
+  const allowed = [".pdf",".doc",".docx",".jpg",".jpeg",".png",".gif",".bmp",".tiff",".tif",".webp",".heic",".heif"];
+  let added = 0;
+  for (const f of fileList) {
+    const ext = "." + f.name.split(".").pop().toLowerCase();
+    if (!allowed.includes(ext)) {
+      tg.showAlert(`File not allowed: ${f.name}`);
+      continue;
+    }
+    if (f.size > 25 * 1024 * 1024) {
+      tg.showAlert(`File too large: ${f.name} (max 25 MB)`);
+      continue;
+    }
+    S.files.push(f);
+    added++;
+  }
+  if (added) tg.HapticFeedback.notificationOccurred("success");
+  renderFileList();
+  // reset input so same file can be re-added
+  document.getElementById("file-input").value = "";
+}
+
+function removeFile(i) {
+  S.files.splice(i, 1);
+  renderFileList();
+}
+
+function fileIcon(name) {
+  const ext = name.split(".").pop().toLowerCase();
+  if (["jpg","jpeg","png","gif","bmp","tiff","webp","heic"].includes(ext)) return "🖼️";
+  if (ext === "pdf") return "📄";
+  if (["doc","docx"].includes(ext)) return "📝";
+  return "📎";
+}
+
+function humanSize(b) {
+  if (b < 1024) return b + " B";
+  if (b < 1024*1024) return (b/1024).toFixed(1) + " KB";
+  return (b/1024/1024).toFixed(1) + " MB";
+}
+
+function renderFileList() {
+  const list = document.getElementById("file-list");
+  if (!S.files.length) { list.innerHTML = ""; return; }
+  list.innerHTML = S.files.map((f, i) => `
+    <div class="file-item">
+      <div class="file-icon">${fileIcon(f.name)}</div>
+      <div class="file-info">
+        <div class="file-name">${escHtml(f.name)}</div>
+        <div class="file-meta">${humanSize(f.size)}</div>
+      </div>
+      <div class="file-remove" onclick="removeFile(${i})">✕</div>
+    </div>
+  `).join("");
+}
+
+function goToPayment() {
+  if (!S.files.length) {
+    tg.showAlert(t("errNoFiles"));
+    return;
+  }
+  buildPayment();
+  showScreen("payment");
+}
+
+// ── Payment ───────────────────────────────────────────────────────────────────
+function buildPayment() {
+  const prod  = S.selectedProduct;
+  const agency = S.user?.is_agency || false;
+  const fp  = agency ? prod.agency_first_page_price : prod.ordinary_first_page_price;
+  const cp  = agency ? prod.agency_copy_price : prod.user_copy_price;
+  const total = fp + cp * S.copies;
+
+  document.getElementById("pay-total").textContent = fmt(total);
+
+  // Card info
+  const ci = S.cardInfo;
+  if (ci) {
+    document.getElementById("pay-card-number").textContent = ci.bank_card || "—";
+    document.getElementById("pay-card-holder").textContent = ci.holder_name || "";
+  }
+
+  selectPayment(S.paymentType || "cash");
+}
+
+function selectPayment(type) {
+  S.paymentType = type;
+
+  document.getElementById("pay-cash").classList.toggle("selected", type === "cash");
+  document.getElementById("pay-card").classList.toggle("selected", type === "card");
+
+  const cardBlock = document.getElementById("card-info-block");
+  const hasCard = S.cardInfo && S.cardInfo.bank_card;
+  cardBlock.style.display = (type === "card" && hasCard) ? "" : "none";
+}
+
+// ── Submit order ──────────────────────────────────────────────────────────────
+async function submitOrder() {
+  if (!S.files.length) { tg.showAlert(t("errNoFiles")); return; }
+
+  const fd = new FormData();
+  fd.append("init_data", INIT_DATA);
+  fd.append("center_id", CENTER_ID);
+  fd.append("product_id", S.selectedProduct.id);
+  if (S.selectedLanguage) fd.append("language_id", S.selectedLanguage);
+  fd.append("copy_number", S.copies);
+  fd.append("payment_type", S.paymentType);
+  if (S.description) fd.append("description", S.description);
+  S.files.forEach(f => fd.append("files[]", f));
+
+  showOverlay(true);
+  try {
+    const res = await api("/api/order/create/", fd, true);
+    if (res.ok) {
+      S.submitResult = res;
+      tg.HapticFeedback.notificationOccurred("success");
+      if (S.paymentType === "card") {
+        buildReceiptScreen(res);
+        showScreen("receipt");
+      } else {
+        buildSuccessScreen(res);
+        showScreen("success", false);
+      }
+    } else {
+      tg.showAlert(res.error || t("errServer"));
+    }
+  } catch (e) {
+    tg.showAlert(t("errServer"));
+  } finally {
+    showOverlay(false);
+  }
+}
+
+// ── Receipt ───────────────────────────────────────────────────────────────────
+function buildReceiptScreen(result) {
+  const ci = S.cardInfo;
+  if (ci && ci.bank_card) {
+    document.getElementById("rec-card-number").textContent = ci.bank_card;
+    document.getElementById("rec-card-holder").textContent = ci.holder_name || "";
+  } else {
+    document.getElementById("rec-card-info").style.display = "none";
+  }
+  S.receiptFile = null;
+  document.getElementById("receipt-preview").style.display = "none";
+}
+
+function onReceiptSelected(files) {
+  if (!files.length) return;
+  S.receiptFile = files[0];
+  const preview = document.getElementById("receipt-preview");
+  const img     = document.getElementById("receipt-img");
+  img.src = URL.createObjectURL(S.receiptFile);
+  preview.style.display = "";
+  document.getElementById("receipt-input").value = "";
+  tg.HapticFeedback.notificationOccurred("success");
+}
+
+async function submitReceipt() {
+  if (!S.receiptFile) {
+    tg.showAlert(t("recZoneTitle")); return;
+  }
+  const orderId = S.submitResult?.order_id;
+  if (!orderId) { tg.showAlert(t("errServer")); return; }
+
+  const fd = new FormData();
+  fd.append("init_data", INIT_DATA);
+  fd.append("center_id", CENTER_ID);
+  fd.append("receipt", S.receiptFile);
+
+  showOverlay(true);
+  try {
+    const res = await fetch(BASE_URL + "/webapp/api/orders/" + orderId + "/receipt/", {
+      method: "POST", body: fd,
+    });
+    const data = await res.json();
+    if (data.ok) {
+      tg.HapticFeedback.notificationOccurred("success");
+      buildSuccessScreen(S.submitResult, "card");
+      showScreen("success", false);
+    } else {
+      tg.showAlert(data.error || t("errServer"));
+    }
+  } catch (e) {
+    tg.showAlert(t("errServer"));
+  } finally {
+    showOverlay(false);
+  }
+}
+
+// ── Success ───────────────────────────────────────────────────────────────────
+function buildSuccessScreen(result, payType) {
+  const pt = payType || S.paymentType;
+  document.getElementById("suc-num").textContent   = "#" + (result?.order_number || result?.order_id || "—");
+  document.getElementById("suc-pages").textContent = result?.total_pages || "—";
+  document.getElementById("suc-pay").textContent   = pt === "card" ? t("payCard") : t("payCash");
+  document.getElementById("suc-price").textContent = result?.total_price ? fmt(result.total_price) : "—";
+
+  document.getElementById("suc-title").textContent = t("sucTitle");
+  document.getElementById("suc-sub").innerHTML     = t("sucSub").replace("\n","<br>");
+  document.getElementById("suc-btn-menu").textContent   = t("sucBtnMenu");
+  document.getElementById("suc-btn-orders").textContent = t("sucBtnOrders");
+}
+
+// ── My orders ─────────────────────────────────────────────────────────────────
+async function loadMyOrders() {
+  showScreen("orders");
+  const list = document.getElementById("orders-list");
+  list.innerHTML = `<div style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto"></div></div>`;
+
+  try {
+    const res = await api("/api/orders/", { init_data: INIT_DATA, center_id: CENTER_ID });
+    if (!res.ok || !res.orders.length) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <div class="empty-title">${t("ordHeader")}</div>
+          <div class="empty-sub">No orders yet</div>
+        </div>`;
+      return;
+    }
+    // Use language from first order response
+    if (res.language in T) S.lang = res.language;
+    list.innerHTML = res.orders.map(o => `
+      <div class="order-card">
+        <div class="order-header">
+          <span class="order-num">#${o.order_number} · ${o.created_at}</span>
+          <span class="order-status-badge">${escHtml(o.status_label)}</span>
+        </div>
+        <div class="order-product">${escHtml(o.category)} — ${escHtml(o.product)}</div>
+        <div class="order-meta">${o.total_pages} pages · ${o.copy_number} copies · ${o.payment_type}</div>
+        <div class="order-price">${fmt(o.total_price)}</div>
+      </div>
+    `).join("");
+  } catch {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">${t("errServer")}</div></div>`;
+  }
+}
+
+// ── Utility ───────────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ── Boot ────────────────────────────────────────────────────────────────────
+// The <script> is at the bottom of <body>: DOM is already fully parsed,
+// so DOMContentLoaded has already fired. Call init() directly.
+// Register BackButton handler here too, safely.
+try { tg.BackButton.onClick(goBack); } catch(e) {}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>

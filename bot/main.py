@@ -1844,6 +1844,34 @@ def show_main_menu(message, language):
         markup.add(btn_pricelist)
     else:
         markup.add(btn5, btn_other)
+    # Web App button — resolve center via 3 methods in priority order:
+    # 1) message._center injected by webhook_handler (most reliable for messages)
+    # 2) user.center_id FK from get_bot_user() (works when bot.token is correct)
+    # 3) Direct BotUser DB lookup (fallback for callback context / race conditions)
+    try:
+        _msg_center = getattr(message, '_center', None)
+        _center_id = None
+        if _msg_center:
+            _center_id = _msg_center.id
+        elif user and user.center_id:
+            _center_id = user.center_id
+        else:
+            # Fallback: query BotUser directly, bypassing center-from-token logic
+            from accounts.models import BotUser as _BU
+            _center_id = _BU.objects.filter(
+                user_id=user_id, is_active=True
+            ).values_list('center_id', flat=True).first()
+        if _center_id:
+            webapp_url = f"https://admin.multilang.uz/webapp/{_center_id}/"
+            btn_webapp = types.KeyboardButton(
+                text="🌐 Web App",
+                web_app=types.WebAppInfo(url=webapp_url),
+            )
+            markup.add(btn_webapp)
+        else:
+            logger.warning(f"Web App button skipped: no center_id for user_id={user_id}")
+    except Exception as _e:
+        logger.error(f"Could not add Web App button: {_e}")
     welcome_text = get_text("main_menu_welcome", language)
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
 @bot.message_handler(

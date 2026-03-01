@@ -160,6 +160,10 @@ from django.conf.urls.static import static
 from bot.main import index
 from bot.webhook_manager import webhook_handler
 
+# Telegram Web App (Mini App) endpoints
+from webapp import urls as webapp_urls
+urlpatterns += [path("webapp/", include(webapp_urls))]
+
 # Legacy single-bot webhook (for backward compatibility)
 urlpatterns += [path("bot", index, name="bot_webhook")]
 
