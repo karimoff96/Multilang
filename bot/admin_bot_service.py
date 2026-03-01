@@ -6,7 +6,7 @@ via a separate Telegram bot for:
 - Contact form submissions from landing page
 - Subscription renewal requests from customers
 
-Bot: @multilang_robot
+Bot: @uzmultilang_bot
 Token: 8014558483:AAFQfx4OXxWHMujEK_AXNHfqHMJxIWHy2HM
 
 Features:
@@ -422,7 +422,7 @@ This bot sends administrative notifications for:
         status_text = f"""
 ⚙️ <b>Admin Bot Status</b>
 
-<b>Bot:</b> @multilang_robot
+<b>Bot:</b> @uzmultilang_bot
 <b>Status:</b> ✅ Running
 
 <b>Configured Recipients:</b> {len(ADMIN_TELEGRAM_IDS)}
@@ -498,7 +498,7 @@ def start_bot_polling():
         return
     
     logger.info("🤖 Starting admin bot polling...")
-    logger.info(f"Bot: @multilang_robot")
+    logger.info(f"Bot: @uzmultilang_bot")
     logger.info(f"Configured admins: {ADMIN_TELEGRAM_IDS}")
     
     try:

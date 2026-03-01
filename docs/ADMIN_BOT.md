@@ -1,4 +1,4 @@
-# Admin Bot Complete Guide (@multilang_robot)
+# Admin Bot Complete Guide (@uzmultilang_bot)
 
 Complete guide for admin notification bot setup, testing, and deployment.
 
@@ -6,7 +6,7 @@ Complete guide for admin notification bot setup, testing, and deployment.
 
 ## Overview
 
-The admin bot (`@multilang_robot`) sends notifications to administrators for:
+The admin bot (`@uzmultilang_bot`) sends notifications to administrators for:
 - 📧 **Contact form submissions** from landing page
 - 🔄 **Subscription renewal requests** from customers
 
@@ -24,10 +24,10 @@ The admin bot (`@multilang_robot`) sends notifications to administrators for:
 
 **For User ID:**
 - Open Telegram, search `@userinfobot`, send any message
-- Or send `/myid` to `@multilang_robot`
+- Or send `/myid` to `@uzmultilang_bot`
 
 **For Channel/Group ID:**
-- Add `@multilang_robot` as administrator to channel/group
+- Add `@uzmultilang_bot` as administrator to channel/group
 - Forward any message from channel to `@userinfobot`
 - ID will be negative (e.g., `-1001234567890`)
 
@@ -86,7 +86,7 @@ sudo tail -f /var/log/supervisor/multilang-admin-bot.log
 
 ## Bot Commands
 
-Users can interact with `@multilang_robot`:
+Users can interact with `@uzmultilang_bot`:
 
 ### For Everyone:
 - `/start` - Welcome message + show your Telegram ID
@@ -171,7 +171,7 @@ sudo supervisorctl status multilang-admin-bot
 sudo tail -f /var/log/supervisor/multilang-admin-bot.log
 
 # Test on Telegram
-# Send /start to @multilang_robot
+# Send /start to @uzmultilang_bot
 ```
 
 ### Control Commands
@@ -341,11 +341,11 @@ sudo supervisorctl status
 
 **Solution 1: Activate bot in channel**
 - Go to channel
-- Type: `@multilang_robot hello`
+- Type: `@uzmultilang_bot hello`
 - This activates bot connection
 
 **Solution 2: Re-add bot**
-- Remove `@multilang_robot` from channel admins
+- Remove `@uzmultilang_bot` from channel admins
 - Add back as administrator
 - Grant "Post Messages" permission
 
@@ -424,7 +424,7 @@ sudo grep "Starting bot" /var/log/supervisor/multilang-admin-bot.log | tail -5
 
 ### Test Interactively
 
-Send to `@multilang_robot`:
+Send to `@uzmultilang_bot`:
 - `/start` → Should respond immediately
 - `/myid` → Should show your ID
 - `/status` → Should show config (if admin)
@@ -531,4 +531,4 @@ python manage.py admin_bot --configure
 ---
 
 **Bot now runs 24/7 on production!** 🎉  
-Users can interact with `@multilang_robot` anytime.
+Users can interact with `@uzmultilang_bot` anytime.

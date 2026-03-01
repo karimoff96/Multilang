@@ -98,7 +98,7 @@ python manage.py run_bots
 sudo supervisorctl restart wowdash-bots
 ```
 
-### Admin Bot (@multilang_robot)
+### Admin Bot (@uzmultilang_bot)
 - Receive contact form submissions
 - Subscription renewal notifications
 - Commands: `/start`, `/myid`, `/status`
@@ -220,7 +220,7 @@ python manage.py COMMAND
 
 ## 📞 Support
 
-- **Admin Bot:** Send `/help` to `@multilang_robot`
+- **Admin Bot:** Send `/help` to `@uzmultilang_bot`
 - **Email:** go.multilang@gmail.com
 - **Phone:** +998(90)-029-01-19
 

@@ -74,7 +74,7 @@ class Command(BaseCommand):
         
         # Instructions to get telegram ID
         self.stdout.write(self.style.WARNING('📋 To get your Telegram ID:'))
-        self.stdout.write('  1. Open Telegram and search for @multilang_robot')
+        self.stdout.write('  1. Open Telegram and search for @uzmultilang_bot')
         self.stdout.write('  2. Start a chat with the bot (/start or /myid)')
         self.stdout.write('  3. Or use @userinfobot - send it any message')
         self.stdout.write('  4. For channels/groups: Add bot as admin, then use /myid\n')
@@ -144,7 +144,7 @@ You will receive notifications for:
             if failed_ids:
                 self.stdout.write(self.style.WARNING(f'⚠️ Failed to send to: {failed_ids}'))
                 self.stdout.write('   Make sure:')
-                self.stdout.write('   1. You have started a chat with @multilang_robot (for users)')
+                self.stdout.write('   1. You have started a chat with @uzmultilang_bot (for users)')
                 self.stdout.write('   2. The bot is added as admin (for channels/groups)')
                 self.stdout.write('   3. The Telegram IDs are correct')
                 self.stdout.write('   4. The bot token is valid\n')
@@ -174,7 +174,7 @@ You will receive notifications for:
                 self.stdout.write(f'   • {admin_id} ({id_type})')
             self.stdout.write('')
         
-        self.stdout.write('🤖 Bot: @multilang_robot')
+        self.stdout.write('🤖 Bot: @uzmultilang_bot')
         self.stdout.write('📡 Mode: Long polling')
         self.stdout.write('')
         self.stdout.write('📱 Available commands for users:')

@@ -1874,6 +1874,35 @@ def show_main_menu(message, language):
         logger.error(f"Could not add Web App button: {_e}")
     welcome_text = get_text("main_menu_welcome", language)
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
+
+    # Also send an inline web_app button for clients where the reply-keyboard
+    # web_app button does not inject initData (older Android / some Telegram builds).
+    try:
+        if _center_id:
+            webapp_url = f"https://admin.multilang.uz/webapp/{_center_id}/"
+            _inline_labels = {
+                "uz": "🚀 Web App orqali buyurtma berish",
+                "ru": "🚀 Оформить заказ через Web App",
+                "en": "🚀 Order via Web App",
+            }
+            _inline_text = {
+                "uz": "👇 Buyurtma berish uchun pastdagi tugmani bosing:",
+                "ru": "👇 Нажмите кнопку ниже для оформления заказа:",
+                "en": "👇 Tap the button below to place your order:",
+            }
+            _il = types.InlineKeyboardMarkup()
+            _il.add(types.InlineKeyboardButton(
+                text=_inline_labels.get(language, _inline_labels["uz"]),
+                web_app=types.WebAppInfo(url=webapp_url),
+            ))
+            bot.send_message(
+                message.chat.id,
+                _inline_text.get(language, _inline_text["uz"]),
+                reply_markup=_il,
+            )
+    except Exception as _e2:
+        logger.warning(f"Could not send inline Web App button: {_e2}")
+
 @bot.message_handler(
     func=lambda message: message.text
     in [

@@ -27,7 +27,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); overflow: 
 
 /* ── Screens ───────────────────────────────────────────────────────────── */
 .screen {
-  position: absolute; inset: 0;
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0; inset: 0;
   overflow-y: auto; overflow-x: hidden;
   display: flex; flex-direction: column;
   opacity: 0; pointer-events: none;
@@ -64,7 +64,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); overflow: 
 .card-title { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
 .card-sub { font-size: 13px; color: var(--hint); line-height: 1.4; }
 .card-right { float: right; color: var(--hint); margin-top: 2px; }
-.card.selected { border-color: var(--btn); background: color-mix(in srgb, var(--btn) 8%, var(--bg2)); }
+.card.selected { border-color: var(--btn); background: rgba(36,129,204,.08); background: color-mix(in srgb, var(--btn) 8%, var(--bg2)); }
 .card.selected .card-title { color: var(--btn); }
 
 /* ── Form fields ───────────────────────────────────────────────────────── */
@@ -113,7 +113,7 @@ textarea { resize: none; height: 80px; }
 .loading-text { font-size: 15px; color: var(--hint); }
 
 .overlay {
-  position: fixed; inset: 0;
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0;
   background: rgba(0,0,0,.35); backdrop-filter: blur(2px);
   z-index: 100; display: flex; align-items: center; justify-content: center;
   display: none;
@@ -129,7 +129,7 @@ textarea { resize: none; height: 80px; }
   transition: border-color .15s, background .15s;
   background: var(--bg2);
 }
-.upload-zone:active, .upload-zone.drag-over { border-color: var(--btn); background: color-mix(in srgb, var(--btn) 6%, var(--bg2)); }
+.upload-zone:active, .upload-zone.drag-over { border-color: var(--btn); background: rgba(36,129,204,.06); background: color-mix(in srgb, var(--btn) 6%, var(--bg2)); }
 .upload-zone svg { display: block; margin: 0 auto 10px; }
 .upload-zone-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
 .upload-zone-hint { font-size: 13px; color: var(--hint); }
@@ -183,8 +183,8 @@ textarea { resize: none; height: 80px; }
 
 /* ── Card info ───────────────────────────────────────────────────────────── */
 .card-info-box {
-  background: color-mix(in srgb, var(--btn) 10%, var(--bg));
-  border: 1.5px solid color-mix(in srgb, var(--btn) 35%, var(--bg));
+  background: rgba(36,129,204,.10); background: color-mix(in srgb, var(--btn) 10%, var(--bg));
+  border: 1.5px solid rgba(36,129,204,.35); border: 1.5px solid color-mix(in srgb, var(--btn) 35%, var(--bg));
   border-radius: var(--radius); padding: 16px;
 }
 .card-info-label { font-size: 12px; color: var(--hint); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
@@ -214,7 +214,7 @@ textarea { resize: none; height: 80px; }
 .order-num { font-size: 13px; color: var(--hint); }
 .order-status-badge {
   font-size: 12px; font-weight: 600; padding: 3px 8px;
-  border-radius: 20px; background: color-mix(in srgb, var(--btn) 15%, var(--bg));
+  border-radius: 20px; background: rgba(36,129,204,.15); background: color-mix(in srgb, var(--btn) 15%, var(--bg));
   color: var(--btn);
 }
 .order-product { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
@@ -230,7 +230,7 @@ textarea { resize: none; height: 80px; }
   -webkit-tap-highlight-color: transparent;
 }
 .lang-btn .lang-name { font-size: 12px; font-weight: 600; color: var(--hint); display: block; margin-top: 3px; }
-.lang-btn.selected { border-color: var(--btn); background: color-mix(in srgb, var(--btn) 8%, var(--bg2)); }
+.lang-btn.selected { border-color: var(--btn); background: rgba(36,129,204,.08); background: color-mix(in srgb, var(--btn) 8%, var(--bg2)); }
 .lang-btn.selected .lang-name { color: var(--btn); }
 
 /* ── Counter +/- ─────────────────────────────────────────────────────────── */
@@ -280,6 +280,9 @@ textarea { resize: none; height: 80px; }
     <div class="empty-icon">⚠️</div>
     <div class="empty-title" id="error-title">Something went wrong</div>
     <div class="empty-sub" id="error-sub"></div>
+    <div style="margin-top:28px">
+      <button onclick="retryInit()" style="background:var(--btn);color:var(--btn-text);border:none;border-radius:10px;padding:13px 32px;font-size:16px;font-weight:600;cursor:pointer;">🔄 Retry</button>
+    </div>
   </div>
 </section>
 
@@ -639,7 +642,7 @@ textarea { resize: none; height: 80px; }
 
     <!-- Receipt already submitted info -->
     <div id="det-receipt-submitted-block" style="display:none">
-      <div style="background:color-mix(in srgb,#2ccf6e 12%,var(--bg));border:1.5px solid color-mix(in srgb,#2ccf6e 35%,var(--bg));border-radius:var(--radius);padding:14px 16px;font-size:14px;color:var(--text)">
+      <div style="background:rgba(44,207,110,.12);border:1.5px solid rgba(44,207,110,.35);border-radius:var(--radius);padding:14px 16px;font-size:14px;color:var(--text)">
         <span style="font-size:20px;margin-right:8px">✅</span><span id="det-receipt-note">Receipt submitted — awaiting verification</span>
       </div>
     </div>
@@ -650,8 +653,8 @@ textarea { resize: none; height: 80px; }
 
 <script>
 // ── Telegram WebApp init ─────────────────────────────────────────────────────
-// Safe Telegram SDK accessor — works even if SDK hasn't loaded yet
-const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : {
+// Mock used only when real SDK is unavailable
+const _tgMock = {
   ready: () => {}, expand: () => {}, close: () => {},
   initData: "", initDataUnsafe: {},
   MainButton: { setText:()=>{}, show:()=>{}, hide:()=>{}, onClick:()=>{},
@@ -662,9 +665,32 @@ const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp 
   showAlert: (msg) => alert(msg),
   showConfirm: (msg, cb) => cb(confirm(msg)),
 };
+
+// Always read from the live window object so late-loading SDK is picked up
+function getRealTg() {
+  return (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+}
+
+// Fallback: Telegram puts initData in the URL hash as tgWebAppData=...
+// This lets us recover initData even if telegram-web-app.js fails to load.
+function getInitDataFromHash() {
+  try {
+    const hash = window.location.hash.replace(/^#/, '');
+    if (!hash) return '';
+    // Parse as query string
+    const params = {};
+    hash.split('&').forEach(part => {
+      const idx = part.indexOf('=');
+      if (idx > 0) params[decodeURIComponent(part.slice(0,idx))] = decodeURIComponent(part.slice(idx+1));
+    });
+    return params['tgWebAppData'] || '';
+  } catch(e) { return ''; }
+}
+
+let tg = getRealTg() || _tgMock;
 try { tg.ready(); tg.expand(); } catch(e) {}
 
-const INIT_DATA = tg.initData || "";
+let INIT_DATA = tg.initData || getInitDataFromHash() || "";
 const CENTER_ID = {{ center_id }};
 const BASE_URL  = window.location.origin;
 
@@ -730,7 +756,7 @@ const T = {
     recHeader: "Chekni yuklang", recSub: "To'lov chekini suratga oling va yuklang.",
     recCardLbl: "O'tkazma manzili",
     recZoneTitle: "Chek rasmini tanlang", recZoneHint: "JPG, PNG • bank chekining surati",
-    recPreviewHint: "Chek tanlandi. Yuborish uchun "Yuborish" tugmasini bosing.",
+    recPreviewHint: "Chek tanlandi. Yuborish uchun «Yuborish» tugmasini bosing.",
     sucTitle: "Buyurtma yuborildi! 🎉",
     sucSub: "Buyurtmangiz qabul qilindi.\nTayyor bo'lganda Telegram orqali xabar beramiz.",
     sucNumLbl: "Buyurtma №", sucPagesLbl: "Sahifalar", sucPayLbl: "To'lov", sucPriceLbl: "Summa",
@@ -960,8 +986,28 @@ async function api(path, data, isMultipart = false) {
 async function init() {
   document.getElementById("loading-text").textContent = t("loading");
 
+  // initData may not be immediately available on some Telegram clients.
+  // Poll window.Telegram.WebApp AND the URL hash fallback for up to 3 s.
   if (!INIT_DATA) {
-    showError("Please open this app from Telegram.", "initData is empty — not inside Telegram?");
+    for (let _i = 0; _i < 30; _i++) {
+      await new Promise(r => setTimeout(r, 100));
+      const _live = getRealTg();
+      if (_live) {
+        tg = _live;
+        try { tg.ready(); tg.expand(); } catch(e) {}
+      }
+      INIT_DATA = (getRealTg() || _tgMock).initData || getInitDataFromHash() || "";
+      if (INIT_DATA) break;
+    }
+  }
+
+  if (!INIT_DATA) {
+    const _sdkLoaded = !!(window.Telegram && window.Telegram.WebApp);
+    const _hashData  = !!getInitDataFromHash();
+    const _sub = !_sdkLoaded
+      ? "Telegram SDK failed to load. Check your connection and retry."
+      : "initData is empty. Close the app completely and reopen it from the bot menu.";
+    showError("Please open this app from Telegram.", _sub);
     return;
   }
 
@@ -1006,6 +1052,18 @@ function showError(msg, sub = "") {
   document.getElementById("error-title").textContent = msg;
   document.getElementById("error-sub").textContent = sub || "";
   showScreen("error", false);
+}
+
+function retryInit() {
+  // Reset INIT_DATA from any available source
+  INIT_DATA = (getRealTg() || _tgMock).initData || getInitDataFromHash() || "";
+  // Show loading and try again
+  showScreen("loading", false);
+  const sp = document.querySelector("#screen-loading .spinner");
+  if (sp) sp.style.display = "";
+  const lt = document.getElementById("loading-text");
+  if (lt) lt.textContent = t("loading");
+  init();
 }
 
 // ── Apply translations to static DOM text ────────────────────────────────────
@@ -1153,17 +1211,6 @@ function resetOrderFlow() {
 // cash payment:  config(0) → upload(1) → payment(2)               (3 steps)
 
 function renderSteps(containerId, currentStep) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  // Show 4 steps always — receipt step shows even on cash (greyed out) for clarity
-  const total = 4;
-  el.innerHTML = Array.from({length: total}, (_, i) => {
-    const cls = i < currentStep ? "step done" : i === currentStep ? "step active" : "step";
-    return `<div class="${cls}"></div>`;
-  }).join("");
-}
-
-// ── Categories ────────────────────────────────────────────────────────────────
   const el = document.getElementById(containerId);
   if (!el) return;
   // Show 4 steps always — receipt step shows even on cash (greyed out) for clarity
@@ -1756,7 +1803,7 @@ function statusBadgeStyle(status) {
     "completed":         "background:#d4edda;color:#155724;",
     "cancelled":         "background:#f8d7da;color:#721c24;",
   };
-  return colorMap[status] || "background:color-mix(in srgb,var(--btn) 15%,var(--bg));color:var(--btn);";
+  return colorMap[status] || "background:rgba(36,129,204,.15);color:#2481cc;";
 }
 
 // ── Boot ────────────────────────────────────────────────────────────────────

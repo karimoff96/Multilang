@@ -124,7 +124,7 @@ def check_staff_limit(view_func):
                 request,
                 _("You have reached your staff limit. Upgrade your plan to add more users.")
             )
-            return redirect('users:user_list')
+            return redirect('usersList')
         
         return view_func(request, *args, **kwargs)
     return wrapper

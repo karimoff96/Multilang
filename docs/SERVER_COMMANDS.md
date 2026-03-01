@@ -89,7 +89,7 @@ python manage.py setup_webhooks --center-id 1
 
 ---
 
-## Admin Bot (@multilang_robot)
+## Admin Bot (@uzmultilang_bot)
 
 ### Control Bot
 ```bash
@@ -565,3 +565,8 @@ python manage.py shell
 # Check Django version
 python manage.py version
 ```
+
+
+
+<!-- SSL certificate renewal -->
+sudo /usr/local/bin/certbot certonly --manual --preferred-challenges dns -d multilang.uz -d '*.multilang.uz'
