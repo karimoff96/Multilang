@@ -17,6 +17,7 @@ import time
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.http import require_GET
 from django.core.files.base import ContentFile
 
@@ -90,6 +91,7 @@ ALLOWED_EXTENSIONS = {
 # HTML entry-point
 # ---------------------------------------------------------------------------
 
+@xframe_options_exempt
 def webapp_index(request, center_id: int):
     """Serve the single-page Web App HTML."""
     from organizations.models import TranslationCenter
@@ -589,6 +591,98 @@ def api_my_orders(request):
         })
 
     return _ok({"orders": orders, "language": lang})
+
+
+# ---------------------------------------------------------------------------
+# API: /webapp/api/orders/<order_id>/
+# ---------------------------------------------------------------------------
+
+@csrf_exempt
+def api_order_detail(request, order_id: int):
+    """
+    POST {init_data, center_id}
+
+    Returns full detail of a single order including status, files, and receipt info.
+    """
+    if request.method != "POST":
+        return _err("Method not allowed", 405)
+
+    import json as json_module
+    try:
+        body = json_module.loads(request.body)
+    except Exception:
+        body = request.POST.dict()
+
+    tg_id, _, center = _auth(body)
+    if tg_id is None:
+        return _err("Invalid or expired initData", 401)
+
+    from accounts.models import BotUser, AdditionalInfo
+    from orders.models import Order
+
+    bot_user = BotUser.objects.filter(user_id=tg_id, center=center).first()
+    if not bot_user:
+        return _err("User not found", 403)
+
+    try:
+        order = Order.objects.select_related(
+            "product", "product__category", "branch", "language"
+        ).prefetch_related("files").get(pk=order_id, bot_user=bot_user)
+    except Order.DoesNotExist:
+        return _err("Order not found", 404)
+
+    lang = bot_user.language or "uz"
+
+    STATUS_LABELS = {
+        "pending": {"uz": "🕐 Kutilmoqda", "ru": "🕐 Ожидание", "en": "🕐 Pending"},
+        "payment_pending": {"uz": "💳 To'lov kutilmoqda", "ru": "💳 Ожидает оплаты", "en": "💳 Awaiting Payment"},
+        "payment_received": {"uz": "📨 Chek qabul qilindi", "ru": "📨 Чек получен", "en": "📨 Receipt Received"},
+        "payment_confirmed": {"uz": "✅ To'lov tasdiqlandi", "ru": "✅ Оплата подтверждена", "en": "✅ Payment Confirmed"},
+        "in_progress": {"uz": "🔄 Jarayonda", "ru": "🔄 В процессе", "en": "🔄 In Progress"},
+        "ready": {"uz": "✅ Tayyor", "ru": "✅ Готов", "en": "✅ Ready"},
+        "completed": {"uz": "🎉 Yakunlandi", "ru": "🎉 Завершён", "en": "🎉 Completed"},
+        "cancelled": {"uz": "❌ Bekor qilindi", "ru": "❌ Отменён", "en": "❌ Cancelled"},
+    }
+
+    # Card info for payment_pending orders
+    card_info = None
+    if order.status == "payment_pending":
+        try:
+            ai = AdditionalInfo.get_for_branch(order.branch)
+            if ai and ai.bank_card:
+                card_info = {
+                    "bank_card": ai.bank_card,
+                    "holder_name": ai.holder_name or "",
+                }
+        except Exception:
+            pass
+
+    status_labels = STATUS_LABELS.get(order.status, {})
+    return _ok({
+        "order": {
+            "id": order.id,
+            "order_number": order.get_order_number(),
+            "product": order.product.name if order.product else "",
+            "category": order.product.category.name if order.product and order.product.category else "",
+            "language": order.language.name if order.language else "",
+            "total_price": float(order.total_price),
+            "total_pages": order.total_pages,
+            "copy_number": order.copy_number,
+            "status": order.status,
+            "status_label": status_labels.get(lang, order.get_status_display()),
+            "payment_type": order.payment_type,
+            "description": order.description or "",
+            "name_clarifications": order.name_clarifications or "",
+            "created_at": order.created_at.strftime("%d.%m.%Y %H:%M"),
+            "branch_name": order.branch.name if order.branch else "",
+            "branch_address": order.branch.address if order.branch else "",
+            "files_count": order.files.count(),
+            "has_receipt": bool(order.recipt),
+            "can_upload_receipt": order.status == "payment_pending",
+        },
+        "card_info": card_info,
+        "language": lang,
+    })
 
 
 # ---------------------------------------------------------------------------

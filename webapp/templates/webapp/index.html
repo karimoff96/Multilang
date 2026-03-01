@@ -401,6 +401,13 @@ textarea { resize: none; height: 80px; }
       <textarea id="conf-desc" placeholder="Any special instructions…"></textarea>
     </div>
 
+    <!-- Name clarifications (shown only when category.written_verification_required) -->
+    <div class="field-wrap" id="conf-names-wrap" style="display:none">
+      <div class="field-label" id="conf-names-label">Names on Document</div>
+      <textarea id="conf-names" rows="3" placeholder="Enter full names exactly as they should appear…"></textarea>
+      <div style="font-size:12px;color:var(--hint);margin-top:5px" id="conf-names-hint">Required: enter names as they should appear on the translated document.</div>
+    </div>
+
     <!-- Price preview -->
     <div class="price-box" id="conf-price-box">
       <div class="price-row"><span class="price-label" id="conf-price-label-base">Base price</span><span class="price-value" id="conf-price-base">—</span></div>
@@ -422,6 +429,7 @@ textarea { resize: none; height: 80px; }
 <section id="screen-upload" class="screen">
   <div class="page-header" id="upl-header">Upload Documents</div>
   <div class="page-sub" id="upl-sub">Add your document files (PDF, Word, images)</div>
+  <div class="steps" id="upl-steps"></div>
   <div class="section">
 
     <input type="file" id="file-input" multiple
@@ -454,6 +462,7 @@ textarea { resize: none; height: 80px; }
 <section id="screen-payment" class="screen">
   <div class="page-header" id="pay-header">Payment Method</div>
   <div class="page-sub" id="pay-sub">How would you like to pay?</div>
+  <div class="steps" id="pay-steps"></div>
   <div class="section">
 
     <div class="pay-option selected" id="pay-cash" onclick="selectPayment('cash')">
@@ -501,6 +510,7 @@ textarea { resize: none; height: 80px; }
 <section id="screen-receipt" class="screen">
   <div class="page-header" id="rec-header">Upload Receipt</div>
   <div class="page-sub" id="rec-sub">Take a photo of your payment receipt and upload it below.</div>
+  <div class="steps" id="rec-steps"></div>
   <div class="section">
 
     <div class="card-info-box" id="rec-card-info" style="margin-bottom:16px">
@@ -567,10 +577,77 @@ textarea { resize: none; height: 80px; }
   <div class="bottom-pad"></div>
 </section>
 
-
 <!-- ══════════════════════════════════════════════════════
-     JAVASCRIPT
+     SCREEN: order-detail
 ═══════════════════════════════════════════════════════ -->
+<section id="screen-order-detail" class="screen">
+  <div class="page-header" id="det-order-num">Order Details</div>
+  <div class="section">
+
+    <!-- Status badge -->
+    <div id="det-status-row" style="margin-bottom:14px">
+      <span id="det-status-badge" class="order-status-badge" style="font-size:14px;padding:6px 14px"></span>
+    </div>
+
+    <!-- Order info card -->
+    <div class="price-box" style="margin-bottom:14px">
+      <div class="price-row"><span class="price-label" id="det-lbl-service">Service</span><span class="price-value" id="det-service">—</span></div>
+      <div class="price-row"><span class="price-label" id="det-lbl-product">Document</span><span class="price-value" id="det-product">—</span></div>
+      <div class="price-row" id="det-lang-row"><span class="price-label" id="det-lbl-lang">Language</span><span class="price-value" id="det-lang">—</span></div>
+      <div class="price-row"><span class="price-label" id="det-lbl-pages">Pages</span><span class="price-value" id="det-pages">—</span></div>
+      <div class="price-row" id="det-copies-row"><span class="price-label" id="det-lbl-copies">Copies</span><span class="price-value" id="det-copies">—</span></div>
+      <div class="price-row"><span class="price-label" id="det-lbl-payment">Payment</span><span class="price-value" id="det-payment">—</span></div>
+      <div class="price-row"><span class="price-label" id="det-lbl-date">Date</span><span class="price-value" id="det-date">—</span></div>
+      <div class="price-row total"><span class="price-label" id="det-lbl-total">Total</span><span class="price-value" id="det-total">—</span></div>
+    </div>
+
+    <!-- Branch info -->
+    <div class="price-box" id="det-branch-box" style="margin-bottom:14px;display:none">
+      <div class="price-row"><span class="price-label" id="det-lbl-branch">Branch</span><span class="price-value" id="det-branch">—</span></div>
+      <div class="price-row" id="det-addr-row" style="display:none"><span class="price-label" id="det-lbl-addr">Address</span><span class="price-value" id="det-addr">—</span></div>
+    </div>
+
+    <!-- Description / name clarifications -->
+    <div id="det-desc-box" style="display:none;margin-bottom:14px">
+      <div class="field-label" id="det-lbl-desc">Notes</div>
+      <div id="det-desc" style="font-size:14px;color:var(--text);padding:10px 14px;background:var(--bg2);border-radius:10px;line-height:1.5"></div>
+    </div>
+    <div id="det-names-box" style="display:none;margin-bottom:14px">
+      <div class="field-label" id="det-lbl-names">Names on Document</div>
+      <div id="det-names" style="font-size:14px;color:var(--text);padding:10px 14px;background:var(--bg2);border-radius:10px;line-height:1.5"></div>
+    </div>
+
+    <!-- Payment pending: show card info + upload receipt button -->
+    <div id="det-payment-pending-block" style="display:none">
+      <div class="card-info-box" style="margin-bottom:14px" id="det-card-info-wrap">
+        <div class="card-info-label" id="det-card-lbl">Transfer to this card</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="card-number" id="det-card-number">—</div>
+          <button onclick="copyCardNumber()" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--btn);font-size:20px" title="Copy">⎘</button>
+        </div>
+        <div class="card-holder" id="det-card-holder"></div>
+      </div>
+      <div class="card" onclick="goToReceiptUpload()" style="display:flex;align-items:center;gap:12px;padding:16px">
+        <div style="font-size:28px">📤</div>
+        <div>
+          <div class="card-title" id="det-btn-upload-receipt">Upload Payment Receipt</div>
+          <div class="card-sub" id="det-btn-upload-receipt-sub">Take a photo of your receipt</div>
+        </div>
+        <div class="card-right" style="float:none;margin-left:auto">›</div>
+      </div>
+    </div>
+
+    <!-- Receipt already submitted info -->
+    <div id="det-receipt-submitted-block" style="display:none">
+      <div style="background:color-mix(in srgb,#2ccf6e 12%,var(--bg));border:1.5px solid color-mix(in srgb,#2ccf6e 35%,var(--bg));border-radius:var(--radius);padding:14px 16px;font-size:14px;color:var(--text)">
+        <span style="font-size:20px;margin-right:8px">✅</span><span id="det-receipt-note">Receipt submitted — awaiting verification</span>
+      </div>
+    </div>
+
+  </div>
+  <div class="bottom-pad"></div>
+</section>
+
 <script>
 // ── Telegram WebApp init ─────────────────────────────────────────────────────
 // Safe Telegram SDK accessor — works even if SDK hasn't loaded yet
@@ -606,10 +683,16 @@ const S = {
   selectedLanguage: null,
   copies: 0,
   description: "",
+  namesClarifications: "",  // for written_verification_required categories
   files: [],          // File objects
   paymentType: "cash",
   receiptFile: null,
   submitResult: null, // {order_id, order_number, total_price, total_pages, status}
+
+  // Order detail
+  viewingOrder: null,   // full order object from api_order_detail
+  viewingCardInfo: null,
+  _receiptForViewingOrder: false,
 
   // history stack for Back button
   history: [],
@@ -662,6 +745,18 @@ const T = {
     errServer: "Serverda xatolik yuz berdi. Qayta urinib ko'ring.",
     sum: "so'm",
     days: d => `~${d} kun`,
+    confNames: "HUJJATDAGI ISMLAR",
+    confNamesPh: "Ismlarni hujjatda ko'rinishi kerak bo'lgan shaklda kiriting…",
+    confNamesHint: "Majburiy: ismlarni tarjima hujjatida ko'rinishi kerak bo'lgan shaklda kiriting.",
+    detService: "Xizmat", detProduct: "Hujjat turi", detLang: "Til",
+    detPages: "Sahifalar", detCopies: "Nusxalar", detPayment: "To'lov",
+    detDate: "Sana", detTotal: "Jami", detBranch: "Filial", detAddr: "Manzil",
+    detNotes: "IZOH", detNames: "HUJJATDAGI ISMLAR",
+    detCardLbl: "Shu kartaga o'tkazing",
+    detBtnUploadReceipt: "Chekni yuklash", detBtnUploadReceiptSub: "To'lov cheki rasmini oling",
+    detReceiptNote: "Chek yuborildi — tekshirilmoqda",
+    ordClickHint: "Tafsilotlarni ko'rish uchun bosing",
+    copied: "Nusxalandi!",
   },
   ru: {
     loading: "Загрузка…",
@@ -706,6 +801,18 @@ const T = {
     errServer: "Ошибка сервера. Попробуйте ещё раз.",
     sum: "сум",
     days: d => `~${d} дней`,
+    confNames: "ИМЕНА В ДОКУМЕНТЕ",
+    confNamesPh: "Введите имена в том виде, как они должны быть в документе…",
+    confNamesHint: "Обязательно: введите имена так, как они должны появиться в переведённом документе.",
+    detService: "Услуга", detProduct: "Тип документа", detLang: "Язык",
+    detPages: "Страницы", detCopies: "Копии", detPayment: "Оплата",
+    detDate: "Дата", detTotal: "Итого", detBranch: "Филиал", detAddr: "Адрес",
+    detNotes: "ПРИМЕЧАНИЕ", detNames: "ИМЕНА В ДОКУМЕНТЕ",
+    detCardLbl: "Переведите на эту карту",
+    detBtnUploadReceipt: "Загрузить чек", detBtnUploadReceiptSub: "Сфотографируйте чек об оплате",
+    detReceiptNote: "Чек отправлен — проверяется",
+    ordClickHint: "Нажмите для подробностей",
+    copied: "Скопировано!",
   },
   en: {
     loading: "Loading…",
@@ -750,6 +857,18 @@ const T = {
     errServer: "Server error. Please try again.",
     sum: "sum",
     days: d => `~${d} days`,
+    confNames: "NAMES ON DOCUMENT",
+    confNamesPh: "Enter full names exactly as they should appear on the document…",
+    confNamesHint: "Required: enter names as they should appear on the translated document.",
+    detService: "Service", detProduct: "Document", detLang: "Language",
+    detPages: "Pages", detCopies: "Copies", detPayment: "Payment",
+    detDate: "Date", detTotal: "Total", detBranch: "Branch", detAddr: "Address",
+    detNotes: "NOTES", detNames: "NAMES ON DOCUMENT",
+    detCardLbl: "Transfer to this card",
+    detBtnUploadReceipt: "Upload Receipt", detBtnUploadReceiptSub: "Take a photo of your receipt",
+    detReceiptNote: "Receipt submitted — awaiting verification",
+    ordClickHint: "Tap for details",
+    copied: "Copied!",
   },
 };
 
@@ -813,6 +932,11 @@ function updateButtons(screen) {
   if (screen === "upload")     main(t("btnUpload"),      goToPayment);
   if (screen === "payment")    main(t("btnConfirmOrder"),submitOrder);
   if (screen === "receipt")    main(t("btnSubmitReceipt"),submitReceipt);
+  if (screen === "order-detail") {
+    if (S.viewingOrder && S.viewingOrder.can_upload_receipt) {
+      main(t("btnSubmitReceipt"), goToReceiptUpload);
+    }
+  }
 }
 
 // ── API helper ───────────────────────────────────────────────────────────────
@@ -897,6 +1021,7 @@ function applyTranslations() {
   T2("conf-desc-label","confDesc"); T2("conf-pages-note","confNote");
   T2("conf-price-label-base","confBase"); T2("conf-price-label-copies","confCopiesLbl");
   T2("conf-price-label-total","confTotal");
+  T2("conf-names-label","confNames"); T2("conf-names-hint","confNamesHint");
   T2("upl-header","uplHeader"); T2("upl-sub","uplSub");
   T2("upl-zone-title","uplZoneTitle"); T2("upl-zone-hint","uplZoneHint");
   T2("pay-header","payHeader"); T2("pay-sub","paySub");
@@ -912,7 +1037,19 @@ function applyTranslations() {
   T2("suc-pay-label","sucPayLbl"); T2("suc-price-label","sucPriceLbl");
   T2("suc-btn-menu","sucBtnMenu"); T2("suc-btn-orders","sucBtnOrders");
   T2("orders-header","ordHeader"); T2("orders-sub","ordSub");
+  // order detail labels
+  T2("det-lbl-service","detService"); T2("det-lbl-product","detProduct");
+  T2("det-lbl-lang","detLang"); T2("det-lbl-pages","detPages");
+  T2("det-lbl-copies","detCopies"); T2("det-lbl-payment","detPayment");
+  T2("det-lbl-date","detDate"); T2("det-lbl-total","detTotal");
+  T2("det-lbl-branch","detBranch"); T2("det-lbl-addr","detAddr");
+  T2("det-lbl-desc","detNotes"); T2("det-lbl-names","detNames");
+  T2("det-card-lbl","detCardLbl");
+  T2("det-btn-upload-receipt","detBtnUploadReceipt");
+  T2("det-btn-upload-receipt-sub","detBtnUploadReceiptSub");
+  T2("det-receipt-note","detReceiptNote");
   document.getElementById("conf-desc").placeholder = t("confDescPh");
+  document.getElementById("conf-names").placeholder = t("confNamesPh");
   document.getElementById("reg-name").placeholder = t("regNamePh");
   document.getElementById("reg-phone").placeholder = t("regPhonePh");
 }
@@ -995,9 +1132,54 @@ function showMenuScreen() {
   showScreen("menu", false);
 }
 
+// ── State reset for new order flow ───────────────────────────────────────────
+function resetOrderFlow() {
+  S.selectedCategory = null;
+  S.selectedProduct  = null;
+  S.selectedLanguage = null;
+  S.copies = 0;
+  S.description = "";
+  S.namesClarifications = "";
+  S.files = [];
+  S.paymentType = "cash";
+  S.receiptFile = null;
+  S.submitResult = null;
+  S._receiptForViewingOrder = false;
+}
+
+// ── Step indicator helper ─────────────────────────────────────────────────────
+// Steps for order flow:
+// card payment:  config(0) → upload(1) → payment(2) → receipt(3)  (4 steps)
+// cash payment:  config(0) → upload(1) → payment(2)               (3 steps)
+
+function renderSteps(containerId, currentStep) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  // Show 4 steps always — receipt step shows even on cash (greyed out) for clarity
+  const total = 4;
+  el.innerHTML = Array.from({length: total}, (_, i) => {
+    const cls = i < currentStep ? "step done" : i === currentStep ? "step active" : "step";
+    return `<div class="${cls}"></div>`;
+  }).join("");
+}
+
+// ── Categories ────────────────────────────────────────────────────────────────
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  // Show 4 steps always — receipt step shows even on cash (greyed out) for clarity
+  const total = 4;
+  el.innerHTML = Array.from({length: total}, (_, i) => {
+    const cls = i < currentStep ? "step done" : i === currentStep ? "step active" : "step";
+    return `<div class="${cls}"></div>`;
+  }).join("");
+}
+
 // ── Categories ────────────────────────────────────────────────────────────────
 function goTo(name) {
-  if (name === "categories") buildCategories();
+  if (name === "categories") {
+    resetOrderFlow();
+    buildCategories();
+  }
   showScreen(name);
 }
 
@@ -1057,6 +1239,9 @@ function selectProduct(id) {
   if (!S.selectedProduct) return;
   S.copies = 0;
   S.selectedLanguage = null;
+  S.namesClarifications = "";
+  S.description = "";
+  S.files = [];
   buildConfig();
   showScreen("config");
 }
@@ -1085,6 +1270,19 @@ function buildConfig() {
   document.getElementById("conf-copies-val").textContent = S.copies;
   document.getElementById("conf-copies-hint").textContent = t("confCopiesHint", S.copies);
   document.getElementById("conf-desc").value = S.description;
+
+  // Name clarifications — show only when written_verification_required
+  const namesWrap = document.getElementById("conf-names-wrap");
+  if (cat.written_verification_required) {
+    namesWrap.style.display = "";
+    document.getElementById("conf-names").value = S.namesClarifications;
+    applyTranslations();  // refresh placeholder and label in current lang
+  } else {
+    namesWrap.style.display = "none";
+    S.namesClarifications = "";
+  }
+
+  renderSteps("conf-steps", 0);
   updatePrice();
 }
 
@@ -1122,6 +1320,16 @@ function updatePrice() {
 
 function goToUpload() {
   S.description = document.getElementById("conf-desc").value.trim();
+  const cat = S.selectedCategory;
+  if (cat && cat.written_verification_required) {
+    S.namesClarifications = document.getElementById("conf-names").value.trim();
+    if (!S.namesClarifications) {
+      tg.showAlert(t("confNamesHint"));
+      return;
+    }
+  } else {
+    S.namesClarifications = "";
+  }
   buildUpload();
   showScreen("upload");
 }
@@ -1129,6 +1337,7 @@ function goToUpload() {
 // ── Upload ─────────────────────────────────────────────────────────────────────
 function buildUpload() {
   renderFileList();
+  renderSteps("upl-steps", 1);
   updateButtons("upload");
 }
 
@@ -1199,6 +1408,7 @@ function goToPayment() {
 
 // ── Payment ───────────────────────────────────────────────────────────────────
 function buildPayment() {
+  renderSteps("pay-steps", 2);
   const prod  = S.selectedProduct;
   const agency = S.user?.is_agency || false;
   const fp  = agency ? prod.agency_first_page_price : prod.ordinary_first_page_price;
@@ -1240,6 +1450,7 @@ async function submitOrder() {
   fd.append("copy_number", S.copies);
   fd.append("payment_type", S.paymentType);
   if (S.description) fd.append("description", S.description);
+  if (S.namesClarifications) fd.append("name_clarifications", S.namesClarifications);
   S.files.forEach(f => fd.append("files[]", f));
 
   showOverlay(true);
@@ -1267,10 +1478,13 @@ async function submitOrder() {
 
 // ── Receipt ───────────────────────────────────────────────────────────────────
 function buildReceiptScreen(result) {
+  renderSteps("rec-steps", 3);
+  S._receiptForViewingOrder = false;  // this is for a fresh order, not an existing one
   const ci = S.cardInfo;
   if (ci && ci.bank_card) {
     document.getElementById("rec-card-number").textContent = ci.bank_card;
     document.getElementById("rec-card-holder").textContent = ci.holder_name || "";
+    document.getElementById("rec-card-info").style.display = "";
   } else {
     document.getElementById("rec-card-info").style.display = "none";
   }
@@ -1293,7 +1507,12 @@ async function submitReceipt() {
   if (!S.receiptFile) {
     tg.showAlert(t("recZoneTitle")); return;
   }
-  const orderId = S.submitResult?.order_id;
+
+  // Determine the order id: from detail view or from new order flow
+  const orderId = S._receiptForViewingOrder
+    ? S.viewingOrder?.id
+    : S.submitResult?.order_id;
+
   if (!orderId) { tg.showAlert(t("errServer")); return; }
 
   const fd = new FormData();
@@ -1309,8 +1528,18 @@ async function submitReceipt() {
     const data = await res.json();
     if (data.ok) {
       tg.HapticFeedback.notificationOccurred("success");
-      buildSuccessScreen(S.submitResult, "card");
-      showScreen("success", false);
+      S._receiptForViewingOrder = false;
+      if (S.viewingOrder) {
+        // Came from the order detail screen: go back to orders list cleanly
+        S.viewingOrder = null;
+        S.viewingCardInfo = null;
+        S.history = [];
+        currentScreen = "menu";  // Back from orders screen will go to menu
+        loadMyOrders();    // shows orders screen fresh
+      } else {
+        buildSuccessScreen(S.submitResult, "card");
+        showScreen("success", false);
+      }
     } else {
       tg.showAlert(data.error || t("errServer"));
     }
@@ -1355,14 +1584,17 @@ async function loadMyOrders() {
     // Use language from first order response
     if (res.language in T) S.lang = res.language;
     list.innerHTML = res.orders.map(o => `
-      <div class="order-card">
+      <div class="order-card" onclick="loadOrderDetail(${o.id})" style="cursor:pointer">
         <div class="order-header">
           <span class="order-num">#${o.order_number} · ${o.created_at}</span>
-          <span class="order-status-badge">${escHtml(o.status_label)}</span>
+          <span class="order-status-badge" style="${statusBadgeStyle(o.status)}">${escHtml(o.status_label)}</span>
         </div>
         <div class="order-product">${escHtml(o.category)} — ${escHtml(o.product)}</div>
         <div class="order-meta">${o.total_pages} pages · ${o.copy_number} copies · ${o.payment_type}</div>
-        <div class="order-price">${fmt(o.total_price)}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+          <div class="order-price">${fmt(o.total_price)}</div>
+          <div style="font-size:12px;color:var(--hint)">${t("ordClickHint")} ›</div>
+        </div>
       </div>
     `).join("");
   } catch {
@@ -1370,9 +1602,161 @@ async function loadMyOrders() {
   }
 }
 
+// ── Order Detail ─────────────────────────────────────────────────────────────
+async function loadOrderDetail(orderId) {
+  showOverlay(true);
+  try {
+    const res = await api("/api/orders/" + orderId + "/", { init_data: INIT_DATA, center_id: CENTER_ID });
+    if (!res.ok) {
+      tg.showAlert(res.error || t("errServer"));
+      return;
+    }
+    S.viewingOrder = res.order;
+    S.viewingCardInfo = res.card_info;
+    buildOrderDetailScreen(res.order, res.card_info);
+    showScreen("order-detail");
+  } catch (e) {
+    tg.showAlert(t("errServer"));
+  } finally {
+    showOverlay(false);
+  }
+}
+
+function buildOrderDetailScreen(order, cardInfo) {
+  applyTranslations();
+
+  // Header & status
+  document.getElementById("det-order-num").textContent = "#" + order.order_number;
+  const badgeEl = document.getElementById("det-status-badge");
+  badgeEl.textContent = escHtml(order.status_label);
+  badgeEl.style.cssText = statusBadgeStyle(order.status) + "font-size:14px;padding:6px 14px;";
+
+  // Info rows
+  document.getElementById("det-service").textContent  = order.category || "—";
+  document.getElementById("det-product").textContent  = order.product  || "—";
+  document.getElementById("det-pages").textContent    = order.total_pages;
+  document.getElementById("det-date").textContent     = order.created_at;
+  document.getElementById("det-total").textContent    = fmt(order.total_price);
+
+  // Language row
+  const langRow = document.getElementById("det-lang-row");
+  if (order.language) {
+    document.getElementById("det-lang").textContent = order.language;
+    langRow.style.display = "";
+  } else {
+    langRow.style.display = "none";
+  }
+
+  // Copies row
+  const copRow = document.getElementById("det-copies-row");
+  if (order.copy_number > 0) {
+    document.getElementById("det-copies").textContent = order.copy_number;
+    copRow.style.display = "";
+  } else {
+    copRow.style.display = "none";
+  }
+
+  // Payment type
+  document.getElementById("det-payment").textContent = order.payment_type === "card" ? t("payCard") : t("payCash");
+
+  // Branch info
+  const branchBox = document.getElementById("det-branch-box");
+  if (order.branch_name) {
+    document.getElementById("det-branch").textContent = order.branch_name;
+    branchBox.style.display = "";
+    const addrRow = document.getElementById("det-addr-row");
+    if (order.branch_address) {
+      document.getElementById("det-addr").textContent = order.branch_address;
+      addrRow.style.display = "";
+    } else {
+      addrRow.style.display = "none";
+    }
+  } else {
+    branchBox.style.display = "none";
+  }
+
+  // Description
+  const descBox = document.getElementById("det-desc-box");
+  if (order.description) {
+    document.getElementById("det-desc").textContent = order.description;
+    descBox.style.display = "";
+  } else {
+    descBox.style.display = "none";
+  }
+
+  // Names on document
+  const namesBox = document.getElementById("det-names-box");
+  if (order.name_clarifications) {
+    document.getElementById("det-names").textContent = order.name_clarifications;
+    namesBox.style.display = "";
+  } else {
+    namesBox.style.display = "none";
+  }
+
+  // Payment pending block
+  const pendingBlock   = document.getElementById("det-payment-pending-block");
+  const submittedBlock = document.getElementById("det-receipt-submitted-block");
+
+  if (order.can_upload_receipt && cardInfo) {
+    document.getElementById("det-card-number").textContent = cardInfo.bank_card || "—";
+    document.getElementById("det-card-holder").textContent = cardInfo.holder_name || "";
+    pendingBlock.style.display   = "";
+    submittedBlock.style.display = "none";
+  } else if (order.has_receipt || order.status === "payment_received" || order.status === "payment_confirmed") {
+    pendingBlock.style.display   = "none";
+    submittedBlock.style.display = "";
+  } else {
+    pendingBlock.style.display   = "none";
+    submittedBlock.style.display = "none";
+  }
+}
+
+function copyCardNumber() {
+  const num = document.getElementById("det-card-number").textContent.trim();
+  if (!num || num === "—") return;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(num).then(() => {
+      tg.HapticFeedback.notificationOccurred("success");
+      tg.showAlert(t("copied") + " " + num);
+    });
+  } else {
+    tg.showAlert(num);
+  }
+}
+
+function goToReceiptUpload() {
+  // Set up receipt screen context from the viewed order (not a new submit flow)
+  S.receiptFile = null;
+  document.getElementById("receipt-preview").style.display = "none";
+  if (S.viewingCardInfo && S.viewingCardInfo.bank_card) {
+    document.getElementById("rec-card-number").textContent = S.viewingCardInfo.bank_card;
+    document.getElementById("rec-card-holder").textContent = S.viewingCardInfo.holder_name || "";
+    document.getElementById("rec-card-info").style.display = "";
+  } else {
+    document.getElementById("rec-card-info").style.display = "none";
+  }
+  // Mark that this receipt upload is for the viewed order (not submitResult)
+  S._receiptForViewingOrder = true;
+  showScreen("receipt");
+}
+
 // ── Utility ───────────────────────────────────────────────────────────────────
 function escHtml(str) {
   return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function statusBadgeStyle(status) {
+  const colorMap = {
+    "pending":           "background:#fff3cd;color:#856404;",
+    "payment_pending":   "background:#fff3cd;color:#856404;",
+    "payment_received":  "background:#cce5ff;color:#004085;",
+    "payment_confirmed": "background:#d4edda;color:#155724;",
+    "in_progress":       "background:#d1ecf1;color:#0c5460;",
+    "ready":             "background:#d4edda;color:#155724;",
+    "completed":         "background:#d4edda;color:#155724;",
+    "cancelled":         "background:#f8d7da;color:#721c24;",
+  };
+  return colorMap[status] || "background:color-mix(in srgb,var(--btn) 15%,var(--bg));color:var(--btn);";
 }
 
 // ── Boot ────────────────────────────────────────────────────────────────────
