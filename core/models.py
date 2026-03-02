@@ -181,6 +181,7 @@ class AdminNotification(models.Model):
     TYPE_PAYMENT_CONFIRMED = 'payment_confirmed'
     TYPE_USER_NEW = 'user_new'
     TYPE_AGENCY_NEW = 'agency_new'
+    TYPE_ORDER_OVERDUE = 'order_overdue'
     TYPE_OTHER = 'other'
     
     TYPE_CHOICES = [
@@ -191,6 +192,7 @@ class AdminNotification(models.Model):
         (TYPE_PAYMENT_CONFIRMED, _('Payment Confirmed')),
         (TYPE_USER_NEW, _('New User Registered')),
         (TYPE_AGENCY_NEW, _('New Agency Registered')),
+        (TYPE_ORDER_OVERDUE, _('Order Overdue')),
         (TYPE_OTHER, _('Other')),
     ]
     
@@ -395,6 +397,34 @@ class AdminNotification(models.Model):
             message=f"{agency.name} registered as agency ({agency.phone})",
             branch=agency.branch,
             center=agency.center,
+        )
+
+    @classmethod
+    def create_overdue_notification(cls, order):
+        """Create a notification for an overdue order (deadline passed, not completed/cancelled)"""
+        from django.contrib.contenttypes.models import ContentType
+
+        # Avoid duplicate unread overdue notifications for the same order
+        content_type = ContentType.objects.get_for_model(order)
+        if cls.objects.filter(
+            notification_type=cls.TYPE_ORDER_OVERDUE,
+            content_type=content_type,
+            object_id=order.id,
+            is_read=False,
+        ).exists():
+            return None
+
+        customer_name = order.bot_user.full_name if order.bot_user else "Unknown"
+        order_number = order.get_order_number()
+
+        return cls.objects.create(
+            notification_type=cls.TYPE_ORDER_OVERDUE,
+            content_type=content_type,
+            object_id=order.id,
+            title=f"🚨 Overdue Order #{order_number}",
+            message=f"{customer_name} — deadline was {order.deadline.strftime('%d %b %Y')}, status: {order.get_status_display()}",
+            branch=order.branch,
+            center=order.branch.center if order.branch else None,
         )
     
     @classmethod

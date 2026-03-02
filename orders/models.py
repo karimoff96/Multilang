@@ -957,17 +957,6 @@ def send_status_notification(sender, instance, created, **kwargs):
                 import traceback
                 traceback.print_exc()
             
-            # Create admin notifications for important status changes
-            try:
-                from core.models import AdminNotification
-                
-                if new_status == 'cancelled':
-                    AdminNotification.create_cancelled_notification(instance)
-                elif new_status == 'completed':
-                    AdminNotification.create_completed_notification(instance)
-            except Exception as e:
-                logger.error(f" Failed to create status change notification: {e}")
-    
     # Check for payment amount change (partial payment received)
     if hasattr(instance, "_old_received"):
         old_received = instance._old_received or 0
@@ -984,26 +973,6 @@ def send_status_notification(sender, instance, created, **kwargs):
                 logger.error(f" Failed to send payment notification: {e}")
                 import traceback
                 traceback.print_exc()
-            
-            # Create admin notification for payment
-            try:
-                from core.models import AdminNotification
-                AdminNotification.create_payment_notification(instance, amount_received)
-            except Exception as e:
-                logger.error(f" Failed to create payment notification: {e}")
-
-
-@receiver(post_save, sender=Receipt)
-def create_receipt_notification(sender, instance, created, **kwargs):
-    """Create an admin notification when a new receipt is uploaded"""
-    if created and instance.status == 'pending':
-        try:
-            from core.models import AdminNotification
-            AdminNotification.create_receipt_notification(instance)
-        except Exception as e:
-            logger.error(f" Failed to create receipt notification: {e}")
-            import traceback
-            traceback.print_exc()
 
 
 @receiver(post_save, sender=Order)

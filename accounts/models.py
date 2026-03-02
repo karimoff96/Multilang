@@ -413,28 +413,8 @@ def track_user_registration(sender, instance, **kwargs):
 
 @receiver(post_save, sender=BotUser)
 def create_user_notification(sender, instance, created, **kwargs):
-    """Create admin notification when a new user completes registration"""
-    try:
-        # Check if user just became active (completed registration)
-        was_active = getattr(instance, '_was_active', False)
-        was_agency = getattr(instance, '_was_agency', False)
-        
-        # New user completed registration
-        if instance.is_active and not was_active:
-            from core.models import AdminNotification
-            
-            if instance.is_agency:
-                AdminNotification.create_agency_notification(instance)
-            else:
-                AdminNotification.create_user_notification(instance)
-        
-        # Existing user became agency
-        elif instance.is_agency and not was_agency and instance.is_active:
-            from core.models import AdminNotification
-            AdminNotification.create_agency_notification(instance)
-            
-    except Exception as e:
-        logger.error(f"Failed to create user notification: {e}", exc_info=True)
+    """User registration signal - notification sending removed (only new orders & overdue orders notify)"""
+    pass
 
 
 class BotUserState(models.Model):
