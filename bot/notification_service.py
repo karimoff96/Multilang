@@ -64,7 +64,7 @@ def create_order_zip(order):
         
         # Create temporary directory for ZIP
         temp_dir = tempfile.mkdtemp()
-        zip_filename = f"order_{order.id}_{order.bot_user.name.replace(' ', '_')}.zip"
+        zip_filename = f"order_{order.get_order_number()}_{order.bot_user.name.replace(' ', '_')}.zip"
         zip_path = os.path.join(temp_dir, zip_filename)
         
         files_added = 0

@@ -739,7 +739,7 @@ def forward_order_to_channel(order, language):
         try:
             with open(zip_path, "rb") as zip_file:
                 zip_filename = (
-                    f"order_{order.id}_{order.bot_user.name.replace(' ', '_')}.zip"
+                    f"order_{order.get_order_number()}_{order.bot_user.name.replace(' ', '_')}.zip"
                 )
                 bot.send_document(
                     chat_id=channel_id,

@@ -9,9 +9,9 @@
 # Exit on any error
 set -e
 
-# Configuration - UPDATE THESE PATHS FOR YOUR SERVER
-PROJECT_DIR="/home/wemard/app"
-VENV_PATH="/home/wemard/app/venv"
+# Configuration
+PROJECT_DIR="/home/Wow-dash"
+VENV_PATH="/home/Wow-dash/venv"
 LOG_DIR="/var/log/wowdash"
 LOG_FILE="${LOG_DIR}/archive.log"
 ERROR_LOG="${LOG_DIR}/archive_error.log"
