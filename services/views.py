@@ -8,7 +8,7 @@ from django.db.models import Q, Count, Sum
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from decimal import Decimal, InvalidOperation
-from .models import Category, Product, Language, Expense
+from .models import Category, Product, Language, Expense, GeneralExpenseCategory, GeneralExpense
 from organizations.rbac import get_user_categories, get_user_products, get_user_branches, get_user_expenses, permission_required, any_permission_required
 from organizations.models import TranslationCenter, Branch
 from billing.decorators import require_feature, require_active_subscription
@@ -1226,3 +1226,473 @@ def deleteLanguage(request, language_id):
             'success': False,
             'error': f'Error deleting language: {str(e)}'
         }, status=500)
+
+
+# ============================================================
+#  General (Operating) Expense Views
+# ============================================================
+
+def _get_user_general_expenses(user):
+    """Return GeneralExpense queryset scoped to the user's accessible branches."""
+    accessible_branches = get_user_branches(user)
+    return GeneralExpense.objects.filter(branch__in=accessible_branches)
+
+
+def _get_user_general_expense_categories(user):
+    """Return GeneralExpenseCategory queryset scoped to the user's accessible branches."""
+    accessible_branches = get_user_branches(user)
+    return GeneralExpenseCategory.objects.filter(branch__in=accessible_branches)
+
+
+@login_required(login_url='admin_login')
+@any_permission_required('can_view_expenses', 'can_manage_expenses')
+def generalExpenseList(request):
+    """List operating expenses with filters and summary cards."""
+    from django.utils import timezone
+    expenses = _get_user_general_expenses(request.user).select_related(
+        'branch', 'branch__center', 'category', 'created_by'
+    ).order_by('-date', '-created_at')
+
+    branches = get_user_branches(request.user).select_related('center')
+    categories = _get_user_general_expense_categories(request.user)
+
+    centers = None
+    center_filter = request.GET.get('center', '')
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_filter:
+            expenses = expenses.filter(branch__center_id=center_filter)
+            branches = branches.filter(center_id=center_filter)
+
+    branch_filter = request.GET.get('branch', '')
+    if branch_filter:
+        expenses = expenses.filter(branch_id=branch_filter)
+
+    category_filter = request.GET.get('category', '')
+    if category_filter:
+        expenses = expenses.filter(category_id=category_filter)
+
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    if date_from:
+        expenses = expenses.filter(date__gte=date_from)
+    if date_to:
+        expenses = expenses.filter(date__lte=date_to)
+
+    payment_type_filter = request.GET.get('payment_type', '')
+    if payment_type_filter:
+        expenses = expenses.filter(payment_type=payment_type_filter)
+
+    is_paid_filter = request.GET.get('is_paid', '')
+    if is_paid_filter == '0':
+        expenses = expenses.filter(is_paid=False)
+    elif is_paid_filter == '1':
+        expenses = expenses.filter(is_paid=True)
+
+    search_query = request.GET.get('search', '')
+    if search_query:
+        expenses = expenses.filter(
+            Q(title__icontains=search_query) | Q(note__icontains=search_query) | Q(vendor__icontains=search_query)
+        )
+
+    aggregates = expenses.aggregate(
+        total=Sum('amount'),
+    )
+    total_amount = aggregates['total'] or 0
+
+    # This month total
+    today = timezone.now().date()
+    this_month_total = expenses.filter(
+        date__year=today.year, date__month=today.month
+    ).aggregate(s=Sum('amount'))['s'] or 0
+
+    per_page = request.GET.get('per_page', 25)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 25
+
+    paginator = Paginator(expenses, per_page)
+    page_obj = paginator.get_page(request.GET.get('page', 1))
+
+    context = {
+        'title': _('General Expenses'),
+        'subTitle': _('Operating Costs'),
+        'expenses': page_obj,
+        'total_expenses': paginator.count,
+        'total_amount': total_amount,
+        'this_month_total': this_month_total,
+        'branches': branches,
+        'categories': categories,
+        'centers': centers,
+        'branch_filter': branch_filter,
+        'category_filter': category_filter,
+        'center_filter': center_filter,
+        'date_from': date_from,
+        'date_to': date_to,
+        'search_query': search_query,
+        'per_page': per_page,
+        'payment_type_filter': payment_type_filter,
+        'is_paid_filter': is_paid_filter,
+        'payment_type_choices': [('cash', _('Cash')), ('card', _('Card')), ('nasiya', _('Nasiya'))],
+    }
+    return render(request, 'services/generalExpenseList.html', context)
+
+
+@login_required(login_url='admin_login')
+@any_permission_required('can_manage_expenses', 'can_create_products')
+def generalExpenseCreate(request):
+    """Create a new operating expense."""
+    branches = get_user_branches(request.user).select_related('center')
+    categories = _get_user_general_expense_categories(request.user).select_related('branch')
+
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        amount_str = request.POST.get('amount', '').strip()
+        category_id = request.POST.get('category', '').strip()
+        date_val = request.POST.get('date', '').strip()
+        note = request.POST.get('note', '').strip()
+        vendor = request.POST.get('vendor', '').strip()
+        branch_id = request.POST.get('branch', '').strip()
+        payment_type = request.POST.get('payment_type', 'cash').strip()
+        nasiya_deadline = request.POST.get('nasiya_deadline', '').strip() or None
+        is_paid = request.POST.get('is_paid') == '1'
+        receipt_image = request.FILES.get('receipt_image')
+
+        if payment_type not in ('cash', 'card', 'nasiya'):
+            payment_type = 'cash'
+
+        errors = []
+        if not title:
+            errors.append(_('Title is required.'))
+        if not date_val:
+            errors.append(_('Date is required.'))
+        if not branch_id:
+            errors.append(_('Branch is required.'))
+        if payment_type == 'nasiya' and not nasiya_deadline:
+            errors.append(_('Nasiya deadline is required for credit expenses.'))
+
+        amount = None
+        try:
+            amount = Decimal(amount_str.replace(',', '').replace(' ', ''))
+            if amount <= 0:
+                errors.append(_('Amount must be greater than zero.'))
+        except (InvalidOperation, ValueError):
+            errors.append(_('Enter a valid amount.'))
+
+        branch = None
+        if branch_id:
+            branch = get_object_or_404(branches, id=branch_id)
+
+        category = None
+        if category_id:
+            try:
+                category = categories.get(id=category_id)
+            except GeneralExpenseCategory.DoesNotExist:
+                errors.append(_('Invalid category selected.'))
+
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+        else:
+            expense = GeneralExpense.objects.create(
+                title=title,
+                amount=amount,
+                category=category,
+                date=date_val,
+                note=note,
+                vendor=vendor,
+                payment_type=payment_type,
+                nasiya_deadline=nasiya_deadline if payment_type == 'nasiya' else None,
+                is_paid=is_paid if payment_type == 'nasiya' else True,
+                branch=branch,
+                created_by=request.user,
+            )
+            if receipt_image:
+                expense.receipt_image = receipt_image
+                expense.save(update_fields=['receipt_image'])
+            messages.success(request, _('Expense recorded successfully.'))
+            return redirect('generalExpenseList')
+
+    from django.utils import timezone
+    context = {
+        'title': _('Record Expense'),
+        'subTitle': _('New Operating Expense'),
+        'branches': branches,
+        'categories': categories,
+        'today': timezone.now().date().isoformat(),
+    }
+    return render(request, 'services/generalExpenseCreate.html', context)
+
+
+@login_required(login_url='admin_login')
+@any_permission_required('can_manage_expenses', 'can_edit_products')
+def generalExpenseEdit(request, expense_id):
+    """Edit an existing operating expense."""
+    branches = get_user_branches(request.user).select_related('center')
+    expense = get_object_or_404(
+        _get_user_general_expenses(request.user).select_related('branch', 'category'),
+        id=expense_id,
+    )
+    categories = _get_user_general_expense_categories(request.user).select_related('branch')
+
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        amount_str = request.POST.get('amount', '').strip()
+        category_id = request.POST.get('category', '').strip()
+        date_val = request.POST.get('date', '').strip()
+        note = request.POST.get('note', '').strip()
+        vendor = request.POST.get('vendor', '').strip()
+        branch_id = request.POST.get('branch', '').strip()
+        payment_type = request.POST.get('payment_type', 'cash').strip()
+        nasiya_deadline = request.POST.get('nasiya_deadline', '').strip() or None
+        is_paid = request.POST.get('is_paid') == '1'
+        receipt_image = request.FILES.get('receipt_image')
+        clear_image = request.POST.get('clear_receipt_image') == '1'
+
+        if payment_type not in ('cash', 'card', 'nasiya'):
+            payment_type = 'cash'
+
+        errors = []
+        if not title:
+            errors.append(_('Title is required.'))
+        if not date_val:
+            errors.append(_('Date is required.'))
+        if payment_type == 'nasiya' and not nasiya_deadline:
+            errors.append(_('Nasiya deadline is required for credit expenses.'))
+
+        amount = None
+        try:
+            amount = Decimal(amount_str.replace(',', '').replace(' ', ''))
+            if amount <= 0:
+                errors.append(_('Amount must be greater than zero.'))
+        except (InvalidOperation, ValueError):
+            errors.append(_('Enter a valid amount.'))
+
+        branch = expense.branch
+        if branch_id:
+            branch = get_object_or_404(branches, id=branch_id)
+
+        category = None
+        if category_id:
+            try:
+                category = categories.get(id=category_id)
+            except GeneralExpenseCategory.DoesNotExist:
+                errors.append(_('Invalid category selected.'))
+
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+        else:
+            expense.title = title
+            expense.amount = amount
+            expense.category = category
+            expense.date = date_val
+            expense.note = note
+            expense.vendor = vendor
+            expense.payment_type = payment_type
+            expense.nasiya_deadline = nasiya_deadline if payment_type == 'nasiya' else None
+            expense.is_paid = is_paid if payment_type == 'nasiya' else True
+            expense.branch = branch
+            if clear_image:
+                expense.receipt_image = None
+            elif receipt_image:
+                expense.receipt_image = receipt_image
+            expense.save()
+            messages.success(request, _('Expense updated successfully.'))
+            return redirect('generalExpenseList')
+
+    context = {
+        'title': _('Edit Expense'),
+        'subTitle': _('Update Operating Expense'),
+        'expense': expense,
+        'branches': branches,
+        'categories': categories,
+    }
+    return render(request, 'services/generalExpenseEdit.html', context)
+
+
+@login_required(login_url='admin_login')
+@any_permission_required('can_manage_expenses')
+@require_POST
+def generalExpenseDelete(request, expense_id):
+    """Delete an operating expense."""
+    expense = get_object_or_404(
+        _get_user_general_expenses(request.user), id=expense_id
+    )
+    expense.delete()
+    messages.success(request, _('Expense deleted.'))
+    return redirect('generalExpenseList')
+
+
+@login_required(login_url='admin_login')
+@any_permission_required('can_view_expenses', 'can_manage_expenses', 'can_view_financial_reports')
+def generalExpenseAnalytics(request):
+    """Analytics: monthly totals + category breakdown for operating expenses."""
+    from django.utils import timezone
+    from django.db.models.functions import TruncMonth
+
+    expenses_qs = _get_user_general_expenses(request.user).select_related('branch', 'branch__center', 'category')
+    branches = get_user_branches(request.user).select_related('center')
+    categories = _get_user_general_expense_categories(request.user)
+
+    centers = None
+    center_filter = request.GET.get('center', '')
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_filter:
+            expenses_qs = expenses_qs.filter(branch__center_id=center_filter)
+
+    branch_filter = request.GET.get('branch', '')
+    if branch_filter:
+        expenses_qs = expenses_qs.filter(branch_id=branch_filter)
+
+    category_filter = request.GET.get('category', '')
+    if category_filter:
+        expenses_qs = expenses_qs.filter(category_id=category_filter)
+
+    today = timezone.now().date()
+
+    # Date range filter
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+
+    filtered_qs = expenses_qs
+    if date_from:
+        filtered_qs = filtered_qs.filter(date__gte=date_from)
+    if date_to:
+        filtered_qs = filtered_qs.filter(date__lte=date_to)
+
+    # Bar chart: use filtered range or fallback to current year
+    chart_qs = filtered_qs if (date_from or date_to) else expenses_qs.filter(date__year=today.year)
+
+    # Monthly totals for chart
+    monthly_data = (
+        chart_qs
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+    months_labels = []
+    months_totals = []
+    for row in monthly_data:
+        months_labels.append(row['month'].strftime('%b %Y'))
+        months_totals.append(float(row['total']))
+
+    # Category breakdown for filtered period
+    cat_data = (
+        filtered_qs
+        .values('category__name')
+        .annotate(total=Sum('amount'))
+        .order_by('-total')
+    )
+    cat_labels = [r['category__name'] or str(_('Uncategorised')) for r in cat_data]
+    cat_totals = [float(r['total']) for r in cat_data]
+    cat_pairs = list(zip(cat_labels, cat_totals))
+
+    # Top 10 individual expenses in filtered period
+    top_expenses = filtered_qs.select_related(
+        'branch', 'branch__center', 'category', 'created_by'
+    ).order_by('-amount')[:10]
+
+    # Summary cards (always based on full branch/center/category filter, not month range)
+    this_month_total = expenses_qs.filter(
+        date__year=today.year, date__month=today.month
+    ).aggregate(s=Sum('amount'))['s'] or 0
+
+    import datetime
+    last_month = today.replace(day=1)
+    last_month = (last_month - datetime.timedelta(days=1)).replace(day=1)
+    last_month_total = expenses_qs.filter(
+        date__year=last_month.year, date__month=last_month.month
+    ).aggregate(s=Sum('amount'))['s'] or 0
+
+    period_total = filtered_qs.aggregate(s=Sum('amount'))['s'] or 0
+
+    context = {
+        'title': _('Expense Analytics'),
+        'subTitle': _('Operating Cost Analytics'),
+        'branches': branches,
+        'categories': categories,
+        'centers': centers,
+        'branch_filter': branch_filter,
+        'center_filter': center_filter,
+        'category_filter': category_filter,
+        'date_from': date_from,
+        'date_to': date_to,
+        'months_labels': months_labels,
+        'months_totals': months_totals,
+        'cat_labels': cat_labels,
+        'cat_totals': cat_totals,
+        'cat_pairs': cat_pairs,
+        'top_expenses': top_expenses,
+        'this_month_total': this_month_total,
+        'last_month_total': last_month_total,
+        'period_total': period_total,
+    }
+    return render(request, 'services/generalExpenseAnalytics.html', context)
+
+
+@login_required(login_url='admin_login')
+@any_permission_required('can_manage_expenses')
+def generalExpenseCategoryList(request):
+    """List and create expense categories."""
+    branches = get_user_branches(request.user).select_related('center')
+    categories = _get_user_general_expense_categories(request.user).select_related(
+        'branch', 'branch__center'
+    ).annotate(expense_count=Count('general_expenses'))
+
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        icon = request.POST.get('icon', '').strip()
+        branch_id = request.POST.get('branch', '').strip()
+
+        errors = []
+        if not name:
+            errors.append(_('Category name is required.'))
+        if not branch_id:
+            errors.append(_('Branch is required.'))
+
+        branch = None
+        if branch_id:
+            try:
+                branch = branches.get(id=branch_id)
+            except Branch.DoesNotExist:
+                errors.append(_('Invalid branch.'))
+
+        if not errors:
+            if GeneralExpenseCategory.objects.filter(branch=branch, name=name).exists():
+                errors.append(_('A category with this name already exists for that branch.'))
+
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+        else:
+            GeneralExpenseCategory.objects.create(name=name, icon=icon, branch=branch)
+            messages.success(request, _('Category created.'))
+            return redirect('generalExpenseCategoryList')
+
+    context = {
+        'title': _('Expense Categories'),
+        'subTitle': _('Manage Operating Expense Categories'),
+        'categories': categories,
+        'branches': branches,
+    }
+    return render(request, 'services/generalExpenseCategoryList.html', context)
+
+
+@login_required(login_url='admin_login')
+@any_permission_required('can_manage_expenses')
+@require_POST
+def generalExpenseCategoryDelete(request, cat_id):
+    """Delete an expense category (only if it has no expenses)."""
+    category = get_object_or_404(
+        _get_user_general_expense_categories(request.user), id=cat_id
+    )
+    if category.general_expenses.exists():
+        messages.error(request, _('Cannot delete category that has expenses. Reassign or delete them first.'))
+    else:
+        category.delete()
+        messages.success(request, _('Category deleted.'))
+    return redirect('generalExpenseCategoryList')

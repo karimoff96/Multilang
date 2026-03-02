@@ -25,6 +25,15 @@ urlpatterns = [
     path("expenses/analytics/", views.expenseAnalytics, name="expenseAnalytics"),
     path("expenses/create-inline/", views.createExpenseInline, name="createExpenseInline"),
     
+    # General (Operating) Expenses
+    path("expenses/general/", views.generalExpenseList, name="generalExpenseList"),
+    path("expenses/general/create/", views.generalExpenseCreate, name="generalExpenseCreate"),
+    path("expenses/general/<int:expense_id>/edit/", views.generalExpenseEdit, name="generalExpenseEdit"),
+    path("expenses/general/<int:expense_id>/delete/", views.generalExpenseDelete, name="generalExpenseDelete"),
+    path("expenses/general/analytics/", views.generalExpenseAnalytics, name="generalExpenseAnalytics"),
+    path("expenses/general/categories/", views.generalExpenseCategoryList, name="generalExpenseCategoryList"),
+    path("expenses/general/categories/<int:cat_id>/delete/", views.generalExpenseCategoryDelete, name="generalExpenseCategoryDelete"),
+
     # Languages
     path("languages/", views.languageList, name="languageList"),
     path("languages/<int:language_id>/edit/", views.editLanguage, name="editLanguage"),

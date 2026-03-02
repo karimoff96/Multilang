@@ -1,0 +1,207 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+{% load number_filters %}
+{% load i18n %}
+
+{% block content %}
+<div class="row g-24 mb-24">
+    <!-- Summary Cards -->
+    <div class="col-md-4">
+        <div class="card radius-12 h-100">
+            <div class="card-body p-20 text-center">
+                <iconify-icon icon="solar:calendar-bold" class="text-primary-600 text-4xl mb-8"></iconify-icon>
+                <h6 class="text-secondary-light mb-4">{% trans "This Month" %}</h6>
+                <h3 class="text-primary-600 mb-0">{{ this_month_total|format_number }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card radius-12 h-100">
+            <div class="card-body p-20 text-center">
+                <iconify-icon icon="solar:calendar-date-bold" class="text-warning-600 text-4xl mb-8"></iconify-icon>
+                <h6 class="text-secondary-light mb-4">{% trans "Last Month" %}</h6>
+                <h3 class="text-warning-600 mb-0">{{ last_month_total|format_number }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card radius-12 h-100">
+            <div class="card-body p-20 text-center">
+                <iconify-icon icon="solar:pie-chart-bold" class="text-success-600 text-4xl mb-8"></iconify-icon>
+                <h6 class="text-secondary-light mb-4">{% trans "Period Total" %}</h6>
+                <h3 class="text-success-600 mb-0">{{ period_total|format_number }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter row -->
+<div class="card mb-24">
+    <div class="card-body py-12 px-24">
+        <form method="get" class="d-flex flex-wrap align-items-center gap-12">
+            {% if user.is_superuser and centers %}
+            <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                <option value="">{% trans "All Centers" %}</option>
+                {% for center in centers %}
+                <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+            {% if branches %}
+            <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                <option value="">{% trans "All Branches" %}</option>
+                {% for branch in branches %}
+                <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.center.name }} – {{ branch.name }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+            <select name="category" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                <option value="">{% trans "All Categories" %}</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:"i" %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+            <div class="d-flex align-items-center gap-6">
+                <span class="text-sm text-secondary-light">{% trans "From" %}:</span>
+                <input type="date" name="date_from" class="form-control form-control-sm w-auto h-40-px radius-12" value="{{ date_from }}" onchange="this.form.submit()">
+            </div>
+            <div class="d-flex align-items-center gap-6">
+                <span class="text-sm text-secondary-light">{% trans "To" %}:</span>
+                <input type="date" name="date_to" class="form-control form-control-sm w-auto h-40-px radius-12" value="{{ date_to }}" onchange="this.form.submit()">
+            </div>
+            {% if branch_filter or category_filter or date_from or date_to or center_filter %}
+            <a href="{% url 'generalExpenseAnalytics' %}" class="btn btn-outline-secondary btn-sm px-12 radius-8 h-40-px d-flex align-items-center">
+                <iconify-icon icon="mdi:close" class="me-4"></iconify-icon>{% trans "Clear" %}
+            </a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<div class="row g-24">
+    <!-- Monthly bar chart -->
+    <div class="col-lg-8">
+        <div class="card radius-12">
+            <div class="card-header border-bottom bg-base py-16 px-24">
+                <h6 class="mb-0">{% trans "Monthly Expenses" %}</h6>
+            </div>
+            <div class="card-body p-24">
+                <canvas id="monthlyChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Category doughnut -->
+    <div class="col-lg-4">
+        <div class="card radius-12">
+            <div class="card-header border-bottom bg-base py-16 px-24">
+                <h6 class="mb-0">{% trans "By Category" %}</h6>
+            </div>
+            <div class="card-body p-24">
+                {% if cat_pairs %}
+                <canvas id="catChart" height="220"></canvas>
+                <ul class="list-unstyled mt-16">
+                    {% for label, total in cat_pairs %}
+                    <li class="d-flex justify-content-between align-items-center mb-6">
+                        <span class="text-sm">{{ label }}</span>
+                        <span class="text-sm fw-semibold">{{ total|format_number }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="text-center py-40 text-secondary-light">{% trans "No data for selected period." %}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const monthlyCtx = document.getElementById('monthlyChart');
+    if (monthlyCtx) {
+        new Chart(monthlyCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ months_labels|safe }},
+                datasets: [{
+                    label: '{% trans "Expenses" %}',
+                    data: {{ months_totals|safe }},
+                    backgroundColor: 'rgba(99,102,241,0.7)',
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString() } } }
+            }
+        });
+    }
+
+    const catCtx = document.getElementById('catChart');
+    if (catCtx) {
+        new Chart(catCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ cat_labels|safe }},
+                datasets: [{
+                    data: {{ cat_totals|safe }},
+                    backgroundColor: ['#6366f1','#f59e0b','#10b981','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6'],
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+});
+</script>
+
+<!-- Top 10 Largest Expenses -->
+{% if top_expenses %}
+<div class="card radius-12 mt-24">
+    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
+        <h6 class="mb-0">{% trans "Top 10 Largest Expenses" %}</h6>
+        <a href="{% url 'generalExpenseList' %}{% if branch_filter or category_filter %}?{% if branch_filter %}branch={{ branch_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% endif %}" class="btn btn-outline-secondary btn-sm px-12 radius-8">
+            {% trans "View all" %}
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table bordered-table sm-table mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{% trans "Title" %}</th>
+                        <th>{% trans "Amount" %}</th>
+                        <th>{% trans "Category" %}</th>
+                        <th>{% trans "Date" %}</th>
+                        <th>{% trans "Branch" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in top_expenses %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <span class="fw-medium">{{ expense.title }}</span>
+                            {% if expense.note %}<div class="text-secondary-light text-sm">{{ expense.note|truncatechars:50 }}</div>{% endif %}
+                        </td>
+                        <td><span class="text-danger-main fw-semibold">{{ expense.amount|format_number }}</span></td>
+                        <td>
+                            {% if expense.category %}
+                            <span class="badge bg-primary-50 text-primary-600 px-8 py-4 radius-6">
+                                {% if expense.category.icon %}<iconify-icon icon="{{ expense.category.icon }}" class="me-4"></iconify-icon>{% endif %}
+                                {{ expense.category.name }}
+                            </span>
+                            {% else %}<span class="text-secondary-light">—</span>{% endif %}
+                        </td>
+                        <td><span class="text-sm">{{ expense.date|date:"d M Y" }}</span></td>
+                        <td><span class="text-sm">{{ expense.branch.center.name }}<br><span class="text-secondary-light">{{ expense.branch.name }}</span></span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

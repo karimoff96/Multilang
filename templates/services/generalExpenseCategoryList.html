@@ -1,0 +1,124 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<div class="row g-24">
+    <!-- Category list -->
+    <div class="col-lg-8">
+        <div class="card h-100 p-0 radius-12">
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
+                <h5 class="mb-0">{% trans "Expense Categories" %}</h5>
+                <a href="{% url 'generalExpenseList' %}" class="btn btn-outline-secondary btn-sm px-12 radius-8">
+                    <iconify-icon icon="ep:back" class="me-4"></iconify-icon>{% trans "Back to Expenses" %}
+                </a>
+            </div>
+
+            {% if messages %}
+            <div class="px-24 pt-16">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="card-body p-24">
+                <div class="table-responsive scroll-sm">
+                    <table class="table bordered-table sm-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>{% trans "Name" %}</th>
+                                <th>{% trans "Icon" %}</th>
+                                <th>{% trans "Branch" %}</th>
+                                <th>{% trans "Expenses" %}</th>
+                                <th>{% trans "Actions" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cat in categories %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td class="fw-medium">{{ cat.name }}</td>
+                                <td>
+                                    {% if cat.icon %}
+                                    <iconify-icon icon="{{ cat.icon }}" class="text-xl text-primary-600"></iconify-icon>
+                                    <span class="text-sm text-secondary-light ms-4">{{ cat.icon }}</span>
+                                    {% else %}
+                                    <span class="text-secondary-light">—</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="text-sm">{{ cat.branch.center.name }}<br><span class="text-secondary-light">{{ cat.branch.name }}</span></span></td>
+                                <td>
+                                    <span class="badge bg-primary-50 text-primary-600 px-8 py-4 radius-6">{{ cat.expense_count }}</span>
+                                </td>
+                                <td>
+                                    {% if cat.expense_count == 0 %}
+                                    <form method="post" action="{% url 'generalExpenseCategoryDelete' cat.id %}" class="d-inline" onsubmit="return confirm('{% trans "Delete this category?" %}')">
+                                        {% csrf_token %}
+                                        <button type="submit" class="w-32-px h-32-px bg-danger-focus text-danger-main radius-8 d-flex align-items-center justify-content-center border-0 bg-transparent" title="{% trans 'Delete' %}">
+                                            <iconify-icon icon="mingcute:delete-2-line" class="menu-icon"></iconify-icon>
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-sm text-secondary-light" title="{% trans 'Has expenses — cannot delete' %}">
+                                        <iconify-icon icon="mdi:lock-outline"></iconify-icon>
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-40 text-secondary-light">
+                                    {% trans "No categories yet. Create one using the form." %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create form -->
+    <div class="col-lg-4">
+        <div class="card radius-12">
+            <div class="card-header border-bottom bg-base py-16 px-24">
+                <h6 class="mb-0">{% trans "New Category" %}</h6>
+            </div>
+            <div class="card-body p-24">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-16">
+                        <label class="form-label fw-semibold text-primary-light">{% trans "Name" %} <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control radius-8" placeholder="{% trans 'e.g. Rent, Utilities, Stationery' %}" required value="{{ request.POST.name }}">
+                    </div>
+                    <div class="mb-16">
+                        <label class="form-label fw-semibold text-primary-light">{% trans "Branch" %} <span class="text-danger">*</span></label>
+                        <select name="branch" class="form-select radius-8" required>
+                            <option value="">{% trans "Select branch…" %}</option>
+                            {% for branch in branches %}
+                            <option value="{{ branch.id }}" {% if request.POST.branch == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.center.name }} – {{ branch.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-20">
+                        <label class="form-label fw-semibold text-primary-light">{% trans "Icon" %} <span class="text-secondary-light fw-normal">({% trans "optional, Iconify name" %})</span></label>
+                        <input type="text" name="icon" class="form-control radius-8" placeholder="solar:cart-bold" value="{{ request.POST.icon }}">
+                        <div class="text-secondary-light text-sm mt-4">
+                            <a href="https://icon-sets.iconify.design/" target="_blank" class="text-primary-600">iconify.design</a>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 radius-8">
+                        <iconify-icon icon="ic:baseline-plus" class="me-6"></iconify-icon>{% trans "Create Category" %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

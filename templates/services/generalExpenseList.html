@@ -1,0 +1,244 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+{% load number_filters %}
+{% load permission_tags %}
+{% load i18n %}
+
+{% block content %}
+<div class="card h-100 p-0 radius-12">
+    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+        <div class="d-flex align-items-center flex-wrap gap-3">
+            <span class="text-md fw-medium text-secondary-light mb-0">{% trans "Show" %}</span>
+            <form method="get" class="d-flex flex-wrap align-items-center gap-3">
+                <select name="per_page" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                    <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                    <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                </select>
+                <div class="navbar-search">
+                    <input type="text" class="bg-base h-40-px w-auto" name="search" placeholder="{% trans 'Search' %}" value="{{ search_query }}">
+                    <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                </div>
+                {% if user.is_superuser and centers %}
+                <select name="center" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">{% trans "All Centers" %}</option>
+                    {% for center in centers %}
+                    <option value="{{ center.id }}" {% if center_filter == center.id|stringformat:"i" %}selected{% endif %}>{{ center.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+                {% if branches %}
+                <select name="branch" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">{% trans "All Branches" %}</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"i" %}selected{% endif %}>{{ branch.center.name }} – {{ branch.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+                <select name="category" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">{% trans "All Categories" %}</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:"i" %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="payment_type" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">{% trans "All Payment Types" %}</option>
+                    {% for val, label in payment_type_choices %}
+                    <option value="{{ val }}" {% if payment_type_filter == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <select name="is_paid" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
+                    <option value="">{% trans "All Statuses" %}</option>
+                    <option value="0" {% if is_paid_filter == '0' %}selected{% endif %}>{% trans "Unpaid" %}</option>
+                    <option value="1" {% if is_paid_filter == '1' %}selected{% endif %}>{% trans "Paid" %}</option>
+                </select>
+                <div class="d-flex align-items-center gap-6">
+                    <span class="text-sm text-secondary-light text-nowrap">{% trans "From" %}:</span>
+                    <input type="date" name="date_from" class="form-control form-control-sm w-auto h-40-px radius-12" value="{{ date_from }}" onchange="this.form.submit()">
+                </div>
+                <div class="d-flex align-items-center gap-6">
+                    <span class="text-sm text-secondary-light text-nowrap">{% trans "To" %}:</span>
+                    <input type="date" name="date_to" class="form-control form-control-sm w-auto h-40-px radius-12" value="{{ date_to }}" onchange="this.form.submit()">
+                </div>
+            </form>
+        </div>
+        {% can_do 'expenses.create' as can_create_expense %}
+        {% if can_create_expense %}
+        <div class="d-flex gap-2">
+            <a href="{% url 'generalExpenseAnalytics' %}" class="btn btn-outline-secondary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
+                <iconify-icon icon="solar:chart-bold" class="icon text-xl line-height-1"></iconify-icon>
+                {% trans "Analytics" %}
+            </a>
+            <a href="{% url 'generalExpenseCreate' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
+                <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+                {% trans "Add Expense" %}
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="card-body border-bottom py-16 px-24">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="bg-primary-50 radius-8 p-16 text-center">
+                    <iconify-icon icon="solar:wallet-bold" class="text-primary-600 text-3xl mb-8"></iconify-icon>
+                    <h6 class="text-primary-600 mb-4">{% trans "Total (filtered)" %}</h6>
+                    <h4 class="text-primary-600 mb-0">{{ total_amount|format_number }}</h4>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="bg-success-50 radius-8 p-16 text-center">
+                    <iconify-icon icon="solar:calendar-bold" class="text-success-600 text-3xl mb-8"></iconify-icon>
+                    <h6 class="text-success-600 mb-4">{% trans "This Month" %}</h6>
+                    <h4 class="text-success-600 mb-0">{{ this_month_total|format_number }}</h4>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="bg-info-50 radius-8 p-16 text-center">
+                    <iconify-icon icon="solar:list-bold" class="text-info-600 text-3xl mb-8"></iconify-icon>
+                    <h6 class="text-info-600 mb-4">{% trans "Records" %}</h6>
+                    <h4 class="text-info-600 mb-0">{{ total_expenses }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-24">
+        <div class="table-responsive scroll-sm">
+            <table class="table bordered-table sm-table mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{% trans "Title" %}</th>
+                        <th>{% trans "Amount" %}</th>
+                        <th>{% trans "Payment" %}</th>
+                        <th>{% trans "Category" %}</th>
+                        <th>{% trans "Date" %}</th>
+                        <th>{% trans "Branch" %}</th>
+                        <th>{% trans "Added by" %}</th>
+                        <th>{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr>
+                        <td>{{ forloop.counter0|add:expenses.start_index }}</td>
+                        <td>
+                            <span class="fw-medium">{{ expense.title }}</span>
+                            {% if expense.vendor %}
+                            <div class="text-secondary-light text-sm"><iconify-icon icon="solar:shop-bold" class="me-2"></iconify-icon>{{ expense.vendor }}</div>
+                            {% endif %}
+                            {% if expense.note %}
+                            <div class="text-secondary-light text-sm">{{ expense.note|truncatechars:50 }}</div>
+                            {% endif %}
+                        </td>
+                        <td><span class="text-danger-main fw-semibold">{{ expense.amount|format_number }}</span></td>
+                        <td>
+                            {% if expense.payment_type == 'cash' %}
+                            <span class="badge bg-success-100 text-success-600 px-8 py-4 radius-6">
+                                <iconify-icon icon="solar:banknote-bold" class="me-2"></iconify-icon>{% trans "Cash" %}
+                            </span>
+                            {% elif expense.payment_type == 'card' %}
+                            <span class="badge bg-info-100 text-info-600 px-8 py-4 radius-6">
+                                <iconify-icon icon="solar:card-bold" class="me-2"></iconify-icon>{% trans "Card" %}
+                            </span>
+                            {% elif expense.payment_type == 'nasiya' %}
+                            <span class="badge {% if expense.is_overdue %}bg-danger-100 text-danger-main{% elif expense.is_paid %}bg-success-100 text-success-600{% else %}bg-warning-100 text-warning-600{% endif %} px-8 py-4 radius-6">
+                                <iconify-icon icon="solar:hand-money-bold" class="me-2"></iconify-icon>{% trans "Nasiya" %}
+                                {% if expense.is_paid %} ✓{% elif expense.is_overdue %} ⚠{% endif %}
+                            </span>
+                            {% if expense.nasiya_deadline %}
+                            <div class="text-sm mt-2 {% if expense.is_overdue %}text-danger-main fw-semibold{% else %}text-secondary-light{% endif %}">
+                                <iconify-icon icon="solar:calendar-bold" class="me-2"></iconify-icon>{{ expense.nasiya_deadline|date:"d M Y" }}
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if expense.category %}
+                            <span class="badge bg-primary-50 text-primary-600 px-8 py-4 radius-6">
+                                {% if expense.category.icon %}<iconify-icon icon="{{ expense.category.icon }}" class="me-4"></iconify-icon>{% endif %}
+                                {{ expense.category.name }}
+                            </span>
+                            {% else %}
+                            <span class="text-secondary-light">—</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="text-sm">{{ expense.date|date:"d M Y" }}</span></td>
+                        <td>
+                            <span class="text-sm">{{ expense.branch.center.name }}<br>
+                            <span class="text-secondary-light">{{ expense.branch.name }}</span></span>
+                        </td>
+                        <td>
+                            {% if expense.created_by %}
+                            <span class="text-sm">{{ expense.created_by.get_full_name|default:expense.created_by.username }}</span>
+                            {% else %}
+                            <span class="text-secondary-light">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                {% can_do 'expenses.edit' as can_edit_expense %}
+                                {% if can_edit_expense %}
+                                <a href="{% url 'generalExpenseEdit' expense.id %}" class="w-32-px h-32-px bg-success-focus text-success-main radius-8 d-flex align-items-center justify-content-center">
+                                    <iconify-icon icon="lucide:edit" class="menu-icon"></iconify-icon>
+                                </a>
+                                {% endif %}
+                                {% can_do 'expenses.delete' as can_delete_expense %}
+                                {% if can_delete_expense %}
+                                <form method="post" action="{% url 'generalExpenseDelete' expense.id %}" class="d-inline" onsubmit="return confirm('{% trans "Delete this expense?" %}')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-32-px h-32-px bg-danger-focus text-danger-main radius-8 d-flex align-items-center justify-content-center border-0 bg-transparent">
+                                        <iconify-icon icon="mingcute:delete-2-line" class="menu-icon"></iconify-icon>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-40 text-secondary-light">
+                            <iconify-icon icon="solar:wallet-bold" class="text-4xl mb-12 d-block"></iconify-icon>
+                            {% trans "No expenses found." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if expenses.has_other_pages %}
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-24">
+            <span class="text-secondary-light">
+                {% blocktrans with start=expenses.start_index end=expenses.end_index total=total_expenses %}Showing {{ start }}–{{ end }} of {{ total }} records{% endblocktrans %}
+            </span>
+            <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
+                {% if expenses.has_previous %}
+                <li class="page-item">
+                    <a class="page-link bg-base border-0 text-secondary-light fw-medium" href="?page={{ expenses.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}&per_page={{ per_page }}">
+                        <iconify-icon icon="ep:d-arrow-left" class="text-xl"></iconify-icon>
+                    </a>
+                </li>
+                {% endif %}
+                {% for num in expenses.paginator.page_range %}
+                {% if expenses.number == num %}
+                <li class="page-item"><a class="page-link bg-primary-600 text-white fw-medium" href="#">{{ num }}</a></li>
+                {% elif num > expenses.number|add:'-3' and num < expenses.number|add:'3' %}
+                <li class="page-item"><a class="page-link bg-base border-0 text-secondary-light fw-medium" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}&per_page={{ per_page }}">{{ num }}</a></li>
+                {% endif %}
+                {% endfor %}
+                {% if expenses.has_next %}
+                <li class="page-item">
+                    <a class="page-link bg-base border-0 text-secondary-light fw-medium" href="?page={{ expenses.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}&per_page={{ per_page }}">
+                        <iconify-icon icon="ep:d-arrow-right" class="text-xl"></iconify-icon>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

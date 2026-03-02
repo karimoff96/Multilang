@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from modeltranslation.admin import TranslationAdmin
-from .models import Category, Product, Language, Expense
+from .models import Category, Product, Language, Expense, GeneralExpenseCategory, GeneralExpense
 
 
 @admin.register(Language)
@@ -256,3 +256,25 @@ class ProductAdmin(TranslationAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("category").prefetch_related("expenses")
+
+
+@admin.register(GeneralExpenseCategory)
+class GeneralExpenseCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'icon', 'branch', 'created_at')
+    list_filter = ('branch', 'branch__center')
+    search_fields = ('name', 'branch__name')
+    ordering = ('branch', 'name')
+
+
+@admin.register(GeneralExpense)
+class GeneralExpenseAdmin(admin.ModelAdmin):
+    list_display = ('title', 'amount_display', 'payment_type', 'vendor', 'is_paid', 'category', 'date', 'nasiya_deadline', 'branch', 'created_by', 'created_at')
+    list_filter = ('branch', 'branch__center', 'category', 'payment_type', 'is_paid', 'date')
+    search_fields = ('title', 'note', 'vendor')
+    ordering = ('-date', '-created_at')
+    date_hierarchy = 'date'
+
+    def amount_display(self, obj):
+        return format_html('<strong>{:,.2f}</strong>', obj.amount)
+    amount_display.short_description = 'Amount'
+    amount_display.admin_order_field = 'amount'

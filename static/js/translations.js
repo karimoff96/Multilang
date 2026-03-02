@@ -108,6 +108,21 @@ const translations = {
         ru: 'Расходы',
         en: 'Expenses'
     },
+    'sidebar.generalExpenses': {
+        uz: 'Umumiy xarajatlar',
+        ru: 'Общие расходы',
+        en: 'General Expenses'
+    },
+    'sidebar.expenseCategories': {
+        uz: 'Xarajat toifalari',
+        ru: 'Категории расходов',
+        en: 'Expense Categories'
+    },
+    'sidebar.generalExpenseAnalytics': {
+        uz: 'Umumiy xarajatlar tahlili',
+        ru: 'Аналитика общих расходов',
+        en: 'General Expense Analytics'
+    },
     'sidebar.services': {
         uz: 'Xizmatlar',
         ru: 'Услуги',

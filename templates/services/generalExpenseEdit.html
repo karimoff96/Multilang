@@ -1,0 +1,157 @@
+{% extends '../layout/layout.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
+                <h5 class="mb-0">{% trans "Edit Expense" %}: {{ expense.title }}</h5>
+                <a href="{% url 'generalExpenseList' %}" class="btn btn-outline-secondary btn-sm px-12 radius-8">
+                    <iconify-icon icon="ep:back" class="me-4"></iconify-icon>{% trans "Back" %}
+                </a>
+            </div>
+            <div class="card-body p-24">
+                {% if messages %}
+                <div class="mb-16">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row g-20">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-primary-light">{% trans "Title" %} <span class="text-danger">*</span></label>
+                            <input type="text" name="title" class="form-control radius-8" required value="{{ expense.title }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light">{% trans "Amount" %} <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-base">UZS</span>
+                                <input type="number" name="amount" class="form-control radius-8" step="0.01" min="0.01" required value="{{ expense.amount }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light">{% trans "Date" %} <span class="text-danger">*</span></label>
+                            <input type="date" name="date" class="form-control radius-8" required value="{{ expense.date|date:'Y-m-d' }}">
+                        </div>
+                        <!-- Payment Type -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-primary-light">{% trans "Payment Type" %} <span class="text-danger">*</span></label>
+                            <div class="d-flex gap-12 flex-wrap">
+                                <label class="d-flex align-items-center gap-8 border radius-8 px-16 py-10 cursor-pointer payment-type-option" style="min-width:120px">
+                                    <input type="radio" name="payment_type" value="cash" class="payment-type-radio d-none" {% if expense.payment_type == 'cash' %}checked{% endif %}>
+                                    <iconify-icon icon="solar:banknote-bold" class="text-xl text-success-600"></iconify-icon>
+                                    <span class="text-sm fw-medium">{% trans "Cash" %}</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-8 border radius-8 px-16 py-10 cursor-pointer payment-type-option" style="min-width:120px">
+                                    <input type="radio" name="payment_type" value="card" class="payment-type-radio d-none" {% if expense.payment_type == 'card' %}checked{% endif %}>
+                                    <iconify-icon icon="solar:card-bold" class="text-xl text-info-600"></iconify-icon>
+                                    <span class="text-sm fw-medium">{% trans "Card" %}</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-8 border radius-8 px-16 py-10 cursor-pointer payment-type-option" style="min-width:120px">
+                                    <input type="radio" name="payment_type" value="nasiya" class="payment-type-radio d-none" {% if expense.payment_type == 'nasiya' %}checked{% endif %}>
+                                    <iconify-icon icon="solar:hand-money-bold" class="text-xl text-warning-600"></iconify-icon>
+                                    <span class="text-sm fw-medium">{% trans "Nasiya" %}</span>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Nasiya-specific fields -->
+                        <div class="col-md-6 nasiya-fields">
+                            <label class="form-label fw-semibold text-primary-light">{% trans "Nasiya Deadline" %} <span class="text-danger">*</span></label>
+                            <input type="date" name="nasiya_deadline" class="form-control radius-8" value="{{ expense.nasiya_deadline|date:'Y-m-d' }}">
+                            <div class="text-secondary-light text-sm mt-4">{% trans "Repayment due date." %}</div>
+                        </div>
+                        <div class="col-md-6 nasiya-fields">
+                            <label class="form-label fw-semibold text-primary-light d-block mb-8">{% trans "Status" %}</label>
+                            <label class="d-flex align-items-center gap-8 cursor-pointer">
+                                <input type="hidden" name="is_paid" value="0">
+                                <input type="checkbox" name="is_paid" value="1" class="form-check-input" {% if expense.is_paid %}checked{% endif %}>
+                                <span class="text-sm">{% trans "Already paid / settled" %}</span>
+                            </label>
+                        </div>
+                        <!-- Vendor -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light">{% trans "Vendor / Supplier" %}</label>
+                            <input type="text" name="vendor" class="form-control radius-8" placeholder="{% trans 'e.g. Papermart, John Smith, Electricity Co.' %}" value="{{ expense.vendor }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light">{% trans "Branch" %} <span class="text-danger">*</span></label>
+                            <select name="branch" class="form-select radius-8" required>
+                                <option value="">{% trans "Select branch…" %}</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}" {% if expense.branch_id == branch.id %}selected{% endif %}>{{ branch.center.name }} – {{ branch.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light">{% trans "Category" %}</label>
+                            <select name="category" class="form-select radius-8">
+                                <option value="">{% trans "None / Uncategorised" %}</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if expense.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-primary-light">{% trans "Note" %}</label>
+                            <textarea name="note" class="form-control radius-8" rows="3">{{ expense.note }}</textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-primary-light">{% trans "Receipt / Image" %}</label>
+                            {% if expense.receipt_image %}
+                            <div class="mb-8 d-flex align-items-center gap-8">
+                                <a href="{{ expense.receipt_image.url }}" target="_blank" class="text-primary-600 text-sm">
+                                    <iconify-icon icon="solar:eye-bold" class="me-4"></iconify-icon>{% trans "View current receipt" %}
+                                </a>
+                                <label class="d-flex align-items-center gap-6 text-sm text-secondary-light cursor-pointer">
+                                    <input type="checkbox" name="clear_receipt_image" value="1"> {% trans "Remove receipt" %}
+                                </label>
+                            </div>
+                            {% endif %}
+                            <input type="file" name="receipt_image" class="form-control radius-8" accept="image/*,.pdf">
+                        </div>
+                        <div class="col-12 d-flex gap-12 justify-content-end">
+                            <a href="{% url 'generalExpenseList' %}" class="btn btn-outline-secondary radius-8 px-20">{% trans "Cancel" %}</a>
+                            <button type="submit" class="btn btn-primary radius-8 px-20">
+                                <iconify-icon icon="ic:baseline-save" class="me-6"></iconify-icon>{% trans "Update Expense" %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function () {
+    const radios = document.querySelectorAll('.payment-type-radio');
+    const nasiyaFields = document.querySelectorAll('.nasiya-fields');
+    const options = document.querySelectorAll('.payment-type-option');
+
+    function update(val) {
+        nasiyaFields.forEach(el => el.style.display = (val === 'nasiya') ? '' : 'none');
+        options.forEach(opt => {
+            const r = opt.querySelector('.payment-type-radio');
+            const isNasiya = r.value === 'nasiya';
+            opt.classList.remove('border-primary-600', 'bg-primary-50', 'border-warning-600', 'bg-warning-50');
+            if (r.checked) {
+                if (isNasiya) { opt.classList.add('border-warning-600', 'bg-warning-50'); }
+                else { opt.classList.add('border-primary-600', 'bg-primary-50'); }
+            }
+        });
+    }
+
+    radios.forEach(r => r.addEventListener('change', () => update(r.value)));
+    const checked = document.querySelector('.payment-type-radio:checked');
+    if (checked) update(checked.value);
+})();
+</script>
+{% endblock %}

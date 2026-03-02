@@ -598,3 +598,136 @@ class Product(models.Model):
         verbose_name = str(_("Document Type"))
         verbose_name_plural = str(_("Document Types"))
         unique_together = ("category", "name")
+
+
+# ─────────────────────────────────────────────────────────────
+# General (Operating) Expenses  – not tied to any specific order
+# ─────────────────────────────────────────────────────────────
+
+class GeneralExpenseCategory(models.Model):
+    """User-managed categories for operating expenses (per branch)."""
+
+    name = models.CharField(max_length=100, verbose_name=_("Category Name"))
+    icon = models.CharField(
+        max_length=60,
+        blank=True,
+        default='',
+        verbose_name=_("Iconify Icon"),
+        help_text=_("e.g. mdi:office-building — leave blank for default"),
+    )
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.CASCADE,
+        related_name='general_expense_categories',
+        verbose_name=_("Branch"),
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
+
+    class Meta:
+        verbose_name = _("General Expense Category")
+        verbose_name_plural = _("General Expense Categories")
+        unique_together = ("branch", "name")
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class GeneralExpense(models.Model):
+    """
+    Operational costs for a center not tied to any specific order.
+    Examples: buying stationery, repairing a printer, paying rent, etc.
+    """
+
+    PAYMENT_CASH = 'cash'
+    PAYMENT_CARD = 'card'
+    PAYMENT_NASIYA = 'nasiya'
+    PAYMENT_TYPE_CHOICES = [
+        (PAYMENT_CASH,   _('Cash')),
+        (PAYMENT_CARD,   _('Card')),
+        (PAYMENT_NASIYA, _('Nasiya (Credit)')),
+    ]
+
+    title = models.CharField(max_length=200, verbose_name=_("Title"))
+    amount = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        verbose_name=_("Amount (UZS)"),
+    )
+    category = models.ForeignKey(
+        GeneralExpenseCategory,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='general_expenses',
+        verbose_name=_("Category"),
+    )
+    date = models.DateField(verbose_name=_("Date"))
+    payment_type = models.CharField(
+        max_length=10,
+        choices=PAYMENT_TYPE_CHOICES,
+        default=PAYMENT_CASH,
+        verbose_name=_("Payment Type"),
+    )
+    nasiya_deadline = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name=_("Nasiya Deadline"),
+        help_text=_("Repayment deadline for credit expenses."),
+    )
+    is_paid = models.BooleanField(
+        default=True,
+        verbose_name=_("Paid"),
+        help_text=_("Mark as paid once a nasiya (credit) expense is settled."),
+    )
+    vendor = models.CharField(
+        max_length=200,
+        blank=True,
+        default='',
+        verbose_name=_("Vendor / Supplier"),
+        help_text=_("Who was paid — shop, person, company, etc."),
+    )
+    note = models.TextField(blank=True, default='', verbose_name=_("Note"))
+    receipt_image = models.ImageField(
+        upload_to='general_expense_receipts/',
+        null=True,
+        blank=True,
+        verbose_name=_("Receipt / Photo"),
+    )
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.CASCADE,
+        related_name='general_expenses',
+        verbose_name=_("Branch"),
+    )
+    created_by = models.ForeignKey(
+        'auth.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='general_expenses_created',
+        verbose_name=_("Recorded By"),
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
+
+    @property
+    def is_overdue(self):
+        """True when nasiya is unpaid and deadline has passed."""
+        from django.utils import timezone
+        if self.payment_type == self.PAYMENT_NASIYA and not self.is_paid:
+            if self.nasiya_deadline and self.nasiya_deadline < timezone.now().date():
+                return True
+        return False
+
+    class Meta:
+        verbose_name = _("General Expense")
+        verbose_name_plural = _("General Expenses")
+        ordering = ["-date", "-created_at"]
+        indexes = [
+            models.Index(fields=["branch", "date"]),
+            models.Index(fields=["category", "date"]),
+        ]
+
+    def __str__(self):
+        return f"{self.title} — {self.amount:,.0f} UZS ({self.date})"

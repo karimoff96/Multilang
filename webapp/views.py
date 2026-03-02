@@ -37,6 +37,15 @@ def _ok(data: dict) -> JsonResponse:
     return JsonResponse({"ok": True, **data})
 
 
+def _gtf(obj, field: str, lang: str) -> str:
+    """Return the translated field value for lang, falling back to the base field."""
+    lang = lang if lang in ("uz", "ru", "en") else "uz"
+    value = getattr(obj, f"{field}_{lang}", None)
+    if not value:
+        value = getattr(obj, field, "") or ""
+    return value
+
+
 def _get_center(center_id):
     """Return TranslationCenter or None."""
     from organizations.models import TranslationCenter
@@ -213,13 +222,15 @@ def api_init(request):
         branch_id__in=branch_ids, is_active=True
     ).prefetch_related("product_set", "languages")
 
+    lang = (bot_user.language or "uz") if bot_user else "uz"
+
     categories = []
     for cat in categories_qs:
         products = []
         for prod in cat.product_set.filter(is_active=True):
             products.append({
                 "id": prod.id,
-                "name": prod.name,
+                "name": _gtf(prod, "name", lang),
                 "min_pages": prod.min_pages,
                 "estimated_days": prod.estimated_days,
                 "charging": cat.charging,
@@ -246,8 +257,8 @@ def api_init(request):
 
         categories.append({
             "id": cat.id,
-            "name": cat.name,
-            "description": cat.description or "",
+            "name": _gtf(cat, "name", lang),
+            "description": _gtf(cat, "description", lang),
             "charging": cat.charging,
             "written_verification_required": cat.written_verification_required,
             "branch_id": cat.branch_id,
@@ -597,8 +608,8 @@ def api_my_orders(request):
         orders.append({
             "id": o.id,
             "order_number": o.get_order_number(),
-            "product": o.product.name,
-            "category": o.product.category.name,
+            "product": _gtf(o.product, "name", lang),
+            "category": _gtf(o.product.category, "name", lang),
             "total_price": float(o.total_price),
             "total_pages": o.total_pages,
             "copy_number": o.copy_number,
@@ -680,8 +691,8 @@ def api_order_detail(request, order_id: int):
         "order": {
             "id": order.id,
             "order_number": order.get_order_number(),
-            "product": order.product.name if order.product else "",
-            "category": order.product.category.name if order.product and order.product.category else "",
+            "product": _gtf(order.product, "name", lang) if order.product else "",
+            "category": _gtf(order.product.category, "name", lang) if order.product and order.product.category else "",
             "language": order.language.name if order.language else "",
             "total_price": float(order.total_price),
             "total_pages": order.total_pages,

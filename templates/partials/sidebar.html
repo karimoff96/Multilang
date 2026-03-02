@@ -128,6 +128,12 @@
                     <li>
                         <a href="{% url 'expenseList' %}"><i class="ri-circle-fill circle-icon text-danger-main w-auto"></i> <span data-i18n="sidebar.expenses">{% trans "Expenses" %}</span></a>
                     </li>
+                    <li>
+                        <a href="{% url 'generalExpenseList' %}"><i class="ri-circle-fill circle-icon text-purple-main w-auto"></i> <span data-i18n="sidebar.generalExpenses">{% trans "General Expenses" %}</span></a>
+                    </li>
+                    <li>
+                        <a href="{% url 'generalExpenseCategoryList' %}"><i class="ri-circle-fill circle-icon text-secondary-light w-auto"></i> <span data-i18n="sidebar.expenseCategories">{% trans "Expense Categories" %}</span></a>
+                    </li>
                     {% endif %}
                     {% can_do 'languages.view' as can_view_languages %}
                     {% if can_view_languages %}
@@ -216,6 +222,12 @@
                     {% if can_expense_analytics and has_expense_analytics %}
                     <li>
                         <a href="{% url 'expense_analytics_report' %}"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> <span data-i18n="sidebar.expenseAnalytics">{% trans "Expense Analytics" %}</span></a>
+                    </li>
+                    {% endif %}
+                    {% has_any_perm 'can_view_expenses,can_manage_expenses' as can_gen_expense_analytics %}
+                    {% if can_gen_expense_analytics %}
+                    <li>
+                        <a href="{% url 'generalExpenseAnalytics' %}"><i class="ri-circle-fill circle-icon text-purple-main w-auto"></i> <span data-i18n="sidebar.generalExpenseAnalytics">{% trans "General Expense Analytics" %}</span></a>
                     </li>
                     {% endif %}
                     {% can_do 'reports.view' as can_order_reports %}
