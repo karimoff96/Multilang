@@ -256,7 +256,21 @@
                 <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                     <input type="date" name="date_to" class="form-control form-control-sm h-40-px w-100" value="{{ date_to }}" placeholder="To">
                 </div>
-                <div class="col-12 col-md-6 col-lg-4">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                    <select name="sort_by" class="form-select form-select-sm h-40-px w-100" onchange="this.form.submit()">
+                        <option value="" {% if not sort_by %}selected{% endif %}>&#128467; Sort: Newest first</option>
+                        <option value="deadline" {% if sort_by == 'deadline' %}selected{% endif %}>&#9203; Deadline &#8593; (soonest)</option>
+                        <option value="deadline_desc" {% if sort_by == 'deadline_desc' %}selected{% endif %}>&#9203; Deadline &#8595; (latest)</option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-2 d-flex align-items-center">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" name="overdue_only" id="overdueOnly" value="1"
+                            {% if overdue_only == '1' %}checked{% endif %} onchange="this.form.submit()">
+                        <label class="form-check-label text-sm fw-medium text-danger-main" for="overdueOnly">&#128680; Overdue only</label>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-auto">
                     <div class="d-flex flex-wrap gap-2 w-100">
                         <button type="button" class="btn btn-outline-secondary btn-sm h-40-px flex-grow-1 flex-md-grow-0 px-10{% if date_preset == 'today' %} active{% endif %}" data-date-preset="today">Today</button>
                         <button type="button" class="btn btn-outline-secondary btn-sm h-40-px flex-grow-1 flex-md-grow-0 px-10{% if date_preset == 'last7' %} active{% endif %}" data-date-preset="last7">Last 7d</button>
@@ -320,8 +334,8 @@
     </div>
     
     <div class="card-body p-24">
-        <div class="table-responsive" style="overflow-x: auto;">
-            <table class="table bordered-table sm-table mb-0" style="min-width: 1000px;">
+        <div class="table-responsive">
+            <table class="table bordered-table sm-table mb-0">
                 <thead>
                     <tr>
                         <th scope="col">
@@ -442,7 +456,7 @@
                             <span class="badge bg-warning-focus text-warning-600 badge-compact" data-i18n="orders.unassigned">Unassigned</span>
                             {% endif %}
                         </td>
-                        <!-- Status -->
+                        <!-- Status + Deadline -->
                         <td class="text-center">
                             {% if order.status == 'pending' %}
                                 <span class="bg-warning-focus text-warning-600 px-8 py-2 radius-4 fw-medium text-xs" data-i18n="orders.pending">Pending</span>
@@ -462,6 +476,17 @@
                                 <span class="bg-danger-focus text-danger-600 px-8 py-2 radius-4 fw-medium text-xs" data-i18n="orders.cancelled">Cancelled</span>
                             {% else %}
                                 <span class="bg-neutral-200 text-neutral-600 px-8 py-2 radius-4 fw-medium text-xs">{{ order.status }}</span>
+                            {% endif %}
+                            {% if order.deadline %}
+                            <div class="mt-4">
+                                {% if order.deadline < today and order.status != 'completed' and order.status != 'cancelled' %}
+                                <span class="badge bg-danger-focus text-danger-main text-xs" title="Overdue!">&#128680; {{ order.deadline|date:"d M" }}</span>
+                                {% elif order.deadline == today %}
+                                <span class="badge bg-warning-focus text-warning-600 text-xs" title="Due today!">&#9203; {{ order.deadline|date:"d M" }}</span>
+                                {% else %}
+                                <span class="badge bg-info-focus text-info-600 text-xs">&#9203; {{ order.deadline|date:"d M" }}</span>
+                                {% endif %}
+                            </div>
                             {% endif %}
                         </td>
                         <!-- Action -->
@@ -511,7 +536,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center py-4">
+                        <td colspan="99" class="text-center py-4">
                             <div class="text-secondary-light">
                                 <iconify-icon icon="mdi:package-variant-closed" class="text-4xl mb-2"></iconify-icon>
                                 <p class="mb-0" data-i18n="orders.noOrders">No orders found</p>

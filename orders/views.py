@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q, Count
+from django.db.models import Q, Count, F
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils.translation import gettext_lazy as _
@@ -139,6 +139,7 @@ def ordersList(request):
     ).prefetch_related('receipts').order_by('-created_at')
     
     # View mode filter (for users who can view all - let them switch to "my orders" view)
+
     view_mode = request.GET.get('view', 'all' if can_view_all else 'mine')
     if can_view_all and view_mode == 'mine' and request.admin_profile:
         orders = orders.filter(assigned_to=request.admin_profile)
@@ -208,6 +209,13 @@ def ordersList(request):
     if has_pending_receipts == 'true':
         orders = orders.filter(receipts__status='pending').distinct()
 
+    # Overdue filter - orders with past deadline that are not completed/cancelled
+    overdue_only = request.GET.get('overdue_only', '')
+    if overdue_only == '1':
+        orders = orders.filter(
+            deadline__lt=timezone.now().date()
+        ).exclude(status__in=['completed', 'cancelled'])
+
     # Date range filters
     date_field = request.GET.get('date_field', 'created_at')
     if date_field not in ['created_at', 'updated_at']:
@@ -229,7 +237,17 @@ def ordersList(request):
         if parsed_to:
             end_dt = timezone.make_aware(datetime.combine(parsed_to, time.max), tz)
             orders = orders.filter(**{f"{date_field}__lte": end_dt})
-    
+
+    # Sort order
+    sort_by = request.GET.get('sort_by', '')
+    if sort_by == 'deadline':
+        # Upcoming deadlines first; orders without deadline appear at end
+        orders = orders.order_by(F('deadline').asc(nulls_last=True))
+    elif sort_by == 'deadline_desc':
+        orders = orders.order_by(F('deadline').desc(nulls_last=True))
+    else:
+        orders = orders.order_by('-created_at')
+
     # Pagination
     per_page = request.GET.get('per_page', 10)
     try:
@@ -313,6 +331,9 @@ def ordersList(request):
         "staff_filter": staff_filter,
         "has_pending_receipts": has_pending_receipts,
         "pending_receipts_count": pending_receipts_count,
+        "sort_by": sort_by,
+        "overdue_only": overdue_only,
+        "today": timezone.now().date(),
         "date_field": date_field,
         "date_from": date_from,
         "date_to": date_to,
@@ -563,6 +584,17 @@ def orderEdit(request, order_id):
             order.copy_number = int(copy_number) if copy_number else 0
             order.payment_type = payment_type if payment_type else order.payment_type
             order.description = description
+
+            # Deadline (optional)
+            from datetime import date as _date
+            deadline_str = (request.POST.get('deadline') or '').strip()
+            if deadline_str:
+                try:
+                    order.deadline = _date.fromisoformat(deadline_str)
+                except ValueError:
+                    pass
+            else:
+                order.deadline = None
             
             # Handle receipt upload/replacement
             if 'recipt' in request.FILES:
@@ -1178,6 +1210,16 @@ def orderCreate(request):
             copy_number = int(request.POST.get('copy_number', 0))
             payment_type = request.POST.get('payment_type', 'cash')
             description = request.POST.get('description', '')
+
+            # Deadline (optional)
+            from datetime import date as _date
+            deadline = None
+            deadline_str = (request.POST.get('deadline') or '').strip()
+            if deadline_str:
+                try:
+                    deadline = _date.fromisoformat(deadline_str)
+                except ValueError:
+                    pass
             
             # Check for manual order (manual customer info)
             manual_first_name = request.POST.get('manual_first_name', '').strip()
@@ -1245,6 +1287,7 @@ def orderCreate(request):
                 copy_number=copy_number,
                 payment_type=payment_type,
                 description=description,
+                deadline=deadline,
                 total_price=total_price,
                 status='pending',
                 is_active=True,

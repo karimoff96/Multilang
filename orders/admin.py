@@ -17,6 +17,7 @@ class OrderAdmin(admin.ModelAdmin):
         "payment_type",
         "status_display",
         "language",
+        "deadline",
         "is_active",
         "created_at",
     )
@@ -24,6 +25,7 @@ class OrderAdmin(admin.ModelAdmin):
         "status",
         "payment_type",
         "is_active",
+        "deadline",
         "created_at",
         "product__category",
     )
@@ -69,6 +71,7 @@ class OrderAdmin(admin.ModelAdmin):
                     "product",
                     "language",
                     "description",
+                    "deadline",
                     "status",
                     "is_active",
                 )
@@ -101,6 +104,7 @@ class OrderAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ("created_at", "updated_at", "total_pages", "total_price", "archive_status_display")
+    date_hierarchy = "deadline"
     
     def archive_status_display(self, obj):
         """Display archive status with link"""

@@ -318,6 +318,14 @@ class Order(models.Model):
         help_text=_("Sequential order number within the center (auto-generated)")
     )
     
+    # Deadline (optional customer-requested completion date)
+    deadline = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name=_("Deadline"),
+        help_text=_("Optional date by which the order should be completed")
+    )
+
     # File archiving
     archived_files = models.ForeignKey(
         'core.FileArchive',

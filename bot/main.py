@@ -650,6 +650,8 @@ def generate_order_summary_caption(order, language):
         caption += f"💵 Jami summa: {total_price:,.0f} so'm\n"
         caption += f"💳 To'lov: {payment_status}\n"
         caption += f"⏱️ Taxminiy muddat: {order.product.estimated_days} kun\n"
+        if order.deadline:
+            caption += f"📆 Tugash muddati: {order.deadline.strftime('%d.%m.%Y')}\n"
         caption += f"📅 Buyurtma sanasi: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
     elif language == "ru":
         caption = "📋 <b>НОВЫЙ ЗАКАЗ</b>\n\n"
@@ -673,6 +675,8 @@ def generate_order_summary_caption(order, language):
         caption += f"💵 Общая сумма: {total_price:,.0f} сум\n"
         caption += f"💳 Оплата: {payment_status}\n"
         caption += f"⏱️ Примерный срок: {order.product.estimated_days} дней\n"
+        if order.deadline:
+            caption += f"📆 Срок выполнения: {order.deadline.strftime('%d.%m.%Y')}\n"
         caption += f"📅 Дата заказа: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
     else:  # English
         caption = "📋 <b>NEW ORDER</b>\n\n"
@@ -694,6 +698,8 @@ def generate_order_summary_caption(order, language):
         caption += f"💵 Total amount: {total_price:,.0f} sum\n"
         caption += f"💳 Payment: {payment_status}\n"
         caption += f"⏱️ Estimated time: {order.product.estimated_days} days\n"
+        if order.deadline:
+            caption += f"📆 Deadline: {order.deadline.strftime('%d.%m.%Y')}\n"
         caption += f"📅 Order date: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
 
     return caption
