@@ -3,6 +3,7 @@ Marketing Views for Dashboard
 
 Handles CRUD operations for marketing posts and broadcast management.
 """
+import json
 import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -113,8 +114,10 @@ def marketing_list(request):
         
         if marketing_permissions['centers']:
             q |= Q(target_center__in=marketing_permissions['centers'])
+            q |= Q(target_centers__in=marketing_permissions['centers'])
         if marketing_permissions['branches']:
             q |= Q(target_branch__in=marketing_permissions['branches'])
+            q |= Q(target_branches__in=marketing_permissions['branches'])
         
         posts = MarketingPost.objects.filter(q).distinct()
     
@@ -173,69 +176,92 @@ def marketing_create(request):
         content = request.POST.get('content', '').strip()
         content_type = request.POST.get('content_type', 'text')
         target_scope = request.POST.get('target_scope', 'branch')
-        target_center_id = request.POST.get('target_center')
-        target_branch_id = request.POST.get('target_branch')
+        # Support both single value (legacy) and multi-select lists
+        target_center_ids = request.POST.getlist('target_center_ids') or \
+                            ([request.POST.get('target_center')] if request.POST.get('target_center') else [])
+        target_branch_ids = request.POST.getlist('target_branch_ids') or \
+                            ([request.POST.get('target_branch')] if request.POST.get('target_branch') else [])
         include_b2c = request.POST.get('include_b2c') == 'on'
         include_b2b = request.POST.get('include_b2b') == 'on'
         scheduled_at = request.POST.get('scheduled_at')
-        
+
         # Validation
         errors = []
-        
+
         if not title:
             errors.append(_("Title is required"))
         if not content:
             errors.append(_("Content is required"))
-        
+
         # Validate scope permissions
         if target_scope == 'all' and not permissions['can_platform_wide']:
             errors.append(_("You don't have permission for platform-wide broadcasts"))
         elif target_scope == 'center' and not permissions['can_center_wide']:
             errors.append(_("You don't have permission for center-wide broadcasts"))
-        
+
         # Validate center/branch access
-        target_center = None
-        target_branch = None
-        
-        if target_scope in ['center', 'branch'] and target_center_id:
-            try:
-                target_center = TranslationCenter.objects.get(id=target_center_id)
-                if target_center not in permissions['centers'] and not request.user.is_superuser:
-                    errors.append(_("You don't have access to this center"))
-            except TranslationCenter.DoesNotExist:
-                errors.append(_("Invalid center selected"))
-        
-        if target_scope == 'branch' and target_branch_id:
-            try:
-                target_branch = Branch.objects.get(id=target_branch_id)
-                if target_branch not in permissions['branches'] and not request.user.is_superuser:
-                    errors.append(_("You don't have access to this branch"))
-            except Branch.DoesNotExist:
-                errors.append(_("Invalid branch selected"))
-        
+        target_centers = []
+        target_branches = []
+
+        if target_scope in ['center', 'branch'] and target_center_ids:
+            for cid in target_center_ids:
+                if not cid:
+                    continue
+                try:
+                    c = TranslationCenter.objects.get(id=cid)
+                    if c not in permissions['centers'] and not request.user.is_superuser:
+                        errors.append(_("You don't have access to center: %(name)s") % {'name': c.name})
+                    else:
+                        target_centers.append(c)
+                except TranslationCenter.DoesNotExist:
+                    errors.append(_("Invalid center selected"))
+
+        if target_scope == 'branch' and target_branch_ids:
+            for bid in target_branch_ids:
+                if not bid:
+                    continue
+                try:
+                    b = Branch.objects.get(id=bid)
+                    if b not in permissions['branches'] and not request.user.is_superuser:
+                        errors.append(_("You don't have access to branch: %(name)s") % {'name': b.name})
+                    else:
+                        target_branches.append(b)
+                except Branch.DoesNotExist:
+                    errors.append(_("Invalid branch selected"))
+
         if errors:
             for error in errors:
                 messages.error(request, error)
         else:
+            # Single FK: use first selected value (for backward compat); M2M holds all
+            target_center_fk = target_centers[0] if len(target_centers) == 1 else None
+            target_branch_fk = target_branches[0] if len(target_branches) == 1 else None
+
             # Create post
             post = MarketingPost.objects.create(
                 title=title,
                 content=content,
                 content_type=content_type,
                 target_scope=target_scope,
-                target_center=target_center,
-                target_branch=target_branch,
+                target_center=target_center_fk,
+                target_branch=target_branch_fk,
                 include_b2c=include_b2c,
                 include_b2b=include_b2b,
                 created_by=request.user,
                 status=MarketingPost.STATUS_DRAFT
             )
-            
+
+            # Save multi-select targets
+            if target_centers:
+                post.target_centers.set(target_centers)
+            if target_branches:
+                post.target_branches.set(target_branches)
+
             # Handle media file
             if 'media_file' in request.FILES:
                 post.media_file = request.FILES['media_file']
                 post.save()
-            
+
             # Handle scheduling
             if scheduled_at:
                 try:
@@ -247,18 +273,67 @@ def marketing_create(request):
                         post.save()
                 except Exception:
                     pass
-            
+
             log_action(
                 user=request.user,
                 action='create',
                 target=post,
-                details=f"Created marketing post: {title}",
+                details=f"Created marketing post: {title} | scope={target_scope} | centers={[c.name for c in target_centers]} | branches={[b.name for b in target_branches]}",
                 request=request
             )
-            
+
             messages.success(request, _("Marketing post created successfully."))
             return redirect('marketing_detail', post_id=post.id)
     
+    # Bot user statistics — scoped to user's accessible center/branch
+    from accounts.models import BotUser
+    from django.db.models import Q as _BUQ
+    _bu_base = BotUser.objects.filter(user_id__isnull=False)
+    if not request.user.is_superuser and request.admin_profile:
+        if request.admin_profile.center:
+            _bu_base = _bu_base.filter(
+                _BUQ(branch__center=request.admin_profile.center) |
+                _BUQ(center=request.admin_profile.center)
+            )
+        elif request.admin_profile.branch:
+            _bu_base = _bu_base.filter(branch=request.admin_profile.branch)
+        else:
+            _bu_base = BotUser.objects.none()
+    total_bot_users = _bu_base.count()
+    active_bot_users = _bu_base.filter(is_active=True).count()
+    inactive_bot_users = _bu_base.filter(is_active=False).count()
+    unassigned_bot_users = _bu_base.filter(branch__isnull=True).count()
+
+    center_stats = []
+    branch_stats = {}  # center_id -> list of {id, name, total, active}
+    if request.user.is_superuser:
+        centers_qs = TranslationCenter.objects.filter(is_active=True).order_by('name')
+        for c in centers_qs:
+            total = BotUser.objects.filter(user_id__isnull=False, branch__center=c).count()
+            active = BotUser.objects.filter(user_id__isnull=False, is_active=True, branch__center=c).count()
+            inactive = total - active
+            center_stats.append({'id': c.id, 'name': c.name, 'total': total, 'active': active, 'inactive': inactive})
+            # Per-branch stats for this center
+            branches_for_center = []
+            for br in Branch.objects.filter(center=c, is_active=True).order_by('name'):
+                br_total = BotUser.objects.filter(user_id__isnull=False, branch=br).count()
+                br_active = BotUser.objects.filter(user_id__isnull=False, is_active=True, branch=br).count()
+                branches_for_center.append({'id': br.id, 'name': br.name, 'total': br_total, 'active': br_active})
+            branch_stats[c.id] = branches_for_center
+    elif not request.user.is_superuser:
+        # Non-superuser: build center_stats + branch_stats from accessible centers/branches
+        for c in permissions['centers']:
+            total = BotUser.objects.filter(user_id__isnull=False, branch__center=c).count()
+            active = BotUser.objects.filter(user_id__isnull=False, is_active=True, branch__center=c).count()
+            center_stats.append({'id': c.id, 'name': c.name, 'total': total, 'active': active, 'inactive': total - active})
+            branches_for_center = []
+            for br in permissions['branches']:
+                if br.center_id == c.id:
+                    br_total = BotUser.objects.filter(user_id__isnull=False, branch=br).count()
+                    br_active = BotUser.objects.filter(user_id__isnull=False, is_active=True, branch=br).count()
+                    branches_for_center.append({'id': br.id, 'name': br.name, 'total': br_total, 'active': br_active})
+            branch_stats[c.id] = branches_for_center
+
     context = {
         'title': _('Create Marketing Post'),
         'subTitle': _('New Broadcast'),
@@ -267,14 +342,20 @@ def marketing_create(request):
         'scope_choices': [
             (MarketingPost.SCOPE_BRANCH, _('Branch Users')),
         ],
+        'total_bot_users': total_bot_users,
+        'active_bot_users': active_bot_users,
+        'inactive_bot_users': inactive_bot_users,
+        'unassigned_bot_users': unassigned_bot_users,
+        'center_stats': center_stats,
+        'branch_stats_json': json.dumps(branch_stats),
     }
-    
+
     # Add scope choices based on permissions
     if permissions['can_center_wide']:
         context['scope_choices'].insert(0, (MarketingPost.SCOPE_CENTER, _('Center Users')))
     if permissions['can_platform_wide']:
         context['scope_choices'].insert(0, (MarketingPost.SCOPE_ALL, _('All Platform Users')))
-    
+
     return render(request, 'marketing/create.html', context)
 
 
@@ -689,35 +770,70 @@ def marketing_cancel(request, post_id):
 @any_permission_required('can_create_marketing_posts', 'can_manage_marketing')
 @require_GET
 def api_recipient_count(request):
-    """API to get recipient count for given scope"""
+    """API to get recipient count for given scope — supports multi-select center/branch IDs."""
+    from accounts.models import BotUser
+    from .models import UserBroadcastPreference
+    from django.db.models import Q
+
     scope = request.GET.get('scope', 'branch')
-    center_id = request.GET.get('center_id')
-    branch_id = request.GET.get('branch_id')
+    # Accept both single values (legacy) and comma-separated / repeated params
+    center_ids = [x for x in request.GET.getlist('center_ids') if x]
+    if not center_ids and request.GET.get('center_id'):
+        center_ids = [request.GET.get('center_id')]
+
+    branch_ids = [x for x in request.GET.getlist('branch_ids') if x]
+    if not branch_ids and request.GET.get('branch_id'):
+        branch_ids = [request.GET.get('branch_id')]
+
     include_b2c = request.GET.get('include_b2c', 'true') == 'true'
     include_b2b = request.GET.get('include_b2b', 'true') == 'true'
-    
-    # Create temporary post object for counting
-    temp_post = MarketingPost(
-        target_scope=scope,
-        include_b2c=include_b2c,
-        include_b2b=include_b2b
-    )
-    
-    if center_id:
-        try:
-            temp_post.target_center = TranslationCenter.objects.get(id=center_id)
-        except TranslationCenter.DoesNotExist:
-            pass
-    
-    if branch_id:
-        try:
-            temp_post.target_branch = Branch.objects.get(id=branch_id)
-        except Branch.DoesNotExist:
-            pass
-    
+
     try:
-        count = get_recipient_count(temp_post)
+        base_query = BotUser.objects.filter(is_active=True, user_id__isnull=False)
+
+        if scope == 'all':
+            pass  # no extra filter
+
+        elif scope == 'center':
+            if not center_ids:
+                return JsonResponse({'success': True, 'count': 0})
+            base_query = base_query.filter(
+                Q(center_id__in=center_ids) | Q(branch__center_id__in=center_ids)
+            )
+
+        elif scope == 'branch':
+            if not branch_ids:
+                return JsonResponse({'success': True, 'count': 0})
+            branch_id_ints = [int(x) for x in branch_ids]
+            center_ids_for_branches = list(
+                Branch.objects.filter(id__in=branch_id_ints)
+                .values_list('center_id', flat=True).distinct()
+            )
+            base_query = base_query.filter(
+                Q(branch_id__in=branch_id_ints) |
+                Q(branch__isnull=True, center_id__in=center_ids_for_branches)
+            )
+
+        else:
+            return JsonResponse({'success': True, 'count': 0})
+
+        # Customer type filter
+        if not include_b2c and not include_b2b:
+            return JsonResponse({'success': True, 'count': 0})
+        if not include_b2c:
+            base_query = base_query.filter(is_agency=True)
+        elif not include_b2b:
+            base_query = base_query.filter(is_agency=False)
+
+        # Exclude opted-out users
+        opted_out = UserBroadcastPreference.objects.filter(
+            receive_marketing=False
+        ).values_list('bot_user_id', flat=True)
+        base_query = base_query.exclude(id__in=opted_out)
+
+        count = base_query.distinct().count()
         return JsonResponse({'success': True, 'count': count})
+
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
 

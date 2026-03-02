@@ -111,7 +111,23 @@ class MarketingPost(models.Model):
         verbose_name=_('Target Branch'),
         help_text=_('Required for branch scope')
     )
-    
+
+    # Multi-target fields (allow selecting multiple centers/branches)
+    target_centers = models.ManyToManyField(
+        'organizations.TranslationCenter',
+        blank=True,
+        related_name='multi_marketing_posts',
+        verbose_name=_('Target Centers'),
+        help_text=_('Multiple centers for multi-center broadcasts')
+    )
+    target_branches = models.ManyToManyField(
+        'organizations.Branch',
+        blank=True,
+        related_name='multi_marketing_posts',
+        verbose_name=_('Target Branches'),
+        help_text=_('Multiple branches for multi-branch broadcasts')
+    )
+
     # Customer type filter
     include_b2c = models.BooleanField(
         _('Include B2C Customers'),

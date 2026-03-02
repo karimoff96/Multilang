@@ -779,6 +779,8 @@ def customer_analytics(request):
     custom_to = request.GET.get("date_to")
     branch_id = request.GET.get("branch")
     center_id = request.GET.get("center")
+    source_filter = request.GET.get("source", "")      # "" / "bot" / "manual"
+    language_filter = request.GET.get("language", "")  # "" / "uz" / "ru" / "en"
 
     # Get period dates
     period_data = get_period_dates(period, custom_from, custom_to)
@@ -797,7 +799,6 @@ def customer_analytics(request):
     if request.user.is_superuser:
         centers = TranslationCenter.objects.filter(is_active=True)
         if center_id:
-            # Filter customers who have orders in branches of this center
             customer_ids = (
                 orders.filter(branch__center_id=center_id)
                 .values_list("bot_user_id", flat=True)
@@ -811,19 +812,54 @@ def customer_analytics(request):
         customers = customers.filter(branch_id=branch_id)
         orders = orders.filter(branch_id=branch_id)
 
-    # Date range filter
+    # Source filter (bot = has Telegram ID / manual = no Telegram ID)
+    if source_filter == "bot":
+        customers = customers.filter(user_id__isnull=False)
+    elif source_filter == "manual":
+        customers = customers.filter(user_id__isnull=True)
+
+    # Language filter
+    if language_filter:
+        customers = customers.filter(language=language_filter)
+
+    # Date range filter for orders
     orders = orders.filter(created_at__gte=date_from, created_at__lte=date_to)
 
-    # Customer metrics
+    # ── Core metrics ────────────────────────────────────────────────────────
     total_customers = customers.count()
     active_customers = customers.filter(is_active=True).count()
     new_customers = customers.filter(
         created_at__gte=date_from, created_at__lte=date_to
     ).count()
-
     agencies = customers.filter(is_agency=True).count()
 
-    # Customer acquisition trend
+    # Bot vs manual breakdown (always on the full/unfiltered-by-source customers
+    # so the cards make sense; re-derive from the pre-source queryset)
+    _base = get_user_customers(request.user)
+    if center_id and request.user.is_superuser:
+        _customer_ids = (
+            get_user_orders(request.user).filter(branch__center_id=center_id)
+            .values_list("bot_user_id", flat=True).distinct()
+        )
+        _base = _base.filter(id__in=_customer_ids)
+    if branch_id:
+        _base = _base.filter(branch_id=branch_id)
+    if language_filter:
+        _base = _base.filter(language=language_filter)
+    bot_customers = _base.filter(user_id__isnull=False).count()
+    manual_customers = _base.filter(user_id__isnull=True).count()
+
+    # Language breakdown
+    lang_uz = customers.filter(language="uz").count()
+    lang_ru = customers.filter(language="ru").count()
+    lang_en = customers.filter(language="en").count()
+    lang_breakdown = [
+        {"lang": "uz", "label": "Uzbek", "count": lang_uz, "color": "primary"},
+        {"lang": "ru", "label": "Russian", "count": lang_ru, "color": "info"},
+        {"lang": "en", "label": "English", "count": lang_en, "color": "success"},
+    ]
+
+    # ── Customer acquisition trend ──────────────────────────────────────────
     acquisition_data = (
         customers.filter(created_at__gte=date_from, created_at__lte=date_to)
         .annotate(period=trunc_func("created_at"))
@@ -831,7 +867,6 @@ def customer_analytics(request):
         .annotate(count=Count("id"))
         .order_by("period")
     )
-
     acquisition_labels = []
     acquisition_values = []
     for item in acquisition_data:
@@ -839,29 +874,49 @@ def customer_analytics(request):
             acquisition_labels.append(item["period"].strftime(date_format))
             acquisition_values.append(item["count"])
 
-    # Top customers by orders
-    top_customers = (
+    # ── Top customers by orders ─────────────────────────────────────────────
+    top_customers_qs = (
         orders.filter(bot_user__isnull=False)
-        .values("bot_user__id", "bot_user__name", "bot_user__is_agency")
+        .values("bot_user__id", "bot_user__name", "bot_user__is_agency",
+                "bot_user__user_id", "bot_user__username", "bot_user__language")
         .annotate(order_count=Count("id"), total_spent=Sum("total_price"))
         .order_by("-total_spent")[:10]
     )
-
     top_customer_data = []
-    for item in top_customers:
-        top_customer_data.append(
-            {
-                "name": item["bot_user__name"] or "Unknown",
-                "is_agency": item["bot_user__is_agency"],
-                "order_count": item["order_count"],
-                "total_spent": float(item["total_spent"] or 0),
-            }
+    for item in top_customers_qs:
+        top_customer_data.append({
+            "name": item["bot_user__name"] or "Unknown",
+            "is_agency": item["bot_user__is_agency"],
+            "from_bot": item["bot_user__user_id"] is not None,
+            "username": item["bot_user__username"] or "",
+            "language": item["bot_user__language"] or "uz",
+            "order_count": item["order_count"],
+            "total_spent": float(item["total_spent"] or 0),
+        })
+
+    # ── Full customer list (paginated) ──────────────────────────────────────
+    customer_list_qs = customers.select_related("branch", "branch__center").annotate(
+        order_count=Count("order", distinct=True),
+        total_spent=Sum("order__total_price"),
+    ).order_by("-created_at")
+
+    customer_search = request.GET.get("q", "").strip()
+    if customer_search:
+        customer_list_qs = customer_list_qs.filter(
+            Q(name__icontains=customer_search)
+            | Q(phone__icontains=customer_search)
+            | Q(username__icontains=customer_search)
         )
 
-    # Customer type breakdown
+    paginator = Paginator(customer_list_qs, 25)
+    customer_page = paginator.get_page(request.GET.get("cpage", 1))
+
+    # ── Type breakdown ──────────────────────────────────────────────────────
     type_breakdown = [
-        {"type": "Agencies", "count": agencies},
-        {"type": "Regular Customers", "count": total_customers - agencies},
+        {"type": _("Via Telegram Bot"), "count": bot_customers, "color": "primary", "icon": "mdi:telegram"},
+        {"type": _("Added Manually"), "count": manual_customers, "color": "secondary", "icon": "solar:user-plus-bold"},
+        {"type": _("Agencies"), "count": agencies, "color": "warning", "icon": "solar:buildings-bold"},
+        {"type": _("Regular"), "count": total_customers - agencies, "color": "success", "icon": "solar:user-bold"},
     ]
 
     context = {
@@ -880,17 +935,29 @@ def customer_analytics(request):
         "selected_branch": branch_id,
         "centers": centers,
         "selected_center": center_id,
+        "source_filter": source_filter,
+        "language_filter": language_filter,
+        "customer_search": customer_search,
         # Metrics
         "total_customers": total_customers,
         "active_customers": active_customers,
         "new_customers": new_customers,
         "agencies": agencies,
+        "bot_customers": bot_customers,
+        "manual_customers": manual_customers,
+        # Language
+        "lang_breakdown": lang_breakdown,
+        "lang_labels_json": json.dumps([r["label"] for r in lang_breakdown]),
+        "lang_values_json": json.dumps([r["count"] for r in lang_breakdown]),
         # Chart data
         "acquisition_labels": json.dumps(acquisition_labels),
         "acquisition_values": json.dumps(acquisition_values),
         # Breakdowns
         "top_customers": top_customer_data,
         "type_breakdown": type_breakdown,
+        # Customer list
+        "customer_page": customer_page,
+        "customer_total": paginator.count,
     }
     return render(request, "reports/customers.html", context)
 

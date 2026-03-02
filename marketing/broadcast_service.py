@@ -152,11 +152,24 @@ class BroadcastService:
             return getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
         
         elif self.post.target_scope == MarketingPost.SCOPE_CENTER:
-            if self.post.target_center and self.post.target_center.bot_token:
+            # Try M2M centers first, then single FK
+            multi_centers = list(self.post.target_centers.all()) if self.post.pk else []
+            if multi_centers:
+                # Use first center's token that has one, else fallback
+                for c in multi_centers:
+                    if c.bot_token:
+                        return c.bot_token
+            elif self.post.target_center and self.post.target_center.bot_token:
                 return self.post.target_center.bot_token
         
         elif self.post.target_scope == MarketingPost.SCOPE_BRANCH:
-            if self.post.target_branch and self.post.target_branch.center:
+            # Try M2M branches first, then single FK
+            multi_branches = list(self.post.target_branches.all()) if self.post.pk else []
+            if multi_branches:
+                for b in multi_branches:
+                    if b.center and b.center.bot_token:
+                        return b.center.bot_token
+            elif self.post.target_branch and self.post.target_branch.center:
                 center = self.post.target_branch.center
                 if center.bot_token:
                     return center.bot_token
@@ -168,6 +181,7 @@ class BroadcastService:
         """
         Get list of recipients based on post scope.
         Respects multi-tenant boundaries and user preferences.
+        Supports both single FK targeting and multi M2M targeting.
         """
         base_query = BotUser.objects.filter(
             is_active=True,
@@ -180,22 +194,44 @@ class BroadcastService:
             pass
         
         elif self.post.target_scope == MarketingPost.SCOPE_CENTER:
-            if not self.post.target_center:
+            # Check M2M first, then single FK
+            multi_centers = list(self.post.target_centers.values_list('id', flat=True)) if self.post.pk else []
+            if multi_centers:
+                # Multiple centers: union of all branches across selected centers
+                base_query = base_query.filter(
+                    Q(center_id__in=multi_centers) |
+                    Q(branch__center_id__in=multi_centers)
+                )
+            elif self.post.target_center:
+                center_branches = list(self.post.target_center.branches.values_list('id', flat=True))
+                base_query = base_query.filter(
+                    Q(center=self.post.target_center) | Q(branch_id__in=center_branches)
+                )
+            else:
                 return []
-            # All users belonging to this center (either via center or branch)
-            center_branches = list(self.post.target_center.branches.values_list('id', flat=True))
-            base_query = base_query.filter(
-                Q(center=self.post.target_center) | Q(branch_id__in=center_branches)
-            )
         
         elif self.post.target_scope == MarketingPost.SCOPE_BRANCH:
-            if not self.post.target_branch:
+            # Check M2M first, then single FK
+            multi_branches = list(self.post.target_branches.values_list('id', flat=True)) if self.post.pk else []
+            if multi_branches:
+                # Multiple branches
+                # Also include no-branch users in any of the affected centers
+                center_ids = list(
+                    Branch.objects.filter(id__in=multi_branches)
+                    .values_list('center_id', flat=True)
+                    .distinct()
+                )
+                base_query = base_query.filter(
+                    Q(branch_id__in=multi_branches) |
+                    Q(branch__isnull=True, center_id__in=center_ids)
+                )
+            elif self.post.target_branch:
+                base_query = base_query.filter(
+                    Q(branch=self.post.target_branch) |
+                    Q(branch__isnull=True, center=self.post.target_branch.center)
+                )
+            else:
                 return []
-            # Users belonging to this branch OR users with center but no branch who are in this center
-            base_query = base_query.filter(
-                Q(branch=self.post.target_branch) |
-                Q(branch__isnull=True, center=self.post.target_branch.center)
-            )
         
         # Filter by customer type
         if not self.post.include_b2c and not self.post.include_b2b:

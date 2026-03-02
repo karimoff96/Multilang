@@ -563,8 +563,17 @@ def orderEdit(request, order_id):
                     )
                     order.bot_user = bot_user
             elif bot_user_id:
-                # Bot user order - update bot_user reference
-                order.bot_user = BotUser.objects.get(pk=bot_user_id)
+                # Bot user order - update bot_user reference; validate cross-center access
+                _new_bot_user = BotUser.objects.get(pk=bot_user_id)
+                if not request.user.is_superuser and request.admin_profile:
+                    _accessible_branches = request.admin_profile.get_accessible_branches()
+                    _customer_in_scope = (
+                        (_new_bot_user.branch_id and _accessible_branches.filter(pk=_new_bot_user.branch_id).exists()) or
+                        (request.admin_profile.center_id and _new_bot_user.center_id == request.admin_profile.center_id)
+                    )
+                    if not _customer_in_scope:
+                        raise PermissionError("Customer outside your accessible scope.")
+                order.bot_user = _new_bot_user
                 # Clear manual fields
                 order.manual_first_name = None
                 order.manual_last_name = None
@@ -572,7 +581,12 @@ def orderEdit(request, order_id):
             
             # Update order
             if branch_id:
-                order.branch = Branch.objects.get(pk=branch_id)
+                _new_branch = Branch.objects.get(pk=branch_id)
+                if not request.user.is_superuser and request.admin_profile:
+                    _accessible_branches = request.admin_profile.get_accessible_branches()
+                    if not _accessible_branches.filter(pk=_new_branch.pk).exists():
+                        raise PermissionError("Branch outside your accessible scope.")
+                order.branch = _new_branch
             if product_id:
                 order.product = Product.objects.get(pk=product_id)
             if language_id:
@@ -673,6 +687,9 @@ def orderEdit(request, order_id):
             messages.success(request, f'Order #{order_id} updated successfully.')
             return redirect('orders:orderDetail', order_id=order_id)
             
+        except PermissionError as pe:
+            messages.error(request, _("You don't have permission to make that change: ") + str(pe))
+            return redirect('orders:orderDetail', order_id=order_id)
         except Exception as e:
             messages.error(request, f'Error updating order: {str(e)}')
     
@@ -1260,10 +1277,26 @@ def orderCreate(request):
                     bot_user.name = new_name
                     bot_user.save()
             else:
-                # Get existing bot user
+                # Get existing bot user — validate scope to prevent cross-center access
                 bot_user = BotUser.objects.get(id=bot_user_id)
+                if not request.user.is_superuser and request.admin_profile:
+                    _accessible_branches = request.admin_profile.get_accessible_branches()
+                    _customer_in_scope = (
+                        (bot_user.branch_id and _accessible_branches.filter(pk=bot_user.branch_id).exists()) or
+                        (request.admin_profile.center_id and bot_user.center_id == request.admin_profile.center_id)
+                    )
+                    if not _customer_in_scope:
+                        messages.error(request, _("You don't have access to the selected customer."))
+                        return redirect('orders:orderCreate')
+
             product = Product.objects.get(id=product_id)
             branch = Branch.objects.get(id=branch_id)
+            # Validate branch is within user's accessible scope
+            if not request.user.is_superuser and request.admin_profile:
+                _accessible_branches = request.admin_profile.get_accessible_branches()
+                if not _accessible_branches.filter(pk=branch.pk).exists():
+                    messages.error(request, _("You don't have access to the selected branch."))
+                    return redirect('orders:orderCreate')
             language = Language.objects.get(id=language_id) if language_id else None
             
             # Calculate total price using the Order model logic so it honors:

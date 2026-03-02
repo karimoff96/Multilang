@@ -3,11 +3,12 @@
 
 {% block content %}
 <div class="row gy-4">
+    <!-- ── Left: Form ─────────────────────────────────────────────── -->
     <div class="col-lg-8">
         <div class="card h-100 p-0 radius-12">
             <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="text-lg fw-semibold mb-0">
-                    <iconify-icon icon="mdi:bullhorn" class="me-2"></iconify-icon>
+                    <iconify-icon icon="mdi:bullhorn" class="me-2 text-primary-600"></iconify-icon>
                     Create Marketing Post
                 </h6>
                 <a href="{% url 'marketing_list' %}" class="btn btn-outline-secondary btn-sm">
@@ -17,113 +18,238 @@
             <div class="card-body p-24">
                 <form method="post" action="{% url 'marketing_create' %}" enctype="multipart/form-data" id="createForm">
                     {% csrf_token %}
-                    
-                    <!-- Title -->
+
+                    <!-- §1  Basic info -->
+                    <div class="d-flex align-items-center gap-8 mb-16">
+                        <span class="badge bg-primary-600 text-white px-10 py-6 radius-6 text-xs fw-bold">1</span>
+                        <h6 class="text-md fw-semibold mb-0">Post Details</h6>
+                    </div>
+
                     <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Title *</label>
-                        <input type="text" name="title" class="form-control radius-8" 
-                               placeholder="Internal title for this post" required>
-                        <small class="text-secondary-light">For internal reference only, not sent to users</small>
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                            Internal Title <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="title" class="form-control radius-8"
+                               placeholder="e.g. Summer promo – July 2025" required>
+                        <small class="text-muted">For internal reference only, not sent to users</small>
                     </div>
-                    
-                    <!-- Content Type -->
+
+                    <div class="row gx-16 mb-20">
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Content Type</label>
+                            <select name="content_type" class="form-select radius-8" id="contentType" onchange="toggleMediaUpload()">
+                                {% for value, label in content_type_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-sm-6" id="mediaUploadSection" style="display:none;">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Media File</label>
+                            <input type="file" name="media_file" class="form-control radius-8"
+                                   accept="image/*,video/*,.pdf,.doc,.docx">
+                        </div>
+                    </div>
+
                     <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Content Type</label>
-                        <select name="content_type" class="form-select radius-8" id="contentType" onchange="toggleMediaUpload()">
-                            {% for value, label in content_type_choices %}
-                            <option value="{{ value }}">{{ label }}</option>
-                            {% endfor %}
-                        </select>
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                            Message Content <span class="text-danger">*</span>
+                        </label>
+                        <textarea name="content" class="form-control radius-8" rows="7" id="messageContent"
+                                  placeholder="Write your message here. HTML: &lt;b&gt;bold&lt;/b&gt;, &lt;i&gt;italic&lt;/i&gt;, &lt;a href='…'&gt;link&lt;/a&gt;"
+                                  required></textarea>
+                        <div class="d-flex gap-8 mt-6 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-outline-secondary px-10 py-4 radius-6 fmt-btn" data-tag="b"><b>B</b></button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary px-10 py-4 radius-6 fmt-btn" data-tag="i"><i>I</i></button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary px-10 py-4 radius-6 fmt-btn" data-tag="code">code</button>
+                            <small class="text-muted align-self-center ms-4">Wrap selection in tag</small>
+                        </div>
                     </div>
-                    
-                    <!-- Media File -->
-                    <div class="mb-20" id="mediaUploadSection" style="display: none;">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Media File</label>
-                        <input type="file" name="media_file" class="form-control radius-8" 
-                               accept="image/*,video/*,.pdf,.doc,.docx">
-                        <small class="text-secondary-light">Upload image, video, or document to send with message</small>
-                    </div>
-                    
-                    <!-- Content -->
-                    <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Message Content *</label>
-                        <textarea name="content" class="form-control radius-8" rows="6" 
-                                  placeholder="Write your message here. You can use HTML: <b>bold</b>, <i>italic</i>, <a href='url'>link</a>" required></textarea>
-                        <small class="text-secondary-light">Supports HTML formatting: &lt;b&gt;, &lt;i&gt;, &lt;a&gt;, &lt;code&gt;</small>
-                    </div>
-                    
+
                     <hr class="my-24">
-                    
-                    <!-- Target Scope -->
-                    <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Target Audience *</label>
-                        <select name="target_scope" class="form-select radius-8" id="targetScope" onchange="updateTargetOptions()">
-                            {% for value, label in scope_choices %}
-                            <option value="{{ value }}">{{ label }}</option>
-                            {% endfor %}
-                        </select>
+
+                    <!-- §2  Target Audience -->
+                    <div class="d-flex align-items-center gap-8 mb-16">
+                        <span class="badge bg-primary-600 text-white px-10 py-6 radius-6 text-xs fw-bold">2</span>
+                        <h6 class="text-md fw-semibold mb-0">Target Audience</h6>
                     </div>
-                    
-                    <!-- Center Selection (for center/branch scope) -->
-                    <div class="mb-20" id="centerSection" style="display: none;">
+
+                    <!-- Scope cards -->
+                    <div class="mb-20">
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-10">Broadcast Scope</label>
+                        <input type="hidden" name="target_scope" id="targetScope" value="">
+                        <div class="d-flex flex-wrap gap-10" id="scopeCards">
+                            {% for value, label in scope_choices %}
+                            <label class="scope-card cursor-pointer border radius-10 px-16 py-12 d-flex align-items-center gap-10"
+                                   data-scope="{{ value }}" onclick="selectScope('{{ value }}', this)">
+                                <input type="radio" name="_scope_ui" value="{{ value }}" class="d-none">
+                                {% if value == 'all' %}
+                                    <iconify-icon icon="mdi:earth" class="text-primary-600 text-xl"></iconify-icon>
+                                    <div>
+                                        <div class="fw-semibold text-sm">{{ label }}</div>
+                                        <div class="text-xs text-muted">Every registered bot user</div>
+                                    </div>
+                                {% elif value == 'center' %}
+                                    <iconify-icon icon="mdi:office-building" class="text-primary-600 text-xl"></iconify-icon>
+                                    <div>
+                                        <div class="fw-semibold text-sm">{{ label }}</div>
+                                        <div class="text-xs text-muted">All branches of one center</div>
+                                    </div>
+                                {% else %}
+                                    <iconify-icon icon="mdi:source-branch" class="text-primary-600 text-xl"></iconify-icon>
+                                    <div>
+                                        <div class="fw-semibold text-sm">{{ label }}</div>
+                                        <div class="text-xs text-muted">One specific branch only</div>
+                                    </div>
+                                {% endif %}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Center checkboxes (multi-select) -->
+                    {% if center_stats %}
+                    <div id="centerCheckboxSection" style="display:none;" class="mb-20">
+                        <div class="d-flex align-items-center justify-content-between mb-10">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-0" id="centerCheckboxLabel">Select Centers</label>
+                            <div class="d-flex gap-8">
+                                <button type="button" class="btn btn-xs btn-outline-primary px-10 py-4 radius-6 text-xs" onclick="selectAllCenters(true)">All</button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary px-10 py-4 radius-6 text-xs" onclick="selectAllCenters(false)">None</button>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column gap-8" id="centerCheckboxList">
+                            {% for cs in center_stats %}
+                            <label class="center-check-card d-flex align-items-center justify-content-between border radius-8 px-16 py-10 cursor-pointer"
+                                   data-center-id="{{ cs.id }}">
+                                <div class="d-flex align-items-center gap-10">
+                                    <input type="checkbox" name="target_center_ids" class="form-check-input center-checkbox mt-0"
+                                           value="{{ cs.id }}" data-center-name="{{ cs.name }}"
+                                           data-total="{{ cs.total }}" data-active="{{ cs.active }}"
+                                           onchange="onCenterCheckChange()">
+                                    <span class="fw-medium text-sm">{{ cs.name }}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-8">
+                                    <span class="badge badge-primary-soft px-8 py-4 radius-6 text-xs">
+                                        {{ cs.total }} users
+                                    </span>
+                                    <span class="badge bg-success-focus text-success-main px-8 py-4 radius-6 text-xs">
+                                        {{ cs.active }} active
+                                    </span>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        <!-- Summary of selected -->
+                        <div id="centerSelectionSummary" class="mt-8 text-xs text-muted" style="display:none;">
+                            <iconify-icon icon="mdi:check-circle" class="text-success-main me-4"></iconify-icon>
+                            <span id="centerSelectionText"></span>
+                        </div>
+                    </div>
+
+                    <!-- Branch multi-select (grouped by center, scope=branch only) -->
+                    <div id="branchCheckboxSection" style="display:none;" class="mb-20">
+                        <div class="d-flex align-items-center justify-content-between mb-10">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-0">Select Branches</label>
+                            <div class="d-flex gap-8">
+                                <button type="button" class="btn btn-xs btn-outline-primary px-10 py-4 radius-6 text-xs" onclick="selectAllBranches(true)">All</button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary px-10 py-4 radius-6 text-xs" onclick="selectAllBranches(false)">None</button>
+                            </div>
+                        </div>
+                        <div id="branchCheckboxList" class="d-flex flex-column gap-12">
+                            {% for cs in center_stats %}
+                            <div class="border radius-10 overflow-hidden branch-center-group" data-center-id="{{ cs.id }}">
+                                <!-- Center header with its own "select all branches in this center" -->
+                                <div class="branch-center-header d-flex align-items-center justify-content-between px-14 py-10">
+                                    <div class="d-flex align-items-center gap-10">
+                                        <iconify-icon icon="mdi:office-building" class="text-primary-600"></iconify-icon>
+                                        <span class="fw-semibold text-sm">{{ cs.name }}</span>
+                                        <span class="badge badge-primary-soft px-8 py-3 radius-6 text-xs">{{ cs.total }}</span>
+                                    </div>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary px-8 py-3 radius-6 text-xs"
+                                            onclick="selectCenterBranches({{ cs.id }}, true)">Select all</button>
+                                </div>
+                                <!-- Branches list (rendered from JS using branch_stats_json) -->
+                                <div class="d-flex flex-column gap-0 branch-list" id="branchList_{{ cs.id }}" data-center-id="{{ cs.id }}">
+                                    <!-- Filled by JS -->
+                                </div>
+                            </div>
+                            {% empty %}
+                            <p class="text-muted text-sm">No centers available.</p>
+                            {% endfor %}
+                        </div>
+                        <!-- Summary of selected -->
+                        <div id="branchSelectionSummary" class="mt-8 text-xs text-muted" style="display:none;">
+                            <iconify-icon icon="mdi:check-circle" class="text-success-main me-4"></iconify-icon>
+                            <span id="branchSelectionText"></span>
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <!-- Fallback dropdown (non-superuser / no stats) -->
+                    <div id="centerDropdownSection" style="display:none;" class="mb-20">
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8">Select Center</label>
-                        <select name="target_center" class="form-select radius-8" id="targetCenter" onchange="loadBranches()">
+                        <select name="target_center_ids" class="form-select radius-8" id="centerDropdown" onchange="onCenterDropdownChange()">
                             <option value="">-- Select Center --</option>
                             {% for center in permissions.centers %}
                             <option value="{{ center.id }}">{{ center.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    
-                    <!-- Branch Selection (for branch scope) -->
-                    <div class="mb-20" id="branchSection" style="display: none;">
+
+                    <!-- Fallback branch dropdown -->
+                    <div id="branchDropdownSection" style="display:none;" class="mb-20">
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8">Select Branch</label>
-                        <select name="target_branch" class="form-select radius-8" id="targetBranch">
+                        <select name="target_branch_ids" class="form-select radius-8" id="targetBranch">
                             <option value="">-- Select Branch --</option>
                             {% for branch in permissions.branches %}
                             <option value="{{ branch.id }}" data-center="{{ branch.center_id }}">{{ branch.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    
-                    <!-- Customer Type Filters -->
+                    {% endif %}
+
+                    <!-- Customer Types -->
                     <div class="mb-20">
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8">Customer Types</label>
-                        <div class="d-flex gap-4">
+                        <div class="d-flex gap-16">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="include_b2c" id="includeB2C" checked onchange="updateRecipientCount()">
-                                <label class="form-check-label" for="includeB2C">
-                                    <iconify-icon icon="mdi:account" class="me-1"></iconify-icon>
-                                    B2C (Individual)
+                                <label class="form-check-label fw-medium text-sm" for="includeB2C">
+                                    <iconify-icon icon="mdi:account" class="me-1"></iconify-icon> B2C (Individual)
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="include_b2b" id="includeB2B" checked onchange="updateRecipientCount()">
-                                <label class="form-check-label" for="includeB2B">
-                                    <iconify-icon icon="mdi:domain" class="me-1"></iconify-icon>
-                                    B2B (Agency)
+                                <label class="form-check-label fw-medium text-sm" for="includeB2B">
+                                    <iconify-icon icon="mdi:domain" class="me-1"></iconify-icon> B2B (Agency)
                                 </label>
                             </div>
                         </div>
                     </div>
-                    
+
                     <hr class="my-24">
-                    
-                    <!-- Scheduling -->
-                    <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Schedule (Optional)</label>
-                        <input type="datetime-local" name="scheduled_at" class="form-control radius-8" id="scheduledAt">
-                        <small class="text-secondary-light">Leave empty to save as draft and send manually</small>
+
+                    <!-- §3  Scheduling -->
+                    <div class="d-flex align-items-center gap-8 mb-16">
+                        <span class="badge bg-primary-600 text-white px-10 py-6 radius-6 text-xs fw-bold">3</span>
+                        <h6 class="text-md fw-semibold mb-0">
+                            Scheduling <span class="text-muted fw-normal" style="font-size:13px;">(optional)</span>
+                        </h6>
                     </div>
-                    
-                    <!-- Submit -->
-                    <div class="d-flex justify-content-between align-items-center mt-32">
-                        <div id="recipientCount" class="text-secondary-light">
-                            <iconify-icon icon="mdi:account-group" class="me-1"></iconify-icon>
-                            Estimated recipients: <span id="countValue">-</span>
+                    <div class="mb-20">
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Send At</label>
+                        <input type="datetime-local" name="scheduled_at" class="form-control radius-8" id="scheduledAt">
+                        <small class="text-muted">Leave empty to save as draft — send manually later</small>
+                    </div>
+
+                    <!-- Submit bar -->
+                    <div class="d-flex justify-content-between align-items-center mt-32 pt-16 border-top">
+                        <div class="d-flex align-items-center gap-8">
+                            <iconify-icon icon="mdi:account-group" class="text-primary-600 text-xl"></iconify-icon>
+                            <span class="text-sm text-secondary-light">Estimated recipients:</span>
+                            <span class="badge bg-primary-100 text-primary-600 px-10 py-6 radius-6 fw-semibold" id="countValue">—</span>
                         </div>
                         <div class="d-flex gap-3">
-                            <a href="{% url 'marketing_list' %}" class="btn btn-outline-secondary px-24" data-i18n="actions.cancel">Cancel</a>
+                            <a href="{% url 'marketing_list' %}" class="btn btn-outline-secondary px-24">Cancel</a>
                             <button type="submit" class="btn btn-primary px-24">
                                 <iconify-icon icon="mdi:content-save" class="me-2"></iconify-icon>
                                 Save Post
@@ -134,132 +260,404 @@
             </div>
         </div>
     </div>
-    
-    <!-- Preview Sidebar -->
-    <div class="col-lg-4">
-        <div class="card radius-12 sticky-top" style="top: 100px;">
-            <div class="card-header border-bottom bg-base py-16 px-24">
+
+    <!-- ── Right Sidebar ──────────────────────────────────────────── -->
+    <div class="col-lg-4 d-flex flex-column gap-4">
+
+        <!-- Bot User Statistics -->
+        <div class="card radius-12">
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="text-md fw-semibold mb-0">
-                    <iconify-icon icon="mdi:eye" class="me-2"></iconify-icon>
-                    Message Preview
+                    <iconify-icon icon="mdi:telegram" class="me-2 text-primary-600"></iconify-icon>
+                    Bot Users
                 </h6>
+                <span class="badge bg-primary-100 text-primary-600 px-10 py-4 radius-6 text-xs">Telegram</span>
             </div>
-            <div class="card-body p-24">
-                <div class="bg-neutral-100 radius-8 p-16" id="messagePreview">
-                    <p class="text-secondary-light text-sm mb-0">Start typing to see preview...</p>
+            <div class="card-body p-20">
+                <div class="row g-2 mb-16">
+                    <div class="col-6">
+                        <div class="text-center p-10 radius-8 stat-tile-primary">
+                            <div class="fw-bold fs-5 stat-value">{{ total_bot_users }}</div>
+                            <div class="text-xs text-muted mt-1">Total</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-10 radius-8 bg-success-focus">
+                            <div class="fw-bold fs-5 text-success-main">{{ active_bot_users }}</div>
+                            <div class="text-xs text-muted mt-1">Active</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-10 radius-8 bg-danger-focus">
+                            <div class="fw-bold fs-5 text-danger-main">{{ inactive_bot_users }}</div>
+                            <div class="text-xs text-muted mt-1">Inactive</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-10 radius-8 bg-warning-focus">
+                            <div class="fw-bold fs-5 text-warning-main">{{ unassigned_bot_users }}</div>
+                            <div class="text-xs text-muted mt-1">No Branch</div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="mt-16">
-                    <h6 class="text-sm fw-semibold mb-8">HTML Formatting Tips:</h6>
-                    <ul class="text-sm text-secondary-light ps-16">
-                        <li><code>&lt;b&gt;bold&lt;/b&gt;</code></li>
-                        <li><code>&lt;i&gt;italic&lt;/i&gt;</code></li>
-                        <li><code>&lt;a href="url"&gt;link&lt;/a&gt;</code></li>
-                        <li><code>&lt;code&gt;code&lt;/code&gt;</code></li>
-                    </ul>
+
+                {% if total_bot_users %}
+                <div class="mb-16">
+                    <div class="d-flex justify-content-between text-xs text-muted mb-4">
+                        <span>Active ratio</span>
+                        <span>{{ active_bot_users }}/{{ total_bot_users }}</span>
+                    </div>
+                    <div class="progress" style="height:6px;border-radius:4px;">
+                        <div class="progress-bar bg-success" style="width:{% widthratio active_bot_users total_bot_users 100 %}%"></div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if center_stats %}
+                <h6 class="text-xs fw-bold text-uppercase text-muted mb-10" style="letter-spacing:.04em;">By Center</h6>
+                <div class="d-flex flex-column gap-8">
+                    {% for cs in center_stats %}
+                    <div class="border radius-8 px-12 py-10">
+                        <div class="d-flex align-items-center justify-content-between mb-6">
+                            <span class="text-sm fw-medium text-truncate" style="max-width:60%;">
+                                <span class="d-inline-block me-6" style="width:6px;height:6px;border-radius:50%;background:var(--primary-600);vertical-align:middle;"></span>
+                                {{ cs.name }}
+                            </span>
+                            <span class="badge badge-primary-soft px-8 py-3 radius-6 text-xs">{{ cs.total }}</span>
+                        </div>
+                        <div class="progress" style="height:4px;border-radius:4px;">
+                            {% if cs.total %}
+                            <div class="progress-bar bg-success" style="width:{% widthratio cs.active cs.total 100 %}%"></div>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex justify-content-between text-xs mt-4">
+                            <span class="text-success-main">{{ cs.active }} active</span>
+                            {% if cs.inactive %}<span class="text-danger-main">{{ cs.inactive }} inactive</span>{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if unassigned_bot_users %}
+                    <div class="border border-warning radius-8 px-12 py-10">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="text-sm fw-medium text-warning-main">
+                                <iconify-icon icon="mdi:help-circle-outline" class="me-4"></iconify-icon>
+                                No branch assigned
+                            </span>
+                            <span class="badge bg-warning-focus text-warning-main px-8 py-3 radius-6 text-xs">{{ unassigned_bot_users }}</span>
+                        </div>
+                        <small class="text-muted d-block mt-4" style="font-size:10px;">Registered in bot but no center/branch link</small>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Message Preview -->
+        <div class="card radius-12 sticky-top" style="top:100px;">
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center gap-8">
+                <iconify-icon icon="mdi:eye" class="text-primary-600"></iconify-icon>
+                <h6 class="text-md fw-semibold mb-0">Message Preview</h6>
+            </div>
+            <div class="card-body p-20">
+                <div class="msg-preview-bubble" id="messagePreview">
+                    <em class="text-muted" style="font-size:13px;">Start typing to see preview…</em>
+                </div>
+                <div class="mt-12">
+                    <h6 class="text-xs fw-bold text-uppercase text-muted mb-6" style="letter-spacing:.04em;">Supported HTML</h6>
+                    <div class="d-flex flex-wrap gap-6">
+                        <code class="text-xs px-6 py-2 radius-4 bg-neutral-100">&lt;b&gt;</code>
+                        <code class="text-xs px-6 py-2 radius-4 bg-neutral-100">&lt;i&gt;</code>
+                        <code class="text-xs px-6 py-2 radius-4 bg-neutral-100">&lt;a href&gt;</code>
+                        <code class="text-xs px-6 py-2 radius-4 bg-neutral-100">&lt;code&gt;</code>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+/* ── shared tokens (auto-adapt to dark mode) ────────────────────── */
+:root {
+  --mkt-soft-bg:      rgba(var(--primary-600-rgb, 79,70,229), 0.08);
+  --mkt-soft-hover:   rgba(var(--primary-600-rgb, 79,70,229), 0.14);
+  --mkt-soft-active:  rgba(var(--primary-600-rgb, 79,70,229), 0.16);
+  --mkt-badge-bg:     rgba(var(--primary-600-rgb, 79,70,229), 0.12);
+  --mkt-badge-color:  var(--primary-600);
+  --mkt-header-bg:    var(--bg-color, #f5f6fa);
+  --mkt-preview-bg:   var(--neutral-100, #f3f4f6);
+  --mkt-divider:      var(--border-color, rgba(209,213,219,.5));
+}
+html[data-theme="dark"] {
+  --mkt-soft-bg:      rgba(99,102,241,0.15);
+  --mkt-soft-hover:   rgba(99,102,241,0.22);
+  --mkt-soft-active:  rgba(99,102,241,0.25);
+  --mkt-badge-bg:     rgba(99,102,241,0.18);
+  --mkt-badge-color:  #a5b4fc;
+  --mkt-header-bg:    var(--neutral-100, #273142);
+  --mkt-preview-bg:   var(--neutral-200, #323d4e);
+  --mkt-divider:      rgba(255,255,255,0.08);
+}
+
+/* scope card */
+.scope-card { transition: border-color .15s, background .15s; user-select: none; }
+.scope-card:hover  { border-color: var(--primary-600) !important; background: var(--mkt-soft-hover) !important; }
+.scope-card.active { border-color: var(--primary-600) !important; background: var(--mkt-soft-active) !important; }
+
+/* center check card */
+.center-check-card { transition: border-color .15s, background .15s; user-select: none; }
+.center-check-card:hover { border-color: var(--primary-400, #818cf8); background: var(--mkt-soft-hover); }
+.center-check-card:has(.center-checkbox:checked) { border-color: var(--primary-600) !important; background: var(--mkt-soft-active); }
+
+/* branch row */
+.branch-item { display:flex; align-items:center; justify-content:space-between; padding:8px 14px;
+               border-bottom:1px solid var(--mkt-divider); transition: background .1s; }
+.branch-item:last-child { border-bottom:none; }
+.branch-item:hover { background: var(--mkt-soft-hover); }
+.branch-item:has(input:checked) { background: var(--mkt-soft-active); }
+
+/* branch center-group header */
+.branch-center-header {
+  background: var(--mkt-header-bg);
+  border-bottom: 1px solid var(--mkt-divider);
+}
+
+/* reusable primary-soft badge */
+.badge-primary-soft {
+  background: var(--mkt-badge-bg) !important;
+  color: var(--mkt-badge-color) !important;
+}
+
+/* stats tiles (sidebar) */
+.stat-tile-primary { background: var(--mkt-soft-bg); }
+.stat-tile-primary .stat-value { color: var(--primary-600); }
+
+/* message preview bubble */
+.msg-preview-bubble {
+  background: var(--mkt-preview-bg);
+  border-radius: 12px;
+  padding: 14px 16px;
+  min-height: 80px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+</style>
+
 <script>
-// Toggle media upload based on content type
-function toggleMediaUpload() {
-    const contentType = document.getElementById('contentType').value;
-    const mediaSection = document.getElementById('mediaUploadSection');
-    
-    if (contentType === 'text') {
-        mediaSection.style.display = 'none';
-    } else {
-        mediaSection.style.display = 'block';
-    }
-}
+const hasCenterStats = {{ center_stats|yesno:"true,false" }};
+const branchStatsData = {{ branch_stats_json|safe }};  // {center_id: [{id, name, total, active},...], ...}
 
-// Update target options based on scope
-function updateTargetOptions() {
-    const scope = document.getElementById('targetScope').value;
-    const centerSection = document.getElementById('centerSection');
-    const branchSection = document.getElementById('branchSection');
-    
-    if (scope === 'all') {
-        centerSection.style.display = 'none';
-        branchSection.style.display = 'none';
-    } else if (scope === 'center') {
-        centerSection.style.display = 'block';
-        branchSection.style.display = 'none';
-    } else if (scope === 'branch') {
-        centerSection.style.display = 'block';
-        branchSection.style.display = 'block';
-    }
-    
-    updateRecipientCount();
-}
-
-// Load branches for selected center
-function loadBranches() {
-    const centerId = document.getElementById('targetCenter').value;
-    const branchSelect = document.getElementById('targetBranch');
-    const scope = document.getElementById('targetScope').value;
-    
-    if (scope === 'branch' && centerId) {
-        // Filter branch options by center
-        const options = branchSelect.querySelectorAll('option');
-        options.forEach(opt => {
-            if (opt.value === '') {
-                opt.style.display = 'block';
-            } else if (opt.dataset.center === centerId) {
-                opt.style.display = 'block';
-            } else {
-                opt.style.display = 'none';
-            }
+/* ── Build branch checkboxes from JSON data ── */
+function buildBranchLists() {
+    Object.entries(branchStatsData).forEach(([centerId, branches]) => {
+        const container = document.getElementById(`branchList_${centerId}`);
+        if (!container) return;
+        container.innerHTML = '';
+        if (!branches.length) {
+            container.innerHTML = '<div class="branch-item text-muted text-xs">No branches</div>';
+            return;
+        }
+        branches.forEach(br => {
+            const el = document.createElement('label');
+            el.className = 'branch-item cursor-pointer';
+            el.innerHTML = `
+                <div class="d-flex align-items-center gap-10">
+                    <input type="checkbox" name="target_branch_ids" class="form-check-input branch-checkbox mt-0"
+                           value="${br.id}" data-center-id="${centerId}" onchange="onBranchCheckChange()">
+                    <span class="fw-medium text-sm">${br.name}</span>
+                </div>
+                <div class="d-flex align-items-center gap-6">
+                    <span class="badge badge-primary-soft px-6 py-3 radius-6 text-xs">${br.total}</span>
+                    <span class="badge bg-success-focus text-success-main px-6 py-3 radius-6 text-xs">${br.active} ✓</span>
+                </div>`;
+            container.appendChild(el);
         });
-    }
-    
+    });
+}
+
+/* ── Scope card selection ── */
+function selectScope(value, el) {
+    document.getElementById('targetScope').value = value;
+    document.querySelectorAll('.scope-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    // Uncheck all center/branch selections on scope change
+    document.querySelectorAll('.center-checkbox').forEach(cb => cb.checked = false);
+    document.querySelectorAll('.branch-checkbox').forEach(cb => cb.checked = false);
+    updateSectionVisibility();
+    updateSelectionSummaries();
     updateRecipientCount();
 }
 
-// Update recipient count estimate
+function updateSectionVisibility() {
+    const scope = document.getElementById('targetScope').value;
+    const cbSection        = document.getElementById('centerCheckboxSection');
+    const branchCbSection  = document.getElementById('branchCheckboxSection');
+    const dropSection      = document.getElementById('centerDropdownSection');
+    const branchDropSection= document.getElementById('branchDropdownSection');
+
+    if (cbSection)        cbSection.style.display        = 'none';
+    if (branchCbSection)  branchCbSection.style.display  = 'none';
+    if (dropSection)      dropSection.style.display      = 'none';
+    if (branchDropSection)branchDropSection.style.display = 'none';
+
+    if (scope === 'center') {
+        if (hasCenterStats && cbSection) {
+            cbSection.style.display = 'block';
+            document.getElementById('centerCheckboxLabel').textContent = 'Select Centers';
+        } else if (dropSection) {
+            dropSection.style.display = 'block';
+        }
+    } else if (scope === 'branch') {
+        if (hasCenterStats && branchCbSection) {
+            branchCbSection.style.display = 'block';
+        } else if (branchDropSection) {
+            dropSection && (dropSection.style.display = 'block');
+            branchDropSection.style.display = 'block';
+        }
+    }
+}
+
+/* ── Center checkbox multi-select ── */
+function onCenterCheckChange() {
+    updateSelectionSummaries();
+    updateRecipientCount();
+}
+
+function selectAllCenters(checked) {
+    document.querySelectorAll('.center-checkbox').forEach(cb => cb.checked = checked);
+    updateSelectionSummaries();
+    updateRecipientCount();
+}
+
+/* ── Branch checkbox multi-select ── */
+function onBranchCheckChange() {
+    updateSelectionSummaries();
+    updateRecipientCount();
+}
+
+function selectAllBranches(checked) {
+    document.querySelectorAll('.branch-checkbox').forEach(cb => cb.checked = checked);
+    updateSelectionSummaries();
+    updateRecipientCount();
+}
+
+function selectCenterBranches(centerId, checked) {
+    document.querySelectorAll(`.branch-checkbox[data-center-id="${centerId}"]`)
+        .forEach(cb => cb.checked = checked);
+    updateSelectionSummaries();
+    updateRecipientCount();
+}
+
+/* ── Selection summary badges ── */
+function updateSelectionSummaries() {
+    // Centers
+    const checkedCenters = [...document.querySelectorAll('.center-checkbox:checked')];
+    const cSummary = document.getElementById('centerSelectionSummary');
+    if (cSummary) {
+        if (checkedCenters.length) {
+            const names = checkedCenters.map(cb => cb.dataset.centerName).join(', ');
+            const total = checkedCenters.reduce((s, cb) => s + parseInt(cb.dataset.total || 0), 0);
+            document.getElementById('centerSelectionText').textContent =
+                `${checkedCenters.length} center(s) selected: ${names} — ~${total} users`;
+            cSummary.style.display = '';
+        } else {
+            cSummary.style.display = 'none';
+        }
+    }
+
+    // Branches
+    const checkedBranches = [...document.querySelectorAll('.branch-checkbox:checked')];
+    const bSummary = document.getElementById('branchSelectionSummary');
+    if (bSummary) {
+        if (checkedBranches.length) {
+            document.getElementById('branchSelectionText').textContent =
+                `${checkedBranches.length} branch(es) selected`;
+            bSummary.style.display = '';
+        } else {
+            bSummary.style.display = 'none';
+        }
+    }
+}
+
+/* ── Fallback dropdown change (non-superuser) ── */
+function onCenterDropdownChange() {
+    updateRecipientCount();
+}
+
+/* ── Recipient count — sends all selected IDs ── */
 function updateRecipientCount() {
     const scope = document.getElementById('targetScope').value;
-    const centerId = document.getElementById('targetCenter').value;
-    const branchId = document.getElementById('targetBranch').value;
     const includeB2C = document.getElementById('includeB2C').checked;
     const includeB2B = document.getElementById('includeB2B').checked;
-    
-    const params = new URLSearchParams({
-        scope: scope,
-        center_id: centerId || '',
-        branch_id: branchId || '',
-        include_b2c: includeB2C,
-        include_b2b: includeB2B
-    });
-    
+
+    const params = new URLSearchParams({ scope, include_b2c: includeB2C, include_b2b: includeB2B });
+
+    if (scope === 'center') {
+        if (hasCenterStats) {
+            document.querySelectorAll('.center-checkbox:checked').forEach(cb => {
+                params.append('center_ids', cb.value);
+            });
+        } else {
+            const v = document.getElementById('centerDropdown')?.value;
+            if (v) params.append('center_ids', v);
+        }
+    } else if (scope === 'branch') {
+        if (hasCenterStats) {
+            document.querySelectorAll('.branch-checkbox:checked').forEach(cb => {
+                params.append('branch_ids', cb.value);
+            });
+        } else {
+            const v = document.getElementById('targetBranch')?.value;
+            if (v) params.append('branch_ids', v);
+        }
+    }
+
     fetch(`{% url 'api_recipient_count' %}?${params}`)
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
-            if (data.success) {
-                document.getElementById('countValue').textContent = data.count.toLocaleString();
-            }
+            document.getElementById('countValue').textContent =
+                data.success ? data.count.toLocaleString() : '?';
         })
-        .catch(err => {
-            console.error('Error fetching recipient count:', err);
-        });
+        .catch(() => {});
 }
 
-// Update preview as user types
-document.addEventListener('DOMContentLoaded', function() {
-    const contentInput = document.querySelector('textarea[name="content"]');
-    const previewDiv = document.getElementById('messagePreview');
-    
-    contentInput.addEventListener('input', function() {
-        const content = this.value || '<p class="text-secondary-light text-sm mb-0">Start typing to see preview...</p>';
-        previewDiv.innerHTML = content;
+/* ── Content type toggle ── */
+function toggleMediaUpload() {
+    const ct = document.getElementById('contentType').value;
+    document.getElementById('mediaUploadSection').style.display = ct === 'text' ? 'none' : '';
+}
+
+/* ── Quick format buttons ── */
+document.querySelectorAll('.fmt-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const ta = document.getElementById('messageContent');
+        const tag = btn.dataset.tag;
+        const s = ta.selectionStart, e = ta.selectionEnd;
+        const sel = ta.value.slice(s, e) || tag;
+        ta.setRangeText(`<${tag}>${sel}</${tag}>`, s, e, 'end');
+        ta.dispatchEvent(new Event('input'));
     });
-    
-    // Initial setup
+});
+
+/* ── Live preview ── */
+document.getElementById('messageContent').addEventListener('input', function () {
+    document.getElementById('messagePreview').innerHTML = this.value.trim()
+        ? this.value
+        : '<em class="text-muted" style="font-size:13px;">Start typing to see preview…</em>';
+});
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', () => {
+    const firstCard = document.querySelector('.scope-card');
+    if (firstCard) {
+        const scope = firstCard.dataset.scope;
+        firstCard.classList.add('active');
+        document.getElementById('targetScope').value = scope;
+    }
+    buildBranchLists();
     toggleMediaUpload();
-    updateTargetOptions();
+    updateSectionVisibility();
     updateRecipientCount();
 });
 </script>
