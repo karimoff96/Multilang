@@ -995,6 +995,10 @@ const T = {
     plPrice: "Narx", plCopyPrice: "Nusxa narxi",
     plEmpty: "Narxlar ro'yxati mavjud emas yoki yoqilmagan.",
     plIsAgency: "Agentlik narxlari 💼", plIsUser: "Mijoz narxlari 👤",
+    noServices: "Xizmatlar mavjud emas",
+    noProducts: "Mahsulotlar mavjud emas",
+    noOrders: "Buyurtmalar hozircha yo'q",
+    pages: "bet", copies: "nusxa",
   },
   ru: {
     loading: "Загрузка…",
@@ -1071,6 +1075,10 @@ const T = {
     plPrice: "Цена", plCopyPrice: "Цена копии",
     plEmpty: "Прайс-лист недоступен или не включён.",
     plIsAgency: "Цены для агентств 💼", plIsUser: "Цены для клиентов 👤",
+    noServices: "Услуги недоступны",
+    noProducts: "Нет продуктов",
+    noOrders: "Заказов пока нет",
+    pages: "стр.", copies: "коп.",
   },
   en: {
     loading: "Loading…",
@@ -1147,6 +1155,10 @@ const T = {
     plPrice: "Price", plCopyPrice: "Copy price",
     plEmpty: "Price list is not available or not enabled.",
     plIsAgency: "Agency prices 💼", plIsUser: "Customer prices 👤",
+    noServices: "No services available",
+    noProducts: "No products available",
+    noOrders: "No orders yet",
+    pages: "pages", copies: "copies",
   },
 };
 
@@ -1511,7 +1523,7 @@ function buildCategories() {
   const list = document.getElementById("cat-list");
   const cats = S.categories;
   if (!cats || !cats.length) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-title">No services available</div></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-title">${t("noServices")}</div></div>`;
     return;
   }
   list.innerHTML = cats.map(c => `
@@ -1537,7 +1549,7 @@ function buildProducts() {
   const list = document.getElementById("prod-list");
   const prods = cat.products;
   if (!prods || !prods.length) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-title">No products</div></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">😕</div><div class="empty-title">${t("noProducts")}</div></div>`;
     return;
   }
   const u = S.user;
@@ -1901,12 +1913,15 @@ async function loadMyOrders() {
         <div class="empty-state">
           <div class="empty-icon">📭</div>
           <div class="empty-title">${t("ordHeader")}</div>
-          <div class="empty-sub">No orders yet</div>
+          <div class="empty-sub">${t("noOrders")}</div>
         </div>`;
       return;
     }
     // Use language from first order response
-    if (res.language in T) S.lang = res.language;
+    if (res.language in T && res.language !== S.lang) {
+      S.lang = res.language;
+      applyTranslations();
+    }
     list.innerHTML = res.orders.map(o => `
       <div class="order-card" onclick="loadOrderDetail(${o.id})" style="cursor:pointer">
         <div class="order-header">
@@ -1914,7 +1929,7 @@ async function loadMyOrders() {
           <span class="order-status-badge" style="${statusBadgeStyle(o.status)}">${escHtml(o.status_label)}</span>
         </div>
         <div class="order-product">${escHtml(o.category)} — ${escHtml(o.product)}</div>
-        <div class="order-meta">${o.total_pages} pages · ${o.copy_number} copies · ${o.payment_type}</div>
+        <div class="order-meta">${o.total_pages} ${t("pages")} · ${o.copy_number} ${t("copies")} · ${o.payment_type === "card" ? t("payCard") : t("payCash")}</div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
           <div class="order-price">${fmt(o.total_price)}</div>
           <div style="font-size:12px;color:var(--hint)">${t("ordClickHint")} ›</div>
@@ -2234,6 +2249,7 @@ async function saveProfileField(field) {
     // If language changed, update app language and retranslate
     if (field === "language" && resp.profile.language) {
       S.lang = resp.profile.language;
+      _centerInfo = null;  // Invalidate cache so About/Help/Other reload in new language
       applyTranslations();
     }
 

@@ -93,12 +93,30 @@ ALLOWED_EXTENSIONS = {
 
 @xframe_options_exempt
 def webapp_index(request, center_id: int):
-    """Serve the single-page Web App HTML."""
+    """Serve the single-page Web App HTML (center_id-based URL)."""
     from organizations.models import TranslationCenter
     center = get_object_or_404(TranslationCenter, pk=center_id, is_active=True)
     return render(request, "webapp/index.html", {
         "center": center,
         "center_id": center_id,
+    })
+
+
+@xframe_options_exempt
+def webapp_index_subdomain(request):
+    """
+    Serve the Web App HTML when accessed via a center's own subdomain.
+
+    BotFather Mini App URL format:  https://{subdomain}.multilang.uz/webapp/
+    The SubdomainMiddleware already populates request.center from the host.
+    """
+    center = getattr(request, 'center', None)
+    if center is None or not center.is_active:
+        from django.http import HttpResponseNotFound
+        return HttpResponseNotFound("No active center found for this subdomain.")
+    return render(request, "webapp/index.html", {
+        "center": center,
+        "center_id": center.pk,
     })
 
 

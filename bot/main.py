@@ -1842,8 +1842,19 @@ def show_main_menu(message, language):
         logger.warning(f"Web App button skipped: no center_id for user_id={user_id}")
         return
 
-    # ── Step 3: send the single Web App launch button ─────────────────────
-    webapp_url = f"https://admin.multilang.uz/webapp/{_center_id}/"
+    # ── Step 3: resolve Web App URL (prefer subdomain-based URL for BotFather) ──
+    try:
+        from django.conf import settings as _dj_settings
+        from organizations.models import TranslationCenter as _TC
+        _main_domain = getattr(_dj_settings, 'MAIN_DOMAIN', 'multilang.uz')
+        _tc = _TC.objects.filter(pk=_center_id, is_active=True).first()
+        if _tc and _tc.subdomain:
+            webapp_url = f"https://{_tc.subdomain}.{_main_domain}/webapp/"
+        else:
+            webapp_url = f"https://admin.{_main_domain}/webapp/{_center_id}/"
+    except Exception as _url_e:
+        logger.error(f"Could not build webapp_url: {_url_e}")
+        webapp_url = f"https://admin.multilang.uz/webapp/{_center_id}/"
 
     _welcome = {
         "uz": (

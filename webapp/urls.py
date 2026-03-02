@@ -4,7 +4,10 @@ from . import views
 app_name = "webapp"
 
 urlpatterns = [
-    # HTML entry-point — each center gets its own URL
+    # HTML entry-point — subdomain-based (BotFather URL: https://{subdomain}.multilang.uz/webapp/)
+    path("", views.webapp_index_subdomain, name="index_subdomain"),
+
+    # HTML entry-point — legacy center_id-based URL (kept for backward compatibility)
     path("<int:center_id>/", views.webapp_index, name="index"),
 
     # JSON API — all require initData + center_id in the request body

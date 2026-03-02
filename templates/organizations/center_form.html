@@ -182,7 +182,28 @@
                                 data-i18n-placeholder="form.companyChannelPlaceholder" placeholder="Enter Telegram channel ID (e.g., -1001234567890)">
                             <small class="text-secondary-light" data-i18n="form.companyChannelHelp">All orders from this center will be sent here</small>
                         </div>
-                        
+
+                        <!-- Bot Web App URL (read-only, auto-generated from subdomain) -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <iconify-icon icon="mdi:cellphone-link" class="me-1"></iconify-icon>
+                                <span data-i18n="form.botWebAppUrl">Bot Web App URL</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="text" id="bot-webapp-url" class="form-control radius-8 bg-neutral-100 font-monospace text-xs"
+                                       value="{% if center and center.subdomain %}https://{{ center.subdomain }}.{{ main_domain }}/webapp/{% endif %}"
+                                       readonly
+                                       placeholder="Set a subdomain first to generate the URL">
+                                <button type="button" class="btn btn-outline-secondary" id="copy-webapp-url-btn"
+                                        onclick="copyWebAppUrl()" title="Copy URL">
+                                    <iconify-icon icon="mdi:content-copy"></iconify-icon>
+                                </button>
+                            </div>
+                            <small class="text-secondary-light" data-i18n="form.botWebAppUrlHelp">
+                                Use this URL in BotFather &rarr; <em>Bot Settings &rarr; Menu Button</em>
+                            </small>
+                        </div>
+
                         {% if center and center.bot_token and request.user.is_superuser %}
                         <!-- Webhook Management -->
                         <div class="col-12 mt-16">
@@ -302,6 +323,47 @@
 <script>
 // CSRF token for all AJAX requests
 const csrfToken = '{{ csrf_token }}';
+</script>
+
+<script>
+/* ── Bot Web App URL: live-update from subdomain input ──────────────────── */
+(function () {
+    const mainDomain = '{{ main_domain|escapejs }}';
+
+    function buildWebAppUrl(subdomain) {
+        return subdomain ? `https://${subdomain}.${mainDomain}/webapp/` : '';
+    }
+
+    function copyWebAppUrl() {
+        const urlInput = document.getElementById('bot-webapp-url');
+        if (!urlInput || !urlInput.value) return;
+        navigator.clipboard.writeText(urlInput.value).then(() => {
+            const btn = document.getElementById('copy-webapp-url-btn');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<iconify-icon icon="mdi:check"></iconify-icon>';
+            btn.classList.replace('btn-outline-secondary', 'btn-success');
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.classList.replace('btn-success', 'btn-outline-secondary');
+            }, 1800);
+        });
+    }
+    // Expose to global scope (onclick handler in HTML)
+    window.copyWebAppUrl = copyWebAppUrl;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const subdomainInput = document.querySelector('input[name="subdomain"]');
+        const urlInput       = document.getElementById('bot-webapp-url');
+        if (!urlInput) return;
+
+        // Keep read-only URL in sync while superuser types in subdomain field
+        if (subdomainInput && !subdomainInput.disabled) {
+            subdomainInput.addEventListener('input', function () {
+                urlInput.value = buildWebAppUrl(this.value.trim().toLowerCase());
+            });
+        }
+    });
+})();
 </script>
 
 {% if request.user.is_superuser %}
