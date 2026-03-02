@@ -85,12 +85,12 @@
                         </span>
                         <div>
                             <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="stats.totalAmount">{% trans "Total Amount" %}</span>
-                            <h6 class="fw-semibold">{{ stats.total_amount|floatformat:0|format_number }} <small class="text-xs fw-normal">UZS</small></h6>
+                            <h6 class="fw-semibold">{{ stats.total_amount|floatformat:0|smart_num }} <small class="text-xs fw-normal">UZS</small></h6>
                         </div>
                     </div>
                 </div>
                 <p class="text-sm mb-0">
-                    <span class="text-secondary-light">{{ stats.average_amount|floatformat:0|format_number }} UZS/<span data-i18n="common.avgPayment">{% trans "avg payment" %}</span></span>
+                    <span class="text-secondary-light">{{ stats.average_amount|floatformat:0|smart_num }} UZS/<span data-i18n="common.avgPayment">{% trans "avg payment" %}</span></span>
                 </p>
             </div>
         </div>
@@ -196,7 +196,7 @@
                                     <span class="bg-secondary-focus text-secondary-main status-badge-sm rounded-pill fw-medium" data-i18n="payment.other">{% trans "Other" %}</span>
                                     {% endif %}
                                 </td>
-                                <td class="col-amount"><span class="fw-medium nowrap">{{ payment.amount|format_number }}</span></td>
+                                <td class="col-amount"><span class="fw-medium nowrap">{{ payment.amount|smart_num }}</span></td>
                                 <td class="text-center">
                                     <span class="bg-info-focus text-info-main px-12 py-4 rounded-pill fw-medium text-sm">{{ payment.orders_count }}</span>
                                 </td>

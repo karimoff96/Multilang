@@ -79,13 +79,13 @@
                                     <span class="badge bg-primary-100 text-primary-600 px-12 py-6">{{ language.short_name }}</span>
                                 </td>
                                 <!-- Agency Pricing -->
-                                <td class="text-end text-primary-600">{{ language.agency_page_price|format_number }}</td>
-                                <td class="text-end text-primary-600">{{ language.agency_other_page_price|format_number }}</td>
-                                <td class="text-end text-primary-600">{{ language.agency_copy_price|format_number }}</td>
+                                <td class="text-end text-primary-600">{{ language.agency_page_price|smart_num }}</td>
+                                <td class="text-end text-primary-600">{{ language.agency_other_page_price|smart_num }}</td>
+                                <td class="text-end text-primary-600">{{ language.agency_copy_price|smart_num }}</td>
                                 <!-- Ordinary User Pricing -->
-                                <td class="text-end text-success-600">{{ language.ordinary_page_price|format_number }}</td>
-                                <td class="text-end text-success-600">{{ language.ordinary_other_page_price|format_number }}</td>
-                                <td class="text-end text-success-600">{{ language.ordinary_copy_price|format_number }}</td>
+                                <td class="text-end text-success-600">{{ language.ordinary_page_price|smart_num }}</td>
+                                <td class="text-end text-success-600">{{ language.ordinary_other_page_price|smart_num }}</td>
+                                <td class="text-end text-success-600">{{ language.ordinary_copy_price|smart_num }}</td>
                                 <!-- Actions -->
                                 <td class="text-center">
                                     <div class="d-flex gap-2 justify-content-center">

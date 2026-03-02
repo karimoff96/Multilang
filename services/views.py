@@ -1529,6 +1529,7 @@ def generalExpenseDelete(request, expense_id):
 @any_permission_required('can_view_expenses', 'can_manage_expenses', 'can_view_financial_reports')
 def generalExpenseAnalytics(request):
     """Analytics: monthly totals + category breakdown for operating expenses."""
+    import json
     from django.utils import timezone
     from django.db.models.functions import TruncMonth
 
@@ -1623,8 +1624,12 @@ def generalExpenseAnalytics(request):
         'date_to': date_to,
         'months_labels': months_labels,
         'months_totals': months_totals,
+        'months_labels_json': json.dumps(months_labels),
+        'months_totals_json': json.dumps(months_totals),
         'cat_labels': cat_labels,
         'cat_totals': cat_totals,
+        'cat_labels_json': json.dumps(cat_labels),
+        'cat_totals_json': json.dumps(cat_totals),
         'cat_pairs': cat_pairs,
         'top_expenses': top_expenses,
         'this_month_total': this_month_total,

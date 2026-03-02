@@ -615,7 +615,7 @@
                                     <span class="text-secondary-light">-</span>
                                     {% endif %}
                                 </td>
-                                <td class="text-end fw-semibold nowrap">{{ order.total_price|format_number }} <small class="text-xs fw-normal text-secondary-light">UZS</small></td>
+                                <td class="text-end fw-semibold nowrap">{{ order.total_price|smart_num }} <small class="text-xs fw-normal text-secondary-light">UZS</small></td>
                                 <td>
                                     {% if order.payment_method == 'cash' %}
                                     <span class="badge bg-success-100 text-success-600" data-i18n="payment.cash">Cash</span>

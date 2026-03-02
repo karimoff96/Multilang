@@ -222,7 +222,7 @@
                             <p class="text-muted mb-1 text-sm">{% trans "Total Debt" %}</p>
                             <h4 class="mb-0 text-danger fw-bold">
                                 {% load number_filters %}
-                                {{ total_debt_amount|format_number }} {% trans "UZS" %}
+                                {{ total_debt_amount|smart_num }} {% trans "UZS" %}
                             </h4>
                         </div>
                         <div class="avatar-sm bg-danger bg-opacity-10 rounded-3">
@@ -274,7 +274,7 @@
                         <div>
                             <p class="text-muted mb-1 text-sm">{% trans "Average Debt" %}</p>
                             <h4 class="mb-0 text-primary fw-bold">
-                                {{ avg_debt_per_customer|floatformat:0|format_number }} {% trans "UZS" %}
+                                {{ avg_debt_per_customer|floatformat:0|smart_num }} {% trans "UZS" %}
                             </h4>
                         </div>
                         <div class="avatar-sm bg-primary bg-opacity-10 rounded-3">
@@ -340,7 +340,7 @@
                                         {% endif %}
                                     </td>
                                     <td class="text-end">
-                                        <span class="fw-bold text-danger">{{ debtor.total_debt|floatformat:0|format_number }} {% trans "UZS" %}</span>
+                                        <span class="fw-bold text-danger">{{ debtor.total_debt|floatformat:0|smart_num }} {% trans "UZS" %}</span>
                                     </td>
                                     <td class="text-center">
                                         <span class="badge bg-info">{{ debtor.order_count }}</span>

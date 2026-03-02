@@ -355,8 +355,8 @@
                                         </td>
                                         <td class="text-end">
                                             <div class="d-flex flex-column align-items-end">
-                                                <span class="fw-semibold text-success-600">{{ expense.price_for_original|format_number }} UZS</span>
-                                                <small class="text-info-600">{{ expense.price_for_copy|format_number }} UZS/copy</small>
+                                                <span class="fw-semibold text-success-600">{{ expense.price_for_original|smart_num }} UZS</span>
+                                                <small class="text-info-600">{{ expense.price_for_copy|smart_num }} UZS/copy</small>
                                             </div>
                                         </td>
                                     </tr>
@@ -365,7 +365,7 @@
                                 <tfoot class="bg-neutral-100">
                                     <tr>
                                         <td colspan="2" class="fw-semibold text-end" data-i18n="detail.totalExpenses">Total Expenses:</td>
-                                        <td class="text-end fw-bold text-danger-600">{{ product.get_expenses_total|format_number }} UZS</td>
+                                        <td class="text-end fw-bold text-danger-600">{{ product.get_expenses_total|smart_num }} UZS</td>
                                     </tr>
                                 </tfoot>
                             </table>

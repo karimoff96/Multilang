@@ -63,8 +63,8 @@
             }, 4000 + (index * 500)); // 4 seconds + 0.5s delay per message
         });
         
-        // Initialize Bootstrap tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        // Initialize Bootstrap tooltips (data-bs-toggle="tooltip" AND any bare [title] elements)
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"], [title]:not([data-bs-toggle])'));
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });

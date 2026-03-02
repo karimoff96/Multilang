@@ -3,9 +3,81 @@ Custom template filters for number formatting and utilities
 """
 
 from django import template
+from django.utils.html import format_html
 from decimal import Decimal, InvalidOperation
 
 register = template.Library()
+
+
+def _to_float(value):
+    """Convert value to float, return None on failure."""
+    if value is None:
+        return None
+    try:
+        if isinstance(value, Decimal):
+            return float(value)
+        return float(value)
+    except (TypeError, ValueError, InvalidOperation):
+        return None
+
+
+def _space_sep_display(v):
+    """Format with non-breaking spaces for display (prevents line-wrapping)."""
+    return f"{int(v):,}".replace(',', '\u00a0')
+
+
+def _space_sep_title(v):
+    """Format with regular spaces for title attribute tooltip."""
+    return f"{int(v):,}".replace(',', ' ')
+
+
+def _abbrev(v):
+    """Return abbreviated string: K / M with space-sep prefix when large."""
+    if v >= 1_000_000:
+        d = v / 1_000_000
+        if d >= 1_000:
+            # e.g. 1_500_000_000 → "1 500M"
+            return _space_sep_display(round(d)) + "M"
+        elif d >= 10:
+            return f"{d:.0f}M"
+        else:
+            return f"{d:.1f}".rstrip('0').rstrip('.') + "M"
+    elif v >= 1_000:
+        d = v / 1_000
+        if d >= 1_000:
+            return _space_sep_display(round(d)) + "K"
+        elif d >= 10:
+            return f"{d:.0f}K"
+        else:
+            return f"{d:.1f}".rstrip('0').rstrip('.') + "K"
+    else:
+        return f"{v:.0f}"
+
+
+@register.filter(is_safe=True)
+def smart_num(value):
+    """
+    Display a number abbreviated (K/M) with the full value on hover.
+    Returns HTML: <span title="1 500 000" style="...">1.5M</span>
+    The title uses plain spaces so browser tooltip renders correctly.
+    """
+    v = _to_float(value)
+    if v is None:
+        return format_html('0')
+    abbrev = _abbrev(v)
+    # Build the plain-space full number for the title attribute
+    if v == int(v):
+        full_title = _space_sep_title(v)
+    else:
+        full_title = f"{v:,.2f}".replace(',', ' ')
+    # Only add hover span when the number was actually abbreviated
+    if abbrev != full_title.replace(' ', ''):
+        return format_html(
+            '<span data-bs-toggle="tooltip" data-bs-placement="top" title="{}" style="cursor:help;border-bottom:1px dotted currentColor">{}</span>',
+            full_title,
+            abbrev,
+        )
+    return format_html('{}', abbrev)
 
 
 @register.filter

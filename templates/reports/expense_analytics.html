@@ -114,7 +114,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="expense.totalExpenses">{% trans "Total Expenses" %}</span>
-                        <h4 class="fw-bold mb-0">{{ total_expenses|format_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ total_expenses|smart_num }} <small class="text-sm fw-normal">UZS</small></h4>
                         <small class="text-secondary-light" data-i18n="expense.itemsCount">{% trans "items" %}</small>
                     </div>
                 </div>
@@ -131,7 +131,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="expense.b2bExpenses">{% trans "B2B Expenses" %}</span>
-                        <h4 class="fw-bold mb-0">{{ b2b_total|format_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ b2b_total|smart_num }} <small class="text-sm fw-normal">UZS</small></h4>
                         <small class="text-secondary-light" data-i18n="expense.itemsCount">{% trans "items" %}</small>
                     </div>
                 </div>
@@ -148,7 +148,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="expense.b2cExpenses">{% trans "B2C Expenses" %}</span>
-                        <h4 class="fw-bold mb-0">{{ b2c_total|format_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ b2c_total|smart_num }} <small class="text-sm fw-normal">UZS</small></h4>
                         <small class="text-secondary-light" data-i18n="expense.itemsCount">{% trans "items" %}</small>
                     </div>
                 </div>
@@ -163,7 +163,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="expense.bothTypes">{% trans "Both Types" %}</span>
-                        <h4 class="fw-bold mb-0">{{ both_total|format_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ both_total|smart_num }} <small class="text-sm fw-normal">UZS</small></h4>
                         <small class="text-secondary-light" data-i18n="expense.itemsCount">{% trans "items" %}</small>
                     </div>
                 </div>
@@ -194,7 +194,7 @@
                                 <h6 class="mb-0 fw-bold">{{ center_data.center.name }}</h6>
                                 <span class="badge bg-neutral-200 text-neutral-900">{{ center_data.count }} {% trans "expenses" %}</span>
                             </div>
-                            <h6 class="mb-0 fw-bold text-primary-600">{{ center_data.total|format_number }} UZS</h6>
+                            <h6 class="mb-0 fw-bold text-primary-600">{{ center_data.total|smart_num }} UZS</h6>
                         </div>
                     </div>
                     <div class="card-body p-20">
@@ -218,10 +218,10 @@
                                         <iconify-icon icon="mdi:source-branch" class="me-2"></iconify-icon>
                                         {{ branch.branch__name }}
                                     </td>
-                                    <td class="text-end text-info-600">{{ branch.b2b_total|default:0|format_number }}</td>
-                                    <td class="text-end text-success-600">{{ branch.b2c_total|default:0|format_number }}</td>
-                                    <td class="text-end text-warning-600">{{ branch.both_total|default:0|format_number }}</td>
-                                    <td class="text-end fw-semibold">{{ branch.total|format_number }}</td>
+                                    <td class="text-end text-info-600">{{ branch.b2b_total|default:0|smart_num }}</td>
+                                    <td class="text-end text-success-600">{{ branch.b2c_total|default:0|smart_num }}</td>
+                                    <td class="text-end text-warning-600">{{ branch.both_total|default:0|smart_num }}</td>
+                                    <td class="text-end fw-semibold">{{ branch.total|smart_num }}</td>
                                     <td class="text-center">
                                         <span class="badge bg-neutral-200 text-neutral-900">{{ branch.count }}</span>
                                     </td>
@@ -304,14 +304,14 @@
                                 {% if is_superuser %}
                                 <td class="text-secondary-light">{{ branch.branch__center__name }}</td>
                                 {% endif %}
-                                <td class="text-end text-info-600">{{ branch.b2b_total|default:0|format_number }}</td>
-                                <td class="text-end text-success-600">{{ branch.b2c_total|default:0|format_number }}</td>
-                                <td class="text-end text-warning-600">{{ branch.both_total|default:0|format_number }}</td>
-                                <td class="text-end fw-semibold text-primary-600">{{ branch.total|format_number }}</td>
+                                <td class="text-end text-info-600">{{ branch.b2b_total|default:0|smart_num }}</td>
+                                <td class="text-end text-success-600">{{ branch.b2c_total|default:0|smart_num }}</td>
+                                <td class="text-end text-warning-600">{{ branch.both_total|default:0|smart_num }}</td>
+                                <td class="text-end fw-semibold text-primary-600">{{ branch.total|smart_num }}</td>
                                 <td class="text-center">
                                     <span class="badge bg-neutral-200 text-neutral-900">{{ branch.count }}</span>
                                 </td>
-                                <td class="text-end text-secondary-light">{{ branch.avg_expense|floatformat:0|format_number }}</td>
+                                <td class="text-end text-secondary-light">{{ branch.avg_expense|floatformat:0|smart_num }}</td>
                                 <td class="text-end">
                                     {% widthratio branch.total total_expenses 100 as percentage %}
                                     <div class="d-flex align-items-center gap-2 justify-content-end">
@@ -366,7 +366,7 @@
                                 <span class="badge bg-warning-600 text-white px-12 py-6" data-i18n="expense.bothTypes">{% trans "Both Types" %}</span>
                                 {% endif %}
                             </div>
-                            <span class="fw-bold text-lg">{{ item.total|format_number }} UZS</span>
+                            <span class="fw-bold text-lg">{{ item.total|smart_num }} UZS</span>
                         </div>
                         <div class="d-flex justify-content-between text-sm text-secondary-light mb-2">
                             <span><i class="ri-file-list-3-line me-1"></i>{{ item.count }} {% trans "expenses" %}</span>
@@ -408,7 +408,7 @@
                                 <iconify-icon icon="solar:arrow-up-bold" class="text-success-600 text-xl"></iconify-icon>
                                 <div>
                                     <span class="text-sm text-secondary-light d-block" data-i18n="expense.highest">{% trans "Highest Expense" %}</span>
-                                    <h5 class="fw-bold mb-0 text-success-600">{{ highest_expense|format_number }}</h5>
+                                    <h5 class="fw-bold mb-0 text-success-600">{{ highest_expense|smart_num }}</h5>
                                     <small class="text-secondary-light" data-i18n="common.currencyUzs">{% trans "UZS" %}</small>
                                 </div>
                             </div>
@@ -420,7 +420,7 @@
                                 <iconify-icon icon="solar:arrow-down-bold" class="text-danger-600 text-xl"></iconify-icon>
                                 <div>
                                     <span class="text-sm text-secondary-light d-block" data-i18n="expense.lowest">{% trans "Lowest Expense" %}</span>
-                                    <h5 class="fw-bold mb-0 text-danger-600">{{ lowest_expense|format_number }}</h5>
+                                    <h5 class="fw-bold mb-0 text-danger-600">{{ lowest_expense|smart_num }}</h5>
                                     <small class="text-secondary-light">UZS</small>
                                 </div>
                             </div>
@@ -432,7 +432,7 @@
                                 <iconify-icon icon="solar:chart-bold" class="text-warning-600 text-xl"></iconify-icon>
                                 <div>
                                     <span class="text-sm text-secondary-light d-block" data-i18n="expense.averageExpense">{% trans "Average Expense" %}</span>
-                                    <h5 class="fw-bold mb-0 text-warning-600">{{ avg_expense|format_number }}</h5>
+                                    <h5 class="fw-bold mb-0 text-warning-600">{{ avg_expense|smart_num }}</h5>
                                     <small class="text-secondary-light">UZS</small>
                                 </div>
                             </div>
@@ -444,7 +444,7 @@
                                 <iconify-icon icon="solar:calculator-minimalistic-bold" class="text-info-600 text-xl"></iconify-icon>
                                 <div>
                                     <span class="text-sm text-secondary-light d-block" data-i18n="expense.medianExpense">{% trans "Median Expense" %}</span>
-                                    <h5 class="fw-bold mb-0 text-info-600">{{ median_expense|format_number }}</h5>
+                                    <h5 class="fw-bold mb-0 text-info-600">{{ median_expense|smart_num }}</h5>
                                     <small class="text-secondary-light">UZS</small>
                                 </div>
                             </div>
@@ -529,14 +529,14 @@
                                 <td class="text-secondary-light">{{ item.expense.branch.name }}</td>
                                 <td class="text-end">
                                     <div class="d-flex flex-column align-items-end">
-                                        <span class="text-success-600">{{ item.expense.price_for_original|format_number }}</span>
-                                        <small class="text-info-600">{{ item.expense.price_for_copy|format_number }}/{% trans "copy" %}</small>
+                                        <span class="text-success-600">{{ item.expense.price_for_original|smart_num }}</span>
+                                        <small class="text-info-600">{{ item.expense.price_for_copy|smart_num }}/{% trans "copy" %}</small>
                                     </div>
                                 </td>
                                 <td class="text-end">
                                     <span class="badge bg-primary-100 text-primary-600">{{ item.order_count }}</span>
                                 </td>
-                                <td class="text-end fw-bold text-primary-600">{{ item.total_cost|format_number }}</td>
+                                <td class="text-end fw-bold text-primary-600">{{ item.total_cost|smart_num }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

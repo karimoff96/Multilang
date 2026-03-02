@@ -16,7 +16,7 @@
                             </div>
                             <div>
                                 <span class="text-secondary-light text-md">Total Expenses</span>
-                                <h4 class="text-primary-600 mb-0">{{ analytics.total|format_number }}</h4>
+                                <h4 class="text-primary-600 mb-0">{{ analytics.total|smart_num }}</h4>
                             </div>
                         </div>
                     </div>
@@ -31,7 +31,7 @@
                             </div>
                             <div>
                                 <span class="text-secondary-light text-md">B2B Expenses</span>
-                                <h4 class="text-info-600 mb-0">{{ analytics.b2b_total|format_number }}</h4>
+                                <h4 class="text-info-600 mb-0">{{ analytics.b2b_total|smart_num }}</h4>
                             </div>
                         </div>
                     </div>
@@ -46,7 +46,7 @@
                             </div>
                             <div>
                                 <span class="text-secondary-light text-md">B2C Expenses</span>
-                                <h4 class="text-success-600 mb-0">{{ analytics.b2c_total|format_number }}</h4>
+                                <h4 class="text-success-600 mb-0">{{ analytics.b2c_total|smart_num }}</h4>
                             </div>
                         </div>
                     </div>
@@ -89,7 +89,7 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ item.count }}</td>
-                                <td class="fw-semibold">{{ item.total|format_number }}</td>
+                                <td class="fw-semibold">{{ item.total|smart_num }}</td>
                                 <td>
                                     {% widthratio item.total analytics.total 100 as percentage %}
                                     <div class="d-flex align-items-center gap-8">

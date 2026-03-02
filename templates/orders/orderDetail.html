@@ -86,7 +86,7 @@
                     <div class="col-sm-4">
                         <div class="p-16 bg-success-50 radius-8 border border-success-200 text-center">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.totalPrice">Total Price</span>
-                            <h4 class="text-success-600 fw-bold mb-0">{{ order.total_price|format_number }} UZS</h4>
+                            <h4 class="text-success-600 fw-bold mb-0">{{ order.total_price|smart_num }} UZS</h4>
                         </div>
                     </div>
                     
@@ -174,16 +174,16 @@
                             <div class="row text-sm">
                                 <div class="col-4 text-center">
                                     <span class="text-secondary-light d-block">Total Due</span>
-                                    <span class="fw-semibold">{{ order.total_due|format_number }} UZS</span>
+                                    <span class="fw-semibold">{{ order.total_due|smart_num }} UZS</span>
                                 </div>
                                 <div class="col-4 text-center">
                                     <span class="text-secondary-light d-block">Received</span>
-                                    <span class="fw-semibold text-success-600">{{ order.received|format_number }} UZS</span>
+                                    <span class="fw-semibold text-success-600">{{ order.received|smart_num }} UZS</span>
                                 </div>
                                 <div class="col-4 text-center">
                                     <span class="text-secondary-light d-block">Remaining</span>
                                     <span class="fw-semibold {% if order.remaining > 0 %}text-danger-600{% else %}text-success-600{% endif %}">
-                                        {{ order.remaining|format_number }} UZS
+                                        {{ order.remaining|smart_num }} UZS
                                     </span>
                                 </div>
                             </div>
@@ -192,7 +192,7 @@
                             <div class="mt-12 pt-12 border-top">
                                 <div class="d-flex justify-content-between">
                                     <span class="text-secondary-light">Extra Fee:</span>
-                                    <span class="fw-semibold">{{ order.extra_fee|format_number }} UZS</span>
+                                    <span class="fw-semibold">{{ order.extra_fee|smart_num }} UZS</span>
                                 </div>
                                 {% if order.extra_fee_description %}
                                 <small class="text-muted">{{ order.extra_fee_description }}</small>

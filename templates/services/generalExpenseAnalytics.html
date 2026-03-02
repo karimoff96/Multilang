@@ -11,7 +11,7 @@
             <div class="card-body p-20 text-center">
                 <iconify-icon icon="solar:calendar-bold" class="text-primary-600 text-4xl mb-8"></iconify-icon>
                 <h6 class="text-secondary-light mb-4">{% trans "This Month" %}</h6>
-                <h3 class="text-primary-600 mb-0">{{ this_month_total|format_number }}</h3>
+                <h3 class="text-primary-600 mb-0">{{ this_month_total|smart_num }}</h3>
             </div>
         </div>
     </div>
@@ -20,7 +20,7 @@
             <div class="card-body p-20 text-center">
                 <iconify-icon icon="solar:calendar-date-bold" class="text-warning-600 text-4xl mb-8"></iconify-icon>
                 <h6 class="text-secondary-light mb-4">{% trans "Last Month" %}</h6>
-                <h3 class="text-warning-600 mb-0">{{ last_month_total|format_number }}</h3>
+                <h3 class="text-warning-600 mb-0">{{ last_month_total|smart_num }}</h3>
             </div>
         </div>
     </div>
@@ -29,7 +29,7 @@
             <div class="card-body p-20 text-center">
                 <iconify-icon icon="solar:pie-chart-bold" class="text-success-600 text-4xl mb-8"></iconify-icon>
                 <h6 class="text-secondary-light mb-4">{% trans "Period Total" %}</h6>
-                <h3 class="text-success-600 mb-0">{{ period_total|format_number }}</h3>
+                <h3 class="text-success-600 mb-0">{{ period_total|smart_num }}</h3>
             </div>
         </div>
     </div>
@@ -103,7 +103,7 @@
                     {% for label, total in cat_pairs %}
                     <li class="d-flex justify-content-between align-items-center mb-6">
                         <span class="text-sm">{{ label }}</span>
-                        <span class="text-sm fw-semibold">{{ total|format_number }}</span>
+                        <span class="text-sm fw-semibold">{{ total|smart_num }}</span>
                     </li>
                     {% endfor %}
                 </ul>
@@ -115,25 +115,59 @@
     </div>
 </div>
 
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
+/* ── number helpers ─────────────────────────────────────── */
+function spaceSep(n) {
+    return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+}
+function abbrevNum(v) {
+    if (v >= 1e6) {
+        const d = v / 1e6;
+        if (d >= 1000) return spaceSep(Math.round(d)) + 'M';
+        if (d >= 10)   return d.toFixed(0) + 'M';
+        return d.toFixed(1).replace(/\.?0+$/, '') + 'M';
+    }
+    if (v >= 1e3) {
+        const d = v / 1e3;
+        if (d >= 1000) return spaceSep(Math.round(d)) + 'K';
+        if (d >= 10)   return d.toFixed(0) + 'K';
+        return d.toFixed(1).replace(/\.?0+$/, '') + 'K';
+    }
+    return Math.round(v).toString();
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const monthlyCtx = document.getElementById('monthlyChart');
     if (monthlyCtx) {
         new Chart(monthlyCtx, {
             type: 'bar',
             data: {
-                labels: {{ months_labels|safe }},
+                labels: {{ months_labels_json|safe }},
                 datasets: [{
                     label: '{% trans "Expenses" %}',
-                    data: {{ months_totals|safe }},
+                    data: {{ months_totals_json|safe }},
                     backgroundColor: 'rgba(99,102,241,0.7)',
                     borderRadius: 6,
                 }]
             },
             options: {
                 responsive: true,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString() } } }
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ' ' + spaceSep(ctx.parsed.y)
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: v => abbrevNum(v) }
+                    }
+                }
             }
         });
     }
@@ -143,17 +177,28 @@ document.addEventListener('DOMContentLoaded', function () {
         new Chart(catCtx, {
             type: 'doughnut',
             data: {
-                labels: {{ cat_labels|safe }},
+                labels: {{ cat_labels_json|safe }},
                 datasets: [{
-                    data: {{ cat_totals|safe }},
+                    data: {{ cat_totals_json|safe }},
                     backgroundColor: ['#6366f1','#f59e0b','#10b981','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6'],
                 }]
             },
-            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ' ' + spaceSep(ctx.parsed) + ' (' + ctx.label + ')'
+                        }
+                    }
+                }
+            }
         });
     }
 });
 </script>
+{% endblock %}
 
 <!-- Top 10 Largest Expenses -->
 {% if top_expenses %}
@@ -185,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <span class="fw-medium">{{ expense.title }}</span>
                             {% if expense.note %}<div class="text-secondary-light text-sm">{{ expense.note|truncatechars:50 }}</div>{% endif %}
                         </td>
-                        <td><span class="text-danger-main fw-semibold">{{ expense.amount|format_number }}</span></td>
+                        <td><span class="text-danger-main fw-semibold">{{ expense.amount|smart_num }}</span></td>
                         <td>
                             {% if expense.category %}
                             <span class="badge bg-primary-50 text-primary-600 px-8 py-4 radius-6">

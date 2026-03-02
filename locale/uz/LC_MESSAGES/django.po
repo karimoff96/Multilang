@@ -9286,3 +9286,6 @@ msgid "Mark as paid once a nasiya (credit) expense is settled."
 msgstr "Nasiya xarajat yopilganda to'langan deb belgilang."
 msgid "Who was paid — shop, person, company, etc."
 msgstr "Kimga to'landi — do'kon, odam, kompaniya va h."
+
+msgid "Monthly Expenses"
+msgstr "Oylik xarajatlar"

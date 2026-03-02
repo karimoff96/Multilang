@@ -8826,3 +8826,6 @@ msgid "Mark as paid once a nasiya (credit) expense is settled."
 msgstr "Mark as paid once a nasiya (credit) expense is settled."
 msgid "Who was paid — shop, person, company, etc."
 msgstr "Who was paid — shop, person, company, etc."
+
+msgid "Monthly Expenses"
+msgstr "Monthly Expenses"
