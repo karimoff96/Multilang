@@ -489,7 +489,9 @@ def tariff_edit(request, pk):
                     existing_ids.add(new_pricing.id)
             
             # Delete pricing options that were removed
-            tariff.pricing.exclude(id__in=existing_ids).delete()
+            # Only delete if at least one pricing row was submitted (safety guard)
+            if pricing_durations:
+                tariff.pricing.exclude(id__in=existing_ids).delete()
             
             messages.success(request, _("Tariff updated successfully!"))
             return redirect('billing:tariff_list')
@@ -497,8 +499,21 @@ def tariff_edit(request, pk):
         except Exception as e:
             messages.error(request, f"Error updating tariff: {str(e)}")
     
+    # Pre-calculate base monthly price for the template (from 1-month plan)
+    base_price = ''
+    one_month_pricing = tariff.pricing.filter(duration_months=1).first()
+    if one_month_pricing:
+        base_price = one_month_pricing.price
+    elif tariff.pricing.exists():
+        first_pricing = tariff.pricing.order_by('duration_months').first()
+        # Reverse-calculate: price / months / (1 - discount/100)
+        discount = first_pricing.discount_percentage / 100
+        if discount < 1:
+            base_price = round(float(first_pricing.price) / first_pricing.duration_months / float(1 - discount) / 100) * 100
+
     context = {
         'tariff': tariff,
+        'base_price': base_price,
     }
     
     return render(request, 'billing/tariff_edit.html', context)

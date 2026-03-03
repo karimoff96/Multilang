@@ -776,7 +776,8 @@
                         <div class="input-group">
                             <span class="input-group-text"><i class="ri-money-dollar-circle-line"></i></span>
                             <input type="number" id="basePrice" class="form-control" step="0.01" min="0"
-                                   placeholder="{% trans 'e.g., 299000' %}" onchange="updateAllPrices()">
+                                   placeholder="{% trans 'e.g., 299000' %}" onchange="updateAllPrices()"
+                                   {% if base_price %}value="{{ base_price|stringformat:'.2f' }}"{% endif %}>
                         </div>
                         <small class="text-secondary-light">{% trans "Full price per month without any discount" %}</small>
                     </div>
@@ -784,7 +785,7 @@
                     <div class="col-12">
                         <div id="pricingContainer">
                             {% for pricing in tariff.pricing.all %}
-                            <div class="row g-3 mb-3 pricing-row border rounded px-2 pt-2 pb-3 bg-light">
+                            <div class="row g-3 mb-3 pricing-row rounded px-2 pt-2 pb-3" style="background: var(--bg-neutral-100, rgba(0,0,0,.04)); border: 1px solid var(--border-neutral-200, rgba(0,0,0,.1));">
                                 <div class="col-md-2">
                                     <label class="form-label text-sm">{% trans "Months" %}</label>
                                     <input type="number" name="pricing_duration[]" class="form-control duration-input"
@@ -794,7 +795,7 @@
                                     <label class="form-label text-sm">{% trans "Discount %" %}</label>
                                     <div class="input-group">
                                         <input type="number" name="pricing_discount[]" class="form-control discount-input"
-                                               value="{{ pricing.discount_percentage }}" min="0" max="100" step="0.1"
+                                               value="{{ pricing.discount_percentage|stringformat:'.2f' }}" min="0" max="100" step="0.1"
                                                onchange="calculatePrice(this)" placeholder="0">
                                         <span class="input-group-text">%</span>
                                     </div>
@@ -802,12 +803,12 @@
                                 <div class="col-md-2">
                                     <label class="form-label text-sm">{% trans "Monthly Price" %}</label>
                                     <input type="number" name="pricing_monthly[]" class="form-control monthly-price bg-neutral-100"
-                                           value="{{ pricing.get_monthly_price|floatformat:2 }}" step="0.01" min="0" required readonly>
+                                           value="{{ pricing.get_monthly_price|stringformat:'.2f' }}" step="0.01" min="0" required readonly tabindex="-1">
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label text-sm">{% trans "Total Price" %}</label>
-                                    <input type="number" name="pricing_total[]" class="form-control total-price bg-neutral-100"
-                                           value="{{ pricing.price|floatformat:2 }}" step="0.01" min="0" required readonly>
+                                    <input type="number" name="pricing_total[]" class="form-control total-price"
+                                           value="{{ pricing.price|stringformat:'.2f' }}" step="0.01" min="0.01" required>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label text-sm">{% trans "Currency" %}</label>
@@ -923,7 +924,7 @@ function updateAllPrices() {
 function addPricing() {
     const container = document.getElementById('pricingContainer');
     const newRow = `
-        <div class="row g-3 mb-3 pricing-row border rounded px-2 pt-2 pb-3 bg-light">
+        <div class="row g-3 mb-3 pricing-row rounded px-2 pt-2 pb-3" style="background: var(--bg-neutral-100, rgba(0,0,0,.04)); border: 1px solid var(--border-neutral-200, rgba(0,0,0,.1));">
             <div class="col-md-2">
                 <label class="form-label text-sm">{% trans "Months" %}</label>
                 <input type="number" name="pricing_duration[]" class="form-control duration-input" min="1" required onchange="calculatePrice(this)" value="1">

@@ -577,10 +577,10 @@
                     
                     <div class="hero-buttons">
                         <a href="#contact" class="btn btn-primary-custom">
-                            {% if current_language == 'uz' %}Bepul Boshlash{% elif current_language == 'en' %}Start Free{% else %}Начать Бесплатно{% endif %}
+                            {% trans "Start Free" %}
                         </a>
                         <a href="#features" class="btn btn-outline-custom">
-                            {% if current_language == 'uz' %}Ko'proq Bilib Oling{% elif current_language == 'en' %}Learn More{% else %}Узнать Больше{% endif %}
+                            {% trans "Learn More" %}
                         </a>
                     </div>
                     
@@ -588,19 +588,19 @@
                         <div class="stat-item" data-aos="fade-up" data-aos-delay="100">
                             <span class="stat-number">10,000+</span>
                             <span class="stat-label">
-                                {% if current_language == 'uz' %}Buyurtmalar{% elif current_language == 'en' %}Orders{% else %}Заказов{% endif %}
+                                {% trans "Orders" %}
                             </span>
                         </div>
                         <div class="stat-item" data-aos="fade-up" data-aos-delay="200">
                             <span class="stat-number">50+</span>
                             <span class="stat-label">
-                                {% if current_language == 'uz' %}Tarjima Markazlari{% elif current_language == 'en' %}Centers{% else %}Центров{% endif %}
+                                {% trans "Centers" %}
                             </span>
                         </div>
                         <div class="stat-item" data-aos="fade-up" data-aos-delay="300">
                             <span class="stat-number">99.9%</span>
                             <span class="stat-label">
-                                {% if current_language == 'uz' %}Ishonchlilik{% elif current_language == 'en' %}Uptime{% else %}Время Работы{% endif %}
+                                {% trans "Uptime" %}
                             </span>
                         </div>
                     </div>
@@ -609,12 +609,12 @@
                     <div class="hero-images-container" style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; flex-wrap: wrap; padding: 1.5rem 1rem;">
                         <!-- Logo 1 -->
                         <div class="hero-logo-card" style="background: white; padding: 1.5rem; border-radius: 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.1); transform: rotate(-2deg); transition: all 0.3s; width: 100%; max-width: 420px;">
-                            <img src="{% static 'images/hero1.png' %}" alt="{% if current_language == 'uz' %}MultiLang Boshqaruv Paneli{% elif current_language == 'en' %}MultiLang Dashboard{% else %}MultiLang Панель Управления{% endif %}" style="width: 100%; height: auto; display: block; border-radius: 10px;">
+                            <img src="{% static 'images/hero1.png' %}" alt="{% trans "MultiLang Dashboard" %}" style="width: 100%; height: auto; display: block; border-radius: 10px;">
                         </div>
                         
                         <!-- Logo 2 -->
                         <div class="hero-logo-card" style="background: white; padding: 1.5rem; border-radius: 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.1); transform: rotate(2deg); transition: all 0.3s; width: 100%; max-width: 420px;">
-                            <img src="{% static 'images/hero2.png' %}" alt="{% if current_language == 'uz' %}MultiLang Analitika{% elif current_language == 'en' %}MultiLang Analytics{% else %}MultiLang Аналитика{% endif %}" style="width: 100%; height: auto; display: block; border-radius: 10px;">
+                            <img src="{% static 'images/hero2.png' %}" alt="{% trans "MultiLang Analytics" %}" style="width: 100%; height: auto; display: block; border-radius: 10px;">
                         </div>
                     </div>
                     
@@ -670,16 +670,10 @@
     <section id="features" class="section bg-light">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">
-                {% if current_language == 'uz' %}Kuchli Imkoniyatlar{% elif current_language == 'en' %}Powerful Features{% else %}Мощные Возможности{% endif %}
+                {% trans "Powerful Features" %}
             </h2>
             <p class="section-subtitle" data-aos="fade-up">
-                {% if current_language == 'uz' %}
-                    Biznesingizni avtomatlashtirish va samaradorlikni oshirish uchun barcha kerakli vositalar
-                {% elif current_language == 'en' %}
-                    All the tools you need to automate your business and increase efficiency
-                {% else %}
-                    Все необходимые инструменты для автоматизации бизнеса и повышения эффективности
-                {% endif %}
+                {% trans "All the tools you need to automate your business and increase efficiency" %}
             </p>
             
             <div class="row g-4">
@@ -690,16 +684,10 @@
                             <i class="fab fa-telegram"></i>
                         </div>
                         <h3 class="feature-title">
-                            {% if current_language == 'uz' %}Telegram Bot Integratsiyasi{% elif current_language == 'en' %}Telegram Bot Integration{% else %}Telegram Бот Интеграция{% endif %}
+                            {% trans "Telegram Bot Integration" %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}
-                                Mijozlar to'g'ridan-to'g'ri Telegram orqali buyurtma berishlari mumkin. Avtomatik narx hisoblash va xabar yuborish
-                            {% elif current_language == 'en' %}
-                                Customers can place orders directly via Telegram. Automatic price calculation and notifications
-                            {% else %}
-                                Клиенты могут оформлять заказы напрямую через Telegram. Автоматический расчет цены и уведомления
-                            {% endif %}
+                            {% trans "Customers can place orders directly via Telegram. Automatic price calculation and notifications" %}
                         </p>
                     </div>
                 </div>
@@ -711,16 +699,10 @@
                             <i class="fas fa-file-alt"></i>
                         </div>
                         <h3 class="feature-title">
-                            {% if current_language == 'uz' %}Buyurtmalarni Boshqarish{% elif current_language == 'en' %}Order Management{% else %}Управление Заказами{% endif %}
+                            {% trans "Order Management" %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}
-                                Botdan va admin paneldan buyurtma qabul qilish. Holat kuzatish, fayllar boshqaruvi, to'lovlarni nazorat qilish
-                            {% elif current_language == 'en' %}
-                                Accept orders from bot and admin panel. Status tracking, file management, payment control
-                            {% else %}
-                                Прием заказов из бота и админ панели. Отслеживание статусов, управление файлами, контроль оплат
-                            {% endif %}
+                            {% trans "Accept orders from bot and admin panel. Status tracking, file management, payment control" %}
                         </p>
                     </div>
                 </div>
@@ -732,16 +714,10 @@
                             <i class="fas fa-money-bill-wave"></i>
                         </div>
                         <h3 class="feature-title">
-                            {% if current_language == 'uz' %}Ommaviy To'lovlar{% elif current_language == 'en' %}Bulk Payments{% else %}Массовые Платежи{% endif %}
+                            {% trans "Bulk Payments" %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}
-                                Bir vaqtning o'zida ko'plab buyurtmalar uchun to'lovlarni qayd etish. Qisman to'lovlar va qarz nazorati
-                            {% elif current_language == 'en' %}
-                                Process payments for multiple orders at once. Partial payments and debt tracking
-                            {% else %}
-                                Обработка оплаты для нескольких заказов одновременно. Частичные платежи и контроль задолженностей
-                            {% endif %}
+                            {% trans "Process payments for multiple orders at once. Partial payments and debt tracking" %}
                         </p>
                     </div>
                 </div>
@@ -753,16 +729,10 @@
                             <i class="fas fa-chart-line"></i>
                         </div>
                         <h3 class="feature-title">
-                            {% if current_language == 'uz' %}Analitika va Hisobotlar{% elif current_language == 'en' %}Analytics & Reports{% else %}Аналитика и Отчеты{% endif %}
+                            {% trans "Analytics & Reports" %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}
-                                Real vaqtda statistika, moliyaviy hisobotlar, xodimlar samaradorligi, filiallar taqqoslash. Excel eksport
-                            {% elif current_language == 'en' %}
-                                Real-time statistics, financial reports, staff performance, branch comparison. Excel export
-                            {% else %}
-                                Статистика в реальном времени, финансовые отчеты, производительность сотрудников, сравнение филиалов. Экспорт в Excel
-                            {% endif %}
+                            {% trans "Real-time statistics, financial reports, staff performance, branch comparison. Excel export" %}
                         </p>
                     </div>
                 </div>
@@ -774,16 +744,10 @@
                             <i class="fas fa-shield-alt"></i>
                         </div>
                         <h3 class="feature-title">
-                            {% if current_language == 'uz' %}Ruxsatlar Tizimi (RBAC){% elif current_language == 'en' %}Role-Based Access Control{% else %}Система Прав Доступа (RBAC){% endif %}
+                            {% trans "Role-Based Access Control" %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}
-                                Har bir xodim uchun alohida ruxsatlar. Owner, Manager, Staff rollari. Xavfsiz kirish nazorati
-                            {% elif current_language == 'en' %}
-                                Individual permissions for each employee. Owner, Manager, Staff roles. Secure access control
-                            {% else %}
-                                Индивидуальные права для каждого сотрудника. Роли Owner, Manager, Staff. Безопасный контроль доступа
-                            {% endif %}
+                            {% trans "Individual permissions for each employee. Owner, Manager, Staff roles. Secure access control" %}
                         </p>
                     </div>
                 </div>
@@ -795,16 +759,10 @@
                             <i class="fas fa-language"></i>
                         </div>
                         <h3 class="feature-title">
-                            {% if current_language == 'uz' %}3 Tilda Qo'llab-quvvatlash{% elif current_language == 'en' %}3 Language Support{% else %}Поддержка 3 Языков{% endif %}
+                            {% trans "3 Language Support" %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}
-                                Rus, O'zbek va Ingliz tillarida to'liq interface. Mijozlar va xodimlar uchun qulay til tanlash
-                            {% elif current_language == 'en' %}
-                                Full interface in Russian, Uzbek and English. Convenient language selection for clients and staff
-                            {% else %}
-                                Полный интерфейс на русском, узбекском и английском языках. Удобный выбор языка для клиентов и сотрудников
-                            {% endif %}
+                            {% trans "Full interface in Russian, Uzbek and English. Convenient language selection for clients and staff" %}
                         </p>
                     </div>
                 </div>
@@ -816,16 +774,10 @@
                             <i class="fas fa-archive"></i>
                         </div>
                         <h3 class="feature-title">
-                            {% if current_language == 'uz' %}Avtomatik Arxivlash{% elif current_language == 'en' %}Automatic Archiving{% else %}Автоматическое Архивирование{% endif %}
+                            {% trans "Automatic Archiving" %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}
-                                Eski buyurtmalar avtomatik arxivlanadi va Telegram kanaliga yuboriladi. Xavfsiz va ierarxik tuzilma. Ma'lumotlar yo'qotilmaydi
-                            {% elif current_language == 'en' %}
-                                Old orders are automatically archived and sent to Telegram channel. Secure and hierarchical structure. No data loss
-                            {% else %}
-                                Старые заказы автоматически архивируются и отправляются в Telegram канал. Безопасная иерархическая структура. Нет потери данных
-                            {% endif %}
+                            {% trans "Old orders are automatically archived and sent to Telegram channel. Secure and hierarchical structure. No data loss" %}
                         </p>
                     </div>
                 </div>
@@ -837,16 +789,10 @@
                             <i class="fas fa-user-check"></i>
                         </div>
                         <h3 class="feature-title">
-                            {% if current_language == 'uz' %}Xodimlar Samaradorligi{% elif current_language == 'en' %}Staff Performance{% else %}Производительность Сотрудников{% endif %}
+                            {% trans "Staff Performance" %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}
-                                Har bir xodimning ish natijalarini kuzatish. Bajarilgan buyurtmalar, daromad, vaqt sarfi statistikasi
-                            {% elif current_language == 'en' %}
-                                Track work results of each employee. Completed orders, revenue, time spent statistics
-                            {% else %}
-                                Отслеживание результатов работы каждого сотрудника. Выполненные заказы, доход, статистика времени
-                            {% endif %}
+                            {% trans "Track work results of each employee. Completed orders, revenue, time spent statistics" %}
                         </p>
                     </div>
                 </div>
@@ -858,16 +804,10 @@
                             <i class="fas fa-building"></i>
                         </div>
                         <h3 class="feature-title">
-                            {% if current_language == 'uz' %}Ko'p Markazlar{% elif current_language == 'en' %}Multi-Tenant{% else %}Мульти-Тенантность{% endif %}
+                            {% trans "Multi-Tenant" %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}
-                                Cheksiz tarjima markazlari va filiallar. Har biri o'z subdomeniga ega. To'liq ajratilgan ma'lumotlar
-                            {% elif current_language == 'en' %}
-                                Unlimited translation centers and branches. Each with own subdomain. Fully isolated data
-                            {% else %}
-                                Неограниченное количество центров и филиалов. Каждый со своим поддоменом. Полная изоляция данных
-                            {% endif %}
+                            {% trans "Unlimited translation centers and branches. Each with own subdomain. Fully isolated data" %}
                         </p>
                     </div>
                 </div>
@@ -879,16 +819,10 @@
                             <i class="fas fa-file-excel"></i>
                         </div>
                         <h3 class="feature-title">
-                            {% if current_language == 'uz' %}Excel va Filtrlar{% elif current_language == 'en' %}Excel & Filters{% else %}Excel и Фильтры{% endif %}
+                            {% trans "Excel & Filters" %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}
-                                Barcha ma'lumotlarni Excel formatida eksport qiling. Kuchli qidiruv va filtrlash tizimi
-                            {% elif current_language == 'en' %}
-                                Export all data to Excel format. Powerful search and filtering system
-                            {% else %}
-                                Экспорт всех данных в формат Excel. Мощная система поиска и фильтрации
-                            {% endif %}
+                            {% trans "Export all data to Excel format. Powerful search and filtering system" %}
                         </p>
                     </div>
                 </div>
@@ -900,16 +834,10 @@
                             <i class="fas fa-bullhorn"></i>
                         </div>
                         <h3 class="feature-title">
-                            {% if current_language == 'uz' %}Marketing Vositalari{% elif current_language == 'en' %}Marketing Tools{% else %}Маркетинговые Инструменты{% endif %}
+                            {% trans "Marketing Tools" %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}
-                                Barcha mijozlarga ommaviy xabarlar yuborish. Maxsus guruhlar, rejalangan xabarlar, media qo'shish
-                            {% elif current_language == 'en' %}
-                                Send bulk messages to all customers. Custom groups, scheduled messages, media attachments
-                            {% else %}
-                                Массовая рассылка всем клиентам. Кастомные группы, запланированные сообщения, медиа вложения
-                            {% endif %}
+                            {% trans "Send bulk messages to all customers. Custom groups, scheduled messages, media attachments" %}
                         </p>
                     </div>
                 </div>
@@ -921,16 +849,10 @@
                             <i class="fas fa-tachometer-alt"></i>
                         </div>
                         <h3 class="feature-title">
-                            {% if current_language == 'uz' %}Real Vaqt Monitoring{% elif current_language == 'en' %}Real-time Monitoring{% else %}Мониторинг в Реальном Времени{% endif %}
+                            {% trans "Real-time Monitoring" %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}
-                                Barcha jarayonlarni jonli kuzatish. Yangi buyurtmalar, to'lovlar, holat o'zgarishlari real vaqtda
-                            {% elif current_language == 'en' %}
-                                Live tracking of all processes. New orders, payments, status changes in real-time
-                            {% else %}
-                                Живое отслеживание всех процессов. Новые заказы, платежи, изменения статусов в реальном времени
-                            {% endif %}
+                            {% trans "Live tracking of all processes. New orders, payments, status changes in real-time" %}
                         </p>
                     </div>
                 </div>
@@ -942,16 +864,10 @@
     <section class="section">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">
-                {% if current_language == 'uz' %}Qanday Ishlaydi?{% elif current_language == 'en' %}How It Works?{% else %}Как Это Работает?{% endif %}
+                {% trans "How It Works?" %}
             </h2>
             <p class="section-subtitle" data-aos="fade-up">
-                {% if current_language == 'uz' %}
-                    4 oddiy qadam - biznesingiz avtomatlashtiriladi
-                {% elif current_language == 'en' %}
-                    4 simple steps - your business is automated
-                {% else %}
-                    4 простых шага - ваш бизнес автоматизирован
-                {% endif %}
+                {% trans "4 simple steps - your business is automated" %}
             </p>
             
             <div class="row g-4">
@@ -959,16 +875,10 @@
                     <div class="step-card">
                         <div class="step-number">1</div>
                         <h3 class="step-title">
-                            {% if current_language == 'uz' %}Buyurtma Qabul Qilish{% elif current_language == 'en' %}Order Reception{% else %}Прием Заказа{% endif %}
+                            {% trans "Order Reception" %}
                         </h3>
                         <p class="step-desc">
-                            {% if current_language == 'uz' %}
-                                Mijoz Telegram bot yoki admin panel orqali buyurtma yuboradi. Fayllar avtomatik yuklanadi
-                            {% elif current_language == 'en' %}
-                                Customer sends order via Telegram bot or admin panel. Files are uploaded automatically
-                            {% else %}
-                                Клиент отправляет заказ через Telegram бот или админ панель. Файлы загружаются автоматически
-                            {% endif %}
+                            {% trans "Customer sends order via Telegram bot or admin panel. Files are uploaded automatically" %}
                         </p>
                     </div>
                 </div>
@@ -977,16 +887,10 @@
                     <div class="step-card">
                         <div class="step-number">2</div>
                         <h3 class="step-title">
-                            {% if current_language == 'uz' %}Narx Hisoblash{% elif current_language == 'en' %}Price Calculation{% else %}Расчет Цены{% endif %}
+                            {% trans "Price Calculation" %}
                         </h3>
                         <p class="step-desc">
-                            {% if current_language == 'uz' %}
-                                Tizim avtomatik ravishda narxni hisoblaydi. Sahifalar soni, til, mijoz turi (B2B/B2C), nusxalar
-                            {% elif current_language == 'en' %}
-                                System automatically calculates price. Pages, language, client type (B2B/B2C), copies
-                            {% else %}
-                                Система автоматически рассчитывает цену. Страницы, язык, тип клиента (B2B/B2C), копии
-                            {% endif %}
+                            {% trans "System automatically calculates price. Pages, language, client type (B2B/B2C), copies" %}
                         </p>
                     </div>
                 </div>
@@ -995,16 +899,10 @@
                     <div class="step-card">
                         <div class="step-number">3</div>
                         <h3 class="step-title">
-                            {% if current_language == 'uz' %}Xodimlarga Tayinlash{% elif current_language == 'en' %}Staff Assignment{% else %}Назначение Сотрудникам{% endif %}
+                            {% trans "Staff Assignment" %}
                         </h3>
                         <p class="step-desc">
-                            {% if current_language == 'uz' %}
-                                Menejer buyurtmani tegishli xodimga tayinlaydi. Xabarlar Telegram orqali yuboriladi
-                            {% elif current_language == 'en' %}
-                                Manager assigns order to appropriate staff. Notifications sent via Telegram
-                            {% else %}
-                                Менеджер назначает заказ соответствующему сотруднику. Уведомления отправляются через Telegram
-                            {% endif %}
+                            {% trans "Manager assigns order to appropriate staff. Notifications sent via Telegram" %}
                         </p>
                     </div>
                 </div>
@@ -1013,16 +911,10 @@
                     <div class="step-card">
                         <div class="step-number">4</div>
                         <h3 class="step-title">
-                            {% if current_language == 'uz' %}Kuzatuv va Hisobot{% elif current_language == 'en' %}Tracking & Reporting{% else %}Отслеживание и Отчеты{% endif %}
+                            {% trans "Tracking & Reporting" %}
                         </h3>
                         <p class="step-desc">
-                            {% if current_language == 'uz' %}
-                                Real vaqtda holat kuzatish, to'lovlar nazorati, analitika. Ma'lumotlar Telegram kanaliga avtomatik arxivlanadi
-                            {% elif current_language == 'en' %}
-                                Real-time status tracking, payment control, analytics. Data automatically archived to Telegram channel
-                            {% else %}
-                                Отслеживание статусов в реальном времени, контроль оплат, аналитика. Данные автоматически архивируются в Telegram канал
-                            {% endif %}
+                            {% trans "Real-time status tracking, payment control, analytics. Data automatically archived to Telegram channel" %}
                         </p>
                     </div>
                 </div>
@@ -1034,16 +926,10 @@
     <section id="pricing" class="section bg-light">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">
-                {% if current_language == 'uz' %}Narxlar{% elif current_language == 'en' %}Pricing{% else %}Тарифы{% endif %}
+                {% trans "Pricing" %}
             </h2>
             <p class="section-subtitle" data-aos="fade-up">
-                {% if current_language == 'uz' %}
-                    Biznesingiz uchun ideal rejani tanlang
-                {% elif current_language == 'en' %}
-                    Choose the perfect plan for your business
-                {% else %}
-                    Выберите идеальный план для вашего бизнеса
-                {% endif %}
+                {% trans "Choose the perfect plan for your business" %}
             </p>
             
             <div class="row g-4">
@@ -1052,11 +938,11 @@
                     <div class="pricing-card {% if tariff.is_featured %}featured{% endif %}">
                         {% if tariff.is_trial %}
                         <div class="pricing-badge">
-                            {% if current_language == 'uz' %}Bepul sinov{% elif current_language == 'en' %}Free Trial{% else %}Бесплатная пробная версия{% endif %}
+                            {% trans "Free Trial" %}
                         </div>
                         {% elif tariff.is_featured %}
                         <div class="pricing-badge">
-                            {% if current_language == 'uz' %}Ommabop{% elif current_language == 'en' %}Popular{% else %}Популярный{% endif %}
+                            {% trans "Popular" %}
                         </div>
                         {% endif %}
                         
@@ -1077,19 +963,19 @@
                         <!-- Limits Section -->
                         <div style="margin-bottom: 1.5rem;">
                             <h6 style="color: #64748B; font-size: 0.9rem; margin-bottom: 0.75rem; font-weight: 600;">
-                                {% if current_language == 'uz' %}Cheklovlar{% elif current_language == 'en' %}Limits{% else %}Лимиты{% endif %}:
+                                {% trans "Limits" %}:
                             </h6>
                             <ul class="pricing-features" style="margin-bottom: 0;">
                                 <li><i class="fas fa-building"></i>
-                                    {% if current_language == 'uz' %}Filiallar{% elif current_language == 'en' %}Branches{% else %}Филиалы{% endif %}: {% if tariff.max_branches %}{{ tariff.max_branches }}{% else %}∞{% endif %}
+                                    {% trans "Branches" %}: {% if tariff.max_branches %}{{ tariff.max_branches }}{% else %}∞{% endif %}
                                 </li>
                                 
                                 <li><i class="fas fa-users"></i>
-                                    {% if current_language == 'uz' %}Xodimlar{% elif current_language == 'en' %}Staff{% else %}Сотрудники{% endif %}: {% if tariff.max_staff %}{{ tariff.max_staff }}{% else %}∞{% endif %}
+                                    {% trans "Staff" %}: {% if tariff.max_staff %}{{ tariff.max_staff }}{% else %}∞{% endif %}
                                 </li>
                                 
                                 <li><i class="fas fa-file-alt"></i>
-                                    {% if current_language == 'uz' %}Buyurtmalar/oy{% elif current_language == 'en' %}Orders/month{% else %}Заказов/месяц{% endif %}: {% if tariff.max_monthly_orders %}{{ tariff.max_monthly_orders }}{% else %}∞{% endif %}
+                                    {% trans "Orders/month" %}: {% if tariff.max_monthly_orders %}{{ tariff.max_monthly_orders }}{% else %}∞{% endif %}
                                 </li>
                             </ul>
                         </div>
@@ -1099,7 +985,7 @@
                         {% if feature_count > 0 %}
                         <div style="margin-bottom: 1.5rem;">
                             <h6 style="color: #64748B; font-size: 0.9rem; margin-bottom: 0.75rem; font-weight: 600;">
-                                {% if current_language == 'uz' %}Imkoniyatlar{% elif current_language == 'en' %}Features{% else %}Возможности{% endif %} ({{ feature_count }}):
+                                {% trans "Features" %} ({{ feature_count }}):
                             </h6>
                             <ul class="pricing-features" style="margin-bottom: 0;">
                                 {% for feature_slug, feature_name in features_with_names|slice:":5" %}
@@ -1110,11 +996,11 @@
                                     <i class="fas fa-ellipsis-h"></i> 
                                     <span class="more-features-trigger" style="cursor: pointer; text-decoration: underline; text-decoration-style: dotted;">
                                         +{{ feature_count|add:"-5" }} 
-                                        {% if current_language == 'uz' %}yana{% elif current_language == 'en' %}more{% else %}еще{% endif %}
+                                        {% trans "more" %}
                                     </span>
                                     <div class="more-features-tooltip" style="display: none; position: absolute; left: 0; top: 100%; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); z-index: 9999; min-width: 250px; max-width: 300px; margin-top: 0.5rem; max-height: 300px; overflow-y: auto;">
                                         <strong style="display: block; margin-bottom: 0.5rem; color: #334155;">
-                                            {% if current_language == 'uz' %}Boshqa imkoniyatlar:{% elif current_language == 'en' %}Additional features:{% else %}Дополнительные возможности:{% endif %}
+                                            {% trans "Additional features:" %}
                                         </strong>
                                         <ul style="list-style: none; padding: 0; margin: 0;">
                                             {% for feature_slug, feature_name in features_with_names|slice:"5:" %}
@@ -1135,14 +1021,14 @@
                         {% if tariff.pricing.exists %}
                         <div style="margin-bottom: 1.5rem;">
                             <h6 style="color: #64748B; font-size: 0.9rem; margin-bottom: 0.75rem; font-weight: 600;">
-                                {% if current_language == 'uz' %}Narx variantlari{% elif current_language == 'en' %}Pricing Options{% else %}Варианты Цен{% endif %}:
+                                {% trans "Pricing Options" %}:
                             </h6>
                             <div style="background: rgba(72, 127, 255, 0.05); border-radius: 8px; padding: 1rem;">
                                 {% for pricing in tariff.pricing.all %}
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; {% if not forloop.last %}border-bottom: 1px solid rgba(100, 116, 139, 0.1);{% endif %}">
                                     <span style="color: #334155; font-size: 0.9rem;">
                                         {{ pricing.duration_months }} 
-                                        {% if current_language == 'uz' %}oy{% elif current_language == 'en' %}month{% else %}мес{% endif %}{% if pricing.duration_months > 1 %}{% if current_language == 'en' %}s{% elif current_language == 'uz' %}{% else %}{% endif %}{% endif %}
+                                        {% trans "month" %}{% if pricing.duration_months > 1 %}{% if current_language == 'en' %}s{% elif current_language == 'uz' %}{% else %}{% endif %}{% endif %}
                                     </span>
                                     <span style="color: var(--primary-color); font-weight: 600; font-size: 1rem;">
                                         {{ pricing.price|intspace }} {{ pricing.currency }}
@@ -1154,7 +1040,7 @@
                         {% endif %}
                         
                         <a href="#contact" class="btn {% if tariff.is_featured %}btn-primary-custom{% else %}btn-outline-custom{% endif %} w-100">
-                            {% if current_language == 'uz' %}Tanlash{% elif current_language == 'en' %}Choose Plan{% else %}Выбрать План{% endif %}
+                            {% trans "Choose Plan" %}
                         </a>
                     </div>
                 </div>
@@ -1163,41 +1049,41 @@
                 <div class="col-lg-4" data-aos="fade-up" data-aos-delay="0">
                     <div class="pricing-card">
                         <h3 class="pricing-name">
-                            {% if current_language == 'uz' %}Starter{% elif current_language == 'en' %}Starter{% else %}Начальный{% endif %}
+                            {% trans "Starter" %}
                         </h3>
                         <div class="pricing-price">299 000 UZS</div>
                         <div class="pricing-period">
-                            {% if current_language == 'uz' %}oyiga{% elif current_language == 'en' %}per month{% else %}в месяц{% endif %}
+                            {% trans "per month" %}
                         </div>
                         <ul class="pricing-features">
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}1 ta Tarjima Markazi{% elif current_language == 'en' %}1 Translation Center{% else %}1 Центр Переводов{% endif %}
+                                {% trans "1 Translation Center" %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}1 ta Filial{% elif current_language == 'en' %}1 Branch{% else %}1 Филиал{% endif %}
+                                {% trans "1 Branch" %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}3 ta Xodim{% elif current_language == 'en' %}3 Staff Members{% else %}3 Сотрудника{% endif %}
+                                {% trans "3 Staff Members" %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}150 Buyurtma/oy{% elif current_language == 'en' %}150 Orders/month{% else %}150 Заказов/месяц{% endif %}
+                                {% trans "150 Orders/month" %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> Telegram Bot</li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Asosiy Hisobotlar{% elif current_language == 'en' %}Basic Reports{% else %}Базовые Отчеты{% endif %}
+                                {% trans "Basic Reports" %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Excel Eksport{% elif current_language == 'en' %}Excel Export{% else %}Экспорт в Excel{% endif %}
+                                {% trans "Excel Export" %}
                             </li>
                             <li class="disabled"><i class="fas fa-times-circle"></i> 
-                                {% if current_language == 'uz' %}Kengaytirilgan Analitika{% elif current_language == 'en' %}Advanced Analytics{% else %}Расширенная Аналитика{% endif %}
+                                {% trans "Advanced Analytics" %}
                             </li>
                             <li class="disabled"><i class="fas fa-times-circle"></i> 
-                                {% if current_language == 'uz' %}Marketing Vositalari{% elif current_language == 'en' %}Marketing Tools{% else %}Маркетинговые Инструменты{% endif %}
+                                {% trans "Marketing Tools" %}
                             </li>
                         </ul>
                         <a href="#contact" class="btn btn-outline-custom w-100">
-                            {% if current_language == 'uz' %}Tanlash{% elif current_language == 'en' %}Choose Plan{% else %}Выбрать План{% endif %}
+                            {% trans "Choose Plan" %}
                         </a>
                     </div>
                 </div>
@@ -1206,44 +1092,44 @@
                 <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
                     <div class="pricing-card featured">
                         <div class="pricing-badge">
-                            {% if current_language == 'uz' %}Ommabop{% elif current_language == 'en' %}Popular{% else %}Популярный{% endif %}
+                            {% trans "Popular" %}
                         </div>
                         <h3 class="pricing-name">
-                            {% if current_language == 'uz' %}Professional{% elif current_language == 'en' %}Professional{% else %}Профессиональный{% endif %}
+                            {% trans "Professional" %}
                         </h3>
                         <div class="pricing-price">499 000 UZS</div>
                         <div class="pricing-period">
-                            {% if current_language == 'uz' %}oyiga{% elif current_language == 'en' %}per month{% else %}в месяц{% endif %}
+                            {% trans "per month" %}
                         </div>
                         <ul class="pricing-features">
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}1 ta Tarjima Markazi{% elif current_language == 'en' %}1 Translation Center{% else %}1 Центр Переводов{% endif %}
+                                {% trans "1 Translation Center" %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}3 ta Filial{% elif current_language == 'en' %}3 Branches{% else %}3 Филиала{% endif %}
+                                {% trans "3 Branches" %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}10 ta Xodim{% elif current_language == 'en' %}10 Staff Members{% else %}10 Сотрудников{% endif %}
+                                {% trans "10 Staff Members" %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}500 Buyurtma/oy{% elif current_language == 'en' %}500 Orders/month{% else %}500 Заказов/месяц{% endif %}
+                                {% trans "500 Orders/month" %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> Telegram Bot</li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}To'liq Hisobotlar{% elif current_language == 'en' %}Full Reports{% else %}Полные Отчеты{% endif %}
+                                {% trans "Full Reports" %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Kengaytirilgan Analitika{% elif current_language == 'en' %}Advanced Analytics{% else %}Расширенная Аналитика{% endif %}
+                                {% trans "Advanced Analytics" %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Marketing Vositalari{% elif current_language == 'en' %}Marketing Tools{% else %}Маркетинговые Инструменты{% endif %}
+                                {% trans "Marketing Tools" %}
                             </li>
                             <li><i class="fas fa-check-circle"></i> 
-                                {% if current_language == 'uz' %}Avtomatik Arxivlash{% elif current_language == 'en' %}Auto Archiving{% else %}Автоматическое Архивирование{% endif %}
+                                {% trans "Auto Archiving" %}
                             </li>
                         </ul>
                         <a href="#contact" class="btn btn-primary-custom w-100">
-                            {% if current_language == 'uz' %}Tanlash{% elif current_language == 'en' %}Choose Plan{% else %}Выбрать План{% endif %}
+                            {% trans "Choose Plan" %}
                         </a>
                     </div>
                 </div>
@@ -1256,16 +1142,10 @@
     <section id="contact" class="section">
         <div class="container">
             <h2 class="section-title" data-aos="fade-up">
-                {% if current_language == 'uz' %}Bog'lanish{% elif current_language == 'en' %}Contact Us{% else %}Связаться с Нами{% endif %}
+                {% trans "Contact Us" %}
             </h2>
             <p class="section-subtitle" data-aos="fade-up">
-                {% if current_language == 'uz' %}
-                    Savollar bormi? Biz yordam berishga tayyormiz!
-                {% elif current_language == 'en' %}
-                    Have questions? We're here to help!
-                {% else %}
-                    Есть вопросы? Мы готовы помочь!
-                {% endif %}
+                {% trans "Have questions? We're here to help!" %}
             </p>
             
             <div class="row justify-content-center">
@@ -1285,40 +1165,40 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">
-                                        {% if current_language == 'uz' %}Ism{% elif current_language == 'en' %}Name{% else %}Имя{% endif %} *
+                                        {% trans "Name" %} *
                                     </label>
                                     <input type="text" name="name" class="form-control" required 
-                                           placeholder="{% if current_language == 'uz' %}Ismingiz{% elif current_language == 'en' %}Your name{% else %}Ваше имя{% endif %}">
+                                           placeholder="{% trans "Your name" %}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Email *</label>
-                                    <input type="email" name="email" class="form-control" required placeholder="{% if current_language == 'uz' %}sizning@email.uz{% elif current_language == 'en' %}you@example.com{% else %}вы@example.com{% endif %}">
+                                    <input type="email" name="email" class="form-control" required placeholder="{% trans "you@example.com" %}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">
-                                        {% if current_language == 'uz' %}Kompaniya{% elif current_language == 'en' %}Company{% else %}Компания{% endif %}
+                                        {% trans "Company" %}
                                     </label>
                                     <input type="text" name="company" class="form-control" 
-                                           placeholder="{% if current_language == 'uz' %}Kompaniya nomi{% elif current_language == 'en' %}Company name{% else %}Название компании{% endif %}">
+                                           placeholder="{% trans "Company name" %}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">
-                                        {% if current_language == 'uz' %}Telefon / Telegram *{% elif current_language == 'en' %}Phone / Telegram *{% else %}Телефон / Telegram *{% endif %}
+                                        {% trans "Phone / Telegram *" %}
                                     </label>
                                     <input type="text" name="phone" required class="form-control" 
-                                           placeholder="{% if current_language == 'uz' %}+998 XX XXX XX XX yoki @username{% elif current_language == 'en' %}+998 XX XXX XX XX or @username{% else %}+998 XX XXX XX XX или @username{% endif %}">
+                                           placeholder="{% trans "+998 XX XXX XX XX or @username" %}">
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label">
-                                        {% if current_language == 'uz' %}Xabar{% elif current_language == 'en' %}Message{% else %}Сообщение{% endif %} *
+                                        {% trans "Message" %} *
                                     </label>
                                     <textarea name="message" class="form-control" required 
-                                              placeholder="{% if current_language == 'uz' %}Xabaringizni yozing...{% elif current_language == 'en' %}Write your message...{% else %}Напишите ваше сообщение...{% endif %}"></textarea>
+                                              placeholder="{% trans "Write your message..." %}"></textarea>
                                 </div>
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary-custom w-100">
                                         <i class="fas fa-paper-plane me-2"></i>
-                                        {% if current_language == 'uz' %}Yuborish{% elif current_language == 'en' %}Send Message{% else %}Отправить Сообщение{% endif %}
+                                        {% trans "Send Message" %}
                                     </button>
                                 </div>
                             </div>
@@ -1326,13 +1206,7 @@
                         
                         <div class="mt-4 text-center">
                             <p class="text-secondary-light">
-                                {% if current_language == 'uz' %}
-                                    Yoki biz bilan to'g'ridan-to'g'ri bog'laning:
-                                {% elif current_language == 'en' %}
-                                    Or contact us directly:
-                                {% else %}
-                                    Или свяжитесь с нами напрямую:
-                                {% endif %}
+                                {% trans "Or contact us directly:" %}
                             </p>
                             <div class="d-flex justify-content-center gap-3 flex-wrap">
                                 <a href="mailto:go.multilang@gmail.com" class="btn btn-outline-custom">
@@ -1362,38 +1236,32 @@
                         <span style="color: white;">MultiLang</span>
                     </div>
                     <p style="color: rgba(255, 255, 255, 0.7);">
-                        {% if current_language == 'uz' %}
-                            Tarjima byurolarini boshqarish uchun zamonaviy SaaS platforma
-                        {% elif current_language == 'en' %}
-                            Modern SaaS platform for translation bureau management
-                        {% else %}
-                            Современная SaaS платформа для управления бюро переводов
-                        {% endif %}
+                        {% trans "Modern SaaS platform for translation bureau management" %}
                     </p>
                 </div>
                 <div class="col-lg-2 col-md-6">
                     <h4 class="footer-title">
-                        {% if current_language == 'uz' %}Platforma{% elif current_language == 'en' %}Platform{% else %}Платформа{% endif %}
+                        {% trans "Platform" %}
                     </h4>
                     <ul class="footer-links">
                         <li><a href="#features">
-                            {% if current_language == 'uz' %}Imkoniyatlar{% elif current_language == 'en' %}Features{% else %}Возможности{% endif %}
+                            {% trans "Features" %}
                         </a></li>
                         <li><a href="#pricing">
-                            {% if current_language == 'uz' %}Narxlar{% elif current_language == 'en' %}Pricing{% else %}Тарифы{% endif %}
+                            {% trans "Pricing" %}
                         </a></li>
                         <li><a href="#contact">
-                            {% if current_language == 'uz' %}Bog'lanish{% elif current_language == 'en' %}Contact{% else %}Контакты{% endif %}
+                            {% trans "Contact" %}
                         </a></li>
                     </ul>
                 </div>
                 <div class="col-lg-2 col-md-6">
                     <h4 class="footer-title">
-                        {% if current_language == 'uz' %}Qo'llab-quvvatlash{% elif current_language == 'en' %}Support{% else %}Поддержка{% endif %}
+                        {% trans "Support" %}
                     </h4>
                     <ul class="footer-links">
                         <li><a href="#contact">
-                            {% if current_language == 'uz' %}Bog'lanish{% elif current_language == 'en' %}Contact{% else %}Контакты{% endif %}
+                            {% trans "Contact" %}
                         </a></li>
                         <li><a href="https://t.me/multilang_support_bot">Telegram</a></li>
                         <li><a href="https://www.instagram.com/multilang.uz?igsh=MWxzbmRiZ2J4NmZybw==">Instagram</a></li>
@@ -1401,28 +1269,16 @@
                 </div>
                 <div class="col-lg-4">
                     <h4 class="footer-title">
-                        {% if current_language == 'uz' %}Yangiliklar{% elif current_language == 'en' %}Newsletter{% else %}Новости{% endif %}
+                        {% trans "Newsletter" %}
                     </h4>
                     <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">
-                        {% if current_language == 'uz' %}
-                            Yangi imkoniyatlar va takliflar haqida birinchilardan bo'lib bilib oling
-                        {% elif current_language == 'en' %}
-                            Be the first to know about new features and offers
-                        {% else %}
-                            Узнавайте первыми о новых возможностях и предложениях
-                        {% endif %}
+                        {% trans "Be the first to know about new features and offers" %}
                     </p>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 MultiLang. 
-                    {% if current_language == 'uz' %}
-                        Barcha huquqlar himoyalangan.
-                    {% elif current_language == 'en' %}
-                        All rights reserved.
-                    {% else %}
-                        Все права защищены.
-                    {% endif %}
+                    {% trans "All rights reserved." %}
                 </p>
             </div>
         </div>

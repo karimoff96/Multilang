@@ -826,7 +826,7 @@ msgstr ""
 #: billing/models.py:22 templates/billing/subscription_detail.html:220
 #: templates/billing/tariff_list.html:81
 msgid "Features"
-msgstr ""
+msgstr "Imkoniyatlar"
 
 #: billing/models.py:31
 msgid "Tariff Title"
@@ -5544,10 +5544,8 @@ msgstr ""
 
 #: templates/billing/subscription_detail.html:237
 #: templates/billing/tariff_create.html:486
-#, fuzzy
-#| msgid "Support Phone"
 msgid "Support"
-msgstr "Qo'llab-quvvatlash telefoni"
+msgstr "Qo'llab-quvvatlash"
 
 #: templates/billing/subscription_detail.html:238
 #: templates/billing/tariff_create.html:516
@@ -5635,10 +5633,8 @@ msgstr "Birim iqtisodiyotga qaytish"
 
 #: templates/billing/subscription_renew.html:23
 #: templates/billing/subscription_renew.html:140
-#, fuzzy
-#| msgid "Dynamic Pricing"
 msgid "Pricing"
-msgstr "Dinamik Narxlash"
+msgstr "Narxlar"
 
 #: templates/billing/subscription_renew.html:30
 #, fuzzy
@@ -7326,10 +7322,8 @@ msgid "Staff Member"
 msgstr "Xodimlar samaradorligi"
 
 #: templates/organizations/staff_list.html:54
-#, fuzzy
-#| msgid "Content"
 msgid "Contact"
-msgstr "Kontent"
+msgstr "Aloqa"
 
 #: templates/partials/sidebar.html:35
 msgid "Companies"
@@ -9289,3 +9283,332 @@ msgstr "Kimga to'landi — do'kon, odam, kompaniya va h."
 
 msgid "Monthly Expenses"
 msgstr "Oylik xarajatlar"
+
+# Landing page
+msgid "+998 XX XXX XX XX or @username"
+msgstr "+998 XX XXX XX XX yoki @username"
+
+
+# Landing page
+msgid "1 Branch"
+msgstr "1 ta Filial"
+
+
+# Landing page
+msgid "1 Translation Center"
+msgstr "1 ta Tarjima Markazi"
+
+
+# Landing page
+msgid "10 Staff Members"
+msgstr "10 ta Xodim"
+
+
+# Landing page
+msgid "150 Orders/month"
+msgstr "150 Buyurtma/oy"
+
+
+# Landing page
+msgid "3 Branches"
+msgstr "3 ta Filial"
+
+
+# Landing page
+msgid "3 Language Support"
+msgstr "3 Tilda Qo'llab-quvvatlash"
+
+
+# Landing page
+msgid "3 Staff Members"
+msgstr "3 ta Xodim"
+
+
+# Landing page
+msgid "4 simple steps - your business is automated"
+msgstr "4 oddiy qadam - biznesingiz avtomatlashtiriladi"
+
+
+# Landing page
+msgid "500 Orders/month"
+msgstr "500 Buyurtma/oy"
+
+
+# Landing page
+msgid "Accept orders from bot and admin panel. Status tracking, file management, payment control"
+msgstr "Botdan va admin paneldan buyurtma qabul qilish. Holat kuzatish, fayllar boshqaruvi, to'lovlarni nazorat qilish"
+
+
+# Landing page
+msgid "Additional features:"
+msgstr "Boshqa imkoniyatlar:"
+
+
+# Landing page
+msgid "All rights reserved."
+msgstr "Barcha huquqlar himoyalangan."
+
+
+# Landing page
+msgid "All the tools you need to automate your business and increase efficiency"
+msgstr "Biznesingizni avtomatlashtirish va samaradorlikni oshirish uchun barcha kerakli vositalar"
+
+
+# Landing page
+msgid "Auto Archiving"
+msgstr "Avtomatik Arxivlash"
+
+
+# Landing page
+msgid "Automatic Archiving"
+msgstr "Avtomatik Arxivlash"
+
+
+# Landing page
+msgid "Basic Reports"
+msgstr "Asosiy Hisobotlar"
+
+
+# Landing page
+msgid "Be the first to know about new features and offers"
+msgstr "Yangi imkoniyatlar va takliflar haqida birinchilardan bo'lib bilib oling"
+
+
+# Landing page
+msgid "Choose Plan"
+msgstr "Tanlash"
+
+
+# Landing page
+msgid "Choose the perfect plan for your business"
+msgstr "Biznesingiz uchun ideal rejani tanlang"
+
+
+# Landing page
+msgid "Company name"
+msgstr "Kompaniya nomi"
+
+
+# Landing page
+msgid "Contact Us"
+msgstr "Bog'lanish"
+
+
+# Landing page
+msgid "Customer sends order via Telegram bot or admin panel. Files are uploaded automatically"
+msgstr "Mijoz Telegram bot yoki admin panel orqali buyurtma yuboradi. Fayllar avtomatik yuklanadi"
+
+
+# Landing page
+msgid "Customers can place orders directly via Telegram. Automatic price calculation and notifications"
+msgstr "Mijozlar to'g'ridan-to'g'ri Telegram orqali buyurtma berishlari mumkin. Avtomatik narx hisoblash va xabar yuborish"
+
+
+# Landing page
+msgid "Excel & Filters"
+msgstr "Excel va Filtrlar"
+
+
+# Landing page
+msgid "Excel Export"
+msgstr "Excel Eksport"
+
+
+# Landing page
+msgid "Export all data to Excel format. Powerful search and filtering system"
+msgstr "Barcha ma'lumotlarni Excel formatida eksport qiling. Kuchli qidiruv va filtrlash tizimi"
+
+
+# Landing page
+msgid "Full Reports"
+msgstr "To'liq Hisobotlar"
+
+
+# Landing page
+msgid "Full interface in Russian, Uzbek and English. Convenient language selection for clients and staff"
+msgstr "Rus, O'zbek va Ingliz tillarida to'liq interface. Mijozlar va xodimlar uchun qulay til tanlash"
+
+
+# Landing page
+msgid "Have questions? We're here to help!"
+msgstr "Savollar bormi? Biz yordam berishga tayyormiz!"
+
+
+# Landing page
+msgid "How It Works?"
+msgstr "Qanday Ishlaydi?"
+
+
+# Landing page
+msgid "Individual permissions for each employee. Owner, Manager, Staff roles. Secure access control"
+msgstr "Har bir xodim uchun alohida ruxsatlar. Owner, Manager, Staff rollari. Xavfsiz kirish nazorati"
+
+
+# Landing page
+msgid "Learn More"
+msgstr "Ko'proq Bilib Oling"
+
+
+# Landing page
+msgid "Live tracking of all processes. New orders, payments, status changes in real-time"
+msgstr "Barcha jarayonlarni jonli kuzatish. Yangi buyurtmalar, to'lovlar, holat o'zgarishlari real vaqtda"
+
+
+# Landing page
+msgid "Manager assigns order to appropriate staff. Notifications sent via Telegram"
+msgstr "Menejer buyurtmani tegishli xodimga tayinlaydi. Xabarlar Telegram orqali yuboriladi"
+
+
+# Landing page
+msgid "Marketing Tools"
+msgstr "Marketing Vositalari"
+
+
+# Landing page
+msgid "Modern SaaS platform for translation bureau management"
+msgstr "Tarjima byurolarini boshqarish uchun zamonaviy SaaS platforma"
+
+
+# Landing page
+msgid "Multi-Tenant"
+msgstr "Ko'p Markazlar"
+
+
+# Landing page
+msgid "MultiLang Analytics"
+msgstr "MultiLang Analitika"
+
+
+# Landing page
+msgid "MultiLang Dashboard"
+msgstr "MultiLang Boshqaruv Paneli"
+
+
+# Landing page
+msgid "Newsletter"
+msgstr "Yangiliklar"
+
+
+# Landing page
+msgid "Old orders are automatically archived and sent to Telegram channel. Secure and hierarchical structure. No data loss"
+msgstr "Eski buyurtmalar avtomatik arxivlanadi va Telegram kanaliga yuboriladi. Xavfsiz va ierarxik tuzilma. Ma'lumotlar yo'qotilmaydi"
+
+
+# Landing page
+msgid "Or contact us directly:"
+msgstr "Yoki biz bilan to'g'ridan-to'g'ri bog'laning:"
+
+
+# Landing page
+msgid "Order Reception"
+msgstr "Buyurtma Qabul Qilish"
+
+
+# Landing page
+msgid "Orders/month"
+msgstr "Buyurtmalar/oy"
+
+
+# Landing page
+msgid "Phone / Telegram *"
+msgstr "Telefon / Telegram *"
+
+
+# Landing page
+msgid "Platform"
+msgstr "Platforma"
+
+
+# Landing page
+msgid "Powerful Features"
+msgstr "Kuchli Imkoniyatlar"
+
+
+# Landing page
+msgid "Price Calculation"
+msgstr "Narx Hisoblash"
+
+
+# Landing page
+msgid "Process payments for multiple orders at once. Partial payments and debt tracking"
+msgstr "Bir vaqtning o'zida ko'plab buyurtmalar uchun to'lovlarni qayd etish. Qisman to'lovlar va qarz nazorati"
+
+
+# Landing page
+msgid "Real-time Monitoring"
+msgstr "Real Vaqt Monitoring"
+
+
+# Landing page
+msgid "Real-time statistics, financial reports, staff performance, branch comparison. Excel export"
+msgstr "Real vaqtda statistika, moliyaviy hisobotlar, xodimlar samaradorligi, filiallar taqqoslash. Excel eksport"
+
+
+# Landing page
+msgid "Real-time status tracking, payment control, analytics. Data automatically archived to Telegram channel"
+msgstr "Real vaqtda holat kuzatish, to'lovlar nazorati, analitika. Ma'lumotlar Telegram kanaliga avtomatik arxivlanadi"
+
+
+# Landing page
+msgid "Send Message"
+msgstr "Yuborish"
+
+
+# Landing page
+msgid "Send bulk messages to all customers. Custom groups, scheduled messages, media attachments"
+msgstr "Barcha mijozlarga ommaviy xabarlar yuborish. Maxsus guruhlar, rejalangan xabarlar, media qo'shish"
+
+
+# Landing page
+msgid "Staff Assignment"
+msgstr "Xodimlarga Tayinlash"
+
+
+# Landing page
+msgid "Start Free"
+msgstr "Bepul Boshlash"
+
+
+# Landing page
+msgid "System automatically calculates price. Pages, language, client type (B2B/B2C), copies"
+msgstr "Tizim avtomatik ravishda narxni hisoblaydi. Sahifalar soni, til, mijoz turi (B2B/B2C), nusxalar"
+
+
+# Landing page
+msgid "Track work results of each employee. Completed orders, revenue, time spent statistics"
+msgstr "Har bir xodimning ish natijalarini kuzatish. Bajarilgan buyurtmalar, daromad, vaqt sarfi statistikasi"
+
+
+# Landing page
+msgid "Tracking & Reporting"
+msgstr "Kuzatuv va Hisobot"
+
+
+# Landing page
+msgid "Unlimited translation centers and branches. Each with own subdomain. Fully isolated data"
+msgstr "Cheksiz tarjima markazlari va filiallar. Har biri o'z subdomeniga ega. To'liq ajratilgan ma'lumotlar"
+
+
+# Landing page
+msgid "Uptime"
+msgstr "Ishonchlilik"
+
+
+# Landing page
+msgid "Write your message..."
+msgstr "Xabaringizni yozing..."
+
+
+# Landing page
+msgid "Your name"
+msgstr "Ismingiz"
+
+
+# Landing page
+msgid "per month"
+msgstr "oyiga"
+
+
+# Landing page
+msgid "you@example.com"
+msgstr "sizning@email.uz"

@@ -7409,10 +7409,8 @@ msgid "Staff Member"
 msgstr "Эффективность сотрудников"
 
 #: templates/organizations/staff_list.html:54
-#, fuzzy
-#| msgid "Contact Requests"
 msgid "Contact"
-msgstr "Запросы на контакт"
+msgstr "Контакты"
 
 #: templates/partials/sidebar.html:35
 msgid "Companies"
@@ -9423,3 +9421,342 @@ msgstr "Кому платили — магазин, человек, компан
 
 msgid "Monthly Expenses"
 msgstr "Ежемесячные расходы"
+
+# Landing page
+msgid "+998 XX XXX XX XX or @username"
+msgstr "+998 XX XXX XX XX или @username"
+
+
+# Landing page
+msgid "1 Branch"
+msgstr "1 Филиал"
+
+
+# Landing page
+msgid "1 Translation Center"
+msgstr "1 Центр Переводов"
+
+
+# Landing page
+msgid "10 Staff Members"
+msgstr "10 Сотрудников"
+
+
+# Landing page
+msgid "150 Orders/month"
+msgstr "150 Заказов/месяц"
+
+
+# Landing page
+msgid "3 Branches"
+msgstr "3 Филиала"
+
+
+# Landing page
+msgid "3 Language Support"
+msgstr "Поддержка 3 Языков"
+
+
+# Landing page
+msgid "3 Staff Members"
+msgstr "3 Сотрудника"
+
+
+# Landing page
+msgid "4 simple steps - your business is automated"
+msgstr "4 простых шага - ваш бизнес автоматизирован"
+
+
+# Landing page
+msgid "500 Orders/month"
+msgstr "500 Заказов/месяц"
+
+
+# Landing page
+msgid "Accept orders from bot and admin panel. Status tracking, file management, payment control"
+msgstr "Прием заказов из бота и админ панели. Отслеживание статусов, управление файлами, контроль оплат"
+
+
+# Landing page
+msgid "Additional features:"
+msgstr "Дополнительные возможности:"
+
+
+# Landing page
+msgid "All rights reserved."
+msgstr "Все права защищены."
+
+
+# Landing page
+msgid "All the tools you need to automate your business and increase efficiency"
+msgstr "Все необходимые инструменты для автоматизации бизнеса и повышения эффективности"
+
+
+# Landing page
+msgid "Auto Archiving"
+msgstr "Автоматическое Архивирование"
+
+
+# Landing page
+msgid "Automatic Archiving"
+msgstr "Автоматическое Архивирование"
+
+
+# Landing page
+msgid "Basic Reports"
+msgstr "Базовые Отчеты"
+
+
+# Landing page
+msgid "Be the first to know about new features and offers"
+msgstr "Узнавайте первыми о новых возможностях и предложениях"
+
+
+# Landing page
+msgid "Choose Plan"
+msgstr "Выбрать План"
+
+
+# Landing page
+msgid "Choose the perfect plan for your business"
+msgstr "Выберите идеальный план для вашего бизнеса"
+
+
+# Landing page
+msgid "Company name"
+msgstr "Название компании"
+
+
+# Landing page
+msgid "Contact Us"
+msgstr "Связаться с Нами"
+
+
+# Landing page
+msgid "Customer sends order via Telegram bot or admin panel. Files are uploaded automatically"
+msgstr "Клиент отправляет заказ через Telegram бот или админ панель. Файлы загружаются автоматически"
+
+
+# Landing page
+msgid "Customers can place orders directly via Telegram. Automatic price calculation and notifications"
+msgstr "Клиенты могут оформлять заказы напрямую через Telegram. Автоматический расчет цены и уведомления"
+
+
+# Landing page
+msgid "Excel & Filters"
+msgstr "Excel и Фильтры"
+
+
+# Landing page
+msgid "Excel Export"
+msgstr "Экспорт в Excel"
+
+
+# Landing page
+msgid "Export all data to Excel format. Powerful search and filtering system"
+msgstr "Экспорт всех данных в формат Excel. Мощная система поиска и фильтрации"
+
+
+# Landing page
+msgid "Full Reports"
+msgstr "Полные Отчеты"
+
+
+# Landing page
+msgid "Full interface in Russian, Uzbek and English. Convenient language selection for clients and staff"
+msgstr "Полный интерфейс на русском, узбекском и английском языках. Удобный выбор языка для клиентов и сотрудников"
+
+
+# Landing page
+msgid "Have questions? We're here to help!"
+msgstr "Есть вопросы? Мы готовы помочь!"
+
+
+# Landing page
+msgid "How It Works?"
+msgstr "Как Это Работает?"
+
+
+# Landing page
+msgid "Individual permissions for each employee. Owner, Manager, Staff roles. Secure access control"
+msgstr "Индивидуальные права для каждого сотрудника. Роли Owner, Manager, Staff. Безопасный контроль доступа"
+
+
+# Landing page
+msgid "Learn More"
+msgstr "Узнать Больше"
+
+
+# Landing page
+msgid "Live tracking of all processes. New orders, payments, status changes in real-time"
+msgstr "Живое отслеживание всех процессов. Новые заказы, платежи, изменения статусов в реальном времени"
+
+
+# Landing page
+msgid "Manager assigns order to appropriate staff. Notifications sent via Telegram"
+msgstr "Менеджер назначает заказ соответствующему сотруднику. Уведомления отправляются через Telegram"
+
+
+# Landing page
+msgid "Marketing Tools"
+msgstr "Маркетинговые Инструменты"
+
+
+# Landing page
+msgid "Modern SaaS platform for translation bureau management"
+msgstr "Современная SaaS платформа для управления бюро переводов"
+
+
+# Landing page
+msgid "Multi-Tenant"
+msgstr "Мульти-Тенантность"
+
+
+# Landing page
+msgid "MultiLang Analytics"
+msgstr "MultiLang Аналитика"
+
+
+# Landing page
+msgid "MultiLang Dashboard"
+msgstr "MultiLang Панель Управления"
+
+
+# Landing page
+msgid "Newsletter"
+msgstr "Новости"
+
+
+# Landing page
+msgid "Old orders are automatically archived and sent to Telegram channel. Secure and hierarchical structure. No data loss"
+msgstr "Старые заказы автоматически архивируются и отправляются в Telegram канал. Безопасная иерархическая структура. Нет потери данных"
+
+
+# Landing page
+msgid "Or contact us directly:"
+msgstr "Или свяжитесь с нами напрямую:"
+
+
+# Landing page
+msgid "Order Reception"
+msgstr "Прием Заказа"
+
+
+# Landing page
+msgid "Orders/month"
+msgstr "Заказов/месяц"
+
+
+# Landing page
+msgid "Phone / Telegram *"
+msgstr "Телефон / Telegram *"
+
+
+# Landing page
+msgid "Platform"
+msgstr "Платформа"
+
+
+# Landing page
+msgid "Powerful Features"
+msgstr "Мощные Возможности"
+
+
+# Landing page
+msgid "Price Calculation"
+msgstr "Расчет Цены"
+
+
+# Landing page
+msgid "Process payments for multiple orders at once. Partial payments and debt tracking"
+msgstr "Обработка оплаты для нескольких заказов одновременно. Частичные платежи и контроль задолженностей"
+
+
+# Landing page
+msgid "Professional"
+msgstr "Профессиональный"
+
+
+# Landing page
+msgid "Real-time Monitoring"
+msgstr "Мониторинг в Реальном Времени"
+
+
+# Landing page
+msgid "Real-time statistics, financial reports, staff performance, branch comparison. Excel export"
+msgstr "Статистика в реальном времени, финансовые отчеты, производительность сотрудников, сравнение филиалов. Экспорт в Excel"
+
+
+# Landing page
+msgid "Real-time status tracking, payment control, analytics. Data automatically archived to Telegram channel"
+msgstr "Отслеживание статусов в реальном времени, контроль оплат, аналитика. Данные автоматически архивируются в Telegram канал"
+
+
+# Landing page
+msgid "Send Message"
+msgstr "Отправить Сообщение"
+
+
+# Landing page
+msgid "Send bulk messages to all customers. Custom groups, scheduled messages, media attachments"
+msgstr "Массовая рассылка всем клиентам. Кастомные группы, запланированные сообщения, медиа вложения"
+
+
+# Landing page
+msgid "Staff Assignment"
+msgstr "Назначение Сотрудникам"
+
+
+# Landing page
+msgid "Start Free"
+msgstr "Начать Бесплатно"
+
+
+# Landing page
+msgid "Starter"
+msgstr "Начальный"
+
+
+# Landing page
+msgid "System automatically calculates price. Pages, language, client type (B2B/B2C), copies"
+msgstr "Система автоматически рассчитывает цену. Страницы, язык, тип клиента (B2B/B2C), копии"
+
+
+# Landing page
+msgid "Track work results of each employee. Completed orders, revenue, time spent statistics"
+msgstr "Отслеживание результатов работы каждого сотрудника. Выполненные заказы, доход, статистика времени"
+
+
+# Landing page
+msgid "Tracking & Reporting"
+msgstr "Отслеживание и Отчеты"
+
+
+# Landing page
+msgid "Unlimited translation centers and branches. Each with own subdomain. Fully isolated data"
+msgstr "Неограниченное количество центров и филиалов. Каждый со своим поддоменом. Полная изоляция данных"
+
+
+# Landing page
+msgid "Uptime"
+msgstr "Время Работы"
+
+
+# Landing page
+msgid "Write your message..."
+msgstr "Напишите ваше сообщение..."
+
+
+# Landing page
+msgid "Your name"
+msgstr "Ваше имя"
+
+
+# Landing page
+msgid "per month"
+msgstr "в месяц"
+
+
+# Landing page
+msgid "you@example.com"
+msgstr "вы@example.com"
