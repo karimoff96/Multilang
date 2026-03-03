@@ -98,27 +98,24 @@ class TariffAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'description': _('Multi-branch management and staff coordination')
         }),
-        (_('📦 Storage & Archive Features (3)'), {
+        (_('📦 Storage & Archive Features (1)'), {
             'fields': (
                 'feature_archive_access',
-                'feature_cloud_backup',
-                'feature_extended_storage',
             ),
             'classes': ('collapse',),
             'description': _('File archiving and cloud storage')
         }),
-        (_('💰 Financial Management Features (2)'), {
+        (_('💰 Financial Management Features (3)'), {
             'fields': (
                 'feature_payment_management',
-                'feature_multi_currency',
                 'feature_expense_tracking',
+                'feature_invoicing',
             ),
             'classes': ('collapse',),
             'description': _('Payment processing and financial tracking')
         }),
-        (_('⚡ Advanced Features (2)'), {
+        (_('⚡ Advanced Features (1)'), {
             'fields': (
-                'feature_advanced_security',
                 'feature_audit_logs',
             ),
             'classes': ('collapse',),
@@ -150,7 +147,7 @@ class TariffAdmin(admin.ModelAdmin):
     
     def feature_count_display(self, obj):
         count = obj.get_feature_count()
-        return f"{count}/37 features"
+        return f"{count}/28 features"
     feature_count_display.short_description = _('Features Enabled')
 
 

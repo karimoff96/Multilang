@@ -86,11 +86,6 @@ class Tariff(models.Model):
         verbose_name=_("Bulk Payment Processing"),
         help_text=_("Process payments across multiple orders")
     )
-    feature_order_templates = models.BooleanField(
-        default=False,
-        verbose_name=_("Order Templates"),
-        help_text=_("Pre-defined templates for common order types")
-    )
     
     # Analytics & Reports Features (6)
     feature_analytics_basic = models.BooleanField(
@@ -174,35 +169,15 @@ class Tariff(models.Model):
         verbose_name=_("Branch Settings"),
         help_text=_("Customize settings per branch")
     )
-    feature_staff_scheduling = models.BooleanField(
-        default=False,
-        verbose_name=_("Staff Scheduling"),
-        help_text=_("Schedule and manage staff work shifts")
-    )
     
-    # Storage & Archive Features (3)
+    # Storage & Archive Features (1)
     feature_archive_access = models.BooleanField(
         default=False,
         verbose_name=_("Historical File Archives"),
         help_text=_("Access compressed archives of completed orders")
     )
-    feature_cloud_backup = models.BooleanField(
-        default=False,
-        verbose_name=_("Automated Cloud Backups"),
-        help_text=_("Database and file backups to cloud storage")
-    )
-    feature_extended_storage = models.BooleanField(
-        default=False,
-        verbose_name=_("Extended Storage Capacity"),
-        help_text=_("Additional storage for documents and media")
-    )
     
-    # Financial Management Features (4)
-    feature_multi_currency = models.BooleanField(
-        default=False,
-        verbose_name=_("Multi-Currency Pricing"),
-        help_text=_("Support for multiple currencies (UZS, USD, RUB)")
-    )
+    # Financial Management Features (3)
     feature_payment_management = models.BooleanField(
         default=False,
         verbose_name=_("Payment Tracking & Recording"),
@@ -219,33 +194,11 @@ class Tariff(models.Model):
         help_text=_("Generate and manage invoices for customers")
     )
     
-    # Support Features (2)
-    feature_support_tickets = models.BooleanField(
-        default=False,
-        verbose_name=_("Support Tickets"),
-        help_text=_("Built-in support ticket management system")
-    )
-    feature_knowledge_base = models.BooleanField(
-        default=False,
-        verbose_name=_("Knowledge Base"),
-        help_text=_("Access to documentation and help articles")
-    )
-    
-    # Advanced Features (3)
-    feature_advanced_security = models.BooleanField(
-        default=False,
-        verbose_name=_("Advanced Security Features"),
-        help_text=_("Enhanced security (audit logs, RBAC)")
-    )
+    # Advanced Features (1)
     feature_audit_logs = models.BooleanField(
         default=False,
         verbose_name=_("Comprehensive Audit Logs"),
         help_text=_("Track all system actions and changes")
-    )
-    feature_data_retention = models.BooleanField(
-        default=False,
-        verbose_name=_("Data Retention Policies"),
-        help_text=_("Configure data retention and archival rules")
     )
     
     # Services Management Features (4)
@@ -400,36 +353,21 @@ class Tariff(models.Model):
             'marketing_basic': gettext('Marketing Campaign Tools'),
             'broadcast_messages': gettext('Mass Broadcast Messaging'),
             
-            # Organization & Staff Features (2)
+            # Organization & Staff Features
             'multi_branch': gettext('Multiple Branches'),
             'custom_roles': gettext('Custom Roles & Permissions'),
             'branch_settings': gettext('Branch Settings'),
             
-            # Storage & Archive Features (3)
+            # Storage & Archive Features
             'archive_access': gettext('Historical File Archives'),
-            'cloud_backup': gettext('Automated Cloud Backups'),
-            'extended_storage': gettext('Extended Storage Capacity'),
             
-            # Financial Management Features (2)
-            'multi_currency': gettext('Multi-Currency Pricing'),
+            # Financial Management Features
             'payment_management': gettext('Payment Tracking & Recording'),
             'expense_tracking': gettext('Expense Tracking'),
-            
-            # Financial Management extras
             'invoicing': gettext('Invoicing'),
 
-            # Support Features (2)
-            'support_tickets': gettext('Support Tickets'),
-            'knowledge_base': gettext('Knowledge Base'),
-
-            # Advanced Features (3)
-            'advanced_security': gettext('Advanced Security Features'),
+            # Advanced Features
             'audit_logs': gettext('Comprehensive Audit Logs'),
-            'data_retention': gettext('Data Retention Policies'),
-
-            # Organization extras
-            'order_templates': gettext('Order Templates'),
-            'staff_scheduling': gettext('Staff Scheduling'),
 
             # Services Management Features (4)
             'products_basic': gettext('Basic Product Management'),

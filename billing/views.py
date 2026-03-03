@@ -345,8 +345,8 @@ def tariff_create(request):
                 'feature_invoicing',
                 # Support (2)
                 'feature_priority_support', 'feature_onboarding',
-                # Advanced (3)
-                'feature_white_label', 'feature_data_backup', 'feature_advanced_security',
+                # Advanced (2)
+                'feature_white_label', 'feature_data_backup',
                 # Services (4)
                 'feature_services_basic', 'feature_services_advanced', 'feature_service_tracking',
                 'feature_service_analytics',
@@ -414,11 +414,11 @@ def tariff_edit(request, pk):
             
             tariff.save()
             
-            # Update boolean feature flags (37 features)
+            # Update boolean feature flags (26 features)
             feature_fields = [
-                # Orders (5)
+                # Orders (4)
                 'feature_orders_basic', 'feature_orders_advanced', 'feature_order_assignment',
-                'feature_bulk_payments', 'feature_order_templates',
+                'feature_bulk_payments',
                 # Analytics (6)
                 'feature_analytics_basic', 'feature_analytics_advanced', 'feature_financial_reports',
                 'feature_staff_performance', 'feature_custom_reports', 'feature_export_reports',
@@ -426,16 +426,14 @@ def tariff_edit(request, pk):
                 'feature_telegram_bot', 'feature_webhooks', 'feature_api_access', 'feature_integrations',
                 # Marketing (2)
                 'feature_marketing_basic', 'feature_broadcast_messages',
-                # Organization (4)
-                'feature_multi_branch', 'feature_custom_roles', 'feature_staff_scheduling', 'feature_branch_settings',
-                # Storage (3)
-                'feature_archive_access', 'feature_cloud_backup', 'feature_extended_storage',
-                # Financial (4)
-                'feature_payment_management', 'feature_multi_currency', 'feature_invoicing', 'feature_expense_tracking',
-                # Support (2)
-                'feature_support_tickets', 'feature_knowledge_base',
-                # Advanced (3)
-                'feature_advanced_security', 'feature_audit_logs', 'feature_data_retention',
+                # Organization (3)
+                'feature_multi_branch', 'feature_custom_roles', 'feature_branch_settings',
+                # Storage (1)
+                'feature_archive_access',
+                # Financial (3)
+                'feature_payment_management', 'feature_invoicing', 'feature_expense_tracking',
+                # Advanced (1)
+                'feature_audit_logs',
                 # Services (4)
                 'feature_products_basic', 'feature_products_advanced', 'feature_language_pricing', 'feature_dynamic_pricing',
             ]

@@ -19,7 +19,6 @@ class Command(BaseCommand):
                 starter.feature_telegram_bot = True
                 starter.feature_webhooks = True
                 starter.feature_products_basic = True
-                starter.feature_knowledge_base = True
                 # Additional features
                 starter.feature_order_assignment = True
                 starter.feature_multi_branch = True
@@ -39,7 +38,6 @@ class Command(BaseCommand):
                 pro.feature_telegram_bot = True
                 pro.feature_webhooks = True
                 pro.feature_products_basic = True
-                pro.feature_knowledge_base = True
                 pro.feature_order_assignment = True
                 pro.feature_multi_branch = True
                 pro.feature_payment_management = True
@@ -57,11 +55,8 @@ class Command(BaseCommand):
                 pro.feature_broadcast_messages = True
                 pro.feature_custom_roles = True
                 pro.feature_branch_settings = True
-                pro.feature_extended_storage = True
-                pro.feature_multi_currency = True
                 pro.feature_invoicing = True
                 pro.feature_expense_tracking = True
-                pro.feature_advanced_security = True
                 pro.feature_audit_logs = True
                 pro.feature_products_advanced = True
                 pro.save()
@@ -70,12 +65,11 @@ class Command(BaseCommand):
             # Enterprise - All 33 features
             enterprise = Tariff.objects.filter(slug='enterprise').first()
             if enterprise:
-                # All Order Management features (5)
+                # All Order Management features (4)
                 enterprise.feature_orders_basic = True
                 enterprise.feature_orders_advanced = True
                 enterprise.feature_order_assignment = True
                 enterprise.feature_bulk_payments = True
-                enterprise.feature_order_templates = True
                 # All Analytics features (6)
                 enterprise.feature_analytics_basic = True
                 enterprise.feature_analytics_advanced = True
@@ -91,27 +85,18 @@ class Command(BaseCommand):
                 # All Marketing features (2)
                 enterprise.feature_marketing_basic = True
                 enterprise.feature_broadcast_messages = True
-                # All Organization features (4)
+                # All Organization features (3)
                 enterprise.feature_multi_branch = True
                 enterprise.feature_custom_roles = True
-                enterprise.feature_staff_scheduling = True
                 enterprise.feature_branch_settings = True
-                # All Storage features (3)
+                # Storage (1)
                 enterprise.feature_archive_access = True
-                enterprise.feature_cloud_backup = True
-                enterprise.feature_extended_storage = True
-                # All Financial features (4)
+                # All Financial features (3)
                 enterprise.feature_payment_management = True
-                enterprise.feature_multi_currency = True
                 enterprise.feature_invoicing = True
                 enterprise.feature_expense_tracking = True
-                # All Support features (2)
-                enterprise.feature_support_tickets = True
-                enterprise.feature_knowledge_base = True
-                # All Advanced features (3)
-                enterprise.feature_advanced_security = True
+                # Advanced (1)
                 enterprise.feature_audit_logs = True
-                enterprise.feature_data_retention = True
                 # All Services features (4)
                 enterprise.feature_products_basic = True
                 enterprise.feature_products_advanced = True
@@ -127,5 +112,5 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING('Feature Summary:'))
             for tariff in Tariff.objects.all():
                 count = tariff.get_feature_count()
-                percent = (count / 37) * 100
+                percent = (count / 28) * 100
                 self.stdout.write(f'  • {tariff.title}: {count}/37 features ({percent:.0f}%)')

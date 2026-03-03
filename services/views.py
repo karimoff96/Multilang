@@ -135,7 +135,14 @@ def addCategory(request):
         charging = request.POST.get('charging', 'dynamic')
         is_active = request.POST.get('is_active') == 'on'
         selected_languages = request.POST.getlist('languages')
-        
+
+        # Enforce dynamic_pricing feature gate
+        if charging == 'dynamic' and not request.user.is_superuser:
+            center = getattr(getattr(request.user, 'admin_profile', None), 'center', None)
+            if center and hasattr(center, 'subscription') and not center.subscription.tariff.has_feature('dynamic_pricing'):
+                messages.warning(request, _('Dynamic pricing requires an upgraded plan. Category set to static pricing.'))
+                charging = 'static'
+
         # Use Uzbek name as primary (fallback to any available)
         name = name_uz or name_ru or name_en
         
@@ -205,7 +212,14 @@ def editCategory(request, category_id):
         charging = request.POST.get('charging', 'dynamic')
         is_active = request.POST.get('is_active') == 'on'
         selected_languages = request.POST.getlist('languages')
-        
+
+        # Enforce dynamic_pricing feature gate
+        if charging == 'dynamic' and not request.user.is_superuser:
+            center = getattr(getattr(request.user, 'admin_profile', None), 'center', None)
+            if center and hasattr(center, 'subscription') and not center.subscription.tariff.has_feature('dynamic_pricing'):
+                messages.warning(request, _('Dynamic pricing requires an upgraded plan. Category set to static pricing.'))
+                charging = 'static'
+
         # Use Uzbek name as primary (fallback to any available)
         name = name_uz or name_ru or name_en
         

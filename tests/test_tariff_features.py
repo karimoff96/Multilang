@@ -107,7 +107,6 @@ def create_test_tariffs():
         feature_orders_advanced=False,
         feature_order_assignment=False,
         feature_bulk_payments=False,
-        feature_order_templates=False,
         # Analytics features
         feature_analytics_basic=True,
         feature_analytics_advanced=False,
@@ -124,20 +123,12 @@ def create_test_tariffs():
         feature_broadcast_messages=False,
         feature_multi_branch=False,
         feature_custom_roles=False,
-        feature_staff_scheduling=False,
         feature_branch_settings=False,
         feature_archive_access=False,
-        feature_cloud_backup=False,
-        feature_extended_storage=False,
-        feature_multi_currency=False,
         feature_payment_management=False,
         feature_invoicing=False,
         feature_expense_tracking=False,
-        feature_support_tickets=False,
-        feature_knowledge_base=False,
-        feature_advanced_security=False,
         feature_audit_logs=False,
-        feature_data_retention=False,
         feature_products_basic=False,
         feature_products_advanced=False,
         feature_language_pricing=False,
@@ -171,7 +162,6 @@ def create_test_tariffs():
         feature_orders_advanced=True,
         feature_order_assignment=True,
         feature_bulk_payments=True,
-        feature_order_templates=True,
         # Analytics features
         feature_analytics_basic=True,
         feature_analytics_advanced=True,
@@ -190,24 +180,16 @@ def create_test_tariffs():
         # Organization features
         feature_multi_branch=True,
         feature_custom_roles=False,
-        feature_staff_scheduling=False,
         feature_branch_settings=True,
         # Storage features
         feature_archive_access=True,
-        feature_cloud_backup=False,
-        feature_extended_storage=False,
         # Financial features
-        feature_multi_currency=False,
         feature_payment_management=True,
         feature_invoicing=False,
         feature_expense_tracking=False,
         # Support features
-        feature_support_tickets=False,
-        feature_knowledge_base=False,
         # Advanced features
-        feature_advanced_security=False,
         feature_audit_logs=False,
-        feature_data_retention=False,
         # Product features
         feature_products_basic=True,
         feature_products_advanced=False,
@@ -242,7 +224,6 @@ def create_test_tariffs():
         feature_orders_advanced=True,
         feature_order_assignment=True,
         feature_bulk_payments=True,
-        feature_order_templates=True,
         # All Analytics features
         feature_analytics_basic=True,
         feature_analytics_advanced=True,
@@ -261,24 +242,16 @@ def create_test_tariffs():
         # All Organization features
         feature_multi_branch=True,
         feature_custom_roles=True,
-        feature_staff_scheduling=True,
         feature_branch_settings=True,
         # Most Storage features
         feature_archive_access=True,
-        feature_cloud_backup=True,
-        feature_extended_storage=False,  # Reserved for enterprise
         # All Financial features
-        feature_multi_currency=True,
         feature_payment_management=True,
         feature_invoicing=True,
         feature_expense_tracking=True,
         # All Support features
-        feature_support_tickets=True,
-        feature_knowledge_base=True,
         # Some Advanced features
-        feature_advanced_security=False,  # Reserved for enterprise
         feature_audit_logs=True,
-        feature_data_retention=False,  # Reserved for enterprise
         # All Product features
         feature_products_basic=True,
         feature_products_advanced=True,
@@ -313,7 +286,6 @@ def create_test_tariffs():
         feature_orders_advanced=True,
         feature_order_assignment=True,
         feature_bulk_payments=True,
-        feature_order_templates=True,
         feature_analytics_basic=True,
         feature_analytics_advanced=True,
         feature_financial_reports=True,
@@ -328,20 +300,12 @@ def create_test_tariffs():
         feature_broadcast_messages=True,
         feature_multi_branch=True,
         feature_custom_roles=True,
-        feature_staff_scheduling=True,
         feature_branch_settings=True,
         feature_archive_access=True,
-        feature_cloud_backup=True,
-        feature_extended_storage=True,
-        feature_multi_currency=True,
         feature_payment_management=True,
         feature_invoicing=True,
         feature_expense_tracking=True,
-        feature_support_tickets=True,
-        feature_knowledge_base=True,
-        feature_advanced_security=True,
         feature_audit_logs=True,
-        feature_data_retention=True,
         feature_products_basic=True,
         feature_products_advanced=True,
         feature_language_pricing=True,
