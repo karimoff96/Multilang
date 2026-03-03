@@ -49,17 +49,18 @@ class TariffAdmin(admin.ModelAdmin):
             'fields': ('max_branches', 'max_staff', 'max_monthly_orders', 'max_monthly_broadcasts'),
             'description': _('Set usage limits (leave empty for unlimited)')
         }),
-        (_('📊 Order Management Features (4)'), {
+        (_('📊 Order Management Features (5)'), {
             'fields': (
                 'feature_orders_basic',
                 'feature_orders_advanced',
                 'feature_order_assignment',
                 'feature_bulk_payments',
+                'feature_extra_fees',
             ),
             'classes': ('collapse',),
             'description': _('Features for creating and managing customer orders')
         }),
-        (_('📈 Analytics & Reports Features (6)'), {
+        (_('📈 Analytics & Reports Features (7)'), {
             'fields': (
                 'feature_analytics_basic',
                 'feature_analytics_advanced',
@@ -67,6 +68,7 @@ class TariffAdmin(admin.ModelAdmin):
                 'feature_staff_performance',
                 'feature_custom_reports',
                 'feature_export_reports',
+                'feature_debt_tracking',
             ),
             'classes': ('collapse',),
             'description': _('Analytics dashboards and reporting capabilities')
@@ -89,11 +91,12 @@ class TariffAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'description': _('Marketing campaigns and broadcast messaging')
         }),
-        (_('🏢 Organization & Staff Features (2)'), {
+        (_('🏢 Organization & Staff Features (4)'), {
             'fields': (
                 'feature_multi_branch',
                 'feature_custom_roles',
                 'feature_branch_settings',
+                'feature_agency_management',
             ),
             'classes': ('collapse',),
             'description': _('Multi-branch management and staff coordination')
@@ -105,11 +108,12 @@ class TariffAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'description': _('File archiving and cloud storage')
         }),
-        (_('💰 Financial Management Features (3)'), {
+        (_('💰 Financial Management Features (4)'), {
             'fields': (
                 'feature_payment_management',
                 'feature_expense_tracking',
                 'feature_invoicing',
+                'feature_general_expenses',
             ),
             'classes': ('collapse',),
             'description': _('Payment processing and financial tracking')
@@ -147,7 +151,7 @@ class TariffAdmin(admin.ModelAdmin):
     
     def feature_count_display(self, obj):
         count = obj.get_feature_count()
-        return f"{count}/28 features"
+        return f"{count}/32 features"
     feature_count_display.short_description = _('Features Enabled')
 
 

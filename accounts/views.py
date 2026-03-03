@@ -202,6 +202,21 @@ def addUser(request):
             }
             return render(request, "users/addUser.html", context)
 
+        # Check tariff feature for agency management
+        if is_agency and not request.user.is_superuser:
+            _center = request.admin_profile.center if request.admin_profile else None
+            if _center and hasattr(_center, 'subscription') and not _center.subscription.tariff.has_feature('agency_management'):
+                messages.error(request, "Agency management is not available in your current plan. Please upgrade.")
+                context = {
+                    "title": "Add User",
+                    "subTitle": "Add User",
+                    "agencies": agencies,
+                    "centers": centers,
+                    "branches": branches,
+                    "languages": BotUser.LANGUAGES,
+                }
+                return render(request, "users/addUser.html", context)
+
         # Validation
         if not name:
             messages.error(request, "Full name is required.")
@@ -417,6 +432,22 @@ def editUser(request, user_id):
             elif not is_agency and not (request.user.is_superuser or 
                                        (request.admin_profile and (request.admin_profile.role.can_manage_agencies or request.admin_profile.role.can_edit_agencies))):
                 messages.error(request, "You don't have permission to modify agency status.")
+                context = {
+                    "title": "Edit User",
+                    "subTitle": "Edit User",
+                    "user": user,
+                    "agencies": agencies,
+                    "centers": centers,
+                    "branches": branches,
+                    "languages": BotUser.LANGUAGES,
+                }
+                return render(request, "users/editUser.html", context)
+
+        # Check tariff feature for agency management
+        if is_agency and not request.user.is_superuser:
+            _center = request.admin_profile.center if request.admin_profile else None
+            if _center and hasattr(_center, 'subscription') and not _center.subscription.tariff.has_feature('agency_management'):
+                messages.error(request, "Agency management is not available in your current plan. Please upgrade.")
                 context = {
                     "title": "Edit User",
                     "subTitle": "Edit User",

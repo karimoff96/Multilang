@@ -31,6 +31,27 @@
         display: block;
         line-height: 1.4;
     }
+
+    /* Feature tile cards */
+    .feature-tile {
+        transition: border-color 0.15s ease, background-color 0.15s ease;
+        user-select: none;
+    }
+    .feature-tile:hover {
+        border-color: #6366f1 !important;
+        background-color: rgba(99, 102, 241, 0.04);
+    }
+    .feature-tile input[type="checkbox"] {
+        cursor: pointer;
+    }
+    .feature-card .card-header {
+        border-radius: calc(0.5rem - 1px) calc(0.5rem - 1px) 0 0;
+    }
+    .btn-xs {
+        padding: 0.15rem 0.5rem;
+        font-size: 0.72rem;
+        border-radius: 0.3rem;
+    }
 </style>
 
 <div class="dashboard-main-body">
@@ -216,434 +237,509 @@
                 <!-- Features -->
                 <div class="row gy-3 mb-32">
                     <div class="col-12">
-                        <h6 class="text-md text-primary-light mb-16">
-                            {% trans "Included Features" %}
-                            <span class="badge bg-primary-600 text-white ms-2" id="featureCount">0/28</span>
-                        </h6>
-                        <p class="text-sm text-secondary-light mb-16">{% trans "Select features available in this tariff plan" %}</p>
-                    </div>
-
-                    <!-- Orders Features -->
-                    <div class="col-12 mb-20">
-                        <div class="card bg-neutral-50 border">
-                            <div class="card-header bg-transparent border-bottom">
-                                <h6 class="mb-0">📊 {% trans "Order Management Features" %} <span class="text-secondary-light">(4)</span></h6>
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <div>
+                                <h6 class="text-md text-primary-light mb-4">
+                                    {% trans "Included Features" %}
+                                    <span class="badge bg-primary-600 text-white ms-2" id="featureCount">0/32</span>
+                                </h6>
+                                <p class="text-sm text-secondary-light mb-0">{% trans "Select features available in this tariff plan" %}</p>
                             </div>
-                            <div class="card-body">
-                                <div class="row gy-2">
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_orders_basic" id="feature_orders_basic"
-                                                   {% if tariff.feature_orders_basic %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_orders_basic">
-                                                <strong>{% trans "Basic Order Management" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Create, view, and track customer orders" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_orders_advanced" id="feature_orders_advanced"
-                                                   {% if tariff.feature_orders_advanced %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_orders_advanced">
-                                                <strong>{% trans "Advanced Order Management" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Bulk operations, advanced filters, export" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_order_assignment" id="feature_order_assignment"
-                                                   {% if tariff.feature_order_assignment %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_order_assignment">
-                                                <strong>{% trans "Order Assignment" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Assign orders to specific staff members" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_bulk_payments" id="feature_bulk_payments"
-                                                   {% if tariff.feature_bulk_payments %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_bulk_payments">
-                                                <strong>{% trans "Bulk Payment Processing" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Process payments across multiple orders" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary-600" onclick="toggleAllFeatures(true)">
+                                    <i class="ri-checkbox-multiple-line me-1"></i>{% trans "Select All" %}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger-600" onclick="toggleAllFeatures(false)">
+                                    <i class="ri-checkbox-blank-line me-1"></i>{% trans "Deselect All" %}
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Analytics Features -->
-                    <div class="col-12 mb-20">
-                        <div class="card bg-neutral-50 border">
-                            <div class="card-header bg-transparent border-bottom">
-                                <h6 class="mb-0">📈 {% trans "Analytics & Reports Features" %} <span class="text-secondary-light">(6)</span></h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row gy-2">
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_analytics_basic" id="feature_analytics_basic"
-                                                   {% if tariff.feature_analytics_basic %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_analytics_basic">
-                                                <strong>{% trans "Basic Analytics" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "View order counts and basic statistics" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_analytics_advanced" id="feature_analytics_advanced"
-                                                   {% if tariff.feature_analytics_advanced %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_analytics_advanced">
-                                                <strong>{% trans "Advanced Analytics" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Detailed reports, financial analytics, trends" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_financial_reports" id="feature_financial_reports"
-                                                   {% if tariff.feature_financial_reports %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_financial_reports">
-                                                <strong>{% trans "Financial Reports" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Revenue, profit, expense analysis" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_staff_performance" id="feature_staff_performance"
-                                                   {% if tariff.feature_staff_performance %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_staff_performance">
-                                                <strong>{% trans "Staff Performance Reports" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Track individual staff productivity" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_custom_reports" id="feature_custom_reports"
-                                                   {% if tariff.feature_custom_reports %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_custom_reports">
-                                                <strong>{% trans "Custom Report Builder" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Create custom reports with filters" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_export_reports" id="feature_export_reports"
-                                                   {% if tariff.feature_export_reports %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_export_reports">
-                                                <strong>{% trans "Export Reports" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Export to Excel, PDF, CSV formats" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
+                    <!-- 1. Core Services -->
+                    <div class="col-12">
+                        <div class="card border feature-card" data-section="core-services">
+                            <div class="card-header bg-primary-50 border-bottom d-flex justify-content-between align-items-center py-12 px-16">
+                                <h6 class="mb-0 text-primary-600">🛠️ {% trans "Core Services" %} <span class="badge bg-primary-100 text-primary-600 ms-1">4</span></h6>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-xs btn-outline-primary-600 py-2 px-8" onclick="toggleSection('core-services', true)">{% trans "All" %}</button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-2 px-8" onclick="toggleSection('core-services', false)">{% trans "None" %}</button>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Integration Features -->
-                    <div class="col-12 mb-20">
-                        <div class="card bg-neutral-50 border">
-                            <div class="card-header bg-transparent border-bottom">
-                                <h6 class="mb-0">🔗 {% trans "Integration Features" %} <span class="text-secondary-light">(4)</span></h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row gy-2">
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_telegram_bot" id="feature_telegram_bot"
-                                                   {% if tariff.feature_telegram_bot %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_telegram_bot">
-                                                <strong>{% trans "Telegram Bot Integration" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Customer-facing bot for order placement" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_webhooks" id="feature_webhooks"
-                                                   {% if tariff.feature_webhooks %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_webhooks">
-                                                <strong>{% trans "Webhook Management" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Configure and manage Telegram webhooks" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_api_access" id="feature_api_access"
-                                                   {% if tariff.feature_api_access %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_api_access">
-                                                <strong>{% trans "REST API Access" %}</strong>
-                                                <span class="badge bg-warning-600 text-white text-xs ms-1">{% trans "On Request" %}</span>
-                                                <br><small class="text-secondary-light">{% trans "REST API for custom integrations" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_integrations" id="feature_integrations"
-                                                   {% if tariff.feature_integrations %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_integrations">
-                                                <strong>{% trans "Third-Party Integrations" %}</strong>
-                                                <span class="badge bg-warning-600 text-white text-xs ms-1">{% trans "On Request" %}</span>
-                                                <br><small class="text-secondary-light">{% trans "Custom integrations with external services" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Marketing & Organization Features -->
-                    <div class="col-md-6 mb-20">
-                        <div class="card bg-neutral-50 border h-100">
-                            <div class="card-header bg-transparent border-bottom">
-                                <h6 class="mb-0">📢 {% trans "Marketing Features" %} <span class="text-secondary-light">(2)</span></h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row gy-2">
-                                    <div class="col-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_marketing_basic" id="feature_marketing_basic"
-                                                   {% if tariff.feature_marketing_basic %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_marketing_basic">
-                                                <strong>{% trans "Marketing Campaign Tools" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Create and manage marketing posts" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_broadcast_messages" id="feature_broadcast_messages"
-                                                   {% if tariff.feature_broadcast_messages %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_broadcast_messages">
-                                                <strong>{% trans "Mass Broadcast Messaging" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Send targeted broadcasts to customers" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Organization Features -->
-                    <div class="col-md-6 mb-20">
-                        <div class="card bg-neutral-50 border h-100">
-                            <div class="card-header bg-transparent border-bottom">
-                                <h6 class="mb-0">🏢 {% trans "Organization & Staff Features" %} <span class="text-secondary-light">(3)</span></h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row gy-2">
-                                    <div class="col-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_multi_branch" id="feature_multi_branch"
-                                                   {% if tariff.feature_multi_branch %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_multi_branch">
-                                                <strong>{% trans "Multi-Branch Management" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Manage multiple branches/locations" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_custom_roles" id="feature_custom_roles"
-                                                   {% if tariff.feature_custom_roles %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_custom_roles">
-                                                <strong>{% trans "Custom Roles & Permissions" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Create custom staff roles with specific permissions" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_branch_settings" id="feature_branch_settings"
-                                                   {% if tariff.feature_branch_settings %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_branch_settings">
-                                                <strong>{% trans "Branch-Specific Settings" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Configure settings per branch" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Storage & Financial Features -->
-                    <div class="col-md-6 mb-20">
-                        <div class="card bg-neutral-50 border h-100">
-                            <div class="card-header bg-transparent border-bottom">
-                                <h6 class="mb-0">📦 {% trans "Storage & Archive Features" %} <span class="text-secondary-light">(1)</span></h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row gy-2">
-                                    <div class="col-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_archive_access" id="feature_archive_access"
-                                                   {% if tariff.feature_archive_access %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_archive_access">
-                                                <strong>{% trans "Archive Access" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Access archived orders and data" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Financial Features -->
-                    <div class="col-md-6 mb-20">
-                        <div class="card bg-neutral-50 border h-100">
-                            <div class="card-header bg-transparent border-bottom">
-                                <h6 class="mb-0">💰 {% trans "Financial Management Features" %} <span class="text-secondary-light">(3)</span></h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row gy-2">
-                                    <div class="col-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_payment_management" id="feature_payment_management"
-                                                   {% if tariff.feature_payment_management %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_payment_management">
-                                                <strong>{% trans "Payment Management" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Track payments and payment status" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_invoicing" id="feature_invoicing"
-                                                   {% if tariff.feature_invoicing %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_invoicing">
-                                                <strong>{% trans "Invoice Generation" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Generate and send invoices" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_expense_tracking" id="feature_expense_tracking"
-                                                   {% if tariff.feature_expense_tracking %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_expense_tracking">
-                                                <strong>{% trans "Expense Tracking" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Track business expenses" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Advanced Features -->
-                    <div class="col-md-6 mb-20">
-                        <div class="card bg-neutral-50 border h-100">
-                            <div class="card-header bg-transparent border-bottom">
-                                <h6 class="mb-0">⚡ {% trans "Advanced Features" %} <span class="text-secondary-light">(1)</span></h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row gy-2">
-                                    <div class="col-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
-                                                   name="feature_audit_logs" id="feature_audit_logs"
-                                                   {% if tariff.feature_audit_logs %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_audit_logs">
-                                                <strong>{% trans "Audit Logs" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Track all system activities" %}</small>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Services Features -->
-                    <div class="col-12 mb-20">
-                        <div class="card bg-neutral-50 border">
-                            <div class="card-header bg-transparent border-bottom">
-                                <h6 class="mb-0">🛠️ {% trans "Services Management Features" %} <span class="text-secondary-light">(4)</span></h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row gy-2">
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
+                            <div class="card-body py-16 px-16">
+                                <div class="row gy-3">
+                                    <div class="col-md-6 col-lg-3">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_products_basic %}border-primary-600 bg-primary-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
                                                    name="feature_products_basic" id="feature_products_basic"
                                                    {% if tariff.feature_products_basic %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_products_basic">
-                                                <strong>{% trans "Basic Product Management" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Manage products and services catalog" %}</small>
-                                            </label>
-                                        </div>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Basic Products" %}</div>
+                                                <small class="text-secondary-light">{% trans "Products & services catalog" %}</small>
+                                            </div>
+                                        </label>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
+                                    <div class="col-md-6 col-lg-3">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_products_advanced %}border-primary-600 bg-primary-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
                                                    name="feature_products_advanced" id="feature_products_advanced"
                                                    {% if tariff.feature_products_advanced %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_products_advanced">
-                                                <strong>{% trans "Advanced Product Management" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Variants, categories, inventory tracking" %}</small>
-                                            </label>
-                                        </div>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Advanced Products" %}</div>
+                                                <small class="text-secondary-light">{% trans "Variants, categories, inventory" %}</small>
+                                            </div>
+                                        </label>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
+                                    <div class="col-md-6 col-lg-3">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_language_pricing %}border-primary-600 bg-primary-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
                                                    name="feature_language_pricing" id="feature_language_pricing"
                                                    {% if tariff.feature_language_pricing %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_language_pricing">
-                                                <strong>{% trans "Language-Specific Pricing" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Set prices per language pair" %}</small>
-                                            </label>
-                                        </div>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Language Pricing" %}</div>
+                                                <small class="text-secondary-light">{% trans "Prices per language pair" %}</small>
+                                            </div>
+                                        </label>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input feature-checkbox" type="checkbox" 
+                                    <div class="col-md-6 col-lg-3">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_dynamic_pricing %}border-primary-600 bg-primary-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
                                                    name="feature_dynamic_pricing" id="feature_dynamic_pricing"
                                                    {% if tariff.feature_dynamic_pricing %}checked{% endif %}>
-                                            <label class="form-check-label" for="feature_dynamic_pricing">
-                                                <strong>{% trans "Dynamic Pricing Rules" %}</strong>
-                                                <br><small class="text-secondary-light">{% trans "Price calculation based on rules" %}</small>
-                                            </label>
-                                        </div>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Dynamic Pricing" %}</div>
+                                                <small class="text-secondary-light">{% trans "Rule-based price calculation" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Order Management -->
+                    <div class="col-12">
+                        <div class="card border feature-card" data-section="orders">
+                            <div class="card-header bg-info-50 border-bottom d-flex justify-content-between align-items-center py-12 px-16">
+                                <h6 class="mb-0 text-info-600">📋 {% trans "Order Management" %} <span class="badge bg-info-100 text-info-600 ms-1">5</span></h6>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-xs btn-outline-info-600 py-2 px-8" onclick="toggleSection('orders', true)">{% trans "All" %}</button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-2 px-8" onclick="toggleSection('orders', false)">{% trans "None" %}</button>
+                                </div>
+                            </div>
+                            <div class="card-body py-16 px-16">
+                                <div class="row gy-3">
+                                    <div class="col-md-6 col-lg-4">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_orders_basic %}border-info-600 bg-info-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_orders_basic" id="feature_orders_basic"
+                                                   {% if tariff.feature_orders_basic %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Basic Orders" %}</div>
+                                                <small class="text-secondary-light">{% trans "Create, view and track orders" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_orders_advanced %}border-info-600 bg-info-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_orders_advanced" id="feature_orders_advanced"
+                                                   {% if tariff.feature_orders_advanced %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Advanced Orders" %}</div>
+                                                <small class="text-secondary-light">{% trans "Bulk ops, filters, export" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_order_assignment %}border-info-600 bg-info-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_order_assignment" id="feature_order_assignment"
+                                                   {% if tariff.feature_order_assignment %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Order Assignment" %}</div>
+                                                <small class="text-secondary-light">{% trans "Assign orders to staff" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_bulk_payments %}border-info-600 bg-info-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_bulk_payments" id="feature_bulk_payments"
+                                                   {% if tariff.feature_bulk_payments %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Bulk Payments" %}</div>
+                                                <small class="text-secondary-light">{% trans "Pay across multiple orders" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_extra_fees %}border-info-600 bg-info-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_extra_fees" id="feature_extra_fees"
+                                                   {% if tariff.feature_extra_fees %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Extra Fees" %}</div>
+                                                <small class="text-secondary-light">{% trans "Surcharges & price corrections" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Financial & Expenses -->
+                    <div class="col-12">
+                        <div class="card border feature-card" data-section="financial">
+                            <div class="card-header bg-success-50 border-bottom d-flex justify-content-between align-items-center py-12 px-16">
+                                <h6 class="mb-0 text-success-600">💰 {% trans "Financial & Expenses" %} <span class="badge bg-success-100 text-success-600 ms-1">5</span></h6>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-xs btn-outline-success-600 py-2 px-8" onclick="toggleSection('financial', true)">{% trans "All" %}</button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-2 px-8" onclick="toggleSection('financial', false)">{% trans "None" %}</button>
+                                </div>
+                            </div>
+                            <div class="card-body py-16 px-16">
+                                <div class="row gy-3">
+                                    <div class="col-md-6 col-lg-4">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_payment_management %}border-success-600 bg-success-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_payment_management" id="feature_payment_management"
+                                                   {% if tariff.feature_payment_management %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Payment Management" %}</div>
+                                                <small class="text-secondary-light">{% trans "Track payments & status" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_invoicing %}border-success-600 bg-success-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_invoicing" id="feature_invoicing"
+                                                   {% if tariff.feature_invoicing %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Invoicing" %}</div>
+                                                <small class="text-secondary-light">{% trans "Generate & send invoices" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_expense_tracking %}border-success-600 bg-success-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_expense_tracking" id="feature_expense_tracking"
+                                                   {% if tariff.feature_expense_tracking %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Expense Tracking" %}</div>
+                                                <small class="text-secondary-light">{% trans "Order-level business expenses" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_general_expenses %}border-success-600 bg-success-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_general_expenses" id="feature_general_expenses"
+                                                   {% if tariff.feature_general_expenses %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "General Expenses" %}</div>
+                                                <small class="text-secondary-light">{% trans "Rent, salaries, operating costs" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_archive_access %}border-success-600 bg-success-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_archive_access" id="feature_archive_access"
+                                                   {% if tariff.feature_archive_access %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Archive Access" %}</div>
+                                                <small class="text-secondary-light">{% trans "Access archived orders & data" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Customers & Marketing (side by side) -->
+                    <div class="col-md-5">
+                        <div class="card border feature-card h-100" data-section="customers">
+                            <div class="card-header bg-warning-50 border-bottom d-flex justify-content-between align-items-center py-12 px-16">
+                                <h6 class="mb-0 text-warning-600">👥 {% trans "Customers & Agencies" %} <span class="badge bg-warning-100 text-warning-600 ms-1">1</span></h6>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-xs btn-outline-warning-600 py-2 px-8" onclick="toggleSection('customers', true)">{% trans "All" %}</button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-2 px-8" onclick="toggleSection('customers', false)">{% trans "None" %}</button>
+                                </div>
+                            </div>
+                            <div class="card-body py-16 px-16">
+                                <div class="row gy-3">
+                                    <div class="col-12">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_agency_management %}border-warning-600 bg-warning-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_agency_management" id="feature_agency_management"
+                                                   {% if tariff.feature_agency_management %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Agency Management" %}</div>
+                                                <small class="text-secondary-light">{% trans "B2B agency partners with agency-specific pricing" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="card border feature-card h-100" data-section="marketing">
+                            <div class="card-header bg-purple-50 border-bottom d-flex justify-content-between align-items-center py-12 px-16">
+                                <h6 class="mb-0 text-purple-600">📢 {% trans "Marketing" %} <span class="badge bg-purple-100 text-purple-600 ms-1">2</span></h6>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-xs btn-outline-purple py-2 px-8" onclick="toggleSection('marketing', true)">{% trans "All" %}</button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-2 px-8" onclick="toggleSection('marketing', false)">{% trans "None" %}</button>
+                                </div>
+                            </div>
+                            <div class="card-body py-16 px-16">
+                                <div class="row gy-3">
+                                    <div class="col-12">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer {% if tariff.feature_marketing_basic %}border-purple bg-purple-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_marketing_basic" id="feature_marketing_basic"
+                                                   {% if tariff.feature_marketing_basic %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Marketing Campaigns" %}</div>
+                                                <small class="text-secondary-light">{% trans "Create and manage marketing posts" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer {% if tariff.feature_broadcast_messages %}border-purple bg-purple-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_broadcast_messages" id="feature_broadcast_messages"
+                                                   {% if tariff.feature_broadcast_messages %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Broadcast Messaging" %}</div>
+                                                <small class="text-secondary-light">{% trans "Mass messages to customers via Telegram" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Analytics & Reports -->
+                    <div class="col-12">
+                        <div class="card border feature-card" data-section="analytics">
+                            <div class="card-header bg-info-50 border-bottom d-flex justify-content-between align-items-center py-12 px-16">
+                                <h6 class="mb-0 text-info-main">📈 {% trans "Analytics & Reports" %} <span class="badge bg-info-100 text-info-main ms-1">7</span></h6>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-xs btn-outline-info py-2 px-8" onclick="toggleSection('analytics', true)">{% trans "All" %}</button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-2 px-8" onclick="toggleSection('analytics', false)">{% trans "None" %}</button>
+                                </div>
+                            </div>
+                            <div class="card-body py-16 px-16">
+                                <div class="row gy-3">
+                                    <div class="col-md-6 col-lg-3">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_analytics_basic %}border-info bg-info-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_analytics_basic" id="feature_analytics_basic"
+                                                   {% if tariff.feature_analytics_basic %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Basic Analytics" %}</div>
+                                                <small class="text-secondary-light">{% trans "Order counts & statistics" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-3">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_analytics_advanced %}border-info bg-info-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_analytics_advanced" id="feature_analytics_advanced"
+                                                   {% if tariff.feature_analytics_advanced %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Advanced Analytics" %}</div>
+                                                <small class="text-secondary-light">{% trans "Trends, branches, customers" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-3">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_financial_reports %}border-info bg-info-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_financial_reports" id="feature_financial_reports"
+                                                   {% if tariff.feature_financial_reports %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Financial Reports" %}</div>
+                                                <small class="text-secondary-light">{% trans "Revenue, profit, expenses" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-3">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_staff_performance %}border-info bg-info-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_staff_performance" id="feature_staff_performance"
+                                                   {% if tariff.feature_staff_performance %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Staff Performance" %}</div>
+                                                <small class="text-secondary-light">{% trans "Individual productivity reports" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-3">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_custom_reports %}border-info bg-info-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_custom_reports" id="feature_custom_reports"
+                                                   {% if tariff.feature_custom_reports %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Custom Reports" %}</div>
+                                                <small class="text-secondary-light">{% trans "Report builder with filters" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-3">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_export_reports %}border-info bg-info-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_export_reports" id="feature_export_reports"
+                                                   {% if tariff.feature_export_reports %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Export Reports" %}</div>
+                                                <small class="text-secondary-light">{% trans "Excel, PDF, CSV export" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6 col-lg-3">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer h-100 {% if tariff.feature_debt_tracking %}border-info bg-info-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_debt_tracking" id="feature_debt_tracking"
+                                                   {% if tariff.feature_debt_tracking %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Debt Tracking" %}</div>
+                                                <small class="text-secondary-light">{% trans "Debtors, unit economy, receivables" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. Organization & 7. Integrations (side by side) -->
+                    <div class="col-md-6">
+                        <div class="card border feature-card h-100" data-section="organization">
+                            <div class="card-header bg-neutral-100 border-bottom d-flex justify-content-between align-items-center py-12 px-16">
+                                <h6 class="mb-0 text-neutral-700">🏢 {% trans "Organization & Staff" %} <span class="badge bg-neutral-200 text-neutral-700 ms-1">4</span></h6>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-2 px-8" onclick="toggleSection('organization', true)">{% trans "All" %}</button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-2 px-8" onclick="toggleSection('organization', false)">{% trans "None" %}</button>
+                                </div>
+                            </div>
+                            <div class="card-body py-16 px-16">
+                                <div class="row gy-3">
+                                    <div class="col-12">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer {% if tariff.feature_multi_branch %}border-neutral-600 bg-neutral-100{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_multi_branch" id="feature_multi_branch"
+                                                   {% if tariff.feature_multi_branch %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Multi-Branch" %}</div>
+                                                <small class="text-secondary-light">{% trans "Manage multiple locations" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer {% if tariff.feature_custom_roles %}border-neutral-600 bg-neutral-100{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_custom_roles" id="feature_custom_roles"
+                                                   {% if tariff.feature_custom_roles %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Custom Roles" %}</div>
+                                                <small class="text-secondary-light">{% trans "Staff roles & permissions" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer {% if tariff.feature_branch_settings %}border-neutral-600 bg-neutral-100{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_branch_settings" id="feature_branch_settings"
+                                                   {% if tariff.feature_branch_settings %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Branch Settings" %}</div>
+                                                <small class="text-secondary-light">{% trans "Per-branch configuration" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer {% if tariff.feature_audit_logs %}border-neutral-600 bg-neutral-100{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_audit_logs" id="feature_audit_logs"
+                                                   {% if tariff.feature_audit_logs %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Audit Logs" %}</div>
+                                                <small class="text-secondary-light">{% trans "Track all system activities" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border feature-card h-100" data-section="integrations">
+                            <div class="card-header bg-secondary-50 border-bottom d-flex justify-content-between align-items-center py-12 px-16">
+                                <h6 class="mb-0 text-secondary-600">🔗 {% trans "Integrations" %} <span class="badge bg-secondary-100 text-secondary-600 ms-1">4</span></h6>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-2 px-8" onclick="toggleSection('integrations', true)">{% trans "All" %}</button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-2 px-8" onclick="toggleSection('integrations', false)">{% trans "None" %}</button>
+                                </div>
+                            </div>
+                            <div class="card-body py-16 px-16">
+                                <div class="row gy-3">
+                                    <div class="col-12">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer {% if tariff.feature_telegram_bot %}border-secondary-600 bg-secondary-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_telegram_bot" id="feature_telegram_bot"
+                                                   {% if tariff.feature_telegram_bot %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Telegram Bot" %}</div>
+                                                <small class="text-secondary-light">{% trans "Customer bot for order placement" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer {% if tariff.feature_webhooks %}border-secondary-600 bg-secondary-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_webhooks" id="feature_webhooks"
+                                                   {% if tariff.feature_webhooks %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">{% trans "Webhooks" %}</div>
+                                                <small class="text-secondary-light">{% trans "Manage Telegram webhooks" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer {% if tariff.feature_api_access %}border-secondary-600 bg-secondary-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_api_access" id="feature_api_access"
+                                                   {% if tariff.feature_api_access %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">
+                                                    {% trans "REST API" %}
+                                                    <span class="badge bg-warning-100 text-warning-600 ms-1 text-xs">{% trans "On Request" %}</span>
+                                                </div>
+                                                <small class="text-secondary-light">{% trans "API for custom integrations" %}</small>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="feature-tile d-flex align-items-start gap-10 p-12 rounded-8 border cursor-pointer {% if tariff.feature_integrations %}border-secondary-600 bg-secondary-50{% endif %}">
+                                            <input class="form-check-input feature-checkbox mt-1 flex-shrink-0" type="checkbox"
+                                                   name="feature_integrations" id="feature_integrations"
+                                                   {% if tariff.feature_integrations %}checked{% endif %}>
+                                            <div>
+                                                <div class="fw-semibold text-sm">
+                                                    {% trans "Third-Party" %}
+                                                    <span class="badge bg-warning-100 text-warning-600 ms-1 text-xs">{% trans "On Request" %}</span>
+                                                </div>
+                                                <small class="text-secondary-light">{% trans "External service connectors" %}</small>
+                                            </div>
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -757,13 +853,32 @@ function updateFeatureCount() {
     document.getElementById('featureCount').textContent = `${checkedCount}/${totalCount}`;
 }
 
-// Attach listeners to all feature checkboxes
-document.addEventListener('DOMContentLoaded', function() {
-    const checkboxes = document.querySelectorAll('.feature-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateFeatureCount);
+function toggleAllFeatures(state) {
+    document.querySelectorAll('.feature-checkbox').forEach(cb => {
+        cb.checked = state;
+        cb.closest('.feature-tile')?.classList.toggle('border-primary-600', state);
+        cb.closest('.feature-tile')?.classList.toggle('bg-primary-50', state);
     });
-    updateFeatureCount(); // Initial count
+    updateFeatureCount();
+}
+
+function toggleSection(sectionName, state) {
+    const card = document.querySelector(`.feature-card[data-section="${sectionName}"]`);
+    if (!card) return;
+    card.querySelectorAll('.feature-checkbox').forEach(cb => {
+        cb.checked = state;
+    });
+    updateFeatureCount();
+}
+
+// Tile highlight on checkbox change
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.feature-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            updateFeatureCount();
+        });
+    });
+    updateFeatureCount();
 });
 
 function toggleTrialSettings() {

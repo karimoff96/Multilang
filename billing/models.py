@@ -63,9 +63,9 @@ class Tariff(models.Model):
         help_text=_("Maximum marketing broadcasts per month. Leave empty for unlimited.")
     )
     
-    # ============ FEATURE FLAGS (31 Features) ============
+    # ============ FEATURE FLAGS (32 Features) ============
     
-    # Order Management Features (4)
+    # Order Management Features (5)
     feature_orders_basic = models.BooleanField(
         default=False, 
         verbose_name=_("Basic Order Management"),
@@ -86,8 +86,13 @@ class Tariff(models.Model):
         verbose_name=_("Bulk Payment Processing"),
         help_text=_("Process payments across multiple orders")
     )
+    feature_extra_fees = models.BooleanField(
+        default=False,
+        verbose_name=_("Order Extra Fees"),
+        help_text=_("Add manual surcharges or price corrections to existing orders")
+    )
     
-    # Analytics & Reports Features (6)
+    # Analytics & Reports Features (7)
     feature_analytics_basic = models.BooleanField(
         default=False,
         verbose_name=_("Basic Analytics"),
@@ -117,6 +122,11 @@ class Tariff(models.Model):
         default=False,
         verbose_name=_("Export Reports"),
         help_text=_("Export to Excel, PDF, CSV formats")
+    )
+    feature_debt_tracking = models.BooleanField(
+        default=False,
+        verbose_name=_("Debt & Receivables Tracking"),
+        help_text=_("Unit economy analytics: outstanding balances, top debtors, collection rates")
     )
     
     # Integration Features (4)
@@ -153,7 +163,7 @@ class Tariff(models.Model):
         help_text=_("Send targeted broadcasts to customers")
     )
     
-    # Organization & Staff Features (4)
+    # Organization & Staff Features (3)
     feature_multi_branch = models.BooleanField(
         default=False,
         verbose_name=_("Multiple Branches"),
@@ -169,6 +179,11 @@ class Tariff(models.Model):
         verbose_name=_("Branch Settings"),
         help_text=_("Customize settings per branch")
     )
+    feature_agency_management = models.BooleanField(
+        default=False,
+        verbose_name=_("Agency Management"),
+        help_text=_("Create and manage B2B agency partners with agency-specific pricing")
+    )
     
     # Storage & Archive Features (1)
     feature_archive_access = models.BooleanField(
@@ -177,7 +192,7 @@ class Tariff(models.Model):
         help_text=_("Access compressed archives of completed orders")
     )
     
-    # Financial Management Features (3)
+    # Financial Management Features (4)
     feature_payment_management = models.BooleanField(
         default=False,
         verbose_name=_("Payment Tracking & Recording"),
@@ -192,6 +207,11 @@ class Tariff(models.Model):
         default=False,
         verbose_name=_("Invoicing"),
         help_text=_("Generate and manage invoices for customers")
+    )
+    feature_general_expenses = models.BooleanField(
+        default=False,
+        verbose_name=_("General (Operating) Expenses"),
+        help_text=_("Track operational costs: rent, salaries, stationery, repairs — not tied to individual orders")
     )
     
     # Advanced Features (1)
@@ -329,19 +349,21 @@ class Tariff(models.Model):
             str: Human-readable translated feature name
         """
         feature_names = {
-            # Order Management Features (4)
+            # Order Management Features (5)
             'orders_basic': gettext('Basic Order Management'),
             'orders_advanced': gettext('Advanced Order Management'),
             'order_assignment': gettext('Order Assignment'),
             'bulk_payments': gettext('Bulk Payment Processing'),
+            'extra_fees': gettext('Order Extra Fees'),
             
-            # Analytics & Reports Features (6)
+            # Analytics & Reports Features (7)
             'analytics_basic': gettext('Basic Analytics'),
             'analytics_advanced': gettext('Advanced Analytics'),
             'financial_reports': gettext('Financial Reports'),
             'staff_performance': gettext('Staff Performance Reports'),
             'custom_reports': gettext('Custom Report Builder'),
             'export_reports': gettext('Export Reports'),
+            'debt_tracking': gettext('Debt & Receivables Tracking'),
             
             # Integration Features (4)
             'api_access': gettext('REST API Access'),
@@ -357,6 +379,7 @@ class Tariff(models.Model):
             'multi_branch': gettext('Multiple Branches'),
             'custom_roles': gettext('Custom Roles & Permissions'),
             'branch_settings': gettext('Branch Settings'),
+            'agency_management': gettext('Agency Management'),
             
             # Storage & Archive Features
             'archive_access': gettext('Historical File Archives'),
@@ -365,6 +388,7 @@ class Tariff(models.Model):
             'payment_management': gettext('Payment Tracking & Recording'),
             'expense_tracking': gettext('Expense Tracking'),
             'invoicing': gettext('Invoicing'),
+            'general_expenses': gettext('General (Operating) Expenses'),
 
             # Advanced Features
             'audit_logs': gettext('Comprehensive Audit Logs'),

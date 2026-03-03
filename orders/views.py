@@ -1542,6 +1542,7 @@ def record_order_payment(request, order_id):
 
 
 @login_required(login_url="admin_login")
+@require_feature('extra_fees')
 @require_POST
 @any_permission_required('can_edit_orders', 'can_manage_orders')
 def add_order_extra_fee(request, order_id):
@@ -1862,6 +1863,7 @@ def search_products(request):
 # ── Price Edit ──────────────────────────────────────────────────────────────
 
 @login_required(login_url='admin_login')
+@require_feature('extra_fees')
 @require_POST
 @any_permission_required('can_edit_orders', 'can_manage_orders', 'can_manage_financial')
 def edit_order_price(request, order_id):

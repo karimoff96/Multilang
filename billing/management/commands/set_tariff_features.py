@@ -47,16 +47,20 @@ class Command(BaseCommand):
                 # Additional Pro features
                 pro.feature_orders_advanced = True
                 pro.feature_bulk_payments = True
+                pro.feature_extra_fees = True
                 pro.feature_analytics_advanced = True
                 pro.feature_financial_reports = True
                 pro.feature_staff_performance = True
                 pro.feature_export_reports = True
+                pro.feature_debt_tracking = True
                 pro.feature_marketing_basic = True
                 pro.feature_broadcast_messages = True
                 pro.feature_custom_roles = True
                 pro.feature_branch_settings = True
+                pro.feature_agency_management = True
                 pro.feature_invoicing = True
                 pro.feature_expense_tracking = True
+                pro.feature_general_expenses = True
                 pro.feature_audit_logs = True
                 pro.feature_products_advanced = True
                 pro.save()
@@ -65,18 +69,20 @@ class Command(BaseCommand):
             # Enterprise - All 33 features
             enterprise = Tariff.objects.filter(slug='enterprise').first()
             if enterprise:
-                # All Order Management features (4)
+                # All Order Management features (5)
                 enterprise.feature_orders_basic = True
                 enterprise.feature_orders_advanced = True
                 enterprise.feature_order_assignment = True
                 enterprise.feature_bulk_payments = True
-                # All Analytics features (6)
+                enterprise.feature_extra_fees = True
+                # All Analytics features (7)
                 enterprise.feature_analytics_basic = True
                 enterprise.feature_analytics_advanced = True
                 enterprise.feature_financial_reports = True
                 enterprise.feature_staff_performance = True
                 enterprise.feature_custom_reports = True
                 enterprise.feature_export_reports = True
+                enterprise.feature_debt_tracking = True
                 # All Integration features (4)
                 enterprise.feature_telegram_bot = True
                 enterprise.feature_webhooks = True
@@ -85,16 +91,18 @@ class Command(BaseCommand):
                 # All Marketing features (2)
                 enterprise.feature_marketing_basic = True
                 enterprise.feature_broadcast_messages = True
-                # All Organization features (3)
+                # All Organization features (4)
                 enterprise.feature_multi_branch = True
                 enterprise.feature_custom_roles = True
                 enterprise.feature_branch_settings = True
+                enterprise.feature_agency_management = True
                 # Storage (1)
                 enterprise.feature_archive_access = True
-                # All Financial features (3)
+                # All Financial features (4)
                 enterprise.feature_payment_management = True
                 enterprise.feature_invoicing = True
                 enterprise.feature_expense_tracking = True
+                enterprise.feature_general_expenses = True
                 # Advanced (1)
                 enterprise.feature_audit_logs = True
                 # All Services features (4)
@@ -112,5 +120,5 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING('Feature Summary:'))
             for tariff in Tariff.objects.all():
                 count = tariff.get_feature_count()
-                percent = (count / 28) * 100
-                self.stdout.write(f'  • {tariff.title}: {count}/37 features ({percent:.0f}%)')
+                percent = (count / 32) * 100
+                self.stdout.write(f'  • {tariff.title}: {count}/32 features ({percent:.0f}%)')

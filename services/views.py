@@ -1259,6 +1259,7 @@ def _get_user_general_expense_categories(user):
 
 
 @login_required(login_url='admin_login')
+@require_feature('general_expenses')
 @any_permission_required('can_view_expenses', 'can_manage_expenses')
 def generalExpenseList(request):
     """List operating expenses with filters and summary cards."""
@@ -1354,6 +1355,7 @@ def generalExpenseList(request):
 
 
 @login_required(login_url='admin_login')
+@require_feature('general_expenses')
 @any_permission_required('can_manage_expenses', 'can_create_products')
 def generalExpenseCreate(request):
     """Create a new operating expense."""
@@ -1440,6 +1442,7 @@ def generalExpenseCreate(request):
 
 
 @login_required(login_url='admin_login')
+@require_feature('general_expenses')
 @any_permission_required('can_manage_expenses', 'can_edit_products')
 def generalExpenseEdit(request, expense_id):
     """Edit an existing operating expense."""
@@ -1527,6 +1530,7 @@ def generalExpenseEdit(request, expense_id):
 
 
 @login_required(login_url='admin_login')
+@require_feature('general_expenses')
 @any_permission_required('can_manage_expenses')
 @require_POST
 def generalExpenseDelete(request, expense_id):
@@ -1540,6 +1544,7 @@ def generalExpenseDelete(request, expense_id):
 
 
 @login_required(login_url='admin_login')
+@require_feature('general_expenses')
 @any_permission_required('can_view_expenses', 'can_manage_expenses', 'can_view_financial_reports')
 def generalExpenseAnalytics(request):
     """Analytics: monthly totals + category breakdown for operating expenses."""
@@ -1654,6 +1659,7 @@ def generalExpenseAnalytics(request):
 
 
 @login_required(login_url='admin_login')
+@require_feature('general_expenses')
 @any_permission_required('can_manage_expenses')
 def generalExpenseCategoryList(request):
     """List and create expense categories."""

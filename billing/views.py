@@ -414,24 +414,27 @@ def tariff_edit(request, pk):
             
             tariff.save()
             
-            # Update boolean feature flags (26 features)
+            # Update boolean feature flags (32 features)
             feature_fields = [
-                # Orders (4)
+                # Orders (5)
                 'feature_orders_basic', 'feature_orders_advanced', 'feature_order_assignment',
-                'feature_bulk_payments',
-                # Analytics (6)
+                'feature_bulk_payments', 'feature_extra_fees',
+                # Analytics (7)
                 'feature_analytics_basic', 'feature_analytics_advanced', 'feature_financial_reports',
                 'feature_staff_performance', 'feature_custom_reports', 'feature_export_reports',
+                'feature_debt_tracking',
                 # Integration (4)
                 'feature_telegram_bot', 'feature_webhooks', 'feature_api_access', 'feature_integrations',
                 # Marketing (2)
                 'feature_marketing_basic', 'feature_broadcast_messages',
-                # Organization (3)
+                # Organization (4)
                 'feature_multi_branch', 'feature_custom_roles', 'feature_branch_settings',
+                'feature_agency_management',
                 # Storage (1)
                 'feature_archive_access',
-                # Financial (3)
+                # Financial (4)
                 'feature_payment_management', 'feature_invoicing', 'feature_expense_tracking',
+                'feature_general_expenses',
                 # Advanced (1)
                 'feature_audit_logs',
                 # Services (4)
