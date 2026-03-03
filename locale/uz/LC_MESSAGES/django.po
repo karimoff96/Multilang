@@ -527,10 +527,8 @@ msgstr ""
 
 #: billing/admin.py:41 templates/billing/tariff_create.html:54
 #: templates/billing/tariff_edit.html:51
-#, fuzzy
-#| msgid "About us information"
 msgid "Basic Information"
-msgstr "Biz haqimizda ma'lumot"
+msgstr "Asosiy ma'lumotlar"
 
 #: billing/admin.py:44
 #, fuzzy
@@ -545,7 +543,7 @@ msgstr ""
 #: billing/admin.py:48 billing/admin.py:149
 #: templates/billing/tariff_list.html:60
 msgid "Limits"
-msgstr ""
+msgstr "Cheklovlar"
 
 #: billing/admin.py:50
 msgid "Set usage limits (leave empty for unlimited)"
@@ -840,12 +838,12 @@ msgstr ""
 #: billing/models.py:35 templates/billing/tariff_create.html:98
 #: templates/billing/tariff_edit.html:147 templates/billing/tariff_list.html:41
 msgid "Featured"
-msgstr ""
+msgstr "Tavsiya etilgan"
 
 #: billing/models.py:36 templates/billing/tariff_create.html:108
 #: templates/billing/tariff_edit.html:159
 msgid "Is Trial"
-msgstr ""
+msgstr "Sinov tarifi"
 
 #: billing/models.py:36
 msgid "Free trial tariff"
@@ -854,7 +852,7 @@ msgstr ""
 #: billing/models.py:37 templates/billing/tariff_create.html:114
 #: templates/billing/tariff_edit.html:165
 msgid "Trial Days"
-msgstr ""
+msgstr "Sinov kunlari"
 
 #: billing/models.py:37
 msgid "Duration of trial period in days (only for trial tariffs)"
@@ -862,17 +860,13 @@ msgstr ""
 
 #: billing/models.py:38 templates/billing/tariff_create.html:78
 #: templates/billing/tariff_edit.html:125
-#, fuzzy
-#| msgid "All Orders"
 msgid "Display Order"
-msgstr "Barcha buyurtmalar"
+msgstr "Ko'rsatish tartibi"
 
 #: billing/models.py:44 templates/billing/tariff_create.html:128
 #: templates/billing/tariff_edit.html:180
-#, fuzzy
-#| msgid "My Branch"
 msgid "Max Branches"
-msgstr "Mening filialim"
+msgstr "Maks. filiallar"
 
 #: billing/models.py:45 billing/models.py:51 billing/models.py:57
 #, fuzzy
@@ -883,12 +877,12 @@ msgstr "Global/standart sozlamalar uchun bo'sh qoldiring"
 #: billing/models.py:50 templates/billing/tariff_create.html:134
 #: templates/billing/tariff_edit.html:187
 msgid "Max Staff"
-msgstr ""
+msgstr "Maks. xodimlar"
 
 #: billing/models.py:56 templates/billing/tariff_create.html:140
 #: templates/billing/tariff_edit.html:194
 msgid "Max Monthly Orders"
-msgstr ""
+msgstr "Oylik maks. buyurtmalar"
 
 # Feature Names - All 37 Features
 # Order Management Features (5)
@@ -1499,7 +1493,7 @@ msgstr ""
 
 #: billing/views.py:487
 msgid "Tariff updated successfully!"
-msgstr ""
+msgstr "Tarif muvaffaqiyatli yangilandi!"
 
 #: billing/views.py:512
 #, python-brace-format
@@ -3173,7 +3167,7 @@ msgstr ""
 #: templates/billing/subscription_detail.html:285
 #: templates/billing/tariff_list.html:63 templates/partials/sidebar.html:38
 msgid "Branches"
-msgstr ""
+msgstr "Filiallar"
 
 #: organizations/models.py:219
 msgid "Display Name"
@@ -5049,7 +5043,7 @@ msgstr ""
 #: templates/billing/tariff_list.html:67 templates/partials/sidebar.html:43
 #: templates/partials/sidebar.html:69
 msgid "Staff"
-msgstr ""
+msgstr "Xodimlar"
 
 #: templates/billing/convert_trial.html:56
 #, fuzzy
@@ -5362,7 +5356,7 @@ msgstr "Yaratildi"
 #: templates/billing/subscription_analytics.html:242
 #: templates/billing/tariff_list.html:36
 msgid "Trial"
-msgstr ""
+msgstr "Sinov"
 
 #: templates/billing/subscription_analytics.html:268
 #: templates/billing/subscription_renew.html:25
@@ -5444,10 +5438,8 @@ msgstr ""
 #: templates/billing/subscription_detail.html:27
 #: templates/billing/tariff_create.html:40
 #: templates/billing/tariff_edit.html:39
-#, fuzzy
-#| msgid "Back to Unit Economy"
 msgid "Back to List"
-msgstr "Birim iqtisodiyotga qaytish"
+msgstr "Ro'yxatga qaytish"
 
 #: templates/billing/subscription_detail.html:36
 #, fuzzy
@@ -5476,7 +5468,7 @@ msgstr ""
 #: templates/billing/subscription_renew.html:27
 #: templates/billing/tariff_list.html:104
 msgid "month(s)"
-msgstr ""
+msgstr "oy"
 
 #: templates/billing/subscription_detail.html:143
 msgid "Trial Days Remaining"
@@ -5716,17 +5708,17 @@ msgstr ""
 #: templates/billing/tariff_create.html:80
 #: templates/billing/tariff_edit.html:127
 msgid "Lower numbers appear first"
-msgstr ""
+msgstr "Kichik raqamlar avval ko'rsatiladi"
 
 #: templates/billing/tariff_create.html:116
 #: templates/billing/tariff_edit.html:168
 msgid "Number of days for free trial period"
-msgstr ""
+msgstr "Bepul sinov davri uchun kunlar soni"
 
 #: templates/billing/tariff_create.html:123
 #: templates/billing/tariff_edit.html:175
 msgid "Resource Limits"
-msgstr ""
+msgstr "Resurs chegaralari"
 
 #: templates/billing/tariff_create.html:124
 #: templates/billing/tariff_edit.html:176
@@ -5747,10 +5739,8 @@ msgstr ""
 # Feature Names - Advanced (3)
 #: templates/billing/tariff_create.html:149
 #: templates/billing/tariff_edit.html:205
-#, fuzzy
-#| msgid "Advanced Security Features"
 msgid "Included Features"
-msgstr "Kengaytirilgan Xavfsizlik Funksiyalari"
+msgstr "Kiritilgan xususiyatlar"
 
 #: templates/billing/tariff_create.html:163
 #, fuzzy
@@ -6122,7 +6112,7 @@ msgstr ""
 
 #: templates/billing/tariff_edit.html:4
 msgid "Edit Tariff"
-msgstr ""
+msgstr "Tarifni tahrirlash"
 
 #: templates/billing/tariff_edit.html:65
 #, fuzzy
@@ -6414,7 +6404,7 @@ msgstr ""
 #: templates/billing/tariff_edit.html:756
 #: templates/billing/tariff_list.html:101
 msgid "Pricing Options"
-msgstr ""
+msgstr "Narx variantlari"
 
 #: templates/billing/tariff_edit.html:760
 #, fuzzy
@@ -6458,10 +6448,8 @@ msgid_plural ""
 msgstr[0] ""
 
 #: templates/billing/tariff_edit.html:835
-#, fuzzy
-#| msgid "View Changes"
 msgid "Save Changes"
-msgstr "O'zgarishlarni ko'rish"
+msgstr "O'zgarishlarni saqlash"
 
 #: templates/billing/tariff_edit.html:943
 msgid "Remove this pricing option?"
@@ -6469,55 +6457,47 @@ msgstr ""
 
 #: templates/billing/tariff_list.html:5
 msgid "Tariff Plans - Billing"
-msgstr ""
+msgstr "Tarif rejalari - Hisob-kitob"
 
 #: templates/billing/tariff_list.html:13
 msgid "Create New Tariff"
 msgstr ""
 
 #: templates/billing/tariff_list.html:46
-#, fuzzy
-#| msgid "Active"
 msgid "Inactive"
-msgstr "Faol"
+msgstr "Nofaol"
 
 #: templates/billing/tariff_list.html:71
-#, fuzzy
-#| msgid "Orders Count"
 msgid "Orders/Month"
-msgstr "Buyurtmalar soni"
+msgstr "Buyurtmalar/Oy"
 
 #: templates/billing/tariff_list.html:90
 msgid "more"
-msgstr ""
+msgstr "ko'proq"
 
 #: templates/billing/tariff_list.html:111
 msgid "No pricing defined"
-msgstr ""
+msgstr "Narx belgilanmagan"
 
 #: templates/billing/tariff_list.html:118
 msgid "days free trial"
-msgstr ""
+msgstr "kun bepul sinov"
 
 #: templates/billing/tariff_list.html:126
-#, fuzzy
-#| msgid "Description"
 msgid "subscription(s)"
-msgstr "Tavsif"
+msgstr "obuna"
 
 #: templates/billing/tariff_list.html:134
 msgid "Edit"
 msgstr ""
 
 #: templates/billing/tariff_list.html:154
-#, fuzzy
-#| msgid "No Audit Logs Found"
 msgid "No Tariffs Found"
-msgstr "Audit yozuvlari topilmadi"
+msgstr "Tarif topilmadi"
 
 #: templates/billing/tariff_list.html:156
 msgid "Create your first tariff plan to start offering subscriptions"
-msgstr ""
+msgstr "Obunalarni taklif qilishni boshlash uchun birinchi tarif rejangizni yarating"
 
 #: templates/billing/tariff_list.html:179
 msgid "Cannot delete this tariff. It has"

@@ -86,6 +86,11 @@ class Tariff(models.Model):
         verbose_name=_("Bulk Payment Processing"),
         help_text=_("Process payments across multiple orders")
     )
+    feature_order_templates = models.BooleanField(
+        default=False,
+        verbose_name=_("Order Templates"),
+        help_text=_("Pre-defined templates for common order types")
+    )
     
     # Analytics & Reports Features (6)
     feature_analytics_basic = models.BooleanField(
@@ -169,6 +174,11 @@ class Tariff(models.Model):
         verbose_name=_("Branch Settings"),
         help_text=_("Customize settings per branch")
     )
+    feature_staff_scheduling = models.BooleanField(
+        default=False,
+        verbose_name=_("Staff Scheduling"),
+        help_text=_("Schedule and manage staff work shifts")
+    )
     
     # Storage & Archive Features (3)
     feature_archive_access = models.BooleanField(
@@ -203,8 +213,25 @@ class Tariff(models.Model):
         verbose_name=_("Expense Tracking"),
         help_text=_("Track business expenses by branch")
     )
+    feature_invoicing = models.BooleanField(
+        default=False,
+        verbose_name=_("Invoicing"),
+        help_text=_("Generate and manage invoices for customers")
+    )
     
-    # Advanced Features (2)
+    # Support Features (2)
+    feature_support_tickets = models.BooleanField(
+        default=False,
+        verbose_name=_("Support Tickets"),
+        help_text=_("Built-in support ticket management system")
+    )
+    feature_knowledge_base = models.BooleanField(
+        default=False,
+        verbose_name=_("Knowledge Base"),
+        help_text=_("Access to documentation and help articles")
+    )
+    
+    # Advanced Features (3)
     feature_advanced_security = models.BooleanField(
         default=False,
         verbose_name=_("Advanced Security Features"),
@@ -214,6 +241,11 @@ class Tariff(models.Model):
         default=False,
         verbose_name=_("Comprehensive Audit Logs"),
         help_text=_("Track all system actions and changes")
+    )
+    feature_data_retention = models.BooleanField(
+        default=False,
+        verbose_name=_("Data Retention Policies"),
+        help_text=_("Configure data retention and archival rules")
     )
     
     # Services Management Features (4)
@@ -383,10 +415,22 @@ class Tariff(models.Model):
             'payment_management': gettext('Payment Tracking & Recording'),
             'expense_tracking': gettext('Expense Tracking'),
             
-            # Advanced Features (2)
+            # Financial Management extras
+            'invoicing': gettext('Invoicing'),
+
+            # Support Features (2)
+            'support_tickets': gettext('Support Tickets'),
+            'knowledge_base': gettext('Knowledge Base'),
+
+            # Advanced Features (3)
             'advanced_security': gettext('Advanced Security Features'),
             'audit_logs': gettext('Comprehensive Audit Logs'),
-            
+            'data_retention': gettext('Data Retention Policies'),
+
+            # Organization extras
+            'order_templates': gettext('Order Templates'),
+            'staff_scheduling': gettext('Staff Scheduling'),
+
             # Services Management Features (4)
             'products_basic': gettext('Basic Product Management'),
             'products_advanced': gettext('Advanced Product Management'),
@@ -747,6 +791,8 @@ class Subscription(models.Model):
         limit = self.tariff.max_monthly_broadcasts
         used = self.organization.get_current_month_broadcasts_count()
         return used, limit
+
+    def get_usage_percentage(self, resource_type):
         """Get usage percentage for a specific resource (branches, staff, orders, broadcasts)."""
         if resource_type == 'branches':
             current = self.organization.branches.count()
@@ -762,11 +808,12 @@ class Subscription(models.Model):
             limit = self.tariff.max_monthly_broadcasts
         else:
             return 0
-        
+
         if limit is None or limit == 0:
             return 0
-        
+
         return int((current / limit) * 100)
+
     def renew(self, new_pricing=None):
         """Create a new subscription for renewal"""
         if new_pricing is None:

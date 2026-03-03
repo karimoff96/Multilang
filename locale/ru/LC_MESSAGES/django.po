@@ -524,10 +524,8 @@ msgstr ""
 
 #: billing/admin.py:41 templates/billing/tariff_create.html:54
 #: templates/billing/tariff_edit.html:51
-#, fuzzy
-#| msgid "Payment Information"
 msgid "Basic Information"
-msgstr "Информация об оплате"
+msgstr "Основная информация"
 
 #: billing/admin.py:44
 #, fuzzy
@@ -542,7 +540,7 @@ msgstr ""
 #: billing/admin.py:48 billing/admin.py:149
 #: templates/billing/tariff_list.html:60
 msgid "Limits"
-msgstr ""
+msgstr "Лимиты"
 
 #: billing/admin.py:50
 msgid "Set usage limits (leave empty for unlimited)"
@@ -819,7 +817,7 @@ msgstr "Категории"
 #: templates/billing/tariff_create.html:88
 #: templates/billing/tariff_edit.html:136
 msgid "Active"
-msgstr "Активна"
+msgstr "Активен"
 
 #: billing/models.py:21
 #, fuzzy
@@ -845,17 +843,13 @@ msgstr ""
 
 #: billing/models.py:35 templates/billing/tariff_create.html:98
 #: templates/billing/tariff_edit.html:147 templates/billing/tariff_list.html:41
-#, fuzzy
-#| msgid "Features"
 msgid "Featured"
-msgstr "Возможности"
+msgstr "Рекомендованный"
 
 #: billing/models.py:36 templates/billing/tariff_create.html:108
 #: templates/billing/tariff_edit.html:159
-#, fuzzy
-#| msgid "Free Trial"
 msgid "Is Trial"
-msgstr "Пробная версия"
+msgstr "Пробный тариф"
 
 #: billing/models.py:36
 #, fuzzy
@@ -865,10 +859,8 @@ msgstr "Пробная версия"
 
 #: billing/models.py:37 templates/billing/tariff_create.html:114
 #: templates/billing/tariff_edit.html:165
-#, fuzzy
-#| msgid "Trial Days Remaining"
 msgid "Trial Days"
-msgstr "Осталось дней пробной версии"
+msgstr "Дни пробного периода"
 
 #: billing/models.py:37
 msgid "Duration of trial period in days (only for trial tariffs)"
@@ -876,17 +868,13 @@ msgstr ""
 
 #: billing/models.py:38 templates/billing/tariff_create.html:78
 #: templates/billing/tariff_edit.html:125
-#, fuzzy
-#| msgid "All Orders"
 msgid "Display Order"
-msgstr "Все заказы"
+msgstr "Порядок отображения"
 
 #: billing/models.py:44 templates/billing/tariff_create.html:128
 #: templates/billing/tariff_edit.html:180
-#, fuzzy
-#| msgid "Branches"
 msgid "Max Branches"
-msgstr "Филиалы"
+msgstr "Макс. филиалов"
 
 #: billing/models.py:45 billing/models.py:51 billing/models.py:57
 #, fuzzy
@@ -896,15 +884,13 @@ msgstr "Оставьте пустым для глобальных/стандар
 
 #: billing/models.py:50 templates/billing/tariff_create.html:134
 #: templates/billing/tariff_edit.html:187
-#, fuzzy
-#| msgid "Staff"
 msgid "Max Staff"
-msgstr "Сотрудники"
+msgstr "Макс. сотрудников"
 
 #: billing/models.py:56 templates/billing/tariff_create.html:140
 #: templates/billing/tariff_edit.html:194
 msgid "Max Monthly Orders"
-msgstr ""
+msgstr "Макс. заказов в месяц"
 
 # Feature Names - Orders
 # Feature Names - All 37 Features
@@ -1523,7 +1509,7 @@ msgstr ""
 
 #: billing/views.py:487
 msgid "Tariff updated successfully!"
-msgstr ""
+msgstr "Тариф успешно обновлён!"
 
 #: billing/views.py:512
 #, python-brace-format
@@ -5420,10 +5406,8 @@ msgstr "Создано"
 
 #: templates/billing/subscription_analytics.html:242
 #: templates/billing/tariff_list.html:36
-#, fuzzy
-#| msgid "Free Trial"
 msgid "Trial"
-msgstr "Пробная версия"
+msgstr "Пробный"
 
 #: templates/billing/subscription_analytics.html:268
 #: templates/billing/subscription_renew.html:25
@@ -5771,17 +5755,17 @@ msgstr "Выберите тарифный план..."
 #: templates/billing/tariff_create.html:80
 #: templates/billing/tariff_edit.html:127
 msgid "Lower numbers appear first"
-msgstr ""
+msgstr "Меньшие числа отображаются первыми"
 
 #: templates/billing/tariff_create.html:116
 #: templates/billing/tariff_edit.html:168
 msgid "Number of days for free trial period"
-msgstr ""
+msgstr "Количество дней для бесплатного пробного периода"
 
 #: templates/billing/tariff_create.html:123
 #: templates/billing/tariff_edit.html:175
 msgid "Resource Limits"
-msgstr ""
+msgstr "Лимиты ресурсов"
 
 #: templates/billing/tariff_create.html:124
 #: templates/billing/tariff_edit.html:176
@@ -5801,10 +5785,8 @@ msgstr ""
 
 #: templates/billing/tariff_create.html:149
 #: templates/billing/tariff_edit.html:205
-#, fuzzy
-#| msgid "Plan Features"
 msgid "Included Features"
-msgstr "Возможности плана"
+msgstr "Включённые функции"
 
 #: templates/billing/tariff_create.html:163
 #, fuzzy
@@ -6187,7 +6169,7 @@ msgstr ""
 
 #: templates/billing/tariff_edit.html:4
 msgid "Edit Tariff"
-msgstr ""
+msgstr "Редактировать тариф"
 
 #: templates/billing/tariff_edit.html:65
 msgid "Titles"
@@ -6484,10 +6466,8 @@ msgstr ""
 
 #: templates/billing/tariff_edit.html:756
 #: templates/billing/tariff_list.html:101
-#, fuzzy
-#| msgid "Pricing"
 msgid "Pricing Options"
-msgstr "Стоимость"
+msgstr "Варианты цен"
 
 #: templates/billing/tariff_edit.html:760
 msgid "Base Monthly Price"
@@ -6534,10 +6514,8 @@ msgstr[2] ""
 msgstr[3] ""
 
 #: templates/billing/tariff_edit.html:835
-#, fuzzy
-#| msgid "View Changes"
 msgid "Save Changes"
-msgstr "Посмотреть изменения"
+msgstr "Сохранить изменения"
 
 #: templates/billing/tariff_edit.html:943
 #, fuzzy
@@ -6546,60 +6524,48 @@ msgid "Remove this pricing option?"
 msgstr "Выберите продолжительность"
 
 #: templates/billing/tariff_list.html:5
-#, fuzzy
-#| msgid "Tariff Plans"
 msgid "Tariff Plans - Billing"
-msgstr "Тарифные планы"
+msgstr "Тарифные планы - Биллинг"
 
 #: templates/billing/tariff_list.html:13
 msgid "Create New Tariff"
 msgstr ""
 
 #: templates/billing/tariff_list.html:46
-#, fuzzy
-#| msgid "Active"
 msgid "Inactive"
-msgstr "Активна"
+msgstr "Неактивна"
 
 #: templates/billing/tariff_list.html:71
-#, fuzzy
-#| msgid "Orders Count"
 msgid "Orders/Month"
-msgstr "Количество заказов"
+msgstr "Заказы/Месяц"
 
 #: templates/billing/tariff_list.html:90
 msgid "more"
-msgstr ""
+msgstr "ещё"
 
 #: templates/billing/tariff_list.html:111
 msgid "No pricing defined"
-msgstr ""
+msgstr "Цена не указана"
 
 #: templates/billing/tariff_list.html:118
-#, fuzzy
-#| msgid "Free Trial"
 msgid "days free trial"
-msgstr "Пробная версия"
+msgstr "дней бесплатного пробного периода"
 
 #: templates/billing/tariff_list.html:126
-#, fuzzy
-#| msgid "Subscriptions"
 msgid "subscription(s)"
-msgstr "Подписки"
+msgstr "подписок"
 
 #: templates/billing/tariff_list.html:134
 msgid "Edit"
 msgstr ""
 
 #: templates/billing/tariff_list.html:154
-#, fuzzy
-#| msgid "No debtors found"
 msgid "No Tariffs Found"
-msgstr "Должники не найдены"
+msgstr "Тарифы не найдены"
 
 #: templates/billing/tariff_list.html:156
 msgid "Create your first tariff plan to start offering subscriptions"
-msgstr ""
+msgstr "Создайте свой первый тарифный план, чтобы начать предлагать подписки"
 
 #: templates/billing/tariff_list.html:179
 msgid "Cannot delete this tariff. It has"
