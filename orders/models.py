@@ -1106,6 +1106,14 @@ class BulkPayment(models.Model):
         verbose_name=_('Receipt/Note'),
         help_text=_('Transaction ID, receipt number, or any additional notes')
     )
+
+    receipt_file = models.FileField(
+        upload_to='bulk_payment_receipts/',
+        blank=True,
+        null=True,
+        verbose_name=_('Receipt File'),
+        help_text=_('Uploaded receipt image/PDF for card payments')
+    )
     
     # Admin who processed the payment
     processed_by = models.ForeignKey(

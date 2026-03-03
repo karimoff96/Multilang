@@ -412,6 +412,13 @@ function renderPaymentDetails(data) {
                             <small><strong>Note:</strong> ${data.receipt_note}</small>
                         </div>
                     </div>` : ''}
+                    ${data.receipt_file_url ? `
+                    <div class="col-12 mt-2">
+                        <a href="${data.receipt_file_url}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <iconify-icon icon="solar:file-download-bold" class="me-1"></iconify-icon>
+                            View Receipt
+                        </a>
+                    </div>` : ''}
                 </div>
             </div>
         </div>

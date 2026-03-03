@@ -486,7 +486,7 @@
                             {% trans "Process Payment" %}
                         </h5>
                         
-                        <form id="paymentForm">
+                        <form id="paymentForm" enctype="multipart/form-data">
                             {% csrf_token %}
                             <input type="hidden" id="selectedCustomerId" name="customer_id">
                             
@@ -521,6 +521,28 @@
                                     <option value="card">{% trans "Card Payment" %}</option>
                                     <option value="other">{% trans "Other" %}</option>
                                 </select>
+                            </div>
+
+                            <!-- Receipt upload — shown only for card payments -->
+                            <div class="mb-3" id="receiptFileGroup" style="display:none;">
+                                <label for="receiptFile" class="form-label">
+                                    <iconify-icon icon="solar:upload-minimalistic-bold" class="me-1"></iconify-icon>
+                                    {% trans "Upload Receipt" %} <small class="text-muted">({% trans "optional" %})</small>
+                                </label>
+                                <input type="file"
+                                       class="form-control"
+                                       id="receiptFile"
+                                       name="receipt_file"
+                                       accept="image/*,.pdf,.jpg,.jpeg,.png,.webp">
+                                <small class="text-muted mt-1 d-block">
+                                    <iconify-icon icon="solar:info-circle-line-duotone" class="me-1"></iconify-icon>
+                                    {% trans "Accepted: images or PDF. Max 10 MB." %}
+                                </small>
+                                <!-- Preview thumbnail -->
+                                <div id="receiptPreviewWrap" class="mt-2" style="display:none;">
+                                    <img id="receiptPreviewImg" src="" alt="receipt preview"
+                                         style="max-height:120px;border-radius:6px;border:1px solid var(--border-color);">
+                                </div>
                             </div>
                             
                             <div class="mb-4">
@@ -1190,6 +1212,50 @@
         // You can use your existing toast/alert system
         alert(message);
     }
+
+    // ── Receipt file: show/hide on payment method change ──────────────────
+    const paymentMethodSel = document.getElementById('paymentMethod');
+    const receiptFileGroup = document.getElementById('receiptFileGroup');
+    const receiptFileInput = document.getElementById('receiptFile');
+    const receiptPreviewWrap = document.getElementById('receiptPreviewWrap');
+    const receiptPreviewImg = document.getElementById('receiptPreviewImg');
+
+    function toggleReceiptField() {
+        const isCard = paymentMethodSel && ['card', 'bank_transfer'].includes(paymentMethodSel.value);
+        if (receiptFileGroup) {
+            receiptFileGroup.style.display = isCard ? '' : 'none';
+            if (!isCard && receiptFileInput) {
+                receiptFileInput.value = '';
+                if (receiptPreviewWrap) receiptPreviewWrap.style.display = 'none';
+            }
+        }
+    }
+
+    if (paymentMethodSel) {
+        paymentMethodSel.addEventListener('change', toggleReceiptField);
+        toggleReceiptField(); // run on load in case of page restore
+    }
+
+    // Image preview when a file is chosen
+    if (receiptFileInput) {
+        receiptFileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) { receiptPreviewWrap.style.display = 'none'; return; }
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    receiptPreviewImg.src = e.target.result;
+                    receiptPreviewWrap.style.display = '';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // PDF or other — just show a file icon placeholder
+                receiptPreviewImg.src = '';
+                receiptPreviewWrap.style.display = 'none';
+            }
+        });
+    }
+    // ──────────────────────────────────────────────────────────────────────
 })();
 </script>
 {% endblock %}

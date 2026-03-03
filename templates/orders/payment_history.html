@@ -139,6 +139,16 @@
                                             <small><strong>{% trans "Note:" %}</strong> {{ payment.receipt_note }}</small>
                                         </div>
                                         {% endif %}
+
+                                        {% if payment.receipt_file %}
+                                        <div class="mb-3">
+                                            <a href="{{ payment.receipt_file.url }}" target="_blank"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <iconify-icon icon="solar:file-download-bold" class="me-1"></iconify-icon>
+                                                {% trans "View Receipt" %}
+                                            </a>
+                                        </div>
+                                        {% endif %}
                                         
                                         <div class="section-divider"></div>
                                         

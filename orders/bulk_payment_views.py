@@ -544,6 +544,7 @@ def process_bulk_payment(request):
         payment_amount_str = request.POST.get('payment_amount', '0')
         payment_method = request.POST.get('payment_method', 'cash')
         receipt_note = request.POST.get('receipt_note', '').strip()
+        receipt_file = request.FILES.get('receipt_file')  # optional card receipt
         
         # Validate customer_id
         if not customer_id:
@@ -618,6 +619,7 @@ def process_bulk_payment(request):
             amount=payment_amount,
             payment_method=payment_method,
             receipt_note=receipt_note,
+            receipt_file=receipt_file if receipt_file else None,
             processed_by=admin_profile,  # Can be None for superuser without admin_profile
             branch=admin_branch,
         )
@@ -1035,6 +1037,7 @@ def get_payment_details(request, payment_id):
             'payment_date': payment.created_at.strftime('%Y-%m-%d %H:%M'),
             'processed_by': payment.processed_by.user.get_full_name() if payment.processed_by else None,
             'receipt_note': payment.receipt_note,
+            'receipt_file_url': payment.receipt_file.url if payment.receipt_file else None,
             'orders_count': payment.orders_count,
             'fully_paid_count': fully_paid_count,
             'remaining_debt': float(remaining_debt),
