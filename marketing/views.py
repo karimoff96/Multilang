@@ -19,7 +19,7 @@ from organizations.rbac import get_user_branches, permission_required, any_permi
 from core.audit import log_action
 from .models import MarketingPost, BroadcastRecipient
 from .broadcast_service import send_broadcast, get_recipient_count, BroadcastService
-from billing.decorators import require_feature, require_active_subscription
+from billing.decorators import require_feature, require_active_subscription, check_marketing_limit
 
 logger = logging.getLogger(__name__)
 audit_logger = logging.getLogger('audit')
@@ -148,13 +148,22 @@ def marketing_list(request):
         'current_status': status,
         'current_scope': scope,
     }
-    
+
+    # Broadcast usage info for non-superusers
+    if not request.user.is_superuser and request.admin_profile and request.admin_profile.center:
+        center = request.admin_profile.center
+        if hasattr(center, 'subscription'):
+            used, limit = center.subscription.get_broadcasts_limit_info()
+            context['broadcasts_used'] = used
+            context['broadcasts_limit'] = limit
+
     return render(request, 'marketing/list.html', context)
 
 
 @login_required
 @require_active_subscription
 @require_feature('marketing_basic')
+@check_marketing_limit
 @any_permission_required('can_create_marketing_posts', 'can_manage_marketing')
 def marketing_create(request):
     """Create a new marketing post"""
@@ -281,6 +290,15 @@ def marketing_create(request):
                 details=f"Created marketing post: {title} | scope={target_scope} | centers={[c.name for c in target_centers]} | branches={[b.name for b in target_branches]}",
                 request=request
             )
+
+            # Increment monthly broadcast counter for the center
+            if not request.user.is_superuser and request.admin_profile and request.admin_profile.center:
+                try:
+                    from billing.models import UsageTracking
+                    tracking = UsageTracking.get_or_create_current_month(request.admin_profile.center)
+                    tracking.increment_broadcasts()
+                except Exception:
+                    pass
 
             messages.success(request, _("Marketing post created successfully."))
             return redirect('marketing_detail', post_id=post.id)

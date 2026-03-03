@@ -11,8 +11,7 @@ from django.utils.dateparse import parse_date
 from datetime import datetime, time
 from decimal import Decimal, InvalidOperation
 import logging
-from .models import Order, OrderMedia
-
+from .models import Order, OrderMedia, OrderPriceChange
 logger = logging.getLogger(__name__)
 from organizations.rbac import (
     get_user_orders, get_user_staff, get_user_branches,
@@ -419,13 +418,27 @@ def orderDetail(request, order_id):
     
     # Get detailed price breakdown
     price_breakdown = order.get_price_breakdown()
-    
+
+    # Price change history
+    price_changes = order.price_changes.select_related('changed_by', 'changed_by__user').order_by('-changed_at')
+
+    # can_edit_price: owners, managers and anyone with financial/edit permissions
+    can_edit_price = request.user.is_superuser or bool(
+        request.admin_profile and (
+            request.admin_profile.has_permission('can_edit_orders') or
+            request.admin_profile.has_permission('can_manage_orders') or
+            request.admin_profile.has_permission('can_manage_financial')
+        )
+    )
+
     context = {
         "title": f"Order #{order.id}",
         "subTitle": _("Order Details"),
         "title_i18n": "detail.orderDetails",
         "order": order,
         "price_breakdown": price_breakdown,
+        "price_changes": price_changes,
+        "can_edit_price": can_edit_price,
         "available_staff": available_staff,
         # Permission flags from the granular permission system
         "can_assign": order_permissions['can_assign_orders'],
@@ -488,14 +501,25 @@ def orderEdit(request, order_id):
         # Check if user can access center-level customers
         if request.admin_profile.has_permission('can_view_centers') or request.admin_profile.has_permission('can_manage_centers'):
             # Center owner/manager - get all customers from their center
+            # Include both: BotUsers with center FK set AND those linked via their branch
             center = request.admin_profile.center
             if center:
-                bot_users = BotUser.objects.filter(center=center).order_by('-created_at')
+                from django.db.models import Q as _Q
+                bot_users = BotUser.objects.filter(
+                    _Q(center=center) | _Q(branch__center=center)
+                ).order_by('-created_at').distinct()
             else:
                 bot_users = BotUser.objects.none()
         else:
             # Branch-level staff - get customers from accessible branches
             bot_users = BotUser.objects.filter(branch_id__in=branch_ids).order_by('-created_at')
+
+        # Always ensure the order's existing bot_user is in the list (even if outside normal scope)
+        if order.bot_user and not bot_users.filter(pk=order.bot_user_id).exists():
+            from django.db.models import Q as _Q2
+            bot_users = BotUser.objects.filter(
+                _Q2(pk=order.bot_user_id) | _Q2(pk__in=bot_users.values_list('pk', flat=True))
+            ).order_by('-created_at')
     else:
         branches = Branch.objects.none()
         products = Product.objects.none()
@@ -643,9 +667,30 @@ def orderEdit(request, order_id):
                     pages=file_pages
                 )
                 order.files.add(order_media)
+
+            # Handle additional file deletions
+            additional_files_to_delete = request.POST.getlist('delete_additional_files')
+            if additional_files_to_delete:
+                for file_id in additional_files_to_delete:
+                    try:
+                        file_obj = OrderMedia.objects.get(pk=file_id)
+                        order.additional_files.remove(file_obj)
+                        file_obj.delete()
+                    except OrderMedia.DoesNotExist:
+                        pass
+
+            # Handle new additional file uploads
+            new_additional_files = request.FILES.getlist('new_additional_files')
+            for uploaded_file in new_additional_files:
+                order_media = OrderMedia.objects.create(
+                    file=uploaded_file,
+                    pages=1
+                )
+                order.additional_files.add(order_media)
             
-            # Recalculate price using the order's calculated_price property
-            order.total_price = order.calculated_price
+            # Recalculate price — skip if a manual price override exists
+            if not order.price_changes.exists():
+                order.total_price = order.calculated_price
             
             # Update extra fee
             try:
@@ -693,6 +738,14 @@ def orderEdit(request, order_id):
         except Exception as e:
             messages.error(request, f'Error updating order: {str(e)}')
     
+    price_changes = order.price_changes.select_related('changed_by', 'changed_by__user').order_by('-changed_at')
+    can_edit_price = request.user.is_superuser or bool(
+        request.admin_profile and (
+            request.admin_profile.has_permission('can_edit_orders') or
+            request.admin_profile.has_permission('can_manage_orders') or
+            request.admin_profile.has_permission('can_manage_financial')
+        )
+    )
     context = {
         "title": f"Edit Order #{order.id}",
         "subTitle": _("Edit Order"),
@@ -705,6 +758,8 @@ def orderEdit(request, order_id):
         "bot_users": bot_users,
         "payment_choices": Order.PAYMENT_TYPE,
         "is_superuser": request.user.is_superuser,
+        "price_changes": price_changes,
+        "can_edit_price": can_edit_price,
     }
     return render(request, "orders/orderEdit.html", context)
 
@@ -1340,6 +1395,15 @@ def orderCreate(request):
                     pages=1  # Default to 1 page per file
                 )
                 order.files.add(media)
+
+            # Handle additional supply document uploads
+            additional_files_list = request.FILES.getlist('additional_files')
+            for file in additional_files_list:
+                media = OrderMedia.objects.create(
+                    file=file,
+                    pages=1
+                )
+                order.additional_files.add(media)
             
             # Send Telegram notification to channels
             try:
@@ -1792,4 +1856,81 @@ def search_products(request):
     
     return JsonResponse({
         'results': results
+    })
+
+
+# ── Price Edit ──────────────────────────────────────────────────────────────
+
+@login_required(login_url='admin_login')
+@require_POST
+@any_permission_required('can_edit_orders', 'can_manage_orders', 'can_manage_financial')
+def edit_order_price(request, order_id):
+    """
+    Manually override an order's total_price.
+    Creates an OrderPriceChange audit record and writes to the audit log.
+    Requires: can_edit_orders OR can_manage_orders OR can_manage_financial.
+    """
+    order = get_object_or_404(Order, id=order_id)
+
+    # Scope check — user must be able to access this order's branch
+    if not request.user.is_superuser:
+        if not has_order_permission(request, 'can_edit_orders', order):
+            return JsonResponse({'success': False, 'error': "You don't have permission to edit this order's price."}, status=403)
+
+    new_price_str = request.POST.get('new_price', '').strip()
+    reason = request.POST.get('reason', '').strip()
+
+    if not new_price_str:
+        return JsonResponse({'success': False, 'error': 'New price is required.'}, status=400)
+    if not reason:
+        return JsonResponse({'success': False, 'error': 'Reason is required.'}, status=400)
+
+    try:
+        new_price = Decimal(new_price_str)
+    except InvalidOperation:
+        return JsonResponse({'success': False, 'error': 'Invalid price format.'}, status=400)
+
+    if new_price < 0:
+        return JsonResponse({'success': False, 'error': 'Price cannot be negative.'}, status=400)
+
+    old_price = order.total_price
+    if old_price == new_price:
+        return JsonResponse({'success': False, 'error': 'New price is the same as the current price.'}, status=400)
+
+    admin_profile = getattr(request, 'admin_profile', None)
+
+    # Create audit record
+    OrderPriceChange.objects.create(
+        order=order,
+        old_price=old_price,
+        new_price=new_price,
+        reason=reason,
+        changed_by=admin_profile,
+    )
+
+    # Update order
+    order.total_price = new_price
+    order.save(update_fields=['total_price', 'updated_at'])
+
+    # Write to system audit log
+    log_action(
+        user=request.user,
+        action='update',
+        target=order,
+        details=f'Price manually changed: {old_price} → {new_price}. Reason: {reason}',
+        changes={'old_price': str(old_price), 'new_price': str(new_price), 'reason': reason},
+        request=request,
+    )
+
+    changed_by_name = 'Superuser'
+    if admin_profile:
+        changed_by_name = admin_profile.user.get_full_name() or admin_profile.user.username
+
+    return JsonResponse({
+        'success': True,
+        'new_price': str(new_price),
+        'old_price': str(old_price),
+        'reason': reason,
+        'changed_by': changed_by_name,
+        'changed_at': timezone.now().strftime('%d %b %Y, %H:%M'),
     })

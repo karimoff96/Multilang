@@ -221,6 +221,13 @@ class Order(models.Model):
         help_text=_("Full names typed by the user to avoid misreading handwriting"),
     )
     files = models.ManyToManyField(OrderMedia, verbose_name=_("Files"))
+    additional_files = models.ManyToManyField(
+        OrderMedia,
+        related_name='additional_for_orders',
+        blank=True,
+        verbose_name=_("Additional Supply Documents"),
+        help_text=_("Supplementary documents provided alongside the main order files"),
+    )
 
     # Staff assignment fields
     assigned_to = models.ForeignKey(
@@ -723,8 +730,11 @@ class Order(models.Model):
             self.update_total_pages()
 
         # Auto-calculate total price based on pages and user type (only on full save)
+        # Skip if the price has been manually overridden via OrderPriceChange
         if not update_fields and (not self.total_price or self.total_pages):
-            self.total_price = self.calculated_price
+            price_is_locked = bool(self.pk and self.price_changes.exists())
+            if not price_is_locked:
+                self.total_price = self.calculated_price
 
         super().save(*args, **kwargs)
 
@@ -1177,6 +1187,51 @@ class BulkPayment(models.Model):
     def __str__(self):
         customer_name = self.bot_user.name if self.bot_user else "Unknown"
         return f"Payment #{self.id} - {customer_name} - {self.amount} ({self.created_at.strftime('%Y-%m-%d')})"
+
+
+class OrderPriceChange(models.Model):
+    """
+    Audit trail for manual price changes on an order.
+    Records who changed the price, when, and why.
+    """
+    order = models.ForeignKey(
+        'Order',
+        on_delete=models.CASCADE,
+        related_name='price_changes',
+        verbose_name=_('Order'),
+    )
+    old_price = models.DecimalField(
+        max_digits=12, decimal_places=2,
+        verbose_name=_('Old Price'),
+    )
+    new_price = models.DecimalField(
+        max_digits=12, decimal_places=2,
+        verbose_name=_('New Price'),
+    )
+    reason = models.TextField(
+        verbose_name=_('Reason'),
+        help_text=_('Why was the price changed?'),
+    )
+    changed_by = models.ForeignKey(
+        AdminUser,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='price_changes_made',
+        verbose_name=_('Changed By'),
+    )
+    changed_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Changed At'))
+
+    class Meta:
+        verbose_name = _('Order Price Change')
+        verbose_name_plural = _('Order Price Changes')
+        ordering = ['-changed_at']
+
+    def __str__(self):
+        return f"Order #{self.order_id}: {self.old_price} → {self.new_price}"
+
+    @property
+    def delta(self):
+        return self.new_price - self.old_price
 
 
 class PaymentOrderLink(models.Model):

@@ -56,6 +56,12 @@ class Tariff(models.Model):
         verbose_name=_("Max Monthly Orders"),
         help_text=_("Leave empty for unlimited")
     )
+    max_monthly_broadcasts = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_("Max Monthly Broadcasts"),
+        help_text=_("Maximum marketing broadcasts per month. Leave empty for unlimited.")
+    )
     
     # ============ FEATURE FLAGS (31 Features) ============
     
@@ -722,9 +728,26 @@ class Subscription(models.Model):
             return True
         
         current_count = self.organization.get_current_month_orders_count()
-        return current_count < limit    
-    def get_usage_percentage(self, resource_type):
-        """Get usage percentage for a specific resource (branches, staff, orders)."""
+        return current_count < limit
+
+    def can_send_broadcast(self):
+        """Check if organization can send more marketing broadcasts this month"""
+        if not self.is_active():
+            return False
+
+        limit = self.tariff.max_monthly_broadcasts
+        if limit is None:
+            return True
+
+        current_count = self.organization.get_current_month_broadcasts_count()
+        return current_count < limit
+
+    def get_broadcasts_limit_info(self):
+        """Return (used, limit) tuple for broadcasts this month"""
+        limit = self.tariff.max_monthly_broadcasts
+        used = self.organization.get_current_month_broadcasts_count()
+        return used, limit
+        """Get usage percentage for a specific resource (branches, staff, orders, broadcasts)."""
         if resource_type == 'branches':
             current = self.organization.branches.count()
             limit = self.tariff.max_branches
@@ -734,13 +757,16 @@ class Subscription(models.Model):
         elif resource_type == 'orders':
             current = self.organization.get_current_month_orders_count()
             limit = self.tariff.max_monthly_orders
+        elif resource_type == 'broadcasts':
+            current = self.organization.get_current_month_broadcasts_count()
+            limit = self.tariff.max_monthly_broadcasts
         else:
             return 0
         
         if limit is None or limit == 0:
             return 0
         
-        return int((current / limit) * 100)    
+        return int((current / limit) * 100)
     def renew(self, new_pricing=None):
         """Create a new subscription for renewal"""
         if new_pricing is None:
@@ -775,6 +801,7 @@ class UsageTracking(models.Model):
     orders_created = models.IntegerField(default=0, verbose_name=_("Orders Created"))
     branches_count = models.IntegerField(default=0, verbose_name=_("Branches Count"))
     staff_count = models.IntegerField(default=0, verbose_name=_("Staff Count"))
+    marketing_posts_sent = models.IntegerField(default=0, verbose_name=_("Marketing Posts Sent"))
     
     # Additional metrics
     total_revenue = models.DecimalField(
@@ -824,6 +851,11 @@ class UsageTracking(models.Model):
         else:
             self.manual_orders += 1
         self.save()
+
+    def increment_broadcasts(self):
+        """Increment marketing broadcast counter"""
+        self.marketing_posts_sent += 1
+        self.save(update_fields=['marketing_posts_sent', 'updated_at'])
 
 
 class SubscriptionHistory(models.Model):

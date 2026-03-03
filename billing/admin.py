@@ -46,7 +46,7 @@ class TariffAdmin(admin.ModelAdmin):
             'description': _('Configure free trial period for this tariff')
         }),
         (_('Limits'), {
-            'fields': ('max_branches', 'max_staff', 'max_monthly_orders'),
+            'fields': ('max_branches', 'max_staff', 'max_monthly_orders', 'max_monthly_broadcasts'),
             'description': _('Set usage limits (leave empty for unlimited)')
         }),
         (_('📊 Order Management Features (4)'), {
@@ -145,7 +145,7 @@ class TariffAdmin(admin.ModelAdmin):
     # inlines = [TariffPricingInline]
     
     def limits_summary(self, obj):
-        return f"Branches: {obj.max_branches or '∞'} | Staff: {obj.max_staff or '∞'} | Orders: {obj.max_monthly_orders or '∞'}"
+        return f"Branches: {obj.max_branches or '∞'} | Staff: {obj.max_staff or '∞'} | Orders: {obj.max_monthly_orders or '∞'} | Broadcasts: {obj.max_monthly_broadcasts or '∞'}"
     limits_summary.short_description = _('Limits')
     
     def feature_count_display(self, obj):

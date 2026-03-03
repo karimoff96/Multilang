@@ -101,6 +101,22 @@ class TranslationCenter(models.Model):
             created_at__year=today.year,
             created_at__month=today.month
         ).count()
+
+    def get_current_month_broadcasts_count(self):
+        """Get marketing broadcast count sent this month"""
+        from datetime import date
+        from marketing.models import MarketingPost
+
+        today = date.today()
+        return MarketingPost.objects.filter(
+            models.Q(target_center=self) |
+            models.Q(target_centers=self) |
+            models.Q(target_branch__center=self) |
+            models.Q(target_branches__center=self),
+            status__in=[MarketingPost.STATUS_SENT, MarketingPost.STATUS_SENDING, MarketingPost.STATUS_SCHEDULED],
+            created_at__year=today.year,
+            created_at__month=today.month,
+        ).distinct().count()
     
     def get_staff_count(self):
         """Get total staff count across all branches"""

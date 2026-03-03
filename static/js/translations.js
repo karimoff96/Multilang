@@ -4163,6 +4163,21 @@ const translations = {
         ru: 'Общая цена',
         en: 'Total Price'
     },
+    'detail.basePrice': {
+        uz: 'Asosiy narx',
+        ru: 'Базовая цена',
+        en: 'Base Price'
+    },
+    'detail.totalDue': {
+        uz: 'Jami to\'lanadigan',
+        ru: 'Итого к оплате',
+        en: 'Total Due'
+    },
+    'detail.addNewFiles': {
+        uz: 'Yangi fayllar qo\'shish',
+        ru: 'Добавить новые файлы',
+        en: 'Add New Files'
+    },
     'detail.paymentInformation': {
         uz: 'To\'lov ma\'lumotlari',
         ru: 'Информация об оплате',
@@ -6753,6 +6768,156 @@ const translations = {
         uz: 'Chegirma',
         ru: 'Скидка',
         en: 'Discount'
+    },
+    'orders.copiesHint': {
+        uz: '0 = faqat asl nusxa',
+        ru: '0 = только оригинал',
+        en: '0 = original only'
+    },
+    'orders.currentReceipt': {
+        uz: 'Joriy chek',
+        ru: 'Текущий чек',
+        en: 'Current Receipt'
+    },
+    'orders.replaceReceipt': {
+        uz: "Chekni almashtirish (ixtiyoriy)",
+        ru: 'Заменить чек (необязательно)',
+        en: 'Replace Receipt (Optional)'
+    },
+    'orders.deadline': {
+        uz: '⏰ Muddat',
+        ru: '⏰ Срок',
+        en: '⏰ Deadline'
+    },
+    'orders.deadlineHint': {
+        uz: "So'ralgan bajarish sanasi. Muddatni o'chirish uchun maydonni tozalang.",
+        ru: 'Запрошенная дата завершения. Очистите поле, чтобы убрать срок.',
+        en: 'Requested completion date. Clear the field to remove the deadline.'
+    },
+    'orders.deleteFilesHint': {
+        uz: "Saqlashda o'chirish uchun katakchalarni belgilang",
+        ru: 'Отметьте флажки для удаления файлов при сохранении',
+        en: 'Check the boxes to delete files when saving'
+    },
+    'orders.newFilesHint': {
+        uz: "Bir nechta faylni tanlashingiz mumkin. Qo'llab-quvvatlanadi: PDF, DOC, DOCX, JPG, PNG",
+        ru: 'Можно выбрать несколько файлов. Поддерживаются: PDF, DOC, DOCX, JPG, PNG',
+        en: 'You can select multiple files. Supported: PDF, DOC, DOCX, JPG, PNG'
+    },
+    'orders.additionalSupplyDocs': {
+        uz: "Qo'shimcha ta'minot hujjatlari",
+        ru: 'Дополнительные документы поставки',
+        en: 'Additional Supply Documents'
+    },
+    'orders.deleteAdditionalFilesHint': {
+        uz: "Saqlashda qo'shimcha fayllarni o'chirish uchun katakchalarni belgilang",
+        ru: 'Отметьте флажки для удаления дополнительных файлов при сохранении',
+        en: 'Check the boxes to delete additional files when saving'
+    },
+    'orders.addAdditionalSupplyDocs': {
+        uz: "Qo'shimcha ta'minot hujjatlarini qo'shish",
+        ru: 'Добавить дополнительные документы поставки',
+        en: 'Add Additional Supply Documents'
+    },
+    'orders.additionalFilesHint': {
+        uz: "Asosiy fayllar bilan birga qo'shimcha hujjatlar (pasport, sertifikat, ma'lumotnoma...)",
+        ru: 'Сопроводительные документы к основным файлам (паспорт, сертификат, рекомендательное письмо...)',
+        en: 'Supporting documents alongside main files (passport, certificate, reference letter, etc.)'
+    },
+    'orders.priceSummary': {
+        uz: 'Narx xulosasi',
+        ru: 'Итог стоимости',
+        en: 'Price Summary'
+    },
+    'orders.editPrice': {
+        uz: 'Narxni tahrirlash',
+        ru: 'Изменить цену',
+        en: 'Edit Price'
+    },
+    'orders.priceLocked': {
+        uz: "Narx qo'lda belgilangan — avtomatik qayta hisoblash o'chirildi.",
+        ru: 'Цена задана вручную — автоматический пересчёт отключён.',
+        en: 'Price is manually set — auto-recalculation disabled.'
+    },
+    'orders.priceAutoCalc': {
+        uz: 'Narx mahsulot va sahifalarga asosan qayta hisoblanadi',
+        ru: 'Цена будет пересчитана исходя из продукта и страниц',
+        en: 'Price will be recalculated based on product and pages'
+    },
+    'orders.extraFeeHint': {
+        uz: "Tezkor yetkazib berish, maxsus ishlov berish uchun qo'shimcha to'lovlar qo'shing",
+        ru: 'Добавьте дополнительную плату за экспресс-доставку, специальную обработку и т.д.',
+        en: 'Add additional charges for express delivery, special handling, etc.'
+    },
+    'orders.orderStatus': {
+        uz: 'Buyurtma holati',
+        ru: 'Статус заказа',
+        en: 'Order Status'
+    },
+    'orders.createdLabel': {
+        uz: 'Yaratilgan',
+        ru: 'Создан',
+        en: 'Created'
+    },
+    'common.unavailable': {
+        uz: 'Mavjud emas',
+        ru: 'Недоступно',
+        en: 'Unavailable'
+    },
+    'common.saving': {
+        uz: 'Saqlanmoqda...',
+        ru: 'Сохранение...',
+        en: 'Saving...'
+    },
+    'common.errorOccurred': {
+        uz: 'Xato yuz berdi.',
+        ru: 'Произошла ошибка.',
+        en: 'An error occurred.'
+    },
+    'common.serverError': {
+        uz: "Server xatosi. Iltimos, qayta urinib ko'ring.",
+        ru: 'Ошибка сервера. Пожалуйста, попробуйте ещё раз.',
+        en: 'Server error. Please try again.'
+    },
+    'common.saveChange': {
+        uz: "O'zgarishni saqlash",
+        ru: 'Сохранить изменение',
+        en: 'Save Change'
+    },
+    'validation.bothFieldsRequired': {
+        uz: "Ikkala maydon ham to'ldirilishi shart.",
+        ru: 'Оба поля обязательны для заполнения.',
+        en: 'Both fields are required.'
+    },
+    'orders.editOrderPrice': {
+        uz: 'Buyurtma narxini tahrirlash',
+        ru: 'Изменить цену заказа',
+        en: 'Edit Order Price'
+    },
+    'orders.currentPrice': {
+        uz: 'Joriy narx',
+        ru: 'Текущая цена',
+        en: 'Current Price'
+    },
+    'orders.newPrice': {
+        uz: 'Yangi narx',
+        ru: 'Новая цена',
+        en: 'New Price'
+    },
+    'orders.enterNewPrice': {
+        uz: 'Yangi narxni kiriting',
+        ru: 'Введите новую цену',
+        en: 'Enter new price'
+    },
+    'orders.reasonForChange': {
+        uz: "O'zgartirish sababi",
+        ru: 'Причина изменения',
+        en: 'Reason for change'
+    },
+    'orders.describePriceChange': {
+        uz: "Narx nima uchun o'zgartirilayotganligini tasvirlab bering...",
+        ru: 'Опишите причину изменения цены...',
+        en: 'Describe why the price is being changed...'
     },
 
     // ========== USERS ==========

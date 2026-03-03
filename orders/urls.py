@@ -8,7 +8,8 @@ from .views import (
     assignOrder, unassignOrder, receivePayment, completeOrder,
     api_order_stats, api_branch_staff, myOrders, orderCreate,
     record_order_payment, add_order_extra_fee, get_order_payment_info,
-    bulk_delete_orders, search_customers, search_categories, search_products
+    bulk_delete_orders, search_customers, search_categories, search_products,
+    edit_order_price,
 )
 from .bulk_payment_views import (
     bulk_payment_page, search_customers_with_debt, get_customer_debt_details,
@@ -34,6 +35,7 @@ urlpatterns = [
     path("<int:order_id>/unassign/", unassignOrder, name="unassignOrder"),
     path("<int:order_id>/receive-payment/", receivePayment, name="receivePayment"),
     path("<int:order_id>/complete/", completeOrder, name="completeOrder"),
+    path("<int:order_id>/edit-price/", edit_order_price, name="edit_order_price"),
     
     # Payment management API
     path("<int:order_id>/payment/record/", record_order_payment, name="record_order_payment"),

@@ -187,10 +187,10 @@
                             <input class="form-check-input" type="checkbox" id="manualOrderToggle" {% if order.is_manual_order %}checked{% endif %}>
                             <label class="form-check-label fw-semibold" for="manualOrderToggle">
                                 <iconify-icon icon="solar:phone-calling-bold" class="me-2 text-warning-600"></iconify-icon>
-                                Manual Order (Phone/Walk-in)
+                                <span data-i18n="orders.manualOrderToggle">Manual Order (Phone/Walk-in)</span>
                             </label>
                         </div>
-                        <small class="text-secondary-light d-block mt-8">
+                        <small class="text-secondary-light d-block mt-8" data-i18n="orders.manualOrderHint">
                             Toggle to switch between bot user and manual customer information
                         </small>
                     </div>
@@ -199,42 +199,42 @@
                     <div class="mb-20" id="botUserSection" {% if order.is_manual_order %}style="display: none;"{% endif %}>
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="orders.customer">Customer</label>
                         <select name="bot_user" class="form-select radius-8" id="customerSelect" {% if not order.is_manual_order %}required{% endif %}>
-                            <option value="">-- Select Customer --</option>
+                            <option value="" data-i18n="form.selectCustomer">-- Select Customer --</option>
                             {% for user in bot_users %}
                             <option value="{{ user.id }}" {% if order.bot_user and order.bot_user.id == user.id %}selected{% endif %}>
                                 {{ user.display_name }} {% if user.phone %}({{ user.phone }}){% endif %}
                             </option>
                             {% endfor %}
                         </select>
-                        <small class="text-primary-light">Select from existing customers (registered via Telegram bot)</small>
+                        <small class="text-primary-light" data-i18n="orders.selectCustomerHint">Select from existing customers (registered via Telegram bot)</small>
                     </div>
                     
                     <!-- Manual Customer Info -->
                     <div id="manualCustomerSection" {% if not order.is_manual_order %}style="display: none;"{% endif %}>
                         <div class="mb-16 p-12 bg-info-50 radius-8 border border-info-200">
                             <iconify-icon icon="solar:info-circle-bold" class="text-info-600 me-2"></iconify-icon>
-                            <span class="text-sm text-info-600 fw-medium">Manual customer details</span>
+                            <span class="text-sm text-info-600 fw-medium" data-i18n="orders.manualInfoBanner">Manual customer details</span>
                         </div>
                         
                         <div class="row">
                             <div class="col-md-6 mb-20">
-                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">First Name *</label>
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8"><span data-i18n="form.firstName">First Name</span> *</label>
                                 <input type="text" name="manual_first_name" id="manualFirstName" class="form-control radius-8" 
                                        value="{{ order.manual_first_name|default:'' }}" data-i18n-placeholder="form.customerFirstName" placeholder="Customer's first name"
                                        {% if order.is_manual_order %}required{% endif %}>
                             </div>
                             <div class="col-md-6 mb-20">
-                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">Last Name</label>
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.lastName">Last Name</label>
                                 <input type="text" name="manual_last_name" id="manualLastName" class="form-control radius-8" 
                                        value="{{ order.manual_last_name|default:'' }}" data-i18n-placeholder="form.customerLastName" placeholder="Customer's last name">
                             </div>
                         </div>
                         <div class="mb-20">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Phone Number *</label>
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8"><span data-i18n="form.phoneNumber">Phone Number</span> *</label>
                             <input type="tel" name="manual_phone" id="manualPhone" class="form-control radius-8" 
                                    value="{{ order.manual_phone|default:'' }}" data-i18n-placeholder="form.phoneNumber" placeholder="+998 XX XXX XX XX"
                                    {% if order.is_manual_order %}required{% endif %}>
-                            <small class="text-primary-light">Customer's contact number</small>
+                            <small class="text-primary-light" data-i18n="orders.manualPhoneHint">Customer's contact number</small>
                         </div>
                     </div>
                     
@@ -244,7 +244,7 @@
                         <div class="col-md-6 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.center">Center *</label>
                             <select name="center" class="form-select radius-8" required id="centerSelect">
-                                <option value="">-- Select Center --</option>
+                                <option value="" data-i18n="form.selectCenter">-- Select Center --</option>
                                 {% for center in centers %}
                                 <option value="{{ center.id }}" {% if order.branch.center_id == center.id %}selected{% endif %}>{{ center.name }}</option>
                                 {% endfor %}
@@ -253,7 +253,7 @@
                         <div class="col-md-6 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.branch">Branch *</label>
                             <select name="branch" class="form-select radius-8" required id="branchSelect">
-                                <option value="">-- Select Center First --</option>
+                                <option value="" data-i18n="orders.branchPlaceholderCenterFirst">-- Select Center First --</option>
                             </select>
                         </div>
                     </div>
@@ -262,7 +262,7 @@
                     <div class="mb-20">
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.branch">Branch *</label>
                         <select name="branch" class="form-select radius-8" required id="branchSelect">
-                            <option value="">-- Select Branch --</option>
+                            <option value="" data-i18n="form.selectBranch">-- Select Branch --</option>
                             {% for branch in branches %}
                             <option value="{{ branch.id }}" {% if order.branch_id == branch.id %}selected{% endif %}>{{ branch.name }}{% if branch.center %} ({{ branch.center.name }}){% endif %}</option>
                             {% endfor %}
@@ -275,14 +275,14 @@
                         <div class="col-md-4 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.category">Category</label>
                             <select name="category" class="form-select radius-8" id="categorySelect">
-                                <option value="">-- All Categories --</option>
+                                <option value="" data-i18n="orders.allCategories">-- All Categories --</option>
                             </select>
                             <small class="text-primary-light" data-i18n="form.categoryHint">Filter products by category</small>
                         </div>
                         <div class="col-md-8 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.productService">Product / Service</label>
                             <select name="product" class="form-select radius-8" id="productSelect" required>
-                                <option value="">-- Select Product --</option>
+                                <option value="" data-i18n="orders.selectProduct">-- Select Product --</option>
                             </select>
                         </div>
                     </div>
@@ -292,7 +292,7 @@
                         <div class="col-md-12 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.language">Language</label>
                             <select name="language" class="form-select radius-8" id="languageSelect">
-                                <option value="">-- Optional --</option>
+                                <option value="" data-i18n="orders.languageOptional">-- Optional --</option>
                                 {% for language in languages %}
                                 <option value="{{ language.id }}" {% if order.language and order.language.id == language.id %}selected{% endif %}>
                                     {{ language.name }}
@@ -311,7 +311,7 @@
                         <div class="col-md-4 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.copies">Copies</label>
                             <input type="number" name="copy_number" class="form-control radius-8" value="{{ order.copy_number }}" min="0">
-                            <small class="text-primary-light d-block mt-4">0 = original only</small>
+                            <small class="text-primary-light d-block mt-4" data-i18n="orders.copiesHint">0 = original only</small>
                         </div>
                         <div class="col-md-4 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="table.payment">Payment Type</label>
@@ -327,7 +327,7 @@
                     <div class="mb-20" id="receiptSection">
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                             <iconify-icon icon="solar:document-add-bold" class="me-1"></iconify-icon>
-                            Payment Receipt
+                            <span data-i18n="orders.paymentReceipt">Payment Receipt</span>
                         </label>
                         {% if order.recipt %}
                         <div class="mb-12 p-12 bg-success-50 border border-success-200 radius-8">
@@ -335,21 +335,21 @@
                                 <div class="d-flex align-items-center">
                                     <iconify-icon icon="solar:file-check-bold" class="text-success-600 text-xl me-2"></iconify-icon>
                                     <div>
-                                        <span class="fw-medium text-success-600">Current Receipt:</span>
+                                        <span class="fw-medium text-success-600" data-i18n="orders.currentReceipt">Current Receipt:</span>
                                         <a href="{{ order.recipt.url }}" target="_blank" class="text-primary-600 ms-2">
                                             {{ order.recipt.name|slice:"-30:" }}
                                         </a>
                                     </div>
                                 </div>
                                 <a href="{{ order.recipt.url }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                    <iconify-icon icon="solar:eye-bold"></iconify-icon> View
+                                    <iconify-icon icon="solar:eye-bold"></iconify-icon> <span data-i18n="common.view">View</span>
                                 </a>
                             </div>
                         </div>
-                        <label class="form-label text-sm mb-8">Replace Receipt (Optional)</label>
+                        <label class="form-label text-sm mb-8" data-i18n="orders.replaceReceipt">Replace Receipt (Optional)</label>
                         {% endif %}
                         <input type="file" name="recipt" class="form-control radius-8" accept="image/*,.pdf">
-                        <small class="text-primary-light">Upload payment receipt for card transactions</small>
+                        <small class="text-primary-light" data-i18n="orders.paymentReceiptHint">Upload payment receipt for card transactions</small>
                     </div>
                     
                     <!-- Description -->
@@ -360,10 +360,10 @@
 
                     <!-- Deadline (optional) -->
                     <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">&#9203; Deadline <span class="text-secondary-light fw-normal">(optional)</span></label>
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8"><span data-i18n="orders.deadline">&#9203; Deadline</span> <span class="text-secondary-light fw-normal" data-i18n="common.optional">(optional)</span></label>
                         <input type="date" name="deadline" class="form-control radius-8"
                                value="{{ order.deadline|date:'Y-m-d'|default:'' }}">
-                        <small class="text-primary-light">Requested completion date. Clear the field to remove the deadline.</small>
+                        <small class="text-primary-light" data-i18n="orders.deadlineHint">Requested completion date. Clear the field to remove the deadline.</small>
                     </div>
                     
                     <!-- Existing Files -->
@@ -407,7 +407,7 @@
                                                 <iconify-icon icon="mdi:download"></iconify-icon>
                                             </a>
                                             {% else %}
-                                            <span class="badge bg-danger-focus text-danger-600">Unavailable</span>
+                                            <span class="badge bg-danger-focus text-danger-600" data-i18n="common.unavailable">Unavailable</span>
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -417,7 +417,7 @@
                         </div>
                         <small class="text-danger mt-8 d-block">
                             <iconify-icon icon="mdi:alert" class="me-1"></iconify-icon>
-                            Check the boxes to delete files when saving
+                            <span data-i18n="orders.deleteFilesHint">Check the boxes to delete files when saving</span>
                         </small>
                     </div>
                     {% endif %}
@@ -429,18 +429,96 @@
                             <span data-i18n="detail.addNewFiles">Add New Files</span>
                         </label>
                         <input type="file" name="new_files" class="form-control radius-8" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                        <small class="text-primary-light mt-8 d-block">You can select multiple files. Supported: PDF, DOC, DOCX, JPG, PNG</small>
+                        <small class="text-primary-light mt-8 d-block" data-i18n="orders.newFilesHint">You can select multiple files. Supported: PDF, DOC, DOCX, JPG, PNG</small>
                     </div>
-                    
+
+                    <!-- Existing Additional Supply Documents -->
+                    {% if order.additional_files.all %}
+                    <div class="mb-20">
+                        <label class="form-label fw-semibold text-warning-600 text-sm mb-8">
+                            <iconify-icon icon="mdi:paperclip" class="me-1"></iconify-icon>
+                            <span data-i18n="orders.additionalSupplyDocs">Additional Supply Documents</span> ({{ order.additional_files.count }})
+                        </label>
+                        <div class="table-responsive">
+                            <table class="table bordered-table sm-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="selectAllAdditionalFiles">
+                                                <label class="form-check-label text-sm" for="selectAllAdditionalFiles" data-i18n="actions.delete">Delete</label>
+                                            </div>
+                                        </th>
+                                        <th data-i18n="detail.file">File</th>
+                                        <th data-i18n="table.action">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for file in order.additional_files.all %}
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input additional-file-checkbox" type="checkbox"
+                                                       name="delete_additional_files" value="{{ file.id }}" id="addfile_{{ file.id }}">
+                                            </div>
+                                        </td>
+                                        <td><span class="text-sm">{{ file.file_name|slice:"-35:" }}</span></td>
+                                        <td>
+                                            {% if file.file_url %}
+                                            <a href="{{ file.file_url }}" target="_blank" class="btn btn-sm btn-outline-warning">
+                                                <iconify-icon icon="mdi:download"></iconify-icon>
+                                            </a>
+                                            {% else %}
+                                            <span class="badge bg-danger-focus text-danger-600" data-i18n="common.unavailable">Unavailable</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <small class="text-danger mt-8 d-block">
+                            <iconify-icon icon="mdi:alert" class="me-1"></iconify-icon>
+                            <span data-i18n="orders.deleteAdditionalFilesHint">Check the boxes to delete additional files when saving</span>
+                        </small>
+                    </div>
+                    {% endif %}
+
+                    <!-- Add New Additional Supply Documents -->
+                    <div class="mb-20">
+                        <label class="form-label fw-semibold text-warning-600 text-sm mb-8">
+                            <iconify-icon icon="mdi:paperclip-plus" class="me-1"></iconify-icon>
+                            <span data-i18n="orders.addAdditionalSupplyDocs">Add Additional Supply Documents</span> <span class="text-secondary-light fw-normal" data-i18n="common.optional">(Optional)</span>
+                        </label>
+                        <input type="file" name="new_additional_files" class="form-control radius-8" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.heic,.heif">
+                        <small class="text-secondary-light mt-8 d-block">
+                            <iconify-icon icon="mdi:information-outline" class="me-1"></iconify-icon>
+                            <span data-i18n="orders.additionalFilesHint">Supporting documents alongside main files (passport, certificate, reference letter, etc.)</span>
+                        </small>
+                    </div>
+
                     <!-- Current Price Info -->
                     <div class="mb-20 p-16 bg-success-50 radius-8">
+                        <div class="d-flex align-items-center justify-content-between mb-12">
+                            <span class="text-secondary-light text-sm fw-semibold" data-i18n="orders.priceSummary">Price Summary</span>
+                            {% if can_edit_price %}
+                            <button type="button"
+                                    class="btn btn-sm d-flex align-items-center gap-4 px-10 py-4 radius-6 fw-semibold text-xs"
+                                    style="background:rgba(234,179,8,.15); color:#a16207; border:1px solid rgba(234,179,8,.35);"
+                                    onclick="openEditPriceModal()"
+                                    title="Edit Price">
+                                <iconify-icon icon="solar:pen-bold" style="font-size:14px;"></iconify-icon>
+                                <span data-i18n="orders.editPrice">Edit Price</span>
+                            </button>
+                            {% endif %}
+                        </div>
                         <div class="d-flex align-items-center justify-content-between mb-8">
                             <span class="text-secondary-light text-sm" data-i18n="detail.basePrice">Base Price</span>
-                            <span class="text-md fw-medium">{{ order.total_price|smart_num }} UZS</span>
+                            <span class="text-md fw-medium" id="editPagePriceDisplay">{{ order.total_price|smart_num }} UZS</span>
                         </div>
                         {% if order.extra_fee > 0 %}
                         <div class="d-flex align-items-center justify-content-between mb-8">
-                            <span class="text-secondary-light text-sm">Extra Fee</span>
+                            <span class="text-secondary-light text-sm" data-i18n="orders.extraFee">Extra Fee</span>
                             <span class="text-md fw-medium text-warning-600">+{{ order.extra_fee|smart_num }} UZS</span>
                         </div>
                         {% endif %}
@@ -454,18 +532,25 @@
                             <span class="text-md fw-medium text-primary-600">{{ order.received|smart_num }} UZS</span>
                         </div>
                         <div class="d-flex align-items-center justify-content-between">
-                            <span class="text-secondary-light text-sm">Remaining</span>
+                            <span class="text-secondary-light text-sm" data-i18n="orders.remaining">Remaining</span>
                             <span class="text-md fw-medium {% if order.remaining > 0 %}text-danger-600{% else %}text-success-600{% endif %}">{{ order.remaining|smart_num }} UZS</span>
                         </div>
                         {% endif %}
-                        <small class="text-primary-light">Price will be recalculated based on product and pages</small>
+                        {% if price_changes %}
+                        <small class="text-warning-600 fw-semibold d-block mt-4">
+                            <iconify-icon icon="solar:lock-bold" class="me-1"></iconify-icon>
+                            <span data-i18n="orders.priceLocked">Price is manually set &mdash; auto-recalculation disabled.</span>
+                        </small>
+                        {% else %}
+                        <small class="text-primary-light" data-i18n="orders.priceAutoCalc">Price will be recalculated based on product and pages</small>
+                        {% endif %}
                     </div>
                     
                     <!-- Extra Fee Section -->
                     <div class="mb-20">
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                             <iconify-icon icon="mdi:cash-plus" class="me-1"></iconify-icon>
-                            Extra Fee (Optional)
+                            <span data-i18n="orders.extraFee">Extra Fee</span> <span class="text-secondary-light fw-normal" data-i18n="common.optional">(Optional)</span>
                         </label>
                         <div class="row">
                             <div class="col-md-4">
@@ -474,10 +559,10 @@
                             </div>
                             <div class="col-md-8">
                                 <input type="text" name="extra_fee_description" class="form-control radius-8" 
-                                       value="{{ order.extra_fee_description|default:'' }}" placeholder="Reason for extra fee (e.g., Urgent delivery)">
+                                       value="{{ order.extra_fee_description|default:'' }}" data-i18n-placeholder="form.reason" placeholder="Reason for extra fee (e.g., Urgent delivery)">
                             </div>
                         </div>
-                        <small class="text-primary-light mt-8 d-block">Add additional charges for express delivery, special handling, etc.</small>
+                        <small class="text-primary-light mt-8 d-block" data-i18n="orders.extraFeeHint">Add additional charges for express delivery, special handling, etc.</small>
                     </div>
                     
                     <!-- Submit Buttons -->
@@ -523,11 +608,11 @@
         <!-- Order Status -->
         <div class="card radius-12">
             <div class="card-header border-bottom bg-base py-16 px-24">
-                <h6 class="text-md fw-semibold mb-0">Order Status</h6>
+                <h6 class="text-md fw-semibold mb-0" data-i18n="orders.orderStatus">Order Status</h6>
             </div>
             <div class="card-body p-24">
                 <div class="mb-16">
-                    <span class="text-secondary-light text-sm d-block mb-8">Status</span>
+                    <span class="text-secondary-light text-sm d-block mb-8" data-i18n="common.status">Status</span>
                     {% if order.status == 'pending' %}
                         <span class="bg-warning-focus text-warning-600 px-16 py-6 radius-4 fw-medium text-sm" data-i18n="status.pending">Pending</span>
                     {% elif order.status == 'payment_pending' %}
@@ -547,12 +632,12 @@
                     {% endif %}
                 </div>
                 <div class="mb-16">
-                    <span class="text-secondary-light text-sm d-block mb-8">Created</span>
+                    <span class="text-secondary-light text-sm d-block mb-8" data-i18n="orders.createdLabel">Created</span>
                     <span class="text-md fw-medium">{{ order.created_at|date:"d M Y, H:i" }}</span>
                 </div>
                 {% if order.branch %}
                 <div>
-                    <span class="text-secondary-light text-sm d-block mb-8">Branch</span>
+                    <span class="text-secondary-light text-sm d-block mb-8" data-i18n="table.branch">Branch</span>
                     <span class="text-md fw-medium">{{ order.branch.name }}</span>
                 </div>
                 {% endif %}
@@ -614,7 +699,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Add placeholder
                 const placeholder = document.createElement('option');
                 placeholder.value = '';
-                placeholder.textContent = '-- Select Branch --';
+                placeholder.textContent = LanguageManager.translate('form.selectBranch');
                 branchSelect.appendChild(placeholder);
                 
                 // Filter and add matching branches
@@ -632,13 +717,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // If no branches found, show message
                 if (matchCount === 0) {
-                    branchSelect.innerHTML = '<option value="">-- No branches for this center --</option>';
+                    branchSelect.innerHTML = `<option value="">${LanguageManager.translate('orders.noBranches')}</option>`;
                 }
             } else {
                 // Add placeholder for no center selected
                 const placeholder = document.createElement('option');
                 placeholder.value = '';
-                placeholder.textContent = '-- Select Center First --';
+                placeholder.textContent = LanguageManager.translate('orders.branchPlaceholderCenterFirst');
                 branchSelect.appendChild(placeholder);
             }
             
@@ -666,7 +751,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             cache: true
         },
-        placeholder: '-- Select Customer --',
+        placeholder: LanguageManager.translate('form.selectCustomer'),
         allowClear: true,
         minimumInputLength: 0,
         width: '100%'
@@ -697,17 +782,17 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             cache: false
         },
-        placeholder: '-- All Categories --',
+        placeholder: LanguageManager.translate('orders.allCategories'),
         allowClear: true,
         minimumInputLength: 0,
         minimumResultsForSearch: 0,
         width: '100%',
         language: {
             searching: function() {
-                return 'Searching...';
+                return LanguageManager.translate('common.searching');
             },
             noResults: function() {
-                return 'No categories found';
+                return LanguageManager.translate('orders.noCategories');
             }
         }
     });
@@ -753,17 +838,17 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             cache: false
         },
-        placeholder: '-- Select Product --',
+        placeholder: LanguageManager.translate('orders.selectProduct'),
         allowClear: true,
         minimumInputLength: 0,
         minimumResultsForSearch: 0,
         width: '100%',
         language: {
             searching: function() {
-                return 'Searching...';
+                return LanguageManager.translate('common.searching');
             },
             noResults: function() {
-                return 'No products found';
+                return LanguageManager.translate('orders.noProducts');
             }
         }
     });
@@ -865,7 +950,27 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
+
+    // Select all additional files checkbox functionality
+    const selectAllAdditionalCheckbox = document.getElementById('selectAllAdditionalFiles');
+    const additionalFileCheckboxes = document.querySelectorAll('.additional-file-checkbox');
+
+    if (selectAllAdditionalCheckbox) {
+        selectAllAdditionalCheckbox.addEventListener('change', function() {
+            additionalFileCheckboxes.forEach(function(checkbox) {
+                checkbox.checked = selectAllAdditionalCheckbox.checked;
+            });
+        });
+        additionalFileCheckboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                const allChecked = Array.from(additionalFileCheckboxes).every(cb => cb.checked);
+                const someChecked = Array.from(additionalFileCheckboxes).some(cb => cb.checked);
+                selectAllAdditionalCheckbox.checked = allChecked;
+                selectAllAdditionalCheckbox.indeterminate = someChecked && !allChecked;
+            });
+        });
+    }
+
     // Show/hide receipt upload based on payment type
     const paymentTypeSelect = document.getElementById('paymentType');
     const receiptSection = document.getElementById('receiptSection');
@@ -885,7 +990,114 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleReceiptSection();
     }
 });
+
+{% if can_edit_price %}
+// ── Edit Order Price ───────────────────────────────────────────────────────
+const EDIT_PRICE_URL_EDIT = '{% url "orders:edit_order_price" order.id %}';
+
+function openEditPriceModal() {
+    document.getElementById('editNewPriceInput').value = '';
+    document.getElementById('editPriceChangeReason').value = '';
+    document.getElementById('editPriceError').classList.add('d-none');
+    document.getElementById('saveEditPriceBtn').disabled = false;
+    document.getElementById('saveEditPriceBtn').innerHTML =
+        `<iconify-icon icon="solar:check-circle-bold" class="me-1"></iconify-icon> ${LanguageManager.translate('common.saveChange')}`;
+    new bootstrap.Modal(document.getElementById('editPriceModalEdit')).show();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const saveEditPriceBtn = document.getElementById('saveEditPriceBtn');
+    if (!saveEditPriceBtn) return;
+
+    saveEditPriceBtn.addEventListener('click', async function() {
+        const newPrice = document.getElementById('editNewPriceInput').value.trim();
+        const reason  = document.getElementById('editPriceChangeReason').value.trim();
+        const errDiv  = document.getElementById('editPriceError');
+
+        if (!newPrice || !reason) {
+            errDiv.textContent = LanguageManager.translate('validation.bothFieldsRequired');
+            errDiv.classList.remove('d-none');
+            return;
+        }
+        this.disabled = true;
+        this.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> ${LanguageManager.translate('common.saving')}`;
+        errDiv.classList.add('d-none');
+
+        const fd = new FormData();
+        fd.append('new_price', newPrice);
+        fd.append('reason', reason);
+        fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        try {
+            const resp = await fetch(EDIT_PRICE_URL_EDIT, { method: 'POST', body: fd });
+            const data = await resp.json();
+            if (!data.success) {
+                errDiv.textContent = data.error || LanguageManager.translate('common.errorOccurred');
+                errDiv.classList.remove('d-none');
+                this.disabled = false;
+                this.innerHTML = `<iconify-icon icon="solar:check-circle-bold" class="me-1"></iconify-icon> ${LanguageManager.translate('common.saveChange')}`;
+                return;
+            }
+            bootstrap.Modal.getInstance(document.getElementById('editPriceModalEdit'))?.hide();
+            location.reload();
+        } catch (err) {
+            errDiv.textContent = LanguageManager.translate('common.serverError');
+            errDiv.classList.remove('d-none');
+            this.disabled = false;
+            this.innerHTML = `<iconify-icon icon="solar:check-circle-bold" class="me-1"></iconify-icon> ${LanguageManager.translate('common.saveChange')}`;
+        }
+    });
+});
+{% endif %}
 </script>
+
+{% if can_edit_price %}
+<div class="modal fade" id="editPriceModalEdit" tabindex="-1" aria-labelledby="editPriceModalEditLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPriceModalEditLabel">
+                    <iconify-icon icon="solar:pen-bold" class="me-2"></iconify-icon>
+                    <span data-i18n="orders.editOrderPrice">Edit Order Price</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-16 p-12 bg-success-50 radius-8 border border-success-200">
+                    <span class="text-secondary-light text-sm" data-i18n="orders.currentPrice">Current Price</span>
+                    <div class="fw-bold text-success-600 fs-5">{{ order.total_price|smart_num }} UZS</div>
+                </div>
+                <div class="mb-16">
+                    <label for="editNewPriceInput" class="form-label fw-semibold">
+                        <span data-i18n="orders.newPrice">New Price</span> <span class="text-danger-600">*</span>
+                    </label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="editNewPriceInput"
+                               step="1" min="0" data-i18n-placeholder="orders.enterNewPrice" placeholder="Enter new price">
+                        <span class="input-group-text">UZS</span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="editPriceChangeReason" class="form-label fw-semibold">
+                        <span data-i18n="orders.reasonForChange">Reason for change</span> <span class="text-danger-600">*</span>
+                    </label>
+                    <textarea class="form-control" id="editPriceChangeReason" rows="3"
+                              data-i18n-placeholder="orders.describePriceChange" placeholder="Describe why the price is being changed..."></textarea>
+                </div>
+                <div id="editPriceError" class="alert alert-danger py-8 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Cancel</button>
+                <button type="button" class="btn btn-warning fw-semibold" id="saveEditPriceBtn">
+                    <iconify-icon icon="solar:check-circle-bold" class="me-1"></iconify-icon>
+                    <span data-i18n="common.saveChange">Save Change</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock content %}
 
 {% block script %}

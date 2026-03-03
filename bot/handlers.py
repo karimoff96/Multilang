@@ -47,6 +47,7 @@ def register_all_handlers(bot, center=None):
         STEP_PAYMENT_METHOD,
         STEP_AWAITING_PAYMENT,
         STEP_UPLOADING_RECEIPT,
+        STEP_UPLOADING_ADDITIONAL_FILES,
         # Data stores
         user_data,
         uploaded_files,

@@ -51,7 +51,7 @@
                         <h6 class="text-md text-primary-light mb-16">{% trans "Basic Information" %}</h6>
                     </div>
                     
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <label class="form-label">{% trans "Slug" %} *</label>
                         <input type="text" name="slug" class="form-control" required 
                                value="{{ tariff.slug }}"
@@ -127,43 +127,37 @@
                         <small class="text-secondary-light">{% trans "Lower numbers appear first" %}</small>
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label d-block mb-8">&nbsp;</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_active" id="isActive" 
-                                   {% if tariff.is_active %}checked{% endif %}>
-                            <label class="form-check-label" for="isActive">
-                                {% trans "Active" %}
-                            </label>
+                    <div class="col-md-5 d-flex flex-column justify-content-end" style="padding-bottom: 1px;">
+                        <label class="form-label mb-8">{% trans "Status Flags" %}</label>
+                        <div class="d-flex gap-16 flex-wrap">
+                            <div class="form-check mb-0">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="isActive"
+                                       {% if tariff.is_active %}checked{% endif %}>
+                                <label class="form-check-label fw-medium" for="isActive">
+                                    <i class="ri-checkbox-circle-line text-success-600 me-1"></i>{% trans "Active" %}
+                                </label>
+                            </div>
+                            <div class="form-check mb-0">
+                                <input class="form-check-input" type="checkbox" name="is_featured" id="isFeatured"
+                                       {% if tariff.is_featured %}checked{% endif %}>
+                                <label class="form-check-label fw-medium" for="isFeatured">
+                                    <i class="ri-star-line text-warning-600 me-1"></i>{% trans "Featured" %}
+                                </label>
+                            </div>
+                            <div class="form-check mb-0">
+                                <input class="form-check-input" type="checkbox" name="is_trial" id="isTrial"
+                                       {% if tariff.is_trial %}checked{% endif %}
+                                       onchange="toggleTrialSettings()">
+                                <label class="form-check-label fw-medium" for="isTrial">
+                                    <i class="ri-time-line text-info-600 me-1"></i>{% trans "Is Trial" %}
+                                </label>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label d-block mb-8">&nbsp;</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_featured" id="isFeatured"
-                                   {% if tariff.is_featured %}checked{% endif %}>
-                            <label class="form-check-label" for="isFeatured">
-                                {% trans "Featured" %}
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label d-block mb-8">&nbsp;</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_trial" id="isTrial" 
-                                   {% if tariff.is_trial %}checked{% endif %}
-                                   onchange="toggleTrialSettings()">
-                            <label class="form-check-label" for="isTrial">
-                                {% trans "Is Trial" %}
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6" id="trialDaysContainer" style="display:{% if tariff.is_trial %}block{% else %}none{% endif %};">
+                    <div class="col-md-4" id="trialDaysContainer" style="display:{% if tariff.is_trial %}block{% else %}none{% endif %};">
                         <label class="form-label">{% trans "Trial Days" %}</label>
-                        <input type="number" name="trial_days" id="trialDays" class="form-control" 
+                        <input type="number" name="trial_days" id="trialDays" class="form-control"
                                value="{{ tariff.trial_days|default:'10' }}" min="1">
                         <small class="text-secondary-light">{% trans "Number of days for free trial period" %}</small>
                     </div>
@@ -173,28 +167,49 @@
                 <div class="row gy-3 mb-32">
                     <div class="col-12">
                         <h6 class="text-md text-primary-light mb-8">{% trans "Resource Limits" %}</h6>
-                        <p class="text-sm text-secondary-light mb-16">{% trans "Leave empty for unlimited access" %}</p>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label">{% trans "Max Branches" %}</label>
-                        <input type="number" name="max_branches" class="form-control" min="0" 
-                               value="{{ tariff.max_branches|default:'' }}"
-                               placeholder="{% trans 'Empty = Unlimited' %}">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="ri-git-branch-line"></i></span>
+                            <input type="number" name="max_branches" class="form-control" min="0"
+                                   value="{{ tariff.max_branches|default:'' }}"
+                                   placeholder="{% trans 'Unlimited' %}">
+                        </div>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label">{% trans "Max Staff" %}</label>
-                        <input type="number" name="max_staff" class="form-control" min="0" 
-                               value="{{ tariff.max_staff|default:'' }}"
-                               placeholder="{% trans 'Empty = Unlimited' %}">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="ri-team-line"></i></span>
+                            <input type="number" name="max_staff" class="form-control" min="0"
+                                   value="{{ tariff.max_staff|default:'' }}"
+                                   placeholder="{% trans 'Unlimited' %}">
+                        </div>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label">{% trans "Max Monthly Orders" %}</label>
-                        <input type="number" name="max_monthly_orders" class="form-control" min="0" 
-                               value="{{ tariff.max_monthly_orders|default:'' }}"
-                               placeholder="{% trans 'Empty = Unlimited' %}">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="ri-shopping-bag-line"></i></span>
+                            <input type="number" name="max_monthly_orders" class="form-control" min="0"
+                                   value="{{ tariff.max_monthly_orders|default:'' }}"
+                                   placeholder="{% trans 'Unlimited' %}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans "Max Monthly Broadcasts" %}</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="ri-broadcast-line"></i></span>
+                            <input type="number" name="max_monthly_broadcasts" class="form-control" min="0"
+                                   value="{{ tariff.max_monthly_broadcasts|default:'' }}"
+                                   placeholder="{% trans 'Unlimited' %}">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <small class="text-secondary-light"><i class="ri-information-line me-1"></i>{% trans "Leave any field empty for unlimited access" %}</small>
                     </div>
                 </div>
 
@@ -756,47 +771,53 @@
                         <h6 class="text-md text-primary-light mb-16">{% trans "Pricing Options" %}</h6>
                     </div>
                     
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-5 mb-3">
                         <label class="form-label">{% trans "Base Monthly Price" %} *</label>
-                        <input type="number" id="basePrice" class="form-control" step="0.01" min="0" 
-                               placeholder="{% trans 'e.g., 299000' %}" onchange="updateAllPrices()">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="ri-money-dollar-circle-line"></i></span>
+                            <input type="number" id="basePrice" class="form-control" step="0.01" min="0"
+                                   placeholder="{% trans 'e.g., 299000' %}" onchange="updateAllPrices()">
+                        </div>
                         <small class="text-secondary-light">{% trans "Full price per month without any discount" %}</small>
                     </div>
                     
                     <div class="col-12">
                         <div id="pricingContainer">
                             {% for pricing in tariff.pricing.all %}
-                            <div class="row gy-3 mb-3 pricing-row border-bottom pb-3">
+                            <div class="row g-3 mb-3 pricing-row border rounded px-2 pt-2 pb-3 bg-light">
                                 <div class="col-md-2">
-                                    <label class="form-label">{% trans "Duration (Months)" %}</label>
-                                    <input type="number" name="pricing_duration[]" class="form-control duration-input" 
+                                    <label class="form-label text-sm">{% trans "Months" %}</label>
+                                    <input type="number" name="pricing_duration[]" class="form-control duration-input"
                                            value="{{ pricing.duration_months }}" min="1" required onchange="calculatePrice(this)">
                                 </div>
                                 <div class="col-md-2">
-                                    <label class="form-label">{% trans "Discount %" %}</label>
-                                    <input type="number" name="pricing_discount[]" class="form-control discount-input" 
-                                           value="{{ pricing.discount_percentage }}" min="0" max="100" step="0.1" 
-                                           onchange="calculatePrice(this)" placeholder="0">
+                                    <label class="form-label text-sm">{% trans "Discount %" %}</label>
+                                    <div class="input-group">
+                                        <input type="number" name="pricing_discount[]" class="form-control discount-input"
+                                               value="{{ pricing.discount_percentage }}" min="0" max="100" step="0.1"
+                                               onchange="calculatePrice(this)" placeholder="0">
+                                        <span class="input-group-text">%</span>
+                                    </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <label class="form-label">{% trans "Monthly Price" %}</label>
-                                    <input type="number" name="pricing_monthly[]" class="form-control monthly-price" 
+                                    <label class="form-label text-sm">{% trans "Monthly Price" %}</label>
+                                    <input type="number" name="pricing_monthly[]" class="form-control monthly-price bg-neutral-100"
                                            value="{{ pricing.get_monthly_price|floatformat:2 }}" step="0.01" min="0" required readonly>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">{% trans "Total Price" %}</label>
-                                    <input type="number" name="pricing_total[]" class="form-control total-price" 
+                                    <label class="form-label text-sm">{% trans "Total Price" %}</label>
+                                    <input type="number" name="pricing_total[]" class="form-control total-price bg-neutral-100"
                                            value="{{ pricing.price|floatformat:2 }}" step="0.01" min="0" required readonly>
                                 </div>
                                 <div class="col-md-2">
-                                    <label class="form-label">{% trans "Currency" %}</label>
+                                    <label class="form-label text-sm">{% trans "Currency" %}</label>
                                     <select name="pricing_currency[]" class="form-control" required>
                                         <option value="UZS" {% if pricing.currency == 'UZS' %}selected{% endif %}>UZS</option>
                                         <option value="USD" {% if pricing.currency == 'USD' %}selected{% endif %}>USD</option>
                                     </select>
                                 </div>
                                 <div class="col-md-1 d-flex align-items-end">
-                                    <button type="button" class="btn btn-outline-danger-600 w-100" onclick="removePricing(this)">
+                                    <button type="button" class="btn btn-outline-danger-600 w-100" onclick="removePricing(this)" title="{% trans 'Remove' %}">
                                         <i class="ri-delete-bin-line"></i>
                                     </button>
                                 </div>
@@ -902,32 +923,35 @@ function updateAllPrices() {
 function addPricing() {
     const container = document.getElementById('pricingContainer');
     const newRow = `
-        <div class="row gy-3 mb-3 pricing-row border-bottom pb-3">
+        <div class="row g-3 mb-3 pricing-row border rounded px-2 pt-2 pb-3 bg-light">
             <div class="col-md-2">
-                <label class="form-label">{% trans "Duration (Months)" %}</label>
+                <label class="form-label text-sm">{% trans "Months" %}</label>
                 <input type="number" name="pricing_duration[]" class="form-control duration-input" min="1" required onchange="calculatePrice(this)" value="1">
             </div>
             <div class="col-md-2">
-                <label class="form-label">{% trans "Discount %" %}</label>
-                <input type="number" name="pricing_discount[]" class="form-control discount-input" min="0" max="100" step="0.1" onchange="calculatePrice(this)" placeholder="0" value="0">
+                <label class="form-label text-sm">{% trans "Discount %" %}</label>
+                <div class="input-group">
+                    <input type="number" name="pricing_discount[]" class="form-control discount-input" min="0" max="100" step="0.1" onchange="calculatePrice(this)" placeholder="0" value="0">
+                    <span class="input-group-text">%</span>
+                </div>
             </div>
             <div class="col-md-2">
-                <label class="form-label">{% trans "Monthly Price" %}</label>
-                <input type="number" name="pricing_monthly[]" class="form-control monthly-price" step="0.01" min="0" required readonly>
+                <label class="form-label text-sm">{% trans "Monthly Price" %}</label>
+                <input type="number" name="pricing_monthly[]" class="form-control monthly-price bg-neutral-100" step="0.01" min="0" required readonly>
             </div>
             <div class="col-md-3">
-                <label class="form-label">{% trans "Total Price" %}</label>
-                <input type="number" name="pricing_total[]" class="form-control total-price" step="0.01" min="0" required readonly>
+                <label class="form-label text-sm">{% trans "Total Price" %}</label>
+                <input type="number" name="pricing_total[]" class="form-control total-price bg-neutral-100" step="0.01" min="0" required readonly>
             </div>
             <div class="col-md-2">
-                <label class="form-label">{% trans "Currency" %}</label>
+                <label class="form-label text-sm">{% trans "Currency" %}</label>
                 <select name="pricing_currency[]" class="form-control" required>
                     <option value="UZS" selected>UZS</option>
                     <option value="USD">USD</option>
                 </select>
             </div>
             <div class="col-md-1 d-flex align-items-end">
-                <button type="button" class="btn btn-outline-danger-600 w-100" onclick="removePricing(this)">
+                <button type="button" class="btn btn-outline-danger-600 w-100" onclick="removePricing(this)" title="Remove">
                     <i class="ri-delete-bin-line"></i>
                 </button>
             </div>

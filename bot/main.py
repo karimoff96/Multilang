@@ -113,6 +113,7 @@ STEP_AWAITING_PAYMENT = 15
 STEP_UPLOADING_RECEIPT = 16
 STEP_AWAITING_RECEIPT = 17  # For additional payment receipts on existing orders
 STEP_COLLECTING_NAMES = 18
+STEP_UPLOADING_ADDITIONAL_FILES = 19  # Optional additional supply documents after main upload
 def is_valid_file_format(file_name):
     """Check if file has allowed extension"""
     if not file_name:
@@ -4770,8 +4771,127 @@ def handle_file_upload(message):
             bot.send_message(message.chat.id, get_text("file_upload_failed", language))
         return
 
+    # Handle additional supply document uploads
+    if current_step == STEP_UPLOADING_ADDITIONAL_FILES:
+        logger.debug(f" Processing additional file upload for user {user_id}")
+        try:
+            import time
+            import random as _rand
+
+            if message.document:
+                file_id = message.document.file_id
+                original_name = message.document.file_name or "doc.bin"
+                ext = os.path.splitext(original_name)[1][:10] or ".bin"
+                file_name = f"add_{int(time.time())}_{_rand.randint(1000,9999)}{ext}"
+                file_size = message.document.file_size
+            elif message.photo:
+                file_id = message.photo[-1].file_id
+                file_info_obj = bot.get_file(file_id)
+                file_size = file_info_obj.file_size
+                file_name = f"add_photo_{int(time.time())}_{_rand.randint(1000,9999)}.jpg"
+            else:
+                return
+
+            if not is_valid_file_format(file_name):
+                bot.send_message(message.chat.id, get_text("invalid_file_format_full", language))
+                return
+
+            file_info = bot.get_file(file_id)
+            downloaded_file = bot.download_file(file_info.file_path)
+
+            from django.core.files.base import ContentFile
+            from django.core.files.storage import default_storage
+            from orders.models import Order, OrderMedia
+
+            file_content = ContentFile(downloaded_file, name=file_name)
+            file_path = default_storage.save(f"order_media/{file_name}", file_content)
+
+            user_upload = uploaded_files.get(user_id, {})
+            order_id = user_upload.get("order_id")
+            if not order_id:
+                bot.send_message(message.chat.id, get_text("error_general", language))
+                return
+
+            order = Order.objects.get(id=order_id)
+            order_media = OrderMedia.objects.create(
+                file=file_path,
+                pages=1,
+                telegram_file_id=file_id,
+            )
+            order.additional_files.add(order_media)
+
+            # Update counter
+            user_upload["additional_files_attached"] = user_upload.get("additional_files_attached", 0) + 1
+            uploaded_files[user_id] = user_upload
+
+            count = user_upload["additional_files_attached"]
+            bot.send_message(
+                chat_id=message.chat.id,
+                text=get_text("additional_file_received", language) + f" ({count})",
+                parse_mode="HTML",
+            )
+        except Exception as e:
+            logger.error(f" Failed to handle additional file: {e}", exc_info=True)
+            bot.send_message(message.chat.id, get_text("file_upload_failed", language))
+        return
+
     # If not in uploading steps, ignore
     logger.debug(f" User not in uploading step, ignoring file")
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("additional_docs_yes_"))
+def handle_additional_docs_yes(call):
+    """User wants to upload additional supply documents"""
+    language = get_user_language(call.message.chat.id)
+    user_id = call.message.chat.id
+    order_id = int(call.data.split("_")[-1])
+
+    # Store order_id so the file handler can attach files directly
+    current = uploaded_files.get(user_id) or {}
+    current["order_id"] = order_id
+    current.setdefault("additional_files_attached", 0)
+    uploaded_files[user_id] = current
+
+    update_user_step(user_id, STEP_UPLOADING_ADDITIONAL_FILES)
+
+    # Show keyboard with "done" button
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    markup.add(types.KeyboardButton(get_text("finish_additional_upload", language)))
+
+    bot.edit_message_reply_markup(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        reply_markup=None,
+    )
+    bot.send_message(
+        chat_id=call.message.chat.id,
+        text=get_text("upload_additional_prompt", language),
+        reply_markup=markup,
+        parse_mode="HTML",
+    )
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("additional_docs_no_"))
+def handle_additional_docs_no(call):
+    """User skips additional documents, proceed to payment"""
+    language = get_user_language(call.message.chat.id)
+    user_id = call.message.chat.id
+    order_id = int(call.data.split("_")[-1])
+
+    bot.edit_message_reply_markup(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        reply_markup=None,
+    )
+
+    try:
+        from orders.models import Order
+        order = Order.objects.get(id=order_id)
+        show_payment_options(call.message, language, order)
+    except Exception as e:
+        logger.error(f"handle_additional_docs_no: {e}")
+        bot.send_message(call.message.chat.id, get_text("error_general", language))
+
+
 @bot.callback_query_handler(func=lambda call: call.data.startswith("payment_card_"))
 def handle_payment_card_selection(call):
     """Handle card payment selection"""
@@ -5166,6 +5286,12 @@ def handle_text_messages(message):
             handle_back_to_documents_message(message, language)
             return
 
+    # Handle additional supply document upload step
+    if current_step == STEP_UPLOADING_ADDITIONAL_FILES:
+        if message.text == get_text("finish_additional_upload", language):
+            handle_finish_additional_upload(message, language)
+            return
+
     # Handle manual name clarifications step
     if current_step == STEP_COLLECTING_NAMES:
         names_text = (message.text or "").strip()
@@ -5549,11 +5675,11 @@ def handle_finish_upload_message(message, language):
         # Clear uploaded files for this user first
         clear_user_files(user_id)
 
-        # Store order info for payment process (after clearing files)
+        # Store order info (after clearing files)
         uploaded_files[user_id] = {"order_id": order.id}
 
-        # Show payment options instead of going to main menu
-        show_payment_options(message, language, order)
+        # Ask about additional supply documents before payment
+        ask_additional_docs(message, language, order.id)
 
     except KeyError as e:
         logger.error(f" Missing required data in user_data: {e}")
@@ -5572,6 +5698,59 @@ def handle_finish_upload_message(message, language):
         bot.send_message(message.chat.id, get_text("error_general", language))
         clear_user_files(user_id)
         show_main_menu(message, language)
+def ask_additional_docs(message, language, order_id):
+    """Ask user if they have additional supply documents to attach"""
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    markup.add(
+        types.InlineKeyboardButton(
+            text=get_text("yes_upload_additional", language),
+            callback_data=f"additional_docs_yes_{order_id}",
+        ),
+        types.InlineKeyboardButton(
+            text=get_text("no_skip_additional", language),
+            callback_data=f"additional_docs_no_{order_id}",
+        ),
+    )
+    bot.send_message(
+        chat_id=message.chat.id,
+        text=get_text("ask_additional_docs", language),
+        reply_markup=markup,
+        parse_mode="HTML",
+    )
+
+
+def handle_finish_additional_upload(message, language):
+    """User finished uploading additional supply documents; proceed to payment"""
+    user_id = message.from_user.id
+    user_upload = uploaded_files.get(user_id, {})
+    order_id = user_upload.get("order_id")
+
+    if not order_id:
+        bot.send_message(message.chat.id, get_text("error_general", language))
+        update_user_step(user_id, STEP_REGISTERED)
+        show_main_menu(message, language)
+        return
+
+    count = user_upload.get("additional_files_attached", 0)
+    if count > 0:
+        bot.send_message(
+            chat_id=message.chat.id,
+            text=get_text("additional_files_attached", language),
+            reply_markup=types.ReplyKeyboardRemove(),
+            parse_mode="HTML",
+        )
+
+    try:
+        from orders.models import Order
+        order = Order.objects.get(id=order_id)
+        update_user_step(user_id, STEP_REGISTERED)
+        show_payment_options(message, language, order)
+    except Exception as e:
+        logger.error(f"handle_finish_additional_upload: {e}", exc_info=True)
+        update_user_step(user_id, STEP_REGISTERED)
+        show_main_menu(message, language)
+
+
 def handle_back_to_upload_docs_message(message, language):
     """Handle back to upload docs button press from keyboard"""
     user_id = message.from_user.id

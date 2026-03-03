@@ -87,6 +87,16 @@
                         <div class="p-16 bg-success-50 radius-8 border border-success-200 text-center">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.totalPrice">Total Price</span>
                             <h4 class="text-success-600 fw-bold mb-0">{{ order.total_price|smart_num }} UZS</h4>
+                            {% if can_edit_price %}
+                            <button type="button"
+                                    class="btn btn-sm d-inline-flex align-items-center gap-4 px-10 py-4 radius-6 fw-semibold text-xs mt-8"
+                                    style="background:rgba(234,179,8,.15); color:#a16207; border:1px solid rgba(234,179,8,.35);"
+                                    onclick="openEditPriceModal()"
+                                    id="editPriceBtn">
+                                <iconify-icon icon="solar:pen-bold" style="font-size:14px;"></iconify-icon>
+                                Edit Price
+                            </button>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -390,10 +400,26 @@
                                 {% endif %}
                             </tbody>
                             <tfoot class="bg-neutral-100">
+                                {% if price_changes %}
+                                <tr>
+                                    <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-semibold text-secondary-light text-sm">Calculated Total:</td>
+                                    <td class="text-end text-secondary-light text-sm text-decoration-line-through">{{ price_breakdown.total_price|intspace }} UZS</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-bold text-lg">
+                                        Grand Total:
+                                        <span class="badge bg-warning-100 text-warning-700 text-xs ms-6 fw-semibold">
+                                            <iconify-icon icon="solar:lock-bold" class="me-1"></iconify-icon>Manually set
+                                        </span>
+                                    </td>
+                                    <td class="text-end fw-bold text-warning-600 text-lg">{{ order.total_price|intspace }} UZS</td>
+                                </tr>
+                                {% else %}
                                 <tr>
                                     <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-bold text-lg">Grand Total:</td>
                                     <td class="text-end fw-bold text-primary-600 text-lg">{{ price_breakdown.total_price|intspace }} UZS</td>
                                 </tr>
+                                {% endif %}
                             </tfoot>
                         </table>
                     </div>
@@ -412,6 +438,59 @@
                         </small>
                     </div>
                     {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Price Change History -->
+                {% if price_changes %}
+                <div class="mt-24" id="priceChangeHistory">
+                    <h6 class="text-md fw-semibold mb-12">
+                        <iconify-icon icon="solar:history-bold" class="me-2"></iconify-icon>
+                        Price Change History
+                    </h6>
+                    <div class="d-flex flex-column gap-8">
+                        {% for pc in price_changes %}
+                        <div class="d-flex align-items-start gap-12 p-12 radius-8 border
+                            {% if pc.delta > 0 %}border-danger-200 bg-danger-50{% elif pc.delta < 0 %}border-success-200 bg-success-50{% else %}border-neutral-200 bg-neutral-50{% endif %}">
+                            <!-- Icon -->
+                            <div class="flex-shrink-0 mt-2">
+                                {% if pc.delta > 0 %}
+                                <iconify-icon icon="solar:arrow-up-bold" class="text-danger-600" style="font-size:18px;"></iconify-icon>
+                                {% elif pc.delta < 0 %}
+                                <iconify-icon icon="solar:arrow-down-bold" class="text-success-600" style="font-size:18px;"></iconify-icon>
+                                {% else %}
+                                <iconify-icon icon="solar:refresh-bold" class="text-neutral-500" style="font-size:18px;"></iconify-icon>
+                                {% endif %}
+                            </div>
+                            <!-- Details -->
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="d-flex align-items-center flex-wrap gap-8 mb-4">
+                                    <span class="text-secondary-light text-sm fw-semibold">{{ pc.old_price|smart_num }}&nbsp;UZS</span>
+                                    <iconify-icon icon="solar:arrow-right-linear" class="text-secondary-light"></iconify-icon>
+                                    <span class="fw-bold
+                                        {% if pc.delta > 0 %}text-danger-600{% elif pc.delta < 0 %}text-success-600{% endif %}">
+                                        {{ pc.new_price|smart_num }}&nbsp;UZS
+                                    </span>
+                                    {% if pc.delta != 0 %}
+                                    <span class="badge text-xs
+                                        {% if pc.delta > 0 %}bg-danger-100 text-danger-600{% else %}bg-success-100 text-success-600{% endif %}">
+                                        {% if pc.delta > 0 %}+{% endif %}{{ pc.delta|smart_num }} UZS
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <p class="text-sm text-neutral-700 mb-4"
+                                   style="font-style:italic;">&ldquo;{{ pc.reason }}&rdquo;</p>
+                                <div class="d-flex align-items-center gap-8 text-xs text-secondary-light">
+                                    <iconify-icon icon="solar:user-linear"></iconify-icon>
+                                    <span>{% if pc.changed_by %}{{ pc.changed_by.user.get_full_name|default:pc.changed_by.user.username }}{% else %}Superuser{% endif %}</span>
+                                    <span>&bull;</span>
+                                    <iconify-icon icon="solar:clock-circle-linear"></iconify-icon>
+                                    <span>{{ pc.changed_at|date:"d M Y, H:i" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
                 {% endif %}
 
@@ -482,11 +561,49 @@
                     </div>
                 </div>
                 {% endif %}
+
+                <!-- Additional Supply Documents -->
+                {% if order.additional_files.all %}
+                <div class="mt-24">
+                    <h6 class="text-md fw-semibold mb-16">
+                        <iconify-icon icon="mdi:paperclip" class="me-1 text-warning-600"></iconify-icon>
+                        Additional Supply Documents ({{ order.additional_files.count }})
+                    </h6>
+                    <div class="table-responsive">
+                        <table class="table bordered-table sm-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>File</th>
+                                    <th>Uploaded</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for file in order.additional_files.all %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ file.file_name|slice:"-35:" }}</td>
+                                    <td>{{ file.created_at|date:"d M Y H:i" }}</td>
+                                    <td>
+                                        {% if file.file_url %}
+                                        <a href="{{ file.file_url }}" target="_blank" class="btn btn-sm btn-outline-warning">
+                                            <iconify-icon icon="mdi:download"></iconify-icon>
+                                        </a>
+                                        {% else %}
+                                        <span class="badge bg-danger-focus text-danger-600">Unavailable</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
-
-    <!-- Customer & Actions Card -->
     <div class="col-lg-4">
         <!-- Customer Info -->
         <div class="card radius-12 mb-24">
@@ -916,6 +1033,54 @@
 </div>
 {% endif %}
 
+{% if can_edit_price %}
+<!-- Edit Price Modal -->
+<div class="modal fade" id="editPriceModal" tabindex="-1" aria-labelledby="editPriceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPriceModalLabel">
+                    <iconify-icon icon="solar:pen-bold" class="me-2"></iconify-icon>
+                    Edit Order Price
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-16 p-12 bg-success-50 radius-8 border border-success-200">
+                    <span class="text-secondary-light text-sm">Current Price</span>
+                    <div class="fw-bold text-success-600 fs-5" id="currentPriceDisplay">{{ order.total_price|smart_num }} UZS</div>
+                </div>
+                <div class="mb-16">
+                    <label for="newPriceInput" class="form-label fw-semibold">
+                        New Price <span class="text-danger-600">*</span>
+                    </label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="newPriceInput"
+                               step="1" min="0" placeholder="Enter new price">
+                        <span class="input-group-text">UZS</span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="priceChangeReason" class="form-label fw-semibold">
+                        Reason for change <span class="text-danger-600">*</span>
+                    </label>
+                    <textarea class="form-control" id="priceChangeReason" rows="3"
+                              placeholder="Describe why the price is being changed..."></textarea>
+                </div>
+                <div id="priceEditError" class="alert alert-danger py-8 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning fw-semibold" id="savePriceChangeBtn">
+                    <iconify-icon icon="solar:check-circle-bold" class="me-1"></iconify-icon>
+                    Save Change
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock content %}
 
 {% block script %}
@@ -1055,6 +1220,65 @@ async function submitPayment() {
         submitBtn.innerHTML = '<iconify-icon icon="mdi:check" class="me-1"></iconify-icon> Record Payment';
     }
 }
+{% endif %}
+
+{% if can_edit_price %}
+// ──────────────────────────────────────────────────────────────────────
+// Edit Order Price
+// ──────────────────────────────────────────────────────────────────────
+const EDIT_PRICE_URL = '{% url "orders:edit_order_price" order.id %}';
+
+function openEditPriceModal() {
+    // Reset fields
+    document.getElementById('newPriceInput').value = '';
+    document.getElementById('priceChangeReason').value = '';
+    document.getElementById('priceEditError').classList.add('d-none');
+    document.getElementById('savePriceChangeBtn').disabled = false;
+    const modal = new bootstrap.Modal(document.getElementById('editPriceModal'));
+    modal.show();
+}
+
+document.getElementById('savePriceChangeBtn')?.addEventListener('click', async function() {
+    const newPrice = document.getElementById('newPriceInput').value.trim();
+    const reason = document.getElementById('priceChangeReason').value.trim();
+    const errDiv = document.getElementById('priceEditError');
+
+    // Client-side validation
+    if (!newPrice || !reason) {
+        errDiv.textContent = 'Both fields are required.';
+        errDiv.classList.remove('d-none');
+        return;
+    }
+
+    this.disabled = true;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+    errDiv.classList.add('d-none');
+
+    const fd = new FormData();
+    fd.append('new_price', newPrice);
+    fd.append('reason', reason);
+    fd.append('csrfmiddlewaretoken', csrfToken);
+
+    try {
+        const resp = await fetch(EDIT_PRICE_URL, { method: 'POST', body: fd });
+        const data = await resp.json();
+        if (!data.success) {
+            errDiv.textContent = data.error || 'An error occurred.';
+            errDiv.classList.remove('d-none');
+            this.disabled = false;
+            this.innerHTML = '<iconify-icon icon="solar:check-circle-bold" class="me-1"></iconify-icon> Save Change';
+            return;
+        }
+        // Success — reload to show updated price and history entry
+        bootstrap.Modal.getInstance(document.getElementById('editPriceModal'))?.hide();
+        location.reload();
+    } catch (err) {
+        errDiv.textContent = 'Server error. Please try again.';
+        errDiv.classList.remove('d-none');
+        this.disabled = false;
+        this.innerHTML = '<iconify-icon icon="solar:check-circle-bold" class="me-1"></iconify-icon> Save Change';
+    }
+});
 {% endif %}
 </script>
 {% endblock %}

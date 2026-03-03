@@ -158,3 +158,34 @@ def check_order_limit(view_func):
         
         return view_func(request, *args, **kwargs)
     return wrapper
+
+
+def check_marketing_limit(view_func):
+    """Check if organization can send more marketing broadcasts this month"""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        # Superusers always have access
+        if request.user.is_superuser:
+            return view_func(request, *args, **kwargs)
+
+        if not hasattr(request.user, 'admin_profile') or not request.user.admin_profile:
+            messages.error(request, _("No admin profile found."))
+            return redirect('billing:subscription_status')
+
+        center = request.user.admin_profile.center
+
+        if not center or not hasattr(center, 'subscription'):
+            messages.error(request, _("No active subscription found."))
+            return redirect('billing:subscription_status')
+
+        if not center.subscription.can_send_broadcast():
+            used, limit = center.subscription.get_broadcasts_limit_info()
+            messages.error(
+                request,
+                _("You have reached your monthly broadcast limit (%(used)s/%(limit)s). "
+                  "Upgrade your plan or wait for next month.") % {'used': used, 'limit': limit}
+            )
+            return redirect('marketing_list')
+
+        return view_func(request, *args, **kwargs)
+    return wrapper

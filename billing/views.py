@@ -214,6 +214,9 @@ def subscription_detail(request, pk):
             'orders': org.get_current_month_orders_count(),
             'orders_limit': subscription.tariff.max_monthly_orders,
             'orders_percent': subscription.get_usage_percentage('orders'),
+            'broadcasts': org.get_current_month_broadcasts_count(),
+            'broadcasts_limit': subscription.tariff.max_monthly_broadcasts,
+            'broadcasts_percent': subscription.get_usage_percentage('broadcasts'),
         }
     
     # Get subscription history
@@ -303,6 +306,7 @@ def tariff_create(request):
             max_branches = request.POST.get('max_branches') or None
             max_staff = request.POST.get('max_staff') or None
             max_monthly_orders = request.POST.get('max_monthly_orders') or None
+            max_monthly_broadcasts = request.POST.get('max_monthly_broadcasts') or None
             
             tariff = Tariff.objects.create(
                 title=title,
@@ -316,6 +320,7 @@ def tariff_create(request):
                 max_branches=max_branches,
                 max_staff=max_staff,
                 max_monthly_orders=max_monthly_orders,
+                max_monthly_broadcasts=max_monthly_broadcasts,
             )
             
             # Set feature flags (37 boolean fields)
@@ -400,10 +405,12 @@ def tariff_edit(request, pk):
             max_branches = request.POST.get('max_branches')
             max_staff = request.POST.get('max_staff')
             max_monthly_orders = request.POST.get('max_monthly_orders')
+            max_monthly_broadcasts = request.POST.get('max_monthly_broadcasts')
             
             tariff.max_branches = int(max_branches) if max_branches else None
             tariff.max_staff = int(max_staff) if max_staff else None
             tariff.max_monthly_orders = int(max_monthly_orders) if max_monthly_orders else None
+            tariff.max_monthly_broadcasts = int(max_monthly_broadcasts) if max_monthly_broadcasts else None
             
             tariff.save()
             
@@ -917,6 +924,7 @@ def request_renewal(request):
                         'branches': center.branches.count(),
                         'staff': center.get_staff_count(),
                         'orders': center.get_current_month_orders_count(),
+                        'broadcasts': center.get_current_month_broadcasts_count(),
                     }
                 }
                 return render(request, 'billing/request_renewal.html', context)
@@ -933,6 +941,7 @@ def request_renewal(request):
                         'branches': center.branches.count(),
                         'staff': center.get_staff_count(),
                         'orders': center.get_current_month_orders_count(),
+                        'broadcasts': center.get_current_month_broadcasts_count(),
                     }
                 }
                 return render(request, 'billing/request_renewal.html', context)
@@ -985,6 +994,7 @@ Request Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}
         'branches': center.branches.count(),
         'staff': center.get_staff_count(),
         'orders': center.get_current_month_orders_count(),
+        'broadcasts': center.get_current_month_broadcasts_count(),
     }
     
     context = {

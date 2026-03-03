@@ -27,6 +27,33 @@
     </div>
 </div>
 
+{% if broadcasts_limit is not None %}
+{% with pct=broadcasts_used|floatformat:0 %}
+<div class="alert d-flex align-items-center gap-12 mb-24
+    {% if broadcasts_used >= broadcasts_limit %}alert-danger
+    {% elif broadcasts_used >= broadcasts_limit|add:"-2" %}alert-warning
+    {% else %}alert-info{% endif %}" role="alert">
+    <iconify-icon icon="solar:megaphone-bold" style="font-size:20px;flex-shrink:0;"></iconify-icon>
+    <div class="flex-grow-1">
+        <span class="fw-semibold">Broadcast Usage:</span>
+        {{ broadcasts_used }} of {{ broadcasts_limit }} this month
+        {% if broadcasts_used >= broadcasts_limit %}
+            &mdash; <strong>limit reached.</strong> Upgrade your plan to send more.
+        {% endif %}
+    </div>
+    <div style="min-width:120px;">
+        <div class="progress" style="height:8px;">
+            <div class="progress-bar
+                {% if broadcasts_used >= broadcasts_limit %}bg-danger
+                {% elif broadcasts_used >= broadcasts_limit|add:"-2" %}bg-warning
+                {% else %}bg-info{% endif %}"
+                style="width:{% widthratio broadcasts_used broadcasts_limit 100 %}%"></div>
+        </div>
+    </div>
+</div>
+{% endwith %}
+{% endif %}
+
 <div class="card basic-data-table">
     <div class="card-body">
         {% if posts %}
