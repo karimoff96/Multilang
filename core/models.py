@@ -272,17 +272,66 @@ class AdminNotification(models.Model):
         self.save(update_fields=['is_read', 'read_by', 'read_at'])
     
     def get_link_id(self):
-        """Get the ID to use for linking - for receipts, return order ID"""
+        """Get the ID to use for linking - for receipts, return order ID.
+        Returns None if the linked object no longer exists."""
         if self.notification_type == self.TYPE_RECEIPT_PENDING:
-            # For receipts, we need to get the order ID
             try:
                 from orders.models import Receipt
                 receipt = Receipt.objects.get(pk=self.object_id)
+                # Verify the order still exists
+                if not receipt.order_id:
+                    return None
+                from orders.models import Order
+                if not Order.objects.filter(pk=receipt.order_id).exists():
+                    return None
                 return receipt.order_id
-            except:
-                return self.object_id
+            except Exception:
+                return None
+        # For order-linked notifications, verify the order still exists
+        if self.notification_type in (
+            self.TYPE_ORDER_NEW, self.TYPE_ORDER_CANCELLED,
+            self.TYPE_ORDER_COMPLETED, self.TYPE_PAYMENT_CONFIRMED,
+            self.TYPE_ORDER_OVERDUE,
+        ):
+            try:
+                from orders.models import Order
+                if not Order.objects.filter(pk=self.object_id).exists():
+                    return None
+            except Exception:
+                return None
         return self.object_id
-    
+
+    @property
+    def link_url(self):
+        """Return the URL to navigate to for this notification, or '#' if orphaned."""
+        ntype = self.notification_type
+        order_types = (
+            self.TYPE_ORDER_NEW, self.TYPE_ORDER_CANCELLED,
+            self.TYPE_ORDER_COMPLETED, self.TYPE_PAYMENT_CONFIRMED,
+            self.TYPE_ORDER_OVERDUE, self.TYPE_RECEIPT_PENDING,
+        )
+        if ntype in order_types:
+            link_id = self.get_link_id()
+            if link_id is None:
+                return '#'
+            try:
+                from django.urls import reverse
+                return reverse('orders:orderDetail', args=[link_id])
+            except Exception:
+                return '#'
+        if ntype in (self.TYPE_USER_NEW, self.TYPE_AGENCY_NEW):
+            try:
+                from django.urls import reverse
+                return reverse('usersList')
+            except Exception:
+                return '#'
+        return '#'
+
+    @property
+    def is_orphaned(self):
+        """True if the linked object no longer exists."""
+        return self.link_url == '#' and self.notification_type != self.TYPE_OTHER
+
     @classmethod
     def create_receipt_notification(cls, receipt):
         """Create a notification for a new receipt upload"""

@@ -163,22 +163,14 @@
     {% endif %}
 </div>
 
-<!-- ================================================================
-     Real-time new-order notification banner (hidden until new orders arrive)
-     ================================================================ -->
-<div id="realtimeOrderBanner" class="alert alert-primary d-flex align-items-center justify-content-between mb-16 py-10 px-20 shadow-sm" role="alert" style="display:none!important;border-radius:10px;">
-    <div class="d-flex align-items-center gap-10">
-        <span class="position-relative d-inline-flex">
-            <iconify-icon icon="solar:bell-bing-bold-duotone" class="text-primary-600 text-xl"></iconify-icon>
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="realtimeBadge" style="font-size:10px;">0</span>
-        </span>
-        <span id="realtimeBannerText" class="fw-medium text-primary-600">{% trans "New orders have arrived" %}</span>
-        <span class="spinner-grow spinner-grow-sm text-primary ms-4" role="status" aria-hidden="true"></span>
-    </div>
-    <button type="button" class="btn btn-primary btn-sm px-16" id="realtimeReloadBtn">
-        <iconify-icon icon="solar:refresh-bold" class="me-4"></iconify-icon>{% trans "Load Now" %}
-    </button>
-</div>
+<!-- Real-time row injection CSS -->
+<style>
+@keyframes realtimeRowIn {
+    0%   { background-color: rgba(82,130,255,.18); }
+    100% { background-color: transparent; }
+}
+.realtime-new-row { animation: realtimeRowIn 3s ease-out forwards; }
+</style>
 
 <div class="card h-100 p-0 radius-12">
     <div class="card-header border-bottom bg-base py-16 px-24">
@@ -374,193 +366,8 @@
                         <th scope="col" class="text-center col-action" data-i18n="orders.actions">{% trans "Action" %}</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for order in orders %}
-                    <tr {% if order.receipts.exists %}class="has-pending-receipts"{% endif %}>
-                        <!-- Order ID + Date (combined) -->
-                        <td>
-                            <div class="d-flex align-items-center gap-10">
-                                <div class="form-check style-check d-flex align-items-center">
-                                    <input class="form-check-input radius-4 border border-neutral-400 order-checkbox" type="checkbox" name="order_ids" value="{{ order.id }}">
-                                </div>
-                                <div>
-                                    <span class="fw-semibold text-primary-600">#{{ order.get_order_number }}</span>
-                                </div>
-                                    {% with pending_count=order.receipts.all|length %}
-                                    {% if pending_count > 0 %}
-                                    <span class="badge bg-warning-focus text-warning-600 ms-4" title="Pending receipts">
-                                        <iconify-icon icon="mdi:receipt-text-pending" class="text-sm"></iconify-icon> {{ pending_count }}
-                                    </span>
-                                    {% endif %}
-                                    {% endwith %}
-                                    <br><small class="text-secondary-light">{{ order.created_at|date:"d M, H:i" }}</small>
-                                </div>
-                            </div>
-                        </td>
-                        <!-- Location: Center + Branch (combined) -->
-                        {% if user.is_superuser or is_owner %}
-                        <td class="hide-mobile">
-                            {% if order.branch %}
-                            <div class="cell-merged-info">
-                                {% if user.is_superuser and order.branch.center %}
-                                <a href="{% url 'center_detail' order.branch.center.id %}" class="cell-primary text-primary-600">{{ order.branch.center.name|truncatechars:12 }}</a>
-                                {% endif %}
-                                <a href="{% url 'branch_detail' order.branch.id %}" class="cell-secondary text-info-600">{{ order.branch.name|truncatechars:12 }}</a>
-                            </div>
-                            {% else %}
-                            <span class="text-secondary-light">-</span>
-                            {% endif %}
-                        </td>
-                        {% endif %}
-                        <!-- Customer -->
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="w-32-px h-32-px rounded-circle flex-shrink-0 me-8 overflow-hidden bg-primary-100 d-flex align-items-center justify-content-center">
-                                    <span class="text-primary-600 fw-semibold text-xs">{{ order.get_customer_display_name|slice:":1"|upper }}</span>
-                                </div>
-                                <div>
-                                    <span class="text-sm fw-medium text-secondary-light d-block" style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ order.get_customer_display_name }}</span>
-                                    <small class="text-secondary-light" style="font-size: 11px;">{{ order.get_customer_phone }}</small>
-                                </div>
-                            </div>
-                        </td>
-                        <!-- Details: Product + Pages + Copies (combined) -->
-                        <td class="hide-mobile">
-                            <div class="d-flex flex-column">
-                                <span class="text-sm fw-medium text-secondary-light truncate-120">{{ order.product.name|truncatechars:15 }}</span>
-                                <div class="d-flex align-items-center gap-1 mt-1">
-                                    <span class="badge bg-info-focus text-info-600 badge-compact">{{ order.total_pages }}p</span>
-                                    {% if order.copy_number > 0 %}
-                                    <span class="badge bg-warning-focus text-warning-600 badge-compact">+{{ order.copy_number }}c</span>
-                                    {% endif %}
-                                    {% if order.language %}
-                                    <span class="badge bg-neutral-200 text-neutral-600 badge-compact">{{ order.language.short_name|default:order.language.name|slice:":2"|upper }}</span>
-                                    {% endif %}
-                                    {% if order.is_archived %}
-                                    <span class="badge {% if order.has_local_files %}bg-info-focus text-info-600{% else %}bg-purple-focus text-purple-600{% endif %} badge-compact" title="{% if order.has_local_files %}Files archived but available locally{% else %}Files archived - local copies deleted{% endif %}">
-                                        <iconify-icon icon="mdi:archive" class="text-xs"></iconify-icon>
-                                    </span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </td>
-                        <!-- Payment: Total + Type + Status -->
-                        <td>
-                            <div class="d-flex flex-column">
-                                <span class="fw-semibold text-success-600 text-sm">{{ order.total_due|intspace }}</span>
-                                {% if order.payment_type == 'cash' %}
-                                <span class="text-xs text-success-600"><iconify-icon icon="mdi:cash" class="text-sm"></iconify-icon> Cash</span>
-                                {% else %}
-                                <span class="text-xs text-primary-600"><iconify-icon icon="mdi:credit-card" class="text-sm"></iconify-icon> Card</span>
-                                {% endif %}
-                                {% if order.is_fully_paid %}
-                                <span class="badge bg-success-focus text-success-600 text-xs mt-4">Paid</span>
-                                {% elif order.received > 0 %}
-                                <span class="badge bg-warning-focus text-warning-600 text-xs mt-4">{{ order.payment_percentage }}%</span>
-                                {% endif %}
-                            </div>
-                        </td>
-                        <!-- Assigned -->
-                        <td class="hide-mobile">
-                            {% if order.assigned_to %}
-                            <div class="d-flex align-items-center gap-1">
-                                <div class="w-24-px h-24-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center flex-shrink-0">
-                                    <span class="text-primary-600 fw-bold text-xs">{{ order.assigned_to.user.first_name|slice:":1"|upper }}</span>
-                                </div>
-                                <small class="text-secondary-light text-xs truncate-120">{{ order.assigned_to.user.first_name|truncatechars:8 }}</small>
-                            </div>
-                            {% else %}
-                            <span class="badge bg-warning-focus text-warning-600 badge-compact" data-i18n="orders.unassigned">Unassigned</span>
-                            {% endif %}
-                        </td>
-                        <!-- Status + Deadline -->
-                        <td class="text-center">
-                            {% if order.status == 'pending' %}
-                                <span class="bg-warning-focus text-warning-600 px-8 py-2 radius-4 fw-medium text-xs" data-i18n="orders.pending">Pending</span>
-                            {% elif order.status == 'payment_pending' %}
-                                <span class="bg-info-focus text-info-600 px-8 py-2 radius-4 fw-medium text-xs" data-i18n="status.paymentPending">Pay Pend</span>
-                            {% elif order.status == 'payment_received' %}
-                                <span class="bg-primary-focus text-primary-600 px-8 py-2 radius-4 fw-medium text-xs" data-i18n="status.paymentReceived">Pay Recv</span>
-                            {% elif order.status == 'payment_confirmed' %}
-                                <span class="bg-cyan-focus text-cyan px-8 py-2 radius-4 fw-medium text-xs" data-i18n="status.paymentConfirmed">Pay Conf</span>
-                            {% elif order.status == 'in_progress' %}
-                                <span class="bg-lilac-focus text-lilac-600 px-8 py-2 radius-4 fw-medium text-xs" data-i18n="orders.inProgress">Progress</span>
-                            {% elif order.status == 'ready' %}
-                                <span class="bg-success-focus text-success-600 px-8 py-2 radius-4 fw-medium text-xs" data-i18n="status.ready">Ready</span>
-                            {% elif order.status == 'completed' %}
-                                <span class="bg-success-focus text-success-600 px-8 py-2 radius-4 fw-medium text-xs" data-i18n="orders.completed">Done</span>
-                            {% elif order.status == 'cancelled' %}
-                                <span class="bg-danger-focus text-danger-600 px-8 py-2 radius-4 fw-medium text-xs" data-i18n="orders.cancelled">Cancelled</span>
-                            {% else %}
-                                <span class="bg-neutral-200 text-neutral-600 px-8 py-2 radius-4 fw-medium text-xs">{{ order.status }}</span>
-                            {% endif %}
-                            {% if order.deadline %}
-                            <div class="mt-4">
-                                {% if order.deadline < today and order.status != 'completed' and order.status != 'cancelled' %}
-                                <span class="badge bg-danger-focus text-danger-main text-xs" title="Overdue!">&#128680; {{ order.deadline|date:"d M" }}</span>
-                                {% elif order.deadline == today %}
-                                <span class="badge bg-warning-focus text-warning-600 text-xs" title="Due today!">&#9203; {{ order.deadline|date:"d M" }}</span>
-                                {% else %}
-                                <span class="badge bg-info-focus text-info-600 text-xs">&#9203; {{ order.deadline|date:"d M" }}</span>
-                                {% endif %}
-                            </div>
-                            {% endif %}
-                        </td>
-                        <!-- Action -->
-                        <td class="text-center col-action">
-                            <div class="d-flex align-items-center gap-4 justify-content-center">
-                                <a href="{% url 'orders:orderDetail' order.id %}" class="bg-info-focus text-info-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" data-i18n-title="orders.view" title="View">
-                                    <iconify-icon icon="majesticons:eye-line"></iconify-icon>
-                                </a>
-                                {% can_do 'orders.edit' as can_edit_order %}
-                                {% if can_edit_order %}
-                                <a href="{% url 'orders:orderEdit' order.id %}" class="bg-success-focus text-success-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" data-i18n-title="orders.edit" title="Edit">
-                                    <iconify-icon icon="lucide:edit"></iconify-icon>
-                                </a>
-                                {% endif %}
-                                {% can_do 'orders.delete' as can_delete_order %}
-                                {% if can_delete_order %}
-                                <button type="button" class="bg-danger-focus text-danger-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle border-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ order.id }}" data-i18n-title="orders.delete" title="Delete">
-                                    <iconify-icon icon="fluent:delete-24-regular"></iconify-icon>
-                                </button>
-                                {% endif %}
-                            </div>
-                            
-                            {% if can_delete_order %}
-                            <!-- Delete Modal -->
-                            <div class="modal fade" id="deleteModal{{ order.id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title"><span data-i18n="orders.delete">Delete Order</span> #{{ order.get_order_number }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body" data-i18n="common.confirmDeleteOrder">
-                                            Are you sure you want to delete this order?
-                                        </div>
-                                        <div class="modal-footer">
-                                            <form method="post" action="{% url 'orders:deleteOrder' order.id %}" style="display: contents;">
-                                                {% csrf_token %}
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="orders.cancel">Cancel</button>
-                                                <button type="submit" class="btn btn-danger" data-i18n="orders.delete">Delete</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="99" class="text-center py-4">
-                            <div class="text-secondary-light">
-                                <iconify-icon icon="mdi:package-variant-closed" class="text-4xl mb-2"></iconify-icon>
-                                <p class="mb-0" data-i18n="orders.noOrders">No orders found</p>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
+                <tbody id="ordersTableBody">
+                    {% include 'orders/_order_row.html' with orders=orders today=today %}
                 </tbody>
             </table>
         </div>
@@ -730,39 +537,48 @@ $(document).ready(function() {
     (function () {
         'use strict';
 
-        var POLL_URL    = '{% url "orders:api_poll_new_orders" %}';
-        var POLL_MS     = 10000;   // 10 s while tab is visible
-        var IDLE_MS     = 60000;   // 60 s when tab is hidden / user idle
-        var sinceTs     = Date.now() / 1000;   // unix seconds, updated each poll
-        var newCount    = 0;
-        var pollTimer   = null;
-        var isVisible   = !document.hidden;
+        var POLL_URL = '{% url "orders:api_poll_new_orders" %}';
+        var POLL_MS  = 10000;   // 10 s while tab is visible
+        var IDLE_MS  = 60000;   // 60 s when tab is hidden
+        var sinceTs  = Date.now() / 1000;
+        var pollTimer = null;
+        var isVisible = !document.hidden;
+        var injectedIds = {};   // orderId -> true, prevents duplicates
 
-        var $banner   = $('#realtimeOrderBanner');
-        var $badge    = $('#realtimeBadge');
-        var $text     = $('#realtimeBannerText');
-        var $reloadBtn = $('#realtimeReloadBtn');
-
-        // Show banner and update count label
-        function showBanner(count) {
-            $badge.text(count);
-            if (count === 1) {
-                $text.text('{% trans "1 new order has arrived" %}');
-            } else {
-                $text.text(count + ' {% trans "new orders have arrived" %}');
-            }
-            $banner.css('display', 'flex');
+        // Returns true when any filter/search/page is active
+        function hasActiveFilters() {
+            var p = new URLSearchParams(window.location.search);
+            var filterKeys = ['search','status','payment','center','branch',
+                              'assignment','date_from','date_to','staff',
+                              'overdue_only','has_pending_receipts','sort_by'];
+            var page = p.get('page');
+            if (page && page !== '1') { return true; }
+            return filterKeys.some(function(k) { return !!p.get(k); });
         }
 
-        // Reload the page (preserving current URL / filters)
-        function reloadPage() {
-            window.location.reload();
+        // Inject rendered HTML rows at top of tbody
+        function injectRows(html) {
+            var $tbody = $('#ordersTableBody');
+            if (!$tbody.length) { return; }
+
+            // Remove empty-state row if present
+            $tbody.find('#emptyOrdersRow').remove();
+
+            var $temp = $('<tbody>').html(html);
+            $temp.children('tr').get().reverse().forEach(function(el) {
+                var $row = $(el);
+                var orderId = $row.find('.order-checkbox').val();
+                if (!orderId || injectedIds[orderId]) { return; }
+                injectedIds[orderId] = true;
+                $row.addClass('realtime-new-row');
+                $tbody.prepend($row);
+                // Trigger notification bell refresh
+                if (typeof window.pollNotifications === 'function') {
+                    window.pollNotifications();
+                }
+            });
         }
 
-        // Reload button
-        $reloadBtn.on('click', reloadPage);
-
-        // Core poll function
         function poll() {
             if (!isVisible) {
                 pollTimer = setTimeout(poll, IDLE_MS);
@@ -776,37 +592,29 @@ $(document).ready(function() {
                 timeout: 8000,
                 success: function (data) {
                     if (data.has_new && data.count > 0) {
-                        newCount = data.count;
-                        sinceTs  = data.latest_ts;   // advance window
-                        showBanner(newCount);
+                        sinceTs = data.latest_ts;
+                        if (!hasActiveFilters() && data.html) {
+                            injectRows(data.html);
+                        }
                     }
-                    // If banner already shown, do not update sinceTs again so
-                    // the count keeps accumulating until user reloads.
                 },
-                error: function () {
-                    // Silent fail – just skip this tick
-                },
+                error: function () { /* silent */ },
                 complete: function () {
-                    // Auto-reload 30 s after banner appears (user may be AFK)
-                    if (!newCount) {
-                        pollTimer = setTimeout(poll, POLL_MS);
-                    }
-                    // Once banner is shown, stop polling (page reload will restart everything)
+                    pollTimer = setTimeout(poll, POLL_MS);
                 }
             });
         }
 
-        // Page Visibility API – pause polling when tab is hidden
+        // Resume immediately when tab becomes visible again
         document.addEventListener('visibilitychange', function () {
             isVisible = !document.hidden;
-            if (isVisible && !newCount) {
-                // Resume immediately on tab focus
+            if (isVisible) {
                 clearTimeout(pollTimer);
                 pollTimer = setTimeout(poll, 500);
             }
         });
 
-        // Start polling after 5s (let page fully render first)
+        // Start polling after 5 s (let page fully render first)
         pollTimer = setTimeout(poll, 5000);
     })();
 

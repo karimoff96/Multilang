@@ -1290,7 +1290,24 @@ def api_poll_new_orders(request):
 
         count = qs.count()
         if count > 0:
-            return JsonResponse({'has_new': True, 'count': count, 'latest_ts': time.time()})
+            latest_ts = time.time()
+            # Render new order rows as HTML so the client can inject them directly
+            rows_html = ''
+            try:
+                import datetime as _dt
+                from django.template.loader import render_to_string
+                new_orders = qs.select_related(
+                    'bot_user', 'product', 'language', 'branch', 'branch__center',
+                    'assigned_to', 'assigned_to__user'
+                ).prefetch_related('receipts').order_by('-created_at')
+                rows_html = render_to_string(
+                    'orders/_order_row.html',
+                    {'orders': new_orders, 'today': _dt.date.today()},
+                    request=request,
+                )
+            except Exception as render_err:
+                logger.warning(f"api_poll_new_orders render failed: {render_err}")
+            return JsonResponse({'has_new': True, 'count': count, 'latest_ts': latest_ts, 'html': rows_html})
 
         return JsonResponse({'has_new': False, 'count': 0, 'latest_ts': since_ts})
 

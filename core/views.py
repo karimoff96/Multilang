@@ -169,15 +169,36 @@ def notifications_list(request):
     if filter_type == 'unread':
         qs = qs.filter(is_read=False)
 
-    paginator = Paginator(qs, 20)
+    paginator = Paginator(qs, 25)
     page_number = request.GET.get('page', 1)
     notifications = paginator.get_page(page_number)
+
+    read_count = total_count - unread_count
+
+    # Smart page range: show first, last, current±2, with ellipsis gaps
+    current = notifications.number
+    total_pages = paginator.num_pages
+    delta = 2
+    left = max(1, current - delta)
+    right = min(total_pages, current + delta)
+    page_range = []
+    if left > 1:
+        page_range.append(1)
+        if left > 2:
+            page_range.append('...')
+    page_range.extend(range(left, right + 1))
+    if right < total_pages:
+        if right < total_pages - 1:
+            page_range.append('...')
+        page_range.append(total_pages)
 
     return render(request, 'core/notifications.html', {
         'notifications': notifications,
         'total_count': total_count,
         'unread_count': unread_count,
+        'read_count': read_count,
         'filter': filter_type,
+        'page_range': page_range,
         'title': _('Notifications'),
         'subTitle': _('All Notifications'),
     })

@@ -3,109 +3,217 @@
 {% load static %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-16 gap-3">
-    <div class="d-flex align-items-center gap-8">
-        <iconify-icon icon="iconoir:bell" class="text-primary-600 text-xl"></iconify-icon>
-        <h6 class="mb-0 fw-semibold">{% trans "All Notifications" %}</h6>
-        <span class="badge bg-primary-100 text-primary-600 px-12 py-4">{{ total_count }}</span>
+
+<!-- Page header -->
+<div class="d-flex align-items-center justify-content-between mb-24 flex-wrap gap-12">
+    <div class="d-flex align-items-center gap-12">
+        <span class="w-44-px h-44-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center flex-shrink-0">
+            <iconify-icon icon="iconoir:bell" class="text-primary-600 text-xl"></iconify-icon>
+        </span>
+        <div>
+            <h5 class="fw-bold mb-0">{% trans "Notifications" %}</h5>
+            <p class="text-secondary-light text-sm mb-0">{% trans "Manage and review all your notifications" %}</p>
+        </div>
     </div>
     {% if unread_count > 0 %}
-    <button type="button" id="pageMarkAllReadBtn" class="btn btn-sm btn-outline-primary px-16" onclick="pageMarkAllRead()">
-        <iconify-icon icon="mdi:check-all" class="me-4"></iconify-icon>{% trans "Mark All as Read" %}
+    <button type="button" id="pageMarkAllReadBtn" class="btn btn-primary btn-sm d-flex align-items-center gap-8 px-20" onclick="pageMarkAllRead()">
+        <iconify-icon icon="mdi:check-all" class="text-lg"></iconify-icon>
+        {% trans "Mark All as Read" %}
     </button>
     {% endif %}
 </div>
 
-<!-- Filter tabs -->
-<div class="d-flex align-items-center gap-8 mb-16">
-    <a href="?filter=all"
-       class="btn btn-sm {% if filter == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %} px-16">
-        {% trans "All" %} <span class="badge {% if filter == 'all' %}bg-white text-primary-600{% else %}bg-primary-100 text-primary-600{% endif %} ms-4">{{ total_count }}</span>
-    </a>
-    <a href="?filter=unread"
-       class="btn btn-sm {% if filter == 'unread' %}btn-primary{% else %}btn-outline-secondary{% endif %} px-16">
-        {% trans "Unread" %} <span class="badge {% if filter == 'unread' %}bg-white text-primary-600{% else %}bg-danger-100 text-danger-600{% endif %} ms-4">{{ unread_count }}</span>
-    </a>
+<!-- Stats row -->
+<div class="row g-16 mb-24">
+    <div class="col-sm-4">
+        <div class="card radius-12 border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-16 p-20">
+                <span class="w-52-px h-52-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center flex-shrink-0">
+                    <iconify-icon icon="mdi:bell-outline" class="text-primary-600 text-2xl"></iconify-icon>
+                </span>
+                <div>
+                    <p class="text-secondary-light text-sm mb-2">{% trans "Total" %}</p>
+                    <h4 class="fw-bold mb-0 text-primary-600">{{ total_count }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card radius-12 border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-16 p-20">
+                <span class="w-52-px h-52-px rounded-circle bg-danger-100 d-flex align-items-center justify-content-center flex-shrink-0">
+                    <iconify-icon icon="mdi:bell-badge-outline" class="text-danger-600 text-2xl"></iconify-icon>
+                </span>
+                <div>
+                    <p class="text-secondary-light text-sm mb-2">{% trans "Unread" %}</p>
+                    <h4 class="fw-bold mb-0 text-danger-600" id="unreadStatCount">{{ unread_count }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card radius-12 border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-16 p-20">
+                <span class="w-52-px h-52-px rounded-circle bg-success-100 d-flex align-items-center justify-content-center flex-shrink-0">
+                    <iconify-icon icon="mdi:bell-check-outline" class="text-success-600 text-2xl"></iconify-icon>
+                </span>
+                <div>
+                    <p class="text-secondary-light text-sm mb-2">{% trans "Read" %}</p>
+                    <h4 class="fw-bold mb-0 text-success-600" id="readStatCount">{{ read_count }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="card h-100 p-0 radius-12">
+<!-- Main card -->
+<div class="card radius-12 border-0 shadow-sm">
+    <!-- Card header with filter tabs -->
+    <div class="card-header border-bottom d-flex align-items-center justify-content-between flex-wrap gap-12 py-16 px-24" style="background:transparent;">
+        <div class="d-flex align-items-center gap-6">
+            <a href="?filter=all"
+               class="btn btn-sm {% if filter == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %} d-flex align-items-center gap-6 px-16">
+                <iconify-icon icon="mdi:view-list" class="text-base"></iconify-icon>
+                {% trans "All" %}
+                <span class="badge {% if filter == 'all' %}bg-white text-primary-600{% else %}bg-secondary-100 text-secondary-600{% endif %} ms-2 fw-semibold">{{ total_count }}</span>
+            </a>
+            <a href="?filter=unread"
+               class="btn btn-sm {% if filter == 'unread' %}btn-danger{% else %}btn-outline-secondary{% endif %} d-flex align-items-center gap-6 px-16">
+                <iconify-icon icon="mdi:bell-badge" class="text-base"></iconify-icon>
+                {% trans "Unread" %}
+                <span class="badge {% if filter == 'unread' %}bg-white text-danger-600{% else %}bg-danger-100 text-danger-600{% endif %} ms-2 fw-semibold">{{ unread_count }}</span>
+            </a>
+        </div>
+        {% if notifications.paginator.num_pages > 1 %}
+        <span class="text-secondary-light text-sm">
+            {% trans "Page" %} {{ notifications.number }} {% trans "of" %} {{ notifications.paginator.num_pages }}
+            &nbsp;·&nbsp; {{ notifications.paginator.count }} {% trans "items" %}
+        </span>
+        {% endif %}
+    </div>
+
     <div class="card-body p-0">
         {% if notifications %}
-        <div class="list-group list-group-flush">
+        <div class="notification-list">
             {% for n in notifications %}
-            <a href="{% if n.notification_type == 'receipt_pending' or n.notification_type == 'order_new' or n.notification_type == 'order_cancelled' or n.notification_type == 'order_completed' or n.notification_type == 'payment_confirmed' or n.notification_type == 'order_overdue' %}{% url 'orders:orderDetail' n.get_link_id %}{% elif n.notification_type == 'user_new' or n.notification_type == 'agency_new' %}{% url 'usersList' %}{% else %}#{% endif %}"
-               class="list-group-item list-group-item-action px-24 py-16 d-flex align-items-start gap-16 {% if not n.is_read %}bg-primary-50{% endif %}"
-               onclick="markReadAndGo(event, this, {{ n.id }})">
+            {% with ntype=n.notification_type %}
+            <a href="{{ n.link_url }}"
+               class="notif-item d-flex align-items-start gap-16 px-24 py-16 text-decoration-none {% if not n.is_read %}notif-unread{% endif %}{% if n.is_orphaned %} notif-orphaned{% endif %}"
+               {% if n.link_url == '#' %}onclick="return false;" style="cursor:default;"{% else %}onclick="markReadAndGo(event, this, {{ n.id }})"{% endif %}>
 
-                <!-- Icon -->
-                <span class="w-44-px h-44-px flex-shrink-0 rounded-circle d-flex justify-content-center align-items-center
-                    {% if n.notification_type == 'receipt_pending' %}bg-warning-subtle text-warning-main
-                    {% elif n.notification_type == 'order_new' %}bg-primary-subtle text-primary-main
-                    {% elif n.notification_type == 'order_cancelled' %}bg-danger-subtle text-danger-main
-                    {% elif n.notification_type == 'order_completed' %}bg-success-subtle text-success-main
-                    {% elif n.notification_type == 'payment_confirmed' %}bg-success-subtle text-success-main
-                    {% elif n.notification_type == 'user_new' %}bg-info-subtle text-info-main
-                    {% elif n.notification_type == 'agency_new' %}bg-purple-subtle text-purple-main
-                    {% elif n.notification_type == 'order_overdue' %}bg-danger-subtle text-danger-main
-                    {% else %}bg-neutral-200 text-secondary-main{% endif %}">
-                    {% if n.notification_type == 'receipt_pending' %}
-                        <iconify-icon icon="mdi:receipt-text-pending" class="text-xl"></iconify-icon>
-                    {% elif n.notification_type == 'order_new' %}
-                        <iconify-icon icon="mdi:cart-plus" class="text-xl"></iconify-icon>
-                    {% elif n.notification_type == 'order_cancelled' %}
-                        <iconify-icon icon="mdi:cart-remove" class="text-xl"></iconify-icon>
-                    {% elif n.notification_type == 'order_completed' %}
-                        <iconify-icon icon="mdi:cart-check" class="text-xl"></iconify-icon>
-                    {% elif n.notification_type == 'payment_confirmed' %}
-                        <iconify-icon icon="mdi:cash-check" class="text-xl"></iconify-icon>
-                    {% elif n.notification_type == 'user_new' %}
-                        <iconify-icon icon="mdi:account-plus" class="text-xl"></iconify-icon>
-                    {% elif n.notification_type == 'agency_new' %}
-                        <iconify-icon icon="mdi:domain" class="text-xl"></iconify-icon>
-                    {% elif n.notification_type == 'order_overdue' %}
-                        <iconify-icon icon="mdi:clock-alert-outline" class="text-xl"></iconify-icon>
-                    {% else %}
-                        <iconify-icon icon="mdi:bell-outline" class="text-xl"></iconify-icon>
+                <!-- Type icon -->
+                <span class="notif-icon flex-shrink-0 w-44-px h-44-px rounded-circle d-flex align-items-center justify-content-center
+                    {% if ntype == 'receipt_pending' %}bg-warning-100 text-warning-600
+                    {% elif ntype == 'order_new' %}bg-primary-100 text-primary-600
+                    {% elif ntype == 'order_cancelled' %}bg-danger-100 text-danger-600
+                    {% elif ntype == 'order_completed' %}bg-success-100 text-success-600
+                    {% elif ntype == 'payment_confirmed' %}bg-success-100 text-success-600
+                    {% elif ntype == 'user_new' %}bg-info-100 text-info-600
+                    {% elif ntype == 'agency_new' %}bg-purple-100 text-purple-600
+                    {% elif ntype == 'order_overdue' %}bg-danger-100 text-danger-600
+                    {% else %}bg-neutral-200 text-secondary-light{% endif %}">
+                    {% if ntype == 'receipt_pending' %}<iconify-icon icon="mdi:receipt-text-pending" class="text-xl"></iconify-icon>
+                    {% elif ntype == 'order_new' %}<iconify-icon icon="mdi:cart-plus" class="text-xl"></iconify-icon>
+                    {% elif ntype == 'order_cancelled' %}<iconify-icon icon="mdi:cart-remove" class="text-xl"></iconify-icon>
+                    {% elif ntype == 'order_completed' %}<iconify-icon icon="mdi:cart-check" class="text-xl"></iconify-icon>
+                    {% elif ntype == 'payment_confirmed' %}<iconify-icon icon="mdi:cash-check" class="text-xl"></iconify-icon>
+                    {% elif ntype == 'user_new' %}<iconify-icon icon="mdi:account-plus" class="text-xl"></iconify-icon>
+                    {% elif ntype == 'agency_new' %}<iconify-icon icon="mdi:domain" class="text-xl"></iconify-icon>
+                    {% elif ntype == 'order_overdue' %}<iconify-icon icon="mdi:clock-alert-outline" class="text-xl"></iconify-icon>
+                    {% else %}<iconify-icon icon="mdi:bell-outline" class="text-xl"></iconify-icon>
                     {% endif %}
                 </span>
 
-                <!-- Text -->
+                <!-- Content -->
                 <div class="flex-grow-1 min-w-0">
-                    <div class="d-flex align-items-center justify-content-between gap-8 mb-4">
-                        <h6 class="text-md fw-semibold mb-0 text-truncate">{{ n.title }}</h6>
-                        {% if not n.is_read %}
-                        <span class="badge bg-danger rounded-pill flex-shrink-0" style="width:8px;height:8px;padding:0;"></span>
+                    <div class="d-flex align-items-start justify-content-between gap-8 mb-4">
+                        <div class="d-flex align-items-center gap-8 flex-wrap min-w-0">
+                            <span class="fw-semibold text-sm" style="word-break:break-word;">{{ n.title }}</span>
+                            <!-- Type badge -->
+                            <span class="badge rounded-pill
+                                {% if ntype == 'receipt_pending' %}bg-warning-100 text-warning-600
+                                {% elif ntype == 'order_new' %}bg-primary-100 text-primary-600
+                                {% elif ntype == 'order_cancelled' %}bg-danger-100 text-danger-600
+                                {% elif ntype == 'order_completed' or ntype == 'payment_confirmed' %}bg-success-100 text-success-600
+                                {% elif ntype == 'user_new' or ntype == 'agency_new' %}bg-info-100 text-info-600
+                                {% elif ntype == 'order_overdue' %}bg-danger-100 text-danger-600
+                                {% else %}bg-neutral-200 text-secondary-light{% endif %}
+                                px-8 py-2" style="font-size:10px;font-weight:600;letter-spacing:.3px;">
+                                {% if ntype == 'receipt_pending' %}{% trans "Receipt" %}
+                                {% elif ntype == 'order_new' %}{% trans "New Order" %}
+                                {% elif ntype == 'order_cancelled' %}{% trans "Cancelled" %}
+                                {% elif ntype == 'order_completed' %}{% trans "Completed" %}
+                                {% elif ntype == 'payment_confirmed' %}{% trans "Payment" %}
+                                {% elif ntype == 'user_new' %}{% trans "New User" %}
+                                {% elif ntype == 'agency_new' %}{% trans "Agency" %}
+                                {% elif ntype == 'order_overdue' %}{% trans "Overdue" %}
+                                {% else %}{% trans "System" %}{% endif %}
+                            </span>
+                            {% if n.is_orphaned %}
+                            <span class="badge bg-neutral-200 text-secondary-light px-8 py-2" style="font-size:10px;font-weight:600;">{% trans "Deleted" %}</span>
+                            {% endif %}
+                        </div>
+                        <!-- Time + unread dot -->
+                        <div class="d-flex align-items-center gap-8 flex-shrink-0">
+                            <span class="text-xs text-secondary-light text-nowrap">
+                                <iconify-icon icon="mdi:clock-outline" class="me-1"></iconify-icon>{{ n.created_at|timesince }} {% trans "ago" %}
+                            </span>
+                            {% if not n.is_read %}
+                            <span class="unread-dot rounded-circle flex-shrink-0" style="width:8px;height:8px;background:#f04438;display:inline-block;"></span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <p class="mb-0 text-sm text-secondary-light" style="line-height:1.55;">{{ n.message }}</p>
+                    {% if n.branch or n.center %}
+                    <div class="mt-6">
+                        {% if n.branch %}
+                        <span class="text-xs text-secondary-light d-inline-flex align-items-center gap-4">
+                            <iconify-icon icon="mdi:source-branch"></iconify-icon>{{ n.branch.name }}
+                        </span>
+                        {% elif n.center %}
+                        <span class="text-xs text-secondary-light d-inline-flex align-items-center gap-4">
+                            <iconify-icon icon="mdi:office-building-outline"></iconify-icon>{{ n.center.name }}
+                        </span>
                         {% endif %}
                     </div>
-                    <p class="mb-4 text-sm text-secondary-light">{{ n.message }}</p>
-                    <span class="text-xs text-secondary-light">
-                        <iconify-icon icon="mdi:clock-outline" class="me-2"></iconify-icon>{{ n.created_at|timesince }} {% trans "ago" %}
-                    </span>
+                    {% endif %}
                 </div>
             </a>
+            {% endwith %}
             {% endfor %}
         </div>
 
         <!-- Pagination -->
         {% if notifications.has_other_pages %}
-        <div class="d-flex justify-content-center py-16 px-24 border-top">
-            <nav>
-                <ul class="pagination pagination-sm mb-0 gap-4">
-                    {% if notifications.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?filter={{ filter }}&page={{ notifications.previous_page_number }}">&laquo;</a>
+        <div class="d-flex align-items-center justify-content-between py-16 px-24 border-top flex-wrap gap-12">
+            <span class="text-sm text-secondary-light">
+                {% trans "Showing" %}
+                <strong>{{ notifications.start_index }}–{{ notifications.end_index }}</strong>
+                {% trans "of" %} <strong>{{ notifications.paginator.count }}</strong>
+            </span>
+            <nav aria-label="Notifications pagination">
+                <ul class="pagination mb-0 gap-4">
+                    <li class="page-item {% if not notifications.has_previous %}disabled{% endif %}">
+                        <a class="page-link notif-page-link" href="{% if notifications.has_previous %}?filter={{ filter }}&page={{ notifications.previous_page_number }}{% else %}#{% endif %}" aria-label="Previous">
+                            <iconify-icon icon="mdi:chevron-left"></iconify-icon>
+                        </a>
+                    </li>
+                    {% for p in page_range %}
+                    {% if p == '...' %}
+                    <li class="page-item disabled">
+                        <span class="page-link notif-page-link" style="border:none;background:transparent;">…</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item {% if notifications.number == p %}active{% endif %}">
+                        <a class="page-link notif-page-link" href="?filter={{ filter }}&page={{ p }}">{{ p }}</a>
                     </li>
                     {% endif %}
-                    {% for num in notifications.paginator.page_range %}
-                    <li class="page-item {% if notifications.number == num %}active{% endif %}">
-                        <a class="page-link" href="?filter={{ filter }}&page={{ num }}">{{ num }}</a>
-                    </li>
                     {% endfor %}
-                    {% if notifications.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?filter={{ filter }}&page={{ notifications.next_page_number }}">&raquo;</a>
+                    <li class="page-item {% if not notifications.has_next %}disabled{% endif %}">
+                        <a class="page-link notif-page-link" href="{% if notifications.has_next %}?filter={{ filter }}&page={{ notifications.next_page_number }}{% else %}#{% endif %}" aria-label="Next">
+                            <iconify-icon icon="mdi:chevron-right"></iconify-icon>
+                        </a>
                     </li>
-                    {% endif %}
                 </ul>
             </nav>
         </div>
@@ -113,59 +221,101 @@
 
         {% else %}
         <!-- Empty state -->
-        <div class="d-flex flex-column align-items-center justify-content-center py-64 text-secondary-light">
-            <iconify-icon icon="mdi:bell-off-outline" class="text-5xl mb-16"></iconify-icon>
-            <h6 class="fw-semibold mb-4">{% trans "No notifications" %}</h6>
-            <p class="text-sm mb-0">{% trans "You're all caught up!" %}</p>
+        <div class="d-flex flex-column align-items-center justify-content-center text-center py-80 px-24">
+            <span class="w-80-px h-80-px rounded-circle bg-neutral-100 d-flex align-items-center justify-content-center mb-20 mx-auto">
+                <iconify-icon icon="mdi:bell-off-outline" class="text-neutral-400" style="font-size:2.5rem;"></iconify-icon>
+            </span>
+            <h5 class="fw-semibold mb-8">
+                {% if filter == 'unread' %}{% trans "No unread notifications" %}{% else %}{% trans "No notifications yet" %}{% endif %}
+            </h5>
+            <p class="text-secondary-light mb-20" style="max-width:320px;">
+                {% if filter == 'unread' %}
+                    {% trans "Great job! You've read all your notifications." %}
+                {% else %}
+                    {% trans "When something important happens, you'll see it here." %}
+                {% endif %}
+            </p>
+            {% if filter == 'unread' %}
+            <a href="?filter=all" class="btn btn-outline-primary btn-sm px-20">{% trans "View all notifications" %}</a>
+            {% endif %}
         </div>
         {% endif %}
     </div>
 </div>
 
+<style>
+.notif-item {
+    border-bottom: 1px solid var(--bs-border-color, rgba(0,0,0,.06));
+    transition: background 0.12s ease;
+    color: inherit;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-item:hover {
+    background: rgba(0,0,0,.025) !important;
+    text-decoration: none;
+    color: inherit;
+}
+.notif-unread {
+    background: rgba(99,102,241,.04);
+    border-left: 3px solid var(--bs-primary, #6366f1);
+}
+.notif-unread:hover {
+    background: rgba(99,102,241,.08) !important;
+}
+.notif-page-link {
+    border-radius: 8px !important;
+    min-width: 36px;
+    text-align: center;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+.notif-orphaned {
+    opacity: 0.5;
+    filter: grayscale(0.4);
+}
+</style>
+
 <script>
 function markReadAndGo(e, anchor, notifId) {
-    // Fire-and-forget mark-read; navigation proceeds naturally
-    fetch(`/notifications/${notifId}/mark-read/`, {
+    var csrfToken = '{{ csrf_token }}';
+    fetch('/core/notifications/' + notifId + '/read/', {
         method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json',
-        }
+        headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' }
     }).catch(function() {});
-    // Remove unread highlight immediately
-    anchor.classList.remove('bg-primary-50');
-    var dot = anchor.querySelector('.badge.bg-danger');
+    anchor.classList.remove('notif-unread');
+    var dot = anchor.querySelector('.unread-dot');
     if (dot) dot.remove();
 }
 
 function pageMarkAllRead() {
     var btn = document.getElementById('pageMarkAllReadBtn');
-    if (btn) { btn.disabled = true; }
+    if (btn) btn.disabled = true;
 
     fetch('{% url "core:mark_all_notifications_read" %}', {
         method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json',
-        }
+        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' }
     })
     .then(function(r) { return r.ok ? r.json() : null; })
     .then(function(data) {
         if (data && data.success) {
-            // Remove all unread highlights + dots from current page
-            document.querySelectorAll('.list-group-item.bg-primary-50').forEach(function(el) {
-                el.classList.remove('bg-primary-50');
+            document.querySelectorAll('.notif-unread').forEach(function(el) {
+                el.classList.remove('notif-unread');
+                el.style.borderLeft = '';
             });
-            document.querySelectorAll('.badge.bg-danger.rounded-pill').forEach(function(el) {
-                el.remove();
-            });
-            if (btn) btn.remove();  // hide the mark-all button
+            document.querySelectorAll('.unread-dot').forEach(function(el) { el.remove(); });
+            if (btn) btn.remove();
+            var u = document.getElementById('unreadStatCount');
+            var r = document.getElementById('readStatCount');
+            if (u && r) {
+                var prev = parseInt(u.textContent) || 0;
+                var prevR = parseInt(r.textContent) || 0;
+                u.textContent = '0';
+                r.textContent = prevR + prev;
+            }
         }
     })
     .catch(function() {})
-    .finally(function() {
-        if (btn) btn.disabled = false;
-    });
+    .finally(function() { if (btn) btn.disabled = false; });
 }
 </script>
 {% endblock %}

@@ -1,6 +1,6 @@
 import logging
 from django.db import models
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save, post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
@@ -1065,6 +1065,30 @@ def track_order_revenue(sender, instance, **kwargs):
                 logger.error(f"✗ Failed to track order revenue: {e}")
                 import traceback
                 traceback.print_exc()
+
+
+@receiver(post_delete, sender=Order)
+def delete_order_notifications(sender, instance, **kwargs):
+    """Delete all admin notifications linked to this order when it is deleted."""
+    try:
+        from django.contrib.contenttypes.models import ContentType
+        from core.models import AdminNotification
+        ct = ContentType.objects.get_for_model(Order)
+        AdminNotification.objects.filter(content_type=ct, object_id=instance.pk).delete()
+    except Exception:
+        pass
+
+
+@receiver(post_delete, sender=Receipt)
+def delete_receipt_notifications(sender, instance, **kwargs):
+    """Delete all admin notifications linked to this receipt when it is deleted."""
+    try:
+        from django.contrib.contenttypes.models import ContentType
+        from core.models import AdminNotification
+        ct = ContentType.objects.get_for_model(Receipt)
+        AdminNotification.objects.filter(content_type=ct, object_id=instance.pk).delete()
+    except Exception:
+        pass
 
 
 @receiver(post_save, sender=Order)
