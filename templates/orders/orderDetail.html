@@ -86,7 +86,7 @@
                     <div class="col-sm-4">
                         <div class="p-16 bg-success-50 radius-8 border border-success-200 text-center">
                             <span class="text-secondary-light text-sm d-block mb-8" data-i18n="detail.totalPrice">Total Price</span>
-                            <h4 class="text-success-600 fw-bold mb-0">{{ order.total_price|smart_num }} UZS</h4>
+                            <h4 class="text-success-600 fw-bold mb-0">{{ order.total_price|intspace }} UZS</h4>
                             {% if can_edit_price %}
                             <button type="button"
                                     class="btn btn-sm d-inline-flex align-items-center gap-4 px-10 py-4 radius-6 fw-semibold text-xs mt-8"
@@ -184,16 +184,16 @@
                             <div class="row text-sm">
                                 <div class="col-4 text-center">
                                     <span class="text-secondary-light d-block">Total Due</span>
-                                    <span class="fw-semibold">{{ order.total_due|smart_num }} UZS</span>
+                                    <span class="fw-semibold">{{ order.total_due|intspace }} UZS</span>
                                 </div>
                                 <div class="col-4 text-center">
                                     <span class="text-secondary-light d-block">Received</span>
-                                    <span class="fw-semibold text-success-600">{{ order.received|smart_num }} UZS</span>
+                                    <span class="fw-semibold text-success-600">{{ order.received|intspace }} UZS</span>
                                 </div>
                                 <div class="col-4 text-center">
                                     <span class="text-secondary-light d-block">Remaining</span>
                                     <span class="fw-semibold {% if order.remaining > 0 %}text-danger-600{% else %}text-success-600{% endif %}">
-                                        {{ order.remaining|smart_num }} UZS
+                                        {{ order.remaining|intspace }} UZS
                                     </span>
                                 </div>
                             </div>
@@ -202,7 +202,7 @@
                             <div class="mt-12 pt-12 border-top">
                                 <div class="d-flex justify-content-between">
                                     <span class="text-secondary-light">Extra Fee:</span>
-                                    <span class="fw-semibold">{{ order.extra_fee|smart_num }} UZS</span>
+                                    <span class="fw-semibold">{{ order.extra_fee|intspace }} UZS</span>
                                 </div>
                                 {% if order.extra_fee_description %}
                                 <small class="text-muted">{{ order.extra_fee_description }}</small>
@@ -399,7 +399,7 @@
                                 </tr>
                                 {% endif %}
                             </tbody>
-                            <tfoot class="bg-neutral-100">
+                            <tfoot style="border-top: 2px solid var(--bs-border-color, rgba(128,128,128,0.25)); background: transparent !important; --bs-table-bg: transparent; --bs-table-striped-bg: transparent; --bs-table-hover-bg: transparent;">
                                 {% if price_changes %}
                                 <tr>
                                     <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-semibold text-secondary-light text-sm">Calculated Total:</td>
@@ -424,14 +424,14 @@
                         </table>
                     </div>
                     {% if price_breakdown.is_agency %}
-                    <div class="mt-12 p-12 bg-info-50 radius-8">
+                    <div class="mt-12 p-12 radius-8 border border-info-300">
                         <small class="text-info-600">
                             <iconify-icon icon="mdi:information" class="me-1"></iconify-icon>
                             This order uses <strong>Agency pricing</strong>
                         </small>
                     </div>
                     {% else %}
-                    <div class="mt-12 p-12 bg-success-50 radius-8">
+                    <div class="mt-12 p-12 radius-8 border border-success-300">
                         <small class="text-success-600">
                             <iconify-icon icon="mdi:information" class="me-1"></iconify-icon>
                             This order uses <strong>Ordinary User pricing</strong>
@@ -451,7 +451,7 @@
                     <div class="d-flex flex-column gap-8">
                         {% for pc in price_changes %}
                         <div class="d-flex align-items-start gap-12 p-12 radius-8 border
-                            {% if pc.delta > 0 %}border-danger-200 bg-danger-50{% elif pc.delta < 0 %}border-success-200 bg-success-50{% else %}border-neutral-200 bg-neutral-50{% endif %}">
+                            {% if pc.delta > 0 %}border-danger-300{% elif pc.delta < 0 %}border-success-300{% else %}border-neutral-300{% endif %}" style="background: transparent;">
                             <!-- Icon -->
                             <div class="flex-shrink-0 mt-2">
                                 {% if pc.delta > 0 %}
@@ -465,20 +465,20 @@
                             <!-- Details -->
                             <div class="flex-grow-1 min-w-0">
                                 <div class="d-flex align-items-center flex-wrap gap-8 mb-4">
-                                    <span class="text-secondary-light text-sm fw-semibold">{{ pc.old_price|smart_num }}&nbsp;UZS</span>
+                                    <span class="text-secondary-light text-sm fw-semibold">{{ pc.old_price|intspace }}&nbsp;UZS</span>
                                     <iconify-icon icon="solar:arrow-right-linear" class="text-secondary-light"></iconify-icon>
                                     <span class="fw-bold
                                         {% if pc.delta > 0 %}text-danger-600{% elif pc.delta < 0 %}text-success-600{% endif %}">
-                                        {{ pc.new_price|smart_num }}&nbsp;UZS
+                                        {{ pc.new_price|intspace }}&nbsp;UZS
                                     </span>
                                     {% if pc.delta != 0 %}
                                     <span class="badge text-xs
                                         {% if pc.delta > 0 %}bg-danger-100 text-danger-600{% else %}bg-success-100 text-success-600{% endif %}">
-                                        {% if pc.delta > 0 %}+{% endif %}{{ pc.delta|smart_num }} UZS
+                                        {% if pc.delta > 0 %}+{% endif %}{{ pc.delta|intspace }} UZS
                                     </span>
                                     {% endif %}
                                 </div>
-                                <p class="text-sm text-neutral-700 mb-4"
+                                <p class="text-sm text-secondary-light mb-4"
                                    style="font-style:italic;">&ldquo;{{ pc.reason }}&rdquo;</p>
                                 <div class="d-flex align-items-center gap-8 text-xs text-secondary-light">
                                     <iconify-icon icon="solar:user-linear"></iconify-icon>
@@ -1048,7 +1048,7 @@
             <div class="modal-body">
                 <div class="mb-16 p-12 bg-success-50 radius-8 border border-success-200">
                     <span class="text-secondary-light text-sm">Current Price</span>
-                    <div class="fw-bold text-success-600 fs-5" id="currentPriceDisplay">{{ order.total_price|smart_num }} UZS</div>
+                    <div class="fw-bold text-success-600 fs-5" id="currentPriceDisplay">{{ order.total_price|intspace }} UZS</div>
                 </div>
                 <div class="mb-16">
                     <label for="newPriceInput" class="form-label fw-semibold">
@@ -1271,7 +1271,7 @@ document.getElementById('savePriceChangeBtn')?.addEventListener('click', async f
         }
         // Success — reload to show updated price and history entry
         bootstrap.Modal.getInstance(document.getElementById('editPriceModal'))?.hide();
-        location.reload();
+        window.location.href = window.location.href;
     } catch (err) {
         errDiv.textContent = 'Server error. Please try again.';
         errDiv.classList.remove('d-none');

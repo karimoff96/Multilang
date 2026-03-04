@@ -64,7 +64,7 @@ def has_order_permission(request, permission_name, order=None):
                     return False
         # For edit/delete/status updates, restrict to assigned orders unless they can manage orders
         elif permission_name in ['can_edit_orders', 'can_delete_orders', 'can_update_order_status',
-                                 'can_complete_orders', 'can_cancel_orders']:
+                                 'can_complete_orders', 'can_cancel_orders', 'can_edit_price']:
             if not (ap.has_permission('can_manage_orders') or ap.has_permission('can_assign_orders')):
                 if order and order.assigned_to != ap:
                     return False
@@ -427,21 +427,11 @@ def orderDetail(request, order_id):
     # Price change history
     price_changes = order.price_changes.select_related('changed_by', 'changed_by__user').order_by('-changed_at')
 
-    # can_edit_price: owners, managers and anyone with financial/edit permissions,
-    # AND the extra_fees billing feature must be enabled for their centre's tariff.
-    def _has_extra_fees_feature():
-        if request.user.is_superuser:
-            return True
-        try:
-            ap = request.admin_profile
-            return bool(ap and ap.center and ap.center.subscription.tariff.has_feature('extra_fees'))
-        except Exception:
-            return False
-
-    can_edit_price = _has_extra_fees_feature() and (
+    # can_edit_price: dedicated permission or financial/order management masters
+    can_edit_price = (
         request.user.is_superuser or bool(
             request.admin_profile and (
-                request.admin_profile.has_permission('can_edit_orders') or
+                request.admin_profile.has_permission('can_edit_price') or
                 request.admin_profile.has_permission('can_manage_orders') or
                 request.admin_profile.has_permission('can_manage_financial')
             )
@@ -763,19 +753,12 @@ def orderEdit(request, order_id):
             messages.error(request, f'Error updating order: {str(e)}')
     
     price_changes = order.price_changes.select_related('changed_by', 'changed_by__user').order_by('-changed_at')
-    def _has_extra_fees_feature_edit():
-        if request.user.is_superuser:
-            return True
-        try:
-            ap = request.admin_profile
-            return bool(ap and ap.center and ap.center.subscription.tariff.has_feature('extra_fees'))
-        except Exception:
-            return False
 
-    can_edit_price = _has_extra_fees_feature_edit() and (
+    # can_edit_price: dedicated permission or financial/order management masters
+    can_edit_price = (
         request.user.is_superuser or bool(
             request.admin_profile and (
-                request.admin_profile.has_permission('can_edit_orders') or
+                request.admin_profile.has_permission('can_edit_price') or
                 request.admin_profile.has_permission('can_manage_orders') or
                 request.admin_profile.has_permission('can_manage_financial')
             )
@@ -1898,9 +1881,8 @@ def search_products(request):
 # ── Price Edit ──────────────────────────────────────────────────────────────
 
 @login_required(login_url='admin_login')
-@require_feature('extra_fees')
 @require_POST
-@any_permission_required('can_edit_orders', 'can_manage_orders', 'can_manage_financial')
+@any_permission_required('can_edit_price', 'can_manage_orders', 'can_manage_financial')
 def edit_order_price(request, order_id):
     """
     Manually override an order's total_price.
@@ -1911,7 +1893,12 @@ def edit_order_price(request, order_id):
 
     # Scope check — user must be able to access this order's branch
     if not request.user.is_superuser:
-        if not has_order_permission(request, 'can_edit_orders', order):
+        can_access = (
+            has_order_permission(request, 'can_edit_price', order) or
+            has_order_permission(request, 'can_manage_orders', order) or
+            has_order_permission(request, 'can_manage_financial', order)
+        )
+        if not can_access:
             return JsonResponse({'success': False, 'error': "You don't have permission to edit this order's price."}, status=403)
 
     new_price_str = request.POST.get('new_price', '').strip()

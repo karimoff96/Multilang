@@ -295,7 +295,8 @@ class Role(models.Model):
     can_view_financial_reports = models.BooleanField(_("Can view financial reports"), default=False)
     can_apply_discounts = models.BooleanField(_("Can apply discounts"), default=False)
     can_refund_orders = models.BooleanField(_("Can refund orders"), default=False)
-    
+    can_edit_price = models.BooleanField(_("Can edit order price"), default=False)
+
     # Permissions - Reports & Analytics
     can_manage_reports = models.BooleanField(_("Can manage reports (full access)"), default=False,
         help_text=_("Full reports management - overrides other report permissions"))
@@ -434,7 +435,7 @@ class Role(models.Model):
         "can_manage_orders": ["can_view_all_orders", "can_view_own_orders", "can_create_orders", "can_edit_orders", 
                               "can_delete_orders", "can_assign_orders", "can_update_order_status", 
                               "can_complete_orders", "can_cancel_orders"],
-        "can_manage_financial": ["can_receive_payments", "can_view_financial_reports", "can_apply_discounts", "can_refund_orders"],
+        "can_manage_financial": ["can_receive_payments", "can_view_financial_reports", "can_apply_discounts", "can_refund_orders", "can_edit_price"],
         "can_manage_reports": ["can_view_reports", "can_view_analytics", "can_export_data"],
         "can_manage_products": ["can_view_products", "can_create_products", "can_edit_products", "can_delete_products"],
         "can_manage_expenses": ["can_view_expenses", "can_create_expenses", "can_edit_expenses", "can_delete_expenses"],
@@ -649,6 +650,7 @@ class Role(models.Model):
                     "can_view_financial_reports",
                     "can_apply_discounts",
                     "can_refund_orders",
+                    "can_edit_price",
                 ],
             },
             "reports": {

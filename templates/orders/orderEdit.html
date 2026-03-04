@@ -514,26 +514,26 @@
                         </div>
                         <div class="d-flex align-items-center justify-content-between mb-8">
                             <span class="text-secondary-light text-sm" data-i18n="detail.basePrice">Base Price</span>
-                            <span class="text-md fw-medium" id="editPagePriceDisplay">{{ order.total_price|smart_num }} UZS</span>
+                            <span class="text-md fw-medium" id="editPagePriceDisplay">{{ order.total_price|intspace }} UZS</span>
                         </div>
                         {% if order.extra_fee > 0 %}
                         <div class="d-flex align-items-center justify-content-between mb-8">
                             <span class="text-secondary-light text-sm" data-i18n="orders.extraFee">Extra Fee</span>
-                            <span class="text-md fw-medium text-warning-600">+{{ order.extra_fee|smart_num }} UZS</span>
+                            <span class="text-md fw-medium text-warning-600">+{{ order.extra_fee|intspace }} UZS</span>
                         </div>
                         {% endif %}
                         <div class="d-flex align-items-center justify-content-between border-top pt-8">
                             <span class="text-secondary-light text-sm fw-semibold" data-i18n="detail.totalDue">Total Due</span>
-                            <h5 class="text-success-600 fw-bold mb-0">{{ order.total_due|smart_num }} UZS</h5>
+                            <h5 class="text-success-600 fw-bold mb-0">{{ order.total_due|intspace }} UZS</h5>
                         </div>
                         {% if order.received > 0 %}
                         <div class="d-flex align-items-center justify-content-between mt-8">
                             <span class="text-secondary-light text-sm" data-i18n="status.paymentReceived">Received</span>
-                            <span class="text-md fw-medium text-primary-600">{{ order.received|smart_num }} UZS</span>
+                            <span class="text-md fw-medium text-primary-600">{{ order.received|intspace }} UZS</span>
                         </div>
                         <div class="d-flex align-items-center justify-content-between">
                             <span class="text-secondary-light text-sm" data-i18n="orders.remaining">Remaining</span>
-                            <span class="text-md fw-medium {% if order.remaining > 0 %}text-danger-600{% else %}text-success-600{% endif %}">{{ order.remaining|smart_num }} UZS</span>
+                            <span class="text-md fw-medium {% if order.remaining > 0 %}text-danger-600{% else %}text-success-600{% endif %}">{{ order.remaining|intspace }} UZS</span>
                         </div>
                         {% endif %}
                         {% if price_changes %}
@@ -1039,7 +1039,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             bootstrap.Modal.getInstance(document.getElementById('editPriceModalEdit'))?.hide();
-            location.reload();
+            // Update price display immediately, then hard-reload to sync all UI
+            const priceDisplay = document.getElementById('editPagePriceDisplay');
+            if (priceDisplay && data.new_price) {
+                priceDisplay.textContent = parseInt(data.new_price).toLocaleString('ru-RU') + ' UZS';
+            }
+            window.location.href = window.location.href;
         } catch (err) {
             errDiv.textContent = LanguageManager.translate('common.serverError');
             errDiv.classList.remove('d-none');
@@ -1065,7 +1070,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="modal-body">
                 <div class="mb-16 p-12 bg-success-50 radius-8 border border-success-200">
                     <span class="text-secondary-light text-sm" data-i18n="orders.currentPrice">Current Price</span>
-                    <div class="fw-bold text-success-600 fs-5">{{ order.total_price|smart_num }} UZS</div>
+                    <div class="fw-bold text-success-600 fs-5">{{ order.total_price|intspace }} UZS</div>
                 </div>
                 <div class="mb-16">
                     <label for="editNewPriceInput" class="form-label fw-semibold">
