@@ -580,3 +580,77 @@ class FileArchive(models.Model):
         """Get Telegram file URL (for reference)"""
         # Note: Actual file download requires bot API call
         return f"https://t.me/c/{self.telegram_channel_id}/{self.telegram_message_id}"
+
+
+# =============================================================================
+# Signal: invalidate notification cache when a new AdminNotification is created
+# =============================================================================
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+@receiver(post_save, sender=AdminNotification)
+def invalidate_notification_cache_on_create(sender, instance, created, **kwargs):
+    """
+    When a new AdminNotification is saved, immediately delete the per-user
+    notification cache for every admin user who would see it.
+
+    This mirrors the scope logic in AdminNotification.get_unread_for_user():
+      - Superusers see ALL notifications.
+      - Owners see all notifications for their center.
+      - Branch-level staff see notifications scoped to their branch.
+      - Center-level staff (no branch) see center-scoped notifications.
+
+    Safety guarantees:
+      - Wrapped in try/except: Redis failure is silently ignored; the page
+        simply serves a slightly stale badge until the 30-s TTL expires, which
+        is identical to the pre-cache behaviour.
+      - Avoids N+1: collects all affected user PKs in 1–2 DB queries, then
+        issues a single cache.delete_many() call.
+      - No writes, no migrations, no model changes.
+    """
+    try:
+        from django.core.cache import cache
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+
+        user_pks_to_bust = set()
+
+        # 1. All superusers always see every notification
+        superuser_pks = list(
+            User.objects.filter(is_superuser=True, is_active=True)
+            .values_list('pk', flat=True)
+        )
+        user_pks_to_bust.update(superuser_pks)
+
+        # 2. AdminUsers whose scope overlaps with this notification
+        #    Import here to avoid circular imports (core ↔ organizations)
+        from organizations.models import AdminUser
+        from django.db.models import Q
+
+        scope_q = Q()
+
+        if instance.branch_id:
+            # Branch staff whose branch matches
+            scope_q |= Q(branch_id=instance.branch_id)
+
+        if instance.center_id:
+            # Owners and center-level staff whose center matches
+            scope_q |= Q(center_id=instance.center_id)
+
+        if scope_q:
+            affected_pks = list(
+                AdminUser.objects.filter(scope_q, is_active=True)
+                .values_list('user_id', flat=True)
+            )
+            user_pks_to_bust.update(affected_pks)
+
+        # 3. Build cache keys and delete in one round-trip
+        if user_pks_to_bust:
+            keys = [f'notif:user:{pk}' for pk in user_pks_to_bust]
+            cache.delete_many(keys)
+
+    except Exception:
+        # Redis down, import error, or anything else — silently skip.
+        # The 30-second TTL will still expire the stale cache naturally.
+        pass

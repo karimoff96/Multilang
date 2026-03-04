@@ -357,3 +357,65 @@ def requests_management(request):
         })
     
     return render(request, 'landing/requests_management.html', context)
+
+
+def google_site_verification(request):
+    """Serve Google Search Console site verification file."""
+    from django.http import HttpResponse
+    return HttpResponse(
+        'google-site-verification: google145d3096a17fea6d.html',
+        content_type='text/html'
+    )
+
+
+def robots_txt(request):
+    """Serve robots.txt for SEO crawlers."""
+    from django.http import HttpResponse
+    content = """User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /accounts/
+Disallow: /billing/
+Disallow: /orders/
+Disallow: /organizations/
+Disallow: /reports/
+Disallow: /services/
+Disallow: /users/
+Disallow: /marketing/
+Disallow: /bot/
+Disallow: /webapp/
+Disallow: /api/
+Disallow: /backups/
+Disallow: /change-language/
+
+Sitemap: https://multilang.uz/sitemap.xml
+"""
+    return HttpResponse(content, content_type='text/plain')
+
+
+def sitemap_xml(request):
+    """Serve sitemap.xml for SEO."""
+    from django.http import HttpResponse
+    from datetime import date
+    today = date.today().isoformat()
+    content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://multilang.uz/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://multilang.uz/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://multilang.uz/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://multilang.uz/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://multilang.uz/"/>
+  </url>
+  <url>
+    <loc>https://multilang.uz/contact/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>"""
+    return HttpResponse(content, content_type='application/xml')

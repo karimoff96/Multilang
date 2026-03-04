@@ -15,6 +15,21 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def _invalidate_monitoring_cache():
+    """
+    Delete the centers-monitoring analytics cache key.
+    Called whenever a subscription is created, renewed, or status-changed
+    so the monitoring page reflects the change on next load instead of
+    waiting up to 5 minutes for TTL expiry.
+    Completely safe: silently swallows any Redis/cache errors.
+    """
+    try:
+        from django.core.cache import cache
+        cache.delete('billing:centers_monitoring_data')
+    except Exception:
+        pass
+
+
 @login_required
 def subscription_list(request):
     """List all subscriptions - Superuser only"""
@@ -261,6 +276,7 @@ def subscription_update_status(request, pk):
             performed_by=request.user
         )
         
+        _invalidate_monitoring_cache()  # reflect change immediately on monitoring page
         messages.success(request, _("Subscription status updated successfully!"))
     
     return redirect('billing:subscription_detail', pk=pk)
@@ -708,6 +724,7 @@ def convert_trial_to_paid(request, pk):
             pricing = TariffPricing.objects.get(pk=pricing_id)
             
             if subscription.convert_trial_to_paid(tariff, pricing):
+                _invalidate_monitoring_cache()  # reflect change immediately
                 messages.success(request, _("Trial subscription converted to paid subscription successfully!"))
                 return redirect('billing:subscription_detail', pk=pk)
             else:
@@ -778,6 +795,7 @@ def subscription_renew(request, pk):
             )
             
             messages.success(request, _("Subscription renewed successfully!"))
+            _invalidate_monitoring_cache()  # reflect change immediately
             return redirect('billing:subscription_detail', pk=pk)
             
         except Exception as e:
@@ -859,10 +877,31 @@ def centers_monitoring(request):
     sort_by = request.GET.get('sort', 'payments')  # payments, age, subscriptions
     search_query = request.GET.get('search', '')
     
-    # Get all centers analytics
-    centers_data = SubscriptionAnalytics.get_all_centers_analytics()
+    # ------------------------------------------------------------------
+    # Redis cache strategy (5-minute TTL, single shared key):
+    # get_all_centers_analytics() is the most expensive query in the project.
+    # Only superusers reach this view, so one shared key is safe.
+    # On Redis failure the code falls through to the original DB call.
+    # ------------------------------------------------------------------
+    CACHE_KEY = 'billing:centers_monitoring_data'
+    CACHE_TTL = 300  # 5 minutes
+
+    centers_data = None
+    try:
+        from django.core.cache import cache
+        centers_data = cache.get(CACHE_KEY)
+    except Exception:
+        pass  # Redis unavailable — fall through
+
+    if centers_data is None:
+        centers_data = SubscriptionAnalytics.get_all_centers_analytics()
+        try:
+            from django.core.cache import cache
+            cache.set(CACHE_KEY, centers_data, timeout=CACHE_TTL)
+        except Exception:
+            pass  # Redis write failure is harmless
     
-    # Apply search filter
+    # Apply search filter (in-memory, on cached or freshly fetched data)
     if search_query:
         centers_data = [
             item for item in centers_data 

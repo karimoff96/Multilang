@@ -16,6 +16,18 @@ from billing.decorators import require_feature, require_active_subscription
 logger = logging.getLogger(__name__)
 
 
+def _invalidate_notification_cache(user):
+    """
+    Delete the per-user notification cache key.
+    Completely safe: wrapped in try/except so Redis failures are silently ignored.
+    """
+    try:
+        from django.core.cache import cache
+        cache.delete(f'notif:user:{user.pk}')
+    except Exception:
+        pass
+
+
 @login_required
 @require_POST
 def mark_notification_read(request, notification_id):
@@ -23,6 +35,7 @@ def mark_notification_read(request, notification_id):
     try:
         notification = AdminNotification.objects.get(id=notification_id)
         notification.mark_as_read(request.user)
+        _invalidate_notification_cache(request.user)  # keep badge in sync
         return JsonResponse({'success': True})
     except AdminNotification.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Notification not found'}, status=404)
@@ -32,41 +45,74 @@ def mark_notification_read(request, notification_id):
 @require_POST
 def mark_all_notifications_read(request):
     """Mark all notifications as read for the current user"""
-    from organizations.models import AdminProfile
-    
     try:
-        profile = request.user.admin_profile
-        if profile.role == 'super_admin' or request.user.is_superuser:
+        from django.utils import timezone as tz
+
+        # Mirror the exact same scoping logic used in
+        # AdminNotification.get_unread_for_user() so the mark-all operation
+        # covers precisely the notifications the user can see.
+        if request.user.is_superuser:
             notifications = AdminNotification.objects.filter(is_read=False)
-        elif profile.role == 'center_admin':
-            notifications = AdminNotification.objects.filter(
-                is_read=False,
-                center=profile.translation_center
-            )
         else:
-            notifications = AdminNotification.objects.filter(
-                is_read=False,
-                branch=profile.branch
-            )
-        
-        from django.utils import timezone
+            profile = getattr(request.user, 'admin_profile', None)
+            if not profile:
+                return JsonResponse({'success': False, 'error': 'No profile'}, status=403)
+
+            if profile.role and profile.role.name == 'owner':
+                notifications = AdminNotification.objects.filter(
+                    is_read=False, center=profile.center
+                )
+            elif profile.branch:
+                notifications = AdminNotification.objects.filter(
+                    is_read=False, branch=profile.branch
+                )
+            elif profile.center:
+                notifications = AdminNotification.objects.filter(
+                    is_read=False, center=profile.center
+                )
+            else:
+                notifications = AdminNotification.objects.filter(is_read=False)
+
         count = notifications.update(
             is_read=True,
             read_by=request.user,
-            read_at=timezone.now()
+            read_at=tz.now()
         )
-        
+
+        _invalidate_notification_cache(request.user)  # bust cache immediately
         return JsonResponse({'success': True, 'count': count})
-    except (AttributeError, AdminProfile.DoesNotExist):
-        return JsonResponse({'success': False, 'error': 'Access denied'}, status=403)
+    except Exception as e:
+        logger.warning(f"mark_all_notifications_read failed: {e}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
 @login_required
 def get_notifications(request):
-    """Get unread notifications for the current user (for AJAX refresh)"""
+    """
+    Get unread notifications for the current user (for AJAX refresh).
+
+    Redis cache strategy (30-second TTL, per-user key):
+    - Cache hit  → return instantly, zero DB queries.
+    - Cache miss → run original DB queries, store result, return data.
+    - Redis down → run original DB queries (try/except guarantees this).
+    Cache is invalidated immediately when the user reads a notification.
+    """
+    CACHE_KEY = f'notif:user:{request.user.pk}'
+    CACHE_TTL = 30  # seconds — acceptable staleness for a notification badge
+
+    # ── Fast path: try cache first ──────────────────────────────────────
+    try:
+        from django.core.cache import cache
+        cached = cache.get(CACHE_KEY)
+        if cached is not None:
+            return JsonResponse(cached)
+    except Exception:
+        pass  # Redis unavailable — fall through to DB
+
+    # ── Slow path: query DB (original logic, unchanged) ──────────────────
     notifications = AdminNotification.get_unread_for_user(request.user, limit=10)
     count = AdminNotification.count_unread_for_user(request.user)
-    
+
     data = {
         'count': count,
         'notifications': [
@@ -80,8 +126,61 @@ def get_notifications(request):
             for n in notifications
         ]
     }
-    
+
+    # ── Store in cache for next request ─────────────────────────────────
+    try:
+        from django.core.cache import cache
+        cache.set(CACHE_KEY, data, timeout=CACHE_TTL)
+    except Exception:
+        pass  # Redis write failure is harmless
+
     return JsonResponse(data)
+
+
+@login_required
+def notifications_list(request):
+    """
+    Full paginated notifications page for the current user's scope.
+    Supports ?filter=all (default) or ?filter=unread.
+    """
+    filter_type = request.GET.get('filter', 'all')
+
+    # Build base queryset using same scoping as get_unread_for_user
+    if request.user.is_superuser:
+        qs = AdminNotification.objects.all()
+    else:
+        profile = getattr(request.user, 'admin_profile', None)
+        if not profile:
+            qs = AdminNotification.objects.none()
+        elif profile.role and profile.role.name == 'owner':
+            qs = AdminNotification.objects.filter(center=profile.center)
+        elif profile.branch:
+            qs = AdminNotification.objects.filter(branch=profile.branch)
+        elif profile.center:
+            qs = AdminNotification.objects.filter(center=profile.center)
+        else:
+            qs = AdminNotification.objects.all()
+
+    qs = qs.select_related('branch', 'center').order_by('-created_at')
+
+    total_count = qs.count()
+    unread_count = qs.filter(is_read=False).count()
+
+    if filter_type == 'unread':
+        qs = qs.filter(is_read=False)
+
+    paginator = Paginator(qs, 20)
+    page_number = request.GET.get('page', 1)
+    notifications = paginator.get_page(page_number)
+
+    return render(request, 'core/notifications.html', {
+        'notifications': notifications,
+        'total_count': total_count,
+        'unread_count': unread_count,
+        'filter': filter_type,
+        'title': _('Notifications'),
+        'subTitle': _('All Notifications'),
+    })
 
 
 # Period choices for audit log filtering

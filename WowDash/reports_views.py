@@ -242,12 +242,17 @@ def financial_reports(request):
             }
         )
 
-    # Revenue by branch (if user has financial management permission)
+    # Revenue by branch (visible to anyone who can view financial reports)
     branch_revenue = []
     has_financial_access = request.user.is_superuser or (
         hasattr(request.user, "admin_profile")
         and request.user.admin_profile
-        and request.user.admin_profile.has_permission("can_manage_financial")
+        and (
+            request.user.admin_profile.has_permission("can_manage_financial")
+            or request.user.admin_profile.has_permission("can_view_financial_reports")
+            or request.user.admin_profile.has_permission("can_view_reports")
+            or request.user.admin_profile.has_permission("can_manage_orders")
+        )
     )
 
     if has_financial_access:

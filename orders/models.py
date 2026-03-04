@@ -1067,6 +1067,51 @@ def track_order_revenue(sender, instance, **kwargs):
                 traceback.print_exc()
 
 
+@receiver(post_save, sender=Order)
+def update_realtime_order_cache(sender, instance, created, **kwargs):
+    """
+    Update Redis cache timestamps when a new order is created.
+    This powers the lightweight polling-based real-time update feature.
+    Writes to:
+      - realtime:orders:latest_ts            (global, for superusers)
+      - realtime:orders:latest_ts:b:<id>     (per branch)
+      - realtime:orders:latest_ts:c:<id>     (per center/org)
+    All keys have a 24-hour TTL and are O(1) to read.
+    Failures are silently swallowed so they never block order creation.
+    """
+    if not created:
+        return
+    try:
+        import time
+        from django.core.cache import cache
+
+        ts = time.time()
+        cache_timeout = 86400  # 24 hours
+
+        keys = ['realtime:orders:latest_ts']
+        if instance.branch_id:
+            keys.append(f'realtime:orders:latest_ts:b:{instance.branch_id}')
+            # Safely access center_id without triggering extra query if already
+            # prefetched; fall back to a tiny query otherwise.
+            center_id = getattr(instance.branch, 'center_id', None)
+            if center_id is None and instance.branch_id:
+                try:
+                    from organizations.models import Branch
+                    center_id = Branch.objects.filter(pk=instance.branch_id).values_list('center_id', flat=True).first()
+                except Exception:
+                    pass
+            if center_id:
+                keys.append(f'realtime:orders:latest_ts:c:{center_id}')
+
+        for key in keys:
+            cache.set(key, ts, timeout=cache_timeout)
+
+        logger.debug(f"✓ Realtime cache updated for new order #{instance.id} (keys: {keys})")
+    except Exception as e:
+        # Never let a cache failure break order creation
+        logger.warning(f"Realtime cache update skipped for order #{instance.id}: {e}")
+
+
 class BulkPayment(models.Model):
     """
     Track bulk payments from customers/agencies that cover multiple orders.

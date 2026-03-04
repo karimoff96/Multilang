@@ -6,7 +6,7 @@ from django.urls import path
 from .views import (
     ordersList, orderDetail, orderEdit, updateOrderStatus, deleteOrder,
     assignOrder, unassignOrder, receivePayment, completeOrder,
-    api_order_stats, api_branch_staff, myOrders, orderCreate,
+    api_order_stats, api_branch_staff, api_poll_new_orders, myOrders, orderCreate,
     record_order_payment, add_order_extra_fee, get_order_payment_info,
     bulk_delete_orders, search_customers, search_categories, search_products,
     edit_order_price,
@@ -56,6 +56,7 @@ urlpatterns = [
     # API endpoints
     path("api/stats/", api_order_stats, name="api_order_stats"),
     path("api/branch/<int:branch_id>/staff/", api_branch_staff, name="api_branch_staff"),
+    path("api/poll-new-orders/", api_poll_new_orders, name="api_poll_new_orders"),
     path("api/search-customers/", search_customers, name="search_customers"),
     path("api/search-categories/", search_categories, name="search_categories"),
     path("api/search-products/", search_products, name="search_products"),

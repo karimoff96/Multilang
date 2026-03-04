@@ -63,17 +63,37 @@
                     </div>
                 </div><!-- Language dropdown end -->
                 <div class="dropdown">
-                    <button class="{% if unread_notifications_count > 0 %}has-indicator{% endif %} w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" type="button" data-bs-toggle="dropdown">
+                    <button class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative" type="button" data-bs-toggle="dropdown" id="notifBellBtn">
                         <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
+                        <!-- Live unread count badge -->
+                        <span id="notifBadge"
+                              class="position-absolute badge rounded-pill bg-danger"
+                              style="font-size:10px; min-width:18px; line-height:1.2; padding:2px 5px;
+                                     top:-4px; right:-4px;
+                                     {% if unread_notifications_count == 0 %}display:none;{% endif %}">
+                            {{ unread_notifications_count|default:0 }}
+                        </span>
                     </button>
                     <div class="dropdown-menu to-top dropdown-menu-lg p-0">
                         <div class="m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
                             <div>
                                 <h6 class="text-lg text-primary-light fw-semibold mb-0" data-i18n="navbar.notifications">Notifications</h6>
                             </div>
-                            {% if unread_notifications_count > 0 %}
-                            <span class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center">{{ unread_notifications_count|default:0 }}</span>
-                            {% endif %}
+                            <div class="d-flex align-items-center gap-8">
+                                <!-- Mark all as read button — only shown when there are unread -->
+                                <button type="button" id="markAllReadBtn"
+                                        onclick="markAllNotificationsRead()"
+                                        class="btn btn-sm text-secondary-light hover-text-primary px-6 py-4"
+                                        style="font-size:11px; line-height:1.2; {% if unread_notifications_count == 0 %}display:none;{% endif %}"
+                                        title="Mark all as read">
+                                    <iconify-icon icon="mdi:check-all" class="me-2"></iconify-icon>Mark all read
+                                </button>
+                                <span class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center"
+                                      id="notifDropdownCount"
+                                      {% if unread_notifications_count == 0 %}style="display:none"{% endif %}>
+                                    {{ unread_notifications_count|default:0 }}
+                                </span>
+                            </div>
                         </div>
 
                         <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
@@ -129,7 +149,7 @@
                         </div>
 
                         <div class="text-center py-12 px-16">
-                            <a href="{% url 'orders:ordersList' %}?has_pending_receipts=true" class="text-primary-600 fw-semibold text-md" data-i18n="navbar.seeAllNotifications">See All Notifications</a>
+                            <a href="{% url 'core:notifications_list' %}" class="text-primary-600 fw-semibold text-md" data-i18n="navbar.seeAllNotifications">See All Notifications</a>
                         </div>
 
                     </div>
@@ -188,6 +208,113 @@ function markNotificationRead(notificationId) {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}',
             'Content-Type': 'application/json',
         }
-    }).catch(err => console.log('Failed to mark notification as read:', err));
+    })
+    .then(() => pollNotifications())
+    .catch(err => console.log('Failed to mark notification as read:', err));
 }
+
+function markAllNotificationsRead() {
+    var btn = document.getElementById('markAllReadBtn');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
+
+    fetch('{% url "core:mark_all_notifications_read" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+        if (data && data.success) {
+            // Zero-out badge + count
+            updateNotifBadge(0);
+            // Swap notification list to empty-state message
+            var list = document.querySelector('.max-h-400-px.overflow-y-auto');
+            if (list) {
+                list.innerHTML = '<div class="px-24 py-12 text-center text-secondary-light">'
+                    + '<iconify-icon icon="mdi:bell-off-outline" class="text-xxl mb-2"></iconify-icon>'
+                    + '<p class="mb-0 text-sm">No new notifications</p></div>';
+            }
+        }
+    })
+    .catch(function() {})
+    .finally(function() {
+        if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+    });
+}
+
+// ================================================================
+// Live notification badge polling (every 15 seconds)
+// Uses the Redis-cached /notifications/get/ endpoint.
+// Updates both the bell badge and the count inside the dropdown.
+// Stops/resumes with Page Visibility API to avoid wasted requests.
+// ================================================================
+
+// Global helper so markAllNotificationsRead() can also call it
+function updateNotifBadge(count) {
+    var badge         = document.getElementById('notifBadge');
+    var dropdownCount = document.getElementById('notifDropdownCount');
+    var markAllBtn    = document.getElementById('markAllReadBtn');
+
+    if (badge) {
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.style.display = '';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+    if (dropdownCount) {
+        if (count > 0) {
+            dropdownCount.textContent = count > 99 ? '99+' : count;
+            dropdownCount.style.display = '';
+        } else {
+            dropdownCount.style.display = 'none';
+        }
+    }
+    // Show/hide the "Mark all read" button together with the count
+    if (markAllBtn) {
+        markAllBtn.style.display = count > 0 ? '' : 'none';
+    }
+}
+
+(function () {
+    var POLL_URL  = '{% url "core:get_notifications" %}';
+    var POLL_MS   = 15000;   // 15 s while tab visible
+    var IDLE_MS   = 60000;   // 60 s when tab hidden
+    var timer     = null;
+
+    function pollNotifications() {
+        fetch(POLL_URL, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(data) {
+            if (data && typeof data.count === 'number') {
+                updateNotifBadge(data.count);
+            }
+        })
+        .catch(function() { /* silent — network error, try again next tick */ })
+        .finally(function() {
+            var interval = document.hidden ? IDLE_MS : POLL_MS;
+            timer = setTimeout(pollNotifications, interval);
+        });
+    }
+
+    // Expose so markNotificationRead() can trigger an immediate refresh
+    window.pollNotifications = pollNotifications;
+
+    // Pause/resume on visibility change
+    document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) {
+            clearTimeout(timer);
+            // Poll immediately on tab focus so badge is always current
+            timer = setTimeout(pollNotifications, 500);
+        }
+    });
+
+    // Kick off after 3 s (let page finish loading first)
+    timer = setTimeout(pollNotifications, 3000);
+})();
 </script>

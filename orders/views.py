@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from datetime import datetime, time
 from decimal import Decimal, InvalidOperation
+import os
 import logging
 from .models import Order, OrderMedia, OrderPriceChange
 logger = logging.getLogger(__name__)
@@ -1138,12 +1139,34 @@ def completeOrder(request, order_id):
 
 @login_required(login_url='admin_login')
 def api_order_stats(request):
-    """API endpoint for order statistics"""
+    """
+    API endpoint for order statistics.
+
+    Redis cache strategy (60-second TTL, per-user key):
+    - On hit:  return immediately — zero additional DB queries.
+    - On miss: run the original 10 COUNT queries, cache result, return data.
+    - On Redis failure: run the original 10 COUNT queries (try/except).
+    Invalidation is TTL-based (60 s is accurate enough for a stats bar).
+    For immediate accuracy after status changes, the TTL is kept short.
+    """
+    CACHE_KEY = f'orderstats:user:{request.user.pk}'
+    CACHE_TTL = 60  # seconds
+
+    # ── Fast path ──────────────────────────────────────────────────
+    try:
+        from django.core.cache import cache
+        cached = cache.get(CACHE_KEY)
+        if cached is not None:
+            return JsonResponse(cached)
+    except Exception:
+        pass  # Redis unavailable — fall through
+
+    # ── Slow path: original DB logic (unchanged) ───────────────────
     if request.user.is_superuser:
         base_orders = Order.objects.all()
     else:
         base_orders = get_user_orders(request.user)
-    
+
     stats = {
         'total': base_orders.count(),
         'pending': base_orders.filter(status='pending').count(),
@@ -1158,8 +1181,122 @@ def api_order_stats(request):
             status__in=['completed', 'cancelled']
         ).count(),
     }
-    
+
+    # ── Store in cache ─────────────────────────────────────────
+    try:
+        from django.core.cache import cache
+        cache.set(CACHE_KEY, stats, timeout=CACHE_TTL)
+    except Exception:
+        pass  # Redis write failure is harmless
+
     return JsonResponse(stats)
+
+
+@login_required(login_url='admin_login')
+@require_feature('orders_basic')
+def api_poll_new_orders(request):
+    """
+    Lightweight polling endpoint for real-time new-order detection.
+
+    Strategy (zero DB hit on the happy path):
+      1. Read a single Redis key (O(1)) that holds the unix timestamp of the
+         last created order in scope.
+      2. Compare with the client's `since` timestamp.
+      3. If the cache key is absent OR its value <= since  →  no new orders,
+         return immediately with no DB query.
+      4. Only when cache says "something new" do we hit the DB for the exact
+         count – and even then it's a cheap COUNT query on an indexed field.
+
+    Query params:
+      since  (float, required) – unix timestamp the client last polled from.
+
+    Response JSON:
+      {has_new: bool, count: int, latest_ts: float}
+    """
+    # Validate `since`
+    try:
+        since_ts = float(request.GET.get('since', 0))
+    except (ValueError, TypeError):
+        return JsonResponse({'has_new': False, 'count': 0, 'latest_ts': 0})
+
+    if since_ts <= 0:
+        return JsonResponse({'has_new': False, 'count': 0, 'latest_ts': 0})
+
+    import time
+    from django.core.cache import cache
+
+    # ------------------------------------------------------------------
+    # Detect whether a shared Redis cache backend is actually in use.
+    # If not (e.g. LocMemCache in dev / DummyCache), skip the fast-path
+    # and go directly to the DB – this ensures correctness in all
+    # environments, at the cost of one lightweight COUNT query per poll.
+    # ------------------------------------------------------------------
+    use_redis = (os.getenv('USE_REDIS', 'False').lower() == 'true')
+
+    # ------------------------------------------------------------------
+    # Fast-path: check Redis cache without touching the database
+    # ------------------------------------------------------------------
+    has_new_in_cache = False
+
+    try:
+        if not use_redis:
+            # No shared cache – skip straight to DB check
+            has_new_in_cache = True
+        elif request.user.is_superuser:
+            latest_ts = cache.get('realtime:orders:latest_ts')
+            has_new_in_cache = (latest_ts is not None and latest_ts > since_ts)
+
+        elif hasattr(request, 'admin_profile') and request.admin_profile:
+            ap = request.admin_profile
+            # Check per-branch cache keys for all branches the user can access
+            try:
+                branch_ids = list(ap.get_accessible_branches().values_list('id', flat=True))
+            except Exception:
+                branch_ids = []
+
+            for branch_id in branch_ids:
+                branch_ts = cache.get(f'realtime:orders:latest_ts:b:{branch_id}')
+                if branch_ts and branch_ts > since_ts:
+                    has_new_in_cache = True
+                    break
+        else:
+            return JsonResponse({'has_new': False, 'count': 0, 'latest_ts': since_ts})
+
+    except Exception:
+        # If Redis is down, fall through to the DB check below
+        has_new_in_cache = True  # be optimistic – better a false positive than missing orders
+
+    # ------------------------------------------------------------------
+    # If cache shows no new orders, return immediately (no DB hit)
+    # ------------------------------------------------------------------
+    if not has_new_in_cache:
+        return JsonResponse({'has_new': False, 'count': 0, 'latest_ts': since_ts})
+
+    # ------------------------------------------------------------------
+    # Cache signals new orders – confirm count via a single DB query
+    # ------------------------------------------------------------------
+    try:
+        from django.utils import timezone as tz_utils
+        import datetime
+
+        since_dt = datetime.datetime.fromtimestamp(since_ts, tz=datetime.timezone.utc)
+
+        if request.user.is_superuser:
+            qs = Order.objects.filter(created_at__gt=since_dt)
+        elif request.admin_profile:
+            qs = get_user_orders(request.user).filter(created_at__gt=since_dt)
+        else:
+            return JsonResponse({'has_new': False, 'count': 0, 'latest_ts': since_ts})
+
+        count = qs.count()
+        if count > 0:
+            return JsonResponse({'has_new': True, 'count': count, 'latest_ts': time.time()})
+
+        return JsonResponse({'has_new': False, 'count': 0, 'latest_ts': since_ts})
+
+    except Exception as e:
+        logger.warning(f"api_poll_new_orders DB check failed: {e}")
+        return JsonResponse({'has_new': False, 'count': 0, 'latest_ts': since_ts})
 
 
 @login_required(login_url='admin_login')

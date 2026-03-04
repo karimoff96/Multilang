@@ -6,32 +6,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ==========================================
+         SEO: Title, Description, Keywords
+    ========================================== -->
     {% if current_language == 'uz' %}
-    <meta name="description" content="MultiLang - Tarjima byurolarini boshqarish uchun zamonaviy SaaS platforma. Buyurtmalarni avtomatlashtirish, Telegram integratsiya, analitika va boshqalar.">
-    <meta name="keywords" content="tarjima boshqaruvi, tarjima byurosi, telegram bot, hujjatlar, tarjima, avtomatlashtirish">
-    <title>MultiLang - Tarjima Boshqaruv Platformasi</title>
+    <title>MultiLang — Tarjima Byurosini Boshqarish Platformasi | multilang.uz</title>
+    <meta name="description" content="MultiLang — tarjima byurosi uchun zamonaviy SaaS platforma. Telegram bot orqali buyurtmalar, to'lovlar, analitika va xodimlarni boshqaring. Bepul sinab ko'ring!">
+    <meta name="keywords" content="tarjima byurosi dasturi, tarjima boshqaruvi, tarjima CRM, telegram bot tarjima, hujjat tarjima, tarjima avtomatlashtirish, MultiLang, multilang.uz, byuro boshqaruvi, o'zbek tarjima platforma">
     {% elif current_language == 'en' %}
-    <meta name="description" content="MultiLang - Modern SaaS platform for translation bureau management. Order automation, Telegram integration, analytics and more.">
-    <meta name="keywords" content="translation management, translation bureau, telegram bot, documents, translation, automation">
-    <title>MultiLang - Translation Management Platform</title>
+    <title>MultiLang — Translation Bureau Management Software | multilang.uz</title>
+    <meta name="description" content="MultiLang is a modern SaaS platform for translation bureaus. Manage orders, payments, staff and analytics via Telegram bot. Start free today!">
+    <meta name="keywords" content="translation management software, translation bureau CRM, translation office software, telegram bot translation, document translation system, translation automation, MultiLang, multilang.uz">
     {% else %}
-    <meta name="description" content="MultiLang - Современная SaaS платформа для управления бюро переводов. Автоматизация заказов, Telegram интеграция, аналитика и многое другое.">
-    <meta name="keywords" content="translation management, бюро переводов, telegram bot, документы, перевод, автоматизация">
-    <title>MultiLang - Платформа Управления Переводами</title>
+    <title>MultiLang — Система Управления Бюро Переводов | multilang.uz</title>
+    <meta name="description" content="MultiLang — современная SaaS платформа для управления бюро переводов. Заказы, оплата, аналитика и персонал через Telegram бот. Попробуйте бесплатно!">
+    <meta name="keywords" content="программа для бюро переводов, управление бюро переводов, CRM бюро переводов, telegram бот переводы, автоматизация бюро переводов, MultiLang, multilang.uz, система管理 переводов, SaaS переводы">
     {% endif %}
-    
+
+    <!-- Robots & Indexing -->
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="author" content="MultiLang">
+    <meta name="revisit-after" content="7 days">
+    <!-- Google Search Console verification -->
+    <meta name="google-site-verification" content="145d3096a17fea6d" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://multilang.uz/">
+
+    <!-- Hreflang for multilingual SEO -->
+    <link rel="alternate" hreflang="ru" href="https://multilang.uz/">
+    <link rel="alternate" hreflang="uz" href="https://multilang.uz/">
+    <link rel="alternate" hreflang="en" href="https://multilang.uz/">
+    <link rel="alternate" hreflang="x-default" href="https://multilang.uz/">
+
+    <!-- ==========================================
+         Open Graph (Facebook, LinkedIn, Telegram)
+    ========================================== -->
+    {% if current_language == 'uz' %}
+    <meta property="og:title" content="MultiLang — Tarjima Byurosini Boshqarish Platformasi">
+    <meta property="og:description" content="Tarjima byurongizdagi barcha jarayonlarni avtomatlashtiring: buyurtmalar, to'lovlar, xodimlar va analitika — barchasi bitta platformada.">
+    <meta property="og:locale" content="uz_UZ">
+    {% elif current_language == 'en' %}
+    <meta property="og:title" content="MultiLang — Translation Bureau Management Software">
+    <meta property="og:description" content="Automate your translation bureau: orders, payments, staff and analytics — all in one platform with Telegram integration.">
+    <meta property="og:locale" content="en_US">
+    {% else %}
+    <meta property="og:title" content="MultiLang — Система Управления Бюро Переводов">
+    <meta property="og:description" content="Автоматизируйте бюро переводов: заказы, оплата, сотрудники и аналитика — всё в одной платформе с Telegram интеграцией.">
+    <meta property="og:locale" content="ru_RU">
+    {% endif %}
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://multilang.uz/">
+    <meta property="og:site_name" content="MultiLang">
+    <meta property="og:image" content="https://multilang.uz/static/images/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="MultiLang — Translation Bureau Management Platform">
+
+    <!-- ==========================================
+         Twitter / X Card
+    ========================================== -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@multilanguz">
+    {% if current_language == 'uz' %}
+    <meta name="twitter:title" content="MultiLang — Tarjima Byurosini Boshqarish Platformasi">
+    <meta name="twitter:description" content="Tarjima byurongizdagi barcha jarayonlarni avtomatlashtiring bitta platformada.">
+    {% elif current_language == 'en' %}
+    <meta name="twitter:title" content="MultiLang — Translation Bureau Management Software">
+    <meta name="twitter:description" content="Automate your translation bureau with Telegram bot, smart orders and analytics.">
+    {% else %}
+    <meta name="twitter:title" content="MultiLang — Система Управления Бюро Переводов">
+    <meta name="twitter:description" content="Автоматизируйте бюро переводов с Telegram ботом, умными заказами и аналитикой.">
+    {% endif %}
+    <meta name="twitter:image" content="https://multilang.uz/static/images/og-image.png">
+
+    <!-- ==========================================
+         JSON-LD Structured Data (Schema.org)
+    ========================================== -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "MultiLang",
+      "url": "https://multilang.uz",
+      "logo": "https://multilang.uz/static/images/favicon.png",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "Modern SaaS platform for translation bureau management with Telegram bot integration, order automation, payment tracking and analytics.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "UZS",
+        "description": "Free trial available"
+      },
+      "provider": {
+        "@type": "Organization",
+        "name": "MultiLang",
+        "url": "https://multilang.uz",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "sales",
+          "availableLanguage": ["Russian", "Uzbek", "English"]
+        }
+      },
+      "inLanguage": ["ru", "uz", "en"],
+      "featureList": [
+        "Telegram Bot Integration",
+        "Order Management",
+        "Payment Tracking",
+        "Staff Management",
+        "Analytics & Reports",
+        "Multi-branch Support",
+        "Multi-language Interface"
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "MultiLang",
+      "url": "https://multilang.uz",
+      "description": "Translation bureau management platform",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://multilang.uz/#contact",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
-    
+    <link rel="apple-touch-icon" href="{% static 'images/favicon.png' %}">
+    <meta name="theme-color" content="#487FFF">
+
+    <!-- Preconnect to external origins for faster load (Core Web Vitals) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -507,23 +632,80 @@
             color: rgba(255, 255, 255, 0.6);
         }
         
+        /* Hamburger toggle button */
+        .nav-hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            z-index: 1001;
+        }
+        .nav-hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: var(--text-dark);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+        .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* Desktop: nav items inline */
+        .nav-items {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
+            .hero-title { font-size: 2rem; }
+            .hero-subtitle { font-size: 1rem; }
+            .section-title { font-size: 1.8rem; }
+            .pricing-card.featured { transform: scale(1); }
+            .hero-stats { gap: 1.5rem; }
+            .stat-number { font-size: 1.8rem; }
+            .contact-form { padding: 1.5rem; }
+            .section { padding: 3.5rem 0; }
+
+            .landing-navbar { position: fixed; } /* keep fixed, dropdown uses fixed positioning */
+
+            /* Show hamburger, hide inline nav */
+            .nav-hamburger { display: flex; }
+            .nav-items {
+                display: none;
+                position: fixed;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                align-items: stretch;
+                padding: 1rem 1.5rem 1.5rem;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+                border-top: 1px solid rgba(0, 0, 0, 0.06);
+                z-index: 999;
+                gap: 1rem;
             }
-            
-            .hero-subtitle {
-                font-size: 1.1rem;
-            }
-            
-            .section-title {
-                font-size: 2rem;
-            }
-            
-            .pricing-card.featured {
-                transform: scale(1);
-            }
+            .nav-items.open { display: flex; }
+            .lang-switcher { justify-content: center; padding: 0.25rem 0; }
+            .nav-items .btn-primary-custom { text-align: center; width: 100%; }
+
+            .navbar-brand span { font-size: 1.4rem; }
+            .logo-placeholder { width: 36px; height: 36px; font-size: 1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title { font-size: 1.7rem; }
+            .hero-buttons { flex-direction: column; }
+            .hero-buttons .btn { width: 100%; text-align: center; }
         }
     </style>
 </head>
@@ -537,8 +719,16 @@
                     <div class="logo-placeholder">ML</div>
                     <span>MultiLang</span>
                 </a>
-                
-                <div class="d-flex align-items-center gap-4">
+
+                <!-- Hamburger — mobile only -->
+                <button class="nav-hamburger" id="navHamburger" onclick="toggleLandingNav()" aria-label="Toggle navigation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <!-- Collapsible nav items -->
+                <div class="nav-items" id="navItems">
                     <div class="lang-switcher">
                         <a href="{% url 'change_language' 'ru' %}" class="lang-btn {% if current_language == 'ru' %}active{% endif %}">RU</a>
                         <a href="{% url 'change_language' 'uz' %}" class="lang-btn {% if current_language == 'uz' %}active{% endif %}">UZ</a>
@@ -1323,6 +1513,32 @@
             });
         });
         
+        // Mobile hamburger nav toggle
+        function toggleLandingNav() {
+            const hamburger = document.getElementById('navHamburger');
+            const navItems = document.getElementById('navItems');
+            hamburger.classList.toggle('open');
+            navItems.classList.toggle('open');
+        }
+
+        // Close mobile nav on outside click
+        document.addEventListener('click', function(e) {
+            const hamburger = document.getElementById('navHamburger');
+            const navItems = document.getElementById('navItems');
+            if (hamburger && navItems && !hamburger.contains(e.target) && !navItems.contains(e.target)) {
+                hamburger.classList.remove('open');
+                navItems.classList.remove('open');
+            }
+        });
+
+        // Close mobile nav when an anchor link is clicked
+        document.querySelectorAll('#navItems a[href^="#"]').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navHamburger').classList.remove('open');
+                document.getElementById('navItems').classList.remove('open');
+            });
+        });
+
         // Handle more features tooltip
         document.querySelectorAll('.more-features-trigger').forEach(trigger => {
             const tooltip = trigger.nextElementSibling;

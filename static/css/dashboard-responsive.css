@@ -988,3 +988,188 @@
         overflow-x: visible;
     }
 }
+
+/* ============================================
+   22. ORDER DETAIL / EDIT — MOBILE
+   ============================================ */
+
+/* Order card header: action buttons wrap on small screens */
+@media (max-width: 575px) {
+    .card-header .d-flex.align-items-center.gap-2 {
+        flex-wrap: wrap;
+        gap: 6px !important;
+    }
+
+    /* Print/export buttons shrink */
+    .card-header .btn-sm {
+        padding: 5px 10px !important;
+        font-size: 0.75rem !important;
+    }
+
+    /* Status badge row */
+    .card-header .badge {
+        font-size: 0.7rem !important;
+    }
+
+    /* Price summary block stacks */
+    .order-price-summary .col-sm-4 {
+        width: 50% !important;
+    }
+}
+
+/* Price breakdown table inside order card */
+@media (max-width: 767px) {
+    .bordered-table th,
+    .bordered-table td {
+        padding: 10px !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* tfoot grand total row */
+    .bordered-table tfoot td {
+        font-size: 0.9rem !important;
+    }
+}
+
+/* ============================================
+   23. REPORT PAGES — MOBILE
+   ============================================ */
+
+@media (max-width: 767px) {
+    /* Filter bar wraps neatly */
+    .report-filter-row .form-select,
+    .report-filter-row .form-control {
+        font-size: 0.875rem !important;
+    }
+
+    /* Metric cards: 2 per row on xs */
+    .col-xxl-3.col-sm-6 {
+        width: 50%;
+    }
+
+    /* Revenue/chart cards full width on mobile already via col-xxl-8 stacking */
+    [class*="col-xxl-"] {
+        width: 100%;
+    }
+}
+
+/* ============================================
+   24. ROLE FORM — MOBILE
+   ============================================ */
+
+@media (max-width: 767px) {
+    /* Permission checkboxes: 2 columns instead of 3 */
+    .permission-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    /* Preset buttons: stack vertically */
+    .role-presets .btn {
+        font-size: 0.75rem !important;
+        padding: 6px 10px !important;
+    }
+}
+
+/* ============================================
+   25. AUTHENTICATION PAGES — MOBILE
+   ============================================ */
+
+@media (max-width: 575px) {
+    .auth-card {
+        margin: 0 !important;
+        border-radius: 0 !important;
+        min-height: 100vh;
+    }
+}
+
+/* ============================================
+   26. SIDEBAR PROFILE / USER INFO — MOBILE
+   ============================================ */
+
+@media (max-width: 1199px) {
+    /* Sidebar profile block */
+    .sidebar-user {
+        padding: 12px 16px !important;
+    }
+
+    .sidebar-user .user-name {
+        font-size: 0.875rem !important;
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* ============================================
+   27. MODALS on MOBILE — FULL SCREEN FEEL
+   ============================================ */
+
+@media (max-width: 575px) {
+    .modal-dialog:not(.modal-sm) {
+        margin: 0.5rem !important;
+        max-width: calc(100vw - 1rem) !important;
+    }
+
+    .modal-header {
+        padding: 12px 16px !important;
+    }
+
+    .modal-footer {
+        padding: 10px 16px !important;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .modal-footer .btn {
+        flex: 1 1 auto;
+        min-width: 80px;
+    }
+}
+
+/* ============================================
+   28. BREADCRUMB — TRUNCATE ON MOBILE
+   ============================================ */
+
+@media (max-width: 575px) {
+    .breadcrumb {
+        font-size: 0.75rem !important;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        padding: 0 4px !important;
+    }
+
+    .page-title {
+        font-size: 1.1rem !important;
+    }
+
+    .page-subtitle {
+        font-size: 0.75rem !important;
+    }
+}
+
+/* ============================================
+   29. GENERAL CARD IMPROVEMENTS ON MOBILE
+   ============================================ */
+
+@media (max-width: 767px) {
+    .card-body {
+        padding: 14px !important;
+    }
+
+    .card-header {
+        padding: 12px 14px !important;
+    }
+}
+
+@media (max-width: 575px) {
+    /* Stats row: allow xs wrapping */
+    .row.gy-4 > [class*="col-sm-6"] {
+        width: 50%;
+    }
+
+    .row.gy-4 > [class*="col-sm-4"] {
+        width: 50%;
+    }
+}

@@ -163,6 +163,23 @@
     {% endif %}
 </div>
 
+<!-- ================================================================
+     Real-time new-order notification banner (hidden until new orders arrive)
+     ================================================================ -->
+<div id="realtimeOrderBanner" class="alert alert-primary d-flex align-items-center justify-content-between mb-16 py-10 px-20 shadow-sm" role="alert" style="display:none!important;border-radius:10px;">
+    <div class="d-flex align-items-center gap-10">
+        <span class="position-relative d-inline-flex">
+            <iconify-icon icon="solar:bell-bing-bold-duotone" class="text-primary-600 text-xl"></iconify-icon>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="realtimeBadge" style="font-size:10px;">0</span>
+        </span>
+        <span id="realtimeBannerText" class="fw-medium text-primary-600">{% trans "New orders have arrived" %}</span>
+        <span class="spinner-grow spinner-grow-sm text-primary ms-4" role="status" aria-hidden="true"></span>
+    </div>
+    <button type="button" class="btn btn-primary btn-sm px-16" id="realtimeReloadBtn">
+        <iconify-icon icon="solar:refresh-bold" class="me-4"></iconify-icon>{% trans "Load Now" %}
+    </button>
+</div>
+
 <div class="card h-100 p-0 radius-12">
     <div class="card-header border-bottom bg-base py-16 px-24">
         <form method="get" id="filterForm">
@@ -707,6 +724,92 @@ $(document).ready(function() {
         }
     });
     
+    // ================================================================
+    // Real-time order polling (Smart Polling + Redis cache)
+    // ================================================================
+    (function () {
+        'use strict';
+
+        var POLL_URL    = '{% url "orders:api_poll_new_orders" %}';
+        var POLL_MS     = 10000;   // 10 s while tab is visible
+        var IDLE_MS     = 60000;   // 60 s when tab is hidden / user idle
+        var sinceTs     = Date.now() / 1000;   // unix seconds, updated each poll
+        var newCount    = 0;
+        var pollTimer   = null;
+        var isVisible   = !document.hidden;
+
+        var $banner   = $('#realtimeOrderBanner');
+        var $badge    = $('#realtimeBadge');
+        var $text     = $('#realtimeBannerText');
+        var $reloadBtn = $('#realtimeReloadBtn');
+
+        // Show banner and update count label
+        function showBanner(count) {
+            $badge.text(count);
+            if (count === 1) {
+                $text.text('{% trans "1 new order has arrived" %}');
+            } else {
+                $text.text(count + ' {% trans "new orders have arrived" %}');
+            }
+            $banner.css('display', 'flex');
+        }
+
+        // Reload the page (preserving current URL / filters)
+        function reloadPage() {
+            window.location.reload();
+        }
+
+        // Reload button
+        $reloadBtn.on('click', reloadPage);
+
+        // Core poll function
+        function poll() {
+            if (!isVisible) {
+                pollTimer = setTimeout(poll, IDLE_MS);
+                return;
+            }
+            $.ajax({
+                url: POLL_URL,
+                type: 'GET',
+                data: { since: sinceTs },
+                dataType: 'json',
+                timeout: 8000,
+                success: function (data) {
+                    if (data.has_new && data.count > 0) {
+                        newCount = data.count;
+                        sinceTs  = data.latest_ts;   // advance window
+                        showBanner(newCount);
+                    }
+                    // If banner already shown, do not update sinceTs again so
+                    // the count keeps accumulating until user reloads.
+                },
+                error: function () {
+                    // Silent fail – just skip this tick
+                },
+                complete: function () {
+                    // Auto-reload 30 s after banner appears (user may be AFK)
+                    if (!newCount) {
+                        pollTimer = setTimeout(poll, POLL_MS);
+                    }
+                    // Once banner is shown, stop polling (page reload will restart everything)
+                }
+            });
+        }
+
+        // Page Visibility API – pause polling when tab is hidden
+        document.addEventListener('visibilitychange', function () {
+            isVisible = !document.hidden;
+            if (isVisible && !newCount) {
+                // Resume immediately on tab focus
+                clearTimeout(pollTimer);
+                pollTimer = setTimeout(poll, 500);
+            }
+        });
+
+        // Start polling after 5s (let page fully render first)
+        pollTimer = setTimeout(poll, 5000);
+    })();
+
     // Confirm bulk delete
     $('#confirmBulkDelete').on('click', function(e) {
         e.preventDefault();

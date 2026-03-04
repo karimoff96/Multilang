@@ -1,0 +1,171 @@
+{% extends '../layout/layout.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-16 gap-3">
+    <div class="d-flex align-items-center gap-8">
+        <iconify-icon icon="iconoir:bell" class="text-primary-600 text-xl"></iconify-icon>
+        <h6 class="mb-0 fw-semibold">{% trans "All Notifications" %}</h6>
+        <span class="badge bg-primary-100 text-primary-600 px-12 py-4">{{ total_count }}</span>
+    </div>
+    {% if unread_count > 0 %}
+    <button type="button" id="pageMarkAllReadBtn" class="btn btn-sm btn-outline-primary px-16" onclick="pageMarkAllRead()">
+        <iconify-icon icon="mdi:check-all" class="me-4"></iconify-icon>{% trans "Mark All as Read" %}
+    </button>
+    {% endif %}
+</div>
+
+<!-- Filter tabs -->
+<div class="d-flex align-items-center gap-8 mb-16">
+    <a href="?filter=all"
+       class="btn btn-sm {% if filter == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %} px-16">
+        {% trans "All" %} <span class="badge {% if filter == 'all' %}bg-white text-primary-600{% else %}bg-primary-100 text-primary-600{% endif %} ms-4">{{ total_count }}</span>
+    </a>
+    <a href="?filter=unread"
+       class="btn btn-sm {% if filter == 'unread' %}btn-primary{% else %}btn-outline-secondary{% endif %} px-16">
+        {% trans "Unread" %} <span class="badge {% if filter == 'unread' %}bg-white text-primary-600{% else %}bg-danger-100 text-danger-600{% endif %} ms-4">{{ unread_count }}</span>
+    </a>
+</div>
+
+<div class="card h-100 p-0 radius-12">
+    <div class="card-body p-0">
+        {% if notifications %}
+        <div class="list-group list-group-flush">
+            {% for n in notifications %}
+            <a href="{% if n.notification_type == 'receipt_pending' or n.notification_type == 'order_new' or n.notification_type == 'order_cancelled' or n.notification_type == 'order_completed' or n.notification_type == 'payment_confirmed' or n.notification_type == 'order_overdue' %}{% url 'orders:orderDetail' n.get_link_id %}{% elif n.notification_type == 'user_new' or n.notification_type == 'agency_new' %}{% url 'usersList' %}{% else %}#{% endif %}"
+               class="list-group-item list-group-item-action px-24 py-16 d-flex align-items-start gap-16 {% if not n.is_read %}bg-primary-50{% endif %}"
+               onclick="markReadAndGo(event, this, {{ n.id }})">
+
+                <!-- Icon -->
+                <span class="w-44-px h-44-px flex-shrink-0 rounded-circle d-flex justify-content-center align-items-center
+                    {% if n.notification_type == 'receipt_pending' %}bg-warning-subtle text-warning-main
+                    {% elif n.notification_type == 'order_new' %}bg-primary-subtle text-primary-main
+                    {% elif n.notification_type == 'order_cancelled' %}bg-danger-subtle text-danger-main
+                    {% elif n.notification_type == 'order_completed' %}bg-success-subtle text-success-main
+                    {% elif n.notification_type == 'payment_confirmed' %}bg-success-subtle text-success-main
+                    {% elif n.notification_type == 'user_new' %}bg-info-subtle text-info-main
+                    {% elif n.notification_type == 'agency_new' %}bg-purple-subtle text-purple-main
+                    {% elif n.notification_type == 'order_overdue' %}bg-danger-subtle text-danger-main
+                    {% else %}bg-neutral-200 text-secondary-main{% endif %}">
+                    {% if n.notification_type == 'receipt_pending' %}
+                        <iconify-icon icon="mdi:receipt-text-pending" class="text-xl"></iconify-icon>
+                    {% elif n.notification_type == 'order_new' %}
+                        <iconify-icon icon="mdi:cart-plus" class="text-xl"></iconify-icon>
+                    {% elif n.notification_type == 'order_cancelled' %}
+                        <iconify-icon icon="mdi:cart-remove" class="text-xl"></iconify-icon>
+                    {% elif n.notification_type == 'order_completed' %}
+                        <iconify-icon icon="mdi:cart-check" class="text-xl"></iconify-icon>
+                    {% elif n.notification_type == 'payment_confirmed' %}
+                        <iconify-icon icon="mdi:cash-check" class="text-xl"></iconify-icon>
+                    {% elif n.notification_type == 'user_new' %}
+                        <iconify-icon icon="mdi:account-plus" class="text-xl"></iconify-icon>
+                    {% elif n.notification_type == 'agency_new' %}
+                        <iconify-icon icon="mdi:domain" class="text-xl"></iconify-icon>
+                    {% elif n.notification_type == 'order_overdue' %}
+                        <iconify-icon icon="mdi:clock-alert-outline" class="text-xl"></iconify-icon>
+                    {% else %}
+                        <iconify-icon icon="mdi:bell-outline" class="text-xl"></iconify-icon>
+                    {% endif %}
+                </span>
+
+                <!-- Text -->
+                <div class="flex-grow-1 min-w-0">
+                    <div class="d-flex align-items-center justify-content-between gap-8 mb-4">
+                        <h6 class="text-md fw-semibold mb-0 text-truncate">{{ n.title }}</h6>
+                        {% if not n.is_read %}
+                        <span class="badge bg-danger rounded-pill flex-shrink-0" style="width:8px;height:8px;padding:0;"></span>
+                        {% endif %}
+                    </div>
+                    <p class="mb-4 text-sm text-secondary-light">{{ n.message }}</p>
+                    <span class="text-xs text-secondary-light">
+                        <iconify-icon icon="mdi:clock-outline" class="me-2"></iconify-icon>{{ n.created_at|timesince }} {% trans "ago" %}
+                    </span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if notifications.has_other_pages %}
+        <div class="d-flex justify-content-center py-16 px-24 border-top">
+            <nav>
+                <ul class="pagination pagination-sm mb-0 gap-4">
+                    {% if notifications.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?filter={{ filter }}&page={{ notifications.previous_page_number }}">&laquo;</a>
+                    </li>
+                    {% endif %}
+                    {% for num in notifications.paginator.page_range %}
+                    <li class="page-item {% if notifications.number == num %}active{% endif %}">
+                        <a class="page-link" href="?filter={{ filter }}&page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+                    {% if notifications.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?filter={{ filter }}&page={{ notifications.next_page_number }}">&raquo;</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty state -->
+        <div class="d-flex flex-column align-items-center justify-content-center py-64 text-secondary-light">
+            <iconify-icon icon="mdi:bell-off-outline" class="text-5xl mb-16"></iconify-icon>
+            <h6 class="fw-semibold mb-4">{% trans "No notifications" %}</h6>
+            <p class="text-sm mb-0">{% trans "You're all caught up!" %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function markReadAndGo(e, anchor, notifId) {
+    // Fire-and-forget mark-read; navigation proceeds naturally
+    fetch(`/notifications/${notifId}/mark-read/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        }
+    }).catch(function() {});
+    // Remove unread highlight immediately
+    anchor.classList.remove('bg-primary-50');
+    var dot = anchor.querySelector('.badge.bg-danger');
+    if (dot) dot.remove();
+}
+
+function pageMarkAllRead() {
+    var btn = document.getElementById('pageMarkAllReadBtn');
+    if (btn) { btn.disabled = true; }
+
+    fetch('{% url "core:mark_all_notifications_read" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+        if (data && data.success) {
+            // Remove all unread highlights + dots from current page
+            document.querySelectorAll('.list-group-item.bg-primary-50').forEach(function(el) {
+                el.classList.remove('bg-primary-50');
+            });
+            document.querySelectorAll('.badge.bg-danger.rounded-pill').forEach(function(el) {
+                el.remove();
+            });
+            if (btn) btn.remove();  // hide the mark-all button
+        }
+    })
+    .catch(function() {})
+    .finally(function() {
+        if (btn) btn.disabled = false;
+    });
+}
+</script>
+{% endblock %}

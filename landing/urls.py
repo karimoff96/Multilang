@@ -10,4 +10,8 @@ urlpatterns = [
     path('contact-requests/<int:pk>/add-note/', views.contact_request_add_note, name='contact_request_add_note'),
     # Unified requests management (contact + renewal)
     path('requests/', views.requests_management, name='requests_management'),
+    # SEO
+    path('google145d3096a17fea6d.html', views.google_site_verification, name='google_site_verification'),
+    path('robots.txt', views.robots_txt, name='robots_txt'),
+    path('sitemap.xml', views.sitemap_xml, name='sitemap_xml'),
 ]
