@@ -1029,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
         try {
-            const resp = await fetch(EDIT_PRICE_URL_EDIT, { method: 'POST', body: fd });
+            const resp = await fetch(EDIT_PRICE_URL_EDIT, { method: 'POST', body: fd, headers: {'X-Requested-With': 'XMLHttpRequest'} });
             const data = await resp.json();
             if (!data.success) {
                 errDiv.textContent = data.error || LanguageManager.translate('common.errorOccurred');

@@ -10,12 +10,12 @@
     {% can_do 'orders.view_all' as can_view_all_orders %}
     {% if can_view_all_orders or can_view_all %}
     <!-- User can view all orders -->
-    {% if user.is_superuser or user_role.name == 'Owner' %}
-    <!-- Superuser/Owner: Just show title, no My Orders toggle -->
+    {% if user.is_superuser or is_owner %}
+    <!-- Superuser/Owner-level: Just show title, no My Orders toggle -->
     <div class="d-flex align-items-center gap-8">
         <iconify-icon icon="solar:documents-bold" class="text-primary-600 text-xl"></iconify-icon>
         <h6 class="mb-0 fw-semibold" data-i18n="orders.allOrders">All Orders</h6>
-        <span class="badge bg-primary-100 text-primary-600 px-12 py-4">{{ stats.total }}</span>
+        <span class="badge bg-primary-100 text-primary-600 px-12 py-4">{{ base_stats.total }}</span>
     </div>
     {% else %}
     <!-- Other users with view_all permission: Show toggle buttons -->
@@ -23,7 +23,7 @@
         <a href="?view=all{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}" 
            class="btn {% if view_mode == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm px-16">
             <iconify-icon icon="solar:documents-bold" class="me-4"></iconify-icon>
-            <span data-i18n="orders.allOrders">All Orders</span> <span class="badge {% if view_mode == 'all' %}bg-white text-primary-600{% else %}bg-primary-100 text-primary-600{% endif %} ms-4">{{ stats.total }}</span>
+            <span data-i18n="orders.allOrders">All Orders</span> <span class="badge {% if view_mode == 'all' %}bg-white text-primary-600{% else %}bg-primary-100 text-primary-600{% endif %} ms-4">{{ base_stats.total }}</span>
         </a>
         <a href="?view=mine{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}" 
            class="btn {% if view_mode == 'mine' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm px-16">
@@ -37,7 +37,7 @@
     <div class="d-flex align-items-center gap-8">
         <iconify-icon icon="solar:user-bold" class="text-primary-600 text-xl"></iconify-icon>
         <h6 class="mb-0 fw-semibold" data-i18n="orders.myOrders">My Orders</h6>
-        <span class="badge bg-primary-100 text-primary-600 px-12 py-4">{{ stats.total }}</span>
+        <span class="badge bg-primary-100 text-primary-600 px-12 py-4">{{ base_stats.total }}</span>
     </div>
     {% endif %}
     
@@ -496,7 +496,7 @@
                                     <iconify-icon icon="majesticons:eye-line"></iconify-icon>
                                 </a>
                                 {% can_do 'orders.edit' as can_edit_order %}
-                                {% if can_edit_order or is_manager %}
+                                {% if can_edit_order %}
                                 <a href="{% url 'orders:orderEdit' order.id %}" class="bg-success-focus text-success-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" data-i18n-title="orders.edit" title="Edit">
                                     <iconify-icon icon="lucide:edit"></iconify-icon>
                                 </a>

@@ -22,9 +22,9 @@
                 </a>
             </li>
             
-            <!-- Organizations Menu - visible based on role -->
-            {% is_at_least 'owner' as is_owner_plus %}
-            {% if is_owner_plus %}
+            <!-- Organizations Menu - visible when user has org-level permissions -->
+            {% has_any_perm 'can_view_centers,can_manage_centers,can_view_branches,can_manage_branches' as can_org_section %}
+            {% if can_org_section %}
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="mdi:domain" class="menu-icon"></iconify-icon>
@@ -54,7 +54,7 @@
             {% else %}
             {% has_any_perm 'can_view_staff,can_manage_staff' as can_staff_section %}
             {% has_any_perm 'can_view_branch_settings,can_manage_branch_settings' as can_settings_section %}
-            {% if is_manager or can_staff_section or can_settings_section %}
+            {% if can_staff_section or can_settings_section %}
             <li class="dropdown">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="mdi:domain" class="menu-icon"></iconify-icon>
@@ -95,7 +95,7 @@
             <!-- Bulk Payment & Top Up - Permission-based -->
             {% has_any_perm 'can_view_financial_reports,can_manage_bulk_payments' as can_bulk_payments %}
             {% has_feature 'bulk_payments' as has_bulk_payment_feature %}
-            {% if can_bulk_payments or is_owner or user.is_superuser %}
+            {% if can_bulk_payments or user.is_superuser %}
             {% if has_bulk_payment_feature %}
             <li>
                 <a href="{% url 'orders:bulk_payment_page' %}">
@@ -150,11 +150,12 @@
             
             <!-- Analytics Section - Permission-based visibility -->
             {% has_any_perm 'can_view_reports,can_view_analytics,can_view_financial_reports' as can_any_reports %}
-            {% if can_any_reports or is_staff_member %}
+            {% has_any_perm 'can_view_own_orders' as can_view_own %}
+            {% if can_any_reports or can_view_own %}
             <li class="sidebar-menu-group-title" data-i18n="sidebar.analyticsReports">{% trans "Analytics & Reports" %}</li>
             
-            <!-- My Statistics - Visible to all staff members (their own stats) -->
-            {% if is_staff_member %}
+            <!-- My Statistics - Visible to users who can only view their own orders -->
+            {% if can_view_own and not can_any_reports %}
             <li>
                 <a href="{% url 'my_statistics' %}">
                     <iconify-icon icon="solar:chart-bold" class="menu-icon"></iconify-icon>
@@ -264,7 +265,7 @@
                     {% endif %}
                     {% has_any_perm 'can_view_audit_logs' as can_audit_logs %}
                     {% has_feature 'audit_logs' as has_audit_logs_feature %}
-                    {% if can_audit_logs or is_owner or user.is_superuser %}
+                    {% if can_audit_logs or user.is_superuser %}
                     {% if has_audit_logs_feature %}
                     <li>
                         <a href="{% url 'audit_logs' %}"><i class="ri-circle-fill circle-icon text-secondary-main w-auto"></i> <span data-i18n="sidebar.auditLogs">{% trans "Audit Logs" %}</span></a>
@@ -279,7 +280,7 @@
             <!-- Marketing & Broadcasts - Permission-based -->
             {% has_any_perm 'can_manage_marketing,can_create_marketing_posts,can_send_branch_broadcasts,can_send_center_broadcasts,can_view_broadcast_stats' as can_marketing %}
             {% has_feature 'marketing_basic' as has_marketing_feature %}
-            {% if can_marketing or is_owner %}
+            {% if can_marketing %}
             {% if has_marketing_feature %}
             <li>
                 <a href="{% url 'marketing_list' %}">

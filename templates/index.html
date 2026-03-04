@@ -148,13 +148,13 @@
                                 </span>
                                 <div>
                                     <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="dashboard.pendingOrders">{% trans "Pending Orders" %}</span>
-                                    <h6 class="fw-semibold gradient-card-text">{{ pending_orders }}</h6>
+                                    <h6 class="fw-semibold gradient-card-text">{{ pending_today }}</h6>
                                 </div>
                             </div>
                         </div>
                         <p class="text-sm mb-0">
                             <span class="bg-warning-focus px-1 rounded-2 fw-medium text-warning-main text-sm">
-                                <iconify-icon icon="solar:bell-bold" class="icon"></iconify-icon> <span data-i18n="dashboard.requiresAttention">Requires attention</span>
+                                <iconify-icon icon="solar:bell-bold" class="icon"></iconify-icon> {{ pending_orders }} <span data-i18n="dashboard.totalBacklog">total backlog</span>
                             </span>
                         </p>
                     </div>
@@ -177,7 +177,8 @@
                             </div>
                         </div>
                         <p class="text-sm mb-0">
-                            <span class="text-secondary-light" data-i18n="dashboard.processingNow">Processing now</span>
+                            <span class="bg-info-focus px-1 rounded-2 fw-medium text-info-main text-sm">{{ all_in_progress }}</span>
+                            <span class="text-secondary-light" data-i18n="dashboard.activeTotal">active total</span>
                         </p>
                     </div>
                 </div>
@@ -478,7 +479,7 @@
                         <div class="d-flex align-items-center gap-2 w-100">
                             <div class="w-100 max-w-66 ms-auto">
                                 <div class="progress progress-sm rounded-pill" role="progressbar">
-                                    <div class="progress-bar bg-info-main rounded-pill" style="width: 30%;"></div>
+                                    <div class="progress-bar bg-info-main rounded-pill" style="width: {{ in_progress_pct }}%;"></div>
                                 </div>
                             </div>
                             <span class="text-secondary-light font-xs fw-semibold">{{ in_progress_today }}</span>
@@ -495,10 +496,10 @@
                         <div class="d-flex align-items-center gap-2 w-100">
                             <div class="w-100 max-w-66 ms-auto">
                                 <div class="progress progress-sm rounded-pill" role="progressbar">
-                                    <div class="progress-bar bg-warning-main rounded-pill" style="width: 40%;"></div>
+                                    <div class="progress-bar bg-warning-main rounded-pill" style="width: {{ pending_pct }}%;"></div>
                                 </div>
                             </div>
-                            <span class="text-secondary-light font-xs fw-semibold">{{ pending_orders }}</span>
+                            <span class="text-secondary-light font-xs fw-semibold">{{ pending_today }}</span>
                         </div>
                     </div>
 
@@ -512,7 +513,7 @@
                         <div class="d-flex align-items-center gap-2 w-100">
                             <div class="w-100 max-w-66 ms-auto">
                                 <div class="progress progress-sm rounded-pill" role="progressbar">
-                                    <div class="progress-bar bg-danger-main rounded-pill" style="width: 10%;"></div>
+                                    <div class="progress-bar bg-danger-main rounded-pill" style="width: {{ cancelled_pct }}%;"></div>
                                 </div>
                             </div>
                             <span class="text-secondary-light font-xs fw-semibold">{{ cancelled_today }}</span>

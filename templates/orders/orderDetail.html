@@ -992,8 +992,8 @@
                         </div>
                     </div>
                     
-                    {% if request.user.is_superuser or request.admin_profile.is_owner %}
-                    <!-- Force Accept (Owner only) -->
+                    {% if can_force_accept %}
+                    <!-- Force Accept (requires financial management permission) -->
                     <div class="mt-16 pt-16 border-top">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="forceAccept" name="force_accept">
@@ -1260,7 +1260,7 @@ document.getElementById('savePriceChangeBtn')?.addEventListener('click', async f
     fd.append('csrfmiddlewaretoken', csrfToken);
 
     try {
-        const resp = await fetch(EDIT_PRICE_URL, { method: 'POST', body: fd });
+        const resp = await fetch(EDIT_PRICE_URL, { method: 'POST', body: fd, headers: {'X-Requested-With': 'XMLHttpRequest'} });
         const data = await resp.json();
         if (!data.success) {
             errDiv.textContent = data.error || 'An error occurred.';

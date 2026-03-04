@@ -77,16 +77,28 @@ def index(request):
     # Status counts for today
     completed_today = today_orders.filter(status="completed").count()
     cancelled_today = today_orders.filter(status="cancelled").count()
+    # today's orders still in_progress (for progress bar percentages)
     in_progress_today = today_orders.filter(status="in_progress").count()
+    # all currently active orders regardless of creation date (for the top card)
+    all_in_progress = all_orders.filter(status="in_progress").count()
+    # today's orders awaiting action (pending-ish but not yet started)
+    pending_today = today_orders.filter(
+        status__in=[
+            "pending",
+            "payment_pending",
+            "payment_received",
+            "payment_confirmed",
+            "ready",
+        ]
+    ).count()
 
-    # Pending orders (orders requiring attention)
+    # Pending backlog (all-time orders requiring attention, in_progress excluded to avoid overlap)
     pending_orders = all_orders.filter(
         status__in=[
             "pending",
             "payment_pending",
             "payment_received",
             "payment_confirmed",
-            "in_progress",
             "ready",
         ]
     ).count()
@@ -110,8 +122,12 @@ def index(request):
     # Completion rate today
     if today_count > 0:
         completion_rate = round((completed_today / today_count) * 100)
+        in_progress_pct = min(round((in_progress_today / today_count) * 100), 100)
+        pending_pct = min(round((pending_today / today_count) * 100), 100)
+        cancelled_pct = min(round((cancelled_today / today_count) * 100), 100)
     else:
         completion_rate = 0
+        in_progress_pct = pending_pct = cancelled_pct = 0
 
     # Weekly revenue chart data
     weekly_chart_data = []
@@ -271,7 +287,13 @@ def index(request):
         "completed_today": completed_today,
         "cancelled_today": cancelled_today,
         "in_progress_today": in_progress_today,
+        "all_in_progress": all_in_progress,
+        "pending_today": pending_today,
         "completion_rate": completion_rate,
+        # Progress bar percentages
+        "in_progress_pct": in_progress_pct,
+        "pending_pct": pending_pct,
+        "cancelled_pct": cancelled_pct,
         # Alerts
         "pending_orders": pending_orders,
         "unassigned_orders": unassigned_orders,

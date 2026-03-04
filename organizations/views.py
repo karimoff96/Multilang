@@ -1544,8 +1544,8 @@ def branch_settings(request, branch_id):
             messages.error(request, "You don't have permission to view branch settings.")
             return redirect('branch_detail', branch_id=branch_id)
         
-        # Check if user has access to this branch
-        if not request.is_owner:
+        # Check if user has access to this branch (needs can_manage_branches to edit other branches)
+        if not request.admin_profile.has_permission('can_manage_branches'):
             user_branch = request.admin_profile.branch
             if user_branch and user_branch.id != branch_id:
                 messages.error(request, "You can only view settings for your own branch.")
@@ -1600,8 +1600,8 @@ def branch_settings_edit(request, branch_id):
             messages.error(request, "You don't have permission to edit branch settings.")
             return redirect('branch_settings', branch_id=branch_id)
         
-        # Check if user has access to this branch
-        if not request.is_owner:
+        # Check if user has access to this branch (needs can_manage_branches to edit other branches)
+        if not request.admin_profile.has_permission('can_manage_branches'):
             user_branch = request.admin_profile.branch
             if user_branch and user_branch.id != branch_id:
                 messages.error(request, "You can only edit settings for your own branch.")

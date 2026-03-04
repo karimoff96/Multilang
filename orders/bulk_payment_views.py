@@ -21,7 +21,7 @@ from django.utils import timezone
 
 from accounts.models import BotUser
 from orders.models import Order, BulkPayment, PaymentOrderLink
-from organizations.rbac import require_permission, get_user_orders, get_user_customers
+from organizations.rbac import require_permission, get_user_orders, get_user_customers, get_user_branches
 from billing.decorators import require_feature, require_active_subscription
 
 logger = logging.getLogger(__name__)
@@ -47,9 +47,9 @@ def can_manage_bulk_payments(user):
     
     admin_profile = user.admin_profile
     
-    # Check if user's role has the bulk payment permission
+    # Check if user has the bulk payment permission
     if admin_profile.role and hasattr(admin_profile.role, 'can_manage_bulk_payments'):
-        return admin_profile.role.can_manage_bulk_payments
+        return admin_profile.has_permission('can_manage_bulk_payments')
     
     return False
 
@@ -148,10 +148,10 @@ def bulk_payment_page(request):
         show_center_filter = True
         show_branch_filter = True
         available_branches = Branch.objects.select_related('center').all().order_by('center__name', 'name')
-    elif admin_profile and admin_profile.is_owner:
-        # Owner sees their center's branches
+    elif admin_profile and admin_profile.has_permission('can_manage_financial'):
+        # Can see all branches within their center
         show_branch_filter = True
-        if hasattr(admin_profile, 'center'):
+        if hasattr(admin_profile, 'center') and admin_profile.center:
             available_branches = Branch.objects.filter(center=admin_profile.center).order_by('name')
     
     # Calculate summary statistics
@@ -741,25 +741,13 @@ def payment_history(request):
         'bot_user', 'processed_by__user', 'branch'
     ).prefetch_related('order_links')
     
-    # Filter based on user role
+    # Filter based on user permissions (RBAC)
     if not request.user.is_superuser:
-        admin_profile = request.user.admin_profile if hasattr(request.user, 'admin_profile') else None
+        admin_profile = getattr(request, 'admin_profile', None)
         if admin_profile:
-            if admin_profile.is_owner:
-                # Owner sees center payments
-                payments = payments.filter(branch__center=admin_profile.center)
-            elif admin_profile.is_manager:
-                # Manager sees branch payments
-                payments = payments.filter(branch=admin_profile.branch)
-            else:
-                # Staff members see payments from their assigned branch
-                if admin_profile.branch:
-                    payments = payments.filter(branch=admin_profile.branch)
-                else:
-                    # If no branch assigned, return empty queryset
-                    payments = payments.none()
+            accessible_branches = get_user_branches(request.user)
+            payments = payments.filter(branch__in=accessible_branches)
         else:
-            # If no admin profile, return empty queryset
             payments = payments.none()
     
     # Apply filters from query params
@@ -874,25 +862,13 @@ def payment_history_full(request):
         'bot_user', 'processed_by__user', 'branch', 'branch__center'
     )
     
-    # Filter based on user role (RBAC)
+    # Filter based on user permissions (RBAC)
     if not request.user.is_superuser:
-        admin_profile = request.user.admin_profile if hasattr(request.user, 'admin_profile') else None
+        admin_profile = getattr(request, 'admin_profile', None)
         if admin_profile:
-            if admin_profile.is_owner:
-                # Owner sees center payments
-                payments = payments.filter(branch__center=admin_profile.center)
-            elif admin_profile.is_manager:
-                # Manager sees branch payments
-                payments = payments.filter(branch=admin_profile.branch)
-            else:
-                # Staff members see payments from their assigned branch
-                if admin_profile.branch:
-                    payments = payments.filter(branch=admin_profile.branch)
-                else:
-                    # If no branch assigned, return empty queryset
-                    payments = payments.none()
+            accessible_branches = get_user_branches(request.user)
+            payments = payments.filter(branch__in=accessible_branches)
         else:
-            # If no admin profile, return empty queryset
             payments = payments.none()
     
     # Apply date range filter
@@ -985,18 +961,13 @@ def get_payment_details(request, payment_id):
             'bot_user', 'processed_by__user', 'branch'
         ).prefetch_related('order_links__order').get(id=payment_id)
         
-        # Check RBAC permissions
+        # Check RBAC permissions — use accessible branches instead of role
         if not request.user.is_superuser:
-            admin_profile = request.user.admin_profile if hasattr(request.user, 'admin_profile') else None
+            admin_profile = getattr(request, 'admin_profile', None)
             if admin_profile:
-                if admin_profile.is_owner:
-                    # Owner must have same center
-                    if payment.branch.center != admin_profile.center:
-                        return JsonResponse({'error': 'Permission denied'}, status=403)
-                elif admin_profile.is_manager:
-                    # Manager must have same branch
-                    if payment.branch != admin_profile.branch:
-                        return JsonResponse({'error': 'Permission denied'}, status=403)
+                accessible_branches = get_user_branches(request.user)
+                if payment.branch not in accessible_branches:
+                    return JsonResponse({'error': 'Permission denied'}, status=403)
         
         # Get all order links for this payment
         order_links = payment.order_links.all()

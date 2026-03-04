@@ -54,23 +54,19 @@ def has_order_permission(request, permission_name, order=None):
         if order.branch not in accessible_branches:
             return False
     
-    # For staff-level users, check if they can only work on their own orders
+    # For staff-level users, restrict to their own orders if they lack broader permissions
     if not request.user.is_superuser:
-        role = request.admin_profile.role
+        ap = request.admin_profile
         # If user only has can_view_own_orders, they can only see assigned orders
         if permission_name in ['can_view_own_orders', 'can_view_all_orders']:
-            # If they don't have can_view_all_orders, check ownership
-            if not role.can_view_all_orders and not role.can_manage_orders:
-                if order and order.assigned_to != request.admin_profile:
+            if not (ap.has_permission('can_view_all_orders') or ap.has_permission('can_manage_orders')):
+                if order and order.assigned_to != ap:
                     return False
-        # For edit/delete/status updates, check if order is assigned to them
-        elif permission_name in ['can_edit_orders', 'can_delete_orders', 'can_update_order_status', 
+        # For edit/delete/status updates, restrict to assigned orders unless they can manage orders
+        elif permission_name in ['can_edit_orders', 'can_delete_orders', 'can_update_order_status',
                                  'can_complete_orders', 'can_cancel_orders']:
-            # Managers and owners can work on any order in their branches
-            if not (role.can_manage_orders or role.can_assign_orders or 
-                   request.admin_profile.is_owner_role or request.admin_profile.is_manager_role):
-                # Regular staff can only work on their assigned orders
-                if order and order.assigned_to != request.admin_profile:
+            if not (ap.has_permission('can_manage_orders') or ap.has_permission('can_assign_orders')):
+                if order and order.assigned_to != ap:
                     return False
     
     return True
@@ -288,13 +284,21 @@ def ordersList(request):
         base_orders = get_user_orders(request.user)
     else:
         base_orders = Order.objects.filter(assigned_to=request.admin_profile) if request.admin_profile else Order.objects.none()
-    
-    stats = {
+
+    # Unfiltered totals — used only for the tab badge counts
+    base_stats = {
         'total': base_orders.count(),
-        'pending': base_orders.filter(status='pending').count(),
-        'in_progress': base_orders.filter(status='in_progress').count(),
-        'completed': base_orders.filter(status='completed').count(),
-        'unassigned': base_orders.filter(assigned_to__isnull=True).count() if can_view_all else 0,
+    }
+
+    # Filtered stats — computed from the same queryset that was built up with all
+    # active filters (date range, status, branch, search, etc.) so the stat cards
+    # always reflect what the user is currently looking at.
+    stats = {
+        'total': orders.count(),
+        'pending': orders.filter(status='pending').count(),
+        'in_progress': orders.filter(status='in_progress').count(),
+        'completed': orders.filter(status='completed').count(),
+        'unassigned': orders.filter(assigned_to__isnull=True).count() if can_view_all else 0,
     }
     
     # Stats for "my orders" (for users who can view all)
@@ -345,6 +349,7 @@ def ordersList(request):
         "branches": branches,
         "staff_members": staff_members,
         "stats": stats,
+        "base_stats": base_stats,
         "my_stats": my_stats,
         "can_view_all": can_view_all,
         "can_view_own_only": can_view_own_only,
@@ -422,13 +427,31 @@ def orderDetail(request, order_id):
     # Price change history
     price_changes = order.price_changes.select_related('changed_by', 'changed_by__user').order_by('-changed_at')
 
-    # can_edit_price: owners, managers and anyone with financial/edit permissions
-    can_edit_price = request.user.is_superuser or bool(
-        request.admin_profile and (
-            request.admin_profile.has_permission('can_edit_orders') or
-            request.admin_profile.has_permission('can_manage_orders') or
-            request.admin_profile.has_permission('can_manage_financial')
+    # can_edit_price: owners, managers and anyone with financial/edit permissions,
+    # AND the extra_fees billing feature must be enabled for their centre's tariff.
+    def _has_extra_fees_feature():
+        if request.user.is_superuser:
+            return True
+        try:
+            ap = request.admin_profile
+            return bool(ap and ap.center and ap.center.subscription.tariff.has_feature('extra_fees'))
+        except Exception:
+            return False
+
+    can_edit_price = _has_extra_fees_feature() and (
+        request.user.is_superuser or bool(
+            request.admin_profile and (
+                request.admin_profile.has_permission('can_edit_orders') or
+                request.admin_profile.has_permission('can_manage_orders') or
+                request.admin_profile.has_permission('can_manage_financial')
+            )
         )
+    )
+
+    # can_force_accept: ability to override payment totals (requires financial management permission)
+    can_force_accept = (
+        request.user.is_superuser or
+        bool(request.admin_profile and request.admin_profile.has_permission('can_manage_financial'))
     )
 
     context = {
@@ -439,6 +462,7 @@ def orderDetail(request, order_id):
         "price_breakdown": price_breakdown,
         "price_changes": price_changes,
         "can_edit_price": can_edit_price,
+        "can_force_accept": can_force_accept,
         "available_staff": available_staff,
         # Permission flags from the granular permission system
         "can_assign": order_permissions['can_assign_orders'],
@@ -739,11 +763,22 @@ def orderEdit(request, order_id):
             messages.error(request, f'Error updating order: {str(e)}')
     
     price_changes = order.price_changes.select_related('changed_by', 'changed_by__user').order_by('-changed_at')
-    can_edit_price = request.user.is_superuser or bool(
-        request.admin_profile and (
-            request.admin_profile.has_permission('can_edit_orders') or
-            request.admin_profile.has_permission('can_manage_orders') or
-            request.admin_profile.has_permission('can_manage_financial')
+    def _has_extra_fees_feature_edit():
+        if request.user.is_superuser:
+            return True
+        try:
+            ap = request.admin_profile
+            return bool(ap and ap.center and ap.center.subscription.tariff.has_feature('extra_fees'))
+        except Exception:
+            return False
+
+    can_edit_price = _has_extra_fees_feature_edit() and (
+        request.user.is_superuser or bool(
+            request.admin_profile and (
+                request.admin_profile.has_permission('can_edit_orders') or
+                request.admin_profile.has_permission('can_manage_orders') or
+                request.admin_profile.has_permission('can_manage_financial')
+            )
         )
     )
     context = {
@@ -1497,16 +1532,16 @@ def record_order_payment(request, order_id):
             order.recipt = receipt_file
             order.save(update_fields=['recipt'])
         
-        # Force accept is only allowed for owners/superusers
+        # Force accept requires financial management permission
         if force_accept:
-            is_owner = (
-                request.user.is_superuser or 
-                (request.admin_profile and request.admin_profile.is_owner)
+            can_force = (
+                request.user.is_superuser or
+                (request.admin_profile and request.admin_profile.has_permission('can_manage_financial'))
             )
-            if not is_owner:
+            if not can_force:
                 return JsonResponse({
                     'success': False,
-                    'error': 'Only owners can force accept payments'
+                    'error': 'You do not have permission to force accept payments'
                 }, status=403)
         
         # Convert to Decimal
@@ -1555,11 +1590,11 @@ def add_order_extra_fee(request, order_id):
     """
     order = get_object_or_404(Order, id=order_id)
     
-    # Check permission - need can_edit_orders or owner/manager
+    # Check permission - need can_edit_orders or can_manage_orders
     can_add_fee = (
         request.user.is_superuser or
         has_order_permission(request, 'can_edit_orders', order) or
-        (request.admin_profile and (request.admin_profile.is_owner or request.admin_profile.is_manager))
+        (request.admin_profile and request.admin_profile.has_permission('can_manage_orders'))
     )
     
     if not can_add_fee:
