@@ -596,10 +596,14 @@ def orderEdit(request, order_id):
                             'name': f"{manual_first_name} {manual_last_name}".strip(),
                             'user_id': None,
                             'username': None,
+                            'is_active': True,
                             'branch': order.branch,
                             'center': order.branch.center if order.branch else None,
                         }
                     )
+                    if not bot_user.is_active:
+                        bot_user.is_active = True
+                        bot_user.save(update_fields=['is_active', 'updated_at'])
                     order.bot_user = bot_user
             elif bot_user_id:
                 # Bot user order - update bot_user reference; validate cross-center access
@@ -1496,13 +1500,21 @@ def orderCreate(request):
                         'name': f"{manual_first_name} {manual_last_name}".strip(),
                         'user_id': None,  # No telegram for manual orders
                         'username': None,
+                        'is_active': True,
                     }
                 )
                 # Update name if user exists but name changed
                 new_name = f"{manual_first_name} {manual_last_name}".strip()
+                fields_to_update = []
                 if not created and bot_user.name != new_name:
                     bot_user.name = new_name
-                    bot_user.save()
+                    fields_to_update.append('name')
+                if not bot_user.is_active:
+                    bot_user.is_active = True
+                    fields_to_update.append('is_active')
+                if fields_to_update:
+                    fields_to_update.append('updated_at')
+                    bot_user.save(update_fields=fields_to_update)
             else:
                 # Get existing bot user — validate scope to prevent cross-center access
                 bot_user = BotUser.objects.get(id=bot_user_id)

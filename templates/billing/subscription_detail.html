@@ -217,7 +217,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">{% trans "Plan Features" %}</h6>
-                    <span class="badge bg-primary-600">{{ subscription.tariff.get_feature_count }} / 37 {% trans "Features" %}</span>
+                    <span class="badge bg-primary-600">{{ subscription.tariff.get_feature_count }} / {{ subscription.tariff.get_total_feature_count }} {% trans "Features" %}</span>
                 </div>
                 <div class="card-body">
                     {% with features_by_category=subscription|get_category_features_in_language:request.LANGUAGE_CODE %}

@@ -296,30 +296,27 @@ class Tariff(models.Model):
         """
         categories = {
             'orders': [
-                'orders_basic', 'orders_advanced', 'orders_bulk',
-                'orders_archive', 'bulk_payment_collection'
+                'orders_basic', 'orders_advanced', 'order_assignment',
+                'bulk_payments', 'extra_fees'
             ],
             'analytics': [
-                'analytics_basic', 'analytics_advanced', 'sales_reports',
-                'finance_reports', 'custom_reports', 'export_data'
+                'analytics_basic', 'analytics_advanced', 'financial_reports',
+                'staff_performance', 'custom_reports', 'export_reports', 'debt_tracking'
             ],
             'integration': [
-                'webhooks', 'api_access', 'third_party_integrations', 'telegram_bot'
+                'webhooks', 'api_access', 'integrations', 'telegram_bot'
             ],
-            'marketing': ['marketing_campaigns', 'broadcasts'],
+            'marketing': ['marketing_basic', 'broadcast_messages'],
             'organization': [
-                'multi_branch', 'staff_management', 'rbac', 'audit_logs'
+                'multi_branch', 'custom_roles', 'branch_settings', 'agency_management'
             ],
-            'storage': [
-                'file_uploads', 'storage_basic', 'storage_advanced'
-            ],
+            'storage': ['archive_access'],
             'financial': [
-                'payment_tracking', 'expense_management', 'payment_reminders', 'invoicing'
+                'payment_management', 'expense_tracking', 'invoicing', 'general_expenses'
             ],
-            'support': ['priority_support', 'onboarding'],
-            'advanced': ['white_label', 'data_backup', 'advanced_security'],
+            'advanced': ['audit_logs'],
             'services': [
-                'services_basic', 'services_advanced', 'service_tracking', 'service_analytics'
+                'products_basic', 'products_advanced', 'language_pricing', 'dynamic_pricing'
             ],
         }
         
@@ -337,6 +334,10 @@ class Tariff(models.Model):
     def get_feature_count(self):
         """Get total number of enabled features"""
         return len(self.get_enabled_features())
+
+    def get_total_feature_count(self):
+        """Get total number of available feature flags on tariff."""
+        return len([field for field in self._meta.get_fields() if field.name.startswith('feature_')])
     
     def get_feature_display_name(self, feature_slug):
         """
@@ -696,7 +697,7 @@ class Subscription(models.Model):
     def get_features_by_category(self, category=None):
         """Get features organized by category"""
         if not self.is_active():
-            return {} if category else {cat: {} for cat in ['orders', 'analytics', 'integration', 'marketing', 'organization', 'storage', 'financial', 'support', 'advanced', 'services']}
+            return {} if category else {cat: {} for cat in ['orders', 'analytics', 'integration', 'marketing', 'organization', 'storage', 'financial', 'advanced', 'services']}
         
         return self.tariff.get_features_by_category(category)
     

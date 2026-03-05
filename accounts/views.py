@@ -182,7 +182,8 @@ def addUser(request):
         username = request.POST.get("username", "").strip()
         user_id = request.POST.get("user_id", "").strip()
         language = request.POST.get("language", "uz")
-        is_active = request.POST.get("is_active") == "on"
+        # Manual users should be active by default unless explicitly changed elsewhere
+        is_active = request.POST.get("is_active", "on") == "on"
         is_agency = request.POST.get("is_agency") == "on"
         agency_id = request.POST.get("agency", "")
         center_id = request.POST.get("center", "")
