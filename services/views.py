@@ -132,6 +132,11 @@ def addCategory(request):
         description_en = request.POST.get('description_en', '').strip()
         
         branch_id = request.POST.get('branch', '')
+        # Default to admin's own branch when none is selected
+        if not branch_id and not request.user.is_superuser:
+            _admin_branch = getattr(getattr(request, 'admin_profile', None), 'branch', None)
+            if _admin_branch:
+                branch_id = str(_admin_branch.id)
         charging = request.POST.get('charging', 'dynamic')
         is_active = request.POST.get('is_active') == 'on'
         selected_languages = request.POST.getlist('languages')
@@ -773,6 +778,11 @@ def addExpense(request):
         price_for_copy = request.POST.get('price_for_copy', '0')
         expense_type = request.POST.get('expense_type', 'both')
         branch_id = request.POST.get('branch', '')
+        # Default to admin's own branch when none is selected
+        if not branch_id and not request.user.is_superuser:
+            _admin_branch = getattr(getattr(request, 'admin_profile', None), 'branch', None)
+            if _admin_branch:
+                branch_id = str(_admin_branch.id)
         description = request.POST.get('description', '').strip()
         is_active = request.POST.get('is_active') == 'on'
         
@@ -995,6 +1005,11 @@ def createExpenseInline(request):
         price_for_copy = data.get('price_for_copy', '0')
         expense_type = data.get('expense_type', 'both')
         branch_id = data.get('branch', '')
+        # Default to admin's own branch when none is selected
+        if not branch_id and not request.user.is_superuser:
+            _admin_branch = getattr(getattr(request, 'admin_profile', None), 'branch', None)
+            if _admin_branch:
+                branch_id = str(_admin_branch.id)
         description = data.get('description', '').strip()
         
         if not name:
@@ -1370,6 +1385,11 @@ def generalExpenseCreate(request):
         note = request.POST.get('note', '').strip()
         vendor = request.POST.get('vendor', '').strip()
         branch_id = request.POST.get('branch', '').strip()
+        # Default to admin's own branch when none is selected
+        if not branch_id and not request.user.is_superuser:
+            _admin_branch = getattr(getattr(request, 'admin_profile', None), 'branch', None)
+            if _admin_branch:
+                branch_id = str(_admin_branch.id)
         payment_type = request.POST.get('payment_type', 'cash').strip()
         nasiya_deadline = request.POST.get('nasiya_deadline', '').strip() or None
         is_paid = request.POST.get('is_paid') == '1'
@@ -1672,6 +1692,11 @@ def generalExpenseCategoryList(request):
         name = request.POST.get('name', '').strip()
         icon = request.POST.get('icon', '').strip()
         branch_id = request.POST.get('branch', '').strip()
+        # Default to admin's own branch when none is selected
+        if not branch_id and not request.user.is_superuser:
+            _admin_branch = getattr(getattr(request, 'admin_profile', None), 'branch', None)
+            if _admin_branch:
+                branch_id = str(_admin_branch.id)
 
         errors = []
         if not name:

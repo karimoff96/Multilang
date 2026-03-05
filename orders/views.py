@@ -590,6 +590,8 @@ def orderEdit(request, order_id):
                 order.manual_phone = manual_phone
                 # Try to get or create bot_user with this phone (for consistency)
                 if manual_phone:
+                    _edit_branch = order.branch
+                    _edit_center = _edit_branch.center if _edit_branch else None
                     bot_user, created = BotUser.objects.get_or_create(
                         phone=manual_phone,
                         defaults={
@@ -597,13 +599,23 @@ def orderEdit(request, order_id):
                             'user_id': None,
                             'username': None,
                             'is_active': True,
-                            'branch': order.branch,
-                            'center': order.branch.center if order.branch else None,
+                            'branch': _edit_branch,
+                            'center': _edit_center,
                         }
                     )
+                    _edit_fields = []
                     if not bot_user.is_active:
                         bot_user.is_active = True
-                        bot_user.save(update_fields=['is_active', 'updated_at'])
+                        _edit_fields.append('is_active')
+                    if not bot_user.branch and _edit_branch:
+                        bot_user.branch = _edit_branch
+                        _edit_fields.append('branch')
+                    if not bot_user.center and _edit_center:
+                        bot_user.center = _edit_center
+                        _edit_fields.append('center')
+                    if _edit_fields:
+                        _edit_fields.append('updated_at')
+                        bot_user.save(update_fields=_edit_fields)
                     order.bot_user = bot_user
             elif bot_user_id:
                 # Bot user order - update bot_user reference; validate cross-center access
@@ -1433,7 +1445,11 @@ def orderCreate(request):
         branches = request.admin_profile.get_accessible_branches()
         # Filter bot users by accessible branches
         branch_ids = branches.values_list('id', flat=True)
-        bot_users = BotUser.objects.filter(branch_id__in=branch_ids).order_by('-created_at')[:100]
+        center_ids = branches.values_list('center_id', flat=True).distinct()
+        # Also include users with only a center set (manually created without branch)
+        bot_users = BotUser.objects.filter(
+            Q(branch_id__in=branch_ids) | Q(center_id__in=center_ids)
+        ).distinct().order_by('-created_at')[:100]
         # Filter products by accessible branches (Product -> Category -> Branch)
         products = Product.objects.filter(
             is_active=True,
@@ -1492,6 +1508,9 @@ def orderCreate(request):
             
             # Get or create bot_user
             if is_manual_order:
+                # Resolve branch early so we can associate the customer with it
+                _manual_branch = Branch.objects.filter(pk=branch_id).first() if branch_id else None
+                _manual_center = _manual_branch.center if _manual_branch else None
                 # Create a temporary/manual bot user for this order
                 # Check if user with this phone already exists
                 bot_user, created = BotUser.objects.get_or_create(
@@ -1501,9 +1520,11 @@ def orderCreate(request):
                         'user_id': None,  # No telegram for manual orders
                         'username': None,
                         'is_active': True,
+                        'branch': _manual_branch,
+                        'center': _manual_center,
                     }
                 )
-                # Update name if user exists but name changed
+                # Update name, activation status, and branch/center if missing
                 new_name = f"{manual_first_name} {manual_last_name}".strip()
                 fields_to_update = []
                 if not created and bot_user.name != new_name:
@@ -1512,6 +1533,12 @@ def orderCreate(request):
                 if not bot_user.is_active:
                     bot_user.is_active = True
                     fields_to_update.append('is_active')
+                if not bot_user.branch and _manual_branch:
+                    bot_user.branch = _manual_branch
+                    fields_to_update.append('branch')
+                if not bot_user.center and _manual_center:
+                    bot_user.center = _manual_center
+                    fields_to_update.append('center')
                 if fields_to_update:
                     fields_to_update.append('updated_at')
                     bot_user.save(update_fields=fields_to_update)
@@ -1841,9 +1868,12 @@ def search_customers(request):
         # Get accessible branches using RBAC
         accessible_branches = get_user_branches(request.user)
         branch_ids = accessible_branches.values_list('id', flat=True)
+        center_ids = accessible_branches.values_list('center_id', flat=True).distinct()
         
-        # Filter customers by accessible branches only (no null branches)
-        customers = BotUser.objects.filter(branch_id__in=branch_ids)
+        # Also include users with only a center set (manually created without a specific branch)
+        customers = BotUser.objects.filter(
+            Q(branch_id__in=branch_ids) | Q(center_id__in=center_ids)
+        ).distinct()
     else:
         # No access if no admin profile
         customers = BotUser.objects.none()

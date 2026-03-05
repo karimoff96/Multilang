@@ -21,7 +21,7 @@
     {% else %}
     <title>MultiLang — Система Управления Бюро Переводов | multilang.uz</title>
     <meta name="description" content="MultiLang — современная SaaS платформа для управления бюро переводов. Заказы, оплата, аналитика и персонал через Telegram бот. Попробуйте бесплатно!">
-    <meta name="keywords" content="программа для бюро переводов, управление бюро переводов, CRM бюро переводов, telegram бот переводы, автоматизация бюро переводов, MultiLang, multilang.uz, система管理 переводов, SaaS переводы">
+    <meta name="keywords" content="программа для бюро переводов, управление бюро переводов, CRM бюро переводов, telegram бот переводы, автоматизация бюро переводов, MultiLang, multilang.uz, система управления переводов, SaaS переводы">
     {% endif %}
 
     <!-- Robots & Indexing -->
@@ -32,12 +32,12 @@
     <meta name="google-site-verification" content="145d3096a17fea6d" />
 
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://multilang.uz/">
+    <link rel="canonical" href="{{ canonical_url|default:'https://multilang.uz/' }}">
 
     <!-- Hreflang for multilingual SEO -->
     <link rel="alternate" hreflang="ru" href="https://multilang.uz/">
-    <link rel="alternate" hreflang="uz" href="https://multilang.uz/">
-    <link rel="alternate" hreflang="en" href="https://multilang.uz/">
+    <link rel="alternate" hreflang="uz" href="https://multilang.uz/uz/">
+    <link rel="alternate" hreflang="en" href="https://multilang.uz/en/">
     <link rel="alternate" hreflang="x-default" href="https://multilang.uz/">
 
     <!-- ==========================================
@@ -82,83 +82,165 @@
     <meta name="twitter:image" content="https://multilang.uz/static/images/og-image.png">
 
     <!-- ==========================================
-         JSON-LD Structured Data (Schema.org)
+         JSON-LD Structured Data (Schema.org @graph)
+         Unified entity graph: Organization + WebSite +
+         SoftwareApplication + WebPage + BreadcrumbList
+         Enables: Knowledge Panel, rich results, breadcrumbs
     ========================================== -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "MultiLang",
-      "url": "https://multilang.uz",
-      "logo": "https://multilang.uz/static/images/favicon.png",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web",
-      "description": "Modern SaaS platform for translation bureau management with Telegram bot integration, order automation, payment tracking and analytics.",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "UZS",
-        "description": "Free trial available"
-      },
-      "provider": {
-        "@type": "Organization",
-        "name": "MultiLang",
-        "url": "https://multilang.uz",
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "contactType": "sales",
-          "availableLanguage": ["Russian", "Uzbek", "English"]
+      "@graph": [
+
+        {
+          "@type": "Organization",
+          "@id": "https://multilang.uz/#organization",
+          "name": "MultiLang",
+          "url": "https://multilang.uz",
+          "logo": {
+            "@type": "ImageObject",
+            "@id": "https://multilang.uz/#logo",
+            "url": "https://multilang.uz/static/images/favicon.png",
+            "width": 512,
+            "height": 512,
+            "caption": "MultiLang"
+          },
+          "image": "https://multilang.uz/static/images/og-image.png",
+          "description": "MultiLang — SaaS platform for automating translation bureau operations: orders, payments, staff, analytics and Telegram bot integration.",
+          "email": "go.multilang@gmail.com",
+          "telephone": "+998900290119",
+          "foundingDate": "2023",
+          "areaServed": "UZ",
+          "sameAs": [
+            "https://www.instagram.com/multilang.uz",
+            "https://t.me/multilang_support_bot"
+          ],
+          "contactPoint": [
+            {
+              "@type": "ContactPoint",
+              "telephone": "+998900290119",
+              "contactType": "customer support",
+              "availableLanguage": ["Russian", "Uzbek", "English"]
+            },
+            {
+              "@type": "ContactPoint",
+              "email": "go.multilang@gmail.com",
+              "contactType": "sales",
+              "availableLanguage": ["Russian", "Uzbek", "English"]
+            },
+            {
+              "@type": "ContactPoint",
+              "url": "https://t.me/multilang_support_bot",
+              "contactType": "technical support",
+              "availableLanguage": ["Russian", "Uzbek", "English"]
+            }
+          ]
+        },
+
+        {
+          "@type": "WebSite",
+          "@id": "https://multilang.uz/#website",
+          "url": "https://multilang.uz",
+          "name": "MultiLang",
+          "description": "Translation bureau management platform",
+          "publisher": { "@id": "https://multilang.uz/#organization" },
+          "inLanguage": ["ru", "uz", "en"]
+        },
+
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://multilang.uz/#software",
+          "name": "MultiLang",
+          "url": "https://multilang.uz",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "description": "Modern SaaS platform for translation bureau management with Telegram bot integration, order automation, payment tracking and analytics.",
+          "provider": { "@id": "https://multilang.uz/#organization" },
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "UZS",
+            "description": "Free trial available"
+          },
+          "inLanguage": ["ru", "uz", "en"],
+          "featureList": [
+            "Telegram Bot Integration",
+            "Admin Telegram Bot Notifications",
+            "Order Management",
+            "Bulk Payment Processing",
+            "Order Extra Fees & Surcharges",
+            "Payment Tracking & Receipt Verification",
+            "Staff Management",
+            "Role-Based Access Control (RBAC)",
+            "Custom Staff Roles & Permissions",
+            "B2B Agency Management",
+            "Agency-Specific Pricing",
+            "Multi-branch Support",
+            "Branch-Level Settings",
+            "Analytics & Reports",
+            "Financial Reports & Profit Analysis",
+            "Staff Performance Tracking",
+            "Debt & Receivables Tracking",
+            "Operating Expense Management",
+            "Invoice Generation",
+            "Expense Tracking by Branch",
+            "Language-Specific Pricing",
+            "Dynamic Per-Page Pricing",
+            "Advanced Product Management",
+            "Marketing & Broadcast Campaigns",
+            "Scheduled Broadcast Messages",
+            "Automatic Order Archiving",
+            "Historical File Archives",
+            "Comprehensive Audit Logs",
+            "Excel & CSV Data Export",
+            "Custom Report Builder",
+            "Multi-language Interface",
+            "Real-time Monitoring"
+          ]
+        },
+
+        {
+          "@type": "WebPage",
+          "@id": "{{ canonical_url|default:'https://multilang.uz/' }}#webpage",
+          "url": "{{ canonical_url|default:'https://multilang.uz/' }}",
+          "name": "{% if current_language == 'uz' %}MultiLang — Tarjima Byurosini Boshqarish Platformasi{% elif current_language == 'en' %}MultiLang — Translation Bureau Management Software{% else %}MultiLang — Система Управления Бюро Переводов{% endif %}",
+          "description": "{% if current_language == 'uz' %}Tarjima byurongizdagi barcha jarayonlarni avtomatlashtiring — buyurtmalar, to'lovlar, analitika va Telegram bot{% elif current_language == 'en' %}Automate your translation bureau — orders, payments, analytics and Telegram bot{% else %}Автоматизируйте бюро переводов — заказы, оплата, аналитика и Telegram бот{% endif %}",
+          "inLanguage": "{{ current_language|default:'ru' }}",
+          "isPartOf": { "@id": "https://multilang.uz/#website" },
+          "about": { "@id": "https://multilang.uz/#software" },
+          "breadcrumb": { "@id": "{{ canonical_url|default:'https://multilang.uz/' }}#breadcrumb" },
+          "primaryImageOfPage": {
+            "@type": "ImageObject",
+            "url": "https://multilang.uz/static/images/og-image.png"
+          }
+        },
+
+        {
+          "@type": "BreadcrumbList",
+          "@id": "{{ canonical_url|default:'https://multilang.uz/' }}#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "MultiLang",
+              "item": "https://multilang.uz/"
+            }{% if current_language == 'en' %},
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "English",
+              "item": "https://multilang.uz/en/"
+            }{% elif current_language == 'uz' %},
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "O'zbek",
+              "item": "https://multilang.uz/uz/"
+            }{% endif %}
+          ]
         }
-      },
-      "inLanguage": ["ru", "uz", "en"],
-      "featureList": [
-        "Telegram Bot Integration",
-        "Admin Telegram Bot Notifications",
-        "Order Management",
-        "Bulk Payment Processing",
-        "Order Extra Fees & Surcharges",
-        "Payment Tracking & Receipt Verification",
-        "Staff Management",
-        "Role-Based Access Control (RBAC)",
-        "Custom Staff Roles & Permissions",
-        "B2B Agency Management",
-        "Agency-Specific Pricing",
-        "Multi-branch Support",
-        "Branch-Level Settings",
-        "Analytics & Reports",
-        "Financial Reports & Profit Analysis",
-        "Staff Performance Tracking",
-        "Debt & Receivables Tracking",
-        "Operating Expense Management",
-        "Invoice Generation",
-        "Expense Tracking by Branch",
-        "Language-Specific Pricing",
-        "Dynamic Per-Page Pricing",
-        "Advanced Product Management",
-        "Marketing & Broadcast Campaigns",
-        "Scheduled Broadcast Messages",
-        "Automatic Order Archiving",
-        "Historical File Archives",
-        "Comprehensive Audit Logs",
-        "Excel & CSV Data Export",
-        "Custom Report Builder",
-        "Multi-language Interface",
-        "Real-time Monitoring"
+
       ]
-    }
-    </script>
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "MultiLang",
-      "url": "https://multilang.uz",
-      "description": "Translation bureau management platform",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://multilang.uz/#contact",
-        "query-input": "required name=search_term_string"
-      }
     }
     </script>
 
@@ -764,9 +846,9 @@
                         {% if current_language == 'uz' %}Aloqa{% elif current_language == 'en' %}Contact{% else %}Контакты{% endif %}
                     </a>
                     <div class="lang-switcher">
-                        <a href="{% url 'change_language' 'ru' %}" class="lang-btn {% if current_language == 'ru' %}active{% endif %}">RU</a>
-                        <a href="{% url 'change_language' 'uz' %}" class="lang-btn {% if current_language == 'uz' %}active{% endif %}">UZ</a>
-                        <a href="{% url 'change_language' 'en' %}" class="lang-btn {% if current_language == 'en' %}active{% endif %}">EN</a>
+                        <a href="/" class="lang-btn {% if current_language == 'ru' %}active{% endif %}">RU</a>
+                        <a href="/uz/" class="lang-btn {% if current_language == 'uz' %}active{% endif %}">UZ</a>
+                        <a href="/en/" class="lang-btn {% if current_language == 'en' %}active{% endif %}">EN</a>
                     </div>
                     <a href="#contact" class="btn btn-primary-custom">
                         <i class="fas fa-rocket me-1"></i>

@@ -32,19 +32,42 @@ def home(request):
         'display_order'  # Then by display order
     )
     
+    canonical_map = {'ru': 'https://multilang.uz/', 'en': 'https://multilang.uz/en/', 'uz': 'https://multilang.uz/uz/'}
     context = {
         'current_language': lang,
         'tariffs': tariffs,
+        'canonical_url': canonical_map.get(lang, 'https://multilang.uz/'),
     }
     
     return render(request, 'landing/home.html', context)
 
 
+def home_lang(request, lang_code):
+    """SEO-friendly language-specific landing page URL (/en/, /uz/).
+    Each language has its own crawlable URL so Googlebot indexes all 3 versions."""
+    if lang_code not in ['ru', 'uz', 'en']:
+        lang_code = 'ru'
+    request.session['landing_language'] = lang_code
+    activate(lang_code)
+
+    tariffs = Tariff.objects.filter(is_active=True).prefetch_related('pricing', 'features').order_by(
+        '-is_trial', 'display_order'
+    )
+    canonical_map = {'ru': 'https://multilang.uz/', 'en': 'https://multilang.uz/en/', 'uz': 'https://multilang.uz/uz/'}
+    context = {
+        'current_language': lang_code,
+        'tariffs': tariffs,
+        'canonical_url': canonical_map.get(lang_code, 'https://multilang.uz/'),
+    }
+    return render(request, 'landing/home.html', context)
+
+
 def change_language(request, lang_code):
-    """Change landing page language"""
-    if lang_code in ['ru', 'uz', 'en']:
+    """Change landing page language — redirects to the SEO-friendly language URL."""
+    lang_redirects = {'en': '/en/', 'uz': '/uz/', 'ru': '/'}
+    if lang_code in lang_redirects:
         request.session['landing_language'] = lang_code
-    
+        return redirect(lang_redirects[lang_code])
     return redirect('landing_home')
 
 
@@ -407,8 +430,28 @@ def sitemap_xml(request):
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ru" href="https://multilang.uz/"/>
-    <xhtml:link rel="alternate" hreflang="uz" href="https://multilang.uz/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://multilang.uz/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://multilang.uz/uz/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://multilang.uz/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://multilang.uz/"/>
+  </url>
+  <url>
+    <loc>https://multilang.uz/en/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://multilang.uz/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://multilang.uz/uz/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://multilang.uz/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://multilang.uz/"/>
+  </url>
+  <url>
+    <loc>https://multilang.uz/uz/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://multilang.uz/"/>
+    <xhtml:link rel="alternate" hreflang="uz" href="https://multilang.uz/uz/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://multilang.uz/en/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://multilang.uz/"/>
   </url>
   <url>

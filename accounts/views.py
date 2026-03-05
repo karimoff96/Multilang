@@ -182,12 +182,17 @@ def addUser(request):
         username = request.POST.get("username", "").strip()
         user_id = request.POST.get("user_id", "").strip()
         language = request.POST.get("language", "uz")
-        # Manual users should be active by default unless explicitly changed elsewhere
-        is_active = request.POST.get("is_active", "on") == "on"
+        # Manual users must always be active on creation
+        is_active = True
         is_agency = request.POST.get("is_agency") == "on"
         agency_id = request.POST.get("agency", "")
         center_id = request.POST.get("center", "")
         branch_id = request.POST.get("branch", "")
+        # Default to admin's own branch when none is selected
+        if not branch_id and not request.user.is_superuser:
+            _admin_branch = getattr(getattr(request, 'admin_profile', None), 'branch', None)
+            if _admin_branch:
+                branch_id = str(_admin_branch.id)
         
         # Check permission for creating agencies
         if is_agency and not (request.user.is_superuser or 

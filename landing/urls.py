@@ -3,6 +3,9 @@ from . import views
 
 urlpatterns = [
     path('', views.home, name='landing_home'),
+    # SEO-friendly per-language URLs so each language gets its own crawlable URL
+    path('en/', views.home_lang, {'lang_code': 'en'}, name='landing_home_en'),
+    path('uz/', views.home_lang, {'lang_code': 'uz'}, name='landing_home_uz'),
     path('change-language/<str:lang_code>/', views.change_language, name='change_language'),
     path('contact/', views.contact_form, name='contact_form'),
     path('contact-requests/', views.contact_requests_list, name='contact_requests_list'),
