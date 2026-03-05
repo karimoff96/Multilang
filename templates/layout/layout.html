@@ -46,7 +46,103 @@
     {% include "../partials/scripts.html" %}
     
     <!-- Auto-dismiss messages after 4 seconds -->
+    <style>
+    .smart-number {
+        cursor: help;
+        border-bottom: 1px dotted currentColor;
+    }
+    .number-tooltip .tooltip-inner {
+        max-width: none;
+        white-space: nowrap;
+        letter-spacing: 0.2px;
+    }
+    </style>
     <script>
+    function initBootstrapTooltips(root) {
+        var scope = root || document;
+        var tooltipTriggerList = [].slice.call(
+            scope.querySelectorAll('[data-bs-toggle="tooltip"], [title]:not([data-bs-toggle])')
+        );
+        tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+            if (!bootstrap.Tooltip.getInstance(tooltipTriggerEl)) {
+                new bootstrap.Tooltip(tooltipTriggerEl, { container: 'body' });
+            }
+        });
+    }
+
+    window.WowDashNumbers = {
+        formatFull: function(value) {
+            var num = Number(value);
+            if (!Number.isFinite(num)) return '0';
+            if (Math.abs(num % 1) < 0.000001) {
+                return Math.trunc(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            }
+            return num
+                .toFixed(2)
+                .replace(/\.00$/, '')
+                .replace(/(\.\d*[1-9])0+$/, '$1')
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        },
+
+        formatCompact: function(value) {
+            var num = Number(value);
+            if (!Number.isFinite(num)) return '0';
+
+            var sign = num < 0 ? '-' : '';
+            var absNum = Math.abs(num);
+
+            if (absNum >= 1000000) {
+                var m = absNum / 1000000;
+                return sign + (m >= 10 ? m.toFixed(0) : m.toFixed(1).replace(/\.0$/, '')) + 'M';
+            }
+
+            if (absNum >= 1000) {
+                var k = absNum / 1000;
+                return sign + (k >= 10 ? k.toFixed(0) : k.toFixed(1).replace(/\.0$/, '')) + 'K';
+            }
+
+            return sign + absNum.toFixed(0);
+        },
+
+        setCompactText: function(element, value, suffix) {
+            if (!element) return;
+            var suffixText = suffix || '';
+            var num = Number(value);
+            if (!Number.isFinite(num)) {
+                element.textContent = '0' + suffixText;
+                return;
+            }
+
+            var compact = this.formatCompact(num);
+            var full = this.formatFull(num);
+            element.textContent = compact + suffixText;
+
+            if (Math.abs(num) >= 1000) {
+                element.classList.add('smart-number');
+                element.setAttribute('title', full + suffixText);
+                element.setAttribute('data-bs-toggle', 'tooltip');
+                element.setAttribute('data-bs-custom-class', 'number-tooltip');
+                element.setAttribute('data-bs-placement', 'top');
+            } else {
+                element.classList.remove('smart-number');
+                element.removeAttribute('title');
+                element.removeAttribute('data-bs-toggle');
+                element.removeAttribute('data-bs-custom-class');
+                element.removeAttribute('data-bs-placement');
+            }
+
+            var existingTooltip = bootstrap.Tooltip.getInstance(element);
+            if (existingTooltip) {
+                existingTooltip.dispose();
+            }
+            if (Math.abs(num) >= 1000) {
+                new bootstrap.Tooltip(element, { container: 'body' });
+            }
+        },
+
+        refreshTooltips: initBootstrapTooltips
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
         var alerts = document.querySelectorAll('.messages-container .alert');
         alerts.forEach(function(alert, index) {
@@ -63,11 +159,8 @@
             }, 4000 + (index * 500)); // 4 seconds + 0.5s delay per message
         });
         
-        // Initialize Bootstrap tooltips (data-bs-toggle="tooltip" AND any bare [title] elements)
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"], [title]:not([data-bs-toggle])'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+        // Initialize Bootstrap tooltips (data-bs-toggle="tooltip" and any bare [title] elements).
+        initBootstrapTooltips(document);
     });
     </script>
     

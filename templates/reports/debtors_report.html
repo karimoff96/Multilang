@@ -166,7 +166,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm">{% trans "Total Debt" %}</span>
-                        <h4 class="fw-bold mb-0 text-danger-main">{{ total_debt|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0 text-danger-main">{{ total_debt|smart_num }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
                 <p class="text-sm mb-0 text-secondary-light">
@@ -185,7 +185,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm">{% trans "Total Received" %}</span>
-                        <h4 class="fw-bold mb-0 text-success-main">{{ total_received|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0 text-success-main">{{ total_received|smart_num }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
             </div>
@@ -200,7 +200,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm">{% trans "Total Expected" %}</span>
-                        <h4 class="fw-bold mb-0">{{ total_expected|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ total_expected|smart_num }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
             </div>

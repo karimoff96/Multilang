@@ -1,4 +1,5 @@
 {% extends './layout/layout.html' %} 
+{% load number_filters %}
 
 {% block content %}
 <style>
@@ -109,7 +110,7 @@
                         </span>
                         <div>
                             <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="finance.totalRevenue">Total Revenue</span>
-                            <h6 class="fw-semibold" id="totalRevenue">{{ yearly_stats.revenue|floatformat:0 }} <small class="text-xs fw-normal">UZS</small></h6>
+                            <h6 class="fw-semibold" id="totalRevenue">{{ yearly_stats.revenue|smart_num }} <small class="text-xs fw-normal">UZS</small></h6>
                         </div>
                     </div>
                 </div>
@@ -135,11 +136,11 @@
                         </span>
                         <div>
                             <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="sales.totalOrders">Total Orders</span>
-                            <h6 class="fw-semibold" id="totalOrders">{{ yearly_stats.count }}</h6>
+                            <h6 class="fw-semibold" id="totalOrders">{{ yearly_stats.count|smart_num }}</h6>
                         </div>
                     </div>
                 </div>
-                <p class="text-sm mb-0"><span class="text-secondary-light"><span id="totalPages" class="fw-semibold text-primary-light">{{ yearly_stats.pages }}</span> <span data-i18n="finance.pages">pages</span></span></p>
+                <p class="text-sm mb-0"><span class="text-secondary-light"><span id="totalPages" class="fw-semibold text-primary-light">{{ yearly_stats.pages|smart_num }}</span> <span data-i18n="finance.pages">pages</span></span></p>
             </div>
         </div>
     </div>
@@ -154,7 +155,7 @@
                         </span>
                         <div>
                             <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="finance.avgOrderValue">Avg Order Value</span>
-                            <h6 class="fw-semibold" id="avgOrderValue">{{ yearly_stats.avg_order_value|floatformat:0 }} <small class="text-xs fw-normal">UZS</small></h6>
+                            <h6 class="fw-semibold" id="avgOrderValue">{{ yearly_stats.avg_order_value|smart_num }} <small class="text-xs fw-normal">UZS</small></h6>
                         </div>
                     </div>
                 </div>
@@ -173,11 +174,11 @@
                         </span>
                         <div>
                             <span class="mb-2 fw-medium text-secondary-light text-sm" data-i18n="finance.pendingPayments">Pending Payments</span>
-                            <h6 class="fw-semibold">{{ pending_payments_total|floatformat:0 }} <small class="text-xs fw-normal">UZS</small></h6>
+                            <h6 class="fw-semibold">{{ pending_payments_total|smart_num }} <small class="text-xs fw-normal">UZS</small></h6>
                         </div>
                     </div>
                 </div>
-                <p class="text-sm mb-0"><span class="bg-warning-focus px-1 rounded-2 fw-medium text-warning-main text-sm">{{ pending_payments_count }}</span> <span class="text-secondary-light" data-i18n="finance.awaiting">awaiting</span></p>
+                <p class="text-sm mb-0"><span class="bg-warning-focus px-1 rounded-2 fw-medium text-warning-main text-sm">{{ pending_payments_count|smart_num }}</span> <span class="text-secondary-light" data-i18n="finance.awaiting">awaiting</span></p>
             </div>
         </div>
     </div>
@@ -356,13 +357,21 @@ const monthlyRevenueLabels = {{ monthly_revenue_labels|safe }};
 const aovTrendData = {{ aov_trend_data|safe }};
 const aovTrendLabels = {{ aov_trend_labels|safe }};
 
-function formatNumber(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+function formatFull(num) {
+    if (window.WowDashNumbers) return window.WowDashNumbers.formatFull(num);
+    return (Number(num) || 0).toString();
+}
 function formatShort(num) {
-    num = parseFloat(num) || 0;
-    if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B';
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-    return num.toFixed(0);
+    if (window.WowDashNumbers) return window.WowDashNumbers.formatCompact(num);
+    return (Number(num) || 0).toString();
+}
+function compactHtml(num, suffix) {
+    const value = Number(num) || 0;
+    const suffixText = suffix || '';
+    const compact = formatShort(value) + suffixText;
+    if (Math.abs(value) < 1000) return compact;
+    const full = formatFull(value) + suffixText;
+    return '<span class="smart-number" data-bs-toggle="tooltip" data-bs-custom-class="number-tooltip" data-bs-placement="top" title="' + full + '">' + compact + '</span>';
 }
 function getThemeColors() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -380,12 +389,12 @@ function initRevenueChart() {
         stroke: { curve: 'smooth', width: 2 },
         dataLabels: { enabled: false },
         xaxis: { categories: monthlyRevenueLabels, labels: { style: { colors: colors.textColor, fontSize: '12px' } }, axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false } },
-        yaxis: { labels: { formatter: val => val >= 1000000 ? (val/1000000).toFixed(1)+'M' : val >= 1000 ? (val/1000).toFixed(0)+'K' : val, style: { colors: colors.textColor, fontSize: '12px' } } },
+        yaxis: { labels: { formatter: val => formatShort(val), style: { colors: colors.textColor, fontSize: '12px' } } },
         grid: { borderColor: colors.gridColor, strokeDashArray: 3 },
         tooltip: {
             theme: 'dark',
             x: { show: true },
-            y: { formatter: val => formatNumber(val) + ' UZS', title: { formatter: () => '' } },
+            y: { formatter: val => formatFull(val) + ' UZS', title: { formatter: () => '' } },
             marker: { show: false }
         }
     }).render();
@@ -395,10 +404,11 @@ function initRevenueChart() {
 let paymentDonutChart;
 function updatePaymentChart(period) {
     const data = paymentBreakdownData[period];
-    document.getElementById('cashRevenue').textContent = formatNumber(data.cash.revenue) + ' UZS';
-    document.getElementById('cashCount').textContent = '(' + data.cash.count + ' orders)';
-    document.getElementById('cardRevenue').textContent = formatNumber(data.card.revenue) + ' UZS';
-    document.getElementById('cardCount').textContent = '(' + data.card.count + ' orders)';
+    document.getElementById('cashRevenue').innerHTML = compactHtml(data.cash.revenue, ' UZS');
+    document.getElementById('cashCount').innerHTML = '(' + compactHtml(data.cash.count, '') + ' orders)';
+    document.getElementById('cardRevenue').innerHTML = compactHtml(data.card.revenue, ' UZS');
+    document.getElementById('cardCount').innerHTML = '(' + compactHtml(data.card.count, '') + ' orders)';
+    if (window.WowDashNumbers) window.WowDashNumbers.refreshTooltips(document);
     if (paymentDonutChart) paymentDonutChart.updateSeries([data.cash.revenue, data.card.revenue]);
 }
 function initPaymentDonutChart() {
@@ -411,7 +421,7 @@ function initPaymentDonutChart() {
         colors: ['#45B369', '#487FFF'],
         legend: { show: false },
         dataLabels: { enabled: false },
-        tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: val => formatNumber(val) + ' UZS', title: { formatter: series => series } }, marker: { show: true } },
+        tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: val => formatFull(val) + ' UZS', title: { formatter: series => series } }, marker: { show: true } },
         plotOptions: { pie: { donut: { size: '70%', labels: { show: true, name: { show: true, fontSize: '12px', color: colors.textColor }, value: { show: true, fontSize: '14px', fontWeight: 600, color: colors.textColor, formatter: val => formatShort(val) }, total: { show: true, label: 'Total', color: colors.textColor, formatter: w => formatShort(w.globals.seriesTotals.reduce((a,b) => a+b, 0)) } } } } }
     });
     paymentDonutChart.render();
@@ -422,10 +432,11 @@ function initPaymentDonutChart() {
 let userTypeDonutChart;
 function updateUserTypeChart(period) {
     const data = userTypeRevenueData[period];
-    document.getElementById('agencyRevenue').textContent = formatNumber(data.agency.revenue) + ' UZS';
-    document.getElementById('agencyCount').textContent = '(' + data.agency.count + ' orders)';
-    document.getElementById('regularRevenue').textContent = formatNumber(data.regular.revenue) + ' UZS';
-    document.getElementById('regularCount').textContent = '(' + data.regular.count + ' orders)';
+    document.getElementById('agencyRevenue').innerHTML = compactHtml(data.agency.revenue, ' UZS');
+    document.getElementById('agencyCount').innerHTML = '(' + compactHtml(data.agency.count, '') + ' orders)';
+    document.getElementById('regularRevenue').innerHTML = compactHtml(data.regular.revenue, ' UZS');
+    document.getElementById('regularCount').innerHTML = '(' + compactHtml(data.regular.count, '') + ' orders)';
+    if (window.WowDashNumbers) window.WowDashNumbers.refreshTooltips(document);
     if (userTypeDonutChart) userTypeDonutChart.updateSeries([data.agency.revenue, data.regular.revenue]);
 }
 function initUserTypeDonutChart() {
@@ -438,7 +449,7 @@ function initUserTypeDonutChart() {
         colors: ['#06B6D4', '#F59E0B'],
         legend: { show: false },
         dataLabels: { enabled: false },
-        tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: val => formatNumber(val) + ' UZS', title: { formatter: series => series } }, marker: { show: true } },
+        tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: val => formatFull(val) + ' UZS', title: { formatter: series => series } }, marker: { show: true } },
         plotOptions: { pie: { donut: { size: '70%', labels: { show: true, name: { show: true, fontSize: '12px', color: colors.textColor }, value: { show: true, fontSize: '14px', fontWeight: 600, color: colors.textColor, formatter: val => formatShort(val) }, total: { show: true, label: 'Total', color: colors.textColor, formatter: w => formatShort(w.globals.seriesTotals.reduce((a,b) => a+b, 0)) } } } } }
     });
     userTypeDonutChart.render();
@@ -455,12 +466,12 @@ function initAovChart() {
         plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
         dataLabels: { enabled: false },
         xaxis: { categories: aovTrendLabels, labels: { style: { colors: colors.textColor, fontSize: '11px' } }, axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false } },
-        yaxis: { labels: { formatter: val => val >= 1000 ? (val/1000).toFixed(0)+'K' : val, style: { colors: colors.textColor, fontSize: '11px' } } },
+        yaxis: { labels: { formatter: val => formatShort(val), style: { colors: colors.textColor, fontSize: '11px' } } },
         grid: { borderColor: colors.gridColor, strokeDashArray: 3 },
         tooltip: {
             theme: 'dark',
             x: { show: true },
-            y: { formatter: val => formatNumber(val) + ' UZS', title: { formatter: () => '' } },
+            y: { formatter: val => formatFull(val) + ' UZS', title: { formatter: () => '' } },
             marker: { show: false }
         }
     }).render();
@@ -481,8 +492,9 @@ function updateProductsTable(period) {
         '<tr><td class="text-secondary-light">' + (i+1) + '</td>' +
         '<td><span class="text-primary-light fw-medium">' + p.name + '</span></td>' +
         '<td class="text-center"><span class="bg-success-focus text-success-main px-12 py-4 rounded-pill fw-medium text-sm">' + p.count + '</span></td>' +
-        '<td class="text-secondary-light">' + formatNumber(p.revenue) + ' UZS</td></tr>'
+        '<td class="text-secondary-light">' + compactHtml(p.revenue, ' UZS') + '</td></tr>'
     ).join('');
+    if (window.WowDashNumbers) window.WowDashNumbers.refreshTooltips(tbody);
 }
 
 document.addEventListener('DOMContentLoaded', function() {

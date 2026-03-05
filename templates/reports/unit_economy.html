@@ -125,7 +125,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="unitEconomy.totalRemaining">Total Remaining</span>
-                        <h4 class="fw-bold mb-0 text-danger-main">{{ total_remaining|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0 text-danger-main">{{ total_remaining|smart_num }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
                 <p class="text-sm mb-0 text-secondary-light">
@@ -144,7 +144,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="unitEconomy.totalReceived">Total Received</span>
-                        <h4 class="fw-bold mb-0 text-success-main">{{ total_received|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0 text-success-main">{{ total_received|smart_num }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
                 <p class="text-sm mb-0 text-secondary-light">
@@ -163,7 +163,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="unitEconomy.totalExpected">Total Expected</span>
-                        <h4 class="fw-bold mb-0">{{ total_expected|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ total_expected|smart_num }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
             </div>
@@ -203,7 +203,7 @@
                             <span class="text-secondary-light text-sm">{{ by_client_type.agency.label }}</span>
                         </div>
                         <div class="text-end">
-                            <span class="text-danger-main fw-semibold">{{ by_client_type.agency.remaining|short_number }} UZS</span>
+                            <span class="text-danger-main fw-semibold">{{ by_client_type.agency.remaining|smart_num }} UZS</span>
                             <span class="text-xs text-secondary-light d-block">{{ by_client_type.agency.orders_with_debt }} orders</span>
                         </div>
                     </div>
@@ -214,7 +214,7 @@
                             <span class="text-secondary-light text-sm">{{ by_client_type.regular.label }}</span>
                         </div>
                         <div class="text-end">
-                            <span class="text-danger-main fw-semibold">{{ by_client_type.regular.remaining|short_number }} UZS</span>
+                            <span class="text-danger-main fw-semibold">{{ by_client_type.regular.remaining|smart_num }} UZS</span>
                             <span class="text-xs text-secondary-light d-block">{{ by_client_type.regular.orders_with_debt }} orders</span>
                         </div>
                     </div>
@@ -265,7 +265,7 @@
                             {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
                             <tr>
                                 <td class="{{ row_color }} fw-medium text-secondary-light">{{ item.center_name }}</td>
-                                <td class="{{ row_color }} text-end text-danger-main fw-semibold">{{ item.remaining|short_number }}</td>
+                                <td class="{{ row_color }} text-end text-danger-main fw-semibold">{{ item.remaining|smart_num }}</td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ item.orders_with_debt }}</td>
                                 <td class="{{ row_color }} text-end">
                                     <span class="badge {% if item.collection_rate >= 80 %}bg-success-focus text-success-main{% elif item.collection_rate >= 50 %}bg-warning-focus text-warning-main{% else %}bg-danger-focus text-danger-main{% endif %}">
@@ -338,7 +338,7 @@
                                     <span class="badge bg-warning-focus text-warning-main px-8 py-4">B2C</span>
                                     {% endif %}
                                 </td>
-                                <td class="{{ row_color }} text-end text-danger-main fw-semibold">{{ debtor.remaining|short_number }}</td>
+                                <td class="{{ row_color }} text-end text-danger-main fw-semibold">{{ debtor.remaining|smart_num }}</td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ debtor.orders_with_debt }}</td>
                             </tr>
                             {% empty %}
@@ -384,9 +384,9 @@
                             <tr>
                                 <td class="fw-medium">{{ item.branch_name }}</td>
                                 <td class="text-secondary-light">{{ item.center_name }}</td>
-                                <td class="text-end">{{ item.total_expected|short_number }}</td>
-                                <td class="text-end text-success-main">{{ item.total_received|short_number }}</td>
-                                <td class="text-end text-danger-main fw-semibold">{{ item.remaining|short_number }}</td>
+                                <td class="text-end">{{ item.total_expected|smart_num }}</td>
+                                <td class="text-end text-success-main">{{ item.total_received|smart_num }}</td>
+                                <td class="text-end text-danger-main fw-semibold">{{ item.remaining|smart_num }}</td>
                                 <td class="text-center">{{ item.orders_with_debt }}</td>
                                 <td class="text-end">
                                     <div class="d-flex align-items-center justify-content-end gap-2">

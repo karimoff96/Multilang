@@ -114,7 +114,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="report.totalRevenue">Total Revenue</span>
-                        <h4 class="fw-bold mb-0">{{ total_revenue|short_number }} <small class="text-sm">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ total_revenue|smart_num }} <small class="text-sm">UZS</small></h4>
                     </div>
                 </div>
             </div>
@@ -238,9 +238,9 @@
                                     </div>
                                 </td>
                                 <td class="{{ row_color }} text-end">
-                                    <span class="fw-semibold text-success-main">{{ branch.revenue|short_number }}</span>
+                                    <span class="fw-semibold text-success-main">{{ branch.revenue|smart_num }}</span>
                                 </td>
-                                <td class="{{ row_color }} text-end text-secondary-light">{{ branch.avg_value|short_number }}</td>
+                                <td class="{{ row_color }} text-end text-secondary-light">{{ branch.avg_value|smart_num }}</td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ branch.staff_count }}</td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ branch.customer_count }}</td>
                             </tr>

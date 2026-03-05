@@ -437,7 +437,10 @@ def order_reports(request):
     language_data = []
     for item in language_breakdown:
         language_data.append(
-            {"pair": item["language__name"] or "N/A", "count": item["count"]}
+            {
+                "pair": item["language__name"] or str(_("Not selected")),
+                "count": item["count"],
+            }
         )
 
     # Recent orders list with pagination
@@ -607,29 +610,31 @@ def staff_performance(request):
             (completed_orders / total_assigned * 100) if total_assigned > 0 else 0, 1
         )
 
-        staff_data.append(
-            {
-                "id": staff.id,
-                "name": staff.user.get_full_name() or staff.user.username,
-                "center": (
-                    staff.branch.center.name
-                    if staff.branch and staff.branch.center
-                    else "N/A"
-                ),
-                "branch": staff.branch.name if staff.branch else "N/A",
-                "role": staff.role.name if staff.role else "Staff",
-                "total_assigned": total_assigned,
-                "completed": completed_orders,
-                "revenue": revenue,
-                "completion_rate": completion_rate,
-            }
-        )
+        # Hide staff entries that have no activity in the selected period.
+        if total_assigned > 0 or completed_orders > 0 or revenue > 0:
+            staff_data.append(
+                {
+                    "id": staff.id,
+                    "name": staff.user.get_full_name() or staff.user.username,
+                    "center": (
+                        staff.branch.center.name
+                        if staff.branch and staff.branch.center
+                        else "N/A"
+                    ),
+                    "branch": staff.branch.name if staff.branch else "N/A",
+                    "role": staff.role.name if staff.role else "Staff",
+                    "total_assigned": total_assigned,
+                    "completed": completed_orders,
+                    "revenue": revenue,
+                    "completion_rate": completion_rate,
+                }
+            )
 
     # Sort by completed orders
     staff_data.sort(key=lambda x: x["completed"], reverse=True)
 
-    # Top performers
-    top_performers = staff_data[:5] if staff_data else []
+    # Top performers must have at least one completed order.
+    top_performers = [staff for staff in staff_data if staff["completed"] > 0][:5]
 
     # Staff performance chart data
     staff_labels = [s["name"] for s in top_performers]

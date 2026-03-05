@@ -304,6 +304,7 @@ def marketing_create(request):
             return redirect('marketing_detail', post_id=post.id)
     
     # Bot user statistics — scoped to user's accessible center/branch
+    # "Sendable" means: has Telegram ID, active, and not opted out from marketing.
     from accounts.models import BotUser
     from django.db.models import Q as _BUQ
     _bu_base = BotUser.objects.filter(user_id__isnull=False)
@@ -317,39 +318,105 @@ def marketing_create(request):
             _bu_base = _bu_base.filter(branch=request.admin_profile.branch)
         else:
             _bu_base = BotUser.objects.none()
-    total_bot_users = _bu_base.count()
+
+    telegram_total_users = _bu_base.count()
     active_bot_users = _bu_base.filter(is_active=True).count()
     inactive_bot_users = _bu_base.filter(is_active=False).count()
+    opted_out_bot_users = _bu_base.filter(
+        broadcast_preference__receive_marketing=False
+    ).count()
+    sendable_bot_users = _bu_base.filter(is_active=True).exclude(
+        broadcast_preference__receive_marketing=False
+    ).count()
     unassigned_bot_users = _bu_base.filter(branch__isnull=True).count()
 
     center_stats = []
-    branch_stats = {}  # center_id -> list of {id, name, total, active}
+    branch_stats = {}  # center_id -> list of {id, name, total, active, opted_out}
     if request.user.is_superuser:
         centers_qs = TranslationCenter.objects.filter(is_active=True).order_by('name')
         for c in centers_qs:
-            total = BotUser.objects.filter(user_id__isnull=False, branch__center=c).count()
-            active = BotUser.objects.filter(user_id__isnull=False, is_active=True, branch__center=c).count()
-            inactive = total - active
-            center_stats.append({'id': c.id, 'name': c.name, 'total': total, 'active': active, 'inactive': inactive})
+            center_users = BotUser.objects.filter(user_id__isnull=False).filter(
+                _BUQ(center=c) | _BUQ(branch__center=c)
+            ).distinct()
+            active = center_users.filter(is_active=True).count()
+            opted_out = center_users.filter(
+                broadcast_preference__receive_marketing=False
+            ).count()
+            sendable = center_users.filter(is_active=True).exclude(
+                broadcast_preference__receive_marketing=False
+            ).count()
+            center_stats.append(
+                {
+                    'id': c.id,
+                    'name': c.name,
+                    'total': sendable,
+                    'active': active,
+                    'opted_out': opted_out,
+                }
+            )
             # Per-branch stats for this center
             branches_for_center = []
             for br in Branch.objects.filter(center=c, is_active=True).order_by('name'):
-                br_total = BotUser.objects.filter(user_id__isnull=False, branch=br).count()
-                br_active = BotUser.objects.filter(user_id__isnull=False, is_active=True, branch=br).count()
-                branches_for_center.append({'id': br.id, 'name': br.name, 'total': br_total, 'active': br_active})
+                branch_users = BotUser.objects.filter(user_id__isnull=False, branch=br)
+                br_active = branch_users.filter(is_active=True).count()
+                br_opted_out = branch_users.filter(
+                    broadcast_preference__receive_marketing=False
+                ).count()
+                br_sendable = branch_users.filter(is_active=True).exclude(
+                    broadcast_preference__receive_marketing=False
+                ).count()
+                branches_for_center.append(
+                    {
+                        'id': br.id,
+                        'name': br.name,
+                        'total': br_sendable,
+                        'active': br_active,
+                        'opted_out': br_opted_out,
+                    }
+                )
             branch_stats[c.id] = branches_for_center
     elif not request.user.is_superuser:
         # Non-superuser: build center_stats + branch_stats from accessible centers/branches
         for c in permissions['centers']:
-            total = BotUser.objects.filter(user_id__isnull=False, branch__center=c).count()
-            active = BotUser.objects.filter(user_id__isnull=False, is_active=True, branch__center=c).count()
-            center_stats.append({'id': c.id, 'name': c.name, 'total': total, 'active': active, 'inactive': total - active})
+            center_users = BotUser.objects.filter(user_id__isnull=False).filter(
+                _BUQ(center=c) | _BUQ(branch__center=c)
+            ).distinct()
+            active = center_users.filter(is_active=True).count()
+            opted_out = center_users.filter(
+                broadcast_preference__receive_marketing=False
+            ).count()
+            sendable = center_users.filter(is_active=True).exclude(
+                broadcast_preference__receive_marketing=False
+            ).count()
+            center_stats.append(
+                {
+                    'id': c.id,
+                    'name': c.name,
+                    'total': sendable,
+                    'active': active,
+                    'opted_out': opted_out,
+                }
+            )
             branches_for_center = []
             for br in permissions['branches']:
                 if br.center_id == c.id:
-                    br_total = BotUser.objects.filter(user_id__isnull=False, branch=br).count()
-                    br_active = BotUser.objects.filter(user_id__isnull=False, is_active=True, branch=br).count()
-                    branches_for_center.append({'id': br.id, 'name': br.name, 'total': br_total, 'active': br_active})
+                    branch_users = BotUser.objects.filter(user_id__isnull=False, branch=br)
+                    br_active = branch_users.filter(is_active=True).count()
+                    br_opted_out = branch_users.filter(
+                        broadcast_preference__receive_marketing=False
+                    ).count()
+                    br_sendable = branch_users.filter(is_active=True).exclude(
+                        broadcast_preference__receive_marketing=False
+                    ).count()
+                    branches_for_center.append(
+                        {
+                            'id': br.id,
+                            'name': br.name,
+                            'total': br_sendable,
+                            'active': br_active,
+                            'opted_out': br_opted_out,
+                        }
+                    )
             branch_stats[c.id] = branches_for_center
 
     context = {
@@ -360,9 +427,11 @@ def marketing_create(request):
         'scope_choices': [
             (MarketingPost.SCOPE_BRANCH, _('Branch Users')),
         ],
-        'total_bot_users': total_bot_users,
+        'telegram_total_users': telegram_total_users,
+        'sendable_bot_users': sendable_bot_users,
         'active_bot_users': active_bot_users,
         'inactive_bot_users': inactive_bot_users,
+        'opted_out_bot_users': opted_out_bot_users,
         'unassigned_bot_users': unassigned_bot_users,
         'center_stats': center_stats,
         'branch_stats_json': json.dumps(branch_stats),

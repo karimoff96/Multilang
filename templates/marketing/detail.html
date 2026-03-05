@@ -100,11 +100,42 @@
                         {{ post.content|safe }}
                     </div>
                     {% if post.media_file %}
-                    <div class="mt-12">
-                        <span class="badge bg-secondary-100 text-secondary-600">
-                            <iconify-icon icon="{% if post.content_type == 'photo' %}mdi:image{% elif post.content_type == 'video' %}mdi:video{% else %}mdi:file{% endif %}" class="me-1"></iconify-icon>
-                            {{ post.get_content_type_display }}: {{ post.media_file.name|slice:"-30:" }}
-                        </span>
+                    <div class="mt-12 p-16 border rounded-3 bg-base">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-12">
+                            <span class="badge bg-secondary-100 text-secondary-600">
+                                <iconify-icon icon="{% if post.content_type == 'photo' %}mdi:image{% elif post.content_type == 'video' %}mdi:video{% else %}mdi:file{% endif %}" class="me-1"></iconify-icon>
+                                {{ post.get_content_type_display }}
+                            </span>
+                            <div class="d-flex gap-2">
+                                <a href="{{ post.media_file.url }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
+                                    <iconify-icon icon="mdi:open-in-new" class="me-1"></iconify-icon>
+                                    View file
+                                </a>
+                                <a href="{{ post.media_file.url }}" download class="btn btn-sm btn-outline-secondary">
+                                    <iconify-icon icon="mdi:download" class="me-1"></iconify-icon>
+                                    Download
+                                </a>
+                            </div>
+                        </div>
+
+                        {% if post.content_type == 'photo' %}
+                        <img
+                            src="{{ post.media_file.url }}"
+                            alt="{{ post.title }}"
+                            class="img-fluid rounded-3 border"
+                            style="max-height: 420px; width: auto;"
+                        >
+                        {% elif post.content_type == 'video' %}
+                        <video controls class="w-100 rounded-3 border" style="max-height: 420px;">
+                            <source src="{{ post.media_file.url }}">
+                            Your browser does not support the video tag.
+                        </video>
+                        {% else %}
+                        <div class="d-flex align-items-center gap-2 text-secondary-light">
+                            <iconify-icon icon="mdi:file-document-outline" class="text-lg"></iconify-icon>
+                            <span class="text-sm">{{ post.media_file.name|slice:"-60:" }}</span>
+                        </div>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </div>

@@ -22,8 +22,8 @@ def _to_float(value):
 
 
 def _space_sep_display(v):
-    """Format with non-breaking spaces for display (prevents line-wrapping)."""
-    return f"{int(v):,}".replace(',', '\u00a0')
+    """Format with regular spaces as thousands separators for display."""
+    return f"{int(v):,}".replace(',', ' ')
 
 
 def _space_sep_title(v):
@@ -32,26 +32,23 @@ def _space_sep_title(v):
 
 
 def _abbrev(v):
-    """Return abbreviated string: K / M with space-sep prefix when large."""
-    if v >= 1_000_000:
-        d = v / 1_000_000
-        if d >= 1_000:
-            # e.g. 1_500_000_000 → "1 500M"
-            return _space_sep_display(round(d)) + "M"
-        elif d >= 10:
-            return f"{d:.0f}M"
-        else:
-            return f"{d:.1f}".rstrip('0').rstrip('.') + "M"
-    elif v >= 1_000:
-        d = v / 1_000
-        if d >= 1_000:
-            return _space_sep_display(round(d)) + "K"
-        elif d >= 10:
-            return f"{d:.0f}K"
-        else:
-            return f"{d:.1f}".rstrip('0').rstrip('.') + "K"
-    else:
-        return f"{v:.0f}"
+    """Return abbreviated string using K / M suffixes."""
+    sign = "-" if v < 0 else ""
+    abs_v = abs(v)
+
+    if abs_v >= 1_000_000:
+        d = abs_v / 1_000_000
+        if d >= 10:
+            return f"{sign}{d:.0f}M"
+        return f"{sign}{d:.1f}".rstrip('0').rstrip('.') + "M"
+
+    if abs_v >= 1_000:
+        d = abs_v / 1_000
+        if d >= 10:
+            return f"{sign}{d:.0f}K"
+        return f"{sign}{d:.1f}".rstrip('0').rstrip('.') + "K"
+
+    return f"{v:.0f}"
 
 
 @register.filter(is_safe=True)
@@ -65,18 +62,21 @@ def smart_num(value):
     if v is None:
         return format_html('0')
     abbrev = _abbrev(v)
-    # Build the plain-space full number for the title attribute
+
+    # Full number in tooltip with spaces between thousands.
     if v == int(v):
         full_title = _space_sep_title(v)
     else:
-        full_title = f"{v:,.2f}".replace(',', ' ')
-    # Only add hover span when the number was actually abbreviated
-    if abbrev != full_title.replace(' ', ''):
+        full_title = f"{v:,.2f}".replace(',', ' ').rstrip('0').rstrip('.')
+
+    # Tooltip only when value is compacted.
+    if abs(v) >= 1_000:
         return format_html(
-            '<span data-bs-toggle="tooltip" data-bs-placement="top" title="{}" style="cursor:help;border-bottom:1px dotted currentColor">{}</span>',
+            '<span class="smart-number" data-bs-toggle="tooltip" data-bs-custom-class="number-tooltip" data-bs-placement="top" title="{}">{}</span>',
             full_title,
             abbrev,
         )
+
     return format_html('{}', abbrev)
 
 
@@ -145,22 +145,7 @@ def short_number(value):
     except (TypeError, ValueError, InvalidOperation):
         return "0"
 
-    if value >= 1_000_000:
-        # Format millions: 1234567 -> 1.2M or 1234000 -> 1M
-        result = value / 1_000_000
-        if result >= 10:
-            return f"{result:.0f}M"
-        else:
-            return f"{result:.1f}M".rstrip('0').rstrip('.')
-    elif value >= 1_000:
-        # Format thousands: 1234 -> 1.2K or 1000 -> 1K
-        result = value / 1_000
-        if result >= 10:
-            return f"{result:.0f}K"
-        else:
-            return f"{result:.1f}K".rstrip('0').rstrip('.')
-    else:
-        return f"{value:.0f}"
+    return _abbrev(value)
 
 
 @register.filter

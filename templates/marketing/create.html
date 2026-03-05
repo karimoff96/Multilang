@@ -129,7 +129,7 @@
                                 </div>
                                 <div class="d-flex align-items-center gap-8">
                                     <span class="badge badge-primary-soft px-8 py-4 radius-6 text-xs">
-                                        {{ cs.total }} users
+                                        {{ cs.total }} sendable
                                     </span>
                                     <span class="badge bg-success-focus text-success-main px-8 py-4 radius-6 text-xs">
                                         {{ cs.active }} active
@@ -269,7 +269,7 @@
             <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="text-md fw-semibold mb-0">
                     <iconify-icon icon="mdi:telegram" class="me-2 text-primary-600"></iconify-icon>
-                    Bot Users
+                    Telegram Reach
                 </h6>
                 <span class="badge bg-primary-100 text-primary-600 px-10 py-4 radius-6 text-xs">Telegram</span>
             </div>
@@ -277,38 +277,45 @@
                 <div class="row g-2 mb-16">
                     <div class="col-6">
                         <div class="text-center p-10 radius-8 stat-tile-primary">
-                            <div class="fw-bold fs-5 stat-value">{{ total_bot_users }}</div>
-                            <div class="text-xs text-muted mt-1">Total</div>
+                            <div class="fw-bold fs-5 stat-value">{{ sendable_bot_users }}</div>
+                            <div class="text-xs text-muted mt-1">Sendable</div>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="text-center p-10 radius-8 bg-success-focus">
                             <div class="fw-bold fs-5 text-success-main">{{ active_bot_users }}</div>
-                            <div class="text-xs text-muted mt-1">Active</div>
+                            <div class="text-xs text-muted mt-1">Active Telegram</div>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="text-center p-10 radius-8 bg-danger-focus">
                             <div class="fw-bold fs-5 text-danger-main">{{ inactive_bot_users }}</div>
-                            <div class="text-xs text-muted mt-1">Inactive</div>
+                            <div class="text-xs text-muted mt-1">Inactive Telegram</div>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="text-center p-10 radius-8 bg-warning-focus">
-                            <div class="fw-bold fs-5 text-warning-main">{{ unassigned_bot_users }}</div>
-                            <div class="text-xs text-muted mt-1">No Branch</div>
+                            <div class="fw-bold fs-5 text-warning-main">{{ opted_out_bot_users }}</div>
+                            <div class="text-xs text-muted mt-1">Opted Out</div>
                         </div>
                     </div>
                 </div>
 
-                {% if total_bot_users %}
                 <div class="mb-16">
                     <div class="d-flex justify-content-between text-xs text-muted mb-4">
-                        <span>Active ratio</span>
-                        <span>{{ active_bot_users }}/{{ total_bot_users }}</span>
+                        <span>Total Telegram users</span>
+                        <span>{{ telegram_total_users }}</span>
+                    </div>
+                </div>
+
+                {% if active_bot_users %}
+                <div class="mb-16">
+                    <div class="d-flex justify-content-between text-xs text-muted mb-4">
+                        <span>Sendable ratio (from active)</span>
+                        <span>{{ sendable_bot_users }}/{{ active_bot_users }}</span>
                     </div>
                     <div class="progress" style="height:6px;border-radius:4px;">
-                        <div class="progress-bar bg-success" style="width:{% widthratio active_bot_users total_bot_users 100 %}%"></div>
+                        <div class="progress-bar bg-success" style="width:{% widthratio sendable_bot_users active_bot_users 100 %}%"></div>
                     </div>
                 </div>
                 {% endif %}
@@ -325,14 +332,9 @@
                             </span>
                             <span class="badge badge-primary-soft px-8 py-3 radius-6 text-xs">{{ cs.total }}</span>
                         </div>
-                        <div class="progress" style="height:4px;border-radius:4px;">
-                            {% if cs.total %}
-                            <div class="progress-bar bg-success" style="width:{% widthratio cs.active cs.total 100 %}%"></div>
-                            {% endif %}
-                        </div>
                         <div class="d-flex justify-content-between text-xs mt-4">
-                            <span class="text-success-main">{{ cs.active }} active</span>
-                            {% if cs.inactive %}<span class="text-danger-main">{{ cs.inactive }} inactive</span>{% endif %}
+                            <span class="text-primary-main">{{ cs.total }} sendable</span>
+                            {% if cs.opted_out %}<span class="text-warning-main">{{ cs.opted_out }} opted out</span>{% endif %}
                         </div>
                     </div>
                     {% endfor %}
@@ -468,8 +470,8 @@ function buildBranchLists() {
                     <span class="fw-medium text-sm">${br.name}</span>
                 </div>
                 <div class="d-flex align-items-center gap-6">
-                    <span class="badge badge-primary-soft px-6 py-3 radius-6 text-xs">${br.total}</span>
-                    <span class="badge bg-success-focus text-success-main px-6 py-3 radius-6 text-xs">${br.active} ✓</span>
+                    <span class="badge badge-primary-soft px-6 py-3 radius-6 text-xs">${br.total} sendable</span>
+                    <span class="badge bg-success-focus text-success-main px-6 py-3 radius-6 text-xs">${br.active} active</span>
                 </div>`;
             container.appendChild(el);
         });
@@ -559,7 +561,7 @@ function updateSelectionSummaries() {
             const names = checkedCenters.map(cb => cb.dataset.centerName).join(', ');
             const total = checkedCenters.reduce((s, cb) => s + parseInt(cb.dataset.total || 0), 0);
             document.getElementById('centerSelectionText').textContent =
-                `${checkedCenters.length} center(s) selected: ${names} — ~${total} users`;
+                `${checkedCenters.length} center(s) selected: ${names} — ~${total} sendable`;
             cSummary.style.display = '';
         } else {
             cSummary.style.display = 'none';

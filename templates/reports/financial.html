@@ -126,7 +126,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="report.totalRevenue">Total Revenue</span>
-                        <h4 class="fw-bold mb-0">{{ total_revenue|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ total_revenue|smart_num }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
             </div>
@@ -141,7 +141,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="report.completedRevenue">Completed Revenue</span>
-                        <h4 class="fw-bold mb-0">{{ completed_revenue|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ completed_revenue|smart_num }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
             </div>
@@ -171,7 +171,7 @@
                     </span>
                     <div>
                         <span class="text-secondary-light text-sm" data-i18n="report.avgOrderValue">Avg Order Value</span>
-                        <h4 class="fw-bold mb-0">{{ avg_order_value|short_number }} <small class="text-sm fw-normal">UZS</small></h4>
+                        <h4 class="fw-bold mb-0">{{ avg_order_value|smart_num }} <small class="text-sm fw-normal">UZS</small></h4>
                     </div>
                 </div>
             </div>
@@ -217,7 +217,7 @@
                                     <span class="badge bg-warning-focus text-warning-main" data-i18n="status.pending">{{ item.status_display }}</span>
                                     {% endif %}
                                 </td>
-                                <td class="{{ row_color }} text-end text-secondary-light">{{ item.revenue|short_number }}</td>
+                                <td class="{{ row_color }} text-end text-secondary-light">{{ item.revenue|smart_num }}</td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ item.count }}</td>
                             </tr>
                             {% empty %}
@@ -252,7 +252,7 @@
                             {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
                             <tr>
                                 <td class="{{ row_color }} fw-medium text-secondary-light">{{ item.branch }}</td>
-                                <td class="{{ row_color }} text-end text-success-main fw-semibold">{{ item.revenue|short_number }}</td>
+                                <td class="{{ row_color }} text-end text-success-main fw-semibold">{{ item.revenue|smart_num }}</td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ item.count }}</td>
                             </tr>
                             {% endfor %}
@@ -292,7 +292,7 @@
                             {% cycle 'bg-primary-light' 'bg-success-focus' 'bg-info-focus' 'bg-warning-focus' 'bg-danger-focus' as row_color silent %}
                             <tr>
                                 <td class="{{ row_color }} fw-medium text-secondary-light">{{ item.product }}</td>
-                                <td class="{{ row_color }} text-end text-success-main fw-semibold">{{ item.revenue|short_number }}</td>
+                                <td class="{{ row_color }} text-end text-success-main fw-semibold">{{ item.revenue|smart_num }}</td>
                                 <td class="{{ row_color }} text-center text-secondary-light">{{ item.count }}</td>
                             </tr>
                             {% empty %}
