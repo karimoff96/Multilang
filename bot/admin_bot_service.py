@@ -198,6 +198,35 @@ def format_contact_request_summary(contact_request, updated_at=None):
     )
 
 
+def send_security_alert(message: str) -> bool:
+    """Send a concise security/abuse alert to admin Telegram IDs."""
+    if not ADMIN_TELEGRAM_IDS:
+        logger.warning("ADMIN_TELEGRAM_IDS not configured. Skipping security alert.")
+        return False
+
+    if not ADMIN_BOT_TOKEN:
+        logger.error("ADMIN_BOT_TOKEN not configured. Cannot send security alert.")
+        return False
+
+    bot = get_admin_bot()
+    if not bot:
+        logger.error("Admin bot not available - cannot send security alert")
+        return False
+
+    sent_any = False
+    for admin_id in ADMIN_TELEGRAM_IDS:
+        try:
+            bot.send_message(chat_id=admin_id, text=message, parse_mode="HTML")
+            sent_any = True
+            logger.info(f"🚨 Security alert sent to {admin_id}")
+        except ApiTelegramException as e:
+            logger.error(f"Failed to send security alert to {admin_id}: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error sending security alert to {admin_id}: {e}")
+
+    return sent_any
+
+
 def format_renewal_request_summary(subscription_history, status_action=None, updated_at=None):
     """Build status-aware summary for renewal requests."""
     status_action = status_action or subscription_history.action
