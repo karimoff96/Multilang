@@ -552,7 +552,7 @@ class Subscription(models.Model):
         default=STATUS_PENDING,
         verbose_name=_("Status")
     )
-    auto_renew = models.BooleanField(default=True, verbose_name=_("Auto Renew"))
+    auto_renew = models.BooleanField(default=False, verbose_name=_("Auto Renew"))
     
     # Payment tracking
     amount_paid = models.DecimalField(
@@ -886,6 +886,8 @@ class SubscriptionHistory(models.Model):
         verbose_name=_("Performed By")
     )
     timestamp = models.DateTimeField(auto_now_add=True)
+    admin_telegram_message_id = models.BigIntegerField(null=True, blank=True, verbose_name=_("Admin Telegram Message ID"))
+    admin_telegram_chat_id = models.BigIntegerField(null=True, blank=True, verbose_name=_("Admin Telegram Chat ID"))
     
     class Meta:
         verbose_name = _("Subscription History")

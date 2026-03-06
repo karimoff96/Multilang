@@ -75,6 +75,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "organizations.middleware.SubdomainMiddleware",  # Subdomain-based tenant identification
     "organizations.rbac.RBACMiddleware",
+    "billing.middleware.SubscriptionEnforcementMiddleware",
 ]
 
 ROOT_URLCONF = "WowDash.urls"

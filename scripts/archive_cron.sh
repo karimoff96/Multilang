@@ -15,18 +15,26 @@ VENV_PATH="/home/Wow-dash/venv"
 LOG_DIR="/var/log/wowdash"
 LOG_FILE="${LOG_DIR}/archive.log"
 ERROR_LOG="${LOG_DIR}/archive_error.log"
+LOCK_FILE="/tmp/wowdash_archive.lock"
 
 # Create log directory if it doesn't exist
 mkdir -p "${LOG_DIR}"
 
 # Function to log messages
 log_message() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "${LOG_FILE}"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "${LOG_FILE}"
 }
 
 log_error() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $1" | tee -a "${ERROR_LOG}"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $1" >> "${ERROR_LOG}"
 }
+
+# Prevent overlapping cron executions.
+exec 9>"${LOCK_FILE}"
+if ! flock -n 9; then
+    log_error "Archive job already running, skipping this run"
+    exit 0
+fi
 
 # Start logging
 log_message "=========================================="
@@ -75,10 +83,11 @@ if [ -f "${LOG_FILE}" ]; then
     LOG_SIZE=$(stat -f%z "${LOG_FILE}" 2>/dev/null || stat -c%s "${LOG_FILE}" 2>/dev/null || echo 0)
     if [ "${LOG_SIZE}" -gt 10485760 ]; then  # 10MB
         log_message "Rotating log file (size: ${LOG_SIZE} bytes)"
-        mv "${LOG_FILE}" "${LOG_FILE}.old"
-        gzip "${LOG_FILE}.old"
-        # Keep only last 5 rotated logs
-        find "${LOG_DIR}" -name "archive.log.old.gz" -mtime +30 -delete
+        ROTATED_FILE="${LOG_FILE}.$(date '+%Y%m%d_%H%M%S').old"
+        mv "${LOG_FILE}" "${ROTATED_FILE}"
+        gzip "${ROTATED_FILE}"
+        # Keep rotated logs for 30 days
+        find "${LOG_DIR}" -name "archive.log.*.old.gz" -mtime +30 -delete
     fi
 fi
 

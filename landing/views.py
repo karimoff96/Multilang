@@ -8,7 +8,11 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from .models import ContactRequest
 from billing.models import Tariff, SubscriptionHistory
-from bot.admin_bot_service import send_contact_request_notification
+from bot.admin_bot_service import (
+    send_contact_request_notification,
+    update_contact_request_notification,
+    update_renewal_request_notification,
+)
 import logging
 
 logger = logging.getLogger(__name__)
@@ -153,6 +157,10 @@ def contact_request_change_status(request, pk):
             contact_request.save()
             
             status_display = dict(ContactRequest.STATUS_CHOICES).get(new_status, new_status)
+            try:
+                update_contact_request_notification(contact_request)
+            except Exception as e:
+                logger.error(f"Failed to update admin bot message for contact request {contact_request.id}: {e}")
             messages.success(request, _(f"Status updated to {status_display}"))
         else:
             messages.error(request, _("Invalid status"))

@@ -183,6 +183,79 @@ class StorageArchiveService:
         
         logger.info(f"Created archive: {archive_path} with {len(orders)} orders")
         return archive_path
+
+    def _estimate_order_size(self, order):
+        """Estimate total file size for a single order in bytes."""
+        order_size = 0
+
+        for media in order.files.all():
+            if media.file and os.path.exists(media.file.path):
+                order_size += os.path.getsize(media.file.path)
+
+        if order.recipt and os.path.exists(order.recipt.path):
+            order_size += os.path.getsize(order.recipt.path)
+
+        return order_size
+
+    def _split_orders_by_size(self, orders_list, max_size_mb):
+        """
+        Split order list into batches so each batch stays within max_size_mb.
+        Keeps at least one order per batch even if a single order exceeds limit.
+        """
+        if not orders_list:
+            return []
+
+        max_size_bytes = int(max_size_mb * 1024 * 1024)
+        if max_size_bytes <= 0:
+            return [orders_list]
+
+        batches = []
+        current_batch = []
+        current_size = 0
+
+        for order in orders_list:
+            order_size = self._estimate_order_size(order)
+
+            # Start a new batch if adding this order would exceed the limit.
+            if current_batch and (current_size + order_size > max_size_bytes):
+                batches.append(current_batch)
+                current_batch = []
+                current_size = 0
+
+            current_batch.append(order)
+            current_size += order_size
+
+        if current_batch:
+            batches.append(current_batch)
+
+        return batches
+
+    def _cleanup_expired_local_archives(self, center=None):
+        """Delete expired local archive files and clear stale archive_path values."""
+        retention_days = ArchiveConfig.LOCAL_RETENTION_DAYS
+        if retention_days <= 0:
+            return
+
+        from core.models import FileArchive
+
+        cutoff = timezone.now() - timedelta(days=retention_days)
+        archives_qs = FileArchive.objects.filter(
+            archive_path__isnull=False,
+            archive_date__lt=cutoff,
+        )
+        if center is not None:
+            archives_qs = archives_qs.filter(center=center)
+
+        for archive in archives_qs:
+            if archive.archive_path and os.path.exists(archive.archive_path):
+                try:
+                    os.remove(archive.archive_path)
+                except Exception as e:
+                    logger.warning(f"Failed to remove expired archive {archive.archive_path}: {e}")
+                    continue
+
+            archive.archive_path = None
+            archive.save(update_fields=['archive_path'])
     
     def upload_to_telegram(self, center, archive_path, caption=None):
         """
@@ -267,6 +340,9 @@ class StorageArchiveService:
         }
         
         try:
+            # Keep local archive records in sync with retention policy.
+            self._cleanup_expired_local_archives(center=center)
+
             # Get archivable orders
             orders = self.get_archivable_orders(center, age_days)
             
@@ -289,14 +365,19 @@ class StorageArchiveService:
             max_size_mb = split_size_mb or ArchiveConfig.MAX_SIZE_MB
             orders_list = list(orders)
             
-            # Split into batches if needed
+            # First split by order count if configured.
             if max_orders:
-                batches = [orders_list[i:i + max_orders] for i in range(0, len(orders_list), max_orders)]
+                initial_batches = [orders_list[i:i + max_orders] for i in range(0, len(orders_list), max_orders)]
             elif ArchiveConfig.MAX_ORDERS_PER_BATCH > 0:
                 batch_size = ArchiveConfig.MAX_ORDERS_PER_BATCH
-                batches = [orders_list[i:i + batch_size] for i in range(0, len(orders_list), batch_size)]
+                initial_batches = [orders_list[i:i + batch_size] for i in range(0, len(orders_list), batch_size)]
             else:
-                batches = [orders_list]
+                initial_batches = [orders_list]
+
+            # Then enforce archive file size limits.
+            batches = []
+            for initial_batch in initial_batches:
+                batches.extend(self._split_orders_by_size(initial_batch, max_size_mb))
             
             total_archived = 0
             
@@ -317,7 +398,8 @@ class StorageArchiveService:
                 archive_size_mb = archive_size / (1024 * 1024)
                 
                 # Generate summary caption
-                caption = self._generate_archive_caption(center, batch_orders, self.calculate_total_size(batch_orders))
+                batch_total_size = self.calculate_total_size(batch_orders)
+                caption = self._generate_archive_caption(center, batch_orders, batch_total_size)
                 if len(batches) > 1:
                     caption += f"\n📦 Part {batch_idx + 1} of {len(batches)}"
                 
@@ -340,7 +422,7 @@ class StorageArchiveService:
                     telegram_message_id=msg_id_or_error,
                     telegram_channel_id=center.company_orders_channel_id,
                     total_orders=len(batch_orders),
-                    total_size_bytes=self.calculate_total_size(batch_orders),
+                    total_size_bytes=batch_total_size,
                     archive_date=timezone.now()
                 )
                 
@@ -362,10 +444,17 @@ class StorageArchiveService:
                     deleted_count = self._cleanup_local_files(batch_orders)
                     logger.info(f"Deleted {deleted_count} local files from batch {batch_idx + 1}")
                 
-                # Delete local archive file (already uploaded to Telegram)
+                # Keep or delete local archive file based on retention policy.
                 if os.path.exists(archive_path):
-                    os.remove(archive_path)
-                    logger.info(f"Deleted local archive file: {archive_path}")
+                    if ArchiveConfig.LOCAL_RETENTION_DAYS <= 0:
+                        os.remove(archive_path)
+                        archive.archive_path = None
+                        archive.save(update_fields=['archive_path'])
+                        logger.info(f"Deleted local archive file: {archive_path}")
+                    else:
+                        logger.info(
+                            f"Retained local archive for {ArchiveConfig.LOCAL_RETENTION_DAYS} days: {archive_path}"
+                        )
             
             result.update({
                 'success': True,
@@ -418,6 +507,7 @@ class StorageArchiveService:
     def _generate_archive_caption(self, center, orders, total_size):
         """Generate detailed caption for archive upload"""
         size_mb = total_size / (1024 * 1024)
+        orders_count = len(orders) if isinstance(orders, list) else orders.count()
         
         # Count by branch
         branch_counts = {}
@@ -431,7 +521,7 @@ class StorageArchiveService:
             f"📦 <b>Storage Archive</b>\n\n"
             f"🏢 Center: {center.name}\n"
             f"📅 Archive Date: {timezone.now().strftime('%Y-%m-%d %H:%M')}\n"
-            f"📋 Total Orders: {orders.count()}\n"
+            f"📋 Total Orders: {orders_count}\n"
             f"💾 Total Size: {size_mb:.2f} MB\n\n"
             f"<b>Orders by Branch:</b>\n{branch_summary}\n\n"
             f"ℹ️ Download and unzip to access files.\n"

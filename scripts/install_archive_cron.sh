@@ -21,9 +21,11 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Configuration
-PROJECT_DIR="/home/wemard/app"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 SCRIPT_PATH="${PROJECT_DIR}/scripts/archive_cron.sh"
-CRON_USER="wemard"  # Change this to your application user
+CRON_USER="${SUDO_USER:-$(logname 2>/dev/null || whoami)}"
+CRON_SCHEDULE="0 1 * * *"
 
 # Verify script exists
 if [ ! -f "${SCRIPT_PATH}" ]; then
@@ -46,25 +48,22 @@ BACKUP_FILE="/tmp/crontab_backup_$(date +%Y%m%d_%H%M%S).txt"
 crontab -u ${CRON_USER} -l > "${BACKUP_FILE}" 2>/dev/null || echo "# New crontab" > "${BACKUP_FILE}"
 echo "✓ Backed up existing crontab to: ${BACKUP_FILE}"
 
-# Check if cron job already exists
-if crontab -u ${CRON_USER} -l 2>/dev/null | grep -q "archive_cron.sh"; then
-    echo ""
-    echo "WARNING: Archive cron job already exists in crontab"
-    echo "Please remove the old entry manually or it will run twice"
-    echo ""
-    read -p "Do you want to continue and add it anyway? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Installation cancelled"
-        exit 1
-    fi
-fi
+# Build idempotent crontab: remove older archive entries, then append one fresh entry.
+CURRENT_CRONTAB=$(mktemp)
+UPDATED_CRONTAB=$(mktemp)
 
-# Add cron job (runs daily at 2 AM)
-(crontab -u ${CRON_USER} -l 2>/dev/null; echo "# WowDash Archive - Runs daily at 2 AM") | crontab -u ${CRON_USER} -
-(crontab -u ${CRON_USER} -l 2>/dev/null; echo "0 2 * * * ${SCRIPT_PATH}") | crontab -u ${CRON_USER} -
+crontab -u ${CRON_USER} -l > "${CURRENT_CRONTAB}" 2>/dev/null || true
 
-echo "✓ Added cron job to run daily at 2:00 AM"
+grep -v "archive_cron.sh" "${CURRENT_CRONTAB}" | grep -v "WowDash Archive" > "${UPDATED_CRONTAB}" || true
+{
+    echo "# WowDash Archive - Runs daily at 1 AM"
+    echo "${CRON_SCHEDULE} ${SCRIPT_PATH}"
+} >> "${UPDATED_CRONTAB}"
+
+crontab -u ${CRON_USER} "${UPDATED_CRONTAB}"
+rm -f "${CURRENT_CRONTAB}" "${UPDATED_CRONTAB}"
+
+echo "✓ Installed archive cron job (${CRON_SCHEDULE})"
 
 # Display installed cron job
 echo ""
@@ -81,7 +80,7 @@ echo ""
 echo "Configuration:"
 echo "  - User: ${CRON_USER}"
 echo "  - Script: ${SCRIPT_PATH}"
-echo "  - Schedule: Daily at 2:00 AM"
+echo "  - Schedule: ${CRON_SCHEDULE}"
 echo "  - Logs: /var/log/wowdash/archive.log"
 echo "  - Error logs: /var/log/wowdash/archive_error.log"
 echo ""

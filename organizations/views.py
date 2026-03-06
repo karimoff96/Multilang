@@ -229,6 +229,7 @@ def center_edit(request, center_id):
 @permission_required('can_view_centers')
 def center_detail(request, center_id):
     """View translation center details with branches, staff, categories, products"""
+    from datetime import date
     from django.db.models import Q as DQ
     from services.models import Category, Product
     from orders.models import Order
@@ -243,6 +244,31 @@ def center_detail(request, center_id):
             from django.http import HttpResponseForbidden
             return HttpResponseForbidden("You don't have access to this center.")
         center = get_object_or_404(TranslationCenter, pk=center_id)
+
+    # Admin-only subscription snapshot
+    subscription_info = None
+    if request.user.is_superuser:
+        lifetime_days = (date.today() - center.created_at.date()).days if center.created_at else None
+        subscription = getattr(center, "subscription", None)
+        if subscription:
+            period_days = None
+            if subscription.start_date and subscription.end_date:
+                period_days = (subscription.end_date - subscription.start_date).days
+
+            subscription_info = {
+                "tariff": subscription.tariff.title,
+                "status": subscription.status,
+                "start_date": subscription.start_date,
+                "end_date": subscription.end_date,
+                "days_remaining": subscription.days_remaining(),
+                "period_days": period_days,
+                "duration_months": subscription.pricing.duration_months if subscription.pricing else None,
+                "is_trial": subscription.is_trial,
+                "auto_renew": subscription.auto_renew,
+                "lifetime_days": lifetime_days,
+            }
+        else:
+            subscription_info = {"tariff": None, "status": "missing", "lifetime_days": lifetime_days}
 
     # Get branches for this center
     branches = (
@@ -309,6 +335,7 @@ def center_detail(request, center_id):
         ).count(),
         "total_orders": Order.objects.filter(branch__center=center).count(),
         "total_customers": BotUser.objects.filter(branch__center=center).count(),
+        "subscription_info": subscription_info,
     }
     return render(request, "organizations/center_detail.html", context)
 

@@ -1,16 +1,18 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+import logging
+import os
+
 from django.contrib import messages
-from django.utils.translation import gettext as _
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q, Count, Sum, Prefetch
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.translation import gettext as _
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
-from .models import Tariff, TariffPricing, Subscription, Feature, UsageTracking, SubscriptionHistory, SubscriptionAnalytics
-from organizations.models import TranslationCenter
 from bot.admin_bot_service import send_renewal_request_notification
-import logging
+from organizations.models import TranslationCenter
+from .models import Tariff, TariffPricing, Subscription, Feature, UsageTracking, SubscriptionHistory, SubscriptionAnalytics
 
 logger = logging.getLogger(__name__)
 
@@ -1061,4 +1063,27 @@ Request Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}
     }
     
     return render(request, 'billing/request_renewal.html', context)
+
+
+@login_required
+def subscription_expired(request):
+    """Blocked state page for users with expired or missing subscriptions."""
+    if request.user.is_superuser:
+        return redirect('dashboard')
+
+    profile = getattr(request.user, 'admin_profile', None)
+    if not profile or not profile.center:
+        return redirect('dashboard')
+
+    contact_email = os.getenv('SUPPORT_EMAIL', 'support@wowdash.com')
+    contact_phone = os.getenv('SUPPORT_PHONE', '+998 (00) 000-00-00')
+
+    context = {
+        'title': _('Subscription expired'),
+        'subTitle': _('Billing'),
+        'contact_email': contact_email,
+        'contact_phone': contact_phone,
+    }
+
+    return render(request, 'billing/subscription_expired.html', context)
 

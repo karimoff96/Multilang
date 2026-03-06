@@ -869,11 +869,32 @@
     .sidebar {
         overflow-y: auto;
         overflow-x: hidden;
+        height: 100vh;
+        max-height: 100vh;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        -webkit-overflow-scrolling: touch;
+    }
+
+    @supports (height: 100dvh) {
+        .sidebar {
+            height: 100dvh;
+            max-height: 100dvh;
+        }
     }
 
     .sidebar-menu-area {
-        max-height: calc(100vh - 5rem);
+        max-height: calc(100vh - 4.75rem);
         overflow-y: auto;
+        padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+
+    @supports (height: 100dvh) {
+        .sidebar-menu-area {
+            height: calc(100dvh - 4.75rem);
+            max-height: calc(100dvh - 4.75rem);
+        }
     }
 }
 

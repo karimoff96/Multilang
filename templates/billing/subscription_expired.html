@@ -1,0 +1,44 @@
+{% extends '../layout/layout.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-6 col-lg-7 col-md-10">
+        <div class="card radius-12 shadow-sm border-danger-100">
+            <div class="card-body p-24">
+                <div class="d-flex align-items-center gap-16 mb-16">
+                    <div class="w-56-px h-56-px rounded-12 bg-danger-100 d-flex align-items-center justify-content-center">
+                        <iconify-icon icon="solar:shield-warning-bold-duotone" class="text-danger-600" style="font-size: 28px;"></iconify-icon>
+                    </div>
+                    <div>
+                        <h4 class="mb-4 text-danger-700">{% trans "Ваша подписка истекла" %}</h4>
+                        <p class="mb-0 text-secondary-light">{% trans "Доступ к панели отключён. Для возобновления работы продлите подписку через администраторов." %}</p>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning border-warning-200 d-flex align-items-start gap-12" role="alert">
+                    <iconify-icon icon="solar:calendar-warning-bold" class="text-warning-600 mt-1"></iconify-icon>
+                    <div>
+                        <strong>{% trans "Что делать дальше" %}</strong>
+                        <ul class="mt-8 mb-0 ps-20 text-sm text-secondary-light">
+                            <li>{% trans "Отправьте запрос на продление и оплатите вручную." %}</li>
+                            <li>{% trans "После подтверждения супер-администратором доступ будет восстановлен." %}</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-12 align-items-center">
+                    <a href="{% url 'billing:request_renewal' %}" class="btn btn-danger-600">
+                        <iconify-icon icon="solar:refresh-bold"></iconify-icon>
+                        <span class="ms-6">{% trans "Отправить запрос на продление" %}</span>
+                    </a>
+                    <div class="text-sm text-secondary-light">
+                        <div>{% trans "Свяжитесь с поддержкой" %}: <a href="mailto:{{ contact_email }}" class="fw-semibold text-primary-600">{{ contact_email }}</a></div>
+                        <div>{% trans "Телефон" %}: <span class="fw-semibold">{{ contact_phone }}</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

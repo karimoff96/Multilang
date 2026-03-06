@@ -30,4 +30,7 @@ urlpatterns = [
     
     # User renewal request
     path('request-renewal/', views.request_renewal, name='request_renewal'),
+
+    # Expired subscription landing
+    path('subscription-expired/', views.subscription_expired, name='subscription_expired'),
 ]

@@ -69,6 +69,58 @@
     </div>
 </div>
 
+{% if request.user.is_superuser %}
+<div class="card radius-12 mb-24 bg-info-50 border border-info-100">
+    <div class="card-body p-20 d-flex flex-wrap gap-16 align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-12">
+            <div class="w-48-px h-48-px rounded-8 bg-info-100 d-flex justify-content-center align-items-center">
+                <iconify-icon icon="solar:wallet-money-bold" class="text-info-600 text-2xl"></iconify-icon>
+            </div>
+            <div>
+                <h6 class="text-md fw-semibold mb-4">Subscription</h6>
+                {% if subscription_info.tariff %}
+                <p class="mb-0 text-sm text-secondary-light">
+                    Tariff: <span class="fw-semibold text-info-700">{{ subscription_info.tariff }}</span>
+                    {% if subscription_info.duration_months %}
+                    · {{ subscription_info.duration_months }} mo
+                    {% endif %}
+                    {% if subscription_info.is_trial %}
+                    · Trial
+                    {% endif %}
+                </p>
+                {% else %}
+                <p class="mb-0 text-sm text-secondary-light">No subscription found</p>
+                {% endif %}
+                {% if subscription_info.lifetime_days is not None %}
+                <p class="mb-0 text-xs text-secondary-light">Center age: {{ subscription_info.lifetime_days }} days</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-12 align-items-center text-sm">
+            {% if subscription_info.tariff %}
+            <span class="badge bg-info-focus text-info-700 px-12 py-8 radius-8">Status: {{ subscription_info.status|title }}</span>
+            {% if subscription_info.days_remaining is not None %}
+            <span class="badge bg-success-focus text-success-700 px-12 py-8 radius-8">{{ subscription_info.days_remaining }} days left</span>
+            {% endif %}
+            {% if subscription_info.end_date %}
+            <span class="badge bg-neutral-100 text-neutral-700 px-12 py-8 radius-8">Renews: {{ subscription_info.end_date }}</span>
+            {% endif %}
+            {% if subscription_info.start_date and subscription_info.period_days %}
+            <span class="badge bg-primary-focus text-primary-700 px-12 py-8 radius-8">Period: {{ subscription_info.period_days }} days</span>
+            {% endif %}
+            {% if subscription_info.auto_renew %}
+            <span class="badge bg-info-100 text-info-700 px-12 py-8 radius-8">Auto-renew on</span>
+            {% else %}
+            <span class="badge bg-warning-focus text-warning-700 px-12 py-8 radius-8">Auto-renew off</span>
+            {% endif %}
+            {% else %}
+            <span class="badge bg-warning-focus text-warning-700 px-12 py-8 radius-8">Add a subscription to track renewals</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Stats Cards -->
 <div class="row gy-4 mb-24">
     <div class="col-xxl-2 col-lg-4 col-sm-6">
