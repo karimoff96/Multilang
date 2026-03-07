@@ -1373,3 +1373,119 @@ class PaymentOrderLink(models.Model):
     
     def __str__(self):
         return f"Payment #{self.bulk_payment.id} → Order #{self.order.id} ({self.amount_applied})"
+
+
+class PaymeTransaction(models.Model):
+    """
+    Payme transaction ledger for bot/webapp payments.
+    Stores Payme transaction lifecycle timestamps and links back to the order.
+
+    SAFETY: All fields nullable/optional where possible for backward compatibility.
+    """
+
+    STATE_CREATED = 1
+    STATE_PERFORMED = 2
+    STATE_CANCELLED = -1  # Created but canceled
+    STATE_CANCELLED_AFTER_PERFORM = -2
+
+    order = models.ForeignKey(
+        'Order',
+        on_delete=models.CASCADE,
+        related_name='payme_transactions',
+        null=True,
+        blank=True,
+        verbose_name=_('Order'),
+    )
+
+    payme_transaction_id = models.CharField(
+        max_length=64,
+        unique=True,
+        verbose_name=_('Payme Transaction ID'),
+    )
+
+    # Amount in tiyin (Payme requires integer minor units)
+    amount_tiyin = models.BigIntegerField(
+        default=0,
+        verbose_name=_('Amount (tiyin)'),
+    )
+
+    # Stored account payload (e.g., order_id, phone)
+    account = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_('Account Payload'),
+    )
+
+    state = models.IntegerField(
+        default=0,
+        db_index=True,
+        verbose_name=_('State'),
+        help_text=_('Payme transaction state: 1=created, 2=performed, -1/-2 canceled'),
+    )
+
+    create_time_ms = models.BigIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_('Create Time (ms)'),
+    )
+    perform_time_ms = models.BigIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_('Perform Time (ms)'),
+    )
+    cancel_time_ms = models.BigIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_('Cancel Time (ms)'),
+    )
+    cancel_reason = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_('Cancel Reason'),
+    )
+
+    # Optional checkout and detail payloads for debugging/reconciliation
+    checkout_url = models.CharField(
+        max_length=500,
+        blank=True,
+        verbose_name=_('Checkout URL'),
+    )
+    detail = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name=_('Receipt Detail Payload'),
+    )
+    raw_request = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name=_('Last Request Payload'),
+    )
+    raw_response = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name=_('Last Response Payload'),
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created At'))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_('Updated At'))
+
+    class Meta:
+        verbose_name = _('Payme Transaction')
+        verbose_name_plural = _('Payme Transactions')
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['payme_transaction_id']),
+            models.Index(fields=['state']),
+            models.Index(fields=['created_at']),
+        ]
+
+    def __str__(self):
+        return f"Payme {self.payme_transaction_id} ({self.state})"
+
+    @property
+    def amount_sum(self):
+        """Amount in sum (UZS) converted from tiyin."""
+        try:
+            return (self.amount_tiyin or 0) / 100
+        except Exception:
+            return 0

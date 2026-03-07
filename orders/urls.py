@@ -10,6 +10,8 @@ from .views import (
     record_order_payment, add_order_extra_fee, get_order_payment_info,
     bulk_delete_orders, search_customers, search_categories, search_products,
     edit_order_price,
+        api_payme_transactions,
+        api_payme_transaction_detail,
 )
 from .bulk_payment_views import (
     bulk_payment_page, search_customers_with_debt, get_customer_debt_details,
@@ -60,4 +62,7 @@ urlpatterns = [
     path("api/search-customers/", search_customers, name="search_customers"),
     path("api/search-categories/", search_categories, name="search_categories"),
     path("api/search-products/", search_products, name="search_products"),
+        # Payme transaction dashboard APIs
+        path("api/payme/transactions/", api_payme_transactions, name="api_payme_transactions"),
+        path("api/payme/transactions/<str:tx_id>/", api_payme_transaction_detail, name="api_payme_transaction_detail"),
 ]

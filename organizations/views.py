@@ -192,6 +192,15 @@ def center_edit(request, center_id):
         else:
             bot_token = center.bot_token  # Keep existing
 
+        # Payme fields – superuser can set merchant_id/secret_key; any editor can toggle enabled
+        payme_enabled = request.POST.get("payme_enabled") == "on"
+        if request.user.is_superuser:
+            payme_merchant_id = request.POST.get("payme_merchant_id", "").strip()
+            payme_secret_key = request.POST.get("payme_secret_key", "").strip()
+        else:
+            payme_merchant_id = center.payme_merchant_id
+            payme_secret_key = center.payme_secret_key
+
         if not name:
             messages.error(request, "Center name is required.")
         elif subdomain and TranslationCenter.objects.filter(subdomain=subdomain).exclude(pk=center_id).exists():
@@ -209,6 +218,9 @@ def center_edit(request, center_id):
             center.bot_token = bot_token
             center.bot_username = bot_username
             center.company_orders_channel_id = company_orders_channel_id
+            center.payme_enabled = payme_enabled
+            center.payme_merchant_id = payme_merchant_id
+            center.payme_secret_key = payme_secret_key
             center.save()
             messages.success(request, f'Center "{name}" updated successfully!')
             return redirect("center_list")

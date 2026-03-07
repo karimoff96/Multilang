@@ -57,6 +57,25 @@ class TranslationCenter(models.Model):
         null=True,
         help_text=_("Telegram channel ID for all company orders and file archives"),
     )
+    # Payme integration fields
+    payme_enabled = models.BooleanField(
+        _("Payme Enabled"),
+        default=False,
+        help_text=_("Enable Payme card payment integration for this center. "
+                    "When enabled, bot users are redirected to Payme checkout instead of uploading a receipt."),
+    )
+    payme_merchant_id = models.CharField(
+        _("Payme Merchant ID"),
+        max_length=100,
+        blank=True,
+        help_text=_("Per-center Payme merchant ID. Leave blank to use the global PAYME_MERCHANT_ID setting."),
+    )
+    payme_secret_key = models.CharField(
+        _("Payme Secret Key"),
+        max_length=200,
+        blank=True,
+        help_text=_("Per-center Payme secret key. Leave blank to use the global PAYME_SECRET_KEY setting."),
+    )
     is_active = models.BooleanField(_("Active"), default=True)
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)

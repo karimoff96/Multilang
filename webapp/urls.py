@@ -26,4 +26,7 @@ urlpatterns = [
 
     # Price list for user's branch
     path("api/pricelist/", views.api_pricelist, name="api_pricelist"),
+
+    # Payme post-checkout return page
+    path("payment-return/", views.payment_return, name="payment_return"),
 ]

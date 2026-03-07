@@ -129,6 +129,35 @@ def webapp_index_subdomain(request):
     })
 
 
+@require_GET
+@xframe_options_exempt
+def payment_return(request):
+    """
+    Landing page Payme redirects the user to after checkout.
+    URL: /webapp/payment-return/?order_id=<id>
+
+    Shows the current order status and a link back to the Telegram bot.
+    No authentication required — order details are intentionally minimal.
+    """
+    from orders.models import Order
+
+    order_id = request.GET.get("order_id")
+    order = None
+    status = None
+
+    if order_id and order_id.isdigit():
+        try:
+            order = Order.objects.select_related("branch__center", "bot_user").get(pk=int(order_id))
+            status = order.status
+        except Order.DoesNotExist:
+            pass
+
+    return render(request, "webapp/payment_return.html", {
+        "order": order,
+        "status": status,
+    })
+
+
 # ---------------------------------------------------------------------------
 # API: /webapp/api/init/
 # ---------------------------------------------------------------------------

@@ -15,6 +15,8 @@ from io import BytesIO
 from django.core.files.storage import default_storage
 import uuid
 from accounts.models import BotUser
+from orders.payme_gateway import build_payme_checkout_url, PaymeIntegrationError
+from django.conf import settings
 
 # Import persistent state (Redis-backed for multi-worker support)
 from .persistent_state import user_data, uploaded_files
@@ -161,6 +163,61 @@ def create_order_zip(order):
     except Exception as e:
         logger.error(f"Failed to create ZIP file: {e}", exc_info=True)
         return None
+def send_payme_deadline_expired_notification(order):
+    """
+    Notify a bot user that their Payme-pending order was auto-cancelled
+    because the 12-hour payment deadline expired.
+    """
+    try:
+        user = order.bot_user
+        if not user or not user.user_id:
+            return
+        language = user.language or "uz"
+        order_num = order.get_order_number()
+        amount = order.total_price
+
+        if language == "ru":
+            text = (
+                f"❌ <b>Заказ #{order_num} отменён</b>\n\n"
+                f"💰 Сумма: {amount:,.0f} сум\n\n"
+                "Срок оплаты через Payme (12 часов) истёк, и заказ был автоматически отменён.\n\n"
+                "Если вы хотите сделать новый заказ, нажмите кнопку ниже."
+            )
+        elif language == "en":
+            text = (
+                f"❌ <b>Order #{order_num} cancelled</b>\n\n"
+                f"💰 Amount: {amount:,.0f} sum\n\n"
+                "Your Payme payment window (12 hours) has expired and the order was automatically cancelled.\n\n"
+                "You can place a new order using the button below."
+            )
+        else:
+            text = (
+                f"❌ <b>Buyurtma #{order_num} bekor qilindi</b>\n\n"
+                f"💰 Summa: {amount:,.0f} so'm\n\n"
+                "Payme orqali to'lov muddati (12 soat) tugadi va buyurtma avtomatik bekor qilindi.\n\n"
+                "Yangi buyurtma berish uchun quyidagi tugmani bosing."
+            )
+
+        markup = types.InlineKeyboardMarkup()
+        if language == "ru":
+            btn_label = "🛍️ Новый заказ"
+        elif language == "en":
+            btn_label = "🛍️ New Order"
+        else:
+            btn_label = "🛍️ Yangi buyurtma"
+        markup.add(types.InlineKeyboardButton(text=btn_label, callback_data="main_menu"))
+
+        bot.send_message(
+            chat_id=user.user_id,
+            text=text,
+            reply_markup=markup,
+            parse_mode="HTML",
+        )
+        logger.info(f"Sent expiry notification to user {user.user_id} for order {order.id}")
+    except Exception as e:
+        logger.error(f"send_payme_deadline_expired_notification failed for order {order.id}: {e}")
+
+
 def send_order_status_notification(order, old_status, new_status):
     """
     Send notification to user when order status changes.
@@ -2502,15 +2559,67 @@ def show_user_orders(message, language):
 
             # Check if order has unpaid balance
             has_remaining = order.remaining > 0 and not order.is_fully_paid
-            
-            # Create inline keyboard for Pay button if unpaid
-            if has_remaining:
+
+            # ── Payme-pending: show pay-later button or expired notice ──
+            _order_center = None
+            try:
+                if order.branch and order.branch.center:
+                    _order_center = order.branch.center
+            except Exception:
+                pass
+            is_payme_pending = (
+                order.status == "payment_pending"
+                and order.payment_type == "card"
+                and _order_center is not None
+                and _order_center.payme_enabled
+            )
+            payme_still_valid = False
+            if is_payme_pending:
+                import datetime as _dt
+                _deadline_hours = getattr(settings, "PAYME_PAYMENT_DEADLINE_HOURS", 12)
+                _payme_deadline = order.updated_at + _dt.timedelta(hours=_deadline_hours)
+                payme_still_valid = _payme_deadline > timezone.now()
+                if payme_still_valid:
+                    remaining_td = _payme_deadline - timezone.now()
+                    total_secs = int(remaining_td.total_seconds())
+                    hrs = total_secs // 3600
+                    mins = (total_secs % 3600) // 60
+                    if language == "ru":
+                        order_text += f"\n\n⏳ <b>Оплатите в течение:</b> {hrs} ч {mins} мин"
+                    elif language == "en":
+                        order_text += f"\n\n⏳ <b>Pay within:</b> {hrs}h {mins}m"
+                    else:
+                        order_text += f"\n\n⏳ <b>To'lash muddati:</b> {hrs} soat {mins} daqiqa"
+                else:
+                    if language == "ru":
+                        order_text += "\n\n❌ <b>Срок оплаты истёк</b>"
+                    elif language == "en":
+                        order_text += "\n\n❌ <b>Payment deadline expired</b>"
+                    else:
+                        order_text += "\n\n❌ <b>To'lov muddati o'tgan</b>"
+
+            # Build inline keyboard
+            markup = None
+            if is_payme_pending and payme_still_valid:
                 markup = types.InlineKeyboardMarkup()
-                pay_text = get_text("btn_pay", language)
+                if language == "ru":
+                    btn_label = "💳 Оплатить через Payme"
+                elif language == "en":
+                    btn_label = "💳 Pay with Payme"
+                else:
+                    btn_label = "💳 Payme orqali to'lash"
                 markup.add(types.InlineKeyboardButton(
-                    text=pay_text,
+                    text=btn_label,
+                    callback_data=f"payme_pay_{order.id}"
+                ))
+            elif has_remaining and not is_payme_pending:
+                markup = types.InlineKeyboardMarkup()
+                markup.add(types.InlineKeyboardButton(
+                    text=get_text("btn_pay", language),
                     callback_data=f"pay_order_{order.id}"
                 ))
+
+            if markup:
                 send_message(
                     chat_id=message.chat.id,
                     text=order_text,
@@ -2627,6 +2736,112 @@ def handle_cancel_payment(call):
         pass
     
     show_main_menu(call.message, language)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("payme_pay_"))
+def handle_payme_pay(call):
+    """Re-send Payme checkout link for a pending order (from 'My Orders' pay-later button)"""
+    import datetime
+    user_id = call.from_user.id
+    language = get_user_language(user_id)
+    from orders.models import Order
+
+    try:
+        order_id = int(call.data.split("_")[2])
+        order = Order.objects.select_related("branch__center", "bot_user").get(id=order_id)
+        user = get_bot_user(user_id)
+
+        if not user or order.bot_user_id != user.id:
+            bot.answer_callback_query(call.id, "⛔ Access denied")
+            return
+
+        # Check deadline
+        import datetime as _dt
+        _deadline_hours = getattr(settings, "PAYME_PAYMENT_DEADLINE_HOURS", 12)
+        _payme_deadline = order.updated_at + _dt.timedelta(hours=_deadline_hours)
+        if _payme_deadline <= timezone.now():
+            if language == "ru":
+                expired_text = "❌ Срок оплаты истёк. Заказ будет отменён."
+            elif language == "en":
+                expired_text = "❌ Payment deadline has expired. The order will be cancelled."
+            else:
+                expired_text = "❌ To'lov muddati o'tgan. Buyurtma bekor qilinadi."
+            bot.answer_callback_query(call.id, expired_text, show_alert=True)
+            return
+
+        center = None
+        try:
+            if order.branch and order.branch.center:
+                center = order.branch.center
+        except Exception:
+            pass
+
+        main_domain = getattr(settings, "MAIN_DOMAIN", "multilang.uz")
+        sub = center.subdomain if (center and center.subdomain) else None
+        return_url = (
+            f"https://{sub}.{main_domain}/webapp/payment-return/?order_id={order.id}"
+            if sub else
+            f"https://{main_domain}/webapp/payment-return/?order_id={order.id}"
+        )
+
+        try:
+            checkout_url, amount_tiyin, _ = build_payme_checkout_url(
+                order, language, callback_url=return_url, center=center
+            )
+        except PaymeIntegrationError as exc:
+            bot.answer_callback_query(call.id, f"⚠️ {exc}", show_alert=True)
+            return
+
+        # Calculate remaining time
+        remaining_td = _payme_deadline - timezone.now()
+        total_secs = int(remaining_td.total_seconds())
+        hrs = total_secs // 3600
+        mins = (total_secs % 3600) // 60
+        amount_sum = amount_tiyin / 100
+
+        if language == "ru":
+            msg = (
+                f"💳 <b>Оплата через Payme</b>\n\n"
+                f"Заказ #{order.get_order_number()}\n"
+                f"Сумма: {amount_sum:,.0f} сум\n\n"
+                f"⏰ Осталось: <b>{hrs} ч {mins} мин</b>\n"
+                "Нажмите кнопку ниже, чтобы завершить оплату."
+            )
+        elif language == "en":
+            msg = (
+                f"💳 <b>Pay with Payme</b>\n\n"
+                f"Order #{order.get_order_number()}\n"
+                f"Amount: {amount_sum:,.0f} sum\n\n"
+                f"⏰ Time remaining: <b>{hrs}h {mins}m</b>\n"
+                "Tap the button below to complete your payment."
+            )
+        else:
+            msg = (
+                f"💳 <b>Payme orqali to'lov</b>\n\n"
+                f"Buyurtma #{order.get_order_number()}\n"
+                f"Summa: {amount_sum:,.0f} so'm\n\n"
+                f"⏰ Qolgan vaqt: <b>{hrs} soat {mins} daqiqa</b>\n"
+                "Quyidagi tugmani bosib to'lovni yakunlang."
+            )
+
+        markup = types.InlineKeyboardMarkup()
+        markup.add(types.InlineKeyboardButton(text="🌐 Payme", url=checkout_url))
+
+        bot.answer_callback_query(call.id)
+        bot.send_message(
+            chat_id=call.message.chat.id,
+            text=msg,
+            reply_markup=markup,
+            parse_mode="HTML",
+        )
+
+    except Order.DoesNotExist:
+        bot.answer_callback_query(call.id, get_text("error_order_not_found", language))
+    except Exception as e:
+        logger.error(f" handle_payme_pay: {e}")
+        bot.answer_callback_query(call.id, get_text("error_general", language))
+
+
 def show_profile(message, language):
     """Show user profile with edit options
 
@@ -4894,40 +5109,94 @@ def handle_additional_docs_no(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("payment_card_"))
 def handle_payment_card_selection(call):
-    """Handle card payment selection"""
+    """Handle card payment selection (inline button callback)"""
     language = get_user_language(call.message.chat.id)
     order_id = int(call.data.split("_")[2])
 
     try:
         from orders.models import Order
 
-        order = Order.objects.get(id=order_id)
+        order = Order.objects.select_related("branch__center").get(id=order_id)
+        # Resolve center for per-center creds
+        center = None
+        try:
+            if order.branch and order.branch.center:
+                center = order.branch.center
+        except Exception:
+            pass
+        # Fallback: use the user's own center (reliable even when order.branch is None)
+        if center is None:
+            _u = get_bot_user(call.message.chat.id)
+            if _u and _u.center:
+                center = _u.center
 
-        # Update user step to awaiting payment
-        update_user_step(call.message.chat.id, STEP_AWAITING_PAYMENT)
+        # Build center-specific return URL (user redirect after checkout)
+        main_domain = getattr(settings, "MAIN_DOMAIN", "multilang.uz")
+        sub = center.subdomain if (center and center.subdomain) else None
 
-        # Show card information and ask for receipt
-        card_info = get_text("payment_card_info", language)
-        card_info += "\n\n💳 <b>Karta ma'lumotlari:</b>\n"
-        card_info += "🏦 Bank: Kapital Bank\n"
-        card_info += "💳 Karta raqami: 1234 5678 9012 3456\n"
-        card_info += "👤 Karta egasi: Translation Center\n\n"
-        card_info += get_text("upload_payment_receipt", language)
+        if sub:
+            return_url = f"https://{sub}.{main_domain}/webapp/payment-return/?order_id={order.id}"
+        else:
+            return_url = f"https://{main_domain}/webapp/payment-return/?order_id={order.id}"
+
+        # Build Payme checkout URL with per-order return URL + per-center merchant_id
+        try:
+            checkout_url, amount_tiyin, _ = build_payme_checkout_url(
+                order, language, callback_url=return_url, center=center
+            )
+        except PaymeIntegrationError as exc:
+            bot.edit_message_text(
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+                text=f"⚠️ Payme sozlamasi to'liq emas: {exc}",
+            )
+            return
+
+        # Mark order as awaiting Payme payment
+        order.payment_type = "card"
+        order.status = "payment_pending"
+        order.is_active = True
+        order.save(update_fields=["payment_type", "status", "is_active", "updated_at"])
+
+        # Reset user step so receipt uploads are not expected
+        update_user_step(call.message.chat.id, STEP_REGISTERED)
+
+        # Prepare localized message
+        amount_sum = amount_tiyin / 100
+        if language == "ru":
+            card_text = (
+                "💳 Оплата через Payme\n\n"
+                f"Заказ #{order.get_order_number()}\n"
+                f"Сумма: {amount_sum:,.0f} сум\n\n"
+                "Нажмите кнопку ниже, чтобы открыть защищенную страницу Payme."
+            )
+        elif language == "en":
+            card_text = (
+                "💳 Pay with Payme\n\n"
+                f"Order #{order.get_order_number()}\n"
+                f"Amount: {amount_sum:,.0f} sum\n\n"
+                "Tap the button to open the Payme checkout page."
+            )
+        else:
+            card_text = (
+                "💳 Payme orqali to'lov\n\n"
+                f"Buyurtma #{order.get_order_number()}\n"
+                f"Summa: {amount_sum:,.0f} so'm\n\n"
+                "Quyidagi tugmani bosib Payme to'lov sahifasini oching."
+            )
 
         markup = types.InlineKeyboardMarkup()
-        done_button = types.InlineKeyboardButton(
-            text=get_text("payment_done", language),
-            callback_data=f"payment_receipt_{order_id}",
+        pay_button = types.InlineKeyboardButton(text="🌐 Payme", url=checkout_url)
+        main_menu_button = types.InlineKeyboardButton(
+            text=get_text("back_to_main_menu", language), callback_data="main_menu"
         )
-        back_button = types.InlineKeyboardButton(
-            text=get_text("back_to_menu", language), callback_data="main_menu"
-        )
-        markup.add(done_button, back_button)
+        markup.add(pay_button)
+        markup.add(main_menu_button)
 
         bot.edit_message_text(
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
-            text=card_info,
+            text=card_text,
             reply_markup=markup,
         )
 
@@ -5382,11 +5651,97 @@ def handle_card_payment_message(message, language):
         from accounts.models import AdditionalInfo
         from orders.models import Order
 
-        order = Order.objects.get(id=order_id)
+        order = Order.objects.select_related("branch__center").get(id=order_id)
         user = get_bot_user(user_id)
         if not user:
             bot.send_message(message.chat.id, get_text("user_not_found", language))
             return
+
+        # ──────────────────────────────────────────────────────────────
+        # Per-center Payme toggle: if enabled, redirect to Payme checkout
+        # ──────────────────────────────────────────────────────────────
+        center = None
+        try:
+            if order.branch and order.branch.center:
+                center = order.branch.center
+        except Exception:
+            pass
+        # Fallback: use the user's own center (reliable even when order.branch is None)
+        if center is None and user:
+            if user.center:
+                center = user.center
+
+        if center and center.payme_enabled:
+            # Build per-center return URL
+            main_domain = getattr(settings, "MAIN_DOMAIN", "multilang.uz")
+            sub = center.subdomain if center.subdomain else None
+            if sub:
+                return_url = f"https://{sub}.{main_domain}/webapp/payment-return/?order_id={order.id}"
+            else:
+                return_url = f"https://{main_domain}/webapp/payment-return/?order_id={order.id}"
+
+            try:
+                checkout_url, amount_tiyin, _ = build_payme_checkout_url(
+                    order, language, callback_url=return_url, center=center
+                )
+            except PaymeIntegrationError as exc:
+                logger.error(f" Payme checkout error for order {order.id}: {exc}")
+                bot.send_message(
+                    message.chat.id,
+                    f"⚠️ Payme sozlamasi to'liq emas: {exc}",
+                )
+                return
+
+            order.payment_type = "card"
+            order.status = "payment_pending"
+            order.is_active = True
+            order.save(update_fields=["payment_type", "status", "is_active", "updated_at"])
+
+            update_user_step(user_id, STEP_REGISTERED)
+
+            amount_sum = amount_tiyin / 100
+            if language == "ru":
+                pay_text = (
+                    "💳 Оплата через Payme\n\n"
+                    f"Заказ #{order.get_order_number()}\n"
+                    f"Сумма: {amount_sum:,.0f} сум\n\n"
+                    "⏰ У вас есть <b>12 часов</b> для завершения оплаты.\n"
+                    "Нажмите кнопку ниже, чтобы открыть страницу Payme."
+                )
+            elif language == "en":
+                pay_text = (
+                    "💳 Pay with Payme\n\n"
+                    f"Order #{order.get_order_number()}\n"
+                    f"Amount: {amount_sum:,.0f} sum\n\n"
+                    "⏰ You have <b>12 hours</b> to complete the payment.\n"
+                    "Tap the button to open the Payme checkout page."
+                )
+            else:
+                pay_text = (
+                    "💳 Payme orqali to'lov\n\n"
+                    f"Buyurtma #{order.get_order_number()}\n"
+                    f"Summa: {amount_sum:,.0f} so'm\n\n"
+                    "⏰ To'lovni yakunlash uchun sizda <b>12 soat</b> bor.\n"
+                    "Quyidagi tugmani bosib Payme to'lov sahifasini oching."
+                )
+
+            markup = types.InlineKeyboardMarkup()
+            markup.add(types.InlineKeyboardButton(text="🌐 Payme", url=checkout_url))
+            markup.add(types.InlineKeyboardButton(
+                text=get_text("back_to_main_menu", language), callback_data="main_menu"
+            ))
+
+            bot.send_message(
+                chat_id=message.chat.id,
+                text=pay_text,
+                reply_markup=markup,
+                parse_mode="HTML",
+            )
+            return
+
+        # ──────────────────────────────────────────────────────────────
+        # Legacy flow: show card number and ask the user to upload receipt
+        # ──────────────────────────────────────────────────────────────
 
         # Update order payment type to card (but don't mark as active yet)
         order.payment_type = "card"

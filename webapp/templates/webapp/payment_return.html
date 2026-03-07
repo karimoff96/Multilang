@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>To'lov natijasi / Payment Result</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       var(--tg-theme-bg-color,         #ffffff);
+  --text:     var(--tg-theme-text-color,        #000000);
+  --hint:     var(--tg-theme-hint-color,        #999999);
+  --btn:      var(--tg-theme-button-color,      #2481cc);
+  --btn-text: var(--tg-theme-button-text-color, #ffffff);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+html, body { min-height: 100vh; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.card { max-width: 380px; width: 100%; text-align: center; }
+.icon { font-size: 64px; margin-bottom: 16px; }
+.title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.sub { font-size: 14px; color: var(--hint); line-height: 1.5; margin-bottom: 24px; }
+.order-num { font-size: 13px; color: var(--hint); margin-bottom: 24px; }
+.btn {
+  display: inline-block; width: 100%; padding: 14px 20px;
+  background: var(--btn); color: var(--btn-text);
+  border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
+  cursor: pointer; text-decoration: none;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  {% if not order %}
+    <div class="icon">❓</div>
+    <div class="title">Buyurtma topilmadi</div>
+    <div class="sub">Order not found. Please return to the bot.</div>
+
+  {% elif status == "payment_pending" %}
+    <div class="icon">⏳</div>
+    <div class="title">To'lov kutilmoqda</div>
+    <div class="sub">
+      Buyurtmangiz hali to'lanmagan.<br>
+      Заказ ещё не оплачен.<br>
+      Payment is still pending.
+    </div>
+    <div class="order-num">Buyurtma #{{ order.get_order_number }}</div>
+
+  {% elif status == "payment_received" or status == "payment_confirmed" or status == "in_progress" or status == "ready" or status == "completed" %}
+    <div class="icon">✅</div>
+    <div class="title">To'lov qabul qilindi!</div>
+    <div class="sub">
+      To'lovingiz muvaffaqiyatli amalga oshirildi.<br>
+      Оплата прошла успешно.<br>
+      Payment was successful.
+    </div>
+    <div class="order-num">Buyurtma #{{ order.get_order_number }}</div>
+
+  {% elif status == "cancelled" %}
+    <div class="icon">❌</div>
+    <div class="title">Buyurtma bekor qilindi</div>
+    <div class="sub">
+      Ushbu buyurtma bekor qilingan.<br>
+      Заказ был отменён.<br>
+      This order has been cancelled.
+    </div>
+    <div class="order-num">Buyurtma #{{ order.get_order_number }}</div>
+
+  {% else %}
+    <div class="icon">📋</div>
+    <div class="title">Buyurtma holati</div>
+    <div class="sub">
+      To'lov qayta ishlanmoqda. Iltimos, biroz kuting.<br>
+      Платёж обрабатывается. Пожалуйста, подождите.<br>
+      Payment is being processed. Please wait.
+    </div>
+    <div class="order-num">Buyurtma #{{ order.get_order_number }}</div>
+  {% endif %}
+
+  <button class="btn" onclick="closePage()">Botga qaytish / Back to Bot</button>
+</div>
+
+<script>
+function closePage() {
+  if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.close();
+  } else {
+    window.history.back();
+  }
+}
+
+// Auto-expand the Telegram WebApp if opened inside it
+if (window.Telegram && window.Telegram.WebApp) {
+  window.Telegram.WebApp.expand();
+  window.Telegram.WebApp.ready();
+}
+</script>
+</body>
+</html>

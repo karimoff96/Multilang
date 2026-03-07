@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import reverse
-from .models import Order, OrderMedia, Receipt, BulkPayment, PaymentOrderLink
+from .models import Order, OrderMedia, Receipt, BulkPayment, PaymentOrderLink, PaymeTransaction
 from django.utils.html import format_html
 
 
@@ -229,6 +229,18 @@ class BulkPaymentAdmin(admin.ModelAdmin):
         "processed_by_name",
         "created_at",
     )
+
+    @admin.display(description="Bot User", ordering="bot_user__name")
+    def bot_user_name(self, obj):
+        if obj.bot_user:
+            return f"{obj.bot_user.name} ({obj.bot_user.phone or '—'})"
+        return "—"
+
+    @admin.display(description="Processed By", ordering="processed_by__user__first_name")
+    def processed_by_name(self, obj):
+        if obj.processed_by:
+            return str(obj.processed_by)
+        return "—"
     list_filter = ("payment_method", "created_at", "branch")
     search_fields = ("bot_user__name", "bot_user__phone", "receipt_note")
     readonly_fields = ("created_at", "orders_count", "fully_paid_orders", "remaining_debt_after")
@@ -267,6 +279,49 @@ class BulkPaymentAdmin(admin.ModelAdmin):
             },
         ),
     )
+
+
+@admin.register(PaymeTransaction)
+class PaymeTransactionAdmin(admin.ModelAdmin):
+    list_display = (
+        "payme_transaction_id",
+        "order_link",
+        "amount_sum",
+        "state",
+        "create_time_ms",
+        "perform_time_ms",
+        "cancel_time_ms",
+        "cancel_reason",
+        "created_at",
+    )
+    list_filter = ("state", "created_at")
+    search_fields = ("payme_transaction_id", "order__id")
+    ordering = ("-created_at",)
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "payme_transaction_id",
+        "amount_tiyin",
+        "account",
+        "state",
+        "create_time_ms",
+        "perform_time_ms",
+        "cancel_time_ms",
+        "cancel_reason",
+        "checkout_url",
+        "detail",
+        "raw_request",
+        "raw_response",
+        "order",
+    )
+
+    def order_link(self, obj):
+        if not obj.order_id:
+            return "—"
+        url = reverse("admin:orders_order_change", args=[obj.order_id])
+        return format_html('<a href="{}">Order #{}</a>', url, obj.order_id)
+
+    order_link.short_description = "Order"
     
     def bot_user_name(self, obj):
         return obj.bot_user.name if obj.bot_user else "N/A"

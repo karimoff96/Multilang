@@ -11,11 +11,30 @@ class BranchInline(admin.TabularInline):
 
 @admin.register(TranslationCenter)
 class TranslationCenterAdmin(admin.ModelAdmin):
-    list_display = ['name', 'owner', 'phone', 'is_active', 'created_at']
-    list_filter = ['is_active', 'created_at']
+    list_display = ['name', 'owner', 'phone', 'is_active', 'payme_enabled', 'created_at']
+    list_filter = ['is_active', 'payme_enabled', 'created_at']
     search_fields = ['name', 'owner__username', 'owner__first_name', 'owner__last_name']
     inlines = [BranchInline]
     ordering = ['-created_at']
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'subdomain', 'owner', 'logo', 'phone', 'email',
+                       'address', 'location_url', 'is_active'),
+        }),
+        ('Bot Configuration', {
+            'fields': ('bot_token', 'bot_username', 'company_orders_channel_id'),
+            'classes': ('collapse',),
+        }),
+        ('Payme Integration', {
+            'fields': ('payme_enabled', 'payme_merchant_id', 'payme_secret_key'),
+            'classes': ('collapse',),
+            'description': (
+                'Enable Payme card payment for this center. '
+                'Leave Merchant ID and Secret Key blank to use the global settings from .env. '
+                'Per-center keys override the global values only for this center.'
+            ),
+        }),
+    )
 
 
 @admin.register(Branch)

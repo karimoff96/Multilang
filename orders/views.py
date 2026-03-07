@@ -12,7 +12,7 @@ from datetime import datetime, time
 from decimal import Decimal, InvalidOperation
 import os
 import logging
-from .models import Order, OrderMedia, OrderPriceChange
+from .models import Order, OrderMedia, OrderPriceChange, PaymeTransaction
 logger = logging.getLogger(__name__)
 from organizations.rbac import (
     get_user_orders, get_user_staff, get_user_branches,
@@ -23,6 +23,7 @@ from organizations.models import AdminUser, Branch, TranslationCenter
 from core.audit import log_action, log_order_assign, log_status_change
 from bot.notification_service import send_order_notification
 from billing.decorators import require_feature, require_active_subscription, check_order_limit
+from django.views.decorators.http import require_GET
 
 
 def has_order_permission(request, permission_name, order=None):
@@ -94,6 +95,82 @@ def get_user_order_permissions(request, order=None):
         'can_refund_orders': has_order_permission(request, 'can_refund_orders', order),
     }
     return permissions
+
+
+@login_required(login_url='admin_login')
+@require_GET
+@any_permission_required('can_view_all_orders', 'can_manage_orders')
+def api_payme_transactions(request):
+    """Return Payme transactions for dashboard tables (JSON)."""
+    qs = PaymeTransaction.objects.select_related('order').order_by('-created_at')
+
+    state = request.GET.get('state')
+    if state:
+        try:
+            qs = qs.filter(state=int(state))
+        except ValueError:
+            pass
+
+    order_id = request.GET.get('order_id')
+    if order_id:
+        qs = qs.filter(order_id=order_id)
+
+    limit = request.GET.get('limit')
+    try:
+        limit_val = int(limit) if limit else 100
+    except ValueError:
+        limit_val = 100
+    qs = qs[: max(1, min(limit_val, 500))]
+
+    data = []
+    for tx in qs:
+        data.append(
+            {
+                "payme_transaction_id": tx.payme_transaction_id,
+                "order_id": tx.order_id,
+                "state": tx.state,
+                "amount_tiyin": tx.amount_tiyin,
+                "amount_sum": tx.amount_sum,
+                "create_time_ms": tx.create_time_ms,
+                "perform_time_ms": tx.perform_time_ms,
+                "cancel_time_ms": tx.cancel_time_ms,
+                "cancel_reason": tx.cancel_reason,
+                "created_at": tx.created_at,
+            }
+        )
+
+    return JsonResponse({"transactions": data})
+
+
+@login_required(login_url='admin_login')
+@require_GET
+@any_permission_required('can_view_all_orders', 'can_manage_orders')
+def api_payme_transaction_detail(request, tx_id):
+    """Return a single Payme transaction with raw payloads."""
+    try:
+        tx = PaymeTransaction.objects.select_related('order').get(payme_transaction_id=tx_id)
+    except PaymeTransaction.DoesNotExist:
+        return JsonResponse({"error": "not_found"}, status=404)
+
+    payload = {
+        "payme_transaction_id": tx.payme_transaction_id,
+        "order_id": tx.order_id,
+        "state": tx.state,
+        "amount_tiyin": tx.amount_tiyin,
+        "amount_sum": tx.amount_sum,
+        "account": tx.account,
+        "create_time_ms": tx.create_time_ms,
+        "perform_time_ms": tx.perform_time_ms,
+        "cancel_time_ms": tx.cancel_time_ms,
+        "cancel_reason": tx.cancel_reason,
+        "checkout_url": tx.checkout_url,
+        "detail": tx.detail,
+        "raw_request": tx.raw_request,
+        "raw_response": tx.raw_response,
+        "created_at": tx.created_at,
+        "updated_at": tx.updated_at,
+    }
+    return JsonResponse(payload)
 
 
 @login_required(login_url='admin_login')

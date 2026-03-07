@@ -232,6 +232,17 @@ MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # =============================================================================
+# Payme configuration (set via environment variables)
+# =============================================================================
+PAYME_MERCHANT_ID = os.getenv("PAYME_MERCHANT_ID", "")
+PAYME_SECRET_KEY = os.getenv("PAYME_SECRET_KEY", "")  # Used for Authorization header validation
+PAYME_USE_SANDBOX = os.getenv("PAYME_USE_SANDBOX", "true").lower() == "true"
+PAYME_CALLBACK_URL = os.getenv("PAYME_CALLBACK_URL", "")  # Payme JSON-RPC webhook endpoint (public URL)
+PAYME_RETURN_URL = os.getenv("PAYME_RETURN_URL", "")  # Optional user redirect URL after checkout
+PAYME_PAYMENT_DEADLINE_HOURS = int(os.getenv("PAYME_PAYMENT_DEADLINE_HOURS", "12"))  # Hours before payment_pending Payme order is auto-cancelled
+
+
+# =============================================================================
 # Authentication settings
 LOGIN_URL = 'admin_login'
 LOGIN_REDIRECT_URL = 'index'

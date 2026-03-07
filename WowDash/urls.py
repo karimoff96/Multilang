@@ -159,6 +159,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from bot.main import index
 from bot.webhook_manager import webhook_handler
+from orders.payme_webhook import payme_webhook_view
 
 # Telegram Web App (Mini App) endpoints
 from webapp import urls as webapp_urls
@@ -169,6 +170,9 @@ urlpatterns += [path("bot", index, name="bot_webhook")]
 
 # Multi-tenant webhook - each center has its own endpoint
 urlpatterns += [path("bot/webhook/<int:center_id>/", webhook_handler, name="center_webhook")]
+
+# Payme JSON-RPC webhook (must always return HTTP 200)
+urlpatterns += [path("payme/webhook/", payme_webhook_view, name="payme_webhook")]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
