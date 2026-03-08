@@ -380,6 +380,11 @@ class Order(models.Model):
         return None
     
     @property
+    def is_new(self):
+        """Order has not been touched: still pending and no staff assigned."""
+        return self.status == 'pending' and self.assigned_to_id is None
+
+    @property
     def is_manual_order(self):
         """Check if this is a manually created order (no bot_user)"""
         return self.bot_user is None

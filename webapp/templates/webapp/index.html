@@ -205,6 +205,19 @@ textarea { resize: none; height: 80px; }
 .detail-value { font-weight: 600; max-width: 55%; text-align: right; }
 
 /* ── Orders list ─────────────────────────────────────────────────────────── */
+/* ── Order timeline ──────────────────────────────── */
+.timeline-track { padding: 12px 16px; background: var(--bg2); border-radius: var(--radius); }
+.timeline-step  { display: flex; align-items: flex-start; gap: 10px; padding: 5px 0; }
+.tl-icon  { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+.tl-icon.tl-pulse { animation: tl-pulse 1.8s ease-in-out infinite; }
+@keyframes tl-pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+.tl-label { font-size: 14px; line-height: 1.4; }
+.tl-label.tl-done    { color: var(--text); }
+.tl-label.tl-current { color: var(--btn); font-weight: 700; }
+.tl-label.tl-future  { color: var(--hint); font-style: italic; }
+.tl-connector { width: 18px; height: 16px; display: flex; justify-content: center; }
+.tl-connector::after { content: ''; display: block; width: 2px; background: var(--border); flex: 1; }
+
 .order-card {
   background: var(--bg2); border-radius: var(--radius);
   padding: 14px 16px; margin-bottom: 10px;
@@ -654,6 +667,12 @@ textarea { resize: none; height: 80px; }
       <div class="price-row" id="det-addr-row" style="display:none"><span class="price-label" id="det-lbl-addr">Address</span><span class="price-value" id="det-addr">—</span></div>
     </div>
 
+    <!-- Order lifecycle timeline -->
+    <div id="det-timeline-box" style="display:none;margin-bottom:14px">
+      <div class="field-label" id="det-lbl-timeline">Order Progress</div>
+      <div id="det-timeline" class="timeline-track"></div>
+    </div>
+
     <!-- Description / name clarifications -->
     <div id="det-desc-box" style="display:none;margin-bottom:14px">
       <div class="field-label" id="det-lbl-desc">Notes</div>
@@ -882,6 +901,9 @@ function getInitDataFromHash() {
 let tg = getRealTg() || _tgMock;
 try { tg.ready(); tg.expand(); } catch(e) {}
 
+// Stop detail polling when the mini-app is hidden/closed
+document.addEventListener("visibilitychange", () => { if (document.hidden) _stopDetailPoll(); });
+
 let INIT_DATA = tg.initData || getInitDataFromHash() || "";
 const CENTER_ID = {{ center_id }};
 const BASE_URL  = window.location.origin;
@@ -973,6 +995,11 @@ const T = {
     detCardLbl: "Shu kartaga o'tkazing",
     detBtnUploadReceipt: "Chekni yuklash", detBtnUploadReceiptSub: "To'lov cheki rasmini oling",
     detReceiptNote: "Chek yuborildi — tekshirilmoqda",
+    detTimeline: "Buyurtma jarayoni",
+    tlReceived: "Buyurtma qabul qilindi", tlPayPending: "To'lov kutilmoqda",
+    tlPayReceived: "Chek qabul qilindi", tlPayConfirmed: "To'lov tasdiqlandi",
+    tlInProgress: "Tarjima jarayonida", tlReady: "Tayyor — olib ketishingiz mumkin",
+    tlCompleted: "Yakunlandi", tlCancelled: "Bekor qilindi",
     ordClickHint: "Tafsilotlarni ko'rish uchun bosing",
     copied: "Nusxalandi!",
     menuProfile: "👤 Profilim", menuProfileSub: "Ma'lumotlaringizni ko'ring va o'zgartiring",
@@ -1053,6 +1080,11 @@ const T = {
     detCardLbl: "Переведите на эту карту",
     detBtnUploadReceipt: "Загрузить чек", detBtnUploadReceiptSub: "Сфотографируйте чек об оплате",
     detReceiptNote: "Чек отправлен — проверяется",
+    detTimeline: "Статус заказа",
+    tlReceived: "Заказ принят", tlPayPending: "Ожидание оплаты",
+    tlPayReceived: "Чек получен", tlPayConfirmed: "Оплата подтверждена",
+    tlInProgress: "В процессе", tlReady: "Готово — можно забрать",
+    tlCompleted: "Завершён", tlCancelled: "Отменён",
     ordClickHint: "Нажмите для подробностей",
     copied: "Скопировано!",
     menuProfile: "👤 Мой профиль", menuProfileSub: "Просмотр и редактирование данных",
@@ -1133,6 +1165,11 @@ const T = {
     detCardLbl: "Transfer to this card",
     detBtnUploadReceipt: "Upload Receipt", detBtnUploadReceiptSub: "Take a photo of your receipt",
     detReceiptNote: "Receipt submitted — awaiting verification",
+    detTimeline: "Order Progress",
+    tlReceived: "Order Received", tlPayPending: "Awaiting Payment",
+    tlPayReceived: "Receipt Received", tlPayConfirmed: "Payment Confirmed",
+    tlInProgress: "In Progress", tlReady: "Ready for Pickup",
+    tlCompleted: "Completed", tlCancelled: "Cancelled",
     ordClickHint: "Tap for details",
     copied: "Copied!",
     menuProfile: "👤 My Profile", menuProfileSub: "View and edit your details",
@@ -1179,6 +1216,8 @@ let currentScreen = "loading";
 function showScreen(name, pushHistory = true) {
   try {
     if (pushHistory && name !== currentScreen) S.history.push(currentScreen);
+    // Stop order detail polling when leaving that screen
+    if (currentScreen === "order-detail" && name !== "order-detail") _stopDetailPoll();
     document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
     const el = document.getElementById("screen-" + name);
     if (el) el.classList.add("active");
@@ -1370,6 +1409,7 @@ function applyTranslations() {
   T2("det-btn-upload-receipt","detBtnUploadReceipt");
   T2("det-btn-upload-receipt-sub","detBtnUploadReceiptSub");
   T2("det-receipt-note","detReceiptNote");
+  T2("det-lbl-timeline","detTimeline");
   // menu extra buttons
   T2("menu-profile","menuProfile"); T2("menu-profile-sub","menuProfileSub");
   T2("menu-about","menuAbout"); T2("menu-about-sub","menuAboutSub");
@@ -1942,7 +1982,31 @@ async function loadMyOrders() {
 }
 
 // ── Order Detail ─────────────────────────────────────────────────────────────
+const TERMINAL_STATUSES = new Set(["completed", "cancelled"]);
+let _detailPollTimer = null;
+
+function _stopDetailPoll() {
+  if (_detailPollTimer) { clearInterval(_detailPollTimer); _detailPollTimer = null; }
+}
+
+async function _pollOrderDetail() {
+  if (currentScreen !== "order-detail" || !S.viewingOrder) { _stopDetailPoll(); return; }
+  try {
+    const res = await api("/api/orders/" + S.viewingOrder.id + "/", { init_data: INIT_DATA, center_id: CENTER_ID });
+    if (!res.ok) return;
+    const order = res.order;
+    // Only update the badge (and stop poll) if status actually changed
+    if (order.status !== S.viewingOrder.status) {
+      S.viewingOrder = order;
+      S.viewingCardInfo = res.card_info;
+      buildOrderDetailScreen(order, res.card_info);
+      if (TERMINAL_STATUSES.has(order.status)) _stopDetailPoll();
+    }
+  } catch (_) { /* silent — don't interrupt the user */ }
+}
+
 async function loadOrderDetail(orderId) {
+  _stopDetailPoll();
   showOverlay(true);
   try {
     const res = await api("/api/orders/" + orderId + "/", { init_data: INIT_DATA, center_id: CENTER_ID });
@@ -1954,6 +2018,10 @@ async function loadOrderDetail(orderId) {
     S.viewingCardInfo = res.card_info;
     buildOrderDetailScreen(res.order, res.card_info);
     showScreen("order-detail");
+    // Start polling for live status updates if order is not yet in a terminal state
+    if (!TERMINAL_STATUSES.has(res.order.status)) {
+      _detailPollTimer = setInterval(_pollOrderDetail, 10000);
+    }
   } catch (e) {
     tg.showAlert(t("errServer"));
   } finally {
@@ -2032,6 +2100,9 @@ function buildOrderDetailScreen(order, cardInfo) {
     namesBox.style.display = "none";
   }
 
+  // Order lifecycle timeline
+  buildOrderTimeline(order);
+
   // Payment pending block
   const pendingBlock   = document.getElementById("det-payment-pending-block");
   const submittedBlock = document.getElementById("det-receipt-submitted-block");
@@ -2048,6 +2119,85 @@ function buildOrderDetailScreen(order, cardInfo) {
     pendingBlock.style.display   = "none";
     submittedBlock.style.display = "none";
   }
+}
+
+function buildOrderTimeline(order) {
+  const box   = document.getElementById("det-timeline-box");
+  const track = document.getElementById("det-timeline");
+  const lbl   = document.getElementById("det-lbl-timeline");
+  if (!box || !track) return;
+
+  // Each step has its own emoji shown when active; ✅ when done; faded when future
+  const STEPS = [
+    { key: "pending",           emoji: "📋", label: () => t("tlReceived") },
+    { key: "payment_pending",   emoji: "💳", label: () => t("tlPayPending") },
+    { key: "payment_received",  emoji: "🧾", label: () => t("tlPayReceived") },
+    { key: "payment_confirmed", emoji: "🟢", label: () => t("tlPayConfirmed") },
+    { key: "in_progress",       emoji: "✏️",  label: () => t("tlInProgress") },
+    { key: "ready",             emoji: "📦", label: () => t("tlReady") },
+    { key: "completed",         emoji: "✨", label: () => t("tlCompleted") },
+  ];
+
+  if (lbl) lbl.textContent = t("detTimeline");
+
+  const stepKeys = STEPS.map(s => s.key);
+  const status   = order.status;
+
+  if (status === "cancelled") {
+    track.innerHTML = `
+      <div class="timeline-step">
+        <span class="tl-icon">✅</span>
+        <span class="tl-label tl-done">${escHtml(t("tlReceived"))}</span>
+      </div>
+      <div style="display:flex;padding-left:4px">
+        <div style="width:18px;display:flex;justify-content:center"><div style="width:2px;height:14px;background:var(--border);margin:1px 0"></div></div>
+      </div>
+      <div class="timeline-step">
+        <span class="tl-icon">❌</span>
+        <span class="tl-label" style="color:#c0392b;font-weight:600">${escHtml(t("tlCancelled"))}</span>
+      </div>`;
+    box.style.display = "";
+    return;
+  }
+
+  const rawIdx = stepKeys.indexOf(status);
+  if (rawIdx === -1) { box.style.display = "none"; return; }
+
+  // "payment_confirmed" = a completed event, not an ongoing state.
+  // Treat it as done and advance the active marker to the next step.
+  const RESOLVED = new Set(["payment_confirmed"]);
+  let doneUpTo, activeIdx;
+  if (RESOLVED.has(status) && rawIdx < STEPS.length - 1) {
+    doneUpTo  = rawIdx;
+    activeIdx = rawIdx + 1;
+  } else {
+    doneUpTo  = rawIdx - 1;
+    activeIdx = rawIdx;
+  }
+
+  let html = "";
+  STEPS.forEach((step, idx) => {
+    if (idx > 0) {
+      html += `<div style="display:flex;padding-left:4px">`;
+      html += `<div style="width:18px;display:flex;justify-content:center"><div style="width:2px;height:14px;background:var(--border);margin:1px 0"></div></div>`;
+      html += `</div>`;
+    }
+    html += `<div class="timeline-step">`;
+    if (idx <= doneUpTo) {
+      html += `<span class="tl-icon">✅</span>`;
+      html += `<span class="tl-label tl-done">${escHtml(step.label())}</span>`;
+    } else if (idx === activeIdx) {
+      html += `<span class="tl-icon tl-pulse">${step.emoji}</span>`;
+      html += `<span class="tl-label tl-current">${escHtml(step.label())}</span>`;
+    } else {
+      html += `<span class="tl-icon" style="opacity:.25">${step.emoji}</span>`;
+      html += `<span class="tl-label tl-future">${escHtml(step.label())}</span>`;
+    }
+    html += `</div>`;
+  });
+
+  track.innerHTML = html;
+  box.style.display = "";
 }
 
 function copyCardNumber() {

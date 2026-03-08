@@ -488,14 +488,19 @@ def send_order_status_notification(order, old_status, new_status):
 
         # Get the correct bot instance for this order's center
         from bot.webhook_manager import get_bot_for_center
+        _notify_center = None
         if order.branch and order.branch.center:
-            center_bot = get_bot_for_center(order.branch.center)
+            _notify_center = order.branch.center
+        elif user.center:
+            _notify_center = user.center
+
+        if _notify_center:
+            center_bot = get_bot_for_center(_notify_center)
             if center_bot:
                 center_bot.send_message(
                     chat_id=user.user_id, text=notification_text, parse_mode="HTML"
                 )
             else:
-                # Fallback to global bot
                 bot.send_message(
                     chat_id=user.user_id, text=notification_text, parse_mode="HTML"
                 )
@@ -2388,6 +2393,56 @@ def show_pricelist(message, language):
                 time.sleep(0.3)
     
     show_main_menu(message, language)
+def format_order_lifecycle_timeline(order, language):
+    """
+    Generate an Aramex-style order lifecycle timeline for Telegram HTML.
+    Completed steps: ✅, current step: 🔵 (bold), future steps: ⬜ (italic).
+    Cancelled orders show ❌ as the terminal state.
+    """
+    LIFECYCLE_STEPS = [
+        ('pending',           {'uz': "Buyurtma qabul qilindi",          'ru': "Заказ принят",             'en': "Order Received"}),
+        ('payment_pending',   {'uz': "To'lov kutilmoqda",               'ru': "Ожидание оплаты",          'en': "Awaiting Payment"}),
+        ('payment_received',  {'uz': "Chek qabul qilindi",              'ru': "Чек получен",              'en': "Receipt Received"}),
+        ('payment_confirmed', {'uz': "To'lov tasdiqlandi",              'ru': "Оплата подтверждена",      'en': "Payment Confirmed"}),
+        ('in_progress',       {'uz': "Tarjima jarayonida",              'ru': "В процессе",               'en': "In Progress"}),
+        ('ready',             {'uz': "Tayyor — olib ketishingiz mumkin",'ru': "Готово — можно забрать",   'en': "Ready for Pickup"}),
+        ('completed',         {'uz': "Yakunlandi",                      'ru': "Завершён",                 'en': "Completed"}),
+    ]
+    lang = language if language in ('uz', 'ru', 'en') else 'uz'
+    current_status = order.status
+    headers      = {'uz': "📊 <b>Buyurtma jarayoni:</b>", 'ru': "📊 <b>Статус заказа:</b>",  'en': "📊 <b>Order Timeline:</b>"}
+    cancel_labels = {'uz': "Bekor qilindi",                'ru': "Отменён",                   'en': "Cancelled"}
+    step_keys = [s[0] for s in LIFECYCLE_STEPS]
+
+    if current_status == 'cancelled':
+        lines = [
+            headers[lang],
+            f"  ✅ {LIFECYCLE_STEPS[0][1][lang]}",
+            f"      │",
+            f"  ❌ <b>{cancel_labels[lang]}</b>",
+        ]
+        return '\n'.join(lines)
+
+    try:
+        current_idx = step_keys.index(current_status)
+    except ValueError:
+        return ""
+
+    lines = [headers[lang]]
+    for idx, (status_key, labels) in enumerate(LIFECYCLE_STEPS):
+        label = labels[lang]
+        is_last = (idx == len(LIFECYCLE_STEPS) - 1)
+        if idx < current_idx:
+            lines.append(f"  ✅ {label}")
+        elif idx == current_idx:
+            lines.append(f"  🔵 <b>{label}</b>")
+        else:
+            lines.append(f"  ⬜ <i>{label}</i>")
+        if not is_last:
+            lines.append("      │")
+    return '\n'.join(lines)
+
+
 def show_user_orders(message, language):
     """Show all orders for the current user"""
     user_id = message.from_user.id
@@ -2448,58 +2503,55 @@ def show_user_orders(message, language):
             else:
                 total_price = first_page_price
 
-            # Order status - check if order is completed first
-            if order.is_active:
-                # Order is completed
-                if order.payment_type == "cash":
-                    status_text = (
-                        "🟡 Joyida (naqd pul)"
-                        if language == "uz"
-                        else (
-                            "🟡 На месте (наличными)"
-                            if language == "ru"
-                            else "🟡 On place (cash)"
-                        )
-                    )
-                    status_emoji = "🟡"
-                elif order.payment_type == "card":
-                    if order.recipt:
-                        status_text = (
-                            "✅ Chek yuklandi"
-                            if language == "uz"
-                            else (
-                                "✅ Чек загружен"
-                                if language == "ru"
-                                else "✅ Receipt uploaded"
-                            )
-                        )
-                        status_emoji = "✅"
-                    else:
-                        status_text = (
-                            "💳 Kartaga o'tkazish"
-                            if language == "uz"
-                            else (
-                                "💳 Перевод на карту"
-                                if language == "ru"
-                                else "💳 Card Transfer"
-                            )
-                        )
-                        status_emoji = "💳"
-                else:
-                    status_text = (
-                        "✅ Yakunlandi"
-                        if language == "uz"
-                        else "✅ Выполнен" if language == "ru" else "✅ Completed"
-                    )
-                    status_emoji = "✅"
+            # Order status — derived from the actual order.status field
+            _status_map = {
+                "pending": {
+                    "uz": ("⏳", "⏳ Kutilmoqda"),
+                    "ru": ("⏳", "⏳ В ожидании"),
+                    "en": ("⏳", "⏳ Pending"),
+                },
+                "payment_pending": {
+                    "uz": ("💳", "💳 To'lov kutilmoqda"),
+                    "ru": ("💳", "💳 Ожидание оплаты"),
+                    "en": ("💳", "💳 Awaiting payment"),
+                },
+                "payment_received": {
+                    "uz": ("📨", "📨 Chek qabul qilindi"),
+                    "ru": ("📨", "📨 Чек получен"),
+                    "en": ("📨", "📨 Receipt received"),
+                },
+                "payment_confirmed": {
+                    "uz": ("✅", "✅ To'lov tasdiqlandi"),
+                    "ru": ("✅", "✅ Оплата подтверждена"),
+                    "en": ("✅", "✅ Payment confirmed"),
+                },
+                "in_progress": {
+                    "uz": ("🔄", "🔄 Jarayonda"),
+                    "ru": ("🔄", "🔄 В процессе"),
+                    "en": ("🔄", "🔄 In progress"),
+                },
+                "ready": {
+                    "uz": ("📦", "📦 Tayyor — olib ketishingiz mumkin!"),
+                    "ru": ("📦", "📦 Готов — можно забрать!"),
+                    "en": ("📦", "📦 Ready for pickup!"),
+                },
+                "completed": {
+                    "uz": ("🎉", "🎉 Yakunlandi"),
+                    "ru": ("🎉", "🎉 Завершён"),
+                    "en": ("🎉", "🎉 Completed"),
+                },
+                "cancelled": {
+                    "uz": ("❌", "❌ Bekor qilindi"),
+                    "ru": ("❌", "❌ Отменён"),
+                    "en": ("❌", "❌ Cancelled"),
+                },
+            }
+            _lang = language if language in ("uz", "ru", "en") else "uz"
+            _entry = _status_map.get(order.status, {}).get(_lang)
+            if _entry:
+                status_emoji, status_text = _entry
             else:
-                # Order is still pending
-                status_text = (
-                    "⏳ Kutilmoqda"
-                    if language == "uz"
-                    else "⏳ В ожидании" if language == "ru" else "⏳ Pending"
-                )
-                status_emoji = "⏳"
+                status_emoji, status_text = "⏳", order.status
 
             # Create order text
             if language == "uz":
@@ -2516,7 +2568,6 @@ def show_user_orders(message, language):
                             f"💰 Qolgan sahifalar: {other_page_price:,.0f} so'm\n"
                         )
                 order_text += f"💵 Jami: {total_price:,.0f} so'm\n"
-                order_text += f"{status_emoji} Holat: {status_text}\n"
                 order_text += f"📅 Sana: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
             elif language == "ru":
                 order_text = f"📄 <b>Заказ #{order.get_order_number()}</b>\n\n"
@@ -2530,7 +2581,6 @@ def show_user_orders(message, language):
                             f"💰 Остальные страницы: {other_page_price:,.0f} сум\n"
                         )
                 order_text += f"💵 Всего: {total_price:,.0f} сум\n"
-                order_text += f"{status_emoji} Статус: {status_text}\n"
                 order_text += f"📅 Дата: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
             else:  # English
                 order_text = f"📄 <b>Order #{order.get_order_number()}</b>\n\n"
@@ -2542,8 +2592,12 @@ def show_user_orders(message, language):
                     if order.total_pages > 1:
                         order_text += f"💰 Other pages: {other_page_price:,.0f} sum\n"
                 order_text += f"💵 Total: {total_price:,.0f} sum\n"
-                order_text += f"{status_emoji} Status: {status_text}\n"
                 order_text += f"📅 Date: {timezone.localtime(order.created_at).strftime('%d.%m.%Y %H:%M')}\n"
+
+            # Append order lifecycle timeline
+            _timeline = format_order_lifecycle_timeline(order, language)
+            if _timeline:
+                order_text += "\n" + _timeline + "\n"
 
             # Add payment info if partially paid
             if order.received > 0 or order.remaining > 0:

@@ -11,6 +11,11 @@
             </div>
             <div>
                 <span class="fw-semibold text-primary-600">#{{ order.get_order_number }}</span>
+                {% if order.is_new %}
+                <span class="badge bg-lilac-focus text-lilac-600 ms-4 text-xs fw-bold" style="letter-spacing:.4px;">
+                    <iconify-icon icon="mdi:bell-ring-outline" class="text-xs"></iconify-icon> NEW
+                </span>
+                {% endif %}
             </div>
                 {% with pending_count=order.receipts.all|length %}
                 {% if pending_count > 0 %}

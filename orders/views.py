@@ -282,6 +282,11 @@ def ordersList(request):
     if has_pending_receipts == 'true':
         orders = orders.filter(receipts__status='pending').distinct()
 
+    # New orders filter - pending and unassigned (no staff action taken)
+    new_only = request.GET.get('new_only', '')
+    if new_only == '1':
+        orders = orders.filter(status='pending', assigned_to__isnull=True)
+
     # Overdue filter - orders with past deadline that are not completed/cancelled
     overdue_only = request.GET.get('overdue_only', '')
     if overdue_only == '1':
@@ -377,6 +382,7 @@ def ordersList(request):
         'in_progress': orders.filter(status='in_progress').count(),
         'completed': orders.filter(status='completed').count(),
         'unassigned': orders.filter(assigned_to__isnull=True).count() if can_view_all else 0,
+        'new': base_orders.filter(status='pending', assigned_to__isnull=True).count(),
     }
     
     # Stats for "my orders" (for users who can view all)
@@ -412,6 +418,7 @@ def ordersList(request):
         "staff_filter": staff_filter,
         "has_pending_receipts": has_pending_receipts,
         "pending_receipts_count": pending_receipts_count,
+        "new_only": new_only,
         "sort_by": sort_by,
         "overdue_only": overdue_only,
         "today": timezone.now().date(),

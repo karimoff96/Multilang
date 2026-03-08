@@ -245,6 +245,36 @@ function markAllNotificationsRead() {
 }
 
 // ================================================================
+// Notification bell sound (Web Audio API – no external file needed)
+// ================================================================
+function playNotificationSound() {
+    try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function tone(freq, startTime, duration, gainValue) {
+            var osc  = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+            gain.gain.setValueAtTime(gainValue, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        }
+
+        var t = ctx.currentTime;
+        tone(1046.5, t,        0.6, 0.4);   // C6 – ding
+        tone(1318.5, t + 0.18, 0.5, 0.3);   // E6
+        tone(1568.0, t + 0.34, 0.7, 0.35);  // G6 – dong
+
+        // Auto-close the context once silent
+        setTimeout(function () { ctx.close(); }, 1500);
+    } catch (e) { /* AudioContext not supported – fail silently */ }
+}
+
+// ================================================================
 // Live notification badge polling (every 15 seconds)
 // Uses the Redis-cached /notifications/get/ endpoint.
 // Updates both the bell badge and the count inside the dropdown.
@@ -284,6 +314,7 @@ function updateNotifBadge(count) {
     var POLL_MS   = 15000;   // 15 s while tab visible
     var IDLE_MS   = 60000;   // 60 s when tab hidden
     var timer     = null;
+    var prevCount = null;    // null = first poll, no sound yet
 
     function pollNotifications() {
         fetch(POLL_URL, {
@@ -292,7 +323,13 @@ function updateNotifBadge(count) {
         .then(function(r) { return r.ok ? r.json() : null; })
         .then(function(data) {
             if (data && typeof data.count === 'number') {
-                updateNotifBadge(data.count);
+                var newCount = data.count;
+                // Play sound only when count actually increases (not on first load)
+                if (prevCount !== null && newCount > prevCount) {
+                    playNotificationSound();
+                }
+                prevCount = newCount;
+                updateNotifBadge(newCount);
             }
         })
         .catch(function() { /* silent — network error, try again next tick */ })

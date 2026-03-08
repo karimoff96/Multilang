@@ -6545,9 +6545,9 @@ const translations = {
     },
     
     'orders.pendingReceipts': {
-        uz: 'Kutilmoqda',
-        ru: 'Ожидание',
-        en: 'Pending'
+        uz: 'Kvitansiyalar',
+        ru: 'Квитанции',
+        en: 'Pending Receipts'
     },
     'orders.show': {
         uz: 'Ko\'rsatish',

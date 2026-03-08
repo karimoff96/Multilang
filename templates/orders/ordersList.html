@@ -76,76 +76,109 @@
 
 <!-- Stats Cards -->
 <div class="row gy-4 mb-24">
-    <div class="col-xxl-2 col-lg-4 col-md-6 col-sm-6 col-12">
-        <div class="card px-16 py-12 shadow-none radius-8 border h-100">
-            <div class="d-flex align-items-center gap-2">
-                <div class="w-48-px h-48-px radius-8 bg-primary-100 d-flex justify-content-center align-items-center">
-                    <iconify-icon icon="solar:document-text-bold" class="text-primary-600 text-xl"></iconify-icon>
-                </div>
-                <div>
-                    <span class="text-secondary-light text-xs" data-i18n="orders.total">Total</span>
-                    <h6 class="mb-0">{{ stats.total }}</h6>
+    <!-- Total -->
+    <div class="col-xxl col-lg-4 col-md-6 col-sm-6 col-6">
+        <a href="?view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}" class="text-decoration-none">
+            <div class="card px-16 py-12 shadow-none radius-8 border h-100 {% if not status_filter and not assignment_filter and new_only != '1' and not overdue_only %}border-primary{% endif %}">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="w-48-px h-48-px radius-8 bg-primary-100 d-flex justify-content-center align-items-center">
+                        <iconify-icon icon="solar:document-text-bold" class="text-primary-600 text-xl"></iconify-icon>
+                    </div>
+                    <div>
+                        <span class="text-secondary-light text-xs" data-i18n="orders.total">Total</span>
+                        <h6 class="mb-0">{{ stats.total }}</h6>
+                    </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
-    <div class="col-xxl-2 col-lg-4 col-md-6 col-sm-6 col-12">
-        <div class="card px-16 py-12 shadow-none radius-8 border h-100">
-            <div class="d-flex align-items-center gap-2">
-                <div class="w-48-px h-48-px radius-8 bg-warning-100 d-flex justify-content-center align-items-center">
-                    <iconify-icon icon="solar:hourglass-bold" class="text-warning-600 text-xl"></iconify-icon>
-                </div>
-                <div>
-                    <span class="text-secondary-light text-xs" data-i18n="orders.pending">Pending</span>
-                    <h6 class="mb-0">{{ stats.pending }}</h6>
+    <!-- Pending -->
+    <div class="col-xxl col-lg-4 col-md-6 col-sm-6 col-6">
+        <a href="{% if status_filter == 'pending' %}?view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% else %}?status=pending&view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% endif %}" class="text-decoration-none">
+            <div class="card px-16 py-12 shadow-none radius-8 border h-100 {% if status_filter == 'pending' %}border-warning{% endif %}">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="w-48-px h-48-px radius-8 bg-warning-100 d-flex justify-content-center align-items-center">
+                        <iconify-icon icon="solar:hourglass-bold" class="text-warning-600 text-xl"></iconify-icon>
+                    </div>
+                    <div>
+                        <span class="text-secondary-light text-xs" data-i18n="orders.pending">Pending</span>
+                        <h6 class="mb-0">{{ stats.pending }}</h6>
+                    </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
-    <div class="col-xxl-2 col-lg-4 col-md-6 col-sm-6 col-12">
-        <div class="card px-16 py-12 shadow-none radius-8 border h-100">
-            <div class="d-flex align-items-center gap-2">
-                <div class="w-48-px h-48-px radius-8 bg-info-100 d-flex justify-content-center align-items-center">
-                    <iconify-icon icon="solar:play-bold" class="text-info-600 text-xl"></iconify-icon>
-                </div>
-                <div>
-                    <span class="text-secondary-light text-xs" data-i18n="orders.inProgress">In Progress</span>
-                    <h6 class="mb-0">{{ stats.in_progress }}</h6>
+    <!-- In Progress -->
+    <div class="col-xxl col-lg-4 col-md-6 col-sm-6 col-6">
+        <a href="{% if status_filter == 'in_progress' %}?view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% else %}?status=in_progress&view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% endif %}" class="text-decoration-none">
+            <div class="card px-16 py-12 shadow-none radius-8 border h-100 {% if status_filter == 'in_progress' %}border-info{% endif %}">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="w-48-px h-48-px radius-8 bg-info-100 d-flex justify-content-center align-items-center">
+                        <iconify-icon icon="solar:play-bold" class="text-info-600 text-xl"></iconify-icon>
+                    </div>
+                    <div>
+                        <span class="text-secondary-light text-xs" data-i18n="orders.inProgress">In Progress</span>
+                        <h6 class="mb-0">{{ stats.in_progress }}</h6>
+                    </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
-    <div class="col-xxl-2 col-lg-4 col-md-6 col-sm-6 col-12">
-        <div class="card px-16 py-12 shadow-none radius-8 border h-100">
-            <div class="d-flex align-items-center gap-2">
-                <div class="w-48-px h-48-px radius-8 bg-success-100 d-flex justify-content-center align-items-center">
-                    <iconify-icon icon="solar:check-circle-bold" class="text-success-600 text-xl"></iconify-icon>
-                </div>
-                <div>
-                    <span class="text-secondary-light text-xs" data-i18n="orders.completed">Completed</span>
-                    <h6 class="mb-0">{{ stats.completed }}</h6>
+    <!-- Completed -->
+    <div class="col-xxl col-lg-4 col-md-6 col-sm-6 col-6">
+        <a href="{% if status_filter == 'completed' %}?view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% else %}?status=completed&view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% endif %}" class="text-decoration-none">
+            <div class="card px-16 py-12 shadow-none radius-8 border h-100 {% if status_filter == 'completed' %}border-success{% endif %}">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="w-48-px h-48-px radius-8 bg-success-100 d-flex justify-content-center align-items-center">
+                        <iconify-icon icon="solar:check-circle-bold" class="text-success-600 text-xl"></iconify-icon>
+                    </div>
+                    <div>
+                        <span class="text-secondary-light text-xs" data-i18n="orders.completed">Completed</span>
+                        <h6 class="mb-0">{{ stats.completed }}</h6>
+                    </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     {% if can_view_all %}
-    <div class="col-xxl-2 col-lg-4 col-md-6 col-sm-6 col-12">
-        <div class="card px-16 py-12 shadow-none radius-8 border h-100">
-            <div class="d-flex align-items-center gap-2">
-                <div class="w-48-px h-48-px radius-8 bg-danger-100 d-flex justify-content-center align-items-center">
-                    <iconify-icon icon="solar:user-cross-bold" class="text-danger-600 text-xl"></iconify-icon>
-                </div>
-                <div>
-                    <span class="text-secondary-light text-xs" data-i18n="orders.unassigned">Unassigned</span>
-                    <h6 class="mb-0">{{ stats.unassigned }}</h6>
+    <!-- Unassigned -->
+    <div class="col-xxl col-lg-4 col-md-6 col-sm-6 col-6">
+        <a href="{% if assignment_filter == 'unassigned' %}?view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% else %}?assignment=unassigned&view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% endif %}" class="text-decoration-none">
+            <div class="card px-16 py-12 shadow-none radius-8 border h-100 {% if assignment_filter == 'unassigned' %}border-danger{% endif %}">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="w-48-px h-48-px radius-8 bg-danger-100 d-flex justify-content-center align-items-center">
+                        <iconify-icon icon="solar:user-cross-bold" class="text-danger-600 text-xl"></iconify-icon>
+                    </div>
+                    <div>
+                        <span class="text-secondary-light text-xs" data-i18n="orders.unassigned">Unassigned</span>
+                        <h6 class="mb-0">{{ stats.unassigned }}</h6>
+                    </div>
                 </div>
             </div>
-        </div>
+        </a>
+    </div>
+    {% endif %}
+    <!-- New (untouched) Orders Card -->
+    {% if stats.new > 0 or new_only == '1' %}
+    <div class="col-xxl col-lg-4 col-md-6 col-sm-6 col-6">
+        <a href="{% if new_only == '1' %}?view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% else %}?new_only=1&view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% endif %}" class="text-decoration-none">
+            <div class="card px-16 py-12 shadow-none radius-8 border h-100 {% if new_only == '1' %}border-lilac{% endif %}">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="w-48-px h-48-px radius-8 bg-lilac-focus d-flex justify-content-center align-items-center">
+                        <iconify-icon icon="mdi:bell-ring-outline" class="text-lilac-600 text-xl"></iconify-icon>
+                    </div>
+                    <div>
+                        <span class="text-secondary-light text-xs">New Orders</span>
+                        <h6 class="mb-0 text-lilac-600">{{ stats.new }}</h6>
+                    </div>
+                </div>
+            </div>
+        </a>
     </div>
     {% endif %}
     <!-- Pending Receipts Card -->
     {% if pending_receipts_count > 0 or has_pending_receipts == 'true' %}
-    <div class="col-xxl-2 col-lg-4 col-md-6 col-sm-6 col-12">
+    <div class="col-xxl col-lg-4 col-md-6 col-sm-6 col-6">
         <a href="{% if has_pending_receipts == 'true' %}?view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% else %}?has_pending_receipts=true&view={{ view_mode }}{% if per_page %}&per_page={{ per_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_filter %}&payment={{ payment_filter }}{% endif %}{% if center_filter %}&center={{ center_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if staff_filter %}&staff={{ staff_filter }}{% endif %}{% if assignment_filter %}&assignment={{ assignment_filter }}{% endif %}{% if date_field %}&date_field={{ date_field }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if date_preset %}&date_preset={{ date_preset }}{% endif %}{% endif %}" class="text-decoration-none">
             <div class="card px-16 py-12 shadow-none radius-8 border h-100 {% if has_pending_receipts == 'true' %}border-warning{% endif %}">
                 <div class="d-flex align-items-center gap-2">
@@ -175,24 +208,31 @@
 <div class="card h-100 p-0 radius-12">
     <div class="card-header border-bottom bg-base py-16 px-24">
         <form method="get" id="filterForm">
-            <!-- Row 1: Basic filters in grid -->
-            <div class="row g-2 align-items-stretch mb-2">
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex align-items-center gap-2">
-                    <span class="text-md fw-medium text-secondary-light mb-0" data-i18n="orders.show">Show</span>
-                    <select name="per_page" class="form-select form-select-sm h-40-px" onchange="this.form.submit()" style="min-width: 90px; max-width: 120px;">
-                        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
-                        <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
-                        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+
+            <!-- Row 1: Search + Status + Payment + Per-page -->
+            <div class="row g-2 align-items-center mb-2">
+                <!-- Per page -->
+                <div class="col-6 col-sm-4 col-md-2 col-lg-1 d-flex align-items-center gap-2">
+                    <span class="text-sm fw-medium text-secondary-light text-nowrap" data-i18n="orders.show">Show</span>
+                    <select name="per_page" class="form-select form-select-sm h-40-px" onchange="this.form.submit()">
+                        <option value="10"  {% if per_page == 10  %}selected{% endif %}>10</option>
+                        <option value="25"  {% if per_page == 25  %}selected{% endif %}>25</option>
+                        <option value="50"  {% if per_page == 50  %}selected{% endif %}>50</option>
                         <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
                     </select>
                 </div>
-                <div class="col-12 col-md-6 col-lg-4">
+                <!-- Search -->
+                <div class="col-12 col-sm-8 col-md-4 col-lg-4">
                     <div class="navbar-search w-100">
-                        <input type="text" class="bg-base h-40-px w-100" name="search" data-i18n-placeholder="orders.searchPlaceholder" placeholder="Search order or customer" value="{{ search_query }}">
+                        <input type="text" class="bg-base h-40-px w-100" name="search"
+                            data-i18n-placeholder="orders.searchPlaceholder"
+                            placeholder="Search order or customer"
+                            value="{{ search_query }}">
                         <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <!-- Status -->
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                     <select name="status" class="form-select form-select-sm h-40-px w-100" onchange="this.form.submit()">
                         <option value="" data-i18n="orders.allStatus">All Status</option>
                         {% for value, label in status_choices %}
@@ -200,7 +240,8 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <!-- Payment -->
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                     <select name="payment" class="form-select form-select-sm h-40-px w-100" onchange="this.form.submit()">
                         <option value="" data-i18n="orders.allPayment">All Payments</option>
                         {% for value, label in payment_choices %}
@@ -208,6 +249,18 @@
                         {% endfor %}
                     </select>
                 </div>
+                <!-- Sort -->
+                <div class="col-12 col-sm-4 col-md-4 col-lg-3">
+                    <select name="sort_by" class="form-select form-select-sm h-40-px w-100" onchange="this.form.submit()">
+                        <option value=""              {% if not sort_by              %}selected{% endif %}>&#128467; Sort: Newest first</option>
+                        <option value="deadline"      {% if sort_by == 'deadline'     %}selected{% endif %}>&#9203; Deadline &#8593; (soonest)</option>
+                        <option value="deadline_desc" {% if sort_by == 'deadline_desc'%}selected{% endif %}>&#9203; Deadline &#8595; (latest)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Row 2: Scope filters (center / branch / staff / assignment) -->
+            <div class="row g-2 align-items-center mb-2">
                 {% if user.is_superuser and centers %}
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                     <select name="center" class="form-select form-select-sm h-40-px w-100" onchange="this.form.submit()">
@@ -245,63 +298,59 @@
                     <select name="assignment" class="form-select form-select-sm h-40-px w-100" onchange="this.form.submit()">
                         <option value="" data-i18n="orders.allOrders">All Orders</option>
                         <option value="unassigned" {% if assignment_filter == 'unassigned' %}selected{% endif %} data-i18n="orders.unassigned">Unassigned</option>
-                        <option value="assigned" {% if assignment_filter == 'assigned' %}selected{% endif %} data-i18n="common.assigned">Assigned</option>
+                        <option value="assigned"   {% if assignment_filter == 'assigned'   %}selected{% endif %} data-i18n="common.assigned">Assigned</option>
                     </select>
                 </div>
                 {% endif %}
             </div>
 
-            <!-- Row 2: Date filters and actions -->
-            <div class="row g-2 align-items-stretch">
-                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+            <!-- Row 3: Date range + presets + overdue + bulk actions -->
+            <div class="row g-2 align-items-center">
+                <!-- Date field -->
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                     <select name="date_field" class="form-select form-select-sm h-40-px w-100">
                         <option value="created_at" {% if date_field == 'created_at' %}selected{% endif %}>Created date</option>
                         <option value="updated_at" {% if date_field == 'updated_at' %}selected{% endif %}>Updated date</option>
                     </select>
                 </div>
-                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <!-- Date from -->
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                     <input type="date" name="date_from" class="form-control form-control-sm h-40-px w-100" value="{{ date_from }}" placeholder="From">
                 </div>
-                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <!-- Date to -->
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                     <input type="date" name="date_to" class="form-control form-control-sm h-40-px w-100" value="{{ date_to }}" placeholder="To">
                 </div>
-                <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                    <select name="sort_by" class="form-select form-select-sm h-40-px w-100" onchange="this.form.submit()">
-                        <option value="" {% if not sort_by %}selected{% endif %}>&#128467; Sort: Newest first</option>
-                        <option value="deadline" {% if sort_by == 'deadline' %}selected{% endif %}>&#9203; Deadline &#8593; (soonest)</option>
-                        <option value="deadline_desc" {% if sort_by == 'deadline_desc' %}selected{% endif %}>&#9203; Deadline &#8595; (latest)</option>
-                    </select>
+                <!-- Preset buttons -->
+                <div class="col-6 col-sm-auto d-flex gap-1">
+                    <button type="button" class="btn btn-outline-secondary btn-sm h-40-px px-10{% if date_preset == 'today'  %} active{% endif %}" data-date-preset="today">Today</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm h-40-px px-10{% if date_preset == 'last7'  %} active{% endif %}" data-date-preset="last7">Last 7d</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm h-40-px px-10{% if date_preset == 'last30' %} active{% endif %}" data-date-preset="last30">Last 30d</button>
                 </div>
-                <div class="col-12 col-sm-6 col-md-4 col-lg-2 d-flex align-items-center">
+                <!-- Overdue toggle -->
+                <div class="col-auto d-flex align-items-center ms-2">
                     <div class="form-check form-switch mb-0">
                         <input class="form-check-input" type="checkbox" name="overdue_only" id="overdueOnly" value="1"
                             {% if overdue_only == '1' %}checked{% endif %} onchange="this.form.submit()">
-                        <label class="form-check-label text-sm fw-medium text-danger-main" for="overdueOnly">&#128680; Overdue only</label>
+                        <label class="form-check-label text-sm fw-medium text-danger-main text-nowrap" for="overdueOnly">&#128680; Overdue only</label>
                     </div>
                 </div>
-                <div class="col-12 col-sm-auto">
-                    <div class="d-flex flex-wrap gap-2 w-100">
-                        <button type="button" class="btn btn-outline-secondary btn-sm h-40-px flex-grow-1 flex-md-grow-0 px-10{% if date_preset == 'today' %} active{% endif %}" data-date-preset="today">Today</button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm h-40-px flex-grow-1 flex-md-grow-0 px-10{% if date_preset == 'last7' %} active{% endif %}" data-date-preset="last7">Last 7d</button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm h-40-px flex-grow-1 flex-md-grow-0 px-10{% if date_preset == 'last30' %} active{% endif %}" data-date-preset="last30">Last 30d</button>
-                    </div>
-                </div>
-
+                <!-- Bulk actions (pushed to right) -->
                 {% can_do 'orders.delete' as can_delete_orders_perm %}
                 {% if can_delete_orders_perm or can_delete_orders %}
-                <div class="col-12 col-md-6 col-lg-2 d-flex justify-content-md-end align-items-center gap-2">
-                    <select id="bulkActionSelect" class="form-select form-select-sm h-40-px w-100" style="min-width: 140px;">
+                <div class="col-12 col-md-auto ms-md-auto d-flex align-items-center gap-2">
+                    <select id="bulkActionSelect" class="form-select form-select-sm h-40-px" style="min-width:140px;">
                         <option value="" data-i18n="common.actions">Actions</option>
                         <option value="delete" data-i18n="common.deleteSelected">Delete selected</option>
                     </select>
-                    <button type="button" id="applyBulkAction" class="btn btn-primary btn-sm px-16 h-40-px" disabled>
+                    <button type="button" id="applyBulkAction" class="btn btn-primary btn-sm px-16 h-40-px text-nowrap" disabled>
                         <span data-i18n="common.apply">Apply</span>
                     </button>
                 </div>
                 {% endif %}
             </div>
-                
-            <!-- Hidden field to preserve view mode -->
+
+            <!-- Hidden fields to preserve state -->
             <input type="hidden" name="view" value="{{ view_mode }}">
             <input type="hidden" name="date_preset" value="{{ date_preset }}">
         </form>
