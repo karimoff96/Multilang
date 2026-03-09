@@ -197,6 +197,7 @@ textarea { resize: none; height: 80px; }
   text-align: center; padding: 24px;
 }
 .success-icon { font-size: 72px; margin-bottom: 18px; }
+#lottie-reliable { margin-bottom: 10px; }
 .success-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
 .success-sub { font-size: 15px; color: var(--hint); line-height: 1.55; }
 .success-detail { margin-top: 24px; background: var(--bg2); border-radius: var(--radius); padding: 16px; text-align: left; width: 100%; max-width: 380px; }
@@ -211,6 +212,7 @@ textarea { resize: none; height: 80px; }
 .tl-icon  { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
 .tl-icon.tl-pulse { animation: tl-pulse 1.8s ease-in-out infinite; }
 @keyframes tl-pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+.tl-img { width: 22px; height: 22px; object-fit: contain; vertical-align: middle; display: block; }
 .tl-label { font-size: 14px; line-height: 1.4; }
 .tl-label.tl-done    { color: var(--text); }
 .tl-label.tl-current { color: var(--btn); font-weight: 700; }
@@ -360,7 +362,10 @@ textarea { resize: none; height: 80px; }
      SCREEN: menu
 ═══════════════════════════════════════════════════════ -->
 <section id="screen-menu" class="screen">
-  <div class="page-header" id="menu-hello">Hello!</div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:8px">
+    <div id="lottie-hey" style="width:44px;height:44px;flex-shrink:0"></div>
+    <div class="page-header" id="menu-hello" style="margin:0">Hello!</div>
+  </div>
   <div class="page-sub" id="menu-center-name"></div>
 
   <div class="section">
@@ -603,7 +608,7 @@ textarea { resize: none; height: 80px; }
      SCREEN: success
 ═══════════════════════════════════════════════════════ -->
 <section id="screen-success" class="screen">
-  <div class="success-icon">🎉</div>
+  <div id="lottie-reliable" style="width:100px;height:100px;margin:0 auto 10px"></div>
   <div class="success-title" id="suc-title">Order Submitted!</div>
   <div class="success-sub" id="suc-sub">Your order has been received.<br>We'll notify you via Telegram when it's ready.</div>
   <div class="success-detail" id="suc-detail">
@@ -615,11 +620,11 @@ textarea { resize: none; height: 80px; }
   <div class="gap"></div>
   <div style="display:flex;gap:10px;width:100%;max-width:380px">
     <div class="card" style="flex:1;text-align:center;margin:0" onclick="goTo('menu')">
-      <div style="font-size:28px;margin-bottom:4px">🏠</div>
+      <div style="margin-bottom:4px"><img src="/static/images/home.png" style="width:32px;height:32px;object-fit:contain"></div>
       <div class="card-title" id="suc-btn-menu">Home</div>
     </div>
     <div class="card" style="flex:1;text-align:center;margin:0" onclick="loadMyOrders()">
-      <div style="font-size:28px;margin-bottom:4px">📦</div>
+      <div style="margin-bottom:4px"><img src="/static/images/box-open.png" style="width:32px;height:32px;object-fit:contain"></div>
       <div class="card-title" id="suc-btn-orders">My Orders</div>
     </div>
   </div>
@@ -948,7 +953,7 @@ const T = {
     regName: "TO'LIQ ISM", regNamePh: "Ism Familiya",
     regPhone: "TELEFON", regPhonePh: "+998 90 123 45 67",
     regBranch: "FILIAL",
-    menuHello: name => `Salom, ${name}! 👋`,
+    menuHello: name => `Salom, ${name}!`,
     menuNewOrder: "📋 Yangi buyurtma", menuNewOrderSub: "Xizmat tanlang va hujjat yuklang",
     menuMyOrders: "📦 Buyurtmalarim", menuMyOrdersSub: "Buyurtma tarixi va holati",
     catHeader: "Xizmatlar", catSub: "Kerakli xizmatni tanlang",
@@ -1033,7 +1038,7 @@ const T = {
     regLang: "ЯЗЫК", regName: "ПОЛНОЕ ИМЯ", regNamePh: "Иванов Иван",
     regPhone: "ТЕЛЕФОН", regPhonePh: "+998 90 123 45 67",
     regBranch: "ФИЛИАЛ",
-    menuHello: name => `Привет, ${name}! 👋`,
+    menuHello: name => `Привет, ${name}!`,
     menuNewOrder: "📋 Новый заказ", menuNewOrderSub: "Выберите услугу и загрузите документы",
     menuMyOrders: "📦 Мои заказы", menuMyOrdersSub: "История заказов и статусы",
     catHeader: "Услуги", catSub: "Выберите нужную услугу",
@@ -1118,7 +1123,7 @@ const T = {
     regLang: "LANGUAGE", regName: "FULL NAME", regNamePh: "John Doe",
     regPhone: "PHONE", regPhonePh: "+998 90 123 45 67",
     regBranch: "BRANCH",
-    menuHello: name => `Hello, ${name}! 👋`,
+    menuHello: name => `Hello, ${name}!`,
     menuNewOrder: "📋 New Order", menuNewOrderSub: "Select service and upload documents",
     menuMyOrders: "📦 My Orders", menuMyOrdersSub: "View order history and status",
     catHeader: "Services", catSub: "Choose the service you need",
@@ -2121,6 +2126,11 @@ function buildOrderDetailScreen(order, cardInfo) {
   }
 }
 
+const TL_IMG_DONE    = '/static/images/checklist.png';
+const TL_IMG_CURRENT = '/static/images/document.png';
+const TL_IMG_COMPLETE = '/static/images/complete.png';
+const TL_IMG_GRAY    = '/static/images/check-gray.png';
+
 function buildOrderTimeline(order) {
   const box   = document.getElementById("det-timeline-box");
   const track = document.getElementById("det-timeline");
@@ -2143,10 +2153,10 @@ function buildOrderTimeline(order) {
   const stepKeys = STEPS.map(s => s.key);
   const status   = order.status;
 
-  if (status === "cancelled") {
+    if (status === "cancelled") {
     track.innerHTML = `
       <div class="timeline-step">
-        <span class="tl-icon">✅</span>
+        <span class="tl-icon"><img src="${TL_IMG_DONE}" class="tl-img"></span>
         <span class="tl-label tl-done">${escHtml(t("tlReceived"))}</span>
       </div>
       <div style="display:flex;padding-left:4px">
@@ -2184,13 +2194,14 @@ function buildOrderTimeline(order) {
     }
     html += `<div class="timeline-step">`;
     if (idx <= doneUpTo) {
-      html += `<span class="tl-icon">✅</span>`;
+      html += `<span class="tl-icon"><img src="${TL_IMG_DONE}" class="tl-img"></span>`;
       html += `<span class="tl-label tl-done">${escHtml(step.label())}</span>`;
     } else if (idx === activeIdx) {
-      html += `<span class="tl-icon tl-pulse">${step.emoji}</span>`;
+      const activeImg = step.key === 'completed' ? TL_IMG_COMPLETE : TL_IMG_CURRENT;
+      html += `<span class="tl-icon tl-pulse"><img src="${activeImg}" class="tl-img"></span>`;
       html += `<span class="tl-label tl-current">${escHtml(step.label())}</span>`;
     } else {
-      html += `<span class="tl-icon" style="opacity:.25">${step.emoji}</span>`;
+      html += `<span class="tl-icon"><img src="${TL_IMG_GRAY}" class="tl-img" style="opacity:.45"></span>`;
       html += `<span class="tl-label tl-future">${escHtml(step.label())}</span>`;
     }
     html += `</div>`;
@@ -2572,4 +2583,55 @@ if (document.readyState === "loading") {
 }
 </script>
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+<script>
+(function(){
+  var _la = null;
+  var _hey = null;
+
+  function initLottieReliable() {
+    if (_la) return;
+    var el = document.getElementById('lottie-reliable');
+    if (!el) return;
+    _la = lottie.loadAnimation({
+      container: el,
+      renderer: 'svg',
+      loop: true,
+      autoplay: false,
+      path: '/static/js/Reliable.json'
+    });
+  }
+
+  function initLottieHey() {
+    if (_hey) return;
+    var el = document.getElementById('lottie-hey');
+    if (!el) return;
+    _hey = lottie.loadAnimation({
+      container: el,
+      renderer: 'svg',
+      loop: true,
+      autoplay: false,
+      path: '/static/Hey.json'
+    });
+  }
+
+  // Patch showScreen to play/stop the animations
+  var _origShowScreen = showScreen;
+  showScreen = function(name, pushHistory) {
+    _origShowScreen.apply(this, arguments);
+    if (name === 'success') {
+      initLottieReliable();
+      if (_la) { _la.goToAndPlay(0, true); }
+    } else {
+      if (_la) _la.pause();
+    }
+    if (name === 'menu') {
+      initLottieHey();
+      if (_hey) { _hey.goToAndPlay(0, true); }
+    } else {
+      if (_hey) _hey.pause();
+    }
+  };
+})();
+</script>
 </html>

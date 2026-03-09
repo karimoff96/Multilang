@@ -56,6 +56,61 @@ const translations = {
         ru: 'Посмотреть все уведомления',
         en: 'See All Notification'
     },
+    'nav.noNotifications': {
+        uz: 'Yangi bildirishnomalar yo\'q',
+        ru: 'Нет новых уведомлений',
+        en: 'No new notifications'
+    },
+    'nav.markAllRead': {
+        uz: 'Hammasini o\'qilgan deb belgilash',
+        ru: 'Отметить все прочитанными',
+        en: 'Mark all as read'
+    },
+    'notif.order_new': {
+        uz: '📋 Yangi Buyurtma',
+        ru: '📋 Новый Заказ',
+        en: '📋 New Order'
+    },
+    'notif.order_cancelled': {
+        uz: '❌ Buyurtma Bekor',
+        ru: '❌ Заказ Отменён',
+        en: '❌ Order Cancelled'
+    },
+    'notif.order_completed': {
+        uz: '✅ Buyurtma Bajarildi',
+        ru: '✅ Заказ Выполнен',
+        en: '✅ Order Completed'
+    },
+    'notif.payment_confirmed': {
+        uz: "💰 To'lov Tasdiqlandi",
+        ru: '💰 Оплата Подтверждена',
+        en: '💰 Payment Confirmed'
+    },
+    'notif.receipt_pending': {
+        uz: '💳 Kvitansiya',
+        ru: '💳 Квитанция',
+        en: '💳 Receipt'
+    },
+    'notif.user_new': {
+        uz: '👤 Yangi Foydalanuvchi',
+        ru: '👤 Новый Пользователь',
+        en: '👤 New User'
+    },
+    'notif.agency_new': {
+        uz: '🏢 Yangi Agentlik',
+        ru: '🏢 Новое Агентstvo',
+        en: '🏢 New Agency'
+    },
+    'notif.order_overdue': {
+        uz: "🚨 Muddati O'tgan",
+        ru: '🚨 Просроченный Заказ',
+        en: '🚨 Overdue Order'
+    },
+    'notif.noNotifications': {
+        uz: "Yangi bildirishnomalar yo'q",
+        ru: 'Нет новых уведомлений',
+        en: 'No new notifications'
+    },
 
     // ========== SIDEBAR ==========
     'sidebar.dashboard': {
@@ -8422,6 +8477,19 @@ const LanguageManager = {
             else if (this.currentLang === 'en' && descEn) displayDesc = descEn;
 
             element.textContent = displayDesc || fallback;
+        });
+
+        // Translate notification item titles using data-notif-type attribute
+        document.querySelectorAll('[data-notif-type]').forEach(element => {
+            const type = element.getAttribute('data-notif-type');
+            const key = `notif.${type}`;
+            const prefix = this.translate(key);
+            if (prefix === key) return; // no translation found
+            const h6 = element.querySelector('h6');
+            if (!h6) return;
+            // Extract order/item number (e.g. #1948) from existing title
+            const match = h6.textContent.match(/#([\w\-]+)/);
+            h6.textContent = match ? `${prefix} #${match[1]}` : prefix;
         });
     },
 

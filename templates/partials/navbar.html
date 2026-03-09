@@ -77,7 +77,7 @@
                     <div class="dropdown-menu to-top dropdown-menu-lg p-0">
                         <div class="m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
                             <div>
-                                <h6 class="text-lg text-primary-light fw-semibold mb-0" data-i18n="navbar.notifications">Notifications</h6>
+                                <h6 class="text-lg text-primary-light fw-semibold mb-0" data-i18n="nav.notifications">Notifications</h6>
                             </div>
                             <div class="d-flex align-items-center gap-8">
                                 <!-- Mark all as read button — only shown when there are unread -->
@@ -85,8 +85,9 @@
                                         onclick="markAllNotificationsRead()"
                                         class="btn btn-sm text-secondary-light hover-text-primary px-6 py-4"
                                         style="font-size:11px; line-height:1.2; {% if unread_notifications_count == 0 %}display:none;{% endif %}"
+                                        data-i18n-title="nav.markAllRead"
                                         title="Mark all as read">
-                                    <iconify-icon icon="mdi:check-all" class="me-2"></iconify-icon>Mark all read
+                                    <iconify-icon icon="mdi:check-all" class="me-2"></iconify-icon><span data-i18n="nav.markAllRead">Mark all as read</span>
                                 </button>
                                 <span class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center"
                                       id="notifDropdownCount"
@@ -102,6 +103,7 @@
                                 <a href="{% if notification.notification_type == 'receipt_pending' %}{% url 'orders:orderDetail' notification.get_link_id %}{% elif notification.notification_type == 'order_new' or notification.notification_type == 'order_cancelled' or notification.notification_type == 'order_completed' or notification.notification_type == 'payment_confirmed' %}{% url 'orders:orderDetail' notification.object_id %}{% elif notification.notification_type == 'user_new' or notification.notification_type == 'agency_new' %}{% url 'usersList' %}{% else %}javascript:void(0){% endif %}" 
                                    class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between {% cycle '' 'bg-neutral-50' %}"
                                    data-notification-id="{{ notification.id }}"
+                                   data-notif-type="{{ notification.notification_type }}"
                                    onclick="markNotificationRead({{ notification.id }})">
                                     <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
                                         <span class="w-44-px h-44-px 
@@ -143,13 +145,13 @@
                             {% else %}
                                 <div class="px-24 py-12 text-center text-secondary-light">
                                     <iconify-icon icon="mdi:bell-off-outline" class="text-xxl mb-2"></iconify-icon>
-                                    <p class="mb-0 text-sm" data-i18n="navbar.noNotifications">No new notifications</p>
+                                    <p class="mb-0 text-sm" data-i18n="nav.noNotifications">No new notifications</p>
                                 </div>
                             {% endif %}
                         </div>
 
                         <div class="text-center py-12 px-16">
-                            <a href="{% url 'core:notifications_list' %}" class="text-primary-600 fw-semibold text-md" data-i18n="navbar.seeAllNotifications">See All Notifications</a>
+                            <a href="{% url 'core:notifications_list' %}" class="text-primary-600 fw-semibold text-md" data-i18n="nav.seeAllNotification">See All Notifications</a>
                         </div>
 
                     </div>
@@ -184,12 +186,12 @@
                         <ul class="to-top-list">
                             <li>
                                 <a class="dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-primary d-flex align-items-center gap-3" href="{% url 'viewProfile' %}">
-                                    <iconify-icon icon="solar:user-linear" class="icon text-xl"></iconify-icon> My Profile
+                                    <iconify-icon icon="solar:user-linear" class="icon text-xl"></iconify-icon> <span data-i18n="nav.myProfile">My Profile</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-danger d-flex align-items-center gap-3" href="{% url 'admin_logout' %}">
-                                    <iconify-icon icon="lucide:power" class="icon text-xl"></iconify-icon> Log Out
+                                    <iconify-icon icon="lucide:power" class="icon text-xl"></iconify-icon> <span data-i18n="nav.logout">Log Out</span>
                                 </a>
                             </li>
                         </ul>
@@ -232,9 +234,12 @@ function markAllNotificationsRead() {
             // Swap notification list to empty-state message
             var list = document.querySelector('.max-h-400-px.overflow-y-auto');
             if (list) {
+                var noNotifText = (typeof LanguageManager !== 'undefined')
+                    ? LanguageManager.translate('notif.noNotifications')
+                    : 'No new notifications';
                 list.innerHTML = '<div class="px-24 py-12 text-center text-secondary-light">'
                     + '<iconify-icon icon="mdi:bell-off-outline" class="text-xxl mb-2"></iconify-icon>'
-                    + '<p class="mb-0 text-sm">No new notifications</p></div>';
+                    + '<p class="mb-0 text-sm">' + noNotifText + '</p></div>';
             }
         }
     })
