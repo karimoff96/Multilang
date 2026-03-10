@@ -198,6 +198,9 @@ class PaymeWebhookView(View):
         except Exception:
             return _rpc_error(PAYME_ERROR_INVALID_AMOUNT, "Invalid amount", rpc_id)
 
+        if order.is_fully_paid or order.status in ("payment_confirmed", "completed", "ready", "cancelled"):
+            return _rpc_error(PAYME_ERROR_CANNOT_PERFORM, "Operation cannot be performed", rpc_id)
+
         return _rpc_result({"allow": True}, rpc_id)
 
     @transaction.atomic
@@ -219,6 +222,15 @@ class PaymeWebhookView(View):
         payme_id = params.get("id")
         if not payme_id:
             return _rpc_error(PAYME_ERROR_INVALID_ACCOUNT, "Missing transaction id", rpc_id)
+
+        # If this order already has an active (pending) transaction with a DIFFERENT id,
+        # another transaction has claimed this order — reject per Payme spec (-31050..-31099)
+        conflict = PaymeTransaction.objects.filter(
+            order=order,
+            state=PaymeTransaction.STATE_CREATED,
+        ).exclude(payme_transaction_id=payme_id).first()
+        if conflict:
+            return _rpc_error(PAYME_ERROR_INVALID_ACCOUNT, "Order is already being processed", rpc_id)
 
         tx, created = PaymeTransaction.objects.select_for_update().get_or_create(
             payme_transaction_id=payme_id,
