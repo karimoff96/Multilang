@@ -23,12 +23,18 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-html, body { height: 100%; background: var(--bg); color: var(--text); overflow: hidden; }
+html, body {
+  height: 100%; width: 100%; max-width: 100%;
+  background: var(--bg); color: var(--text);
+  overflow: hidden;
+  overscroll-behavior: none;
+}
 
 /* ── Screens ───────────────────────────────────────────────────────────── */
 .screen {
   position: absolute; top: 0; right: 0; bottom: 0; left: 0; inset: 0;
   overflow-y: auto; overflow-x: hidden;
+  width: 100%; max-width: 100%;
   display: flex; flex-direction: column;
   opacity: 0; pointer-events: none;
   transform: translateX(30px);
@@ -63,7 +69,10 @@ html, body { height: 100%; background: var(--bg); color: var(--text); overflow: 
 .card:active { opacity: .7; }
 .card-title { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
 .card-sub { font-size: 13px; color: var(--hint); line-height: 1.4; }
-.card-right { float: right; color: var(--hint); margin-top: 2px; }
+.card-right { color: var(--hint); margin-left: auto; flex-shrink: 0; }
+.menu-card { display: flex; align-items: center; gap: 14px; }
+.menu-card .menu-icon { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+.menu-card .menu-card-body { flex: 1; min-width: 0; }
 .card.selected { border-color: var(--btn); background: rgba(36,129,204,.08); background: color-mix(in srgb, var(--btn) 8%, var(--bg2)); }
 .card.selected .card-title { color: var(--btn); }
 
@@ -363,47 +372,68 @@ textarea { resize: none; height: 80px; }
 ═══════════════════════════════════════════════════════ -->
 <section id="screen-menu" class="screen">
   <div style="display:flex;align-items:center;justify-content:center;gap:8px">
-    <div id="lottie-hey" style="width:44px;height:44px;flex-shrink:0"></div>
     <div class="page-header" id="menu-hello" style="margin:0">Hello!</div>
+    <div id="lottie-hey" style="width:44px;height:44px;flex-shrink:0"></div>
   </div>
   <div class="page-sub" id="menu-center-name"></div>
 
   <div class="section">
-    <div class="card" onclick="goTo('categories')">
+    <div class="card menu-card" onclick="goTo('categories')">
+      <img src="/static/images/webapp/new-order.png" class="menu-icon" alt="">
+      <div class="menu-card-body">
+        <div class="card-title" id="menu-new-order">New Order</div>
+        <div class="card-sub" id="menu-new-order-sub">Select service and upload documents</div>
+      </div>
       <div class="card-right">›</div>
-      <div class="card-title" id="menu-new-order">📋 New Order</div>
-      <div class="card-sub" id="menu-new-order-sub">Select service and upload documents</div>
     </div>
-    <div class="card" onclick="loadMyOrders()">
+    <div class="card menu-card" onclick="loadMyOrders()">
+      <img src="/static/images/webapp/my-orders.png" class="menu-icon" alt="">
+      <div class="menu-card-body">
+        <div class="card-title" id="menu-my-orders">My Orders</div>
+        <div class="card-sub" id="menu-my-orders-sub">View your order history and status</div>
+      </div>
       <div class="card-right">›</div>
-      <div class="card-title" id="menu-my-orders">📦 My Orders</div>
-      <div class="card-sub" id="menu-my-orders-sub">View your order history and status</div>
     </div>
-    <div class="card" onclick="loadProfile()">
+    <div class="card menu-card" onclick="loadProfile()">
+      <img src="/static/images/webapp/user-profile.png" class="menu-icon" alt="">
+      <div class="menu-card-body">
+        <div class="card-title" id="menu-profile">My Profile</div>
+        <div class="card-sub" id="menu-profile-sub">View and edit your details</div>
+      </div>
       <div class="card-right">›</div>
-      <div class="card-title" id="menu-profile">👤 My Profile</div>
-      <div class="card-sub" id="menu-profile-sub">View and edit your details</div>
     </div>
-    <div class="card" onclick="loadAbout()">
+    <div class="card menu-card" onclick="loadAbout()">
+      <img src="/static/images/webapp/about-us.png" class="menu-icon" alt="">
+      <div class="menu-card-body">
+        <div class="card-title" id="menu-about">About Us</div>
+        <div class="card-sub" id="menu-about-sub">Company information</div>
+      </div>
       <div class="card-right">›</div>
-      <div class="card-title" id="menu-about">ℹ️ About Us</div>
-      <div class="card-sub" id="menu-about-sub">Company information</div>
     </div>
-    <div class="card" onclick="loadHelp()">
+    <div class="card menu-card" onclick="loadHelp()">
+      <img src="/static/images/webapp/info.png" class="menu-icon" alt="">
+      <div class="menu-card-body">
+        <div class="card-title" id="menu-help">Help</div>
+        <div class="card-sub" id="menu-help-sub">Questions and support</div>
+      </div>
       <div class="card-right">›</div>
-      <div class="card-title" id="menu-help">❓ Help</div>
-      <div class="card-sub" id="menu-help-sub">Questions and support</div>
     </div>
-    <div class="card" onclick="loadOtherServices()">
+    <div class="card menu-card" onclick="loadOtherServices()">
+      <img src="/static/images/webapp/other-services.png" class="menu-icon" alt="">
+      <div class="menu-card-body">
+        <div class="card-title" id="menu-other">Other Services</div>
+        <div class="card-sub" id="menu-other-sub">Additional services</div>
+      </div>
       <div class="card-right">›</div>
-      <div class="card-title" id="menu-other">🧾 Other Services</div>
-      <div class="card-sub" id="menu-other-sub">Additional services</div>
     </div>
     <!-- Price list — shown/hidden dynamically based on branch.show_pricelist -->
-    <div class="card" id="menu-pricelist-card" onclick="loadPricelist()" style="display:none">
+    <div class="card menu-card" id="menu-pricelist-card" onclick="loadPricelist()" style="display:none">
+      <img src="/static/images/webapp/price-list.png" class="menu-icon" alt="">
+      <div class="menu-card-body">
+        <div class="card-title" id="menu-pricelist">Price List</div>
+        <div class="card-sub" id="menu-pricelist-sub">Service prices</div>
+      </div>
       <div class="card-right">›</div>
-      <div class="card-title" id="menu-pricelist">💰 Price List</div>
-      <div class="card-sub" id="menu-pricelist-sub">Service prices</div>
     </div>
   </div>
   <div class="bottom-pad"></div>
@@ -964,8 +994,8 @@ const T = {
     regPhone: "TELEFON", regPhonePh: "+998 90 123 45 67",
     regBranch: "FILIAL",
     menuHello: name => `Salom, ${name}!`,
-    menuNewOrder: "📋 Yangi buyurtma", menuNewOrderSub: "Xizmat tanlang va hujjat yuklang",
-    menuMyOrders: "📦 Buyurtmalarim", menuMyOrdersSub: "Buyurtma tarixi va holati",
+    menuNewOrder: "Yangi buyurtma", menuNewOrderSub: "Xizmat tanlang va hujjat yuklang",
+    menuMyOrders: "Buyurtmalarim", menuMyOrdersSub: "Buyurtma tarixi va holati",
     catHeader: "Xizmatlar", catSub: "Kerakli xizmatni tanlang",
     prodHeader: "Hujjat turi", prodSub: "Qaysi hujjatni tarjima qilmoqchisiz?",
     confHeader: "Buyurtma tafsilotlari",
@@ -1017,11 +1047,11 @@ const T = {
     tlCompleted: "Yakunlandi", tlCancelled: "Bekor qilindi",
     ordClickHint: "Tafsilotlarni ko'rish uchun bosing",
     copied: "Nusxalandi!",
-    menuProfile: "👤 Profilim", menuProfileSub: "Ma'lumotlaringizni ko'ring va o'zgartiring",
-    menuAbout: "ℹ️ Biz haqimizda", menuAboutSub: "Kompaniya haqida ma'lumot",
-    menuHelp: "❓ Yordam", menuHelpSub: "Savollar va qo'llab-quvvatlash",
-    menuOther: "🧾 Boshqa xizmatlar", menuOtherSub: "Qo'shimcha xizmatlarimiz",
-    menuPricelist: "💰 Narxlar ro'yxati", menuPricelistSub: "Xizmatlar narxlari",
+    menuProfile: "Profilim", menuProfileSub: "Ma'lumotlaringizni ko'ring va o'zgartiring",
+    menuAbout: "Biz haqimizda", menuAboutSub: "Kompaniya haqida ma'lumot",
+    menuHelp: "Yordam", menuHelpSub: "Savollar va qo'llab-quvvatlash",
+    menuOther: "Boshqa xizmatlar", menuOtherSub: "Qo'shimcha xizmatlarimiz",
+    menuPricelist: "Narxlar ro'yxati", menuPricelistSub: "Xizmatlar narxlari",
     profHeader: "Mening profilim", profSub: "Shaxsiy ma'lumotlar",
     profName: "ISM", profPhone: "TELEFON", profLang: "TIL", profBranch: "FILIAL",
     profJoined: "Ro'yxatdan o'tgan", profAgency: "💼 Agentlik",
@@ -1049,8 +1079,8 @@ const T = {
     regPhone: "ТЕЛЕФОН", regPhonePh: "+998 90 123 45 67",
     regBranch: "ФИЛИАЛ",
     menuHello: name => `Привет, ${name}!`,
-    menuNewOrder: "📋 Новый заказ", menuNewOrderSub: "Выберите услугу и загрузите документы",
-    menuMyOrders: "📦 Мои заказы", menuMyOrdersSub: "История заказов и статусы",
+    menuNewOrder: "Новый заказ", menuNewOrderSub: "Выберите услугу и загрузите документы",
+    menuMyOrders: "Мои заказы", menuMyOrdersSub: "История заказов и статусы",
     catHeader: "Услуги", catSub: "Выберите нужную услугу",
     prodHeader: "Тип документа", prodSub: "Выберите документ для перевода",
     confHeader: "Детали заказа",
@@ -1102,11 +1132,11 @@ const T = {
     tlCompleted: "Завершён", tlCancelled: "Отменён",
     ordClickHint: "Нажмите для подробностей",
     copied: "Скопировано!",
-    menuProfile: "👤 Мой профиль", menuProfileSub: "Просмотр и редактирование данных",
-    menuAbout: "ℹ️ О нас", menuAboutSub: "Информация о компании",
-    menuHelp: "❓ Помощь", menuHelpSub: "Вопросы и поддержка",
-    menuOther: "🧾 Другие услуги", menuOtherSub: "Дополнительные услуги",
-    menuPricelist: "💰 Прайс-лист", menuPricelistSub: "Цены на услуги",
+    menuProfile: "Мой профиль", menuProfileSub: "Просмотр и редактирование данных",
+    menuAbout: "О нас", menuAboutSub: "Информация о компании",
+    menuHelp: "Помощь", menuHelpSub: "Вопросы и поддержка",
+    menuOther: "Другие услуги", menuOtherSub: "Дополнительные услуги",
+    menuPricelist: "Прайс-лист", menuPricelistSub: "Цены на услуги",
     profHeader: "Мой профиль", profSub: "Личные данные",
     profName: "ИМЯ", profPhone: "ТЕЛЕФОН", profLang: "ЯЗЫК", profBranch: "ФИЛИАЛ",
     profJoined: "Зарегистрирован", profAgency: "💼 Агентство",
@@ -1134,8 +1164,8 @@ const T = {
     regPhone: "PHONE", regPhonePh: "+998 90 123 45 67",
     regBranch: "BRANCH",
     menuHello: name => `Hello, ${name}!`,
-    menuNewOrder: "📋 New Order", menuNewOrderSub: "Select service and upload documents",
-    menuMyOrders: "📦 My Orders", menuMyOrdersSub: "View order history and status",
+    menuNewOrder: "New Order", menuNewOrderSub: "Select service and upload documents",
+    menuMyOrders: "My Orders", menuMyOrdersSub: "View order history and status",
     catHeader: "Services", catSub: "Choose the service you need",
     prodHeader: "Document Type", prodSub: "Select the document you want to translate",
     confHeader: "Order Details",
@@ -1187,11 +1217,11 @@ const T = {
     tlCompleted: "Completed", tlCancelled: "Cancelled",
     ordClickHint: "Tap for details",
     copied: "Copied!",
-    menuProfile: "👤 My Profile", menuProfileSub: "View and edit your details",
-    menuAbout: "ℹ️ About Us", menuAboutSub: "Company information",
-    menuHelp: "❓ Help", menuHelpSub: "Questions and support",
-    menuOther: "🧾 Other Services", menuOtherSub: "Additional services",
-    menuPricelist: "💰 Price List", menuPricelistSub: "Service prices",
+    menuProfile: "My Profile", menuProfileSub: "View and edit your details",
+    menuAbout: "About Us", menuAboutSub: "Company information",
+    menuHelp: "Help", menuHelpSub: "Questions and support",
+    menuOther: "Other Services", menuOtherSub: "Additional services",
+    menuPricelist: "Price List", menuPricelistSub: "Service prices",
     profHeader: "My Profile", profSub: "Personal details",
     profName: "NAME", profPhone: "PHONE", profLang: "LANGUAGE", profBranch: "BRANCH",
     profJoined: "Joined", profAgency: "💼 Agency",

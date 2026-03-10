@@ -140,7 +140,7 @@
                                 <div class="d-flex align-items-center justify-content-between p-12 radius-8 bg-neutral-50 border w-100">
                                     <div>
                                         <div class="fw-semibold text-primary-light text-sm" data-i18n="form.status">Center Status</div>
-                                        <div class="text-secondary-light text-xs mt-2">Enable or disable this center</div>
+                                        <div class="text-secondary-light text-xs mt-2" data-i18n="form.statusDesc">Enable or disable this center</div>
                                     </div>
                                     <div class="form-check form-switch switch-primary ms-16 mb-0">
                                         <input class="form-check-input" type="checkbox" role="switch"
@@ -209,7 +209,7 @@
                                             <div class="text-xs fw-semibold text-secondary-light mb-6">
                                                 <iconify-icon icon="mdi:cellphone-link" class="me-1"></iconify-icon>
                                                 <span data-i18n="form.botWebAppUrl">Bot Web App URL</span>
-                                                <span class="fw-normal ms-1">(BotFather → Bot Settings → Menu Button)</span>
+                                                <span class="fw-normal ms-1" data-i18n="form.botWebAppUrlHint">(BotFather → Bot Settings → Menu Button)</span>
                                             </div>
                                             <div class="input-group input-group-sm">
                                                 <input type="text" id="bot-webapp-url" class="form-control bg-base font-monospace text-xs"
@@ -230,7 +230,7 @@
                                                     <iconify-icon icon="mdi:webhook" class="me-1"></iconify-icon>
                                                     <span data-i18n="form.webhookStatus">Webhook Status</span>
                                                 </div>
-                                                <p class="text-xs text-secondary-light mb-0" id="webhook-status">Click "Check" to view status</p>
+                                                <p class="text-xs text-secondary-light mb-0" id="webhook-status" data-i18n="form.webhookClickCheck">Click "Check" to view status</p>
                                             </div>
                                             <div class="d-flex gap-8">
                                                 <button type="button" class="btn btn-outline-info btn-sm radius-8" onclick="checkWebhook()">
@@ -261,7 +261,7 @@
                             <div class="w-28-px h-28-px radius-6 bg-success-100 d-flex align-items-center justify-content-center flex-shrink-0">
                                 <iconify-icon icon="mdi:credit-card-check" class="text-success-600 text-md"></iconify-icon>
                             </div>
-                            <h6 class="text-md fw-semibold mb-0">Payme Integration</h6>
+                            <h6 class="text-md fw-semibold mb-0" data-i18n="form.paymeIntegration">Payme Integration</h6>
                         </div>
                         <div class="row gy-16">
 
@@ -269,8 +269,8 @@
                             <div class="col-md-6">
                                 <div class="d-flex align-items-center justify-content-between p-12 radius-8 bg-neutral-50 border h-100">
                                     <div>
-                                        <div class="fw-semibold text-primary-light text-sm">Enable Payme Payments</div>
-                                        <div class="text-secondary-light text-xs mt-2">Users pay via Payme checkout instead of uploading a receipt</div>
+                                        <div class="fw-semibold text-primary-light text-sm" data-i18n="form.enablePaymePayments">Enable Payme Payments</div>
+                                        <div class="text-secondary-light text-xs mt-2" data-i18n="form.enablePaymeDesc">Users pay via Payme checkout instead of uploading a receipt</div>
                                     </div>
                                     <div class="form-check form-switch switch-primary ms-16 mb-0">
                                         <input class="form-check-input" type="checkbox" role="switch"
@@ -286,7 +286,7 @@
                                     <div>
                                         <div class="fw-semibold text-warning-700 text-sm">
                                             <iconify-icon icon="mdi:flask-outline" class="me-1"></iconify-icon>
-                                            Sandbox Mode
+                                            <span data-i18n="form.sandboxMode">Sandbox Mode</span>
                                             <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Superadmin only"></iconify-icon>
                                         </div>
                                         <div class="text-secondary-light text-xs mt-2">
@@ -305,19 +305,19 @@
                             <!-- Merchant ID + Webhook URL side by side -->
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                    Payme Merchant ID
+                                    <span data-i18n="form.paymeMerchantId">Payme Merchant ID</span>
                                     <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Superadmin only"></iconify-icon>
                                 </label>
                                 <input type="text" name="payme_merchant_id" class="form-control radius-8 font-monospace text-sm"
                                        value="{{ center.payme_merchant_id|default:'' }}"
                                        placeholder="64e6b8a7d1bf3f80ab123456">
-                                <small class="text-secondary-light">From <a href="https://merchant.payme.uz" target="_blank" class="text-primary-600">merchant.payme.uz</a></small>
+                                <small class="text-secondary-light"><span data-i18n="form.paymeMerchantIdFrom">From</span> <a href="https://merchant.payme.uz" target="_blank" class="text-primary-600">merchant.payme.uz</a></small>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                                     <iconify-icon icon="mdi:webhook" class="me-1"></iconify-icon>
-                                    Webhook Callback URL
+                                    <span data-i18n="form.paymeWebhookUrl">Webhook Callback URL</span>
                                     <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Superadmin only"></iconify-icon>
                                 </label>
                                 <div class="input-group">
@@ -330,14 +330,14 @@
                                         <iconify-icon icon="mdi:content-copy"></iconify-icon>
                                     </button>
                                 </div>
-                                <small class="text-secondary-light">Paste into your Payme merchant cabinet</small>
+                                <small class="text-secondary-light" data-i18n="form.paymeWebhookHint">Paste into your Payme merchant cabinet</small>
                             </div>
 
                             <!-- Both secret keys side by side -->
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                                     <iconify-icon icon="mdi:flask-outline" class="text-warning-600 me-1"></iconify-icon>
-                                    Sandbox Secret Key
+                                    <span data-i18n="form.paymeSandboxKey">Sandbox Secret Key</span>
                                     <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Superadmin only"></iconify-icon>
                                 </label>
                                 <div class="input-group">
@@ -350,13 +350,13 @@
                                         <iconify-icon icon="mdi:eye" id="payme-key-eye-sandbox"></iconify-icon>
                                     </button>
                                 </div>
-                                <small class="text-secondary-light">Active when Sandbox Mode is <strong>ON</strong></small>
+                                <small class="text-secondary-light" data-i18n="form.paymeSandboxKeyHint">Active when Sandbox Mode is ON</small>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                                     <iconify-icon icon="mdi:check-decagram" class="text-success-600 me-1"></iconify-icon>
-                                    Production Secret Key
+                                    <span data-i18n="form.paymeProductionKey">Production Secret Key</span>
                                     <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Superadmin only"></iconify-icon>
                                 </label>
                                 <div class="input-group">
@@ -369,7 +369,7 @@
                                         <iconify-icon icon="mdi:eye" id="payme-key-eye-prod"></iconify-icon>
                                     </button>
                                 </div>
-                                <small class="text-secondary-light">Active when Sandbox Mode is <strong>OFF</strong></small>
+                                <small class="text-secondary-light" data-i18n="form.paymeProductionKeyHint">Active when Sandbox Mode is OFF</small>
                             </div>
 
                             {% endif %}

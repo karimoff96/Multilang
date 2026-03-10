@@ -8370,6 +8370,92 @@ const translations = {
         uz: 'B2C - Shaxsiy',
         ru: 'B2C - Физлицо',
         en: 'B2C - Individual'
+    },
+
+    // ========== CENTER FORM – STATUS ==========
+    'form.statusDesc': {
+        uz: 'Ushbu markazni yoqish yoki o\'chirish',
+        ru: 'Включить или отключить этот центр',
+        en: 'Enable or disable this center'
+    },
+
+    // ========== CENTER FORM – BOT ==========
+    'form.botWebAppUrl': {
+        uz: 'Bot Web App URL',
+        ru: 'URL веб-приложения бота',
+        en: 'Bot Web App URL'
+    },
+    'form.botWebAppUrlHint': {
+        uz: '(BotFather → Bot Settings → Menu Button)',
+        ru: '(BotFather → Bot Settings → Menu Button)',
+        en: '(BotFather → Bot Settings → Menu Button)'
+    },
+    'form.webhookClickCheck': {
+        uz: 'Holatni ko\'rish uchun "Tekshirish"ni bosing',
+        ru: 'Нажмите «Проверить», чтобы увидеть статус',
+        en: 'Click "Check" to view status'
+    },
+
+    // ========== CENTER FORM – PAYME INTEGRATION ==========
+    'form.paymeIntegration': {
+        uz: 'Payme integratsiyasi',
+        ru: 'Интеграция Payme',
+        en: 'Payme Integration'
+    },
+    'form.enablePaymePayments': {
+        uz: 'Payme to\'lovlarini yoqish',
+        ru: 'Включить оплату через Payme',
+        en: 'Enable Payme Payments'
+    },
+    'form.enablePaymeDesc': {
+        uz: 'Foydalanuvchilar chek yuklash o\'rniga Payme orqali to\'laydi',
+        ru: 'Пользователи платят через Payme вместо загрузки чека',
+        en: 'Users pay via Payme checkout instead of uploading a receipt'
+    },
+    'form.sandboxMode': {
+        uz: 'Sandbox rejimi',
+        ru: 'Режим песочницы',
+        en: 'Sandbox Mode'
+    },
+    'form.paymeMerchantId': {
+        uz: 'Payme Merchant ID',
+        ru: 'Payme Merchant ID',
+        en: 'Payme Merchant ID'
+    },
+    'form.paymeMerchantIdFrom': {
+        uz: 'Manba:',
+        ru: 'Источник:',
+        en: 'From'
+    },
+    'form.paymeWebhookUrl': {
+        uz: 'Webhook callback URL',
+        ru: 'URL вебхука (callback)',
+        en: 'Webhook Callback URL'
+    },
+    'form.paymeWebhookHint': {
+        uz: 'Payme merchant kabinetiga webhook URL sifatida kiriting',
+        ru: 'Вставьте в личный кабинет Payme как URL вебхука',
+        en: 'Paste into your Payme merchant cabinet'
+    },
+    'form.paymeSandboxKey': {
+        uz: 'Sandbox maxfiy kaliti',
+        ru: 'Секретный ключ песочницы',
+        en: 'Sandbox Secret Key'
+    },
+    'form.paymeSandboxKeyHint': {
+        uz: 'Sandbox rejimi yoniq bo\'lganda faol',
+        ru: 'Активен при включённом режиме песочницы',
+        en: 'Active when Sandbox Mode is ON'
+    },
+    'form.paymeProductionKey': {
+        uz: 'Production maxfiy kaliti',
+        ru: 'Секретный ключ продакшена',
+        en: 'Production Secret Key'
+    },
+    'form.paymeProductionKeyHint': {
+        uz: 'Sandbox rejimi o\'chirilganda faol',
+        ru: 'Активен при выключённом режиме песочницы',
+        en: 'Active when Sandbox Mode is OFF'
     }
 };
 
