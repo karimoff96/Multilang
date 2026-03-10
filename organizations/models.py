@@ -71,10 +71,21 @@ class TranslationCenter(models.Model):
         help_text=_("Per-center Payme merchant ID. Leave blank to use the global PAYME_MERCHANT_ID setting."),
     )
     payme_secret_key = models.CharField(
-        _("Payme Secret Key"),
+        _("Payme Sandbox Secret Key"),
         max_length=200,
         blank=True,
-        help_text=_("Per-center Payme secret key. Leave blank to use the global PAYME_SECRET_KEY setting."),
+        help_text=_("Payme secret key for the sandbox/test environment (test.paycom.uz)."),
+    )
+    payme_secret_key_prod = models.CharField(
+        _("Payme Production Secret Key"),
+        max_length=200,
+        blank=True,
+        help_text=_("Payme secret key for the production environment (checkout.paycom.uz)."),
+    )
+    payme_sandbox = models.BooleanField(
+        _("Payme Sandbox Mode"),
+        default=False,
+        help_text=_("Use Payme test environment (test.paycom.uz). Enable while testing; disable when going live with production credentials."),
     )
     is_active = models.BooleanField(_("Active"), default=True)
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True)

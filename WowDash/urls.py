@@ -173,6 +173,9 @@ urlpatterns += [path("bot/webhook/<int:center_id>/", webhook_handler, name="cent
 
 # Payme JSON-RPC webhook (must always return HTTP 200)
 urlpatterns += [path("payme/webhook/", payme_webhook_view, name="payme_webhook")]
+# Per-center Payme webhook — use this URL in Payme merchant cabinet: /payme/webhook/<center_id>/
+from orders.payme_webhook import PaymeWebhookView
+urlpatterns += [path("payme/webhook/<int:center_id>/", PaymeWebhookView.as_view(), name="payme_webhook_center")]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

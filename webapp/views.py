@@ -322,6 +322,7 @@ def api_init(request):
             "name": center.name,
             "phone": center.phone or "",
             "logo": center.logo.url if center.logo else None,
+            "payme_enabled": center.payme_enabled and not center.payme_sandbox,
         },
         "branches": branches,
         "categories": categories,
@@ -573,12 +574,38 @@ def api_create_order(request):
     except Exception as e:
         logger.warning(f"WebApp: channel notification failed for order {order.pk}: {e}")
 
+    # ------------------------------------------------------------------
+    # Payme checkout URL (when center has Payme enabled and payment is card)
+    # ------------------------------------------------------------------
+    payme_checkout_url = None
+    if payment_type == "card" and center.payme_enabled and not center.payme_sandbox:
+        try:
+            from orders.payme_gateway import build_payme_checkout_url, PaymeIntegrationError, check_payme_config
+            from django.conf import settings as django_settings
+            ok, reason = check_payme_config(center)
+            if not ok:
+                logger.warning(f"WebApp: Payme config not ready for center {center.id}: {reason}")
+            else:
+                main_domain = getattr(django_settings, "MAIN_DOMAIN", "multilang.uz")
+                sub = center.subdomain if center.subdomain else None
+                if sub:
+                    return_url = f"https://{sub}.{main_domain}/webapp/payment-return/?order_id={order.id}"
+                else:
+                    return_url = f"https://{main_domain}/webapp/payment-return/?order_id={order.id}"
+                lang = bot_user.language or "uz"
+                payme_checkout_url, _, _ = build_payme_checkout_url(
+                    order, lang, callback_url=return_url, center=center
+                )
+        except Exception as exc:
+            logger.error(f"WebApp: Payme checkout URL build failed for order {order.pk}: {exc}")
+
     return _ok({
         "order_id": order.id,
         "order_number": order.get_order_number(),
         "total_price": float(order.total_price),
         "total_pages": order.total_pages,
         "status": order.status,
+        "payme_checkout_url": payme_checkout_url,
     })
 
 

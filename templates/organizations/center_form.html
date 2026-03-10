@@ -6,314 +6,392 @@
 <div class="row gy-4">
     <div class="col-12">
         <div class="card h-100 p-0 radius-12">
-            <div class="card-header border-bottom bg-base py-16 px-24">
-                <h6 class="text-lg fw-semibold mb-0" {% if title_i18n %}data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</h6>
+
+            <!-- ── Header ───────────────────────────────────────────────── -->
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-lg fw-semibold mb-2" {% if title_i18n %}data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</h6>
+                    <span class="text-xs text-secondary-light">{% if center %}{{ center.name }}{% endif %}</span>
+                </div>
+                <div class="d-flex gap-8">
+                    <a href="{% url 'center_list' %}" class="btn btn-outline-secondary btn-sm radius-8">
+                        <iconify-icon icon="mdi:arrow-left" class="me-1"></iconify-icon>
+                        <span data-i18n="common.back">Back</span>
+                    </a>
+                </div>
             </div>
+
             <div class="card-body p-24">
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    
-                    <div class="row gy-3">
-                        <!-- Basic Info -->
-                        <div class="col-12">
-                            <h6 class="text-md fw-semibold mb-16 pb-8 border-bottom" data-i18n="form.centerInfo">Center Information</h6>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                <span data-i18n="form.centerName">Center Name</span> <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" name="name" class="form-control radius-8" 
-                                   value="{% if center %}{{ center.name }}{% endif %}"
-                                   data-i18n-placeholder="form.enterCenterName" placeholder="Enter center name" required>
-                        </div>
-                        
-                        <!-- Subdomain Field -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                <span data-i18n="form.subdomain">Subdomain</span>
-                                {% if not request.user.is_superuser %}
-                                <span class="text-warning-600 ms-2" data-bs-toggle="tooltip" data-i18n-title="form.superadminOnlyEdit" title="Only superadmin can edit this field">
-                                    <iconify-icon icon="mdi:shield-lock"></iconify-icon>
-                                </span>
-                                {% endif %}
-                            </label>
-                            {% if request.user.is_superuser %}
-                            <div class="input-group">
-                                <input type="text" name="subdomain" class="form-control radius-8" 
-                                       value="{% if center %}{{ center.subdomain|default:'' }}{% endif %}"
-                                       data-i18n-placeholder="form.exampleSubdomain" placeholder="e.g., mycompany" pattern="[a-z0-9\-]+" 
-                                       data-i18n-title="form.subdomainPatternHelp" title="Only lowercase letters, numbers and hyphens allowed">
-                                <span class="input-group-text bg-neutral-100">.{{ main_domain }}</span>
+
+                    <!-- ══════════════════════════════════════════════════════ -->
+                    <!-- §1  Basic Information                                  -->
+                    <!-- ══════════════════════════════════════════════════════ -->
+                    <div class="mb-28">
+                        <div class="d-flex align-items-center gap-8 mb-16 pb-8 border-bottom">
+                            <div class="w-28-px h-28-px radius-6 bg-primary-100 d-flex align-items-center justify-content-center flex-shrink-0">
+                                <iconify-icon icon="mdi:office-building" class="text-primary-600 text-md"></iconify-icon>
                             </div>
-                            <small class="text-secondary-light" data-i18n="form.uniqueUrlHint">Unique URL for this center (lowercase, no spaces)</small>
-                            {% else %}
-                            <div class="input-group">
-                                <input type="text" class="form-control radius-8 bg-neutral-100" 
-                                       value="{% if center and center.subdomain %}{{ center.subdomain }}{% else %}{{ _('Not set') }}{% endif %}"
-                                       disabled readonly>
-                                <span class="input-group-text bg-neutral-100">.{{ main_domain }}</span>
-                            </div>
-                            <small class="text-secondary-light" data-i18n="form.contactAdminChangeSubdomain">Contact administrator to change subdomain</small>
-                            {% endif %}
+                            <h6 class="text-md fw-semibold mb-0" data-i18n="form.centerInfo">Center Information</h6>
                         </div>
-                        
-                        {% if request.user.is_superuser and available_owners %}
-                        <!-- Owner Selection - Superuser Only -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                <span data-i18n="form.owner">Owner</span>
-                                <span class="text-warning-600 ms-2" data-bs-toggle="tooltip" title="Only superadmin can set this field">
-                                    <iconify-icon icon="mdi:shield-lock"></iconify-icon>
-                                </span>
-                            </label>
-                            <div class="input-group">
-                                <select name="owner_id" id="owner_id" class="form-select radius-8">
-                                    <option value="" data-i18n="form.selectOwnerPlaceholder">-- Select Owner --</option>
-                                    {% for user in available_owners %}
-                                    <option value="{{ user.id }}" {% if center and center.owner_id == user.id %}selected{% endif %}>
-                                        {{ user.get_full_name|default:user.username }} ({{ user.email|default:"No email" }})
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createUserModal" data-i18n-title="form.createNewUserTooltip" title="Create new user">
-                                    <iconify-icon icon="mdi:account-plus"></iconify-icon>
-                                </button>
-                            </div>
-                            <small class="text-secondary-light" data-i18n="form.ownerHelp">The user who will own and manage this center</small>
-                        </div>
-                        {% endif %}
-                        
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.phone">Phone</label>
-                            <input type="tel" name="phone" class="form-control radius-8" 
-                                   value="{% if center %}{{ center.phone|default:'' }}{% endif %}"
-                                   data-i18n-placeholder="form.enterPhone" placeholder="Enter phone number">
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.email">Email</label>
-                            <input type="email" name="email" class="form-control radius-8" 
-                                   value="{% if center %}{{ center.email|default:'' }}{% endif %}"
-                                   data-i18n-placeholder="form.enterEmail" placeholder="Enter email">
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.locationUrl">Location URL</label>
-                            <input type="url" name="location_url" class="form-control radius-8" 
-                                   value="{% if center %}{{ center.location_url|default:'' }}{% endif %}"
-                                   data-i18n-placeholder="form.locationHint" placeholder="Google Maps or Yandex Maps URL">
-                        </div>
-                        
-                        <div class="col-12">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.address">Address</label>
-                            <textarea name="address" class="form-control radius-8" rows="2" 
-                                      data-i18n-placeholder="form.enterAddress" placeholder="Enter full address">{% if center %}{{ center.address|default:'' }}{% endif %}</textarea>
-                        </div>
-                        
-                        {% if center %}
-                        <div class="col-md-6 mt-24">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.status">Status</label>
-                            <div class="form-check form-switch switch-primary d-flex align-items-center gap-3">
-                                <input class="form-check-input" type="checkbox" role="switch" 
-                                       name="is_active" id="is_active" {% if center.is_active %}checked{% endif %}>
-                                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="is_active" data-i18n="common.active">
-                                    Active
+                        <div class="row gy-16">
+
+                            <!-- Row 1: Name · Subdomain · Phone -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    <span data-i18n="form.centerName">Center Name</span> <span class="text-danger">*</span>
                                 </label>
+                                <input type="text" name="name" class="form-control radius-8"
+                                       value="{% if center %}{{ center.name }}{% endif %}"
+                                       placeholder="Enter center name" required>
                             </div>
-                        </div>
-                        {% endif %}
-                        
-                        <!-- Bot Configuration Section -->
-                        <div class="col-12 mt-24">
-                            <h6 class="text-md fw-semibold mb-16 pb-8 border-bottom" data-i18n="form.botConfiguration">
-                                <iconify-icon icon="mdi:robot" class="me-2"></iconify-icon>
-                                Bot Configuration
-                            </h6>
-                        </div>
-                        
-                        {% if request.user.is_superuser %}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                <span data-i18n="form.botToken">Bot Token</span>
-                                <span class="text-warning-600 ms-2" data-bs-toggle="tooltip" title="Only superusers can edit this field">
-                                    <iconify-icon icon="mdi:shield-lock"></iconify-icon>
-                                </span>
-                            </label>
-                            <input type="text" name="bot_token" class="form-control radius-8" 
-                                   value="{% if center %}{{ center.bot_token|default:'' }}{% endif %}"
-                                data-i18n-placeholder="form.botTokenPlaceholder" placeholder="Enter Telegram bot token (e.g., 123456:ABC-DEF...)">
-                            <small class="text-secondary-light" data-i18n="form.botTokenHint">Get this from @BotFather on Telegram</small>
-                        </div>
-                        {% else %}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                <span data-i18n="form.botToken">Bot Token</span>
-                                <span class="text-warning-600 ms-2" data-bs-toggle="tooltip" title="Only superusers can edit this field">
-                                    <iconify-icon icon="mdi:shield-lock"></iconify-icon>
-                                </span>
-                            </label>
-                            <input type="text" class="form-control radius-8 bg-neutral-100" 
-                                   value="{% if center and center.bot_token %}••••••••{% endif %}"
-                                   disabled readonly>
-                            <small class="text-secondary-light" data-i18n="form.botTokenChangeHelp">Contact administrator to change bot token</small>
-                        </div>
-                        {% endif %}
-                        
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                <span data-i18n="form.botUsername">Bot Username</span>
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-neutral-100">@</span>
-                                <input type="text" name="bot_username" class="form-control radius-8" 
-                                       value="{% if center %}{{ center.bot_username|default:'' }}{% endif %}"
-                                       data-i18n-placeholder="form.botUsernamePlaceholder" placeholder="my_translation_bot">
-                            </div>
-                            <small class="text-secondary-light" data-i18n="form.botUsernameHelp">Bot username without @ (required for agency invitation links)</small>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                <span data-i18n="form.companyOrdersChannel">Company Orders Channel ID</span>
-                            </label>
-                            <input type="text" name="company_orders_channel_id" class="form-control radius-8" 
-                                   value="{% if center %}{{ center.company_orders_channel_id|default:'' }}{% endif %}"
-                                data-i18n-placeholder="form.companyChannelPlaceholder" placeholder="Enter Telegram channel ID (e.g., -1001234567890)">
-                            <small class="text-secondary-light" data-i18n="form.companyChannelHelp">All orders from this center will be sent here</small>
-                        </div>
 
-                        <!-- Bot Web App URL (read-only, auto-generated from subdomain) -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                <iconify-icon icon="mdi:cellphone-link" class="me-1"></iconify-icon>
-                                <span data-i18n="form.botWebAppUrl">Bot Web App URL</span>
-                            </label>
-                            <div class="input-group">
-                                <input type="text" id="bot-webapp-url" class="form-control radius-8 bg-neutral-100 font-monospace text-xs"
-                                       value="{% if center and center.subdomain %}https://{{ center.subdomain }}.{{ main_domain }}/webapp/{% endif %}"
-                                       readonly
-                                       placeholder="Set a subdomain first to generate the URL">
-                                <button type="button" class="btn btn-outline-secondary" id="copy-webapp-url-btn"
-                                        onclick="copyWebAppUrl()" title="Copy URL">
-                                    <iconify-icon icon="mdi:content-copy"></iconify-icon>
-                                </button>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    <span data-i18n="form.subdomain">Subdomain</span>
+                                    {% if not request.user.is_superuser %}
+                                    <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Only superadmin can edit this field"></iconify-icon>
+                                    {% endif %}
+                                </label>
+                                {% if request.user.is_superuser %}
+                                <div class="input-group">
+                                    <input type="text" name="subdomain" class="form-control radius-8"
+                                           value="{% if center %}{{ center.subdomain|default:'' }}{% endif %}"
+                                           placeholder="e.g., mycompany" pattern="[a-z0-9\-]+"
+                                           title="Only lowercase letters, numbers and hyphens allowed">
+                                    <span class="input-group-text bg-neutral-100 text-secondary-light text-xs">.{{ main_domain }}</span>
+                                </div>
+                                {% else %}
+                                <div class="input-group">
+                                    <input type="text" class="form-control radius-8 bg-neutral-100"
+                                           value="{% if center and center.subdomain %}{{ center.subdomain }}{% else %}Not set{% endif %}" disabled readonly>
+                                    <span class="input-group-text bg-neutral-100 text-secondary-light text-xs">.{{ main_domain }}</span>
+                                </div>
+                                {% endif %}
                             </div>
-                            <small class="text-secondary-light" data-i18n="form.botWebAppUrlHelp">
-                                Use this URL in BotFather &rarr; <em>Bot Settings &rarr; Menu Button</em>
-                            </small>
-                        </div>
 
-                        {% if center and center.bot_token and request.user.is_superuser %}
-                        <!-- Webhook Management -->
-                        <div class="col-12 mt-16">
-                            <div class="card bg-neutral-50 border-0">
-                                <div class="card-body p-16">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <h6 class="text-sm fw-semibold mb-4">
-                                                <iconify-icon icon="mdi:webhook" class="me-2"></iconify-icon>
-                                                <span data-i18n="form.webhookStatus">Webhook Status</span>
-                                            </h6>
-                                            <p class="text-xs text-secondary-light mb-0" id="webhook-status" data-i18n="form.webhookHint">
-                                                Click "Check Status" to view webhook info
-                                            </p>
-                                        </div>
-                                        <div class="d-flex gap-2">
-                                            <button type="button" class="btn btn-outline-info btn-sm" onclick="checkWebhook()">
-                                                <iconify-icon icon="mdi:information"></iconify-icon> <span data-i18n="form.checkStatus">Check Status</span>
-                                            </button>
-                                            <button type="button" class="btn btn-success btn-sm" onclick="setupWebhook()">
-                                                <iconify-icon icon="mdi:check"></iconify-icon> <span data-i18n="form.activate">Activate</span>
-                                            </button>
-                                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeWebhook()">
-                                                <iconify-icon icon="mdi:close"></iconify-icon> <span data-i18n="form.deactivate">Deactivate</span>
-                                            </button>
-                                        </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.phone">Phone</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-neutral-100"><iconify-icon icon="solar:phone-bold" class="text-secondary-light"></iconify-icon></span>
+                                    <input type="tel" name="phone" class="form-control radius-8"
+                                           value="{% if center %}{{ center.phone|default:'' }}{% endif %}"
+                                           placeholder="+998 XX XXX XX XX">
+                                </div>
+                            </div>
+
+                            <!-- Row 2: Owner · Email · Location URL -->
+                            {% if request.user.is_superuser and available_owners %}
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    <span data-i18n="form.owner">Owner</span>
+                                    <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Superadmin only"></iconify-icon>
+                                </label>
+                                <div class="input-group">
+                                    <select name="owner_id" class="form-select radius-8">
+                                        <option value="">-- Select Owner --</option>
+                                        {% for user in available_owners %}
+                                        <option value="{{ user.id }}" {% if center and center.owner_id == user.id %}selected{% endif %}>
+                                            {{ user.get_full_name|default:user.username }} ({{ user.email|default:"No email" }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createUserModal" title="Create new user">
+                                        <iconify-icon icon="mdi:account-plus"></iconify-icon>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="{% if request.user.is_superuser and available_owners %}col-md-4{% else %}col-md-6{% endif %}">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.email">Email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-neutral-100"><iconify-icon icon="solar:letter-bold" class="text-secondary-light"></iconify-icon></span>
+                                    <input type="email" name="email" class="form-control radius-8"
+                                           value="{% if center %}{{ center.email|default:'' }}{% endif %}"
+                                           placeholder="contact@example.com">
+                                </div>
+                            </div>
+
+                            <div class="{% if request.user.is_superuser and available_owners %}col-md-4{% else %}col-md-6{% endif %}">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.locationUrl">Location URL</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-neutral-100"><iconify-icon icon="solar:map-point-bold" class="text-secondary-light"></iconify-icon></span>
+                                    <input type="url" name="location_url" class="form-control radius-8"
+                                           value="{% if center %}{{ center.location_url|default:'' }}{% endif %}"
+                                           placeholder="Google / Yandex Maps URL">
+                                </div>
+                            </div>
+
+                            <!-- Row 3: Address · Status -->
+                            <div class="{% if center %}col-md-8{% else %}col-12{% endif %}">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.address">Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-neutral-100"><iconify-icon icon="solar:home-2-bold" class="text-secondary-light"></iconify-icon></span>
+                                    <input type="text" name="address" class="form-control radius-8"
+                                           value="{% if center %}{{ center.address|default:'' }}{% endif %}"
+                                           placeholder="Enter full address">
+                                </div>
+                            </div>
+
+                            {% if center %}
+                            <div class="col-md-4 d-flex align-items-end">
+                                <div class="d-flex align-items-center justify-content-between p-12 radius-8 bg-neutral-50 border w-100">
+                                    <div>
+                                        <div class="fw-semibold text-primary-light text-sm" data-i18n="form.status">Center Status</div>
+                                        <div class="text-secondary-light text-xs mt-2">Enable or disable this center</div>
+                                    </div>
+                                    <div class="form-check form-switch switch-primary ms-16 mb-0">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               name="is_active" id="is_active" {% if center.is_active %}checked{% endif %}>
                                     </div>
                                 </div>
                             </div>
+                            {% endif %}
+
                         </div>
-                        {% endif %}
                     </div>
-                    
-                    <!-- ── Payme Integration Section ─────────────────────────── -->
-                    {% if center %}
-                    <div class="row gy-3 mt-8">
-                        <div class="col-12 mt-16">
-                            <h6 class="text-md fw-semibold mb-16 pb-8 border-bottom">
-                                <iconify-icon icon="mdi:credit-card-check" class="me-2"></iconify-icon>
-                                <span data-i18n="form.paymeIntegration">Payme Integration</span>
-                            </h6>
-                        </div>
 
-                        <!-- Toggle: any authorized editor can switch Payme on/off -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.paymeEnabled">
-                                Enable Payme Card Payments
-                            </label>
-                            <div class="form-check form-switch switch-primary d-flex align-items-center gap-3">
-                                <input class="form-check-input" type="checkbox" role="switch"
-                                       name="payme_enabled" id="payme_enabled"
-                                       {% if center.payme_enabled %}checked{% endif %}>
-                                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="payme_enabled" data-i18n="form.paymeEnabledHint">
-                                    When enabled, bot users pay via Payme checkout instead of uploading a receipt
-                                </label>
+                    <!-- ══════════════════════════════════════════════════════ -->
+                    <!-- §2  Bot Configuration                                  -->
+                    <!-- ══════════════════════════════════════════════════════ -->
+                    <div class="mb-28">
+                        <div class="d-flex align-items-center gap-8 mb-16 pb-8 border-bottom">
+                            <div class="w-28-px h-28-px radius-6 bg-info-100 d-flex align-items-center justify-content-center flex-shrink-0">
+                                <iconify-icon icon="mdi:robot" class="text-info-600 text-md"></iconify-icon>
                             </div>
+                            <h6 class="text-md fw-semibold mb-0" data-i18n="form.botConfiguration">Bot Configuration</h6>
                         </div>
+                        <div class="row gy-16">
 
-                        {% if request.user.is_superuser %}
-                        <!-- Per-center Merchant ID (superuser only) -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                <span data-i18n="form.paymeMerchantId">Payme Merchant ID</span>
-                                <span class="text-warning-600 ms-2" data-bs-toggle="tooltip" title="Only superadmin can edit this field">
-                                    <iconify-icon icon="mdi:shield-lock"></iconify-icon>
-                                </span>
-                            </label>
-                            <input type="text" name="payme_merchant_id" class="form-control radius-8"
-                                   value="{{ center.payme_merchant_id|default:'' }}"
-                                   placeholder="Leave blank to use global setting">
-                            <small class="text-secondary-light" data-i18n="form.paymeMerchantIdHint">
-                                Override the global <code>PAYME_MERCHANT_ID</code> for this center only
-                            </small>
-                        </div>
+                            <!-- Token + Username side-by-side -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    <span data-i18n="form.botToken">Bot Token</span>
+                                    <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Superadmin only"></iconify-icon>
+                                </label>
+                                {% if request.user.is_superuser %}
+                                <input type="text" name="bot_token" class="form-control radius-8 font-monospace text-sm"
+                                       value="{% if center %}{{ center.bot_token|default:'' }}{% endif %}"
+                                       placeholder="123456:ABC-DEF...">
+                                <small class="text-secondary-light">Get this from @BotFather on Telegram</small>
+                                {% else %}
+                                <input type="text" class="form-control radius-8 bg-neutral-100"
+                                       value="{% if center and center.bot_token %}••••••••{% endif %}" disabled readonly>
+                                {% endif %}
+                            </div>
 
-                        <!-- Per-center Secret Key (superuser only) -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                <span data-i18n="form.paymeSecretKey">Payme Secret Key</span>
-                                <span class="text-warning-600 ms-2" data-bs-toggle="tooltip" title="Only superadmin can edit this field">
-                                    <iconify-icon icon="mdi:shield-lock"></iconify-icon>
-                                </span>
-                            </label>
-                            <input type="password" name="payme_secret_key" id="payme_secret_key"
-                                   class="form-control radius-8"
-                                   value="{{ center.payme_secret_key|default:'' }}"
-                                   placeholder="Leave blank to use global setting"
-                                   autocomplete="new-password">
-                            <small class="text-secondary-light" data-i18n="form.paymeSecretKeyHint">
-                                Override the global <code>PAYME_SECRET_KEY</code> for this center only
-                            </small>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.botUsername">Bot Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-neutral-100 text-secondary-light">@</span>
+                                    <input type="text" name="bot_username" class="form-control radius-8"
+                                           value="{% if center %}{{ center.bot_username|default:'' }}{% endif %}"
+                                           placeholder="my_bot">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.companyOrdersChannel">Orders Channel ID</label>
+                                <input type="text" name="company_orders_channel_id" class="form-control radius-8 font-monospace text-sm"
+                                       value="{% if center %}{{ center.company_orders_channel_id|default:'' }}{% endif %}"
+                                       placeholder="-1001234567890">
+                                <small class="text-secondary-light">Orders are forwarded here</small>
+                            </div>
+
+                            <!-- Web App URL + Webhook bar combined -->
+                            <div class="col-12">
+                                <div class="p-16 radius-8 bg-neutral-50 border">
+                                    <div class="d-flex align-items-center gap-16 flex-wrap">
+                                        <!-- Web App URL -->
+                                        <div class="flex-grow-1" style="min-width:220px">
+                                            <div class="text-xs fw-semibold text-secondary-light mb-6">
+                                                <iconify-icon icon="mdi:cellphone-link" class="me-1"></iconify-icon>
+                                                <span data-i18n="form.botWebAppUrl">Bot Web App URL</span>
+                                                <span class="fw-normal ms-1">(BotFather → Bot Settings → Menu Button)</span>
+                                            </div>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" id="bot-webapp-url" class="form-control bg-base font-monospace text-xs"
+                                                       value="{% if center and center.subdomain %}https://{{ center.subdomain }}.{{ main_domain }}/webapp/{% endif %}"
+                                                       readonly placeholder="Set a subdomain first">
+                                                <button type="button" class="btn btn-outline-secondary" id="copy-webapp-url-btn"
+                                                        onclick="copyWebAppUrl()" title="Copy URL">
+                                                    <iconify-icon icon="mdi:content-copy"></iconify-icon>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {% if center and center.bot_token and request.user.is_superuser %}
+                                        <div class="vr d-none d-lg-block"></div>
+                                        <!-- Webhook Status -->
+                                        <div class="d-flex align-items-center gap-12 flex-wrap">
+                                            <div>
+                                                <div class="fw-semibold text-sm mb-2">
+                                                    <iconify-icon icon="mdi:webhook" class="me-1"></iconify-icon>
+                                                    <span data-i18n="form.webhookStatus">Webhook Status</span>
+                                                </div>
+                                                <p class="text-xs text-secondary-light mb-0" id="webhook-status">Click "Check" to view status</p>
+                                            </div>
+                                            <div class="d-flex gap-8">
+                                                <button type="button" class="btn btn-outline-info btn-sm radius-8" onclick="checkWebhook()">
+                                                    <iconify-icon icon="mdi:information" class="me-1"></iconify-icon><span data-i18n="form.checkStatus">Check</span>
+                                                </button>
+                                                <button type="button" class="btn btn-success btn-sm radius-8" onclick="setupWebhook()">
+                                                    <iconify-icon icon="mdi:check" class="me-1"></iconify-icon><span data-i18n="form.activate">Activate</span>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm radius-8" onclick="removeWebhook()">
+                                                    <iconify-icon icon="mdi:close" class="me-1"></iconify-icon><span data-i18n="form.deactivate">Deactivate</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
-                        {% endif %}
+                    </div>
+
+                    <!-- ══════════════════════════════════════════════════════ -->
+                    <!-- §3  Payme Integration                                  -->
+                    <!-- ══════════════════════════════════════════════════════ -->
+                    {% if center %}
+                    <div class="mb-28">
+                        <div class="d-flex align-items-center gap-8 mb-16 pb-8 border-bottom">
+                            <div class="w-28-px h-28-px radius-6 bg-success-100 d-flex align-items-center justify-content-center flex-shrink-0">
+                                <iconify-icon icon="mdi:credit-card-check" class="text-success-600 text-md"></iconify-icon>
+                            </div>
+                            <h6 class="text-md fw-semibold mb-0">Payme Integration</h6>
+                        </div>
+                        <div class="row gy-16">
+
+                            <!-- Enable toggle + Sandbox toggle side by side -->
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center justify-content-between p-12 radius-8 bg-neutral-50 border h-100">
+                                    <div>
+                                        <div class="fw-semibold text-primary-light text-sm">Enable Payme Payments</div>
+                                        <div class="text-secondary-light text-xs mt-2">Users pay via Payme checkout instead of uploading a receipt</div>
+                                    </div>
+                                    <div class="form-check form-switch switch-primary ms-16 mb-0">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               name="payme_enabled" id="payme_enabled"
+                                               {% if center.payme_enabled %}checked{% endif %}>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if request.user.is_superuser %}
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center justify-content-between p-12 radius-8 bg-warning-50 border border-warning-200 h-100">
+                                    <div>
+                                        <div class="fw-semibold text-warning-700 text-sm">
+                                            <iconify-icon icon="mdi:flask-outline" class="me-1"></iconify-icon>
+                                            Sandbox Mode
+                                            <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Superadmin only"></iconify-icon>
+                                        </div>
+                                        <div class="text-secondary-light text-xs mt-2">
+                                            <strong>ON</strong> → <code>test.paycom.uz</code> (sandbox key)<br>
+                                            <strong>OFF</strong> → <code>checkout.paycom.uz</code> (prod key)
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch switch-warning ms-16 mb-0">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               name="payme_sandbox" id="payme_sandbox"
+                                               {% if center.payme_sandbox %}checked{% endif %}>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Merchant ID + Webhook URL side by side -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    Payme Merchant ID
+                                    <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Superadmin only"></iconify-icon>
+                                </label>
+                                <input type="text" name="payme_merchant_id" class="form-control radius-8 font-monospace text-sm"
+                                       value="{{ center.payme_merchant_id|default:'' }}"
+                                       placeholder="64e6b8a7d1bf3f80ab123456">
+                                <small class="text-secondary-light">From <a href="https://merchant.payme.uz" target="_blank" class="text-primary-600">merchant.payme.uz</a></small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    <iconify-icon icon="mdi:webhook" class="me-1"></iconify-icon>
+                                    Webhook Callback URL
+                                    <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Superadmin only"></iconify-icon>
+                                </label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control radius-8 bg-neutral-50 font-monospace text-sm"
+                                           id="payme-webhook-url-id"
+                                           value="https://{{ main_domain }}/payme/webhook/{{ center.id }}/"
+                                           readonly>
+                                    <button type="button" class="btn btn-outline-secondary px-12"
+                                            onclick="copyPaymeWebhook('payme-webhook-url-id')" title="Copy">
+                                        <iconify-icon icon="mdi:content-copy"></iconify-icon>
+                                    </button>
+                                </div>
+                                <small class="text-secondary-light">Paste into your Payme merchant cabinet</small>
+                            </div>
+
+                            <!-- Both secret keys side by side -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    <iconify-icon icon="mdi:flask-outline" class="text-warning-600 me-1"></iconify-icon>
+                                    Sandbox Secret Key
+                                    <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Superadmin only"></iconify-icon>
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" name="payme_secret_key" id="payme_secret_key"
+                                           class="form-control radius-8"
+                                           value="{{ center.payme_secret_key|default:'' }}"
+                                           placeholder="Sandbox key" autocomplete="new-password">
+                                    <button type="button" class="btn btn-outline-secondary px-12"
+                                            onclick="togglePaymeKey('payme_secret_key','payme-key-eye-sandbox')" title="Show / hide">
+                                        <iconify-icon icon="mdi:eye" id="payme-key-eye-sandbox"></iconify-icon>
+                                    </button>
+                                </div>
+                                <small class="text-secondary-light">Active when Sandbox Mode is <strong>ON</strong></small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                    <iconify-icon icon="mdi:check-decagram" class="text-success-600 me-1"></iconify-icon>
+                                    Production Secret Key
+                                    <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Superadmin only"></iconify-icon>
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" name="payme_secret_key_prod" id="payme_secret_key_prod"
+                                           class="form-control radius-8"
+                                           value="{{ center.payme_secret_key_prod|default:'' }}"
+                                           placeholder="Production key" autocomplete="new-password">
+                                    <button type="button" class="btn btn-outline-secondary px-12"
+                                            onclick="togglePaymeKey('payme_secret_key_prod','payme-key-eye-prod')" title="Show / hide">
+                                        <iconify-icon icon="mdi:eye" id="payme-key-eye-prod"></iconify-icon>
+                                    </button>
+                                </div>
+                                <small class="text-secondary-light">Active when Sandbox Mode is <strong>OFF</strong></small>
+                            </div>
+
+                            {% endif %}
+
+                        </div>
                     </div>
                     {% endif %}
 
-                    <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
-                        <a href="{% url 'center_list' %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8" data-i18n="common.cancel">
-                            Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8">
-                            <span data-i18n="{% if center %}form.updateCenter{% else %}form.createCenter{% endif %}">{% if center %}Update{% else %}Create{% endif %} Center</span>
+                    <!-- ── Actions ───────────────────────────────────────── -->
+                    <div class="d-flex align-items-center justify-content-end gap-12 pt-16 border-top">
+                        <a href="{% url 'center_list' %}" class="btn btn-outline-secondary radius-8 px-24" data-i18n="common.cancel">Cancel</a>
+                        <button type="submit" class="btn btn-primary radius-8 px-32">
+                            <iconify-icon icon="mdi:content-save" class="me-1"></iconify-icon>
+                            <span data-i18n="{% if center %}form.updateCenter{% else %}form.createCenter{% endif %}">{% if center %}Update Center{% else %}Create Center{% endif %}</span>
                         </button>
                     </div>
+
                 </form>
             </div>
         </div>
     </div>
 </div>
-
 {% if request.user.is_superuser %}
 <!-- Create User Modal -->
 <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
@@ -333,36 +411,32 @@
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                                 <span data-i18n="form.username">Username</span> <span class="text-danger">*</span>
                             </label>
-                            <input type="text" name="username" id="new_username" class="form-control radius-8" 
-                                   data-i18n-placeholder="form.enterUsername" placeholder="Enter username" required>
+                            <input type="text" name="username" id="new_username" class="form-control radius-8"
+                                   placeholder="Enter username" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                <span data-i18n="form.email">Email</span>
-                            </label>
-                            <input type="email" name="email" id="new_email" class="form-control radius-8" 
-                                   data-i18n-placeholder="form.enterEmail" placeholder="Enter email">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.email">Email</label>
+                            <input type="email" name="email" id="new_email" class="form-control radius-8"
+                                   placeholder="Enter email">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                                 <span data-i18n="form.firstName">First Name</span> <span class="text-danger">*</span>
                             </label>
-                            <input type="text" name="first_name" id="new_first_name" class="form-control radius-8" 
-                                   data-i18n-placeholder="form.enterFirstName" placeholder="Enter first name" required>
+                            <input type="text" name="first_name" id="new_first_name" class="form-control radius-8"
+                                   placeholder="Enter first name" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                                <span data-i18n="form.lastName">Last Name</span>
-                            </label>
-                            <input type="text" name="last_name" id="new_last_name" class="form-control radius-8" 
-                                   data-i18n-placeholder="form.enterLastName" placeholder="Enter last name">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.lastName">Last Name</label>
+                            <input type="text" name="last_name" id="new_last_name" class="form-control radius-8"
+                                   placeholder="Enter last name">
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                                 <span data-i18n="form.password">Password</span> <span class="text-danger">*</span>
                             </label>
-                            <input type="password" name="password" id="new_password" class="form-control radius-8" 
-                                   data-i18n-placeholder="form.enterPassword" placeholder="Enter password" required minlength="6">
+                            <input type="password" name="password" id="new_password" class="form-control radius-8"
+                                   placeholder="Enter password" required minlength="6">
                             <small class="text-secondary-light" data-i18n="form.minSixCharacters">Minimum 6 characters</small>
                         </div>
                     </div>
@@ -386,6 +460,31 @@
 <script>
 // CSRF token for all AJAX requests
 const csrfToken = '{{ csrf_token }}';
+
+function copyPaymeWebhook(elId) {
+    const el = document.getElementById(elId || 'payme-webhook-url-id');
+    if (!el) return;
+    navigator.clipboard.writeText(el.value).then(() => {
+        const btn = el.nextElementSibling;
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<iconify-icon icon="mdi:check"></iconify-icon>';
+        btn.classList.replace('btn-outline-secondary', 'btn-success');
+        setTimeout(() => { btn.innerHTML = orig; btn.classList.replace('btn-success', 'btn-outline-secondary'); }, 1800);
+    });
+}
+
+function togglePaymeKey(inputId, eyeId) {
+    const inp = document.getElementById(inputId || 'payme_secret_key');
+    const eye = document.getElementById(eyeId || 'payme-key-eye-sandbox');
+    if (!inp) return;
+    if (inp.type === 'password') {
+        inp.type = 'text';
+        eye.setAttribute('icon', 'mdi:eye-off');
+    } else {
+        inp.type = 'password';
+        eye.setAttribute('icon', 'mdi:eye');
+    }
+}
 </script>
 
 <script>

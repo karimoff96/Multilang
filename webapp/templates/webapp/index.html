@@ -548,13 +548,23 @@ textarea { resize: none; height: 80px; }
       <div class="pay-radio"><div class="pay-radio-dot"></div></div>
     </div>
 
-    <!-- Card info (shown when card is selected) -->
+    <!-- Card info (shown when card is selected + payme NOT enabled) -->
     <div id="card-info-block" style="display:none">
       <div class="gap-sm"></div>
       <div class="card-info-box">
         <div class="card-info-label" id="pay-card-info-label">Transfer to this card</div>
         <div class="card-number" id="pay-card-number">—</div>
         <div class="card-holder" id="pay-card-holder"></div>
+      </div>
+    </div>
+
+    <!-- Payme block (shown when card is selected + payme IS enabled) -->
+    <div id="payme-info-block" style="display:none">
+      <div class="gap-sm"></div>
+      <div class="card-info-box" style="text-align:center;padding:16px 12px">
+        <div style="font-size:28px;margin-bottom:6px">💳</div>
+        <div class="card-info-label" id="pay-payme-label">Pay via Payme</div>
+        <div style="font-size:13px;color:var(--hint);margin-top:4px" id="pay-payme-hint">You will be redirected to Payme secure checkout after confirming the order.</div>
       </div>
     </div>
 
@@ -1814,9 +1824,18 @@ function selectPayment(type) {
   document.getElementById("pay-cash").classList.toggle("selected", type === "cash");
   document.getElementById("pay-card").classList.toggle("selected", type === "card");
 
-  const cardBlock = document.getElementById("card-info-block");
-  const hasCard = S.cardInfo && S.cardInfo.bank_card;
-  cardBlock.style.display = (type === "card" && hasCard) ? "" : "none";
+  const paymeEnabled = S.center && S.center.payme_enabled;
+  const cardBlock  = document.getElementById("card-info-block");
+  const paymeBlock = document.getElementById("payme-info-block");
+
+  if (type === "card" && paymeEnabled) {
+    paymeBlock.style.display = "";
+    cardBlock.style.display  = "none";
+  } else {
+    const hasCard = S.cardInfo && S.cardInfo.bank_card;
+    cardBlock.style.display  = (type === "card" && hasCard) ? "" : "none";
+    paymeBlock.style.display = "none";
+  }
 }
 
 // ── Submit order ──────────────────────────────────────────────────────────────
@@ -1840,7 +1859,12 @@ async function submitOrder() {
     if (res.ok) {
       S.submitResult = res;
       tg.HapticFeedback.notificationOccurred("success");
-      if (S.paymentType === "card") {
+      if (S.paymentType === "card" && res.payme_checkout_url) {
+        // Payme-enabled center: open Payme checkout in browser
+        tg.openLink(res.payme_checkout_url);
+        buildSuccessScreen(res);
+        showScreen("success", false);
+      } else if (S.paymentType === "card") {
         buildReceiptScreen(res);
         showScreen("receipt");
       } else {

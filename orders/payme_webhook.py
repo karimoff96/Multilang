@@ -70,6 +70,15 @@ class PaymeWebhookView(View):
     http_method_names = ["post", "options"]
 
     def post(self, request, *args, **kwargs):
+        # center_id baked into URL (per-center endpoint) takes priority;
+        # fall back to request.center set by SubdomainMiddleware so that
+        # {subdomain}.multilang.uz/payme/webhook/ also resolves correctly.
+        url_center_id = kwargs.get("center_id")
+        if not url_center_id:
+            req_center = getattr(request, "center", None)
+            if req_center is not None:
+                url_center_id = req_center.pk
+
         rpc_id = None
         try:
             payload = json.loads(request.body.decode() or "{}")
@@ -80,10 +89,14 @@ class PaymeWebhookView(View):
             logger.error("Payme: invalid JSON: %s", exc)
             return JsonResponse(_rpc_error(-32602, "Invalid params", rpc_id), status=200)
 
-        # Auth check: look up per-center secret key when possible, fall back to global
+        # Auth check: Payme sends "Authorization: Basic base64('Paycom:{SECRET_KEY}')"
+        # Must run BEFORE any method logic — Payme tests auth with empty/bad accounts.
         provided_auth = request.headers.get("Authorization", "")
-        expected = self._resolve_secret_key(params)
-        if expected and expected not in provided_auth:
+        expected_key = self._resolve_secret_key(params, url_center_id)
+        if not expected_key:
+            # No key configured at all — deny to prevent unauthenticated access
+            return JsonResponse(_rpc_error(-32504, "Unauthorized", rpc_id), status=200)
+        if not self._check_auth(provided_auth, expected_key):
             return JsonResponse(_rpc_error(-32504, "Unauthorized", rpc_id), status=200)
 
         try:
@@ -99,6 +112,8 @@ class PaymeWebhookView(View):
                 return JsonResponse(self._check_transaction(params, rpc_id), status=200)
             if method == "GetStatement":
                 return JsonResponse(self._get_statement(params, rpc_id), status=200)
+            if method == "ChangePassword":
+                return JsonResponse(self._change_password(params, rpc_id, url_center_id), status=200)
 
             return JsonResponse(_rpc_error(-32601, "Method not found", rpc_id), status=200)
         except Exception as exc:
@@ -109,24 +124,64 @@ class PaymeWebhookView(View):
     # Internal helpers
     # ------------------------------------------------------------------
     @staticmethod
-    def _resolve_secret_key(params):
+    def _check_auth(provided_auth: str, expected_key: str) -> bool:
         """
-        Return the Payme secret key to validate the incoming request.
-
-        Tries to look up the order in the params and return its center's
-        per-center secret key.  Falls back to the global PAYME_SECRET_KEY
-        if the center has no per-center key configured.
+        Validate Payme's Authorization header.
+        Payme sends: Authorization: Basic base64("Paycom:{SECRET_KEY}")
         """
+        import base64 as _b64
         try:
-            from organizations.models import TranslationCenter
+            scheme, _, encoded = provided_auth.partition(" ")
+            if scheme.lower() != "basic" or not encoded:
+                return False
+            decoded = _b64.b64decode(encoded.strip()).decode("utf-8", errors="replace")
+            # decoded should be "Paycom:{SECRET_KEY}"
+            return decoded == f"Paycom:{expected_key}"
+        except Exception:
+            return False
+
+    @staticmethod
+    def _resolve_secret_key(params, url_center_id=None):
+        """
+        Return the Payme secret key for this request.
+
+        Priority:
+        1. Center ID baked into the webhook URL  → direct DB lookup, always works
+           (even for GetStatement / ChangePassword / bad-auth tests with empty account)
+        2. order_id in params.account            → look up order → center key
+        3. Global PAYME_SECRET_KEY setting       → fallback
+        """
+        def _key_for_center(c):
+            """Return the active key based on sandbox mode."""
+            if c.payme_sandbox:
+                return c.payme_secret_key or None
+            return c.payme_secret_key_prod or c.payme_secret_key or None
+
+        # 1. Per-center URL: always resolvable regardless of params content
+        if url_center_id:
+            try:
+                from organizations.models import TranslationCenter
+                center = TranslationCenter.objects.get(pk=url_center_id)
+                key = _key_for_center(center)
+                if key:
+                    return key
+            except Exception:
+                pass
+
+        # 2. Resolve from order in params (shared URL fallback)
+        try:
             order_id = _validate_account(params)
             order = Order.objects.select_related("branch__center").get(pk=order_id)
             center = order.branch.center if (order.branch and order.branch.center) else None
-            if center and center.payme_secret_key:
-                return center.payme_secret_key
+            if center:
+                key = _key_for_center(center)
+                if key:
+                    return key
         except Exception:
             pass
-        return settings.PAYME_SECRET_KEY
+
+        # 3. Global fallback
+        return settings.PAYME_SECRET_KEY or None
 
     # ------------------------------------------------------------------
     # Methods
@@ -351,6 +406,47 @@ class PaymeWebhookView(View):
             )
 
         return _rpc_result({"transactions": data}, rpc_id)
+
+    def _change_password(self, params, rpc_id, url_center_id=None):
+        """
+        Payme may rotate the secret key at any time by calling ChangePassword.
+        Save the new password to the center's payme_secret_key so subsequent
+        requests continue to authenticate correctly.
+        """
+        new_password = (params.get("password") or "").strip()
+        if not new_password:
+            return _rpc_error(-32602, "Invalid params", rpc_id)
+
+        saved = False
+        if url_center_id:
+            try:
+                from organizations.models import TranslationCenter
+                center = TranslationCenter.objects.get(pk=url_center_id)
+                # Save into the currently-active key field
+                if center.payme_sandbox:
+                    center.payme_secret_key = new_password
+                    center.save(update_fields=["payme_secret_key", "updated_at"])
+                else:
+                    center.payme_secret_key_prod = new_password
+                    center.save(update_fields=["payme_secret_key_prod", "updated_at"])
+                saved = True
+                logger.info(
+                    "Payme: ChangePassword saved for center %s (sandbox=%s)",
+                    url_center_id, center.payme_sandbox,
+                )
+            except Exception as exc:
+                logger.error("Payme: ChangePassword DB update failed: %s", exc)
+
+        if not saved:
+            # Shared URL fallback: update global setting is not possible at runtime,
+            # log the new key so an admin can update .env manually.
+            logger.warning(
+                "Payme: ChangePassword received but no center resolved — "
+                "update PAYME_SECRET_KEY in .env manually. new_key_preview=%s...",
+                new_password[:6],
+            )
+
+        return _rpc_result({}, rpc_id)
 
 
 payme_webhook_view = PaymeWebhookView.as_view()

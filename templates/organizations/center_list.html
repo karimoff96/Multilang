@@ -70,11 +70,45 @@
                             {% endif %}
                         </div>
                         
-                        <div class="d-flex gap-12 mb-16">
+                        <div class="d-flex gap-12 mb-12">
                             <div class="bg-neutral-100 rounded-8 p-12 text-center flex-grow-1">
                                 <h6 class="text-lg fw-semibold mb-4">{{ center.branch_count }}</h6>
                                 <span class="text-xs text-secondary-light" data-i18n="common.branches">Branches</span>
                             </div>
+                        </div>
+
+                        <!-- Feature badges -->
+                        <div class="d-flex flex-wrap gap-6 mb-12">
+                            {% if center.payme_enabled %}
+                                {% if center.payme_sandbox %}
+                                <span class="badge bg-warning-focus text-warning-700 d-inline-flex align-items-center gap-4 px-8 py-4 radius-4 text-xs fw-medium"
+                                      data-bs-toggle="tooltip" title="Payme enabled — Sandbox mode (test.paycom.uz)">
+                                    <iconify-icon icon="mdi:credit-card-check"></iconify-icon>
+                                    Payme
+                                    <span class="badge bg-warning-600 text-white ms-2 px-6 py-2 radius-4" style="font-size:10px">SANDBOX</span>
+                                </span>
+                                {% else %}
+                                <span class="badge bg-success-focus text-success-700 d-inline-flex align-items-center gap-4 px-8 py-4 radius-4 text-xs fw-medium"
+                                      data-bs-toggle="tooltip" title="Payme enabled — Production mode (checkout.paycom.uz)">
+                                    <iconify-icon icon="mdi:credit-card-check"></iconify-icon>
+                                    Payme
+                                    <span class="badge bg-success-600 text-white ms-2 px-6 py-2 radius-4" style="font-size:10px">LIVE</span>
+                                </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-neutral-200 text-secondary-light d-inline-flex align-items-center gap-4 px-8 py-4 radius-4 text-xs"
+                                      data-bs-toggle="tooltip" title="Payme payments not enabled">
+                                    <iconify-icon icon="mdi:credit-card-off-outline"></iconify-icon>
+                                    Payme off
+                                </span>
+                            {% endif %}
+                            {% if center.bot_token %}
+                                <span class="badge bg-info-focus text-info-700 d-inline-flex align-items-center gap-4 px-8 py-4 radius-4 text-xs fw-medium"
+                                      data-bs-toggle="tooltip" title="Telegram bot configured">
+                                    <iconify-icon icon="mdi:robot-outline"></iconify-icon>
+                                    Bot
+                                </span>
+                            {% endif %}
                         </div>
                         
                         <div class="d-flex align-items-center justify-content-between pt-16 border-top">

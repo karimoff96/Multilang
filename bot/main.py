@@ -5184,6 +5184,45 @@ def handle_payment_card_selection(call):
             if _u and _u.center:
                 center = _u.center
 
+        # Sandbox gate: Payme sandbox mode is for webhook testing only — use manual receipt flow
+        if center and center.payme_sandbox:
+            order.payment_type = "card"
+            order.status = "payment_pending"
+            order.is_active = False
+            order.save(update_fields=["payment_type", "status", "is_active", "updated_at"])
+            _uid = call.from_user.id
+            if _uid not in uploaded_files:
+                uploaded_files[_uid] = {}
+            uploaded_files[_uid]["pending_payment_order_id"] = str(order.id)
+            update_user_step(_uid, STEP_AWAITING_RECEIPT)
+            from accounts.models import AdditionalInfo
+            _u2 = get_bot_user(call.message.chat.id)
+            additional_info = AdditionalInfo.get_for_user(_u2) if _u2 else None
+            text = get_text("payment_title", language) + "\n\n"
+            text += f"{get_text('payment_order', language)}: #{order.get_order_number()}\n"
+            text += f"{get_text('payment_remaining', language)}: <b>{order.total_due:,.0f} so'm</b>\n\n"
+            if additional_info and additional_info.bank_card:
+                text += f"{get_text('payment_card_number', language)}:\n<code>{additional_info.bank_card}</code>\n"
+                if additional_info.holder_name:
+                    text += f"{get_text('payment_card_holder', language)}: {additional_info.holder_name}\n"
+                text += "\n"
+            else:
+                text += get_text("payment_card_not_found", language) + "\n\n"
+            text += get_text("payment_send_receipt", language)
+            markup = types.InlineKeyboardMarkup()
+            markup.add(types.InlineKeyboardButton(
+                text=get_text("btn_back_to_orders", language),
+                callback_data="cancel_payment",
+            ))
+            bot.edit_message_text(
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+                text=text,
+                parse_mode="HTML",
+                reply_markup=markup,
+            )
+            return
+
         # Build center-specific return URL (user redirect after checkout)
         main_domain = getattr(settings, "MAIN_DOMAIN", "multilang.uz")
         sub = center.subdomain if (center and center.subdomain) else None
@@ -5725,7 +5764,7 @@ def handle_card_payment_message(message, language):
             if user.center:
                 center = user.center
 
-        if center and center.payme_enabled:
+        if center and center.payme_enabled and not center.payme_sandbox:
             # Build per-center return URL
             main_domain = getattr(settings, "MAIN_DOMAIN", "multilang.uz")
             sub = center.subdomain if center.subdomain else None

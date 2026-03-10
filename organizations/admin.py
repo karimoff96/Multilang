@@ -26,7 +26,7 @@ class TranslationCenterAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
         ('Payme Integration', {
-            'fields': ('payme_enabled', 'payme_merchant_id', 'payme_secret_key'),
+            'fields': ('payme_enabled', 'payme_sandbox', 'payme_merchant_id', 'payme_secret_key'),
             'classes': ('collapse',),
             'description': (
                 'Enable Payme card payment for this center. '

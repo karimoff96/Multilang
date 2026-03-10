@@ -94,8 +94,29 @@ def build_payme_checkout_url(order, language="uz", callback_url=None, center=Non
         params.append(f"callback={quote(cb, safe=':/')}")
 
     token = base64.b64encode(";".join(params).encode()).decode()
-    # Payme checkout uses checkout.paycom.uz for hosted page; sandbox/test relies on merchant/test credentials
-    base_url = "https://checkout.paycom.uz"
+    use_sandbox = bool(center and getattr(center, "payme_sandbox", False))
+    base_url = "https://test.paycom.uz" if use_sandbox else "https://checkout.paycom.uz"
     checkout_url = f"{base_url}/{token}"
     logger.info("Generated Payme checkout URL for order %s", order.id)
     return checkout_url, amount_tiyin, detail_encoded
+
+
+def check_payme_config(center):
+    """
+    Validate that the center is fully configured for **live** Payme payments.
+    Returns (True, None) on success, (False, reason_str) on failure.
+    Does not make network calls.
+    """
+    if not center:
+        return False, "No center"
+    if center.payme_sandbox:
+        return False, "Sandbox mode is active — Payme payments are disabled for real users"
+    merchant_id = (getattr(center, "payme_merchant_id", "") or "").strip()
+    if not merchant_id:
+        merchant_id = (getattr(settings, "PAYME_MERCHANT_ID", "") or "").strip()
+    if not merchant_id:
+        return False, "Payme Merchant ID not configured"
+    secret_key = (getattr(center, "payme_secret_key_prod", "") or "").strip()
+    if not secret_key:
+        return False, "Payme production secret key not configured"
+    return True, None
