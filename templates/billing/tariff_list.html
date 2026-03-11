@@ -99,18 +99,24 @@
                     {% if not tariff.is_trial %}
                     <div class="mb-20">
                         <h6 class="text-secondary-light mb-12">{% trans "Pricing Options" %}:</h6>
-                        {% for pricing in tariff.pricing.all %}
-                        <div class="d-flex justify-content-between align-items-center mb-8">
-                            <span class="text-sm">{{ pricing.duration_months }} {% trans "month(s)" %}</span>
-                            <span class="fw-semibold text-primary-600">
-                                {{ pricing.price|intspace }} {{ pricing.currency }}
-                            </span>
-                        </div>
-                        {% empty %}
-                        <p class="text-sm text-warning-600 mb-0">
-                            <i class="ri-alert-line"></i> {% trans "No pricing defined" %}
-                        </p>
-                        {% endfor %}
+                        {% if tariff.show_prices %}
+                            {% for pricing in tariff.pricing.all %}
+                            <div class="d-flex justify-content-between align-items-center mb-8">
+                                <span class="text-sm">{{ pricing.duration_months }} {% trans "month(s)" %}</span>
+                                <span class="fw-semibold text-primary-600" data-bs-toggle="tooltip" title="{{ pricing.price|intspace }} {{ pricing.currency }}">
+                                    {{ pricing.price|compact_number }} {{ pricing.currency }}
+                                </span>
+                            </div>
+                            {% empty %}
+                            <p class="text-sm text-secondary-light mb-0">
+                                <i class="ri-phone-line me-1"></i> {% trans "Contact admin for more information" %}
+                            </p>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-sm text-secondary-light mb-0">
+                                <i class="ri-phone-line me-1"></i> {% trans "Contact admin for more information" %}
+                            </p>
+                        {% endif %}
                     </div>
                     {% else %}
                     <div class="alert alert-info-50 text-info-600 p-12 mb-20">

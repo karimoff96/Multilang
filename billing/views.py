@@ -111,7 +111,6 @@ def subscription_create(request, center_id):
         payment_method = request.POST.get('payment_method')
         transaction_id = request.POST.get('transaction_id')
         notes = request.POST.get('notes', '')
-        auto_renew = request.POST.get('auto_renew') == 'on'
         
         try:
             if not tariff_id:
@@ -146,46 +145,65 @@ def subscription_create(request, center_id):
             
             # Check if center already has subscription
             if hasattr(center, 'subscription'):
-                # Cancel old subscription
-                old_sub = center.subscription
-                old_sub.status = Subscription.STATUS_CANCELLED
-                old_sub.save()
-                
+                # Center already has a subscription (OneToOneField — only one allowed).
+                # Update it in-place so the PK and full history are preserved.
+                subscription = center.subscription
+                old_info = f'{subscription.tariff.title} ({subscription.start_date} – {subscription.end_date})'
+
+                # Log the replacement under the EXISTING subscription record
                 SubscriptionHistory.objects.create(
-                    subscription=old_sub,
+                    subscription=subscription,
                     action='cancelled',
-                    description=_('Cancelled to create new subscription'),
+                    description=_('Replaced: ') + old_info,
                     performed_by=request.user
                 )
-            
-            # Create new subscription
-            subscription = Subscription.objects.create(
-                organization=center,
-                tariff=tariff,
-                pricing=pricing,
-                start_date=start_date,
-                status=status if not tariff.is_trial else Subscription.STATUS_ACTIVE,
-                amount_paid=amount_paid if amount_paid else None,
-                payment_method=payment_method or '',
-                transaction_id=transaction_id or '',
-                notes=notes,
-                auto_renew=auto_renew,
-                created_by=request.user
-            )
-            
-            if status == Subscription.STATUS_ACTIVE:
-                subscription.payment_date = date.today()
+
+                # Overwrite all mutable fields
+                subscription.tariff = tariff
+                subscription.pricing = pricing
+                subscription.start_date = start_date
+                subscription.end_date = None        # let save() auto-calculate
+                subscription.trial_end_date = None  # let save() handle trial
+                subscription.is_trial = tariff.is_trial
+                subscription.status = status if not tariff.is_trial else Subscription.STATUS_ACTIVE
+                subscription.amount_paid = amount_paid if amount_paid else None
+                subscription.payment_method = payment_method or ''
+                subscription.transaction_id = transaction_id or ''
+                subscription.notes = notes
+                subscription.auto_renew = False
+                subscription.created_by = request.user
+                subscription.payment_date = date.today() if status == Subscription.STATUS_ACTIVE else None
                 subscription.save()
-            
+            else:
+                # No existing subscription — create fresh
+                subscription = Subscription.objects.create(
+                    organization=center,
+                    tariff=tariff,
+                    pricing=pricing,
+                    start_date=start_date,
+                    status=status if not tariff.is_trial else Subscription.STATUS_ACTIVE,
+                    amount_paid=amount_paid if amount_paid else None,
+                    payment_method=payment_method or '',
+                    transaction_id=transaction_id or '',
+                    notes=notes,
+                    auto_renew=False,
+                    created_by=request.user
+                )
+
+                if status == Subscription.STATUS_ACTIVE:
+                    subscription.payment_date = date.today()
+                    subscription.save()
+
             SubscriptionHistory.objects.create(
                 subscription=subscription,
                 action='created',
-                description=_('Subscription created by superuser'),
+                description=_('Subscription assigned by superuser'),
                 performed_by=request.user
             )
-            
+
+            _invalidate_monitoring_cache()
             messages.success(request, _("Subscription created successfully!"))
-            return redirect('billing:subscription_list')
+            return redirect('billing:subscription_detail', pk=subscription.pk)
             
         except Exception as e:
             messages.error(request, f"Error creating subscription: {str(e)}")
@@ -291,7 +309,10 @@ def tariff_list(request):
         messages.error(request, _("Access denied. This feature is only available to superusers."))
         return redirect('dashboard')
     
-    tariffs = Tariff.objects.prefetch_related('pricing', 'features').all()
+    tariffs = Tariff.objects.prefetch_related(
+        Prefetch('pricing', queryset=TariffPricing.objects.filter(is_active=True)),
+        'features'
+    ).all()
     
     context = {
         'title': _('Tariff Plans'),
@@ -316,6 +337,7 @@ def tariff_create(request):
             description = request.POST.get('description', '')
             is_active = request.POST.get('is_active') == 'on'
             is_featured = request.POST.get('is_featured') == 'on'
+            show_prices = request.POST.get('show_prices') == 'on'
             is_trial = request.POST.get('is_trial') == 'on'
             trial_days = request.POST.get('trial_days') or None
             display_order = request.POST.get('display_order', 0)
@@ -332,6 +354,7 @@ def tariff_create(request):
                 description=description,
                 is_active=is_active,
                 is_featured=is_featured,
+                show_prices=show_prices,
                 is_trial=is_trial,
                 trial_days=trial_days,
                 display_order=display_order,
@@ -401,20 +424,15 @@ def tariff_edit(request, pk):
             tariff.title_ru = request.POST.get('title_ru', '')
             tariff.title_en = request.POST.get('title_en', '')
             
-            # Also set base title to default language (Uzbek)
-            tariff.title = request.POST.get('title_uz', '')
-            
             tariff.slug = request.POST.get('slug')
             
             tariff.description_uz = request.POST.get('description_uz', '')
             tariff.description_ru = request.POST.get('description_ru', '')
             tariff.description_en = request.POST.get('description_en', '')
             
-            # Also set base description to default language (Uzbek)
-            tariff.description = request.POST.get('description_uz', '')
-            
             tariff.is_active = request.POST.get('is_active') == 'on'
             tariff.is_featured = request.POST.get('is_featured') == 'on'
+            tariff.show_prices = request.POST.get('show_prices') == 'on'
             tariff.is_trial = request.POST.get('is_trial') == 'on'
             tariff.trial_days = request.POST.get('trial_days') or None
             tariff.display_order = request.POST.get('display_order', 0)
@@ -507,10 +525,23 @@ def tariff_edit(request, pk):
                     )
                     existing_ids.add(new_pricing.id)
             
-            # Delete pricing options that were removed
-            # Only delete if at least one pricing row was submitted (safety guard)
+            # Delete or deactivate pricing options that were removed
+            def _soft_delete(pricing_qs):
+                for pricing in pricing_qs:
+                    # If a pricing plan has subscriptions, keep it but mark inactive
+                    if pricing.subscriptions.exists():
+                        pricing.is_active = False
+                        pricing.save()
+                    else:
+                        pricing.delete()
+
             if pricing_durations:
-                tariff.pricing.exclude(id__in=existing_ids).delete()
+                # User submitted pricing rows; delete everything not in the submitted set
+                obsolete = tariff.pricing.exclude(id__in=existing_ids)
+                _soft_delete(obsolete)
+            else:
+                # User removed all rows on the page; wipe all pricing for this tariff
+                _soft_delete(tariff.pricing.all())
             
             messages.success(request, _("Tariff updated successfully!"))
             return redirect('billing:tariff_list')
@@ -780,7 +811,10 @@ def subscription_renew(request, pk):
             subscription.payment_method = payment_method
             subscription.transaction_id = transaction_id
             subscription.notes = notes
-            
+            # A renewed subscription is always a paid one — clear any trial flags
+            subscription.is_trial = False
+            subscription.trial_end_date = None
+
             if amount_paid:
                 subscription.amount_paid = amount_paid
                 subscription.payment_date = datetime.now()

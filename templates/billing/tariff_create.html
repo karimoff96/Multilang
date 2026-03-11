@@ -103,6 +103,16 @@
                     <div class="col-md-3">
                         <label class="form-label d-block mb-8">&nbsp;</label>
                         <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="show_prices" id="showPrices" checked>
+                            <label class="form-check-label" for="showPrices">
+                                {% trans "Show Prices" %}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label d-block mb-8">&nbsp;</label>
+                        <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="is_trial" id="isTrial" onchange="toggleTrialSettings()">
                             <label class="form-check-label" for="isTrial">
                                 {% trans "Is Trial" %}

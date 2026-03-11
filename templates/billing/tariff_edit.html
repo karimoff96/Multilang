@@ -63,7 +63,7 @@
 
     <div class="card">
         <div class="card-body p-24">
-            <form method="post">
+            <form method="post" novalidate>
                 {% csrf_token %}
                 
                 <!-- Basic Information -->
@@ -163,6 +163,13 @@
                                        {% if tariff.is_featured %}checked{% endif %}>
                                 <label class="form-check-label fw-medium" for="isFeatured">
                                     <i class="ri-star-line text-warning-600 me-1"></i>{% trans "Featured" %}
+                                </label>
+                            </div>
+                            <div class="form-check mb-0">
+                                <input class="form-check-input" type="checkbox" name="show_prices" id="showPrices"
+                                       {% if tariff.show_prices %}checked{% endif %}>
+                                <label class="form-check-label fw-medium" for="showPrices">
+                                    <i class="ri-price-tag-3-line text-primary-600 me-1"></i>{% trans "Show Prices" %}
                                 </label>
                             </div>
                             <div class="form-check mb-0">
@@ -785,7 +792,7 @@
                                 <div class="col-md-2">
                                     <label class="form-label text-sm">{% trans "Monthly Price" %}</label>
                                     <input type="number" name="pricing_monthly[]" class="form-control monthly-price bg-neutral-100"
-                                           value="{{ pricing.get_monthly_price|stringformat:'.2f' }}" step="0.01" min="0" required readonly tabindex="-1">
+                                           value="{{ pricing.get_monthly_price|stringformat:'.2f' }}" step="0.01" min="0" readonly tabindex="-1">
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label text-sm">{% trans "Total Price" %}</label>
@@ -800,13 +807,17 @@
                                     </select>
                                 </div>
                                 <div class="col-md-1 d-flex align-items-end">
-                                    <button type="button" class="btn btn-outline-danger-600 w-100" onclick="removePricing(this)" title="{% trans 'Remove' %}">
-                                        <i class="ri-delete-bin-line"></i>
+                                    <button type="button" class="btn btn-outline-danger-600 w-100 remove-pricing-btn" title="{% trans 'Remove' %}">
+                                        <i class="ri-delete-bin-line" style="pointer-events:none;"></i>
                                     </button>
                                 </div>
                                 <input type="hidden" name="pricing_id[]" value="{{ pricing.id }}">
                             </div>
                             {% endfor %}
+                        </div>
+                        <div id="pricingEmptyState" class="text-center py-16 text-secondary-light {% if tariff.pricing.exists %}d-none{% endif %}">
+                            <i class="ri-price-tag-3-line" style="font-size:32px;opacity:.4;"></i>
+                            <p class="mb-0 mt-8 text-sm">{% trans "No pricing options. Add one below or leave empty to show 'Contact admin' on the public page." %}</p>
                         </div>
                         
                         <button type="button" class="btn btn-outline-primary-600 mt-2" onclick="addPricing()">
@@ -924,6 +935,8 @@ function updateAllPrices() {
 
 function addPricing() {
     const container = document.getElementById('pricingContainer');
+    const emptyState = document.getElementById('pricingEmptyState');
+    emptyState.classList.add('d-none');
     const newRow = `
         <div class="row g-3 mb-3 pricing-row rounded px-2 pt-2 pb-3" style="background: var(--bg-neutral-100, rgba(0,0,0,.04)); border: 1px solid var(--border-neutral-200, rgba(0,0,0,.1));">
             <div class="col-md-2">
@@ -939,11 +952,11 @@ function addPricing() {
             </div>
             <div class="col-md-2">
                 <label class="form-label text-sm">{% trans "Monthly Price" %}</label>
-                <input type="number" name="pricing_monthly[]" class="form-control monthly-price bg-neutral-100" step="0.01" min="0" required readonly>
+                <input type="number" name="pricing_monthly[]" class="form-control monthly-price bg-neutral-100" step="0.01" min="0" readonly>
             </div>
             <div class="col-md-3">
                 <label class="form-label text-sm">{% trans "Total Price" %}</label>
-                <input type="number" name="pricing_total[]" class="form-control total-price bg-neutral-100" step="0.01" min="0" required readonly>
+                <input type="number" name="pricing_total[]" class="form-control total-price" step="0.01" min="0" placeholder="e.g. 299000">
             </div>
             <div class="col-md-2">
                 <label class="form-label text-sm">{% trans "Currency" %}</label>
@@ -953,8 +966,8 @@ function addPricing() {
                 </select>
             </div>
             <div class="col-md-1 d-flex align-items-end">
-                <button type="button" class="btn btn-outline-danger-600 w-100" onclick="removePricing(this)" title="Remove">
-                    <i class="ri-delete-bin-line"></i>
+                <button type="button" class="btn btn-outline-danger-600 w-100 remove-pricing-btn" title="Remove">
+                    <i class="ri-delete-bin-line" style="pointer-events:none;"></i>
                 </button>
             </div>
             <input type="hidden" name="pricing_id[]" value="">
@@ -966,10 +979,22 @@ function addPricing() {
 
 function removePricing(button) {
     const row = button.closest('.pricing-row');
-    if (document.querySelectorAll('.pricing-row').length > 1 || confirm('{% trans "Remove this pricing option?" %}')) {
-        row.remove();
+    if (!row) return;
+    row.remove();
+    const container = document.getElementById('pricingContainer');
+    const emptyState = document.getElementById('pricingEmptyState');
+    if (container.querySelectorAll('.pricing-row').length === 0) {
+        emptyState.classList.remove('d-none');
     }
 }
+
+// Delegated click handler for delete buttons (works even on dynamically added rows)
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('pricingContainer').addEventListener('click', function (e) {
+        const btn = e.target.closest('.remove-pricing-btn');
+        if (btn) removePricing(btn);
+    });
+});
 
 // Initialize base price from first pricing option on load
 document.addEventListener('DOMContentLoaded', function() {
