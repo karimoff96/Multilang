@@ -189,6 +189,13 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_filter = ['status', 'tariff', 'auto_renew', 'start_date', 'end_date']
     search_fields = ['organization__name', 'transaction_id']
     readonly_fields = ['created_at', 'updated_at']
+
+    def get_readonly_fields(self, request, obj=None):
+        """end_date is auto-calculated when pricing is set; make it read-only to prevent drift."""
+        ro = list(self.readonly_fields)
+        if obj and obj.pricing:
+            ro.append('end_date')
+        return ro
     
     fieldsets = (
         (_('Organization'), {

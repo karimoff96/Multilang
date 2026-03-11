@@ -4,318 +4,336 @@
 {% load translation_filters %}
 
 {% block content %}
-<!-- Center Header -->
-<div class="card radius-12 mb-24">
-    <div class="card-body p-24">
-        <div class="d-flex align-items-start justify-content-between flex-wrap gap-16">
-            <div class="d-flex align-items-center gap-16">
-                {% if center.logo %}
-                <img src="{{ center.logo.url }}" alt="{{ center.name }}" class="w-80-px h-80-px rounded-12 object-fit-cover">
-                {% else %}
-                <div class="w-80-px h-80-px rounded-12 bg-primary-100 d-flex justify-content-center align-items-center flex-shrink-0">
-                    <iconify-icon icon="fluent:building-multiple-20-filled" class="text-primary-600" style="font-size: 40px;"></iconify-icon>
-                </div>
-                {% endif %}
-                <div>
-                    <h4 class="text-xl fw-semibold mb-8">{{ center.name }}</h4>
-                    {% if center.subdomain %}
-                    <div class="mb-8">
-                        <a href="https://{{ center.subdomain }}.{{ main_domain }}" target="_blank" 
-                           class="d-inline-flex align-items-center gap-4 text-primary-600 text-decoration-none bg-primary-50 px-12 py-4 radius-4">
-                            <iconify-icon icon="mdi:web" class="text-lg"></iconify-icon>
-                            <span class="text-sm fw-medium">{{ center.subdomain }}.{{ main_domain }}</span>
-                            <iconify-icon icon="mdi:open-in-new" class="text-xs"></iconify-icon>
-                        </a>
-                    </div>
-                    {% endif %}
-                    <div class="d-flex flex-wrap gap-16 text-sm text-secondary-light">
-                        {% if center.phone %}
-                        <span class="d-flex align-items-center gap-4">
-                            <iconify-icon icon="fluent:call-20-filled" class="text-lg text-success-600"></iconify-icon>
-                            {{ center.phone }}
-                        </span>
-                        {% endif %}
-                        {% if center.email %}
-                        <span class="d-flex align-items-center gap-4">
-                            <iconify-icon icon="fluent:mail-20-filled" class="text-lg text-info-600"></iconify-icon>
-                            {{ center.email }}
-                        </span>
-                        {% endif %}
-                    </div>
-                    {% if center.address %}
-                    <p class="text-sm text-secondary-light mt-8 mb-0 d-flex align-items-center">
-                        <iconify-icon icon="fluent:location-20-filled" class="text-lg me-4 flex-shrink-0 text-danger-600"></iconify-icon>
-                        {{ center.address }}
-                    </p>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="d-flex gap-8">
-                <span class="{% if center.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-16 py-8 radius-8 text-sm fw-medium">
-                    {% if center.is_active %}<span data-i18n="common.active">Active</span>{% else %}<span data-i18n="common.inactive">Inactive</span>{% endif %}
+
+<!-- ── Header card ───────────────────────────────────────────── -->
+<div class="card radius-12 mb-20">
+    <div class="card-body px-20 py-16 d-flex align-items-center gap-16">
+
+        {# Logo #}
+        {% if center.logo %}
+        <img src="{{ center.logo.url }}" alt="{{ center.name }}"
+             class="w-52-px h-52-px rounded-12 object-fit-cover flex-shrink-0">
+        {% else %}
+        <div class="w-52-px h-52-px rounded-12 bg-primary-100 d-flex align-items-center justify-content-center flex-shrink-0">
+            <iconify-icon icon="fluent:building-multiple-20-filled" class="text-primary-600 text-2xl"></iconify-icon>
+        </div>
+        {% endif %}
+
+        {# Center info #}
+        <div class="flex-grow-1 min-w-0">
+            <div class="d-flex align-items-center flex-wrap gap-8 mb-4">
+                <h5 class="fw-bold mb-0 text-primary-light">{{ center.name }}</h5>
+                <span class="badge {% if center.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-8 py-3 radius-4 text-xs">
+                    {% if center.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
                 </span>
-                <a href="{% url 'center_edit' center.id %}" class="btn btn-outline-primary-600 btn-sm px-16 py-8 radius-8 d-inline-flex align-items-center">
-                    <iconify-icon icon="fluent:edit-20-filled" class="me-4"></iconify-icon>
-                    <span data-i18n="common.edit">Edit</span>
-                </a>
-                {% if center.location_url %}
-                <a href="{{ center.location_url }}" target="_blank" class="btn btn-outline-info-600 btn-sm px-16 py-8 radius-8 d-inline-flex align-items-center">
-                    <iconify-icon icon="fluent:map-20-filled" class="me-4"></iconify-icon>
-                    <span data-i18n="common.map">Map</span>
+                {% if center.subdomain %}
+                <a href="https://{{ center.subdomain }}.{{ main_domain }}" target="_blank"
+                   class="d-inline-flex align-items-center gap-4 text-primary-600 text-xs bg-primary-50 px-8 py-3 radius-4 text-decoration-none">
+                    <iconify-icon icon="mdi:web" class="text-base"></iconify-icon>
+                    {{ center.subdomain }}.{{ main_domain }}
+                    <iconify-icon icon="mdi:open-in-new" style="font-size:10px;"></iconify-icon>
                 </a>
                 {% endif %}
             </div>
-        </div>
-    </div>
-</div>
-
-{% if request.user.is_superuser %}
-<div class="card radius-12 mb-24 bg-info-50 border border-info-100">
-    <div class="card-body p-20 d-flex flex-wrap gap-16 align-items-center justify-content-between">
-        <div class="d-flex align-items-center gap-12">
-            <div class="w-48-px h-48-px rounded-8 bg-info-100 d-flex justify-content-center align-items-center">
-                <iconify-icon icon="solar:wallet-money-bold" class="text-info-600 text-2xl"></iconify-icon>
-            </div>
-            <div>
-                <h6 class="text-md fw-semibold mb-4">Subscription</h6>
-                {% if subscription_info.tariff %}
-                <p class="mb-0 text-sm text-secondary-light">
-                    Tariff: <span class="fw-semibold text-info-700">{{ subscription_info.tariff }}</span>
-                    {% if subscription_info.duration_months %}
-                    · {{ subscription_info.duration_months }} mo
-                    {% endif %}
-                    {% if subscription_info.is_trial %}
-                    · Trial
-                    {% endif %}
-                </p>
-                {% else %}
-                <p class="mb-0 text-sm text-secondary-light">No subscription found</p>
+            <div class="d-flex flex-wrap gap-16 text-xs text-secondary-light">
+                {% if center.phone %}
+                <span class="d-flex align-items-center gap-4">
+                    <iconify-icon icon="fluent:call-20-filled" class="text-success-600"></iconify-icon>{{ center.phone }}
+                </span>
                 {% endif %}
-                {% if subscription_info.lifetime_days is not None %}
-                <p class="mb-0 text-xs text-secondary-light">Center age: {{ subscription_info.lifetime_days }} days</p>
+                {% if center.email %}
+                <span class="d-flex align-items-center gap-4">
+                    <iconify-icon icon="fluent:mail-20-filled" class="text-info-600"></iconify-icon>{{ center.email }}
+                </span>
+                {% endif %}
+                {% if center.address %}
+                <span class="d-flex align-items-center gap-4">
+                    <iconify-icon icon="fluent:location-20-filled" class="text-danger-600"></iconify-icon>{{ center.address }}
+                </span>
                 {% endif %}
             </div>
         </div>
-        <div class="d-flex flex-wrap gap-12 align-items-center text-sm">
-            {% if subscription_info.tariff %}
-            <span class="badge bg-info-focus text-info-700 px-12 py-8 radius-8">Status: {{ subscription_info.status|title }}</span>
-            {% if subscription_info.days_remaining is not None %}
-            <span class="badge bg-success-focus text-success-700 px-12 py-8 radius-8">{{ subscription_info.days_remaining }} days left</span>
+
+        {# Subscription mini-card (right side) #}
+        {% if subscription_info and subscription_info.tariff %}
+        <div class="flex-shrink-0 border-start ps-20" style="min-width:300px;max-width:380px;">
+            <!-- Plan name + status row -->
+            <div class="d-flex align-items-center gap-8 mb-8">
+                <div class="w-28-px h-28-px rounded-6 {% if request.user.is_superuser %}bg-info-100{% else %}bg-warning-100{% endif %} d-flex align-items-center justify-content-center flex-shrink-0">
+                    <iconify-icon icon="{% if request.user.is_superuser %}solar:wallet-money-bold{% else %}solar:crown-star-bold{% endif %}"
+                                  class="{% if request.user.is_superuser %}text-info-600{% else %}text-warning-600{% endif %} text-sm"></iconify-icon>
+                </div>
+                <span class="fw-bold text-sm text-primary-light">{{ subscription_info.tariff }}</span>
+                {% if subscription_info.is_trial %}<span class="badge bg-warning-focus text-warning-600 text-xs px-6 py-2">{% trans "Trial" %}</span>{% endif %}
+                <span class="badge text-xs px-6 py-2 radius-4 {% if subscription_info.status == 'active' %}bg-success-focus text-success-main{% elif subscription_info.status == 'expired' %}bg-danger-focus text-danger-main{% else %}bg-warning-focus text-warning-main{% endif %}">{{ subscription_info.status|title }}</span>
+                {% if subscription_info.lifetime_days is not None and request.user.is_superuser %}
+                <span class="text-xs text-secondary-light ms-auto">{{ subscription_info.lifetime_days }}d old</span>
+                {% endif %}
+            </div>
+            <!-- Dates + countdown + progress -->
+            {% if subscription_info.elapsed_pct is not None %}
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <span class="text-xs text-secondary-light">{{ subscription_info.start_date|date:"d M Y" }} — {{ subscription_info.end_date|date:"d M Y" }}</span>
+                <span class="text-xs fw-semibold {% if subscription_info.days_remaining > 30 %}text-success-main{% elif subscription_info.days_remaining > 14 %}text-warning-main{% else %}text-danger-main{% endif %}">{{ subscription_info.days_remaining }}d {% trans "left" %}</span>
+            </div>
+            <div class="progress mb-8" style="height:3px;border-radius:3px;">
+                <div class="progress-bar {% if subscription_info.elapsed_pct < 70 %}bg-success-main{% elif subscription_info.elapsed_pct < 90 %}bg-warning-main{% else %}bg-danger-main{% endif %}" style="width:{{ subscription_info.elapsed_pct }}%;border-radius:3px;"></div>
+            </div>
             {% endif %}
-            {% if subscription_info.end_date %}
-            <span class="badge bg-neutral-100 text-neutral-700 px-12 py-8 radius-8">Renews: {{ subscription_info.end_date }}</span>
-            {% endif %}
-            {% if subscription_info.start_date and subscription_info.period_days %}
-            <span class="badge bg-primary-focus text-primary-700 px-12 py-8 radius-8">Period: {{ subscription_info.period_days }} days</span>
-            {% endif %}
-            {% if subscription_info.auto_renew %}
-            <span class="badge bg-info-100 text-info-700 px-12 py-8 radius-8">Auto-renew on</span>
-            {% else %}
-            <span class="badge bg-warning-focus text-warning-700 px-12 py-8 radius-8">Auto-renew off</span>
-            {% endif %}
-            {% else %}
-            <span class="badge bg-warning-focus text-warning-700 px-12 py-8 radius-8">Add a subscription to track renewals</span>
+            <!-- Usage limits (hover reveals current/max) -->
+            <div class="d-flex gap-8">
+                <!-- Branches -->
+                <div class="sub-limit-pill d-flex align-items-center gap-4 px-8 py-4 radius-6 bg-primary-50 cursor-pointer"
+                     style="transition:all .18s ease;"
+                     data-label="{% trans 'Branches' %}"
+                     data-current="{{ total_branches }}"
+                     data-max="{% if subscription_info.max_branches %}{{ subscription_info.max_branches }}{% else %}∞{% endif %}">
+                    <iconify-icon icon="fluent:building-multiple-20-filled" class="text-primary-600 text-sm"></iconify-icon>
+                    <span class="pill-default text-xs fw-semibold text-primary-600">{{ total_branches }}<span class="text-primary-400 fw-normal">/{% if subscription_info.max_branches %}{{ subscription_info.max_branches }}{% else %}∞{% endif %}</span></span>
+                    <span class="pill-hover text-xs fw-semibold text-primary-600 d-none">{% trans "Branches" %}: {{ total_branches }}/{% if subscription_info.max_branches %}{{ subscription_info.max_branches }}{% else %}∞{% endif %}</span>
+                </div>
+                <!-- Staff -->
+                <div class="sub-limit-pill d-flex align-items-center gap-4 px-8 py-4 radius-6 bg-success-50 cursor-pointer"
+                     style="transition:all .18s ease;"
+                     data-label="{% trans 'Staff' %}"
+                     data-current="{{ total_staff }}"
+                     data-max="{% if subscription_info.max_staff %}{{ subscription_info.max_staff }}{% else %}∞{% endif %}">
+                    <iconify-icon icon="fluent:people-team-20-filled" class="text-success-600 text-sm"></iconify-icon>
+                    <span class="pill-default text-xs fw-semibold text-success-600">{{ total_staff }}<span class="text-success-400 fw-normal">/{% if subscription_info.max_staff %}{{ subscription_info.max_staff }}{% else %}∞{% endif %}</span></span>
+                    <span class="pill-hover text-xs fw-semibold text-success-600 d-none">{% trans "Staff" %}: {{ total_staff }}/{% if subscription_info.max_staff %}{{ subscription_info.max_staff }}{% else %}∞{% endif %}</span>
+                </div>
+                <!-- Orders/mo -->
+                <div class="sub-limit-pill d-flex align-items-center gap-4 px-8 py-4 radius-6 bg-warning-50 cursor-pointer"
+                     style="transition:all .18s ease;"
+                     data-label="{% trans 'Orders/mo' %}"
+                     data-current="{{ total_orders }}"
+                     data-max="{% if subscription_info.max_monthly_orders %}{{ subscription_info.max_monthly_orders }}{% else %}∞{% endif %}">
+                    <iconify-icon icon="fluent:document-bullet-list-20-filled" class="text-warning-600 text-sm"></iconify-icon>
+                    <span class="pill-default text-xs fw-semibold text-warning-600">{{ total_orders }}<span class="text-warning-400 fw-normal">/{% if subscription_info.max_monthly_orders %}{{ subscription_info.max_monthly_orders }}{% else %}∞{% endif %}/mo</span></span>
+                    <span class="pill-hover text-xs fw-semibold text-warning-600 d-none">{% trans "Orders/mo" %}: {{ total_orders }}/{% if subscription_info.max_monthly_orders %}{{ subscription_info.max_monthly_orders }}{% else %}∞{% endif %}</span>
+                </div>
+            </div>
+        </div>
+        {% elif subscription_info %}
+        <div class="flex-shrink-0 border-start ps-16 d-flex align-items-center gap-6">
+            <iconify-icon icon="solar:danger-triangle-bold" class="text-warning-600"></iconify-icon>
+            <span class="text-xs text-warning-600">{% trans "No subscription" %}</span>
+        </div>
+        {% endif %}
+
+        <style>
+        .sub-limit-pill .pill-hover { display: none !important; }
+        .sub-limit-pill:hover .pill-default { display: none !important; }
+        .sub-limit-pill:hover .pill-hover { display: inline !important; }
+        .sub-limit-pill:hover { opacity: .9; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+        </style>
+
+        {# Action buttons #}
+        <div class="d-flex flex-column gap-6 flex-shrink-0">
+            <a href="{% url 'center_edit' center.id %}"
+               class="btn btn-sm btn-outline-primary-600 px-12 py-6 radius-8 d-inline-flex align-items-center gap-6">
+                <iconify-icon icon="fluent:edit-20-filled"></iconify-icon>{% trans "Edit" %}
+            </a>
+            {% if center.location_url %}
+            <a href="{{ center.location_url }}" target="_blank"
+               class="btn btn-sm btn-outline-info-600 px-12 py-6 radius-8 d-inline-flex align-items-center gap-6">
+                <iconify-icon icon="fluent:map-20-filled"></iconify-icon>{% trans "Map" %}
+            </a>
             {% endif %}
         </div>
+
     </div>
 </div>
-{% endif %}
 
-<!-- Stats Cards -->
-<div class="row gy-4 mb-24">
+<!-- ── Stats row ─────────────────────────────────────────────── -->
+<div class="row gy-12 mb-20">
     <div class="col-xxl-2 col-lg-4 col-sm-6">
-        <a href="#branches-section" class="card p-16 radius-12 h-100 text-decoration-none hover-border-primary-600 transition-all">
-            <div class="d-flex align-items-center gap-12">
-                <div class="w-48-px h-48-px bg-primary-100 rounded-8 d-flex justify-content-center align-items-center">
-                    <iconify-icon icon="fluent:building-multiple-20-filled" class="text-primary-600 text-2xl"></iconify-icon>
+        <a href="#sec-branches" class="card p-14 radius-12 h-100 text-decoration-none hover-border-primary-600 transition-all">
+            <div class="d-flex align-items-center gap-10">
+                <div class="w-40-px h-40-px bg-primary-100 rounded-8 d-flex align-items-center justify-content-center flex-shrink-0">
+                    <iconify-icon icon="fluent:building-multiple-20-filled" class="text-primary-600 text-xl"></iconify-icon>
                 </div>
                 <div>
                     <h6 class="text-lg fw-semibold mb-0">{{ total_branches }}</h6>
-                    <span class="text-sm text-secondary-light" data-i18n="sidebar.branches">Branches</span>
+                    <span class="text-xs text-secondary-light">{% trans "Branches" %}</span>
                 </div>
             </div>
         </a>
     </div>
     <div class="col-xxl-2 col-lg-4 col-sm-6">
-        <a href="#staff-section" class="card p-16 radius-12 h-100 text-decoration-none hover-border-success-600 transition-all">
-            <div class="d-flex align-items-center gap-12">
-                <div class="w-48-px h-48-px bg-success-100 rounded-8 d-flex justify-content-center align-items-center">
-                    <iconify-icon icon="fluent:people-team-20-filled" class="text-success-600 text-2xl"></iconify-icon>
+        <a href="#sec-staff" class="card p-14 radius-12 h-100 text-decoration-none hover-border-success-600 transition-all">
+            <div class="d-flex align-items-center gap-10">
+                <div class="w-40-px h-40-px bg-success-100 rounded-8 d-flex align-items-center justify-content-center flex-shrink-0">
+                    <iconify-icon icon="fluent:people-team-20-filled" class="text-success-600 text-xl"></iconify-icon>
                 </div>
                 <div>
                     <h6 class="text-lg fw-semibold mb-0">{{ total_staff }}</h6>
-                    <span class="text-sm text-secondary-light" data-i18n="common.staff">Staff</span>
+                    <span class="text-xs text-secondary-light">{% trans "Staff" %}</span>
                 </div>
             </div>
         </a>
     </div>
     <div class="col-xxl-2 col-lg-4 col-sm-6">
-        <a href="#categories-section" class="card p-16 radius-12 h-100 text-decoration-none hover-border-warning-600 transition-all">
-            <div class="d-flex align-items-center gap-12">
-                <div class="w-48-px h-48-px bg-warning-100 rounded-8 d-flex justify-content-center align-items-center">
-                    <iconify-icon icon="fluent:grid-20-filled" class="text-warning-600 text-2xl"></iconify-icon>
+        <a href="#sec-categories" class="card p-14 radius-12 h-100 text-decoration-none hover-border-warning-600 transition-all">
+            <div class="d-flex align-items-center gap-10">
+                <div class="w-40-px h-40-px bg-warning-100 rounded-8 d-flex align-items-center justify-content-center flex-shrink-0">
+                    <iconify-icon icon="fluent:grid-20-filled" class="text-warning-600 text-xl"></iconify-icon>
                 </div>
                 <div>
                     <h6 class="text-lg fw-semibold mb-0">{{ total_categories }}</h6>
-                    <span class="text-sm text-secondary-light" data-i18n="sidebar.categories">Categories</span>
+                    <span class="text-xs text-secondary-light">{% trans "Categories" %}</span>
                 </div>
             </div>
         </a>
     </div>
     <div class="col-xxl-2 col-lg-4 col-sm-6">
-        <a href="{% url 'productList' %}?center={{ center.id }}" class="card p-16 radius-12 h-100 text-decoration-none hover-border-info-600 transition-all">
-            <div class="d-flex align-items-center gap-12">
-                <div class="w-48-px h-48-px bg-info-100 rounded-8 d-flex justify-content-center align-items-center">
-                    <iconify-icon icon="fluent:box-20-filled" class="text-info-600 text-2xl"></iconify-icon>
+        <a href="{% url 'productList' %}?center={{ center.id }}" class="card p-14 radius-12 h-100 text-decoration-none hover-border-info-600 transition-all">
+            <div class="d-flex align-items-center gap-10">
+                <div class="w-40-px h-40-px bg-info-100 rounded-8 d-flex align-items-center justify-content-center flex-shrink-0">
+                    <iconify-icon icon="fluent:box-20-filled" class="text-info-600 text-xl"></iconify-icon>
                 </div>
                 <div>
                     <h6 class="text-lg fw-semibold mb-0">{{ total_products }}</h6>
-                    <span class="text-sm text-secondary-light" data-i18n="sidebar.products">Products</span>
+                    <span class="text-xs text-secondary-light">{% trans "Products" %}</span>
                 </div>
             </div>
         </a>
     </div>
     <div class="col-xxl-2 col-lg-4 col-sm-6">
-        <a href="#orders-section" class="card p-16 radius-12 h-100 text-decoration-none hover-border-cyan-600 transition-all">
-            <div class="d-flex align-items-center gap-12">
-                <div class="w-48-px h-48-px bg-cyan-100 rounded-8 d-flex justify-content-center align-items-center">
-                    <iconify-icon icon="fluent:document-bullet-list-20-filled" class="text-cyan-600 text-2xl"></iconify-icon>
+        <a href="{% url 'orders:ordersList' %}?center={{ center.id }}" class="card p-14 radius-12 h-100 text-decoration-none hover-border-cyan-600 transition-all">
+            <div class="d-flex align-items-center gap-10">
+                <div class="w-40-px h-40-px bg-cyan-100 rounded-8 d-flex align-items-center justify-content-center flex-shrink-0">
+                    <iconify-icon icon="fluent:document-bullet-list-20-filled" class="text-cyan-600 text-xl"></iconify-icon>
                 </div>
                 <div>
                     <h6 class="text-lg fw-semibold mb-0">{{ total_orders }}</h6>
-                    <span class="text-sm text-secondary-light" data-i18n="sidebar.orders">Orders</span>
+                    <span class="text-xs text-secondary-light">{% trans "Orders" %}</span>
                 </div>
             </div>
         </a>
     </div>
     <div class="col-xxl-2 col-lg-4 col-sm-6">
-        <a href="{% url 'usersList' %}?center={{ center.id }}" class="card p-16 radius-12 h-100 text-decoration-none hover-border-purple-600 transition-all">
-            <div class="d-flex align-items-center gap-12">
-                <div class="w-48-px h-48-px bg-purple-100 rounded-8 d-flex justify-content-center align-items-center">
-                    <iconify-icon icon="fluent:people-20-filled" class="text-purple-600 text-2xl"></iconify-icon>
+        <a href="{% url 'usersList' %}?center={{ center.id }}" class="card p-14 radius-12 h-100 text-decoration-none hover-border-purple-600 transition-all">
+            <div class="d-flex align-items-center gap-10">
+                <div class="w-40-px h-40-px bg-purple-100 rounded-8 d-flex align-items-center justify-content-center flex-shrink-0">
+                    <iconify-icon icon="fluent:people-20-filled" class="text-purple-600 text-xl"></iconify-icon>
                 </div>
                 <div>
                     <h6 class="text-lg fw-semibold mb-0">{{ total_customers }}</h6>
-                    <span class="text-sm text-secondary-light" data-i18n="sidebar.users">Customers</span>
+                    <span class="text-xs text-secondary-light">{% trans "Customers" %}</span>
                 </div>
             </div>
         </a>
     </div>
 </div>
 
-<!-- Branches Section -->
-<div id="branches-section" class="card radius-12 mb-24">
-    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
-        <h6 class="text-lg fw-semibold mb-0 d-flex align-items-center">
-            <iconify-icon icon="fluent:building-multiple-20-filled" class="me-8 text-primary-600"></iconify-icon>
-            <span data-i18n="sidebar.branches">Branches</span> ({{ total_branches }})
+<!-- ── Branches ──────────────────────────────────────────────── -->
+<div id="sec-branches" class="card radius-12 mb-20">
+    <div class="card-header border-bottom bg-base py-14 px-20 d-flex align-items-center justify-content-between">
+        <h6 class="text-md fw-semibold mb-0 d-flex align-items-center gap-8">
+            <iconify-icon icon="fluent:building-multiple-20-filled" class="text-primary-600"></iconify-icon>
+            {% trans "Branches" %} <span class="text-secondary-light fw-normal">({{ total_branches }})</span>
         </h6>
-        <a href="{% url 'branch_create_for_center' center.id %}" class="btn btn-primary btn-sm px-16 py-8 text-secondary-light radius-8 d-inline-flex align-items-center">
-            <iconify-icon icon="fluent:add-circle-20-filled" class="me-4"></iconify-icon>
-            <span data-i18n="common.addBranch">Add Branch</span>
+        <a href="{% url 'branch_create_for_center' center.id %}"
+           class="btn btn-primary btn-sm px-12 py-6 d-inline-flex align-items-center gap-6">
+            <iconify-icon icon="fluent:add-circle-20-filled"></iconify-icon>{% trans "Add Branch" %}
         </a>
     </div>
-    <div class="card-body p-24">
-        <div class="row gy-4">
+    <div class="card-body p-20">
+        <div class="row gy-12">
             {% for branch in branches %}
             <div class="col-xxl-4 col-lg-6">
-                <a href="{% url 'branch_detail' branch.id %}" class="card border radius-12 h-100 hover-border-primary-600 transition-all text-decoration-none">
-                    <div class="card-body p-20">
-                            <div class="d-flex align-items-start justify-content-between mb-16">
-                            <div class="d-flex align-items-center gap-12">
-                                <div class="w-48-px h-48-px rounded-8 {% if branch.is_main %}bg-warning-100{% else %}bg-primary-100{% endif %} d-flex justify-content-center align-items-center flex-shrink-0">
-                                    <iconify-icon icon="{% if branch.is_main %}fluent:star-20-filled{% else %}fluent:building-20-filled{% endif %}" class="{% if branch.is_main %}text-warning-600{% else %}text-primary-600{% endif %} text-xl"></iconify-icon>
+                <a href="{% url 'branch_detail' branch.id %}"
+                   class="card border radius-10 h-100 hover-border-primary-600 transition-all text-decoration-none">
+                    <div class="card-body p-16">
+                        <div class="d-flex align-items-center justify-content-between mb-10">
+                            <div class="d-flex align-items-center gap-10">
+                                <div class="w-34-px h-34-px rounded-8 {% if branch.is_main %}bg-warning-100{% else %}bg-primary-100{% endif %} d-flex align-items-center justify-content-center flex-shrink-0">
+                                    <iconify-icon icon="{% if branch.is_main %}fluent:star-20-filled{% else %}fluent:building-20-filled{% endif %}"
+                                                  class="{% if branch.is_main %}text-warning-600{% else %}text-primary-600{% endif %}"></iconify-icon>
                                 </div>
                                 <div>
-                                    <h6 class="text-md fw-semibold mb-4 text-primary-light">{{ branch.name }}</h6>
-                                    {% if branch.is_main %}
-                                    <span class="badge bg-warning-focus text-warning-600 text-xs" data-i18n="common.mainBranch">Main Branch</span>
-                                    {% endif %}
+                                    <h6 class="text-sm fw-semibold mb-0 text-primary-light">{{ branch.name }}</h6>
+                                    {% if branch.is_main %}<span class="badge bg-warning-focus text-warning-600 text-xs">{% trans "Main" %}</span>{% endif %}
                                 </div>
                             </div>
-                            <span class="{% if branch.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-12 py-4 radius-4 text-xs fw-medium">
-                                {% if branch.is_active %}<span data-i18n="common.active">Active</span>{% else %}<span data-i18n="common.inactive">Inactive</span>{% endif %}
+                            <span class="{% if branch.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-8 py-3 radius-4 text-xs fw-medium">
+                                {% if branch.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
                             </span>
                         </div>
-                        
                         {% if branch.region %}
-                        <div class="d-flex align-items-center gap-8 mb-8 text-secondary-light">
-                            <iconify-icon icon="fluent:location-20-filled" class="text-lg"></iconify-icon>
-                            <span class="text-sm">{{ branch.region.name }}{% if branch.district %}, {{ branch.district.name }}{% endif %}</span>
+                        <div class="d-flex align-items-center gap-6 text-xs text-secondary-light mb-10">
+                            <iconify-icon icon="fluent:location-20-filled"></iconify-icon>
+                            {{ branch.region.name }}{% if branch.district %}, {{ branch.district.name }}{% endif %}
                         </div>
                         {% endif %}
-                        
-                        <div class="d-flex gap-12 mt-16 pt-16 border-top">
-                            <div class="text-center flex-grow-1">
-                                <h6 class="text-md fw-semibold mb-0">{{ branch.staff_count }}</h6>
-                                <span class="text-xs text-secondary-light" data-i18n="common.staff">Staff</span>
+                        <div class="d-flex pt-10 border-top text-center">
+                            <div class="flex-grow-1">
+                                <span class="text-sm fw-semibold text-primary-light d-block lh-1 mb-2">{{ branch.staff_count }}</span>
+                                <span class="text-xs text-secondary-light">{% trans "Staff" %}</span>
                             </div>
-                            <div class="text-center flex-grow-1">
-                                <h6 class="text-md fw-semibold mb-0">{{ branch.customer_count }}</h6>
-                                <span class="text-xs text-secondary-light" data-i18n="sidebar.users">Customers</span>
+                            <div class="flex-grow-1 border-start">
+                                <span class="text-sm fw-semibold text-primary-light d-block lh-1 mb-2">{{ branch.customer_count }}</span>
+                                <span class="text-xs text-secondary-light">{% trans "Customers" %}</span>
                             </div>
-                            <div class="text-center flex-grow-1">
-                                <h6 class="text-md fw-semibold mb-0">{{ branch.order_count }}</h6>
-                                <span class="text-xs text-secondary-light" data-i18n="sidebar.orders">Orders</span>
+                            <div class="flex-grow-1 border-start">
+                                <span class="text-sm fw-semibold text-primary-light d-block lh-1 mb-2">{{ branch.order_count }}</span>
+                                <span class="text-xs text-secondary-light">{% trans "Orders" %}</span>
                             </div>
                         </div>
                     </div>
                 </a>
             </div>
             {% empty %}
-            <div class="col-12 text-center py-24">
-                <iconify-icon icon="fluent:building-20-filled" class="text-4xl text-secondary-light mb-8"></iconify-icon>
-                <p class="text-secondary-light mb-16" data-i18n="common.noBranchesYet">No branches yet</p>
-                <a href="{% url 'branch_create_for_center' center.id %}" class="btn btn-primary btn-sm" data-i18n="common.addBranch">Add Branch</a>
+            <div class="col-12 text-center py-32">
+                <iconify-icon icon="fluent:building-20-filled" class="text-4xl text-secondary-light d-block mb-8"></iconify-icon>
+                <p class="text-secondary-light mb-12 text-sm">{% trans "No branches yet" %}</p>
+                <a href="{% url 'branch_create_for_center' center.id %}" class="btn btn-primary btn-sm">{% trans "Add Branch" %}</a>
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
 
-<div class="row gy-4">
-    <!-- Staff Section -->
-    <div id="staff-section" class="col-xxl-6">
+<!-- ── Staff + Categories (2-col) ───────────────────────────── -->
+<div class="row gy-20 mb-20">
+    <div id="sec-staff" class="col-xxl-6">
         <div class="card radius-12 h-100">
-            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
-                <h6 class="text-lg fw-semibold mb-0 d-flex align-items-center">
-                    <iconify-icon icon="fluent:people-team-20-filled" class="me-8 text-success-600"></iconify-icon>
-                    <span data-i18n="common.staff">Staff</span> ({{ total_staff }})
+            <div class="card-header border-bottom bg-base py-14 px-20 d-flex align-items-center justify-content-between">
+                <h6 class="text-md fw-semibold mb-0 d-flex align-items-center gap-8">
+                    <iconify-icon icon="fluent:people-team-20-filled" class="text-success-600"></iconify-icon>
+                    {% trans "Staff" %} <span class="text-secondary-light fw-normal">({{ total_staff }})</span>
                 </h6>
-                <a href="{% url 'staff_list' %}?center={{ center.id }}" class="text-primary-600 text-sm" data-i18n="common.viewAll">View All</a>
+                <a href="{% url 'staff_list' %}?center={{ center.id }}" class="text-primary-600 text-xs d-inline-flex align-items-center gap-4">
+                    {% trans "View All" %}<iconify-icon icon="fluent:arrow-right-20-filled"></iconify-icon>
+                </a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base" data-i18n="table.name">Name</th>
-                                <th scope="col" class="bg-base" data-i18n="table.branch">Branch</th>
-                                <th scope="col" class="bg-base" data-i18n="table.role">Role</th>
+                                <th class="bg-base ps-20 text-xs">{% trans "Name" %}</th>
+                                <th class="bg-base text-xs">{% trans "Branch" %}</th>
+                                <th class="bg-base text-xs">{% trans "Role" %}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for member in staff|slice:":5" %}
+                            {% for member in staff|slice:":8" %}
                             <tr>
-                                <td class="bg-success-focus">
-                                    <div class="d-flex align-items-center">
-                                        <div class="w-40-px h-40-px rounded-circle bg-success-100 d-flex justify-content-center align-items-center me-12 flex-shrink-0">
-                                            <iconify-icon icon="fluent:person-20-filled" class="text-success-600 text-xl"></iconify-icon>
+                                <td class="bg-success-focus ps-20">
+                                    <div class="d-flex align-items-center gap-8">
+                                        <div class="w-28-px h-28-px rounded-circle bg-success-100 d-flex align-items-center justify-content-center flex-shrink-0">
+                                            <iconify-icon icon="fluent:person-20-filled" class="text-success-600 text-sm"></iconify-icon>
                                         </div>
-                                        <h6 class="text-md mb-0 fw-medium flex-grow-1">{{ member.user.get_full_name|default:member.user.username }}</h6>
+                                        <span class="text-sm">{{ member.user.get_full_name|default:member.user.username }}</span>
                                     </div>
                                 </td>
-                                <td class="bg-success-focus">
-                                    <a href="{% url 'branch_detail' member.branch.id %}" class="text-primary-600 fw-medium">{{ member.branch.name }}</a>
-                                </td>
-                                <td class="bg-success-focus">
-                                    <span class="badge bg-primary-focus text-primary-600">{{ member.role.name }}</span>
-                                </td>
+                                <td class="bg-success-focus"><a href="{% url 'branch_detail' member.branch.id %}" class="text-primary-600 text-sm">{{ member.branch.name }}</a></td>
+                                <td class="bg-success-focus"><span class="badge bg-primary-focus text-primary-600 text-xs">{{ member.role.name }}</span></td>
                             </tr>
                             {% empty %}
-                            <tr>
-                                <td colspan="3" class="text-center py-24 text-secondary-light bg-base" data-i18n="common.noStaffMembers">No staff members</td>
-                            </tr>
+                            <tr><td colspan="3" class="text-center py-24 text-secondary-light bg-base text-sm">{% trans "No staff members" %}</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -323,46 +341,41 @@
             </div>
         </div>
     </div>
-    
-    <!-- Categories Section -->
-    <div id="categories-section" class="col-xxl-6">
+
+    <div id="sec-categories" class="col-xxl-6">
         <div class="card radius-12 h-100">
-            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
-                <h6 class="text-lg fw-semibold mb-0 d-flex align-items-center">
-                    <iconify-icon icon="fluent:grid-20-filled" class="me-8 text-warning-600"></iconify-icon>
-                    <span data-i18n="sidebar.categories">Categories</span> ({{ total_categories }})
+            <div class="card-header border-bottom bg-base py-14 px-20 d-flex align-items-center justify-content-between">
+                <h6 class="text-md fw-semibold mb-0 d-flex align-items-center gap-8">
+                    <iconify-icon icon="fluent:grid-20-filled" class="text-warning-600"></iconify-icon>
+                    {% trans "Categories" %} <span class="text-secondary-light fw-normal">({{ total_categories }})</span>
                 </h6>
-                <a href="{% url 'categoryList' %}?center={{ center.id }}" class="text-primary-600 text-sm" data-i18n="common.viewAll">View All</a>
+                <a href="{% url 'categoryList' %}?center={{ center.id }}" class="text-primary-600 text-xs d-inline-flex align-items-center gap-4">
+                    {% trans "View All" %}<iconify-icon icon="fluent:arrow-right-20-filled"></iconify-icon>
+                </a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table colored-row-table mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" class="bg-base" data-i18n="table.category">Category</th>
-                                <th scope="col" class="bg-base" data-i18n="table.branch">Branch</th>
-                                <th scope="col" class="bg-base" data-i18n="table.status">Status</th>
+                                <th class="bg-base ps-20 text-xs">{% trans "Category" %}</th>
+                                <th class="bg-base text-xs">{% trans "Branch" %}</th>
+                                <th class="bg-base text-xs">{% trans "Status" %}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for category in categories|slice:":5" %}
+                            {% for category in categories|slice:":8" %}
                             <tr>
+                                <td class="bg-warning-focus ps-20"><a href="{% url 'categoryDetail' category.id %}" class="fw-medium text-primary-600 text-sm">{{ category.name }}</a></td>
+                                <td class="bg-warning-focus"><a href="{% url 'branch_detail' category.branch.id %}" class="text-primary-600 text-sm">{{ category.branch.name }}</a></td>
                                 <td class="bg-warning-focus">
-                                    <a href="{% url 'categoryDetail' category.id %}" class="fw-medium text-primary-600">{{ category.name }}</a>
-                                </td>
-                                <td class="bg-warning-focus">
-                                    <a href="{% url 'branch_detail' category.branch.id %}" class="text-primary-600">{{ category.branch.name }}</a>
-                                </td>
-                                <td class="bg-warning-focus">
-                                    <span class="{% if category.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-12 py-4 radius-4 text-xs fw-medium">
-                                        {% if category.is_active %}<span data-i18n="common.active">Active</span>{% else %}<span data-i18n="common.inactive">Inactive</span>{% endif %}
+                                    <span class="{% if category.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-8 py-3 radius-4 text-xs fw-medium">
+                                        {% if category.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
                                     </span>
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr>
-                                <td colspan="3" class="text-center py-24 text-secondary-light bg-base" data-i18n="common.noCategories">No categories</td>
-                            </tr>
+                            <tr><td colspan="3" class="text-center py-24 text-secondary-light bg-base text-sm">{% trans "No categories" %}</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -372,50 +385,44 @@
     </div>
 </div>
 
-<!-- Products Section -->
-<div id="products-section" class="card radius-12 mt-24">
-    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
-        <h6 class="text-lg fw-semibold mb-0 d-flex align-items-center">
-            <iconify-icon icon="fluent:box-20-filled" class="me-8 text-info-600"></iconify-icon>
-            <span data-i18n="sidebar.products">Products</span> ({{ total_products }})
+<!-- ── Products ──────────────────────────────────────────────── -->
+<div class="card radius-12 mb-20">
+    <div class="card-header border-bottom bg-base py-14 px-20 d-flex align-items-center justify-content-between">
+        <h6 class="text-md fw-semibold mb-0 d-flex align-items-center gap-8">
+            <iconify-icon icon="fluent:box-20-filled" class="text-info-600"></iconify-icon>
+            {% trans "Products" %} <span class="text-secondary-light fw-normal">({{ total_products }})</span>
         </h6>
-        <a href="{% url 'productList' %}?center={{ center.id }}" class="text-primary-600 text-sm" data-i18n="common.viewAll">View All</a>
+        <a href="{% url 'productList' %}?center={{ center.id }}" class="text-primary-600 text-xs d-inline-flex align-items-center gap-4">
+            {% trans "View All" %}<iconify-icon icon="fluent:arrow-right-20-filled"></iconify-icon>
+        </a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table colored-row-table mb-0">
                 <thead>
                     <tr>
-                        <th scope="col" class="bg-base" data-i18n="table.product">Product</th>
-                        <th scope="col" class="bg-base" data-i18n="table.category">Category</th>
-                        <th scope="col" class="bg-base" data-i18n="table.branch">Branch</th>
-                        <th scope="col" class="bg-base" data-i18n="table.regularPrice">Regular Price</th>
-                        <th scope="col" class="bg-base" data-i18n="table.status">Status</th>
+                        <th class="bg-base ps-20 text-xs">{% trans "Product" %}</th>
+                        <th class="bg-base text-xs">{% trans "Category" %}</th>
+                        <th class="bg-base text-xs">{% trans "Branch" %}</th>
+                        <th class="bg-base text-xs">{% trans "Price" %}</th>
+                        <th class="bg-base text-xs">{% trans "Status" %}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for product in products|slice:":5" %}
+                    {% for product in products %}
                     <tr>
+                        <td class="bg-info-focus ps-20"><a href="{% url 'productDetail' product.id %}" class="fw-medium text-primary-600 text-sm">{{ product.name }}</a></td>
+                        <td class="bg-info-focus"><a href="{% url 'categoryDetail' product.category.id %}" class="text-primary-600 text-sm">{{ product.category.name }}</a></td>
+                        <td class="bg-info-focus"><a href="{% url 'branch_detail' product.category.branch.id %}" class="text-primary-600 text-sm">{{ product.category.branch.name }}</a></td>
+                        <td class="bg-info-focus text-sm text-secondary-light">{{ product.ordinary_first_page_price|floatformat:0 }} UZS</td>
                         <td class="bg-info-focus">
-                            <a href="{% url 'productDetail' product.id %}" class="fw-medium text-primary-600">{{ product.name }}</a>
-                        </td>
-                        <td class="bg-info-focus">
-                            <a href="{% url 'categoryDetail' product.category.id %}" class="text-primary-600">{{ product.category.name }}</a>
-                        </td>
-                        <td class="bg-info-focus">
-                            <a href="{% url 'branch_detail' product.category.branch.id %}" class="text-primary-600">{{ product.category.branch.name }}</a>
-                        </td>
-                        <td class="bg-info-focus">{{ product.ordinary_first_page_price|floatformat:0 }} UZS</td>
-                        <td class="bg-info-focus">
-                            <span class="{% if product.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-12 py-4 radius-4 text-xs fw-medium">
-                                {% if product.is_active %}<span data-i18n="common.active">Active</span>{% else %}<span data-i18n="common.inactive">Inactive</span>{% endif %}
+                            <span class="{% if product.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-8 py-3 radius-4 text-xs fw-medium">
+                                {% if product.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
                             </span>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center py-24 text-secondary-light bg-base" data-i18n="common.noProducts">No products yet</td>
-                    </tr>
+                    <tr><td colspan="5" class="text-center py-24 text-secondary-light bg-base text-sm">{% trans "No products yet" %}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -423,58 +430,51 @@
     </div>
 </div>
 
-<!-- Recent Orders Section -->
-<div id="orders-section" class="card radius-12 mt-24">
-    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
-        <h6 class="text-lg fw-semibold mb-0 d-flex align-items-center">
-            <iconify-icon icon="fluent:document-bullet-list-20-filled" class="me-8 text-cyan-600"></iconify-icon>
-            <span data-i18n="common.recentOrders">Recent Orders</span>
+<!-- ── Recent Orders ─────────────────────────────────────────── -->
+<div class="card radius-12">
+    <div class="card-header border-bottom bg-base py-14 px-20 d-flex align-items-center justify-content-between">
+        <h6 class="text-md fw-semibold mb-0 d-flex align-items-center gap-8">
+            <iconify-icon icon="fluent:document-bullet-list-20-filled" class="text-cyan-600"></iconify-icon>
+            {% trans "Recent Orders" %}
         </h6>
-        <a href="{% url 'orders:ordersList' %}?center={{ center.id }}" class="text-primary-600 text-sm" data-i18n="common.viewAll">View All</a>
+        <a href="{% url 'orders:ordersList' %}?center={{ center.id }}" class="text-primary-600 text-xs d-inline-flex align-items-center gap-4">
+            {% trans "View All" %}<iconify-icon icon="fluent:arrow-right-20-filled"></iconify-icon>
+        </a>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table colored-row-table mb-0">
                 <thead>
                     <tr>
-                        <th scope="col" class="bg-base" data-i18n="table.orderId">Order ID</th>
-                        <th scope="col" class="bg-base" data-i18n="table.customer">Customer</th>
-                        <th scope="col" class="bg-base" data-i18n="table.branch">Branch</th>
-                        <th scope="col" class="bg-base" data-i18n="table.product">Product</th>
-                        <th scope="col" class="bg-base" data-i18n="table.status">Status</th>
-                        <th scope="col" class="bg-base" data-i18n="table.date">Date</th>
+                        <th class="bg-base ps-20 text-xs">{% trans "Order" %}</th>
+                        <th class="bg-base text-xs">{% trans "Customer" %}</th>
+                        <th class="bg-base text-xs">{% trans "Branch" %}</th>
+                        <th class="bg-base text-xs">{% trans "Product" %}</th>
+                        <th class="bg-base text-xs">{% trans "Status" %}</th>
+                        <th class="bg-base text-xs">{% trans "Date" %}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for order in recent_orders %}
                     <tr>
+                        <td class="bg-info-focus ps-20"><a href="{% url 'orders:orderDetail' order.id %}" class="fw-medium text-primary-600 text-sm">#{{ order.id }}</a></td>
+                        <td class="bg-info-focus text-sm text-secondary-light">{% if order.bot_user %}{{ order.bot_user.name|default:order.bot_user.user_id }}{% else %}—{% endif %}</td>
+                        <td class="bg-info-focus"><a href="{% url 'branch_detail' order.branch.id %}" class="text-primary-600 text-sm">{{ order.branch.name }}</a></td>
+                        <td class="bg-info-focus text-sm text-secondary-light">{{ order.product.name }}</td>
                         <td class="bg-info-focus">
-                            <a href="{% url 'orders:orderDetail' order.id %}" class="fw-medium text-primary-600">#{{ order.id }}</a>
-                        </td>
-                        <td class="bg-info-focus">{% if order.bot_user %}{{ order.bot_user.name|default:order.bot_user.user_id }}{% else %}N/A{% endif %}</td>
-                        <td class="bg-info-focus">
-                            <a href="{% url 'branch_detail' order.branch.id %}" class="text-primary-600">{{ order.branch.name }}</a>
-                        </td>
-                        <td class="bg-info-focus">{{ order.product.name }}</td>
-                        <td class="bg-info-focus">
-                            <span class="badge 
-                                {% if order.status == 'completed' %}bg-success-focus text-success-main
-                                {% elif order.status == 'cancelled' %}bg-danger-focus text-danger-main
-                                {% elif order.status == 'in_progress' %}bg-info-focus text-info-main
-                                {% else %}bg-warning-focus text-warning-main{% endif %}">
+                            <span class="badge text-xs {% if order.status == 'completed' %}bg-success-focus text-success-main{% elif order.status == 'cancelled' %}bg-danger-focus text-danger-main{% elif order.status == 'in_progress' %}bg-info-focus text-info-main{% else %}bg-warning-focus text-warning-main{% endif %}">
                                 {{ order.get_status_display }}
                             </span>
                         </td>
-                        <td class="bg-info-focus text-secondary-light">{{ order.created_at|date:"M d, Y" }}</td>
+                        <td class="bg-info-focus text-xs text-secondary-light">{{ order.created_at|date:"d M Y" }}</td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center py-24 text-secondary-light bg-base" data-i18n="common.noOrdersYet">No orders yet</td>
-                    </tr>
+                    <tr><td colspan="6" class="text-center py-24 text-secondary-light bg-base text-sm">{% trans "No orders yet" %}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
 {% endblock %}

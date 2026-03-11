@@ -603,8 +603,8 @@ class Subscription(models.Model):
             self.status = self.STATUS_ACTIVE  # Trial is automatically active
             self.amount_paid = Decimal('0.00')  # Free trial
         
-        # Auto-calculate end_date based on pricing duration for non-trial
-        elif not self.end_date and self.start_date and self.pricing:
+        # Always recalculate end_date from pricing to prevent manual-entry drift
+        elif self.start_date and self.pricing:
             self.end_date = self.start_date + relativedelta(months=self.pricing.duration_months)
         
         # Auto-update status based on dates

@@ -25,6 +25,107 @@
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
 
+{% if not request.user.is_superuser %}
+{# ══════════════════════════════════════════════════════════════════════════ #}
+{# NON-SUPERUSER LAYOUT: read-only info + editable contact fields            #}
+{# ══════════════════════════════════════════════════════════════════════════ #}
+
+                    <!-- Read-only Center Details -->
+                    <div class="mb-24">
+                        <div class="d-flex align-items-center gap-8 mb-14 pb-8 border-bottom">
+                            <div class="w-28-px h-28-px radius-6 bg-neutral-100 d-flex align-items-center justify-content-center flex-shrink-0">
+                                <iconify-icon icon="mdi:lock" class="text-secondary-light text-md"></iconify-icon>
+                            </div>
+                            <h6 class="text-md fw-semibold mb-0 text-secondary-light">{% trans "Center Details" %}</h6>
+                            <span class="badge bg-warning-focus text-warning-600 text-xs ms-auto">{% trans "Read-only" %} · {% trans "Contact support to change" %}</span>
+                        </div>
+                        <div class="row gy-12">
+                            <div class="col-md-3">
+                                <div class="text-xs text-secondary-light mb-4">{% trans "Center Name" %}</div>
+                                <div class="fw-semibold text-primary-light">{{ center.name }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-xs text-secondary-light mb-4">{% trans "Subdomain" %}</div>
+                                <div class="fw-semibold font-monospace text-sm">
+                                    {% if center.subdomain %}{{ center.subdomain }}<span class="text-secondary-light fw-normal">.{{ main_domain }}</span>{% else %}<span class="text-secondary-light">—</span>{% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="text-xs text-secondary-light mb-4">{% trans "Status" %}</div>
+                                <span class="badge {% if center.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-10 py-4 radius-6 text-xs">
+                                    {% if center.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
+                                </span>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="text-xs text-secondary-light mb-4">{% trans "Bot" %}</div>
+                                <div class="text-sm">
+                                    {% if center.bot_username %}<span class="font-monospace">@{{ center.bot_username }}</span>
+                                    {% elif center.bot_token %}<span class="text-success-main">{% trans "Configured" %}</span>
+                                    {% else %}<span class="text-secondary-light">{% trans "Not set" %}</span>{% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="text-xs text-secondary-light mb-4">{% trans "Payme" %}</div>
+                                <span class="badge {% if center.payme_enabled %}bg-success-focus text-success-main{% else %}bg-neutral-100 text-secondary-light{% endif %} px-10 py-4 radius-6 text-xs">
+                                    {% if center.payme_enabled %}{% trans "Enabled" %}{% else %}{% trans "Disabled" %}{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Editable Contact Information -->
+                    <div class="mb-24">
+                        <div class="d-flex align-items-center gap-8 mb-14 pb-8 border-bottom">
+                            <div class="w-28-px h-28-px radius-6 bg-primary-100 d-flex align-items-center justify-content-center flex-shrink-0">
+                                <iconify-icon icon="mdi:phone-in-talk" class="text-primary-600 text-md"></iconify-icon>
+                            </div>
+                            <h6 class="text-md fw-semibold mb-0">{% trans "Contact Information" %}</h6>
+                        </div>
+                        <div class="row gy-16">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">{% trans "Phone" %}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-neutral-100"><iconify-icon icon="solar:phone-bold" class="text-secondary-light"></iconify-icon></span>
+                                    <input type="tel" name="phone" class="form-control radius-8"
+                                           value="{{ center.phone|default:'' }}"
+                                           placeholder="+998 XX XXX XX XX">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">{% trans "Email" %}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-neutral-100"><iconify-icon icon="solar:letter-bold" class="text-secondary-light"></iconify-icon></span>
+                                    <input type="email" name="email" class="form-control radius-8"
+                                           value="{{ center.email|default:'' }}"
+                                           placeholder="contact@example.com">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">{% trans "Address" %}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-neutral-100"><iconify-icon icon="solar:home-2-bold" class="text-secondary-light"></iconify-icon></span>
+                                    <input type="text" name="address" class="form-control radius-8"
+                                           value="{{ center.address|default:'' }}"
+                                           placeholder="{% trans 'Enter full address' %}">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8">{% trans "Location URL" %}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-neutral-100"><iconify-icon icon="solar:map-point-bold" class="text-secondary-light"></iconify-icon></span>
+                                    <input type="url" name="location_url" class="form-control radius-8"
+                                           value="{{ center.location_url|default:'' }}"
+                                           placeholder="Google / Yandex Maps URL">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+{% else %}
+{# ══════════════════════════════════════════════════════════════════════════ #}
+{# SUPERUSER LAYOUT: full edit form                                          #}
+{# ══════════════════════════════════════════════════════════════════════════ #}
+
                     <!-- ══════════════════════════════════════════════════════ -->
                     <!-- §1  Basic Information                                  -->
                     <!-- ══════════════════════════════════════════════════════ -->
@@ -50,11 +151,7 @@
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                                     <span data-i18n="form.subdomain">Subdomain</span>
-                                    {% if not request.user.is_superuser %}
-                                    <iconify-icon icon="mdi:shield-lock" class="text-warning-600 ms-1" data-bs-toggle="tooltip" title="Only superadmin can edit this field"></iconify-icon>
-                                    {% endif %}
                                 </label>
-                                {% if request.user.is_superuser %}
                                 <div class="input-group">
                                     <input type="text" name="subdomain" class="form-control radius-8"
                                            value="{% if center %}{{ center.subdomain|default:'' }}{% endif %}"
@@ -62,13 +159,6 @@
                                            title="Only lowercase letters, numbers and hyphens allowed">
                                     <span class="input-group-text bg-neutral-100 text-secondary-light text-xs">.{{ main_domain }}</span>
                                 </div>
-                                {% else %}
-                                <div class="input-group">
-                                    <input type="text" class="form-control radius-8 bg-neutral-100"
-                                           value="{% if center and center.subdomain %}{{ center.subdomain }}{% else %}Not set{% endif %}" disabled readonly>
-                                    <span class="input-group-text bg-neutral-100 text-secondary-light text-xs">.{{ main_domain }}</span>
-                                </div>
-                                {% endif %}
                             </div>
 
                             <div class="col-md-4">
@@ -82,7 +172,7 @@
                             </div>
 
                             <!-- Row 2: Owner · Email · Location URL -->
-                            {% if request.user.is_superuser and available_owners %}
+                            {% if available_owners %}
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold text-primary-light text-sm mb-8">
                                     <span data-i18n="form.owner">Owner</span>
@@ -104,7 +194,7 @@
                             </div>
                             {% endif %}
 
-                            <div class="{% if request.user.is_superuser and available_owners %}col-md-4{% else %}col-md-6{% endif %}">
+                            <div class="{% if available_owners %}col-md-4{% else %}col-md-6{% endif %}">
                                 <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.email">Email</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-neutral-100"><iconify-icon icon="solar:letter-bold" class="text-secondary-light"></iconify-icon></span>
@@ -114,7 +204,7 @@
                                 </div>
                             </div>
 
-                            <div class="{% if request.user.is_superuser and available_owners %}col-md-4{% else %}col-md-6{% endif %}">
+                            <div class="{% if available_owners %}col-md-4{% else %}col-md-6{% endif %}">
                                 <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.locationUrl">Location URL</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-neutral-100"><iconify-icon icon="solar:map-point-bold" class="text-secondary-light"></iconify-icon></span>
@@ -378,12 +468,18 @@
                     </div>
                     {% endif %}
 
+{% endif %}{# end if/else superuser #}
+
                     <!-- ── Actions ───────────────────────────────────────── -->
                     <div class="d-flex align-items-center justify-content-end gap-12 pt-16 border-top">
+                        {% if request.user.is_superuser %}
                         <a href="{% url 'center_list' %}" class="btn btn-outline-secondary radius-8 px-24" data-i18n="common.cancel">Cancel</a>
+                        {% else %}
+                        <a href="{% url 'center_detail' center.id %}" class="btn btn-outline-secondary radius-8 px-24" data-i18n="common.cancel">Cancel</a>
+                        {% endif %}
                         <button type="submit" class="btn btn-primary radius-8 px-32">
                             <iconify-icon icon="mdi:content-save" class="me-1"></iconify-icon>
-                            <span data-i18n="{% if center %}form.updateCenter{% else %}form.createCenter{% endif %}">{% if center %}Update Center{% else %}Create Center{% endif %}</span>
+                            <span>{% if request.user.is_superuser %}{% if center %}Update Center{% else %}Create Center{% endif %}{% else %}Save Changes{% endif %}</span>
                         </button>
                     </div>
 

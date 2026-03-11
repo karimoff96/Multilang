@@ -169,17 +169,44 @@
                             <td>
                                 {% if item.current_subscription %}
                                     {% if item.current_subscription.status == 'active' %}
+                                        {% with days=item.current_subscription.days_remaining %}
                                         <div>
                                             <span class="badge bg-success-50 text-success-600 mb-1">{% trans "Active" %}</span>
+                                            {% if item.current_subscription.is_trial %}
+                                            <span class="badge bg-warning-50 text-warning-600 mb-1">{% trans "Trial" %}</span>
+                                            {% endif %}
                                             <div class="text-xs text-gray-500">
                                                 {{ item.current_subscription.tariff.title }}
                                             </div>
-                                            <div class="text-xs text-gray-500">
-                                                {% trans "Until" %} {{ item.current_subscription.end_date|date:"d M Y" }}
+                                            <div class="d-flex align-items-center gap-4 mt-1">
+                                                <span class="text-xs text-gray-500">{% trans "Until" %} {{ item.current_subscription.end_date|date:"d M Y" }}</span>
+                                                {% if days is not None %}
+                                                <span class="badge text-xs
+                                                    {% if days > 30 %}bg-success-50 text-success-600
+                                                    {% elif days > 14 %}bg-warning-50 text-warning-700
+                                                    {% elif days > 0 %}bg-danger-50 text-danger-600
+                                                    {% else %}bg-gray-100 text-gray-600{% endif %}">
+                                                    {{ days }}d {% trans "left" %}
+                                                </span>
+                                                {% endif %}
                                             </div>
+                                            {% if days is not None and days <= 30 and days > 0 %}
+                                            <div class="mt-1" style="max-width:120px;">
+                                                <div class="progress" style="height:3px;border-radius:2px;">
+                                                    <div class="progress-bar {% if days > 14 %}bg-warning-main{% else %}bg-danger-main{% endif %}"
+                                                         style="width:{% widthratio days 30 100 %}%;border-radius:2px;"></div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
                                         </div>
+                                        {% endwith %}
                                     {% elif item.current_subscription.status == 'expired' %}
-                                        <span class="badge bg-gray-50 text-gray-600">{% trans "Expired" %}</span>
+                                        <div>
+                                            <span class="badge bg-gray-50 text-gray-600">{% trans "Expired" %}</span>
+                                            {% if item.current_subscription.end_date %}
+                                            <div class="text-xs text-gray-400 mt-1">{{ item.current_subscription.end_date|date:"d M Y" }}</div>
+                                            {% endif %}
+                                        </div>
                                     {% elif item.current_subscription.status == 'pending' %}
                                         <span class="badge bg-warning-50 text-warning-600">{% trans "Pending" %}</span>
                                     {% else %}

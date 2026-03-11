@@ -49,6 +49,14 @@ class SubscriptionEnforcementMiddleware:
         if subscription and subscription.is_active():
             return self.get_response(request)
 
+        # If dates have passed but DB status is stale, sync it now.
+        if subscription and subscription.status == 'active':
+            from datetime import date as _date
+            if subscription.end_date and subscription.end_date < _date.today():
+                from billing.models import Subscription as _Sub
+                _Sub.objects.filter(pk=subscription.pk).update(status='expired')
+                subscription.status = 'expired'
+
         # Inactive or missing subscription: keep user in the expired flow only.
         expired_url = reverse("billing:subscription_expired")
         if request.path != expired_url:

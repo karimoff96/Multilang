@@ -31,6 +31,18 @@ def admin_login(request):
 
         if user is not None:
             if user.is_staff or user.is_superuser:
+                # Check subscription status before granting access (superusers bypass)
+                if not user.is_superuser:
+                    from django.urls import reverse as _reverse
+                    profile = getattr(user, "admin_profile", None)
+                    center = getattr(profile, "center", None) if profile else None
+                    subscription = getattr(center, "subscription", None) if center else None
+                    if subscription is not None and not subscription.is_active():
+                        messages.error(
+                            request,
+                            "Your subscription has ended. Please contact your administrator to restore access.",
+                        )
+                        return render(request, "authentication/signin.html")
                 login(request, user)
                 next_url = request.GET.get("next", "index")
                 return redirect(next_url)

@@ -6,36 +6,52 @@
     <div class="col-xl-6 col-lg-7 col-md-10">
         <div class="card radius-12 shadow-sm border-danger-100">
             <div class="card-body p-24">
-                <div class="d-flex align-items-center gap-16 mb-16">
-                    <div class="w-56-px h-56-px rounded-12 bg-danger-100 d-flex align-items-center justify-content-center">
+                <div class="d-flex align-items-center gap-16 mb-20">
+                    <div class="w-56-px h-56-px rounded-12 bg-danger-100 d-flex align-items-center justify-content-center flex-shrink-0">
                         <iconify-icon icon="solar:shield-warning-bold-duotone" class="text-danger-600" style="font-size: 28px;"></iconify-icon>
                     </div>
                     <div>
-                        <h4 class="mb-4 text-danger-700">{% trans "Ваша подписка истекла" %}</h4>
-                        <p class="mb-0 text-secondary-light">{% trans "Доступ к панели отключён. Для возобновления работы продлите подписку через администраторов." %}</p>
+                        <h4 class="mb-4 text-danger-700">{% trans "Subscription Ended" %}</h4>
+                        <p class="mb-0 text-secondary-light">{% trans "Your subscription has expired and access to this panel has been disabled." %}</p>
                     </div>
                 </div>
 
-                <div class="alert alert-warning border-warning-200 d-flex align-items-start gap-12" role="alert">
-                    <iconify-icon icon="solar:calendar-warning-bold" class="text-warning-600 mt-1"></iconify-icon>
+                <div class="alert alert-danger border-danger-200 d-flex align-items-start gap-12 mb-20" role="alert">
+                    <iconify-icon icon="solar:info-circle-bold" class="text-danger-600 mt-1 flex-shrink-0"></iconify-icon>
                     <div>
-                        <strong>{% trans "Что делать дальше" %}</strong>
-                        <ul class="mt-8 mb-0 ps-20 text-sm text-secondary-light">
-                            <li>{% trans "Отправьте запрос на продление и оплатите вручную." %}</li>
-                            <li>{% trans "После подтверждения супер-администратором доступ будет восстановлен." %}</li>
-                        </ul>
+                        <strong>{% trans "What to do next" %}</strong>
+                        <p class="mt-8 mb-0 text-sm text-secondary-light">
+                            {% trans "Please contact your administrator to renew your subscription. Once renewed, you will regain full access." %}
+                        </p>
                     </div>
                 </div>
 
-                <div class="d-flex flex-wrap gap-12 align-items-center">
+                <div class="d-flex flex-wrap gap-12 align-items-center mb-20">
                     <a href="{% url 'billing:request_renewal' %}" class="btn btn-danger-600">
                         <iconify-icon icon="solar:refresh-bold"></iconify-icon>
-                        <span class="ms-6">{% trans "Отправить запрос на продление" %}</span>
+                        <span class="ms-6">{% trans "Send Renewal Request" %}</span>
                     </a>
                     <div class="text-sm text-secondary-light">
-                        <div>{% trans "Свяжитесь с поддержкой" %}: <a href="mailto:{{ contact_email }}" class="fw-semibold text-primary-600">{{ contact_email }}</a></div>
-                        <div>{% trans "Телефон" %}: <span class="fw-semibold">{{ contact_phone }}</span></div>
+                        {% if contact_email %}
+                        <div class="mb-4">
+                            <iconify-icon icon="solar:letter-bold" class="me-6"></iconify-icon>
+                            {% trans "Email" %}: <a href="mailto:{{ contact_email }}" class="fw-semibold text-primary-600">{{ contact_email }}</a>
+                        </div>
+                        {% endif %}
+                        {% if contact_phone %}
+                        <div>
+                            <iconify-icon icon="solar:phone-bold" class="me-6"></iconify-icon>
+                            {% trans "Phone" %}: <span class="fw-semibold">{{ contact_phone }}</span>
+                        </div>
+                        {% endif %}
                     </div>
+                </div>
+
+                <div class="pt-16 border-top">
+                    <a href="{% url 'admin_logout' %}" class="btn btn-outline-secondary-600 btn-sm">
+                        <iconify-icon icon="solar:logout-2-bold" class="me-6"></iconify-icon>
+                        {% trans "Log out" %}
+                    </a>
                 </div>
             </div>
         </div>

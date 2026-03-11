@@ -159,51 +159,49 @@ def center_edit(request, center_id):
         available_owners = User.objects.filter(is_active=True).order_by('username')
 
     if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-        phone = request.POST.get("phone", "").strip()
-        email = request.POST.get("email", "").strip()
-        address = request.POST.get("address", "").strip()
-        location_url = request.POST.get("location_url", "").strip()
-        is_active = request.POST.get("is_active") == "on"
-        
-        # Subdomain - only superuser can edit
         if request.user.is_superuser:
+            # Superusers can edit everything
+            name = request.POST.get("name", "").strip()
             subdomain = request.POST.get("subdomain", "").strip().lower() or None
-        else:
-            subdomain = center.subdomain  # Keep existing
-        
-        # Owner - only superuser can change
-        if request.user.is_superuser:
-            owner_id = request.POST.get("owner_id", "").strip()
-            if owner_id:
-                try:
-                    new_owner = User.objects.get(pk=owner_id, is_active=True)
-                    center.owner = new_owner
-                except User.DoesNotExist:
-                    messages.error(request, "Selected owner not found.")
-                    return redirect("center_edit", center_id=center_id)
-        
-        # Bot fields
-        company_orders_channel_id = request.POST.get("company_orders_channel_id", "").strip() or None
-        bot_username = request.POST.get("bot_username", "").strip().lstrip("@") or None
-        # Only superuser can edit bot_token
-        if request.user.is_superuser:
+            is_active = request.POST.get("is_active") == "on"
             bot_token = request.POST.get("bot_token", "").strip() or None
-        else:
-            bot_token = center.bot_token  # Keep existing
-
-        # Payme fields – superuser can set merchant_id/secret_key/sandbox; any editor can toggle enabled
-        payme_enabled = request.POST.get("payme_enabled") == "on"
-        if request.user.is_superuser:
+            bot_username = request.POST.get("bot_username", "").strip().lstrip("@") or None
+            company_orders_channel_id = request.POST.get("company_orders_channel_id", "").strip() or None
+            payme_enabled = request.POST.get("payme_enabled") == "on"
             payme_merchant_id = request.POST.get("payme_merchant_id", "").strip()
             payme_secret_key = request.POST.get("payme_secret_key", "").strip()
             payme_secret_key_prod = request.POST.get("payme_secret_key_prod", "").strip()
             payme_sandbox = request.POST.get("payme_sandbox") == "on"
+
+            # Owner change
+            if available_owners:
+                owner_id = request.POST.get("owner_id", "").strip()
+                if owner_id:
+                    try:
+                        new_owner = User.objects.get(pk=owner_id, is_active=True)
+                        center.owner = new_owner
+                    except User.DoesNotExist:
+                        messages.error(request, "Selected owner not found.")
+                        return redirect("center_edit", center_id=center_id)
         else:
-            payme_merchant_id = center.payme_merchant_id
-            payme_secret_key = center.payme_secret_key
-            payme_secret_key_prod = center.payme_secret_key_prod
-            payme_sandbox = center.payme_sandbox
+            # Non-superusers: only contact fields allowed
+            phone = request.POST.get("phone", "").strip()
+            email = request.POST.get("email", "").strip()
+            address = request.POST.get("address", "").strip()
+            location_url = request.POST.get("location_url", "").strip()
+            center.phone = phone or None
+            center.email = email or None
+            center.address = address or None
+            center.location_url = location_url or None
+            center.save()
+            messages.success(request, 'Contact information updated successfully!')
+            return redirect("center_detail", center_id=center_id)
+
+        # Superuser save path
+        phone = request.POST.get("phone", "").strip()
+        email = request.POST.get("email", "").strip()
+        address = request.POST.get("address", "").strip()
+        location_url = request.POST.get("location_url", "").strip()
 
         if not name:
             messages.error(request, "Center name is required.")
@@ -263,30 +261,57 @@ def center_detail(request, center_id):
             return HttpResponseForbidden("You don't have access to this center.")
         center = get_object_or_404(TranslationCenter, pk=center_id)
 
-    # Admin-only subscription snapshot
+    # Subscription snapshot — superusers see admin strip; owners see plan card
     subscription_info = None
-    if request.user.is_superuser:
-        lifetime_days = (date.today() - center.created_at.date()).days if center.created_at else None
-        subscription = getattr(center, "subscription", None)
-        if subscription:
-            period_days = None
-            if subscription.start_date and subscription.end_date:
-                period_days = (subscription.end_date - subscription.start_date).days
+    lifetime_days = (date.today() - center.created_at.date()).days if center.created_at else None
+    subscription = getattr(center, "subscription", None)
+    if subscription:
+        period_days = None
+        elapsed_pct = None
+        if subscription.start_date and subscription.end_date:
+            period_days = (subscription.end_date - subscription.start_date).days
+            elapsed = (date.today() - subscription.start_date).days
+            elapsed_pct = min(100, max(0, int(elapsed * 100 / period_days))) if period_days else 0
 
-            subscription_info = {
-                "tariff": subscription.tariff.title,
-                "status": subscription.status,
-                "start_date": subscription.start_date,
-                "end_date": subscription.end_date,
-                "days_remaining": subscription.days_remaining(),
-                "period_days": period_days,
-                "duration_months": subscription.pricing.duration_months if subscription.pricing else None,
-                "is_trial": subscription.is_trial,
-                "auto_renew": subscription.auto_renew,
-                "lifetime_days": lifetime_days,
-            }
-        else:
-            subscription_info = {"tariff": None, "status": "missing", "lifetime_days": lifetime_days}
+        tariff = subscription.tariff
+        # Feature labels the founder cares about
+        _feature_map = [
+            ('orders_basic',       'Orders'),
+            ('orders_advanced',    'Advanced Orders'),
+            ('analytics_basic',    'Analytics'),
+            ('analytics_advanced', 'Advanced Analytics'),
+            ('marketing_basic',    'Marketing'),
+            ('broadcast_messages', 'Broadcasts'),
+            ('telegram_bot',       'Telegram Bot'),
+            ('bulk_payments',      'Bulk Payments'),
+            ('multi_branch',       'Multi-Branch'),
+            ('agency_management',  'Agencies'),
+            ('export_reports',     'Export Reports'),
+            ('api_access',         'API Access'),
+            ('audit_logs',         'Audit Logs'),
+        ]
+        enabled_features = [label for code, label in _feature_map if tariff.has_feature(code)]
+
+        subscription_info = {
+            "tariff": tariff.title,
+            "tariff_slug": tariff.slug,
+            "status": subscription.status,
+            "is_active": subscription.is_active(),
+            "start_date": subscription.start_date,
+            "end_date": subscription.end_date,
+            "days_remaining": subscription.days_remaining(),
+            "period_days": period_days,
+            "elapsed_pct": elapsed_pct,
+            "duration_months": subscription.pricing.duration_months if subscription.pricing else None,
+            "is_trial": subscription.is_trial,
+            "lifetime_days": lifetime_days,
+            "max_branches": tariff.max_branches,
+            "max_staff": tariff.max_staff,
+            "max_monthly_orders": tariff.max_monthly_orders,
+            "enabled_features": enabled_features,
+        }
+    else:
+        subscription_info = {"tariff": None, "status": "missing", "lifetime_days": lifetime_days}
 
     # Get branches for this center
     branches = (
