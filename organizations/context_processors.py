@@ -188,7 +188,7 @@ def rbac_context(request):
         context.update({
             'admin_profile': admin_profile,
             'user_role': role.name if role else None,
-            'user_role_display': role.get_name_display() if role else 'No Role',
+            'user_role_display': (role.display_name or role.name.title()) if role else 'No Role',
             'is_owner': computed_is_owner,
             'is_manager': computed_is_manager,
             'is_staff_member': computed_is_staff,

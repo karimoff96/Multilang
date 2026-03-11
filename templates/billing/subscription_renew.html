@@ -23,8 +23,10 @@
                             <li><strong>{% trans "Pricing" %}:</strong> 
                                 {% if subscription.is_trial %}
                                     {{ subscription.tariff.trial_days }} {% trans "day(s) trial" %} - {% trans "Free" %}
-                                {% else %}
+                                {% elif subscription.pricing %}
                                     {{ subscription.pricing.duration_months }} {% trans "month(s)" %} - {{ subscription.pricing.price }} {{ subscription.pricing.currency }}
+                                {% else %}
+                                    {% trans "No pricing defined (unlimited/manual)" %}
                                 {% endif %}
                             </li>
                             <li><strong>{% trans "Current End Date" %}:</strong> {{ subscription.end_date|date:"F d, Y" }}</li>
@@ -58,12 +60,12 @@
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">{% trans "Select Pricing Duration" %} *</label>
-                                <select name="pricing" id="pricingSelect" class="form-select" required>
+                                <label class="form-label">{% trans "Select Pricing Duration" %}</label>
+                                <select name="pricing" id="pricingSelect" class="form-select">
                                     <option value="">{% trans "Select tariff first..." %}</option>
                                 </select>
                                 <small class="text-secondary-light">
-                                    {% trans "The subscription will be extended from current end date by selected duration" %}
+                                    {% trans "If the tariff has pricing, choose a duration. If it has none, renewal keeps the current end date (treated as unlimited/manual)." %}
                                 </small>
                             </div>
 
@@ -139,9 +141,13 @@
                         <div class="text-xs">
                             <strong>{% trans "Pricing" %}:</strong>
                             <ul class="list-unstyled mb-0 mt-4">
-                                {% for pricing in tariff.active_pricing %}
-                                <li>{{ pricing.duration_months }}mo - {{ pricing.price|floatformat:0 }} {{ pricing.currency }}</li>
-                                {% endfor %}
+                                {% if tariff.active_pricing %}
+                                    {% for pricing in tariff.active_pricing %}
+                                    <li>{{ pricing.duration_months }}mo - {{ pricing.price|floatformat:0 }} {{ pricing.currency }}</li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li class="text-secondary">{% trans "No pricing periods (unlimited/manual)" %}</li>
+                                {% endif %}
                             </ul>
                         </div>
                     </div>
@@ -194,6 +200,9 @@ document.getElementById('tariffSelect').addEventListener('change', function() {
     pricingSelect.innerHTML = '<option value="">{% trans "Choose duration..." %}</option>';
     newEndDateInfo.style.display = 'none';
     
+    pricingSelect.disabled = false;
+    pricingSelect.required = false;
+
     if (!tariffId || !tariffData[tariffId]) {
         console.log('No tariff data found');
         return;
@@ -203,6 +212,17 @@ document.getElementById('tariffSelect').addEventListener('change', function() {
     console.log('Pricing array:', tariff.pricing);
     console.log('Pricing count:', tariff.pricing.length);
     
+    if (tariff.pricing.length === 0) {
+        pricingSelect.innerHTML = '<option value="">{% trans "No pricing periods (unlimited/manual)" %}</option>';
+        pricingSelect.disabled = true;
+        pricingSelect.required = false;
+        document.getElementById('calculatedEndDate').textContent = '{% trans "End date unchanged (unlimited/manual)" %}';
+        newEndDateInfo.style.display = 'block';
+        console.log('Tariff has no pricing - treating as unlimited/manual');
+        return;
+    }
+
+    pricingSelect.required = true;
     tariff.pricing.forEach(pricing => {
         console.log('Adding pricing option:', pricing);
         pricingSelect.innerHTML += `<option value="${pricing.id}" data-duration="${pricing.duration}" data-price="${pricing.price}" data-currency="${pricing.currency}">${pricing.duration} month(s) - ${pricing.price.toFixed(0)} ${pricing.currency}</option>`;
@@ -251,17 +271,26 @@ window.addEventListener('load', function() {
             pricingSelect.innerHTML = '<option value="">{% trans "Choose duration..." %}</option>';
             
             const tariff = tariffData[tariffId];
-            tariff.pricing.forEach(pricing => {
-                pricingSelect.innerHTML += `<option value="${pricing.id}" data-duration="${pricing.duration}" data-price="${pricing.price}" data-currency="${pricing.currency}">${pricing.duration} month(s) - ${pricing.price.toFixed(0)} ${pricing.currency}</option>`;
-            });
-            
-            // Select current pricing if available
-            setTimeout(() => {
-                pricingSelect.value = '{{ subscription.pricing.id }}';
-                if (pricingSelect.value) {
-                    pricingSelect.dispatchEvent(new Event('change'));
-                }
-            }, 100);
+            if (tariff.pricing.length === 0) {
+                pricingSelect.innerHTML = '<option value="">{% trans "No pricing periods (unlimited/manual)" %}</option>';
+                pricingSelect.disabled = true;
+                pricingSelect.required = false;
+                document.getElementById('calculatedEndDate').textContent = '{% trans "End date unchanged (unlimited/manual)" %}';
+                document.getElementById('newEndDateInfo').style.display = 'block';
+            } else {
+                pricingSelect.required = true;
+                tariff.pricing.forEach(pricing => {
+                    pricingSelect.innerHTML += `<option value="${pricing.id}" data-duration="${pricing.duration}" data-price="${pricing.price}" data-currency="${pricing.currency}">${pricing.duration} month(s) - ${pricing.price.toFixed(0)} ${pricing.currency}</option>`;
+                });
+                
+                // Select current pricing if available
+                setTimeout(() => {
+                    pricingSelect.value = '{{ subscription.pricing.id|default_if_none:"" }}';
+                    if (pricingSelect.value) {
+                        pricingSelect.dispatchEvent(new Event('change'));
+                    }
+                }, 100);
+            }
         } else {
             console.error('No tariff data found for ID:', tariffId);
         }

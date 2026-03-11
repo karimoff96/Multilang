@@ -1261,15 +1261,26 @@ class AdminUser(models.Model):
 
     @property
     def is_owner(self):
-        return self.role and self.role.name == Role.OWNER
+        """Permission-based: any role with financial/reporting access is owner-tier."""
+        return (
+            self.has_permission('can_manage_financial') or
+            self.has_permission('can_view_financial_reports')
+        )
 
     @property
     def is_manager(self):
-        return self.role and self.role.name == Role.MANAGER
+        """Permission-based: order management access without owner-tier financial access."""
+        if self.is_owner:
+            return False
+        return (
+            self.has_permission('can_manage_orders') or
+            self.has_permission('can_view_all_orders')
+        )
 
     @property
     def is_staff_role(self):
-        return self.role and self.role.name == Role.STAFF
+        """Permission-based: anyone who is not owner-tier or manager-tier."""
+        return not self.is_owner and not self.is_manager
 
     def has_permission(self, permission):
         """

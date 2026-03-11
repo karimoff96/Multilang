@@ -74,56 +74,50 @@
                                   placeholder="{% trans 'Describe this tariff plan...' %}"></textarea>
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-lg-3 col-md-4">
                         <label class="form-label">{% trans "Display Order" %}</label>
                         <input type="number" name="display_order" class="form-control" value="0">
                         <small class="text-secondary-light">{% trans "Lower numbers appear first" %}</small>
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label d-block mb-8">&nbsp;</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_active" id="isActive" checked>
-                            <label class="form-check-label" for="isActive">
-                                {% trans "Active" %}
-                            </label>
+                    <div class="col-lg-9 col-md-8">
+                        <div class="row gy-2 gx-3 align-items-center mt-lg-4">
+                            <div class="col-sm-4 col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_active" id="isActive" checked>
+                                    <label class="form-check-label" for="isActive">{% trans "Active" %}</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_featured" id="isFeatured">
+                                    <label class="form-check-label" for="isFeatured">{% trans "Featured" %}</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="show_prices" id="showPrices" checked>
+                                    <label class="form-check-label" for="showPrices">{% trans "Show Prices" %}</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_special" id="isSpecial">
+                                    <label class="form-check-label" for="isSpecial">{% trans "Private (Hide on Landing)" %}</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_trial" id="isTrial" onchange="toggleTrialSettings()">
+                                    <label class="form-check-label" for="isTrial">{% trans "Is Trial" %}</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-12" id="trialDaysContainer" style="display:none;">
+                                <label class="form-label mb-1">{% trans "Trial Days" %}</label>
+                                <input type="number" name="trial_days" id="trialDays" class="form-control" value="10" min="1">
+                                <small class="text-secondary-light">{% trans "Number of days for free trial period" %}</small>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label d-block mb-8">&nbsp;</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_featured" id="isFeatured">
-                            <label class="form-check-label" for="isFeatured">
-                                {% trans "Featured" %}
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label d-block mb-8">&nbsp;</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="show_prices" id="showPrices" checked>
-                            <label class="form-check-label" for="showPrices">
-                                {% trans "Show Prices" %}
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label d-block mb-8">&nbsp;</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_trial" id="isTrial" onchange="toggleTrialSettings()">
-                            <label class="form-check-label" for="isTrial">
-                                {% trans "Is Trial" %}
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6" id="trialDaysContainer" style="display:none;">
-                        <label class="form-label">{% trans "Trial Days" %}</label>
-                        <input type="number" name="trial_days" id="trialDays" class="form-control" value="10" min="1">
-                        <small class="text-secondary-light">{% trans "Number of days for free trial period" %}</small>
                     </div>
                 </div>
 

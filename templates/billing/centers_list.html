@@ -58,12 +58,38 @@
     <!-- Centers Table -->
     <div class="card">
         <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div class="d-flex flex-wrap align-items-center gap-3">
-                <form method="get" class="d-flex flex-wrap align-items-center gap-2">
-                    <input type="text" name="search" class="form-control" placeholder="{% trans 'Search centers...' %}" value="{{ search_query }}">
-                    <button type="submit" class="btn btn-primary-600">
-                        <iconify-icon icon="solar:magnifer-bold"></iconify-icon>
-                    </button>
+            <div class="w-100">
+                <form method="get" class="row g-2 align-items-end">
+                    <div class="col-md-3 col-sm-6">
+                        <label class="form-label text-sm mb-6">{% trans "Search" %}</label>
+                        <input type="text" name="search" class="form-control" placeholder="{% trans 'Search centers...' %}" value="{{ search_query }}">
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <label class="form-label text-sm mb-6">{% trans "Subscription" %}</label>
+                        <select name="sub_status" class="form-select" onchange="this.form.submit()">
+                            <option value="all" {% if sub_status == 'all' %}selected{% endif %}>{% trans "All" %}</option>
+                            <option value="active" {% if sub_status == 'active' %}selected{% endif %}>{% trans "Active" %}</option>
+                            <option value="expired" {% if sub_status == 'expired' %}selected{% endif %}>{% trans "Expired" %}</option>
+                            <option value="pending" {% if sub_status == 'pending' %}selected{% endif %}>{% trans "Pending" %}</option>
+                            <option value="cancelled" {% if sub_status == 'cancelled' %}selected{% endif %}>{% trans "Cancelled" %}</option>
+                            <option value="none" {% if sub_status == 'none' %}selected{% endif %}>{% trans "No Subscription" %}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <label class="form-label text-sm mb-6">{% trans "Sort" %}</label>
+                        <select name="sort" class="form-select" onchange="this.form.submit()">
+                            <option value="name" {% if sort_by == 'name' %}selected{% endif %}>{% trans "Name (A-Z)" %}</option>
+                            <option value="-name" {% if sort_by == '-name' %}selected{% endif %}>{% trans "Name (Z-A)" %}</option>
+                            <option value="-end_date" {% if sort_by == '-end_date' %}selected{% endif %}>{% trans "End Date (Latest)" %}</option>
+                            <option value="end_date" {% if sort_by == 'end_date' %}selected{% endif %}>{% trans "End Date (Oldest)" %}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-sm-6 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary-600 flex-grow-1">
+                            <iconify-icon icon="solar:magnifer-bold"></iconify-icon> {% trans "Apply" %}
+                        </button>
+                        <a href="{% url 'billing:centers_list' %}" class="btn btn-outline-secondary-600" title="{% trans 'Reset' %}"><i class="ri-refresh-line"></i></a>
+                    </div>
                 </form>
             </div>
         </div>
@@ -167,8 +193,8 @@
                 <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                     {% if centers.has_previous %}
                     <li class="page-item">
-                        <a class="page-link text-secondary-light fw-medium radius-4 border-0 px-10 py-10 d-flex align-items-center justify-content-center h-32-px w-32-px bg-base" 
-                           href="?page={{ centers.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                <a class="page-link text-secondary-light fw-medium radius-4 border-0 px-10 py-10 d-flex align-items-center justify-content-center h-32-px w-32-px bg-base" 
+                                    href="?page={{ centers.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sub_status %}&sub_status={{ sub_status }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
                             <iconify-icon icon="ep:d-arrow-left" class="text-xl"></iconify-icon>
                         </a>
                     </li>
@@ -179,18 +205,20 @@
                         <li class="page-item active">
                             <span class="page-link bg-primary-600 text-white fw-medium radius-4 border-0 px-10 py-10 d-flex align-items-center justify-content-center h-32-px w-32-px">{{ num }}</span>
                         </li>
-                        {% elif num > centers.number|add:'-3' and num < centers.number|add:'3' %}
+                        {% elif num == 1 or num == centers.paginator.num_pages or num >= centers.number|add:'-1' and num <= centers.number|add:'1' %}
                         <li class="page-item">
                             <a class="page-link text-secondary-light fw-medium radius-4 border-0 px-10 py-10 d-flex align-items-center justify-content-center h-32-px w-32-px bg-base" 
-                               href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                               href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sub_status %}&sub_status={{ sub_status }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">{{ num }}</a>
                         </li>
+                        {% elif num == centers.number|add:'-2' or num == centers.number|add:'2' %}
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
                         {% endif %}
                     {% endfor %}
                     
                     {% if centers.has_next %}
                     <li class="page-item">
-                        <a class="page-link text-secondary-light fw-medium radius-4 border-0 px-10 py-10 d-flex align-items-center justify-content-center h-32-px w-32-px bg-base" 
-                           href="?page={{ centers.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                <a class="page-link text-secondary-light fw-medium radius-4 border-0 px-10 py-10 d-flex align-items-center justify-content-center h-32-px w-32-px bg-base" 
+                                    href="?page={{ centers.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sub_status %}&sub_status={{ sub_status }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
                             <iconify-icon icon="ep:d-arrow-right" class="text-xl"></iconify-icon>
                         </a>
                     </li>

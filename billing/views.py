@@ -4,7 +4,7 @@ import os
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Q, Count, Sum, Prefetch
+from django.db.models import Q, Count, Sum, Prefetch, F, FloatField, Case, When, Value, ExpressionWrapper
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import gettext as _
 from datetime import date, datetime, timedelta
@@ -42,6 +42,12 @@ def subscription_list(request):
     # Filters
     status_filter = request.GET.get('status', 'all')
     search_query = request.GET.get('search', '')
+    sub_status = request.GET.get('sub_status', 'all')
+    sort_by = request.GET.get('sort', 'name')
+    tariff_filter = request.GET.get('tariff')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    sort_by = request.GET.get('sort', '-end_date')
     
     # Base queryset
     subscriptions = Subscription.objects.select_related(
@@ -58,6 +64,36 @@ def subscription_list(request):
             Q(organization__subdomain__icontains=search_query) |
             Q(transaction_id__icontains=search_query)
         )
+
+    if tariff_filter:
+        subscriptions = subscriptions.filter(tariff_id=tariff_filter)
+
+    if start_date:
+        try:
+            start_dt = datetime.strptime(start_date, '%Y-%m-%d').date()
+            subscriptions = subscriptions.filter(start_date__gte=start_dt)
+        except ValueError:
+            pass
+
+    if end_date:
+        try:
+            end_dt = datetime.strptime(end_date, '%Y-%m-%d').date()
+            subscriptions = subscriptions.filter(end_date__lte=end_dt)
+        except ValueError:
+            pass
+
+    valid_sorts = [
+        'organization__name', '-organization__name',
+        'tariff__title', '-tariff__title',
+        'start_date', '-start_date',
+        'end_date', '-end_date',
+        'status', '-status',
+        'id', '-id'
+    ]
+    if sort_by in valid_sorts:
+        subscriptions = subscriptions.order_by(sort_by)
+    else:
+        subscriptions = subscriptions.order_by('-end_date')
     
     # Statistics
     total_subscriptions = Subscription.objects.count()
@@ -77,12 +113,19 @@ def subscription_list(request):
     page_number = request.GET.get('page')
     subscriptions_page = paginator.get_page(page_number)
     
+    tariffs = Tariff.objects.filter(is_active=True).order_by('title')
+
     context = {
         'title': _('Subscription Management'),
         'subTitle': _('Subscriptions'),
         'subscriptions': subscriptions_page,
         'status_filter': status_filter,
         'search_query': search_query,
+        'tariff_filter': tariff_filter,
+        'start_date': start_date,
+        'end_date': end_date,
+        'sort_by': sort_by,
+        'tariffs': tariffs,
         'total_subscriptions': total_subscriptions,
         'active_count': active_count,
         'expired_count': expired_count,
@@ -338,6 +381,7 @@ def tariff_create(request):
             is_active = request.POST.get('is_active') == 'on'
             is_featured = request.POST.get('is_featured') == 'on'
             show_prices = request.POST.get('show_prices') == 'on'
+            is_special = request.POST.get('is_special') == 'on'
             is_trial = request.POST.get('is_trial') == 'on'
             trial_days = request.POST.get('trial_days') or None
             display_order = request.POST.get('display_order', 0)
@@ -355,6 +399,7 @@ def tariff_create(request):
                 is_active=is_active,
                 is_featured=is_featured,
                 show_prices=show_prices,
+                is_special=is_special,
                 is_trial=is_trial,
                 trial_days=trial_days,
                 display_order=display_order,
@@ -364,33 +409,32 @@ def tariff_create(request):
                 max_monthly_broadcasts=max_monthly_broadcasts,
             )
             
-            # Set feature flags (37 boolean fields)
+            # Set feature flags (aligned with Tariff model, 32 fields)
             feature_fields = [
                 # Orders (5)
-                'feature_orders_basic', 'feature_orders_advanced', 'feature_orders_bulk',
-                'feature_orders_archive', 'feature_bulk_payment_collection',
-                # Analytics (6)
-                'feature_analytics_basic', 'feature_analytics_advanced', 'feature_sales_reports',
-                'feature_finance_reports', 'feature_custom_reports', 'feature_export_data',
+                'feature_orders_basic', 'feature_orders_advanced', 'feature_order_assignment',
+                'feature_bulk_payments', 'feature_extra_fees',
+                # Analytics (7)
+                'feature_analytics_basic', 'feature_analytics_advanced', 'feature_financial_reports',
+                'feature_staff_performance', 'feature_custom_reports', 'feature_export_reports',
+                'feature_debt_tracking',
                 # Integration (4)
-                'feature_webhooks', 'feature_api_access', 'feature_third_party_integrations',
-                'feature_telegram_bot',
+                'feature_telegram_bot', 'feature_webhooks', 'feature_api_access', 'feature_integrations',
                 # Marketing (2)
-                'feature_marketing_campaigns', 'feature_broadcasts',
+                'feature_marketing_basic', 'feature_broadcast_messages',
                 # Organization (4)
-                'feature_multi_branch', 'feature_staff_management', 'feature_rbac', 'feature_audit_logs',
-                # Storage (3)
-                'feature_file_uploads', 'feature_storage_basic', 'feature_storage_advanced',
+                'feature_multi_branch', 'feature_custom_roles', 'feature_branch_settings',
+                'feature_agency_management',
+                # Storage (1)
+                'feature_archive_access',
                 # Financial (4)
-                'feature_payment_tracking', 'feature_expense_management', 'feature_payment_reminders',
-                'feature_invoicing',
-                # Support (2)
-                'feature_priority_support', 'feature_onboarding',
-                # Advanced (2)
-                'feature_white_label', 'feature_data_backup',
+                'feature_payment_management', 'feature_invoicing', 'feature_expense_tracking',
+                'feature_general_expenses',
+                # Advanced (1)
+                'feature_audit_logs',
                 # Services (4)
-                'feature_services_basic', 'feature_services_advanced', 'feature_service_tracking',
-                'feature_service_analytics',
+                'feature_products_basic', 'feature_products_advanced', 'feature_language_pricing',
+                'feature_dynamic_pricing',
             ]
             
             for field in feature_fields:
@@ -433,6 +477,7 @@ def tariff_edit(request, pk):
             tariff.is_active = request.POST.get('is_active') == 'on'
             tariff.is_featured = request.POST.get('is_featured') == 'on'
             tariff.show_prices = request.POST.get('show_prices') == 'on'
+            tariff.is_special = request.POST.get('is_special') == 'on'
             tariff.is_trial = request.POST.get('is_trial') == 'on'
             tariff.trial_days = request.POST.get('trial_days') or None
             tariff.display_order = request.POST.get('display_order', 0)
@@ -606,6 +651,10 @@ def usage_tracking_list(request):
     month = request.GET.get('month', date.today().month)
     min_orders = request.GET.get('min_orders')
     min_revenue = request.GET.get('min_revenue')
+    min_bot_orders = request.GET.get('min_bot_orders')
+    min_manual_orders = request.GET.get('min_manual_orders')
+    min_branches = request.GET.get('min_branches')
+    min_staff = request.GET.get('min_staff')
     sort_by = request.GET.get('sort', '-total_revenue')  # Default: highest revenue first
     
     usage_data = UsageTracking.objects.select_related('organization').all()
@@ -630,10 +679,54 @@ def usage_tracking_list(request):
             usage_data = usage_data.filter(total_revenue__gte=float(min_revenue))
         except ValueError:
             pass
+
+    if min_bot_orders:
+        try:
+            usage_data = usage_data.filter(bot_orders__gte=int(min_bot_orders))
+        except ValueError:
+            pass
+
+    if min_manual_orders:
+        try:
+            usage_data = usage_data.filter(manual_orders__gte=int(min_manual_orders))
+        except ValueError:
+            pass
+
+    if min_branches:
+        try:
+            usage_data = usage_data.filter(branches_count__gte=int(min_branches))
+        except ValueError:
+            pass
+
+    if min_staff:
+        try:
+            usage_data = usage_data.filter(staff_count__gte=int(min_staff))
+        except ValueError:
+            pass
     
+    # Add derived averages
+    usage_data = usage_data.annotate(
+        avg_revenue_per_order=Case(
+            When(
+                orders_created__gt=0,
+                then=ExpressionWrapper(F('total_revenue') / F('orders_created'), output_field=FloatField()),
+            ),
+            default=Value(0.0),
+            output_field=FloatField(),
+        )
+    )
+
     # Apply sorting
-    valid_sorts = ['organization__name', '-organization__name', 'orders_created', '-orders_created', 
-                   'total_revenue', '-total_revenue', 'year', '-year', 'month', '-month']
+    valid_sorts = [
+        'organization__name', '-organization__name',
+        'orders_created', '-orders_created',
+        'bot_orders', '-bot_orders',
+        'manual_orders', '-manual_orders',
+        'branches_count', '-branches_count',
+        'staff_count', '-staff_count',
+        'total_revenue', '-total_revenue',
+        'year', '-year', 'month', '-month'
+    ]
     if sort_by in valid_sorts:
         usage_data = usage_data.order_by(sort_by, '-year', '-month')
     else:
@@ -655,6 +748,9 @@ def usage_tracking_list(request):
     # Calculate summary statistics
     total_orders = usage_data.aggregate(total=Sum('orders_created'))['total'] or 0
     total_revenue = usage_data.aggregate(total=Sum('total_revenue'))['total'] or 0
+    total_bot_orders = usage_data.aggregate(total=Sum('bot_orders'))['total'] or 0
+    total_manual_orders = usage_data.aggregate(total=Sum('manual_orders'))['total'] or 0
+    avg_revenue_per_order = (total_revenue / total_orders) if total_orders else 0
     total_centers = usage_data.values('organization').distinct().count()
     
     context = {
@@ -667,11 +763,18 @@ def usage_tracking_list(request):
         'selected_month': month,
         'min_orders': min_orders,
         'min_revenue': min_revenue,
+        'min_bot_orders': min_bot_orders,
+        'min_manual_orders': min_manual_orders,
+        'min_branches': min_branches,
+        'min_staff': min_staff,
         'sort_by': sort_by,
         'years': years,
         'months': months,
         'total_orders': total_orders,
         'total_revenue': total_revenue,
+        'total_bot_orders': total_bot_orders,
+        'total_manual_orders': total_manual_orders,
+        'avg_revenue_per_order': avg_revenue_per_order,
         'total_centers': total_centers,
     }
     
@@ -686,8 +789,10 @@ def centers_list(request):
         return redirect('dashboard')
     
     search_query = request.GET.get('search', '')
-    
-    centers = TranslationCenter.objects.select_related('owner').prefetch_related('subscription').all()
+    sub_status = request.GET.get('sub_status', 'all')
+    sort_by = request.GET.get('sort', 'name')
+
+    centers = TranslationCenter.objects.select_related('owner').prefetch_related('subscription', 'subscription__tariff').all()
     
     if search_query:
         centers = centers.filter(
@@ -695,6 +800,21 @@ def centers_list(request):
             Q(subdomain__icontains=search_query) |
             Q(owner__username__icontains=search_query)
         )
+
+    if sub_status and sub_status != 'all':
+        if sub_status == 'none':
+            centers = centers.filter(subscription__isnull=True)
+        else:
+            centers = centers.filter(subscription__status=sub_status)
+
+    if sort_by == 'end_date':
+        centers = centers.order_by('subscription__end_date', 'name')
+    elif sort_by == '-end_date':
+        centers = centers.order_by('-subscription__end_date', 'name')
+    elif sort_by == '-name':
+        centers = centers.order_by('-name')
+    else:
+        centers = centers.order_by('name')
     
     # Add subscription status to each center
     for center in centers:
@@ -722,6 +842,8 @@ def centers_list(request):
         'subTitle': _('Centers'),
         'centers': centers_page,
         'search_query': search_query,
+        'sub_status': sub_status,
+        'sort_by': sort_by,
         'total_centers': total_centers,
         'with_subscription': with_subscription,
         'without_subscription': without_subscription,
@@ -786,6 +908,7 @@ def subscription_renew(request, pk):
     subscription = get_object_or_404(Subscription, pk=pk)
     
     if request.method == 'POST':
+        tariff_id = request.POST.get('tariff')
         pricing_id = request.GET.get('pricing_id') or request.POST.get('pricing')
         payment_method = request.POST.get('payment_method', '')
         transaction_id = request.POST.get('transaction_id', '')
@@ -793,20 +916,35 @@ def subscription_renew(request, pk):
         notes = request.POST.get('notes', '')
         
         try:
-            # Get pricing (can be same or different)
+            # Figure out the target tariff first (explicit selection overrides current one)
+            tariff = Tariff.objects.get(pk=tariff_id) if tariff_id else subscription.tariff
+
+            pricing = None
+
             if pricing_id:
                 pricing = TariffPricing.objects.get(pk=pricing_id)
                 tariff = pricing.tariff
             else:
-                # Keep same pricing
-                pricing = subscription.pricing
-                tariff = subscription.tariff
+                # If the chosen tariff has active pricing, a choice is required
+                has_active_pricing = tariff.pricing.filter(is_active=True).exists()
+                if has_active_pricing:
+                    # Try to keep the current pricing if it belongs to the selected tariff
+                    if subscription.pricing and subscription.pricing.tariff_id == tariff.id:
+                        pricing = subscription.pricing
+                    else:
+                        messages.error(request, _("Please select a pricing option for this tariff."))
+                        raise ValueError("pricing_required")
+                # If no active pricing, allow renewing without a pricing option (treat as unlimited/manual)
             
             # Extend subscription
             old_end_date = subscription.end_date
             subscription.tariff = tariff
             subscription.pricing = pricing
-            subscription.end_date = old_end_date + relativedelta(months=pricing.duration_months)
+            subscription.end_date = (
+                old_end_date + relativedelta(months=pricing.duration_months)
+                if pricing
+                else old_end_date  # No pricing configured: keep current end date (treated as unlimited/manual)
+            )
             subscription.status = Subscription.STATUS_PENDING
             subscription.payment_method = payment_method
             subscription.transaction_id = transaction_id
@@ -823,10 +961,20 @@ def subscription_renew(request, pk):
             subscription.save()
             
             # Log renewal
+            period_text = (
+                f"{pricing.duration_months} month(s)" if pricing else _("unlimited / no pricing")
+            )
+            description = _(
+                "Subscription renewed for %(period)s. Extended from %(old)s to %(new)s"
+            ) % {
+                'period': period_text,
+                'old': old_end_date,
+                'new': subscription.end_date,
+            }
             SubscriptionHistory.objects.create(
                 subscription=subscription,
                 action='renewed',
-                description=f'Subscription renewed for {pricing.duration_months} month(s). Extended from {old_end_date} to {subscription.end_date}',
+                description=description,
                 performed_by=request.user
             )
             
@@ -835,8 +983,9 @@ def subscription_renew(request, pk):
             return redirect('billing:subscription_detail', pk=pk)
             
         except Exception as e:
-            messages.error(request, f"Error renewing subscription: {str(e)}")
-    
+            if str(e) != "pricing_required":
+                messages.error(request, f"Error renewing subscription: {str(e)}")
+        
     # Get available pricing options for current or other tariffs
     # Get all active tariffs
     tariffs = Tariff.objects.filter(is_active=True, is_trial=False).prefetch_related('pricing')
@@ -912,6 +1061,7 @@ def centers_monitoring(request):
     # Get sorting parameters
     sort_by = request.GET.get('sort', 'payments')  # payments, age, subscriptions
     search_query = request.GET.get('search', '')
+    status_filter = request.GET.get('status', 'all')  # all, active, expired, pending, none
     
     # ------------------------------------------------------------------
     # Redis cache strategy (5-minute TTL, single shared key):
@@ -944,6 +1094,15 @@ def centers_monitoring(request):
             if search_query.lower() in item['center'].name.lower() or 
                search_query.lower() in item['center'].subdomain.lower()
         ]
+
+    if status_filter != 'all':
+        if status_filter == 'none':
+            centers_data = [item for item in centers_data if not item['current_subscription']]
+        else:
+            centers_data = [
+                item for item in centers_data
+                if item['current_subscription'] and item['current_subscription'].status == status_filter
+            ]
     
     # Apply sorting
     if sort_by == 'age':
@@ -974,6 +1133,7 @@ def centers_monitoring(request):
         'total_revenue': total_revenue,
         'total_centers': total_centers,
         'active_centers': active_centers,
+        'status_filter': status_filter,
     }
     
     return render(request, 'billing/centers_monitoring.html', context)

@@ -173,6 +173,13 @@
                                 </label>
                             </div>
                             <div class="form-check mb-0">
+                                <input class="form-check-input" type="checkbox" name="is_special" id="isSpecial"
+                                       {% if tariff.is_special %}checked{% endif %}>
+                                <label class="form-check-label fw-medium" for="isSpecial">
+                                    <i class="ri-lock-line text-secondary me-1"></i>{% trans "Private (Hide on Landing)" %}
+                                </label>
+                            </div>
+                            <div class="form-check mb-0">
                                 <input class="form-check-input" type="checkbox" name="is_trial" id="isTrial"
                                        {% if tariff.is_trial %}checked{% endif %}
                                        onchange="toggleTrialSettings()">

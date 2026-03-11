@@ -172,8 +172,12 @@
                                 <span class="text-secondary-light fw-medium text-sm">
                                     {% if user.is_superuser %}
                                         <span data-i18n="profile.superAdmin">Super Admin</span>
-                                    {% elif user.is_staff %}
+                                    {% elif admin_profile and admin_profile.role %}
+                                        {{ admin_profile.role.display_name|default:admin_profile.role.name|title }}
+                                    {% elif is_owner %}
                                         <span data-i18n="profile.admin">Admin</span>
+                                    {% elif is_manager %}
+                                        <span data-i18n="profile.manager">Manager</span>
                                     {% else %}
                                         <span data-i18n="profile.staff">Staff</span>
                                     {% endif %}

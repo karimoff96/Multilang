@@ -653,19 +653,27 @@ def updateProfile(request):
             user.email = email
             user.save()
 
-            # Update admin_profile fields (avatar and phone)
-            # Create AdminUser if it doesn't exist (for superusers, role can be null)
+            # Update admin_profile fields (avatar and phone) — never auto-create one.
+            # Auto-creating an AdminUser here would produce a role-less profile that
+            # shadows (or conflicts with) the real profile already assigned by a superuser.
             from organizations.models import AdminUser
-            
-            admin_profile, created = AdminUser.objects.get_or_create(
-                user=user,
-                defaults={'is_active': True}
-            )
-            
-            if avatar:
-                admin_profile.avatar = avatar
-            admin_profile.phone = phone
-            admin_profile.save()
+            try:
+                admin_profile = user.admin_profile
+                if avatar:
+                    admin_profile.avatar = avatar
+                admin_profile.phone = phone
+                admin_profile.save()
+            except AdminUser.DoesNotExist:
+                # Superuser with no admin profile: only create a minimal one when
+                # the user is actually a superuser (they legitimately have no role).
+                if user.is_superuser:
+                    admin_profile = AdminUser.objects.create(user=user, is_active=True)
+                    if avatar:
+                        admin_profile.avatar = avatar
+                    admin_profile.phone = phone
+                    admin_profile.save()
+                # Non-superusers without an admin profile should never happen in normal
+                # use — skip silently so we don't create a ghost role-less record.
 
             messages.success(request, "Profile updated successfully.")
             return redirect("dashboard")

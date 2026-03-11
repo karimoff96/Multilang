@@ -73,19 +73,55 @@
     <!-- Filters and Table -->
     <div class="card">
         <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div class="d-flex flex-wrap align-items-center gap-3">
-                <form method="get" class="d-flex flex-wrap align-items-center gap-2">
-                    <select name="status" class="form-select" style="min-width: 130px;" onchange="this.form.submit()">
-                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>{% trans "All Status" %}</option>
-                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>{% trans "Active" %}</option>
-                        <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>{% trans "Expired" %}</option>
-                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>{% trans "Pending" %}</option>
-                        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>{% trans "Cancelled" %}</option>
-                    </select>
-                    <input type="text" name="search" class="form-control" placeholder="{% trans 'Search...' %}" value="{{ search_query }}">
-                    <button type="submit" class="btn btn-primary-600">
-                        <iconify-icon icon="solar:magnifer-bold"></iconify-icon>
-                    </button>
+            <div class="d-flex flex-wrap align-items-center gap-3 w-100">
+                <form method="get" class="row g-2 w-100 align-items-end">
+                    <div class="col-md-2 col-sm-4">
+                        <label class="form-label text-sm mb-6">{% trans "Status" %}</label>
+                        <select name="status" class="form-select" onchange="this.form.submit()">
+                            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>{% trans "All Status" %}</option>
+                            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>{% trans "Active" %}</option>
+                            <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>{% trans "Expired" %}</option>
+                            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>{% trans "Pending" %}</option>
+                            <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>{% trans "Cancelled" %}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-sm-4">
+                        <label class="form-label text-sm mb-6">{% trans "Tariff" %}</label>
+                        <select name="tariff" class="form-select" onchange="this.form.submit()">
+                            <option value="">{% trans "All Tariffs" %}</option>
+                            {% for tariff in tariffs %}
+                            <option value="{{ tariff.id }}" {% if tariff_filter == tariff.id|stringformat:'s' %}selected{% endif %}>{{ tariff.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-sm-4">
+                        <label class="form-label text-sm mb-6">{% trans "Start From" %}</label>
+                        <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+                    </div>
+                    <div class="col-md-2 col-sm-4">
+                        <label class="form-label text-sm mb-6">{% trans "End To" %}</label>
+                        <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+                    </div>
+                    <div class="col-md-2 col-sm-4">
+                        <label class="form-label text-sm mb-6">{% trans "Sort" %}</label>
+                        <select name="sort" class="form-select" onchange="this.form.submit()">
+                            <option value="-end_date" {% if sort_by == '-end_date' %}selected{% endif %}>{% trans "End Date (Latest)" %}</option>
+                            <option value="end_date" {% if sort_by == 'end_date' %}selected{% endif %}>{% trans "End Date (Oldest)" %}</option>
+                            <option value="-start_date" {% if sort_by == '-start_date' %}selected{% endif %}>{% trans "Start Date (Latest)" %}</option>
+                            <option value="start_date" {% if sort_by == 'start_date' %}selected{% endif %}>{% trans "Start Date (Oldest)" %}</option>
+                            <option value="organization__name" {% if sort_by == 'organization__name' %}selected{% endif %}>{% trans "Organization (A-Z)" %}</option>
+                            <option value="-organization__name" {% if sort_by == '-organization__name' %}selected{% endif %}>{% trans "Organization (Z-A)" %}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-sm-4">
+                        <label class="form-label text-sm mb-6">{% trans "Search" %}</label>
+                        <div class="d-flex gap-2">
+                            <input type="text" name="search" class="form-control" placeholder="{% trans 'Search...' %}" value="{{ search_query }}">
+                            <button type="submit" class="btn btn-primary-600">
+                                <iconify-icon icon="solar:magnifer-bold"></iconify-icon>
+                            </button>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -159,7 +195,7 @@
                 <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                     {% if subscriptions.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ subscriptions.previous_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                        <a class="page-link" href="?page={{ subscriptions.previous_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if tariff_filter %}&tariff={{ tariff_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
                             <iconify-icon icon="ep:d-arrow-left"></iconify-icon>
                         </a>
                     </li>
@@ -168,12 +204,12 @@
                         {% if subscriptions.number == num %}
                         <li class="page-item active"><span class="page-link">{{ num }}</span></li>
                         {% elif num > subscriptions.number|add:'-3' and num < subscriptions.number|add:'3' %}
-                        <li class="page-item"><a class="page-link" href="?page={{ num }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if tariff_filter %}&tariff={{ tariff_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">{{ num }}</a></li>
                         {% endif %}
                     {% endfor %}
                     {% if subscriptions.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ subscriptions.next_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                        <a class="page-link" href="?page={{ subscriptions.next_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if tariff_filter %}&tariff={{ tariff_filter }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
                             <iconify-icon icon="ep:d-arrow-right"></iconify-icon>
                         </a>
                     </li>

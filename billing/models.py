@@ -34,6 +34,7 @@ class Tariff(models.Model):
     is_active = models.BooleanField(default=True, verbose_name=_("Active"))
     is_featured = models.BooleanField(default=False, verbose_name=_("Featured"))
     show_prices = models.BooleanField(default=True, verbose_name=_("Show Prices"), help_text=_("Display pricing options publicly"))
+    is_special = models.BooleanField(default=False, verbose_name=_("Private Tariff"), help_text=_("Hide from public landing page"))
     is_trial = models.BooleanField(default=False, verbose_name=_("Is Trial"), help_text=_("Free trial tariff"))
     trial_days = models.IntegerField(null=True, blank=True, verbose_name=_("Trial Days"), help_text=_("Duration of trial period in days (only for trial tariffs)"))
     display_order = models.IntegerField(default=0, verbose_name=_("Display Order"))

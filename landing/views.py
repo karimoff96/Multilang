@@ -31,7 +31,7 @@ def home(request):
     activate(lang)
     
     # Get active tariffs ordered by trial first, then by price
-    tariffs = Tariff.objects.filter(is_active=True).prefetch_related('pricing', 'features').order_by(
+    tariffs = Tariff.objects.filter(is_active=True, is_special=False).prefetch_related('pricing', 'features').order_by(
         '-is_trial',  # Trial tariffs first
         'display_order'  # Then by display order
     )
@@ -54,7 +54,7 @@ def home_lang(request, lang_code):
     request.session['landing_language'] = lang_code
     activate(lang_code)
 
-    tariffs = Tariff.objects.filter(is_active=True).prefetch_related('pricing', 'features').order_by(
+    tariffs = Tariff.objects.filter(is_active=True, is_special=False).prefetch_related('pricing', 'features').order_by(
         '-is_trial', 'display_order'
     )
     canonical_map = {'ru': 'https://multilang.uz/', 'en': 'https://multilang.uz/en/', 'uz': 'https://multilang.uz/uz/'}
