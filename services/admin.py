@@ -7,8 +7,10 @@ from .models import Category, Product, Language, Expense, GeneralExpenseCategory
 @admin.register(Language)
 class LanguageAdmin(admin.ModelAdmin):
     list_display = (
-        "name", 
+        "name",
         "short_name",
+        "branch",
+        "center_display",
         "agency_first_page_display",
         "agency_other_page_display",
         "agency_copy_display",
@@ -17,10 +19,12 @@ class LanguageAdmin(admin.ModelAdmin):
         "ordinary_copy_display",
         "created_at"
     )
-    
+    list_filter = ("branch", "branch__center")
+    search_fields = ("name", "short_name", "branch__name", "branch__center__name")
+
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'short_name')
+            'fields': ('name', 'short_name', 'branch')
         }),
         ('Agency Pricing', {
             'fields': ('agency_page_price', 'agency_other_page_price', 'agency_copy_price'),
@@ -36,7 +40,14 @@ class LanguageAdmin(admin.ModelAdmin):
         return format_html('<span style="color: #007bff; font-weight: bold;">{}</span>', f"{obj.agency_page_price:,.2f}")
     agency_first_page_display.short_description = "Agency 1st Page"
     agency_first_page_display.admin_order_field = "agency_page_price"
-    
+
+    def center_display(self, obj):
+        if obj.branch and obj.branch.center:
+            return obj.branch.center.name
+        return '-'
+    center_display.short_description = "Center"
+    center_display.admin_order_field = "branch__center__name"
+
     def agency_other_page_display(self, obj):
         return format_html('<span style="color: #17a2b8;">{}</span>', f"{obj.agency_other_page_price:,.2f}")
     agency_other_page_display.short_description = "Agency Other"

@@ -41,4 +41,5 @@ urlpatterns = [
     
     # AJAX Endpoints
     path("api/create-language/", views.createLanguageInline, name="createLanguageInline"),
+    path("api/languages-by-branch/<int:branch_id>/", views.getLanguagesByBranch, name="getLanguagesByBranch"),
 ]

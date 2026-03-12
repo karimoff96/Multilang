@@ -279,6 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify({
                 name: name,
                 short_name: shortName,
+                branch_id: '{{ category.branch_id }}',
                 agency_page_price: agencyPagePrice,
                 agency_other_page_price: agencyOtherPagePrice,
                 agency_copy_price: agencyCopyPrice,
@@ -296,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (emptyMessage) {
                     emptyMessage.remove();
                 }
-                
+
                 const newCheckbox = document.createElement('div');
                 newCheckbox.className = 'form-check';
                 newCheckbox.innerHTML = `
@@ -306,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </label>
                 `;
                 checkboxContainer.appendChild(newCheckbox);
-                
+
                 // Reset form and close modal
                 languageNameInput.value = '';
                 languageShortNameInput.value = '';
@@ -317,7 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('ordinaryOtherPagePrice').value = '0';
                 document.getElementById('ordinaryCopyPrice').value = '0';
                 addLanguageModal.hide();
-                
+
                 // Show success message
                 alert('Language created successfully!');
             } else {

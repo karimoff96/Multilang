@@ -20,6 +20,34 @@
                         <div class="col-12">
                             <h6 class="text-md fw-semibold mb-16 text-neutral-600">Basic Information</h6>
                         </div>
+                        {% if can_change_branch %}
+                        <div class="col-12">
+                            <label for="branch_id" class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                Branch <span class="text-danger-600">*</span>
+                            </label>
+                            <select class="form-control radius-8" id="branch_id" name="branch_id">
+                                <option value="">— No branch (global) —</option>
+                                {% for b in selectable_branches %}
+                                <option value="{{ b.id }}" {% if language.branch_id == b.id %}selected{% endif %}>
+                                    {{ b.center.name }} – {{ b.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if not language.branch %}
+                            <small class="text-warning-600">
+                                <iconify-icon icon="mdi:alert" class="me-4"></iconify-icon>
+                                This language has no branch assigned. Assign it to a branch so it can be managed and deleted.
+                            </small>
+                            {% endif %}
+                        </div>
+                        {% elif language.branch %}
+                        <div class="col-12">
+                            <div class="alert alert-light d-flex align-items-center py-8 px-12 mb-0">
+                                <iconify-icon icon="mdi:source-branch" class="me-8 text-secondary-600" style="font-size: 18px;"></iconify-icon>
+                                <small class="text-secondary-600">Branch: <strong>{{ language.branch.center.name }} – {{ language.branch.name }}</strong></small>
+                            </div>
+                        </div>
+                        {% endif %}
                         <div class="col-md-6">
                             <label for="name" class="form-label fw-semibold text-primary-light text-sm mb-8">
                                 Language Name <span class="text-danger-600">*</span>

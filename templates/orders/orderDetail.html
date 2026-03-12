@@ -267,10 +267,14 @@
                 <!-- Payment Info -->
                 <div class="mt-24">
                     <h6 class="text-md fw-semibold mb-16" data-i18n="detail.paymentInformation">Payment Information</h6>
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
                         {% if order.payment_type == 'cash' %}
                             <span class="badge bg-success-focus text-success-600 px-16 py-8 d-inline-flex align-items-center">
                                 <iconify-icon icon="mdi:cash" class="me-1 text-lg"></iconify-icon> <span data-i18n="detail.cashPayment">Cash Payment</span>
+                            </span>
+                        {% elif order.payment_source == 'payme' %}
+                            <span class="badge bg-info-focus text-info-600 px-16 py-8 d-inline-flex align-items-center">
+                                <iconify-icon icon="mdi:credit-card-check" class="me-1 text-lg"></iconify-icon> Payme
                             </span>
                         {% else %}
                             <span class="badge bg-primary-focus text-primary-600 px-16 py-8 d-inline-flex align-items-center">
@@ -285,6 +289,40 @@
                             </span>
                         {% endif %}
                     </div>
+
+                    {% if order.payment_source == 'payme' %}
+                    {% with tx=order.payme_transactions.all|dictsortreversed:"created_at"|first %}
+                    {% if tx and tx.state == 2 %}
+                    <div class="mt-16 p-16 radius-8 border border-info-200" style="background:rgba(13,202,240,.06)">
+                        <div class="d-flex align-items-center gap-2 mb-12">
+                            <iconify-icon icon="mdi:credit-card-check" class="text-info-600 text-xl"></iconify-icon>
+                            <span class="fw-semibold text-info-600">Payme Transaction</span>
+                        </div>
+                        <div class="row g-2 text-sm">
+                            <div class="col-sm-6">
+                                <span class="text-secondary-light">Transaction ID</span><br>
+                                <code class="text-xs">{{ tx.payme_transaction_id }}</code>
+                            </div>
+                            <div class="col-sm-3">
+                                <span class="text-secondary-light">Amount</span><br>
+                                <span class="fw-medium">{{ tx.amount_sum|floatformat:0|intspace }} UZS</span>
+                            </div>
+                            <div class="col-sm-3">
+                                <span class="text-secondary-light">Confirmed at</span><br>
+                                <span class="fw-medium">{{ tx.updated_at|date:"d M Y H:i" }}</span>
+                            </div>
+                        </div>
+                        <div class="mt-12">
+                            {% if payme_receipt_url %}
+                            <a href="{{ payme_receipt_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-info btn-sm py-4 px-12 d-inline-flex align-items-center gap-1">
+                                <iconify-icon icon="mdi:receipt"></iconify-icon> View Payme Receipt
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                    {% endif %}
                     
                     <!-- Receipts Section -->
                     {% if order.receipts.exists %}

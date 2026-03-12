@@ -202,6 +202,17 @@ class Order(models.Model):
         default="cash",
         verbose_name=_("Payment Type"),
     )
+    PAYMENT_SOURCE = (
+        ("manual", _("Manual")),  # Cash or manual card transfer + receipt upload
+        ("payme", _("Payme")),    # Paid via Payme checkout
+    )
+    payment_source = models.CharField(
+        max_length=20,
+        choices=PAYMENT_SOURCE,
+        default="manual",
+        verbose_name=_("Payment Source"),
+        db_index=True,
+    )
     recipt = models.FileField(
         upload_to="recipts/", blank=True, null=True, verbose_name=_("Receipt"),
         max_length=255,

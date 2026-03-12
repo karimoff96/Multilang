@@ -868,19 +868,24 @@ def finance(request):
 
     # ============ PAYMENT TYPE BREAKDOWN ============
     def get_payment_breakdown(orders_queryset):
-        breakdown = orders_queryset.values("payment_type").annotate(
+        breakdown = orders_queryset.values("payment_type", "payment_source").annotate(
             count=Count("id"), revenue=Sum("total_price")
         )
         result = {
-            "cash": {"count": 0, "revenue": 0},
-            "card": {"count": 0, "revenue": 0},
+            "cash":     {"count": 0, "revenue": 0},
+            "payme":    {"count": 0, "revenue": 0},
+            "card":     {"count": 0, "revenue": 0},  # manual card transfer
         }
         for item in breakdown:
-            if item["payment_type"] in result:
-                result[item["payment_type"]] = {
-                    "count": item["count"],
-                    "revenue": float(item["revenue"] or 0),
-                }
+            if item["payment_type"] == "cash":
+                result["cash"]["count"]   += item["count"]
+                result["cash"]["revenue"] += float(item["revenue"] or 0)
+            elif item["payment_source"] == "payme":
+                result["payme"]["count"]   += item["count"]
+                result["payme"]["revenue"] += float(item["revenue"] or 0)
+            else:
+                result["card"]["count"]   += item["count"]
+                result["card"]["revenue"] += float(item["revenue"] or 0)
         return result
 
     payment_breakdown = {

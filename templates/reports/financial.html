@@ -214,7 +214,7 @@
                                     {% elif item.status == 'in_progress' %}
                                     <span class="badge bg-info-focus text-info-main" data-i18n="status.inProgress">{{ item.status_display }}</span>
                                     {% else %}
-                                    <span class="badge bg-warning-focus text-warning-main" data-i18n="status.pending">{{ item.status_display }}</span>
+                                    <span class="badge bg-warning-focus text-warning-main">{{ item.status_display }}</span>
                                     {% endif %}
                                 </td>
                                 <td class="{{ row_color }} text-end text-secondary-light">{{ item.revenue|smart_num }}</td>

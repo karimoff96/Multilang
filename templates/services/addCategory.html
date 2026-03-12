@@ -113,23 +113,14 @@
                             <small class="text-secondary-light">Select languages this category can be translated to</small>
                             {% can_do 'languages.create' as can_create_languages %}
                             {% if can_create_languages %}
-                            <button type="button" class="btn btn-sm btn-outline-primary radius-8 px-12 py-6" data-bs-toggle="modal" data-bs-target="#addLanguageModal">
+                            <button type="button" class="btn btn-sm btn-outline-primary radius-8 px-12 py-6" id="addLangBtn" disabled data-bs-toggle="modal" data-bs-target="#addLanguageModal">
                                 <iconify-icon icon="mdi:plus" class="text-lg"></iconify-icon>
                                 <span class="text-sm">Add New Language</span>
                             </button>
                             {% endif %}
                         </div>
                         <div id="languageCheckboxes" class="d-flex flex-wrap gap-3">
-                            {% for lang in languages %}
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="languages" value="{{ lang.id }}" id="lang{{ lang.id }}">
-                                <label class="form-check-label" for="lang{{ lang.id }}">
-                                    {{ lang.name }} ({{ lang.short_name }})
-                                </label>
-                            </div>
-                            {% empty %}
-                            <p class="text-secondary-light">No languages available. Please add languages first.</p>
-                            {% endfor %}
+                            <p class="text-secondary-light">Select a branch first to load available languages.</p>
                         </div>
                     </div>
                     
@@ -243,7 +234,49 @@ document.addEventListener('DOMContentLoaded', function() {
     languageShortNameInput.addEventListener('input', function() {
         this.value = this.value.toUpperCase();
     });
-    
+
+    // Load languages when branch changes
+    const branchSelect = document.getElementById('branch');
+    const addLangBtn = document.getElementById('addLangBtn');
+    const langCheckboxes = document.getElementById('languageCheckboxes');
+
+    function loadLanguagesForBranch(branchId) {
+        if (!branchId) {
+            langCheckboxes.innerHTML = '<p class="text-secondary-light">Select a branch first to load available languages.</p>';
+            if (addLangBtn) addLangBtn.disabled = true;
+            return;
+        }
+        langCheckboxes.innerHTML = '<p class="text-secondary-light"><span class="spinner-border spinner-border-sm me-1"></span> Loading languages...</p>';
+        if (addLangBtn) addLangBtn.disabled = true;
+        fetch(`{% url 'getLanguagesByBranch' 0 %}`.replace('/0/', `/${branchId}/`))
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.languages.length === 0) {
+                        langCheckboxes.innerHTML = '<p class="text-secondary-light">No languages for this branch. Add one using the button above.</p>';
+                    } else {
+                        langCheckboxes.innerHTML = data.languages.map(l =>
+                            `<div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="languages" value="${l.id}" id="lang${l.id}">
+                                <label class="form-check-label" for="lang${l.id}">${l.name} (${l.short_name})</label>
+                            </div>`
+                        ).join('');
+                    }
+                    if (addLangBtn) addLangBtn.disabled = false;
+                }
+            })
+            .catch(() => {
+                langCheckboxes.innerHTML = '<p class="text-danger">Failed to load languages.</p>';
+            });
+    }
+
+    if (branchSelect) {
+        branchSelect.addEventListener('change', function() {
+            loadLanguagesForBranch(this.value);
+        });
+        if (branchSelect.value) loadLanguagesForBranch(branchSelect.value);
+    }
+
     saveLanguageBtn.addEventListener('click', function() {
         const name = languageNameInput.value.trim();
         const shortName = languageShortNameInput.value.trim().toUpperCase();
@@ -277,6 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify({
                 name: name,
                 short_name: shortName,
+                branch_id: document.getElementById('branch').value,
                 agency_page_price: agencyPagePrice,
                 agency_other_page_price: agencyOtherPagePrice,
                 agency_copy_price: agencyCopyPrice,
@@ -288,22 +322,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Add new checkbox to the list
-                const checkboxContainer = document.getElementById('languageCheckboxes');
-                const emptyMessage = checkboxContainer.querySelector('p');
-                if (emptyMessage) {
-                    emptyMessage.remove();
-                }
-                
-                const newCheckbox = document.createElement('div');
-                newCheckbox.className = 'form-check';
-                newCheckbox.innerHTML = `
-                    <input class="form-check-input" type="checkbox" name="languages" value="${data.language.id}" id="lang${data.language.id}" checked>
-                    <label class="form-check-label" for="lang${data.language.id}">
-                        ${data.language.name} (${data.language.short_name})
-                    </label>
-                `;
-                checkboxContainer.appendChild(newCheckbox);
+                // Add new checkbox to the list and reload languages
+                loadLanguagesForBranch(document.getElementById('branch').value);
                 
                 // Reset form and close modal
                 languageNameInput.value = '';

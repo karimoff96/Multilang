@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from decimal import Decimal, InvalidOperation
 from .models import Category, Product, Language, Expense, GeneralExpenseCategory, GeneralExpense
-from organizations.rbac import get_user_categories, get_user_products, get_user_branches, get_user_expenses, permission_required, any_permission_required
+from organizations.rbac import get_user_categories, get_user_products, get_user_branches, get_user_expenses, get_user_languages, permission_required, any_permission_required
 from organizations.models import TranslationCenter, Branch
 from billing.decorators import require_feature, require_active_subscription
 
@@ -119,7 +119,7 @@ def categoryDetail(request, category_id):
 @any_permission_required('can_create_products', 'can_manage_products')
 def addCategory(request):
     """Add a new category"""
-    languages = Language.objects.all()
+    languages = get_user_languages(request.user).select_related('branch', 'branch__center').order_by('name')
     branches = get_user_branches(request.user).select_related('center')
     
     if request.method == 'POST':
@@ -201,7 +201,7 @@ def editCategory(request, category_id):
     # Get category with RBAC check
     accessible_categories = get_user_categories(request.user)
     category = get_object_or_404(accessible_categories.select_related('branch', 'branch__center'), id=category_id)
-    languages = Language.objects.all()
+    languages = get_user_languages(request.user).select_related('branch', 'branch__center').filter(branch=category.branch).order_by('name')
     branches = get_user_branches(request.user).select_related('center')
     
     if request.method == 'POST':
@@ -1063,17 +1063,18 @@ def createExpenseInline(request):
 def createLanguageInline(request):
     """Create a language inline via AJAX"""
     import json
-    
+
     try:
         # Check if JSON or form data
         if request.content_type == 'application/json':
             data = json.loads(request.body)
         else:
             data = request.POST
-        
+
         name = data.get('name', '').strip()
         short_name = data.get('short_name', '').strip()
-        
+        branch_id = data.get('branch_id', '')
+
         # Get pricing fields (optional, default to 0)
         agency_page_price = Decimal(data.get('agency_page_price', '0') or '0')
         agency_other_page_price = Decimal(data.get('agency_other_page_price', '0') or '0')
@@ -1081,24 +1082,32 @@ def createLanguageInline(request):
         ordinary_page_price = Decimal(data.get('ordinary_page_price', '0') or '0')
         ordinary_other_page_price = Decimal(data.get('ordinary_other_page_price', '0') or '0')
         ordinary_copy_price = Decimal(data.get('ordinary_copy_price', '0') or '0')
-        
+
         if not name:
             return JsonResponse({'success': False, 'error': 'Language name is required.'}, status=400)
-        
+
         if not short_name:
             return JsonResponse({'success': False, 'error': 'Short name is required.'}, status=400)
-        
-        # Check if language already exists
-        if Language.objects.filter(name__iexact=name).exists():
-            return JsonResponse({'success': False, 'error': f'Language "{name}" already exists.'}, status=400)
-        
-        if Language.objects.filter(short_name__iexact=short_name).exists():
-            return JsonResponse({'success': False, 'error': f'Short name "{short_name}" already exists.'}, status=400)
-        
+
+        if not branch_id:
+            return JsonResponse({'success': False, 'error': 'Branch is required.'}, status=400)
+
+        # Verify branch access
+        accessible_branches = get_user_branches(request.user)
+        branch = get_object_or_404(accessible_branches, id=branch_id)
+
+        # Check per-branch uniqueness
+        if Language.objects.filter(name__iexact=name, branch=branch).exists():
+            return JsonResponse({'success': False, 'error': f'Language "{name}" already exists for this branch.'}, status=400)
+
+        if Language.objects.filter(short_name__iexact=short_name, branch=branch).exists():
+            return JsonResponse({'success': False, 'error': f'Short name "{short_name}" already exists for this branch.'}, status=400)
+
         # Create the language
         language = Language.objects.create(
             name=name,
             short_name=short_name.upper(),
+            branch=branch,
             agency_page_price=agency_page_price,
             agency_other_page_price=agency_other_page_price,
             agency_copy_price=agency_copy_price,
@@ -1106,7 +1115,7 @@ def createLanguageInline(request):
             ordinary_other_page_price=ordinary_other_page_price,
             ordinary_copy_price=ordinary_copy_price,
         )
-        
+
         return JsonResponse({
             'success': True,
             'language': {
@@ -1115,11 +1124,23 @@ def createLanguageInline(request):
                 'short_name': language.short_name,
             }
         })
-        
+
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'error': 'Invalid JSON data.'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required(login_url='admin_login')
+def getLanguagesByBranch(request, branch_id):
+    """Return languages for a given branch (AJAX helper for category forms)"""
+    accessible_branches = get_user_branches(request.user)
+    branch = get_object_or_404(accessible_branches, id=branch_id)
+    languages = Language.objects.filter(branch=branch).order_by('name')
+    return JsonResponse({
+        'success': True,
+        'languages': [{'id': l.id, 'name': l.name, 'short_name': l.short_name} for l in languages],
+    })
 
 
 # ============ Language Management Views ============
@@ -1128,8 +1149,24 @@ def createLanguageInline(request):
 @any_permission_required('can_view_languages', 'can_manage_languages')
 def languageList(request):
     """List all languages with pricing information"""
-    languages = Language.objects.all().order_by('name')
-    
+    languages = get_user_languages(request.user).select_related('branch', 'branch__center').order_by('branch__center__name', 'branch__name', 'name')
+
+    branches = get_user_branches(request.user).select_related('center')
+
+    # Center filter (superuser only)
+    centers = None
+    center_filter = request.GET.get('center', '')
+    if request.user.is_superuser:
+        centers = TranslationCenter.objects.filter(is_active=True)
+        if center_filter:
+            languages = languages.filter(branch__center_id=center_filter)
+            branches = branches.filter(center_id=center_filter)
+
+    # Branch filter
+    branch_filter = request.GET.get('branch', '')
+    if branch_filter:
+        languages = languages.filter(branch_id=branch_filter)
+
     # Search functionality
     search_query = request.GET.get('search', '')
     if search_query:
@@ -1137,24 +1174,28 @@ def languageList(request):
             Q(name__icontains=search_query) |
             Q(short_name__icontains=search_query)
         )
-    
+
     # Pagination
     per_page = request.GET.get('per_page', 20)
     try:
         per_page = int(per_page)
     except ValueError:
         per_page = 20
-    
+
     paginator = Paginator(languages, per_page)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
-    
+
     context = {
         "title": _("Languages"),
         "subTitle": _("Manage Languages"),
         "title_i18n": "languages.pageTitle",
         "subTitle_i18n": "languages.manageLanguages",
         "languages": page_obj,
+        "branches": branches,
+        "centers": centers,
+        "branch_filter": branch_filter,
+        "center_filter": center_filter,
         "search_query": search_query,
         "per_page": per_page,
     }
@@ -1165,12 +1206,47 @@ def languageList(request):
 @any_permission_required('can_edit_languages', 'can_manage_languages')
 def editLanguage(request, language_id):
     """Edit an existing language"""
-    language = get_object_or_404(Language, id=language_id)
-    
+    language = get_object_or_404(get_user_languages(request.user).select_related('branch', 'branch__center'), id=language_id)
+
+    # Determine if user can change the branch assignment
+    is_superuser = request.user.is_superuser
+    is_owner = getattr(request, 'is_owner', False)
+    can_change_branch = is_superuser or is_owner
+
+    # Build branch list for the selector (only for high-level users)
+    if can_change_branch:
+        selectable_branches = get_user_branches(request.user).select_related('center').order_by('center__name', 'name')
+    else:
+        selectable_branches = None
+
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         short_name = request.POST.get('short_name', '').strip().upper()
-        
+
+        # Determine the target branch
+        if can_change_branch:
+            new_branch_id = request.POST.get('branch_id') or None
+            if new_branch_id:
+                try:
+                    new_branch_id = int(new_branch_id)
+                    from organizations.models import Branch as BranchModel
+                    new_branch = get_user_branches(request.user).get(id=new_branch_id)
+                except (ValueError, BranchModel.DoesNotExist):
+                    messages.error(request, 'Invalid branch selected.')
+                    context = {
+                        "title": f"Edit {language.name}",
+                        "subTitle": _("Edit Language"),
+                        "title_i18n": "languages.editLanguage",
+                        "language": language,
+                        "can_change_branch": can_change_branch,
+                        "selectable_branches": selectable_branches,
+                    }
+                    return render(request, "services/editLanguage.html", context)
+            else:
+                new_branch = None
+        else:
+            new_branch = language.branch  # branch-level users cannot change branch
+
         # Get pricing fields
         try:
             agency_page_price = Decimal(request.POST.get('agency_page_price', '0') or '0')
@@ -1181,20 +1257,29 @@ def editLanguage(request, language_id):
             ordinary_copy_price = Decimal(request.POST.get('ordinary_copy_price', '0') or '0')
         except (ValueError, InvalidOperation):
             messages.error(request, 'Invalid price values. Please enter valid numbers.')
-            return render(request, "services/editLanguage.html", {"language": language})
-        
+            context = {
+                "title": f"Edit {language.name}",
+                "subTitle": _("Edit Language"),
+                "title_i18n": "languages.editLanguage",
+                "language": language,
+                "can_change_branch": can_change_branch,
+                "selectable_branches": selectable_branches,
+            }
+            return render(request, "services/editLanguage.html", context)
+
         if not name:
             messages.error(request, 'Language name is required.')
         elif not short_name:
             messages.error(request, 'Short name is required.')
-        elif Language.objects.filter(name__iexact=name).exclude(id=language_id).exists():
-            messages.error(request, f'A language with the name "{name}" already exists.')
-        elif Language.objects.filter(short_name__iexact=short_name).exclude(id=language_id).exists():
-            messages.error(request, f'A language with short name "{short_name}" already exists.')
+        elif Language.objects.filter(name__iexact=name, branch=new_branch).exclude(id=language_id).exists():
+            messages.error(request, f'A language with the name "{name}" already exists for this branch.')
+        elif Language.objects.filter(short_name__iexact=short_name, branch=new_branch).exclude(id=language_id).exists():
+            messages.error(request, f'A language with short name "{short_name}" already exists for this branch.')
         else:
             try:
                 language.name = name
                 language.short_name = short_name
+                language.branch = new_branch
                 language.agency_page_price = agency_page_price
                 language.agency_other_page_price = agency_other_page_price
                 language.agency_copy_price = agency_copy_price
@@ -1202,18 +1287,20 @@ def editLanguage(request, language_id):
                 language.ordinary_other_page_price = ordinary_other_page_price
                 language.ordinary_copy_price = ordinary_copy_price
                 language.save()
-                
+
                 messages.success(request, f'Language "{language.name}" updated successfully!')
                 return redirect('languageList')
             except Exception as e:
                 logger.error(f"Error updating language {language_id}: {e}")
                 messages.error(request, f'Error updating language: {str(e)}')
-    
+
     context = {
         "title": f"Edit {language.name}",
         "subTitle": _("Edit Language"),
         "title_i18n": "languages.editLanguage",
         "language": language,
+        "can_change_branch": can_change_branch,
+        "selectable_branches": selectable_branches,
     }
     return render(request, "services/editLanguage.html", context)
 
@@ -1224,15 +1311,15 @@ def editLanguage(request, language_id):
 def deleteLanguage(request, language_id):
     """Delete a language via AJAX"""
     import json
-    
+
     try:
-        language = get_object_or_404(Language, id=language_id)
+        language = get_object_or_404(get_user_languages(request.user), id=language_id)
         language_name = language.name
         
         # Check if language is being used in any orders
         from orders.models import Order
         orders_using_language = Order.objects.filter(
-            language_pairs__language=language
+            language=language
         ).count()
         
         if orders_using_language > 0:

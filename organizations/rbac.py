@@ -747,3 +747,14 @@ def get_user_expenses(user):
     
     accessible_branches = get_user_branches(user)
     return Expense.objects.filter(branch__in=accessible_branches)
+
+
+def get_user_languages(user):
+    """Get all languages accessible by this user."""
+    from services.models import Language
+
+    if user.is_superuser:
+        return Language.objects.all()
+
+    accessible_branches = get_user_branches(user)
+    return Language.objects.filter(branch__in=accessible_branches)

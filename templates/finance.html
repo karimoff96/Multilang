@@ -223,10 +223,20 @@
                             <span class="text-secondary-light text-xs d-block" id="cashCount">(0 <span data-i18n="sidebar.orders">orders</span>)</span>
                         </div>
                     </div>
+                    <div class="d-flex align-items-center justify-content-between p-12 radius-8" style="background:rgba(13,202,240,.1)">
+                        <div class="d-flex align-items-center gap-2">
+                            <iconify-icon icon="mdi:credit-card-check" class="text-info-600 text-xl"></iconify-icon>
+                            <span class="text-primary-light text-sm fw-medium">Payme</span>
+                        </div>
+                        <div class="text-end">
+                            <span class="fw-bold text-info-600" id="paymeRevenue">0 UZS</span>
+                            <span class="text-secondary-light text-xs d-block" id="paymeCount">(0 <span data-i18n="sidebar.orders">orders</span>)</span>
+                        </div>
+                    </div>
                     <div class="d-flex align-items-center justify-content-between p-12 radius-8 bg-primary-focus">
                         <div class="d-flex align-items-center gap-2">
                             <iconify-icon icon="solar:card-bold" class="text-primary-600 text-xl"></iconify-icon>
-                            <span class="text-primary-light text-sm fw-medium" data-i18n="finance.card">Card</span>
+                            <span class="text-primary-light text-sm fw-medium" data-i18n="finance.card">Card Transfer</span>
                         </div>
                         <div class="text-end">
                             <span class="fw-bold text-primary-600" id="cardRevenue">0 UZS</span>
@@ -406,19 +416,21 @@ function updatePaymentChart(period) {
     const data = paymentBreakdownData[period];
     document.getElementById('cashRevenue').innerHTML = compactHtml(data.cash.revenue, ' UZS');
     document.getElementById('cashCount').innerHTML = '(' + compactHtml(data.cash.count, '') + ' orders)';
+    document.getElementById('paymeRevenue').innerHTML = compactHtml(data.payme.revenue, ' UZS');
+    document.getElementById('paymeCount').innerHTML = '(' + compactHtml(data.payme.count, '') + ' orders)';
     document.getElementById('cardRevenue').innerHTML = compactHtml(data.card.revenue, ' UZS');
     document.getElementById('cardCount').innerHTML = '(' + compactHtml(data.card.count, '') + ' orders)';
     if (window.WowDashNumbers) window.WowDashNumbers.refreshTooltips(document);
-    if (paymentDonutChart) paymentDonutChart.updateSeries([data.cash.revenue, data.card.revenue]);
+    if (paymentDonutChart) paymentDonutChart.updateSeries([data.cash.revenue, data.payme.revenue, data.card.revenue]);
 }
 function initPaymentDonutChart() {
     const colors = getThemeColors();
     const data = paymentBreakdownData.yearly;
     paymentDonutChart = new ApexCharts(document.querySelector("#paymentDonutChart"), {
-        series: [data.cash.revenue, data.card.revenue],
+        series: [data.cash.revenue, data.payme.revenue, data.card.revenue],
         chart: { type: 'donut', height: 180 },
-        labels: ['Cash', 'Card'],
-        colors: ['#45B369', '#487FFF'],
+        labels: ['Cash', 'Payme', 'Card Transfer'],
+        colors: ['#45B369', '#0dcaf0', '#487FFF'],
         legend: { show: false },
         dataLabels: { enabled: false },
         tooltip: { theme: 'dark', fillSeriesColor: false, y: { formatter: val => formatFull(val) + ' UZS', title: { formatter: series => series } }, marker: { show: true } },

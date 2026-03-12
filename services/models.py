@@ -166,11 +166,20 @@ class Expense(models.Model):
 class Language(models.Model):
     """Languages for translation with pricing"""
 
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.CASCADE,
+        related_name='languages',
+        verbose_name=_("Branch"),
+        null=True,
+        blank=True,
+        help_text=_("Branch this language belongs to")
+    )
     name = models.CharField(
-        max_length=100, unique=True, verbose_name=_("Language Name")
+        max_length=100, verbose_name=_("Language Name")
     )
     short_name = models.CharField(
-        max_length=10, unique=True, verbose_name=_("Short Name")
+        max_length=10, verbose_name=_("Short Name")
     )
     
     # Pricing fields for agencies
@@ -228,6 +237,7 @@ class Language(models.Model):
     class Meta:
         verbose_name = str(_("Language"))
         verbose_name_plural = str(_("Languages"))
+        unique_together = [('branch', 'name'), ('branch', 'short_name')]
 
 
 class Category(models.Model):

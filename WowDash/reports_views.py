@@ -222,23 +222,40 @@ def financial_reports(request):
             daily_values.append(float(item["revenue"] or 0))
             daily_counts.append(item["count"])
 
-    # Revenue by status
+    # Revenue by status — group into logical buckets so that all "pending-like"
+    # statuses (pending, payment_pending, payment_received, payment_confirmed, ready)
+    # are combined into a single row instead of appearing as separate "Pending" rows.
+    PENDING_STATUSES = {"pending", "payment_pending", "payment_received", "payment_confirmed", "ready"}
+    SHOW_INDIVIDUALLY = {"completed", "in_progress", "cancelled"}
+
     status_breakdown = (
         orders.values("status")
         .annotate(revenue=Sum("total_price"), count=Count("id"))
         .order_by("-revenue")
     )
 
-    status_data = []
+    # Aggregate individual statuses
+    grouped: dict = {}
     for item in status_breakdown:
+        s = item["status"]
+        bucket = s if s in SHOW_INDIVIDUALLY else "pending"
+        if bucket not in grouped:
+            grouped[bucket] = {"revenue": 0.0, "count": 0}
+        grouped[bucket]["revenue"] += float(item["revenue"] or 0)
+        grouped[bucket]["count"] += item["count"]
+
+    # Sort by revenue descending and build final list
+    status_choices_map = dict(Order.STATUS_CHOICES)
+    status_choices_map["pending"] = str(_("Pending"))  # canonical display label
+
+    status_data = []
+    for bucket, totals in sorted(grouped.items(), key=lambda x: -x[1]["revenue"]):
         status_data.append(
             {
-                "status": item["status"],
-                "status_display": dict(Order.STATUS_CHOICES).get(
-                    item["status"], item["status"]
-                ),
-                "revenue": float(item["revenue"] or 0),
-                "count": item["count"],
+                "status": bucket,
+                "status_display": status_choices_map.get(bucket, bucket),
+                "revenue": round(totals["revenue"], 2),
+                "count": totals["count"],
             }
         )
 

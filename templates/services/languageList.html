@@ -25,7 +25,25 @@
                 <!-- Search and Filter -->
                 <form method="get" class="mb-20">
                     <div class="row g-3">
-                        <div class="col-lg-6 col-md-6 col-12">
+                        {% if centers %}
+                        <div class="col-lg-3 col-md-4 col-12">
+                            <select name="center" class="form-select">
+                                <option value="">All Centers</option>
+                                {% for c in centers %}
+                                <option value="{{ c.id }}" {% if center_filter == c.id|stringformat:'s' %}selected{% endif %}>{{ c.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <div class="col-lg-3 col-md-4 col-12">
+                            <select name="branch" class="form-select">
+                                <option value="">All Branches</option>
+                                {% for b in branches %}
+                                <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:'s' %}selected{% endif %}>{{ b.center.name }} - {{ b.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-4 col-12">
                             <input type="text" name="search" class="form-control" data-i18n-placeholder="form.searchLanguage" placeholder="Search by language name or code..." value="{{ search_query }}">
                         </div>
                         <div class="col-lg-2 col-md-3 col-sm-4 col-12">
@@ -36,13 +54,13 @@
                                 <option value="100" {% if per_page == 100 %}selected{% endif %}>100 per page</option>
                             </select>
                         </div>
-                        <div class="col-lg-4 col-md-3 col-sm-8 col-12">
+                        <div class="col-lg-1 col-md-3 col-sm-8 col-12">
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary flex-grow-1">
-                                    <iconify-icon icon="mdi:magnify"></iconify-icon> Search
+                                    <iconify-icon icon="mdi:magnify"></iconify-icon>
                                 </button>
                                 <a href="{% url 'languageList' %}" class="btn btn-secondary">
-                                    <iconify-icon icon="mdi:refresh"></iconify-icon> Reset
+                                    <iconify-icon icon="mdi:refresh"></iconify-icon>
                                 </a>
                             </div>
                         </div>
@@ -51,17 +69,18 @@
 
                 <!-- Languages Table -->
                 <div class="table-responsive" style="overflow-x: auto;">
-                    <table class="table bordered-table mb-0" style="min-width: 800px;">
+                    <table class="table bordered-table mb-0" style="min-width: 900px;">
                         <thead>
                             <tr>
                                 <th data-i18n="table.language">Language</th>
                                 <th data-i18n="table.shortCode">Short Code</th>
+                                <th>Branch</th>
                                 <th class="text-center" colspan="3" data-i18n="pricing.agencyPricing">Agency Pricing (UZS)</th>
                                 <th class="text-center" colspan="3" data-i18n="pricing.ordinaryPricing">Ordinary User Pricing (UZS)</th>
                                 <th class="text-center" data-i18n="table.action">Actions</th>
                             </tr>
                             <tr class="bg-neutral-50">
-                                <th colspan="2"></th>
+                                <th colspan="3"></th>
                                 <th class="text-center text-sm">1st Page</th>
                                 <th class="text-center text-sm">Other Pages</th>
                                 <th class="text-center text-sm">Copy</th>
@@ -77,6 +96,14 @@
                                 <td class="fw-semibold">{{ language.name }}</td>
                                 <td>
                                     <span class="badge bg-primary-100 text-primary-600 px-12 py-6">{{ language.short_name }}</span>
+                                </td>
+                                <td class="text-sm">
+                                    {% if language.branch %}
+                                    <span class="text-secondary-600">{{ language.branch.center.name }}</span>
+                                    <br><small class="text-secondary-light">{{ language.branch.name }}</small>
+                                    {% else %}
+                                    <span class="text-secondary-light">—</span>
+                                    {% endif %}
                                 </td>
                                 <!-- Agency Pricing -->
                                 <td class="text-end text-primary-600">{{ language.agency_page_price|smart_num }}</td>
@@ -113,7 +140,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="9" class="text-center py-20">
+                                <td colspan="10" class="text-center py-20">
                                     <iconify-icon icon="mdi:translate-off" class="text-secondary-light" style="font-size: 48px;"></iconify-icon>
                                     <p class="text-secondary-light mt-2 mb-0">No languages found</p>
                                 </td>
@@ -177,6 +204,15 @@
             <div class="modal-body">
                 <form id="addLanguageForm">
                     {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="languageBranch" class="form-label fw-semibold">Branch <span class="text-danger">*</span></label>
+                        <select class="form-select radius-8" id="languageBranch" required>
+                            <option value="">Select Branch</option>
+                            {% for b in branches %}
+                            <option value="{{ b.id }}">{{ b.center.name }} – {{ b.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <div class="mb-3">
                         <label for="languageName" class="form-label fw-semibold" data-i18n="form.languageName">Language Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control radius-8" id="languageName" required data-i18n-placeholder="form.languageNamePlaceholder" placeholder="e.g., English, French, Spanish">
@@ -251,24 +287,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorDiv = document.getElementById('languageError');
     const languageNameInput = document.getElementById('languageName');
     const languageShortNameInput = document.getElementById('languageShortName');
-    
+    const branchSelect = document.getElementById('languageBranch');
+
     if (!modal) return;
-    
+
     // Auto-capitalize short name
     languageShortNameInput.addEventListener('input', function() {
         this.value = this.value.toUpperCase();
     });
-    
+
     saveBtn.addEventListener('click', function() {
         const name = languageNameInput.value.trim();
         const shortName = languageShortNameInput.value.trim().toUpperCase();
-        
+        const branchId = branchSelect.value;
+
+        if (!branchId) {
+            errorDiv.textContent = 'Please select a branch.';
+            errorDiv.classList.remove('d-none');
+            return;
+        }
+
         if (!name || !shortName) {
             errorDiv.textContent = 'Both Language Name and Short Name are required.';
             errorDiv.classList.remove('d-none');
             return;
         }
-        
+
         // Get pricing values
         const agencyPagePrice = document.getElementById('agencyPagePrice').value || '0';
         const agencyOtherPagePrice = document.getElementById('agencyOtherPagePrice').value || '0';
@@ -292,6 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify({
                 name: name,
                 short_name: shortName,
+                branch_id: branchId,
                 agency_page_price: agencyPagePrice,
                 agency_other_page_price: agencyOtherPagePrice,
                 agency_copy_price: agencyCopyPrice,
@@ -306,19 +351,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Close modal and reload page
                 const modalInstance = bootstrap.Modal.getInstance(modal);
                 modalInstance.hide();
-                
-                // Show success message
-                const successAlert = document.createElement('div');
-                successAlert.className = 'alert alert-success alert-dismissible fade show';
-                successAlert.innerHTML = `
-                    <iconify-icon icon="mdi:check-circle" class="me-2"></iconify-icon>
-                    Language "${data.language.name}" created successfully!
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
-                document.querySelector('.card-body').insertBefore(successAlert, document.querySelector('.card-body').firstChild);
-                
                 // Reload page to show new language
-                setTimeout(() => window.location.reload(), 1500);
+                setTimeout(() => window.location.reload(), 1000);
             } else {
                 errorDiv.textContent = data.error || 'An error occurred while creating the language.';
                 errorDiv.classList.remove('d-none');
@@ -333,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
             saveBtn.innerHTML = '<iconify-icon icon="mdi:content-save" class="me-1"></iconify-icon> Create Language';
         });
     });
-    
+
     // Reset form when modal is closed
     modal.addEventListener('hidden.bs.modal', function () {
         form.reset();

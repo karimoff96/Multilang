@@ -940,6 +940,11 @@ def subscription_renew(request, pk):
             old_end_date = subscription.end_date
             subscription.tariff = tariff
             subscription.pricing = pricing
+            # start_date must move to old_end_date so that save()'s recalculation
+            # (end_date = start_date + duration) produces the correct new end_date.
+            # Without this, the trial/pre-payment period would be swallowed into
+            # the paid period.
+            subscription.start_date = old_end_date
             subscription.end_date = (
                 old_end_date + relativedelta(months=pricing.duration_months)
                 if pricing

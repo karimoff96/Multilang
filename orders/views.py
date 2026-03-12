@@ -236,8 +236,14 @@ def ordersList(request):
     
     # Payment type filter
     payment_filter = request.GET.get('payment', '')
-    if payment_filter:
-        orders = orders.filter(payment_type=payment_filter)
+    if payment_filter == 'payme':
+        orders = orders.filter(payment_source='payme')
+    elif payment_filter:
+        # 'card' filter → manual card transfers only (exclude Payme)
+        if payment_filter == 'card':
+            orders = orders.filter(payment_type='card', payment_source='manual')
+        else:
+            orders = orders.filter(payment_type=payment_filter)
     
     # Center filter (for superusers only)
     center_filter = request.GET.get('center', '')
@@ -340,7 +346,7 @@ def ordersList(request):
     
     # Get filter options
     status_choices = Order.STATUS_CHOICES
-    payment_choices = Order.PAYMENT_TYPE
+    payment_choices = list(Order.PAYMENT_TYPE) + [("payme", "Payme")]
     
     # Get accessible branches for filter dropdown
     branches = get_user_branches(request.user) if not request.user.is_superuser else None
@@ -510,6 +516,23 @@ def orderDetail(request, order_id):
     # Get detailed price breakdown
     price_breakdown = order.get_price_breakdown()
 
+    # Payme receipt URL (correct checkout-URL format; /receipts/<id> gives "Некорректные данные")
+    payme_receipt_url = None
+    if order.payment_source == 'payme':
+        latest_tx = order.payme_transactions.filter(state=2).order_by('-created_at').first()
+        if latest_tx:
+            try:
+                import base64 as _b64
+                url = latest_tx.checkout_url
+                if not url:
+                    mid = order.center.payme_merchant_id if order.center else ''
+                    oid = latest_tx.account.get('order_id') or str(latest_tx.order_id)
+                    params = f"m={mid};ac.order_id={oid};a={latest_tx.amount_tiyin}"
+                    url = f"https://checkout.paycom.uz/{_b64.b64encode(params.encode()).decode()}"
+                payme_receipt_url = url
+            except Exception:
+                pass
+
     # Price change history
     price_changes = order.price_changes.select_related('changed_by', 'changed_by__user').order_by('-changed_at')
 
@@ -537,6 +560,7 @@ def orderDetail(request, order_id):
         "order": order,
         "price_breakdown": price_breakdown,
         "price_changes": price_changes,
+        "payme_receipt_url": payme_receipt_url,
         "can_edit_price": can_edit_price,
         "can_force_accept": can_force_accept,
         "available_staff": available_staff,

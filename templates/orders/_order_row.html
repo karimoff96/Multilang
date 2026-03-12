@@ -81,6 +81,8 @@
             <span class="fw-semibold text-success-600 text-sm">{{ order.total_due|intspace }}</span>
             {% if order.payment_type == 'cash' %}
             <span class="text-xs text-success-600"><iconify-icon icon="mdi:cash" class="text-sm"></iconify-icon> Cash</span>
+            {% elif order.payment_source == 'payme' %}
+            <span class="text-xs text-info-600"><iconify-icon icon="mdi:credit-card-check" class="text-sm"></iconify-icon> Payme</span>
             {% else %}
             <span class="text-xs text-primary-600"><iconify-icon icon="mdi:credit-card" class="text-sm"></iconify-icon> Card</span>
             {% endif %}

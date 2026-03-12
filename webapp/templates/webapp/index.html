@@ -506,6 +506,7 @@ textarea { resize: none; height: 80px; }
     <!-- Price preview -->
     <div class="price-box" id="conf-price-box">
       <div class="price-row"><span class="price-label" id="conf-price-label-base">Base price</span><span class="price-value" id="conf-price-base">—</span></div>
+      <div class="price-row" id="conf-lang-price-row" style="display:none"><span class="price-label" id="conf-price-label-lang">Language</span><span class="price-value" id="conf-price-lang">—</span></div>
       <div class="price-row" id="conf-copies-row" style="display:none"><span class="price-label" id="conf-price-label-copies">Copies</span><span class="price-value" id="conf-price-copies">—</span></div>
       <div class="price-row total"><span class="price-label" id="conf-price-label-total">Total (estimated)</span><span class="price-value" id="conf-price-total">—</span></div>
     </div>
@@ -600,6 +601,9 @@ textarea { resize: none; height: 80px; }
 
     <div class="gap"></div>
     <div class="price-box">
+      <div class="price-row"><span class="price-label" id="pay-base-label">Base price</span><span class="price-value" id="pay-base">—</span></div>
+      <div class="price-row" id="pay-lang-row" style="display:none"><span class="price-label" id="pay-lang-label">Language</span><span class="price-value" id="pay-lang">—</span></div>
+      <div class="price-row" id="pay-copies-row" style="display:none"><span class="price-label" id="pay-copies-label">Copies</span><span class="price-value" id="pay-copies">—</span></div>
       <div class="price-row total">
         <span class="price-label" id="pay-total-label">Amount to pay</span>
         <span class="price-value" id="pay-total">—</span>
@@ -1015,13 +1019,14 @@ const T = {
     confCopies: "QOʻSHIMCHA NUSXALAR",
     confCopiesHint: c => c === 0 ? "0 – faqat asl nusxa" : `${c} ta qoʻshimcha nusxa`,
     confDesc: "IZOH (ixtiyoriy)", confDescPh: "Qoʻshimcha ko'rsatmalar…",
-    confBase: "Asosiy narx", confCopiesLbl: "Nusxalar", confTotal: "Jami (taxminiy)",
+    confBase: "Asosiy narx", confLangPrice: "Tarjima narxi", confCopiesLbl: "Nusxalar", confTotal: "Jami (taxminiy)",
     confNote: "Sahifa soni yuklangan fayllardan avtomatik aniqlanadi.",
     uplHeader: "Hujjatlarni yuklang", uplSub: "PDF, Word yoki rasm fayllarini qo'shing",
     uplZoneTitle: "Fayllarni tanlash uchun bosing", uplZoneHint: "PDF, Word, JPG, PNG • har biri maks 25 MB",
     payHeader: "To'lov usuli", paySub: "Qanday to'lamoqchisiz?",
     payCash: "Naqd pul", payCashSub: "Olib ketishda ofisda to'lash",
     payCard: "Plastik karta", payCardSub: "Kartamizga o'tkazing va chek yuboring",
+    payPayme: "Payme", payPaymeSub: "Payme orqali xavfsiz to'lash",
     payCardInfoLbl: "Shu kartaga o'tkazing",
     payTotalLbl: "To'lov summasi",
     recHeader: "Chekni yuklang", recSub: "To'lov chekini suratga oling va yuklang.",
@@ -1101,13 +1106,14 @@ const T = {
     confCopies: "ДОПОЛНИТЕЛЬНЫЕ КОПИИ",
     confCopiesHint: c => c === 0 ? "0 — только оригинал" : `${c} додп. копий`,
     confDesc: "ПРИМЕЧАНИЕ (необяз.)", confDescPh: "Особые инструкции…",
-    confBase: "Базовая цена", confCopiesLbl: "Копии", confTotal: "Итого (ориент.)",
+    confBase: "Базовая цена", confLangPrice: "Стоимость перевода", confCopiesLbl: "Копии", confTotal: "Итого (ориент.)",
     confNote: "Количество страниц будет определено автоматически из загруженных файлов.",
     uplHeader: "Загрузите документы", uplSub: "Добавьте файлы PDF, Word или изображения",
     uplZoneTitle: "Нажмите для выбора файлов", uplZoneHint: "PDF, Word, JPG, PNG • до 25 МБ каждый",
     payHeader: "Способ оплаты", paySub: "Как хотите оплатить?",
     payCash: "Наличные", payCashSub: "Оплата при получении в офисе",
     payCard: "Карта", payCardSub: "Переведите на нашу карту и пришлите чек",
+    payPayme: "Payme", payPaymeSub: "Безопасная оплата через Payme",
     payCardInfoLbl: "Переведите на эту карту",
     payTotalLbl: "Сумма к оплате",
     recHeader: "Загрузить чек", recSub: "Сфотографируйте чек об оплате и загрузите.",
@@ -1187,13 +1193,14 @@ const T = {
     confCopies: "EXTRA COPIES",
     confCopiesHint: c => c === 0 ? "0 — original only, no extra copies" : `${c} extra cop${c===1?'y':'ies'}`,
     confDesc: "NOTES (optional)", confDescPh: "Any special instructions…",
-    confBase: "Base price", confCopiesLbl: "Copies", confTotal: "Total (estimated)",
+    confBase: "Base price", confLangPrice: "Language price", confCopiesLbl: "Copies", confTotal: "Total (estimated)",
     confNote: "Page count will be detected automatically from your uploaded files.",
     uplHeader: "Upload Documents", uplSub: "Add your document files (PDF, Word, images)",
     uplZoneTitle: "Tap to select files", uplZoneHint: "PDF, Word, JPG, PNG • max 25 MB each",
     payHeader: "Payment Method", paySub: "How would you like to pay?",
     payCash: "Cash", payCashSub: "Pay at the branch when you pick up",
     payCard: "Card", payCardSub: "Transfer to our card and upload receipt",
+    payPayme: "Payme", payPaymeSub: "Secure payment via Payme",
     payCardInfoLbl: "Transfer to this card",
     payTotalLbl: "Amount to pay",
     recHeader: "Upload Receipt", recSub: "Take a photo of your payment receipt and upload it.",
@@ -1440,8 +1447,8 @@ function applyTranslations() {
   T2("conf-header","confHeader");
   T2("conf-lang-label","confLang"); T2("conf-copies-label","confCopies");
   T2("conf-desc-label","confDesc"); T2("conf-pages-note","confNote");
-  T2("conf-price-label-base","confBase"); T2("conf-price-label-copies","confCopiesLbl");
-  T2("conf-price-label-total","confTotal");
+  T2("conf-price-label-base","confBase"); T2("conf-price-label-lang","confLangPrice"); T2("conf-price-label-copies","confCopiesLbl");
+  T2("conf-price-label-total","confTotal"); T2("pay-base-label","confBase"); T2("pay-lang-label","confLangPrice"); T2("pay-copies-label","confCopiesLbl");
   T2("conf-names-label","confNames"); T2("conf-names-hint","confNamesHint");
   T2("upl-header","uplHeader"); T2("upl-sub","uplSub");
   T2("upl-zone-title","uplZoneTitle"); T2("upl-zone-hint","uplZoneHint");
@@ -1738,18 +1745,38 @@ function updatePrice() {
   if (!prod) return;
   const agency = S.user?.is_agency || false;
   const fp = agency ? prod.agency_first_page_price : prod.ordinary_first_page_price;
-  // For dynamic, assume 1 page for preview. Actual count from files.
+
+  // Language surcharge
+  let langFp = 0, langCopyPrice = 0;
+  if (S.selectedLanguage && cat && cat.languages) {
+    const lang = cat.languages.find(l => String(l.id) === String(S.selectedLanguage));
+    if (lang) {
+      langFp        = agency ? lang.agency_page_price        : lang.ordinary_page_price;
+      langCopyPrice = agency ? lang.agency_copy_price        : lang.ordinary_copy_price;
+    }
+  }
+
   const base = fp;
   const copyPrice = agency ? prod.agency_copy_price : prod.user_copy_price;
-  const copying = copyPrice * S.copies;
-  const total = base + copying;
+  const totalCopyUnit = copyPrice + langCopyPrice;
+  const copying = totalCopyUnit * S.copies;
+  const total = base + langFp + copying;
 
   document.getElementById("conf-price-base").textContent  = fmt(base);
   document.getElementById("conf-price-total").textContent = fmt(total);
 
+  // Language price row
+  const langPriceRow = document.getElementById("conf-lang-price-row");
+  if (langFp > 0) {
+    document.getElementById("conf-price-lang").textContent = fmt(langFp);
+    langPriceRow.style.display = "";
+  } else {
+    langPriceRow.style.display = "none";
+  }
+
   const copiesRow = document.getElementById("conf-copies-row");
-  if (S.copies > 0 && copyPrice > 0) {
-    document.getElementById("conf-price-copies").textContent = `${S.copies} × ${fmt(copyPrice)} = ${fmt(copying)}`;
+  if (S.copies > 0 && totalCopyUnit > 0) {
+    document.getElementById("conf-price-copies").textContent = `${S.copies} × ${fmt(totalCopyUnit)} = ${fmt(copying)}`;
     copiesRow.style.display = "";
   } else {
     copiesRow.style.display = "none";
@@ -1847,16 +1874,54 @@ function goToPayment() {
 // ── Payment ───────────────────────────────────────────────────────────────────
 function buildPayment() {
   renderSteps("pay-steps", 2);
+  const cat   = S.selectedCategory;
   const prod  = S.selectedProduct;
   const agency = S.user?.is_agency || false;
   const fp  = agency ? prod.agency_first_page_price : prod.ordinary_first_page_price;
   const cp  = agency ? prod.agency_copy_price : prod.user_copy_price;
-  const total = fp + cp * S.copies;
 
+  // Language surcharge
+  let langFp = 0, langCopyPrice = 0;
+  if (S.selectedLanguage && cat && cat.languages) {
+    const lang = cat.languages.find(l => String(l.id) === String(S.selectedLanguage));
+    if (lang) {
+      langFp        = agency ? lang.agency_page_price  : lang.ordinary_page_price;
+      langCopyPrice = agency ? lang.agency_copy_price  : lang.ordinary_copy_price;
+    }
+  }
+
+  const totalCopyUnit = cp + langCopyPrice;
+  const total = fp + langFp + totalCopyUnit * S.copies;
+
+  document.getElementById("pay-base").textContent  = fmt(fp);
   document.getElementById("pay-total").textContent = fmt(total);
+
+  // Language row
+  const payLangRow = document.getElementById("pay-lang-row");
+  if (langFp > 0) {
+    document.getElementById("pay-lang").textContent = fmt(langFp);
+    payLangRow.style.display = "";
+  } else {
+    payLangRow.style.display = "none";
+  }
+
+  // Copies row
+  const payCopiesRow = document.getElementById("pay-copies-row");
+  if (S.copies > 0 && totalCopyUnit > 0) {
+    document.getElementById("pay-copies").textContent = `${S.copies} × ${fmt(totalCopyUnit)} = ${fmt(totalCopyUnit * S.copies)}`;
+    payCopiesRow.style.display = "";
+  } else {
+    payCopiesRow.style.display = "none";
+  }
 
   // Card info
   const ci = S.cardInfo;
+  // Rename the card option to "Payme" when center has Payme enabled
+  const _paymeEnabled = S.center && S.center.payme_enabled;
+  const _cardTitleEl  = document.getElementById("pay-card-title");
+  const _cardSubEl    = document.getElementById("pay-card-sub");
+  if (_cardTitleEl) _cardTitleEl.textContent = _paymeEnabled ? t("payPayme") : t("payCard");
+  if (_cardSubEl)   _cardSubEl.textContent   = _paymeEnabled ? t("payPaymeSub") : t("payCardSub");
   if (ci) {
     document.getElementById("pay-card-number").textContent = ci.bank_card || "—";
     document.getElementById("pay-card-holder").textContent = ci.holder_name || "";

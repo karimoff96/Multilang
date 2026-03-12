@@ -280,7 +280,17 @@ def api_init(request):
             })
 
         languages = [
-            {"id": lang.id, "name": lang.name, "short_name": lang.short_name}
+            {
+                "id": lang.id,
+                "name": lang.name,
+                "short_name": lang.short_name,
+                "agency_page_price": float(lang.agency_page_price),
+                "agency_other_page_price": float(lang.agency_other_page_price),
+                "agency_copy_price": float(lang.agency_copy_price),
+                "ordinary_page_price": float(lang.ordinary_page_price),
+                "ordinary_other_page_price": float(lang.ordinary_other_page_price),
+                "ordinary_copy_price": float(lang.ordinary_copy_price),
+            }
             for lang in cat.languages.all()
         ]
 
@@ -506,6 +516,7 @@ def api_create_order(request):
     # Create Order (price=0 initially, updated after pages are counted)
     # ------------------------------------------------------------------
     initial_status = "payment_pending" if payment_type == "card" else "pending"
+    payment_source = "payme" if (payment_type == "card" and center.payme_enabled and not center.payme_sandbox) else "manual"
 
     order = Order(
         branch=bot_user.branch,
@@ -514,6 +525,7 @@ def api_create_order(request):
         language=language_obj,
         copy_number=copy_number,
         payment_type=payment_type,
+        payment_source=payment_source,
         description=description or None,
         name_clarifications=name_clarifications or None,
         status=initial_status,

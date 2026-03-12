@@ -255,6 +255,18 @@ class PaymeWebhookView(View):
             order.is_active = True
             order.save(update_fields=["payment_type", "status", "is_active", "updated_at"])
 
+            # Build and store the checkout URL so it can be used as a receipt link later
+            try:
+                import base64 as _b64
+                center = order.center
+                if center and center.payme_merchant_id:
+                    _params = f"m={center.payme_merchant_id};ac.order_id={order.id};a={amount_tiyin}"
+                    _base_url = "https://test.paycom.uz" if getattr(center, 'payme_sandbox', False) else "https://checkout.paycom.uz"
+                    tx.checkout_url = f"{_base_url}/{_b64.b64encode(_params.encode()).decode()}"
+                    tx.save(update_fields=["checkout_url"])
+            except Exception as _e:
+                logger.warning("Could not build checkout_url for PaymeTransaction %s: %s", payme_id, _e)
+
         result = {
             "create_time": tx.create_time_ms,
             "transaction": tx.payme_transaction_id,
@@ -297,11 +309,12 @@ class PaymeWebhookView(View):
 
         # Mark order paid
         order.payment_type = "card"
+        order.payment_source = "payme"
         order.payment_accepted_fully = True
         order.received = order.total_due
         order.status = "payment_confirmed"
         order.is_active = True
-        order.save(update_fields=["payment_type", "payment_accepted_fully", "received", "status", "is_active", "updated_at"])
+        order.save(update_fields=["payment_type", "payment_source", "payment_accepted_fully", "received", "status", "is_active", "updated_at"])
 
         # Notify about status change
         try:
