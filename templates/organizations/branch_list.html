@@ -98,7 +98,7 @@
                                     <iconify-icon icon="fluent:map-20-filled" class="icon"></iconify-icon>
                                 </a>
                                 {% endif %}
-                                <a href="{% url 'branch_edit' branch.id %}" class="bg-primary-focus text-primary-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" title="Edit" onclick="event.stopPropagation();">
+                                <a href="{% url 'branch_edit' branch.id %}?return_page={{ branches.number }}" class="bg-primary-focus text-primary-main w-32-px h-32-px d-flex justify-content-center align-items-center radius-8" title="Edit" onclick="event.stopPropagation();">
                                     <iconify-icon icon="fluent:edit-20-filled" class="icon"></iconify-icon>
                                 </a>
                             </div>

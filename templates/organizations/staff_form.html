@@ -13,8 +13,7 @@
             <div class="card-body p-24">
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    
-                    <div class="row gy-3">
+                    <input type="hidden" name="return_page" value="{{ request.GET.return_page|default:'' }}">
                         <!-- User Account Section -->
                         <div class="col-12">
                             <h6 class="text-md fw-semibold mb-16 pb-8 border-bottom" data-i18n="form.accountInfo">Account Information</h6>
@@ -180,7 +179,7 @@
                     </div>
                     
                     <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
-                        <a href="{% url 'staff_list' %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8" data-i18n="common.cancel">
+                        <a href="{% url 'staff_list' %}{% if request.GET.return_page %}?page={{ request.GET.return_page }}{% endif %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8" data-i18n="common.cancel">
                             Cancel
                         </a>
                         <button type="submit" class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8" data-i18n="{% if staff_member %}form.updateStaff{% else %}form.createStaff{% endif %}">

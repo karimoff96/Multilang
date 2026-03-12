@@ -254,10 +254,10 @@
                         <!-- Action -->
                         <td class="text-center col-action">
                             <div class="d-flex align-items-center gap-4 justify-content-center">
-                                <a href="{% url 'userDetail' %}?id={{ bot_user.id }}" class="bg-info-focus text-info-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="View">
+                                <a href="{% url 'userDetail' %}?id={{ bot_user.id }}&return_page={{ users.number }}" class="bg-info-focus text-info-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="View">
                                     <iconify-icon icon="majesticons:eye-line"></iconify-icon>
                                 </a>
-                                <a href="{% url 'editUser' bot_user.id %}" class="bg-success-focus text-success-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="Edit">
+                                <a href="{% url 'editUser' bot_user.id %}?return_page={{ users.number }}" class="bg-success-focus text-success-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" title="Edit">
                                     <iconify-icon icon="lucide:edit"></iconify-icon>
                                 </a>
                                 {% if user.is_superuser or is_owner %}

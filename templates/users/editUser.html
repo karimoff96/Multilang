@@ -9,7 +9,7 @@
                 <iconify-icon icon="lucide:edit" class="me-8 text-warning-600"></iconify-icon>
                 <span data-i18n="form.editUser">Edit User</span>: {{ user.name }}
             </h6>
-            <a href="{% url 'usersList' %}" class="btn btn-outline-secondary-600 radius-8 px-20 py-9 d-flex align-items-center">
+            <a href="{% url 'usersList' %}{% if request.GET.return_page %}?page={{ request.GET.return_page }}{% endif %}" class="btn btn-outline-secondary-600 radius-8 px-20 py-9 d-flex align-items-center">
                 <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
                 <span data-i18n="form.backToList">Back to List</span>
             </a>
@@ -20,8 +20,7 @@
             <div class="col-xxl-6 col-xl-8 col-lg-10">
                 <form method="post" action="{% url 'editUser' user.id %}">
                     {% csrf_token %}
-                    
-                    <!-- Basic Info Section -->
+                    <input type="hidden" name="return_page" value="{{ request.GET.return_page|default:'' }}">
                     <div class="mb-24">
                         <h6 class="text-md fw-semibold text-primary-light mb-16 d-flex align-items-center">
                             <iconify-icon icon="solar:user-linear" class="me-8"></iconify-icon>
@@ -170,7 +169,7 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
-                        <a href="{% url 'usersList' %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8" data-i18n="common.cancel">
+                        <a href="{% url 'usersList' %}{% if request.GET.return_page %}?page={{ request.GET.return_page }}{% endif %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8" data-i18n="common.cancel">
                             Cancel
                         </a>
                         <button type="submit" class="btn btn-primary border border-primary-600 text-md px-40 py-12 radius-8 d-flex align-items-center gap-2">

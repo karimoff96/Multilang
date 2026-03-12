@@ -728,6 +728,18 @@ textarea { resize: none; height: 80px; }
       <div id="det-names" style="font-size:14px;color:var(--text);padding:10px 14px;background:var(--bg2);border-radius:10px;line-height:1.5"></div>
     </div>
 
+    <!-- Payment pending: Payme button (when center has Payme enabled) -->
+    <div id="det-payme-pending-block" style="display:none">
+      <div class="card" onclick="payOrderWithPayme()" style="display:flex;align-items:center;gap:12px;padding:16px">
+        <div style="font-size:28px">💳</div>
+        <div>
+          <div class="card-title" id="det-btn-pay-payme">Pay with Payme</div>
+          <div class="card-sub" id="det-btn-pay-payme-sub">Complete your payment securely</div>
+        </div>
+        <div class="card-right" style="float:none;margin-left:auto">›</div>
+      </div>
+    </div>
+
     <!-- Payment pending: show card info + upload receipt button -->
     <div id="det-payment-pending-block" style="display:none">
       <div class="card-info-box" style="margin-bottom:14px" id="det-card-info-wrap">
@@ -1039,6 +1051,7 @@ const T = {
     detNotes: "IZOH", detNames: "HUJJATDAGI ISMLAR",
     detCardLbl: "Shu kartaga o'tkazing",
     detBtnUploadReceipt: "Chekni yuklash", detBtnUploadReceiptSub: "To'lov cheki rasmini oling",
+    detBtnPayPayme: "Payme orqali to'lash", detBtnPayPaymeSub: "To'lovni xavfsiz amalga oshiring",
     detReceiptNote: "Chek yuborildi — tekshirilmoqda",
     detTimeline: "Buyurtma jarayoni",
     tlReceived: "Buyurtma qabul qilindi", tlPayPending: "To'lov kutilmoqda",
@@ -1124,6 +1137,7 @@ const T = {
     detNotes: "ПРИМЕЧАНИЕ", detNames: "ИМЕНА В ДОКУМЕНТЕ",
     detCardLbl: "Переведите на эту карту",
     detBtnUploadReceipt: "Загрузить чек", detBtnUploadReceiptSub: "Сфотографируйте чек об оплате",
+    detBtnPayPayme: "Оплатить через Payme", detBtnPayPaymeSub: "Завершите оплату безопасно",
     detReceiptNote: "Чек отправлен — проверяется",
     detTimeline: "Статус заказа",
     tlReceived: "Заказ принят", tlPayPending: "Ожидание оплаты",
@@ -1209,6 +1223,7 @@ const T = {
     detNotes: "NOTES", detNames: "NAMES ON DOCUMENT",
     detCardLbl: "Transfer to this card",
     detBtnUploadReceipt: "Upload Receipt", detBtnUploadReceiptSub: "Take a photo of your receipt",
+    detBtnPayPayme: "Pay with Payme", detBtnPayPaymeSub: "Complete your payment securely",
     detReceiptNote: "Receipt submitted — awaiting verification",
     detTimeline: "Order Progress",
     tlReceived: "Order Received", tlPayPending: "Awaiting Payment",
@@ -1453,6 +1468,8 @@ function applyTranslations() {
   T2("det-card-lbl","detCardLbl");
   T2("det-btn-upload-receipt","detBtnUploadReceipt");
   T2("det-btn-upload-receipt-sub","detBtnUploadReceiptSub");
+  T2("det-btn-pay-payme","detBtnPayPayme");
+  T2("det-btn-pay-payme-sub","detBtnPayPaymeSub");
   T2("det-receipt-note","detReceiptNote");
   T2("det-lbl-timeline","detTimeline");
   // menu extra buttons
@@ -2163,20 +2180,28 @@ function buildOrderDetailScreen(order, cardInfo) {
   buildOrderTimeline(order);
 
   // Payment pending block
-  const pendingBlock   = document.getElementById("det-payment-pending-block");
-  const submittedBlock = document.getElementById("det-receipt-submitted-block");
+  const paymePendingBlock = document.getElementById("det-payme-pending-block");
+  const pendingBlock       = document.getElementById("det-payment-pending-block");
+  const submittedBlock     = document.getElementById("det-receipt-submitted-block");
 
-  if (order.can_upload_receipt && cardInfo) {
+  if (order.can_pay_with_payme) {
+    paymePendingBlock.style.display  = "";
+    pendingBlock.style.display       = "none";
+    submittedBlock.style.display     = "none";
+  } else if (order.can_upload_receipt && cardInfo) {
     document.getElementById("det-card-number").textContent = cardInfo.bank_card || "—";
     document.getElementById("det-card-holder").textContent = cardInfo.holder_name || "";
-    pendingBlock.style.display   = "";
-    submittedBlock.style.display = "none";
+    paymePendingBlock.style.display  = "none";
+    pendingBlock.style.display       = "";
+    submittedBlock.style.display     = "none";
   } else if (order.has_receipt || order.status === "payment_received" || order.status === "payment_confirmed") {
-    pendingBlock.style.display   = "none";
-    submittedBlock.style.display = "";
+    paymePendingBlock.style.display  = "none";
+    pendingBlock.style.display       = "none";
+    submittedBlock.style.display     = "";
   } else {
-    pendingBlock.style.display   = "none";
-    submittedBlock.style.display = "none";
+    paymePendingBlock.style.display  = "none";
+    pendingBlock.style.display       = "none";
+    submittedBlock.style.display     = "none";
   }
 }
 
@@ -2278,8 +2303,27 @@ function copyCardNumber() {
   }
 }
 
+async function payOrderWithPayme() {
+  if (!S.viewingOrder) return;
+  showOverlay(true);
+  try {
+    const res = await api("/api/orders/" + S.viewingOrder.id + "/payme-checkout/", {
+      init_data: INIT_DATA,
+      center_id: CENTER_ID,
+    });
+    if (!res.ok || !res.checkout_url) {
+      tg.showAlert(res.error || t("errServer"));
+      return;
+    }
+    tg.openLink(res.checkout_url);
+  } catch (e) {
+    tg.showAlert(t("errServer"));
+  } finally {
+    showOverlay(false);
+  }
+}
+
 function goToReceiptUpload() {
-  // Set up receipt screen context from the viewed order (not a new submit flow)
   S.receiptFile = null;
   document.getElementById("receipt-preview").style.display = "none";
   if (S.viewingCardInfo && S.viewingCardInfo.bank_card) {

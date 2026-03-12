@@ -157,12 +157,12 @@
                         <!-- Actions (compact icons) -->
                         <td class="text-center col-action">
                             <div class="d-flex align-items-center gap-4 justify-content-center">
-                                <a href="{% url 'staff_detail' member.id %}" class="bg-primary-focus text-primary-main action-btn-sm d-flex justify-content-center align-items-center radius-4" data-bs-toggle="tooltip" data-i18n-title="common.viewDetails" title="View Details">
+                                <a href="{% url 'staff_detail' member.id %}?return_page={{ staff.number }}" class="bg-primary-focus text-primary-main action-btn-sm d-flex justify-content-center align-items-center radius-4" data-bs-toggle="tooltip" data-i18n-title="common.viewDetails" title="View Details">
                                     <iconify-icon icon="lucide:eye"></iconify-icon>
                                 </a>
                                 {% can_do 'staff.manage' as can_edit_staff %}
                                 {% if can_edit_staff %}
-                                <a href="{% url 'staff_edit' member.id %}" class="bg-info-focus text-info-main action-btn-sm d-flex justify-content-center align-items-center radius-4" data-bs-toggle="tooltip" data-i18n-title="common.edit" title="Edit">
+                                <a href="{% url 'staff_edit' member.id %}?return_page={{ staff.number }}" class="bg-info-focus text-info-main action-btn-sm d-flex justify-content-center align-items-center radius-4" data-bs-toggle="tooltip" data-i18n-title="common.edit" title="Edit">
                                     <iconify-icon icon="lucide:edit"></iconify-icon>
                                 </a>
                                 <form method="post" action="{% url 'staff_toggle_active' member.id %}" class="d-inline">

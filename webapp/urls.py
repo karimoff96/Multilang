@@ -16,6 +16,7 @@ urlpatterns = [
     path("api/order/create/", views.api_create_order, name="api_create_order"),
     path("api/orders/", views.api_my_orders, name="api_my_orders"),
     path("api/orders/<int:order_id>/", views.api_order_detail, name="api_order_detail"),
+    path("api/orders/<int:order_id>/payme-checkout/", views.api_order_payme_checkout, name="api_order_payme_checkout"),
     path("api/orders/<int:order_id>/receipt/", views.api_upload_receipt, name="api_upload_receipt"),
 
     # Profile view / update

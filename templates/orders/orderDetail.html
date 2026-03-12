@@ -690,7 +690,7 @@
                 {% can_do 'orders.edit' as can_edit_order %}
                 {% if can_edit_order %}
                 <div class="mb-16">
-                    <a href="{% url 'orders:orderEdit' order.id %}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+                    <a href="{% url 'orders:orderEdit' order.id %}{% if request.GET.return_page %}?return_page={{ request.GET.return_page }}{% endif %}" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
                         <iconify-icon icon="lucide:edit" class="me-1"></iconify-icon> <span data-i18n="common.edit">Edit Order</span>
                     </a>
                 </div>
@@ -791,7 +791,7 @@
                 
                 <hr class="my-16">
                 
-                <a href="{% url 'orders:ordersList' %}" class="btn btn-secondary radius-8 px-20 py-11 w-100 d-flex align-items-center justify-content-center mb-12">
+                <a href="{% url 'orders:ordersList' %}{% if request.GET.return_page %}?page={{ request.GET.return_page }}{% endif %}" class="btn btn-secondary radius-8 px-20 py-11 w-100 d-flex align-items-center justify-content-center mb-12">
                     <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
                     <span data-i18n="detail.back">Back to Orders</span>
                 </a>

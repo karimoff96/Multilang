@@ -173,15 +173,14 @@
                 <h6 class="text-lg fw-semibold mb-0">
                     <span data-i18n="common.edit">Edit</span> <span data-i18n="sidebar.orders">Order</span> #{{ order.get_order_number }}
                 </h6>
-                <a href="{% url 'orders:orderDetail' order.id %}" class="btn btn-outline-secondary btn-sm">
+                <a href="{% url 'orders:orderDetail' order.id %}{% if request.GET.return_page %}?return_page={{ request.GET.return_page }}{% endif %}" class="btn btn-outline-secondary btn-sm">
                     <iconify-icon icon="ep:back" class="me-1"></iconify-icon> <span data-i18n="detail.back">Back</span>
                 </a>
             </div>
             <div class="card-body p-24">
                 <form method="post" action="{% url 'orders:orderEdit' order.id %}" enctype="multipart/form-data">
                     {% csrf_token %}
-                    
-                    <!-- Manual Order Toggle -->
+                    <input type="hidden" name="return_page" value="{{ request.GET.return_page|default:'' }}">
                     <div class="mb-20 p-16 bg-warning-50 radius-8 border border-warning-200">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="manualOrderToggle" {% if order.is_manual_order %}checked{% endif %}>
@@ -570,7 +569,7 @@
                         <button type="submit" class="btn btn-primary px-32">
                             <iconify-icon icon="mdi:content-save" class="me-1"></iconify-icon> <span data-i18n="common.save">Save Changes</span>
                         </button>
-                        <a href="{% url 'orders:orderDetail' order.id %}" class="btn btn-outline-secondary px-32">
+                        <a href="{% url 'orders:orderDetail' order.id %}{% if request.GET.return_page %}?return_page={{ request.GET.return_page }}{% endif %}" class="btn btn-outline-secondary px-32">
                             <span data-i18n="common.cancel">Cancel</span>
                         </a>
                     </div>

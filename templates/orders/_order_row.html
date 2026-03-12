@@ -140,12 +140,12 @@
     <!-- Action -->
     <td class="text-center col-action">
         <div class="d-flex align-items-center gap-4 justify-content-center">
-            <a href="{% url 'orders:orderDetail' order.id %}" class="bg-info-focus text-info-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" data-i18n-title="orders.view" title="View">
+            <a href="{% url 'orders:orderDetail' order.id %}?return_page={{ orders.number }}" class="bg-info-focus text-info-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" data-i18n-title="orders.view" title="View">
                 <iconify-icon icon="majesticons:eye-line"></iconify-icon>
             </a>
             {% can_do 'orders.edit' as can_edit_order %}
             {% if can_edit_order %}
-            <a href="{% url 'orders:orderEdit' order.id %}" class="bg-success-focus text-success-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" data-i18n-title="orders.edit" title="Edit">
+            <a href="{% url 'orders:orderEdit' order.id %}?return_page={{ orders.number }}" class="bg-success-focus text-success-600 action-btn-sm d-flex justify-content-center align-items-center rounded-circle" data-i18n-title="orders.edit" title="Edit">
                 <iconify-icon icon="lucide:edit"></iconify-icon>
             </a>
             {% endif %}

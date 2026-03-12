@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -845,6 +846,9 @@ def orderEdit(request, order_id):
             )
             
             messages.success(request, f'Order #{order_id} updated successfully.')
+            return_page = request.POST.get('return_page', '')
+            if return_page:
+                return redirect(reverse('orders:ordersList') + f'?page={return_page}')
             return redirect('orders:orderDetail', order_id=order_id)
             
         except PermissionError as pe:

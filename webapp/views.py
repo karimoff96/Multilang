@@ -730,8 +730,11 @@ def api_order_detail(request, order_id: int):
     }
 
     # Card info for payment_pending orders
+    payme_enabled = center.payme_enabled and not center.payme_sandbox
+    is_payment_pending = order.status == "payment_pending"
+
     card_info = None
-    if order.status == "payment_pending":
+    if is_payment_pending and not payme_enabled:
         try:
             ai = AdditionalInfo.get_for_branch(order.branch)
             if ai and ai.bank_card:
@@ -763,11 +766,82 @@ def api_order_detail(request, order_id: int):
             "branch_address": order.branch.address if order.branch else "",
             "files_count": order.files.count(),
             "has_receipt": bool(order.recipt),
-            "can_upload_receipt": order.status == "payment_pending",
+            "can_upload_receipt": is_payment_pending and not payme_enabled,
+            "can_pay_with_payme": is_payment_pending and payme_enabled,
         },
         "card_info": card_info,
         "language": lang,
     })
+
+
+# ---------------------------------------------------------------------------
+# API: /webapp/api/orders/<order_id>/payme-checkout/
+# ---------------------------------------------------------------------------
+
+@csrf_exempt
+def api_order_payme_checkout(request, order_id: int):
+    """
+    POST {init_data, center_id}
+
+    Generates a fresh Payme checkout URL for an existing payment_pending order
+    whose center has Payme integration enabled. Used when the user leaves the
+    Payme page without paying and wants to retry from "My Orders".
+    """
+    if request.method != "POST":
+        return _err("Method not allowed", 405)
+
+    import json as json_module
+    try:
+        body = json_module.loads(request.body)
+    except Exception:
+        body = request.POST.dict()
+
+    tg_id, _, center = _auth(body)
+    if tg_id is None:
+        return _err("Invalid or expired initData", 401)
+
+    from accounts.models import BotUser
+    from orders.models import Order
+
+    bot_user = BotUser.objects.filter(user_id=tg_id, center=center, is_active=True).first()
+    if not bot_user:
+        return _err("User not found", 403)
+
+    try:
+        order = Order.objects.get(pk=order_id, bot_user=bot_user)
+    except Order.DoesNotExist:
+        return _err("Order not found", 404)
+
+    if order.status != "payment_pending":
+        return _err("Order is not awaiting payment", 400)
+
+    if not (center.payme_enabled and not center.payme_sandbox):
+        return _err("Payme is not enabled for this center", 400)
+
+    try:
+        from orders.payme_gateway import build_payme_checkout_url, PaymeIntegrationError, check_payme_config
+        from django.conf import settings as django_settings
+
+        ok, reason = check_payme_config(center)
+        if not ok:
+            return _err(f"Payme configuration error: {reason}", 400)
+
+        main_domain = getattr(django_settings, "MAIN_DOMAIN", "multilang.uz")
+        sub = center.subdomain if center.subdomain else None
+        if sub:
+            return_url = f"https://{sub}.{main_domain}/webapp/payment-return/?order_id={order.id}"
+        else:
+            return_url = f"https://{main_domain}/webapp/payment-return/?order_id={order.id}"
+
+        lang = bot_user.language or "uz"
+        checkout_url, _, _ = build_payme_checkout_url(
+            order, lang, callback_url=return_url, center=center
+        )
+    except Exception as exc:
+        logger.error(f"WebApp: Payme retry checkout URL build failed for order {order.pk}: {exc}")
+        return _err("Could not generate payment link", 500)
+
+    return _ok({"checkout_url": checkout_url})
 
 
 # ---------------------------------------------------------------------------

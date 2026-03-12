@@ -10,7 +10,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <h6 class="mb-0" data-i18n="detail.userInformation">User Information</h6>
                     <div class="d-flex align-items-center gap-2">
-                        <a href="{% url 'editUser' bot_user.id %}" class="btn btn-sm btn-outline-warning-600 radius-8 px-12 py-6 d-flex align-items-center">
+                        <a href="{% url 'editUser' bot_user.id %}{% if request.GET.return_page %}?return_page={{ request.GET.return_page }}{% endif %}" class="btn btn-sm btn-outline-warning-600 radius-8 px-12 py-6 d-flex align-items-center">
                             <iconify-icon icon="lucide:edit" class="me-4"></iconify-icon>
                             <span data-i18n="detail.edit">Edit</span>
                         </a>
@@ -163,7 +163,7 @@
                 {% endif %}
 
                 <div class="d-flex gap-8 mt-24">
-                    <a href="{% url 'usersList' %}" class="btn btn-outline-secondary-600 radius-8 px-20 py-11 flex-grow-1 d-flex align-items-center justify-content-center">
+                    <a href="{% url 'usersList' %}{% if request.GET.return_page %}?page={{ request.GET.return_page }}{% endif %}" class="btn btn-outline-secondary-600 radius-8 px-20 py-11 flex-grow-1 d-flex align-items-center justify-content-center">
                         <iconify-icon icon="ep:back" class="me-4"></iconify-icon>
                         <span data-i18n="form.backToList">Back to List</span>
                     </a>

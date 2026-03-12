@@ -3,6 +3,7 @@ Views for organization management (Centers, Branches, Staff).
 """
 import logging
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -622,7 +623,11 @@ def branch_edit(request, branch_id):
             branch.show_pricelist = show_pricelist
             branch.save()
             messages.success(request, f'Branch "{name}" updated successfully!')
-            return redirect("branch_list")
+            return_page = request.POST.get('return_page', '')
+            redirect_url = reverse('branch_list')
+            if return_page:
+                redirect_url += f'?page={return_page}'
+            return redirect(redirect_url)
 
     context = {
         "title": "Edit Branch",
@@ -976,7 +981,11 @@ def staff_edit(request, staff_id):
                     request,
                     f'Staff member "{first_name} {last_name}" updated successfully!',
                 )
-                return redirect("staff_list")
+                return_page = request.POST.get('return_page', '')
+                redirect_url = reverse('staff_list')
+                if return_page:
+                    redirect_url += f'?page={return_page}'
+                return redirect(redirect_url)
             except Exception as e:
                 messages.error(request, f"Failed to update staff member: {str(e)}")
 
