@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from datetime import timedelta
 
-from core.models import AdminNotification, AuditLog
+from core.models import AdminNotification, AuditLog, NotificationRead
 from organizations.rbac import permission_required
 from billing.decorators import require_feature, require_active_subscription
 
@@ -46,13 +46,17 @@ def mark_notification_read(request, notification_id):
 def mark_all_notifications_read(request):
     """Mark all notifications as read for the current user"""
     try:
-        from django.utils import timezone as tz
+        from django.db.models import Exists, OuterRef
+
+        already_read = NotificationRead.objects.filter(
+            notification=OuterRef('pk'), user=request.user
+        )
 
         # Mirror the exact same scoping logic used in
         # AdminNotification.get_unread_for_user() so the mark-all operation
         # covers precisely the notifications the user can see.
         if request.user.is_superuser:
-            notifications = AdminNotification.objects.filter(is_read=False)
+            notifications = AdminNotification.objects.exclude(Exists(already_read))
         else:
             profile = getattr(request.user, 'admin_profile', None)
             if not profile:
@@ -60,27 +64,28 @@ def mark_all_notifications_read(request):
 
             if profile.role and profile.role.name == 'owner':
                 notifications = AdminNotification.objects.filter(
-                    is_read=False, center=profile.center
-                )
+                    center=profile.center
+                ).exclude(Exists(already_read))
             elif profile.branch:
                 notifications = AdminNotification.objects.filter(
-                    is_read=False, branch=profile.branch
-                )
+                    branch=profile.branch
+                ).exclude(Exists(already_read))
             elif profile.center:
                 notifications = AdminNotification.objects.filter(
-                    is_read=False, center=profile.center
-                )
+                    center=profile.center
+                ).exclude(Exists(already_read))
             else:
-                notifications = AdminNotification.objects.filter(is_read=False)
+                notifications = AdminNotification.objects.exclude(Exists(already_read))
 
-        count = notifications.update(
-            is_read=True,
-            read_by=request.user,
-            read_at=tz.now()
-        )
+        ids = list(notifications.values_list('id', flat=True))
+        if ids:
+            NotificationRead.objects.bulk_create(
+                [NotificationRead(notification_id=nid, user=request.user) for nid in ids],
+                ignore_conflicts=True,
+            )
 
         _invalidate_notification_cache(request.user)  # bust cache immediately
-        return JsonResponse({'success': True, 'count': count})
+        return JsonResponse({'success': True, 'count': len(ids)})
     except Exception as e:
         logger.warning(f"mark_all_notifications_read failed: {e}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
@@ -162,6 +167,13 @@ def notifications_list(request):
             qs = AdminNotification.objects.all()
 
     qs = qs.select_related('branch', 'center').order_by('-created_at')
+
+    from django.db.models import Exists, OuterRef
+    already_read = NotificationRead.objects.filter(
+        notification=OuterRef('pk'), user=request.user
+    )
+    # Annotate each notification with whether the current user has read it
+    qs = qs.annotate(is_read=Exists(already_read))
 
     total_count = qs.count()
     unread_count = qs.filter(is_read=False).count()

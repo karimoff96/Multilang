@@ -264,12 +264,8 @@ class AdminNotification(models.Model):
         return f"{self.get_notification_type_display()} - {self.title}"
     
     def mark_as_read(self, user):
-        """Mark notification as read"""
-        from django.utils import timezone
-        self.is_read = True
-        self.read_by = user
-        self.read_at = timezone.now()
-        self.save(update_fields=['is_read', 'read_by', 'read_at'])
+        """Mark notification as read for this specific user"""
+        NotificationRead.objects.get_or_create(notification=self, user=user)
     
     def get_link_id(self):
         """Get the ID to use for linking - for receipts, return order ID.
@@ -453,13 +449,12 @@ class AdminNotification(models.Model):
         """Create a notification for an overdue order (deadline passed, not completed/cancelled)"""
         from django.contrib.contenttypes.models import ContentType
 
-        # Avoid duplicate unread overdue notifications for the same order
+        # Avoid duplicate overdue notifications for the same order
         content_type = ContentType.objects.get_for_model(order)
         if cls.objects.filter(
             notification_type=cls.TYPE_ORDER_OVERDUE,
             content_type=content_type,
             object_id=order.id,
-            is_read=False,
         ).exists():
             return None
 
@@ -479,64 +474,99 @@ class AdminNotification(models.Model):
     @classmethod
     def get_unread_for_user(cls, user, limit=10):
         """Get unread notifications for a user based on their permissions"""
+        from django.db.models import Exists, OuterRef
         from organizations.models import AdminUser
-        
+
+        already_read = NotificationRead.objects.filter(
+            notification=OuterRef('pk'), user=user
+        )
+
         # Superuser sees all notifications
         if user.is_superuser:
-            return cls.objects.filter(is_read=False)[:limit]
-        
+            return cls.objects.exclude(Exists(already_read))[:limit]
+
         try:
             profile = user.admin_profile
             if profile.role and profile.role.name == 'owner':
                 # Owner sees all for their center
-                return cls.objects.filter(is_read=False, center=profile.center)[:limit]
+                return cls.objects.filter(center=profile.center).exclude(Exists(already_read))[:limit]
             elif profile.branch:
                 # Branch staff see branch notifications
                 return cls.objects.filter(
-                    is_read=False,
                     branch=profile.branch
-                )[:limit]
+                ).exclude(Exists(already_read))[:limit]
             elif profile.center:
                 # Center-level staff see center notifications
                 return cls.objects.filter(
-                    is_read=False,
                     center=profile.center
-                )[:limit]
+                ).exclude(Exists(already_read))[:limit]
             else:
-                return cls.objects.filter(is_read=False)[:limit]
+                return cls.objects.exclude(Exists(already_read))[:limit]
         except (AttributeError, AdminUser.DoesNotExist):
             return cls.objects.none()
     
     @classmethod
     def count_unread_for_user(cls, user):
         """Count unread notifications for a user"""
+        from django.db.models import Exists, OuterRef
         from organizations.models import AdminUser
-        
+
+        already_read = NotificationRead.objects.filter(
+            notification=OuterRef('pk'), user=user
+        )
+
         # Superuser sees all notifications
         if user.is_superuser:
-            return cls.objects.filter(is_read=False).count()
-        
+            return cls.objects.exclude(Exists(already_read)).count()
+
         try:
             profile = user.admin_profile
             if profile.role and profile.role.name == 'owner':
                 # Owner sees all for their center
-                return cls.objects.filter(is_read=False, center=profile.center).count()
+                return cls.objects.filter(center=profile.center).exclude(Exists(already_read)).count()
             elif profile.branch:
                 # Branch staff see branch notifications
                 return cls.objects.filter(
-                    is_read=False,
                     branch=profile.branch
-                ).count()
+                ).exclude(Exists(already_read)).count()
             elif profile.center:
                 # Center-level staff see center notifications
                 return cls.objects.filter(
-                    is_read=False,
                     center=profile.center
-                ).count()
+                ).exclude(Exists(already_read)).count()
             else:
-                return cls.objects.filter(is_read=False).count()
+                return cls.objects.exclude(Exists(already_read)).count()
         except (AttributeError, AdminUser.DoesNotExist):
             return 0
+
+
+class NotificationRead(models.Model):
+    """Tracks which users have read which notifications (per-user read status)."""
+    notification = models.ForeignKey(
+        AdminNotification,
+        on_delete=models.CASCADE,
+        related_name='read_records',
+        verbose_name=_("Notification"),
+    )
+    user = models.ForeignKey(
+        'auth.User',
+        on_delete=models.CASCADE,
+        related_name='notification_reads',
+        verbose_name=_("User"),
+    )
+    read_at = models.DateTimeField(_("Read At"), auto_now_add=True)
+
+    class Meta:
+        unique_together = [('notification', 'user')]
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['notification', 'user']),
+        ]
+        verbose_name = _("Notification Read")
+        verbose_name_plural = _("Notification Reads")
+
+    def __str__(self):
+        return f"{self.user} read {self.notification_id}"
 
 
 class FileArchive(models.Model):
