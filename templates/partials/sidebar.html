@@ -291,6 +291,14 @@
             {% endif %}
             {% endif %}
             
+            <!-- Support Tickets - visible to all authenticated staff -->
+            <li>
+                <a href="{% url 'support:ticket_list' %}">
+                    <iconify-icon icon="solar:ticket-bold" class="menu-icon"></iconify-icon>
+                    <span data-i18n="sidebar.supportTickets">{% trans "Support Tickets" %}</span>
+                </a>
+            </li>
+
             <!-- Superuser-Only Section -->
             {% if user.is_superuser %}
             <li class="sidebar-menu-group-title" data-i18n="sidebar.superuserTools">{% trans "Superuser Tools" %}</li>
@@ -320,6 +328,14 @@
                 </ul>
             </li>
             
+            <!-- Support Inbox (superuser replies to all tickets) -->
+            <li>
+                <a href="{% url 'support:support_list' %}">
+                    <iconify-icon icon="solar:headphones-bold" class="menu-icon"></iconify-icon>
+                    <span>{% trans "Support Inbox" %}</span>
+                </a>
+            </li>
+
             <!-- Contact Requests -->
             <!-- Requests Management (Contact + Renewal) -->
             <li>

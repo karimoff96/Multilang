@@ -94,6 +94,8 @@ urlpatterns = [
     path("core/", include("core.urls")),
     # Billing & Subscriptions (Superuser only)
     path("billing/", include("billing.urls")),
+    # Support ticketing system
+    path("support/", include("support.urls")),
     # home routes
     path("index", home_views.index, name="index"),
     path("view-details", home_views.viewDetails, name="viewDetails"),

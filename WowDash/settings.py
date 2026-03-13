@@ -64,6 +64,15 @@ CSRF_TRUSTED_ORIGINS = [
 # Main domain for subdomain extraction
 MAIN_DOMAIN = os.getenv("MAIN_DOMAIN", "multilang.uz")
 
+# ── Support ticketing — dedicated bot & group ────────────────────────────────
+# This bot sends all support ticket notifications to the central support group.
+# The same token is reused from ADMIN_BOT_TOKEN in .env.
+SUPPORT_BOT_TOKEN = os.getenv("ADMIN_BOT_TOKEN", "")
+SUPPORT_TELEGRAM_GROUP_ID = os.getenv("SUPPORT_TELEGRAM_GROUP_ID", "")
+# Base URL used for dashboard deep-links in Telegram notifications
+BASE_URL = os.getenv("BASE_URL", f"https://admin.{os.getenv('MAIN_DOMAIN', 'multilang.uz')}")
+# ─────────────────────────────────────────────────────────────────────────────
+
 
 # Application definition
 
@@ -85,6 +94,7 @@ INSTALLED_APPS = [
     "landing",
     "billing",
     "webapp",
+    "support",
 ]
 
 MIDDLEWARE = [
