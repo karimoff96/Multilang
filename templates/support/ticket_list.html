@@ -184,13 +184,13 @@
                         </td>
                         <td class="px-16 py-12">
                             <a href="{% url 'support:ticket_detail' ticket.pk %}"
-                               class="text-sm fw-medium text-dark text-decoration-none hover-text-primary">
+                               class="text-sm fw-medium text-neutral-900 text-decoration-none hover-text-primary">
                                 {{ ticket.subject|truncatechars:60 }}
                             </a>
                         </td>
                         <td class="px-16 py-12">
                             <span class="text-sm text-secondary-light">
-                                {% if ticket.category %}{{ ticket.category.name_uz }}{% else %}—{% endif %}
+                                {% if ticket.category %}{{ ticket.category.localized_name }}{% else %}—{% endif %}
                             </span>
                         </td>
                         <td class="px-16 py-12">

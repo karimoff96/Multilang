@@ -55,6 +55,12 @@ class TicketCategory(models.Model):
     def get_name(self, lang='uz'):
         return getattr(self, f'name_{lang}', None) or self.name_uz
 
+    @property
+    def localized_name(self):
+        from django.utils.translation import get_language
+        lang = (get_language() or 'uz')[:2]
+        return getattr(self, f'name_{lang}', None) or self.name_uz
+
 
 class Ticket(models.Model):
     STATUS_OPEN = 'open'
@@ -361,3 +367,11 @@ class TicketStatusHistory(models.Model):
 
     def __str__(self):
         return f"{self.ticket.ticket_number}: {self.from_status} → {self.to_status}"
+
+    def get_from_status_display(self):
+        choices_dict = dict(Ticket.STATUS_CHOICES)
+        return choices_dict.get(self.from_status, self.from_status)
+
+    def get_to_status_display(self):
+        choices_dict = dict(Ticket.STATUS_CHOICES)
+        return choices_dict.get(self.to_status, self.to_status)

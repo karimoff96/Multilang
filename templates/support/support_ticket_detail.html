@@ -62,7 +62,7 @@
                             <span class="w-28-px h-28-px radius-circle bg-primary-100 d-flex align-items-center justify-content-center">
                                 <iconify-icon icon="solar:user-bold" class="text-primary-600 text-sm"></iconify-icon>
                             </span>
-                            <span class="text-xs fw-semibold text-dark">
+                            <span class="text-xs fw-semibold text-neutral-900">
                                 {% if msg.sender %}{{ msg.sender.get_full_name|default:msg.sender.username }}{% else %}Staff{% endif %}
                             </span>
                             <span class="badge bg-primary-50 text-primary-600 text-xs px-6 py-2">{% trans "Staff" %}</span>
@@ -85,7 +85,7 @@
                             </a>
                             {% else %}
                             <a href="{{ att.file_url }}" target="_blank"
-                               class="badge bg-white border text-dark px-10 py-6 text-xs d-flex align-items-center gap-4 text-decoration-none">
+                               class="badge bg-neutral-50 border text-neutral-900 px-10 py-6 text-xs d-flex align-items-center gap-4 text-decoration-none">
                                 <iconify-icon icon="solar:file-bold" class="text-primary-600"></iconify-icon>
                                 {{ att.original_filename|truncatechars:25 }}
                                 <span class="text-secondary-light">({{ att.file_size_display }})</span>
@@ -108,7 +108,7 @@
                                 <iconify-icon icon="solar:lock-bold" class="me-2"></iconify-icon>{% trans "Internal" %}
                             </span>
                             {% endif %}
-                            <span class="text-xs fw-semibold text-dark">{% trans "Support Team" %}</span>
+                            <span class="text-xs fw-semibold text-neutral-900">{% trans "Support Team" %}</span>
                             <span class="w-28-px h-28-px radius-circle bg-success-100 d-flex align-items-center justify-content-center ms-4">
                                 <iconify-icon icon="solar:headphones-bold" class="text-success-600 text-sm"></iconify-icon>
                             </span>
@@ -130,7 +130,7 @@
                             </a>
                             {% else %}
                             <a href="{{ att.file_url }}" target="_blank"
-                               class="badge bg-white border text-dark px-10 py-6 text-xs d-flex align-items-center gap-4 text-decoration-none">
+                               class="badge bg-neutral-50 border text-neutral-900 px-10 py-6 text-xs d-flex align-items-center gap-4 text-decoration-none">
                                 <iconify-icon icon="solar:file-bold" class="text-success-600"></iconify-icon>
                                 {{ att.original_filename|truncatechars:25 }}
                                 <span class="text-secondary-light">({{ att.file_size_display }})</span>
@@ -251,7 +251,7 @@
                     </li>
                     <li class="list-group-item px-20 py-10 d-flex justify-content-between">
                         <span class="text-secondary-light text-sm">{% trans "Category" %}</span>
-                        <span class="text-sm fw-medium">{% if ticket.category %}{{ ticket.category.name_uz }}{% else %}—{% endif %}</span>
+                        <span class="text-sm fw-medium">{% if ticket.category %}{{ ticket.category.localized_name }}{% else %}—{% endif %}</span>
                     </li>
                     <li class="list-group-item px-20 py-10 d-flex justify-content-between">
                         <span class="text-secondary-light text-sm">{% trans "Type" %}</span>
@@ -291,9 +291,9 @@
                         <div>
                             <p class="text-xs text-secondary-light mb-2">{{ h.created_at|date:"d M Y, H:i" }}</p>
                             <p class="text-sm mb-0 fw-medium">
-                                <span class="text-secondary-light">{{ h.from_status }}</span>
+                                <span class="text-secondary-light">{{ h.get_from_status_display }}</span>
                                 <iconify-icon icon="solar:arrow-right-linear" class="text-xs mx-4"></iconify-icon>
-                                <b>{{ h.to_status }}</b>
+                                <b>{{ h.get_to_status_display }}</b>
                             </p>
                             {% if h.changed_by %}
                             <p class="text-xs text-secondary-light mb-0">{{ h.changed_by.get_full_name|default:h.changed_by.username }}</p>
@@ -329,7 +329,7 @@
         <a id="lightboxOpen" href="#" target="_blank"
            class="btn btn-outline-light btn-sm px-20 d-inline-flex align-items-center gap-6">
           <iconify-icon icon="solar:maximize-square-bold"></iconify-icon>
-          Open full size
+          {% trans "Open full size" %}
         </a>
       </div>
     </div>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-13 15:25+0500\n"
+"POT-Creation-Date: 2026-03-13 15:59+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -896,7 +896,7 @@ msgstr "Возможности"
 #, fuzzy
 #| msgid "Categories"
 msgid "Category"
-msgstr "Категории"
+msgstr "Категория"
 
 #: billing/models.py:17 billing/models.py:34 billing/models.py:470
 #: billing/models.py:515 core/models.py:9 core/models.py:30
@@ -1931,6 +1931,7 @@ msgid "Body"
 msgstr ""
 
 #: core/models.py:58 orders/models.py:38 support/models.py:299
+#: venv/lib/python3.10/site-packages/django/db/models/fields/files.py:244
 msgid "File"
 msgstr ""
 
@@ -1954,6 +1955,7 @@ msgstr ""
 
 #: core/models.py:88 templates/billing/tariff_list.html:147
 #: templates/services/generalExpenseCategoryList.html:62
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:499
 msgid "Delete"
 msgstr ""
 
@@ -1962,7 +1964,7 @@ msgstr ""
 #: templates/landing/contact_requests.html:243
 #: templates/support/ticket_list.html:215
 msgid "View"
-msgstr ""
+msgstr "Просмотр"
 
 #: core/models.py:90
 msgid "Login"
@@ -3088,6 +3090,8 @@ msgstr ""
 #: templates/orders/bulk_payment.html:666
 #: templates/orders/bulk_payment.html:1106 templates/orders/ordersList.html:404
 #: templates/organizations/center_detail.html:449
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:484
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:491
 msgid "Order"
 msgstr ""
 
@@ -3117,7 +3121,7 @@ msgstr ""
 #: templates/landing/requests_management.html:52
 #: templates/support/support_ticket_list.html:96
 msgid "Rejected"
-msgstr ""
+msgstr "Отклонён"
 
 #: orders/models.py:791 orders/models.py:1209
 msgid "Receipt File"
@@ -5345,65 +5349,59 @@ msgstr "Категории"
 #: templates/support/support_ticket_list.html:227
 #: templates/support/ticket_list.html:52
 msgid "Open"
-msgstr ""
+msgstr "Открыт"
 
 #: support/models.py:69 templates/support/support_ticket_list.html:57
 #: templates/support/ticket_list.html:66
-#, fuzzy
-#| msgid "In Process"
 msgid "In Progress"
 msgstr "В процессе"
 
 #: support/models.py:70
 msgid "Awaiting Staff Response"
-msgstr ""
+msgstr "Ожидание ответа сотрудника"
 
 #: support/models.py:71 templates/support/support_ticket_detail.html:266
 #: templates/support/support_ticket_list.html:83
 #: templates/support/ticket_detail.html:239
 #: templates/support/ticket_list.html:94
 msgid "Resolved"
-msgstr ""
+msgstr "Решён"
 
 #: support/models.py:72
 msgid "Closed"
-msgstr ""
+msgstr "Закрыт"
 
 #: support/models.py:82
 msgid "Low"
-msgstr ""
+msgstr "Низкий"
 
 #: support/models.py:83
 msgid "Normal"
-msgstr ""
+msgstr "Обычный"
 
 #: support/models.py:84
 msgid "High"
-msgstr ""
+msgstr "Высокий"
 
 #: support/models.py:85
 msgid "Critical"
-msgstr ""
+msgstr "Критический"
 
 #: support/models.py:95
 msgid "Bug / Error"
-msgstr ""
+msgstr "Баг / Ошибка"
 
 #: support/models.py:97
 msgid "Technical"
-msgstr ""
+msgstr "Технический"
 
 #: support/models.py:98
-#, fuzzy
-#| msgid "Contact Requests"
 msgid "Change Request"
-msgstr "Запросы на контакт"
+msgstr "Запрос на изменение"
 
 #: support/models.py:99
-#, fuzzy
-#| msgid "General Expense"
 msgid "General Inquiry"
-msgstr "Общий расход"
+msgstr "Общий вопрос"
 
 #: support/models.py:103
 msgid "Ticket Number"
@@ -5413,7 +5411,7 @@ msgstr ""
 #: templates/support/ticket_create.html:87
 #: templates/support/ticket_list.html:167
 msgid "Subject"
-msgstr ""
+msgstr "Тема"
 
 #: support/models.py:133 templates/support/support_ticket_detail.html:215
 #: templates/support/support_ticket_list.html:141
@@ -5422,10 +5420,8 @@ msgstr ""
 #: templates/support/ticket_detail.html:214
 #: templates/support/ticket_list.html:130
 #: templates/support/ticket_list.html:170
-#, fuzzy
-#| msgid "Support"
 msgid "Priority"
-msgstr "Поддержка"
+msgstr "Приоритет"
 
 #: support/models.py:148
 #, fuzzy
@@ -5559,7 +5555,7 @@ msgstr "Статус"
 #, fuzzy
 #| msgid "Payment History"
 msgid "Status History"
-msgstr "История платежей"
+msgstr "История статусов"
 
 #: support/models.py:359
 #, fuzzy
@@ -5574,14 +5570,12 @@ msgstr ""
 # Support & Services Features (2)
 #: support/views.py:144 support/views.py:174 support/views.py:275
 #: templates/partials/sidebar.html:298 templates/support/ticket_list.html:11
-#, fuzzy
-#| msgid "Support Ticketing System"
 msgid "Support Tickets"
-msgstr "Система Тикетов Поддержки"
+msgstr "Мои запросы"
 
 #: support/views.py:145
 msgid "My Tickets"
-msgstr ""
+msgstr "Мои запросы"
 
 #: support/views.py:145 support/views.py:432
 #, fuzzy
@@ -5591,7 +5585,7 @@ msgstr "Все пользователи"
 
 #: support/views.py:173 templates/support/ticket_list.html:23
 msgid "New Ticket"
-msgstr ""
+msgstr "Новый запрос"
 
 #: support/views.py:189
 #, fuzzy
@@ -5637,12 +5631,12 @@ msgstr ""
 
 #: support/views.py:358
 msgid "Resolved by staff"
-msgstr ""
+msgstr "Решено сотрудником"
 
 #: support/views.py:363
 #, python-format
 msgid "Ticket marked as resolved by %(name)s."
-msgstr ""
+msgstr "Запрос отмечен как решённый пользователем %(name)s."
 
 #: support/views.py:371
 msgid "Ticket has been resolved."
@@ -5651,10 +5645,8 @@ msgstr ""
 #: support/views.py:431 support/views.py:465
 #: templates/partials/sidebar.html:335
 #: templates/support/support_ticket_list.html:11
-#, fuzzy
-#| msgid "Support"
 msgid "Support Inbox"
-msgstr "Поддержка"
+msgstr "Служба поддержки"
 
 #: support/views.py:503
 msgid "Reply sent to staff."
@@ -5748,7 +5740,7 @@ msgstr "Поиск записей..."
 #: templates/support/support_ticket_list.html:153
 #: templates/support/ticket_list.html:38
 msgid "All"
-msgstr ""
+msgstr "Все"
 
 #: templates/billing/centers_list.html:75
 #: templates/billing/centers_list.html:145
@@ -6391,6 +6383,7 @@ msgstr ""
 #: templates/billing/subscription_analytics.html:230
 #: templates/billing/subscription_detail.html:103
 #: templates/billing/subscription_list.html:136
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1868
 msgid "Duration"
 msgstr "Продолжительность"
 
@@ -7357,6 +7350,7 @@ msgstr "Услуги"
 #: templates/billing/tariff_edit.html:550
 #: templates/billing/tariff_edit.html:644
 #: templates/billing/tariff_edit.html:703
+#: venv/lib/python3.10/site-packages/modeltranslation/widgets.py:32
 msgid "None"
 msgstr ""
 
@@ -7762,54 +7756,66 @@ msgid "All Months"
 msgstr "Все суммы"
 
 #: templates/billing/usage_tracking.html:103
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:25
 msgid "January"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:104
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:26
 msgid "February"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:105
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:27
 #, fuzzy
 #| msgid "Search"
 msgid "March"
 msgstr "Поиск"
 
 #: templates/billing/usage_tracking.html:106
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:28
 msgid "April"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:107
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:29
 #, fuzzy
 #| msgid "Pay"
 msgid "May"
 msgstr "Оплатить"
 
 #: templates/billing/usage_tracking.html:108
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:30
 msgid "June"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:109
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:31
 msgid "July"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:110
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:32
 msgid "August"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:111
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:33
 msgid "September"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:112
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:34
 msgid "October"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:113
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:35
 msgid "November"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:114
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:36
 msgid "December"
 msgstr ""
 
@@ -8101,11 +8107,13 @@ msgstr "Компании"
 
 #: templates/landing/contact_requests.html:147
 #: templates/landing/contact_requests.html:155
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:867
 msgid "Yes"
 msgstr "Да"
 
 #: templates/landing/contact_requests.html:148
 #: templates/landing/contact_requests.html:156
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:868
 msgid "No"
 msgstr "Нет"
 
@@ -8150,7 +8158,7 @@ msgstr "Необязательные примечания об этом прод
 #: templates/landing/contact_requests.html:271
 #: templates/orders/bulk_payment.html:646
 msgid "Close"
-msgstr ""
+msgstr "Закрыть"
 
 #: templates/landing/contact_requests.html:274
 #, fuzzy
@@ -8239,7 +8247,7 @@ msgstr ""
 
 #: templates/landing/partials/renewal_table.html:52
 msgid "Reject"
-msgstr ""
+msgstr "Отклонить"
 
 #: templates/landing/partials/renewal_table.html:62
 #, fuzzy
@@ -9080,6 +9088,7 @@ msgstr "Языки"
 #: templates/services/generalExpenseAnalytics.html:74
 #: templates/support/support_ticket_list.html:162
 #: templates/support/ticket_list.html:151
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:527
 msgid "Clear"
 msgstr "Сбросить"
 
@@ -9749,86 +9758,90 @@ msgstr "Поддержка"
 #: templates/support/support_ticket_detail.html:149
 #: templates/support/ticket_detail.html:150
 msgid "No messages yet."
-msgstr ""
+msgstr "Сообщений пока нет."
 
 #: templates/support/support_ticket_detail.html:166
 msgid "Internal note (not visible to staff)"
-msgstr ""
+msgstr "Внутренняя заметка (не видна сотруднику)"
 
 #: templates/support/support_ticket_detail.html:172
 #: templates/support/support_ticket_detail.html:367
 msgid "Write your reply to the staff member…"
-msgstr ""
+msgstr "Напишите ответ сотруднику…"
 
 #: templates/support/support_ticket_detail.html:178
 msgid "Attach"
-msgstr ""
+msgstr "Прикрепить"
 
 #: templates/support/support_ticket_detail.html:185
 #: templates/support/support_ticket_detail.html:368
 #: templates/support/ticket_detail.html:176
 msgid "Send Reply"
-msgstr ""
+msgstr "Отправить ответ"
 
 #: templates/support/support_ticket_detail.html:201
 #, fuzzy
 #| msgid "Update Status"
 msgid "Update Ticket"
-msgstr "Обновить статус"
+msgstr "Обновить запрос"
 
 #: templates/support/support_ticket_detail.html:223
 msgid "Reason / Note"
-msgstr ""
+msgstr "Причина / Заметка"
 
 #: templates/support/support_ticket_detail.html:225
 msgid "e.g. Escalated, rejected because…"
-msgstr ""
+msgstr "напр. Эскалировано, отклонено потому что…"
 
 #: templates/support/support_ticket_detail.html:228
 #, fuzzy
 #| msgid "Save Changes"
 msgid "Apply Changes"
-msgstr "Сохранить изменения"
+msgstr "Применить изменения"
 
 #: templates/support/support_ticket_detail.html:238
 #: templates/support/ticket_detail.html:203
 #, fuzzy
 #| msgid "actions.viewDetails"
 msgid "Ticket Details"
-msgstr "Просмотр деталей"
+msgstr "Детали запроса"
 
 #: templates/support/support_ticket_detail.html:261
 #: templates/support/ticket_detail.html:234
 msgid "Submitted"
-msgstr ""
+msgstr "Отправлен"
 
 #: templates/support/support_ticket_detail.html:272
 msgid "Auto-resolve at"
-msgstr ""
+msgstr "Автозакрытие в"
+
+#: templates/support/support_ticket_detail.html:332
+#: templates/support/ticket_create.html:280
+#: templates/support/ticket_detail.html:303
+msgid "Open full size"
+msgstr "Открыть полный размер"
 
 #: templates/support/support_ticket_detail.html:363
 msgid "Write an internal note (support team only)…"
-msgstr ""
+msgstr "Напишите внутреннюю заметку (только для команды поддержки)…"
 
 #: templates/support/support_ticket_detail.html:364
 #, fuzzy
 #| msgid "Notes"
 msgid "Save Note"
-msgstr "Примечания"
+msgstr "Сохранить заметку"
 
 #: templates/support/support_ticket_list.html:16
 msgid "critical"
-msgstr ""
+msgstr "критический"
 
 #: templates/support/support_ticket_list.html:70
-#, fuzzy
-#| msgid "Awaiting"
 msgid "Awaiting Staff"
-msgstr "Ожидание"
+msgstr "Ожидает сотрудника"
 
 #: templates/support/support_ticket_list.html:114
 msgid "Ticket # / subject / staff name / center…"
-msgstr ""
+msgstr "№ запроса / тема / имя сотрудника / центр…"
 
 #: templates/support/support_ticket_list.html:123
 #, fuzzy
@@ -9841,143 +9854,145 @@ msgstr "Все центры"
 #, fuzzy
 #| msgid "Apply Filters"
 msgid "Filter"
-msgstr "Применить фильтры"
+msgstr "Фильтр"
 
 #: templates/support/support_ticket_list.html:278
 #: templates/support/ticket_list.html:266
 #, fuzzy
 #| msgid "No debtors found"
 msgid "No tickets found"
-msgstr "Должники не найдены"
+msgstr "Запросы не найдены"
 
 #: templates/support/support_ticket_list.html:279
 msgid "Your support inbox is empty."
-msgstr ""
+msgstr "Ваш ящик поддержки пуст."
 
 # Support & Services Features (2)
 #: templates/support/ticket_create.html:17
 #, fuzzy
 #| msgid "Support Ticketing System"
 msgid "Submit a Support Ticket"
-msgstr "Система Тикетов Поддержки"
+msgstr "Отправить запрос в поддержку"
 
 #: templates/support/ticket_create.html:18
 msgid "Describe your issue and our team will respond shortly."
-msgstr ""
+msgstr "Опишите проблему, и наша команда скоро ответит."
 
 #: templates/support/ticket_create.html:56
 msgid "Issue Type"
-msgstr ""
+msgstr "Тип проблемы"
 
 #: templates/support/ticket_create.html:92
 #, fuzzy
 #| msgid "Optional description or details"
 msgid "Brief description of the issue"
-msgstr "Необязательное описание"
+msgstr "Краткое описание проблемы"
 
 #: templates/support/ticket_create.html:104
 msgid ""
 "Please describe the issue in detail. Include steps to reproduce if relevant."
-msgstr ""
+msgstr "Пожалуйста, опишите проблему подробно. Включите шаги для воспроизведения, если применимо."
 
 #: templates/support/ticket_create.html:114
 #, fuzzy
 #| msgid "payment.cash"
 msgid "Attachments"
-msgstr "Наличные"
+msgstr "Вложения"
 
 #: templates/support/ticket_create.html:115
 msgid "optional, max 10 MB each"
-msgstr ""
+msgstr "необязательно, макс. 10 МБ каждое"
 
 #: templates/support/ticket_create.html:119
 msgid "Drag & drop files here or"
-msgstr ""
+msgstr "Перетащите файлы сюда или"
 
 # Landing page
 #: templates/support/ticket_create.html:121
 #, fuzzy
 #| msgid "Choose Plan"
 msgid "Choose Files"
-msgstr "Выбрать План"
+msgstr "Выбрать файлы"
+
+#: templates/support/ticket_create.html:127
+msgid "JPG, PNG, PDF, DOC, DOCX, XLS, ZIP"
+msgstr "JPG, PNG, PDF, DOC, DOCX, XLS, ZIP"
 
 #: templates/support/ticket_create.html:141
 msgid "Submit Ticket"
-msgstr ""
+msgstr "Отправить запрос"
 
 #: templates/support/ticket_detail.html:40
 msgid "Mark this ticket as resolved?"
-msgstr ""
+msgstr "Отметить этот запрос как решённый?"
 
 #: templates/support/ticket_detail.html:45
 #, fuzzy
 #| msgid "Trial End Date"
 msgid "Mark Resolved"
-msgstr "Дата окончания пробной версии"
+msgstr "Отметить как решённый"
 
 #: templates/support/ticket_detail.html:163
 msgid "Add a reply or provide more information…"
-msgstr ""
+msgstr "Добавьте ответ или дополнительную информацию…"
 
 #: templates/support/ticket_detail.html:169
 msgid "Attach file"
-msgstr ""
+msgstr "Прикрепить файл"
 
 #: templates/support/ticket_detail.html:186
 #, fuzzy
 #| msgid "Title is required."
 msgid "Ticket is resolved."
-msgstr "Необходимо указать название."
+msgstr "Запрос решён."
 
 #: templates/support/ticket_detail.html:188
 msgid "Ticket is closed."
-msgstr ""
+msgstr "Запрос закрыт."
 
 #: templates/support/ticket_detail.html:190
 msgid "Ticket has been rejected."
-msgstr ""
+msgstr "Запрос отклонён."
 
 #: templates/support/ticket_detail.html:245
 #, fuzzy
 #| msgid "Auto-Renew"
 msgid "Auto-resolve"
-msgstr "Автопродление"
+msgstr "Автозакрытие"
 
 #: templates/support/ticket_list.html:16
 msgid "new replies"
-msgstr ""
+msgstr "новых ответов"
 
 #: templates/support/ticket_list.html:80
-#, fuzzy
-#| msgid "Received"
 msgid "Reply Received"
-msgstr "Получено"
+msgstr "Ответ получен"
 
 #: templates/support/ticket_list.html:113
 msgid "Ticket # or subject…"
-msgstr ""
+msgstr "№ запроса или тема…"
 
 #: templates/support/ticket_list.html:122
 #, fuzzy
 #| msgid "All Rates"
 msgid "All statuses"
-msgstr "Все коэффициенты"
+msgstr "Все статусы"
 
 #: templates/support/ticket_list.html:132
 #, fuzzy
 #| msgid "All Categories"
 msgid "All priorities"
-msgstr "Все категории"
+msgstr "Все приоритеты"
 
 #: templates/support/ticket_list.html:142
 #, fuzzy
 #| msgid "All Users"
 msgid "All types"
-msgstr "Все пользователи"
+msgstr "Все типы"
 
 #: templates/support/ticket_list.html:182
 msgid "New reply"
-msgstr ""
+msgstr "Новый ответ"
 
 #: templates/support/ticket_list.html:228
 #, fuzzy, python-format
@@ -9990,589 +10005,1279 @@ msgstr "Показано %(start)s–%(end)s из %(total)s записей"
 
 #: templates/support/ticket_list.html:267
 msgid "Submit a new support ticket if you are experiencing an issue."
-msgstr ""
+msgstr "Отправьте новый запрос в поддержку, если возникла проблема."
 
 #: templates/support/ticket_list.html:270
 msgid "Create First Ticket"
+msgstr "Создать первый запрос"
+
+#: venv/lib/python3.10/site-packages/django/contrib/messages/apps.py:16
+#, fuzzy
+#| msgid "message.info"
+msgid "Messages"
+msgstr "Информация"
+
+#: venv/lib/python3.10/site-packages/django/contrib/sitemaps/apps.py:8
+msgid "Site Maps"
 msgstr ""
 
-#~ msgid "Automated Cloud Backups"
-#~ msgstr "Автоматическое Облачное Резервирование"
-
-#~ msgid "Extended Storage Capacity"
-#~ msgstr "Расширенная Емкость Хранилища"
-
-# Financial Management Features (4)
-#~ msgid "Multi-Currency Pricing"
-#~ msgstr "Мультивалютное Ценообразование"
-
-# Advanced Features (3)
-#~ msgid "Advanced Security Features"
-#~ msgstr "Расширенные Функции Безопасности"
-
+#: venv/lib/python3.10/site-packages/django/contrib/staticfiles/apps.py:9
 #, fuzzy
-#~| msgid "Convert to Paid Subscription"
-#~ msgid "Cancelled to create new subscription"
-#~ msgstr "Преобразовать в платную подписку"
+#| msgid "Status Changed"
+msgid "Static Files"
+msgstr "Статус изменен"
 
+#: venv/lib/python3.10/site-packages/django/contrib/syndication/apps.py:7
 #, fuzzy
-#~| msgid "No"
-#~ msgid "Nov"
-#~ msgstr "Нет"
+#| msgid "Location"
+msgid "Syndication"
+msgstr "Местоположение"
 
+#. Translators: String used to replace omitted page numbers in elided page
+#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
+#: venv/lib/python3.10/site-packages/django/core/paginator.py:30
+msgid "…"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/paginator.py:32
+msgid "That page number is not an integer"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/paginator.py:33
+msgid "That page number is less than 1"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/paginator.py:34
+msgid "That page contains no results"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:22
 #, fuzzy
-#~| msgid "Renew Subscription"
-#~ msgid "Auto-renew subscription"
-#~ msgstr "Продлить подписку"
+#| msgid "Enter a valid amount."
+msgid "Enter a valid value."
+msgstr "Введите корректную сумму."
 
-#~ msgid "Center Analytics Summary"
-#~ msgstr "Сводка аналитики центра"
-
-#~ msgid "Subscription Information"
-#~ msgstr "Информация о подписке"
-
-#~ msgid "Trial Days Remaining"
-#~ msgstr "Осталось дней пробной версии"
-
-#~ msgid "Upgrade Plan"
-#~ msgstr "Улучшить план"
-
-#~ msgid "View Complete History"
-#~ msgstr "Посмотреть полную историю"
-
-#~ msgid ""
-#~ "The subscription will be extended from current end date by selected "
-#~ "duration"
-#~ msgstr "Подписка будет продлена с текущей даты окончания на выбранный срок"
-
-# Advanced Features (3)
+#: venv/lib/python3.10/site-packages/django/core/validators.py:70
 #, fuzzy
-#~| msgid "Advanced Security Features"
-#~ msgid "Advanced Security"
-#~ msgstr "Расширенные Функции Безопасности"
+#| msgid "Enter a valid amount."
+msgid "Enter a valid domain name."
+msgstr "Введите корректную сумму."
 
-# Feature Names - Orders
-# Feature Names - All 37 Features
-# Order Management Features (5)
+#: venv/lib/python3.10/site-packages/django/core/validators.py:153
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:775
 #, fuzzy
-#~| msgid "Basic Order Management"
-#~ msgid "Order Management Features"
-#~ msgstr "Базовое Управление Заказами"
+#| msgid "Enter a valid amount."
+msgid "Enter a valid URL."
+msgstr "Введите корректную сумму."
 
-#~ msgid "Order Templates"
-#~ msgstr "Шаблоны Заказов"
-
+#: venv/lib/python3.10/site-packages/django/core/validators.py:200
 #, fuzzy
-#~| msgid "Analytics & Reports"
-#~ msgid "Analytics & Reports Features"
-#~ msgstr "Аналитика и отчеты"
+#| msgid "Enter a valid amount."
+msgid "Enter a valid integer."
+msgstr "Введите корректную сумму."
 
+#: venv/lib/python3.10/site-packages/django/core/validators.py:211
 #, fuzzy
-#~| msgid "Integration"
-#~ msgid "Integration Features"
-#~ msgstr "Интеграция"
+#| msgid "form.address"
+msgid "Enter a valid email address."
+msgstr "Адрес"
 
-#, fuzzy
-#~| msgid "Telegram Webhook Management"
-#~ msgid "Webhook Management"
-#~ msgstr "Управление Telegram Вебхуками"
+#. Translators: "letters" means latin letters: a-z and A-Z.
+#: venv/lib/python3.10/site-packages/django/core/validators.py:289
+msgid ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
+msgstr ""
 
-#, fuzzy
-#~| msgid "Plan Features"
-#~ msgid "Marketing Features"
-#~ msgstr "Возможности плана"
+#: venv/lib/python3.10/site-packages/django/core/validators.py:297
+msgid ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or "
+"hyphens."
+msgstr ""
 
-# Feature Names - Orders
-# Feature Names - All 37 Features
-# Order Management Features (5)
-#, fuzzy
-#~| msgid "Basic Order Management"
-#~ msgid "Multi-Branch Management"
-#~ msgstr "Базовое Управление Заказами"
+#: venv/lib/python3.10/site-packages/django/core/validators.py:309
+#: venv/lib/python3.10/site-packages/django/core/validators.py:318
+#: venv/lib/python3.10/site-packages/django/core/validators.py:332
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2220
+#, fuzzy, python-format
+#| msgid "Enter a valid amount."
+msgid "Enter a valid %(protocol)s address."
+msgstr "Введите корректную сумму."
 
-# Organization & Staff Features (4)
-#, fuzzy
-#~| msgid "Multiple Branches"
-#~ msgid "Manage multiple branches/locations"
-#~ msgstr "Несколько Филиалов"
+#: venv/lib/python3.10/site-packages/django/core/validators.py:311
+msgid "IPv4"
+msgstr ""
 
-#~ msgid "Staff Scheduling"
-#~ msgstr "Планирование Сотрудников"
+#: venv/lib/python3.10/site-packages/django/core/validators.py:320
+#: venv/lib/python3.10/site-packages/django/utils/ipv6.py:43
+msgid "IPv6"
+msgstr ""
 
-#, fuzzy
-#~| msgid "Branch Settings"
-#~ msgid "Branch-Specific Settings"
-#~ msgstr "Настройки Филиалов"
+#: venv/lib/python3.10/site-packages/django/core/validators.py:334
+msgid "IPv4 or IPv6"
+msgstr ""
 
-#, fuzzy
-#~| msgid "Automated Cloud Backups"
-#~ msgid "Cloud Backup"
-#~ msgstr "Автоматическое Облачное Резервирование"
+#: venv/lib/python3.10/site-packages/django/core/validators.py:375
+msgid "Enter only digits separated by commas."
+msgstr ""
 
-#, fuzzy
-#~| msgid "Automated Cloud Backups"
-#~ msgid "Automatic cloud backup of data"
-#~ msgstr "Автоматическое Облачное Резервирование"
-
-#, fuzzy
-#~| msgid "Extended Storage Capacity"
-#~ msgid "Extended Storage"
-#~ msgstr "Расширенная Емкость Хранилища"
-
-#, fuzzy
-#~| msgid "Extended Storage Capacity"
-#~ msgid "Increased file storage capacity"
-#~ msgstr "Расширенная Емкость Хранилища"
-
-# Financial Management Features (4)
-#, fuzzy
-#~| msgid "Multi-Currency Pricing"
-#~ msgid "Multi-Currency Support"
-#~ msgstr "Мультивалютное Ценообразование"
-
-#, fuzzy
-#~| msgid "Integration"
-#~ msgid "Invoice Generation"
-#~ msgstr "Интеграция"
-
-#, fuzzy
-#~| msgid "Features"
-#~ msgid "Support Features"
-#~ msgstr "Возможности"
-
-#~ msgid "Knowledge Base Access"
-#~ msgstr "Доступ к Базе Знаний"
-
-# Advanced Features (3)
-#, fuzzy
-#~| msgid "Advanced Security Features"
-#~ msgid "Advanced Features"
-#~ msgstr "Расширенные Функции Безопасности"
-
-# Advanced Features (3)
-#, fuzzy
-#~| msgid "Advanced Security Features"
-#~ msgid "Enhanced security features"
-#~ msgstr "Расширенные Функции Безопасности"
-
-#, fuzzy
-#~| msgid "Data Retention Control"
-#~ msgid "Data Retention Policies"
-#~ msgstr "Контроль Хранения Данных"
-
-#, fuzzy
-#~| msgid "Dynamic Pricing"
-#~ msgid "Dynamic Pricing Rules"
-#~ msgstr "Динамическое Ценообразование"
-
-#, fuzzy
-#~| msgid "Select Pricing Duration"
-#~ msgid "Remove this pricing option?"
-#~ msgstr "Выберите продолжительность"
-
+#: venv/lib/python3.10/site-packages/django/core/validators.py:381
 #, python-format
-#~ msgid "%(year)s Total"
-#~ msgstr "Итого %(year)s"
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr ""
 
-#~ msgid "From month"
-#~ msgstr "С месяца"
-
-#~ msgid "To month"
-#~ msgstr "По месяц"
-
+#: venv/lib/python3.10/site-packages/django/core/validators.py:416
 #, python-format
-#~ msgid "Monthly Expenses — %(year)s"
-#~ msgstr "Расходы по месяцам — %(year)s"
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr ""
 
+#: venv/lib/python3.10/site-packages/django/core/validators.py:425
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:434
+#, python-format
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:441
+#, python-format
+msgid ""
+"Ensure this value is a multiple of step size %(limit_value)s, starting from "
+"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:473
+#, python-format
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:491
+#, python-format
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:514
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:366
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:405
 #, fuzzy
-#~| msgid "Location"
-#~ msgid "Syndication"
-#~ msgstr "Местоположение"
+#| msgid "orders.orderNumber"
+msgid "Enter a number."
+msgstr "Номер заказа"
 
+#: venv/lib/python3.10/site-packages/django/core/validators.py:516
+#, python-format
+msgid "Ensure that there are no more than %(max)s digit in total."
+msgid_plural "Ensure that there are no more than %(max)s digits in total."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:521
+#, python-format
+msgid "Ensure that there are no more than %(max)s decimal place."
+msgid_plural "Ensure that there are no more than %(max)s decimal places."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:526
+#, python-format
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:597
+#, python-format
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:659
+msgid "Null characters are not allowed."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/base.py:1600
+#: venv/lib/python3.10/site-packages/django/forms/models.py:908
+msgid "and"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/base.py:1602
+#, python-format
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/constraints.py:22
+#, python-format
+msgid "Constraint “%(name)s” is violated."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:134
+#, python-format
+msgid "Value %(value)r is not a valid choice."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:135
+msgid "This field cannot be null."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:136
+msgid "This field cannot be blank."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:137
+#, python-format
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr ""
+
+#. Translators: The 'lookup_type' is one of 'date', 'year' or
+#. 'month'. Eg: "Title must be unique for pub_date year"
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:141
+#, python-format
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:180
+#, python-format
+msgid "Field of type: %(field_type)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1162
+#, python-format
+msgid "“%(value)s” value must be either True or False."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1163
+#, python-format
+msgid "“%(value)s” value must be either True, False, or None."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1165
+msgid "Boolean (Either True or False)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1215
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1217
+msgid "String (unlimited)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1326
+msgid "Comma-separated integers"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1427
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1431
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1566
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1435
+msgid "Date (without time)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1562
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
+"uuuuuu]][TZ] format."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1570
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
+"[TZ]) but it is an invalid date/time."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1575
+msgid "Date (with time)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1702
+#, python-format
+msgid "“%(value)s” value must be a decimal number."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1704
+msgid "Decimal number"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1864
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[."
+"uuuuuu] format."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1920
 #, fuzzy
-#~| msgid "org.address"
-#~ msgid "IPv4 address"
-#~ msgstr "Адрес"
+#| msgid "org.address"
+msgid "Email address"
+msgstr "Адрес"
 
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1945
+msgid "File path"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2023
+#, python-format
+msgid "“%(value)s” value must be a float."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2025
+msgid "Floating point number"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2065
+#, python-format
+msgid "“%(value)s” value must be an integer."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2067
 #, fuzzy
-#~| msgid "org.address"
-#~ msgid "IP address"
-#~ msgstr "Адрес"
+#| msgid "Integration"
+msgid "Integer"
+msgstr "Интеграция"
 
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2163
+msgid "Big (8 byte) integer"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2180
+msgid "Small integer"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2188
 #, fuzzy
-#~| msgid "Help Text"
-#~ msgid "Text"
-#~ msgstr "Текст справки"
+#| msgid "org.address"
+msgid "IPv4 address"
+msgstr "Адрес"
 
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2219
 #, fuzzy
-#~| msgid "Current Usage"
-#~ msgid "Currently"
-#~ msgstr "Текущее использование"
+#| msgid "org.address"
+msgid "IP address"
+msgstr "Адрес"
 
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2310
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2311
+#, python-format
+msgid "“%(value)s” value must be either None, True or False."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2313
+msgid "Boolean (Either True, False or None)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2364
+msgid "Positive big integer"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2379
 #, fuzzy
-#~| msgid "at"
-#~ msgid "Sat"
-#~ msgstr "в"
+#| msgid "All Centers"
+msgid "Positive integer"
+msgstr "Все центры"
 
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2394
+msgid "Positive small integer"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2410
+#, python-format
+msgid "Slug (up to %(max_length)s)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2446
 #, fuzzy
-#~| msgid "Pay"
-#~ msgid "may"
-#~ msgstr "Оплатить"
+#| msgid "Help Text"
+msgid "Text"
+msgstr "Текст справки"
 
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2526
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2530
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2534
+msgid "Time"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2642
+msgid "URL"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2666
+msgid "Raw binary data"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2731
+#, python-format
+msgid "“%(value)s” is not a valid UUID."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2733
+msgid "Universally unique identifier"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/files.py:420
+msgid "Image"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/json.py:24
+msgid "A JSON object"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/json.py:26
+msgid "Value must be valid JSON."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:979
+#, python-format
+msgid "%(model)s instance with %(field)s %(value)r is not a valid choice."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:982
+msgid "Foreign Key (type determined by related field)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:1276
+msgid "One-to-one relationship"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:1333
+#, python-format
+msgid "%(from)s-%(to)s relationship"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:1335
+#, python-format
+msgid "%(from)s-%(to)s relationships"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:1383
+msgid "Many-to-many relationship"
+msgstr ""
+
+#. Translators: If found as last label character, these punctuation
+#. characters will prevent the default label_suffix to be appended to the label
+#: venv/lib/python3.10/site-packages/django/forms/boundfield.py:185
+msgid ":?.!"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:95
 #, fuzzy
-#~| msgid "Search"
-#~ msgctxt "abbrev. month"
-#~ msgid "March"
-#~ msgstr "Поиск"
+#| msgid "Title is required."
+msgid "This field is required."
+msgstr "Необходимо указать название."
 
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:315
 #, fuzzy
-#~| msgid "Pay"
-#~ msgctxt "abbrev. month"
-#~ msgid "May"
-#~ msgstr "Оплатить"
+#| msgid "orders.orderNumber"
+msgid "Enter a whole number."
+msgstr "Номер заказа"
 
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:486
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1267
 #, fuzzy
-#~| msgid "Search"
-#~ msgctxt "alt. month"
-#~ msgid "March"
-#~ msgstr "Поиск"
+#| msgid "Enter a valid amount."
+msgid "Enter a valid date."
+msgstr "Введите корректную сумму."
 
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:509
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1268
 #, fuzzy
-#~| msgid "Pay"
-#~ msgctxt "alt. month"
-#~ msgid "May"
-#~ msgstr "Оплатить"
+#| msgid "Enter a valid amount."
+msgid "Enter a valid time."
+msgstr "Введите корректную сумму."
 
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:536
 #, fuzzy
-#~| msgid "Not specified"
-#~ msgid "No year specified"
-#~ msgstr "Не указано"
+#| msgid "Enter a valid amount."
+msgid "Enter a valid date/time."
+msgstr "Введите корректную сумму."
 
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:570
 #, fuzzy
-#~| msgid "Not specified"
-#~ msgid "No month specified"
-#~ msgstr "Не указано"
+#| msgid "Enter a valid amount."
+msgid "Enter a valid duration."
+msgstr "Введите корректную сумму."
 
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:571
+#, python-brace-format
+msgid "The number of days must be between {min_days} and {max_days}."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:640
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:641
+msgid "No file was submitted."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:642
+msgid "The submitted file is empty."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:644
+#, python-format
+msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:649
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:717
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:889
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:975
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1592
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:977
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1096
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1590
 #, fuzzy
-#~| msgid "Not specified"
-#~ msgid "No day specified"
-#~ msgstr "Не указано"
+#| msgid "Enter a valid amount."
+msgid "Enter a list of values."
+msgstr "Введите корректную сумму."
 
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1097
+msgid "Enter a complete value."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1339
 #, fuzzy
-#~| msgid "Not specified"
-#~ msgid "No week specified"
-#~ msgstr "Не указано"
+#| msgid "Enter a valid amount."
+msgid "Enter a valid UUID."
+msgstr "Введите корректную сумму."
 
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1369
 #, fuzzy
-#~| msgid "Contact Requests"
-#~ msgid "Contact Requests from Landing Page"
-#~ msgstr "Запросы на контакт"
+#| msgid "Enter a valid amount."
+msgid "Enter a valid JSON."
+msgstr "Введите корректную сумму."
 
-# Landing page
-#~ msgid "+998 XX XXX XX XX or @username"
-#~ msgstr "+998 XX XXX XX XX или @username"
+#. Translators: This is the default suffix added to form field labels
+#: venv/lib/python3.10/site-packages/django/forms/forms.py:97
+msgid ":"
+msgstr ""
 
-# Landing page
-#~ msgid "1 Translation Center"
-#~ msgstr "1 Центр Переводов"
+#: venv/lib/python3.10/site-packages/django/forms/forms.py:239
+#, python-format
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr ""
 
-# Landing page
-#~ msgid "10 Staff Members"
-#~ msgstr "10 Сотрудников"
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:61
+#, python-format
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
+msgstr ""
 
-# Landing page
-#~ msgid "150 Orders/month"
-#~ msgstr "150 Заказов/месяц"
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:65
+#, python-format
+msgid "Please submit at most %(num)d form."
+msgid_plural "Please submit at most %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
 
-# Landing page
-#~ msgid "3 Branches"
-#~ msgstr "3 Филиала"
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:70
+#, python-format
+msgid "Please submit at least %(num)d form."
+msgid_plural "Please submit at least %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
 
-# Landing page
-#~ msgid "3 Language Support"
-#~ msgstr "Поддержка 3 Языков"
+#: venv/lib/python3.10/site-packages/django/forms/models.py:901
+#, python-format
+msgid "Please correct the duplicate data for %(field)s."
+msgstr ""
 
-# Landing page
-#~ msgid "4 simple steps - your business is automated"
-#~ msgstr "4 простых шага - ваш бизнес автоматизирован"
+#: venv/lib/python3.10/site-packages/django/forms/models.py:906
+#, python-format
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr ""
 
-# Landing page
-#~ msgid "500 Orders/month"
-#~ msgstr "500 Заказов/месяц"
+#: venv/lib/python3.10/site-packages/django/forms/models.py:913
+#, python-format
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
+msgstr ""
 
-# Landing page
-#~ msgid ""
-#~ "Accept orders from bot and admin panel. Status tracking, file management, "
-#~ "payment control"
-#~ msgstr ""
-#~ "Прием заказов из бота и админ панели. Отслеживание статусов, управление "
-#~ "файлами, контроль оплат"
+#: venv/lib/python3.10/site-packages/django/forms/models.py:922
+msgid "Please correct the duplicate values below."
+msgstr ""
 
-# Landing page
-#~ msgid "Additional features:"
-#~ msgstr "Дополнительные возможности:"
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1359
+msgid "The inline value did not match the parent instance."
+msgstr ""
 
-# Landing page
-#~ msgid "All rights reserved."
-#~ msgstr "Все права защищены."
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1450
+msgid "Select a valid choice. That choice is not one of the available choices."
+msgstr ""
 
-# Landing page
-#~ msgid ""
-#~ "All the tools you need to automate your business and increase efficiency"
-#~ msgstr ""
-#~ "Все необходимые инструменты для автоматизации бизнеса и повышения "
-#~ "эффективности"
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1594
+#, python-format
+msgid "“%(pk)s” is not a valid value."
+msgstr ""
 
-# Landing page
-#~ msgid "Auto Archiving"
-#~ msgstr "Автоматическое Архивирование"
+#: venv/lib/python3.10/site-packages/django/forms/utils.py:229
+#, python-format
+msgid ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
+msgstr ""
 
-# Landing page
-#~ msgid "Automatic Archiving"
-#~ msgstr "Автоматическое Архивирование"
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:528
+#, fuzzy
+#| msgid "Current Usage"
+msgid "Currently"
+msgstr "Текущее использование"
 
-# Landing page
-#~ msgid "Basic Reports"
-#~ msgstr "Базовые Отчеты"
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:529
+#, fuzzy
+#| msgid "View Changes"
+msgid "Change"
+msgstr "Посмотреть изменения"
 
-# Landing page
-#~ msgid "Be the first to know about new features and offers"
-#~ msgstr "Узнавайте первыми о новых возможностях и предложениях"
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:866
+#, fuzzy
+#| msgid "Unique Customers"
+msgid "Unknown"
+msgstr "Уникальных клиентов"
 
-# Landing page
-#~ msgid "Choose the perfect plan for your business"
-#~ msgstr "Выберите идеальный план для вашего бизнеса"
+#. Translators: Please do not add spaces around commas.
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:873
+msgid "yes,no,maybe"
+msgstr ""
 
-# Landing page
-#~ msgid "Company name"
-#~ msgstr "Название компании"
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:903
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:920
+#, python-format
+msgid "%(size)d byte"
+msgid_plural "%(size)d bytes"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
 
-# Landing page
-#~ msgid "Contact Us"
-#~ msgstr "Связаться с Нами"
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:922
+#, python-format
+msgid "%s KB"
+msgstr ""
 
-# Landing page
-#~ msgid ""
-#~ "Customer sends order via Telegram bot or admin panel. Files are uploaded "
-#~ "automatically"
-#~ msgstr ""
-#~ "Клиент отправляет заказ через Telegram бот или админ панель. Файлы "
-#~ "загружаются автоматически"
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:924
+#, python-format
+msgid "%s MB"
+msgstr ""
 
-# Landing page
-#~ msgid ""
-#~ "Customers can place orders directly via Telegram. Automatic price "
-#~ "calculation and notifications"
-#~ msgstr ""
-#~ "Клиенты могут оформлять заказы напрямую через Telegram. Автоматический "
-#~ "расчет цены и уведомления"
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:926
+#, python-format
+msgid "%s GB"
+msgstr ""
 
-# Landing page
-#~ msgid "Excel & Filters"
-#~ msgstr "Excel и Фильтры"
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:928
+#, python-format
+msgid "%s TB"
+msgstr ""
 
-# Landing page
-#~ msgid "Excel Export"
-#~ msgstr "Экспорт в Excel"
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:930
+#, python-format
+msgid "%s PB"
+msgstr ""
 
-# Landing page
-#~ msgid ""
-#~ "Export all data to Excel format. Powerful search and filtering system"
-#~ msgstr ""
-#~ "Экспорт всех данных в формат Excel. Мощная система поиска и фильтрации"
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:74
+msgid "p.m."
+msgstr ""
 
-# Landing page
-#~ msgid "Full Reports"
-#~ msgstr "Полные Отчеты"
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:75
+msgid "a.m."
+msgstr ""
 
-# Landing page
-#~ msgid ""
-#~ "Full interface in Russian, Uzbek and English. Convenient language "
-#~ "selection for clients and staff"
-#~ msgstr ""
-#~ "Полный интерфейс на русском, узбекском и английском языках. Удобный выбор "
-#~ "языка для клиентов и сотрудников"
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:80
+msgid "PM"
+msgstr ""
 
-# Landing page
-#~ msgid "Have questions? We're here to help!"
-#~ msgstr "Есть вопросы? Мы готовы помочь!"
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:81
+msgid "AM"
+msgstr ""
 
-# Landing page
-#~ msgid "How It Works?"
-#~ msgstr "Как Это Работает?"
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:153
+msgid "midnight"
+msgstr ""
 
-# Landing page
-#~ msgid ""
-#~ "Individual permissions for each employee. Owner, Manager, Staff roles. "
-#~ "Secure access control"
-#~ msgstr ""
-#~ "Индивидуальные права для каждого сотрудника. Роли Owner, Manager, Staff. "
-#~ "Безопасный контроль доступа"
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:155
+msgid "noon"
+msgstr ""
 
-# Landing page
-#~ msgid "Learn More"
-#~ msgstr "Узнать Больше"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:7
+msgid "Monday"
+msgstr ""
 
-# Landing page
-#~ msgid ""
-#~ "Live tracking of all processes. New orders, payments, status changes in "
-#~ "real-time"
-#~ msgstr ""
-#~ "Живое отслеживание всех процессов. Новые заказы, платежи, изменения "
-#~ "статусов в реальном времени"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:8
+msgid "Tuesday"
+msgstr ""
 
-# Landing page
-#~ msgid ""
-#~ "Manager assigns order to appropriate staff. Notifications sent via "
-#~ "Telegram"
-#~ msgstr ""
-#~ "Менеджер назначает заказ соответствующему сотруднику. Уведомления "
-#~ "отправляются через Telegram"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:9
+msgid "Wednesday"
+msgstr ""
 
-# Landing page
-#~ msgid "Modern SaaS platform for translation bureau management"
-#~ msgstr "Современная SaaS платформа для управления бюро переводов"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:10
+msgid "Thursday"
+msgstr ""
 
-# Landing page
-#~ msgid "Multi-Tenant"
-#~ msgstr "Мульти-Тенантность"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:11
+msgid "Friday"
+msgstr ""
 
-# Landing page
-#~ msgid "MultiLang Analytics"
-#~ msgstr "MultiLang Аналитика"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:12
+#, fuzzy
+#| msgid "Featured"
+msgid "Saturday"
+msgstr "Рекомендованный"
 
-# Landing page
-#~ msgid "MultiLang Dashboard"
-#~ msgstr "MultiLang Панель Управления"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:13
+msgid "Sunday"
+msgstr ""
 
-# Landing page
-#~ msgid "Newsletter"
-#~ msgstr "Новости"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:16
+#, fuzzy
+msgid "Mon"
+msgstr "Этот месяц"
 
-# Landing page
-#~ msgid ""
-#~ "Old orders are automatically archived and sent to Telegram channel. "
-#~ "Secure and hierarchical structure. No data loss"
-#~ msgstr ""
-#~ "Старые заказы автоматически архивируются и отправляются в Telegram канал. "
-#~ "Безопасная иерархическая структура. Нет потери данных"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:17
+msgid "Tue"
+msgstr ""
 
-# Landing page
-#~ msgid "Or contact us directly:"
-#~ msgstr "Или свяжитесь с нами напрямую:"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:18
+msgid "Wed"
+msgstr ""
 
-# Landing page
-#~ msgid "Order Reception"
-#~ msgstr "Прием Заказа"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:19
+msgid "Thu"
+msgstr ""
 
-# Landing page
-#~ msgid "Phone / Telegram *"
-#~ msgstr "Телефон / Telegram *"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:20
+msgid "Fri"
+msgstr ""
 
-# Landing page
-#~ msgid "Platform"
-#~ msgstr "Платформа"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:21
+#, fuzzy
+#| msgid "at"
+msgid "Sat"
+msgstr "в"
 
-# Landing page
-#~ msgid "Powerful Features"
-#~ msgstr "Мощные Возможности"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:22
+msgid "Sun"
+msgstr ""
 
-# Landing page
-#~ msgid "Price Calculation"
-#~ msgstr "Расчет Цены"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:39
+msgid "jan"
+msgstr ""
 
-# Landing page
-#~ msgid ""
-#~ "Process payments for multiple orders at once. Partial payments and debt "
-#~ "tracking"
-#~ msgstr ""
-#~ "Обработка оплаты для нескольких заказов одновременно. Частичные платежи и "
-#~ "контроль задолженностей"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:40
+msgid "feb"
+msgstr ""
 
-# Landing page
-#~ msgid "Professional"
-#~ msgstr "Профессиональный"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:41
+#, fuzzy
+#| msgid "Pay"
+msgid "mar"
+msgstr "Оплатить"
 
-# Landing page
-#~ msgid "Real-time Monitoring"
-#~ msgstr "Мониторинг в Реальном Времени"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:42
+#, fuzzy
+#| msgid "Search"
+msgid "apr"
+msgstr "Поиск"
 
-# Landing page
-#~ msgid ""
-#~ "Real-time statistics, financial reports, staff performance, branch "
-#~ "comparison. Excel export"
-#~ msgstr ""
-#~ "Статистика в реальном времени, финансовые отчеты, производительность "
-#~ "сотрудников, сравнение филиалов. Экспорт в Excel"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:43
+#, fuzzy
+#| msgid "Pay"
+msgid "may"
+msgstr "Оплатить"
 
-# Landing page
-#~ msgid ""
-#~ "Real-time status tracking, payment control, analytics. Data automatically "
-#~ "archived to Telegram channel"
-#~ msgstr ""
-#~ "Отслеживание статусов в реальном времени, контроль оплат, аналитика. "
-#~ "Данные автоматически архивируются в Telegram канал"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:44
+msgid "jun"
+msgstr ""
 
-# Landing page
-#~ msgid ""
-#~ "Send bulk messages to all customers. Custom groups, scheduled messages, "
-#~ "media attachments"
-#~ msgstr ""
-#~ "Массовая рассылка всем клиентам. Кастомные группы, запланированные "
-#~ "сообщения, медиа вложения"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:45
+msgid "jul"
+msgstr ""
 
-# Landing page
-#~ msgid "Staff Assignment"
-#~ msgstr "Назначение Сотрудникам"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:46
+msgid "aug"
+msgstr ""
 
-# Landing page
-#~ msgid "Starter"
-#~ msgstr "Начальный"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:47
+msgid "sep"
+msgstr ""
 
-# Landing page
-#~ msgid ""
-#~ "System automatically calculates price. Pages, language, client type (B2B/"
-#~ "B2C), copies"
-#~ msgstr ""
-#~ "Система автоматически рассчитывает цену. Страницы, язык, тип клиента (B2B/"
-#~ "B2C), копии"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:48
+#, fuzzy
+#| msgid "Products"
+msgid "oct"
+msgstr "Товары"
 
-# Landing page
-#~ msgid ""
-#~ "Track work results of each employee. Completed orders, revenue, time "
-#~ "spent statistics"
-#~ msgstr ""
-#~ "Отслеживание результатов работы каждого сотрудника. Выполненные заказы, "
-#~ "доход, статистика времени"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:49
+#, fuzzy
+#| msgid "No"
+msgid "nov"
+msgstr "Нет"
 
-# Landing page
-#~ msgid "Tracking & Reporting"
-#~ msgstr "Отслеживание и Отчеты"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:50
+msgid "dec"
+msgstr ""
 
-# Landing page
-#~ msgid ""
-#~ "Unlimited translation centers and branches. Each with own subdomain. "
-#~ "Fully isolated data"
-#~ msgstr ""
-#~ "Неограниченное количество центров и филиалов. Каждый со своим поддоменом. "
-#~ "Полная изоляция данных"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:53
+msgctxt "abbrev. month"
+msgid "Jan."
+msgstr ""
 
-# Landing page
-#~ msgid "Uptime"
-#~ msgstr "Время Работы"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:54
+msgctxt "abbrev. month"
+msgid "Feb."
+msgstr ""
 
-# Landing page
-#~ msgid "Write your message..."
-#~ msgstr "Напишите ваше сообщение..."
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:55
+#, fuzzy
+#| msgid "Search"
+msgctxt "abbrev. month"
+msgid "March"
+msgstr "Поиск"
 
-# Landing page
-#~ msgid "Your name"
-#~ msgstr "Ваше имя"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:56
+msgctxt "abbrev. month"
+msgid "April"
+msgstr ""
 
-# Landing page
-#~ msgid "per month"
-#~ msgstr "в месяц"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:57
+#, fuzzy
+#| msgid "Pay"
+msgctxt "abbrev. month"
+msgid "May"
+msgstr "Оплатить"
 
-# Landing page
-#~ msgid "you@example.com"
-#~ msgstr "вы@example.com"
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:58
+msgctxt "abbrev. month"
+msgid "June"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:59
+msgctxt "abbrev. month"
+msgid "July"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:60
+msgctxt "abbrev. month"
+msgid "Aug."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:61
+msgctxt "abbrev. month"
+msgid "Sept."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:62
+msgctxt "abbrev. month"
+msgid "Oct."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:63
+msgctxt "abbrev. month"
+msgid "Nov."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:64
+msgctxt "abbrev. month"
+msgid "Dec."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:67
+#, fuzzy
+#| msgid "All Orders"
+msgctxt "alt. month"
+msgid "January"
+msgstr "Все заказы"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:68
+msgctxt "alt. month"
+msgid "February"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:69
+#, fuzzy
+#| msgid "Search"
+msgctxt "alt. month"
+msgid "March"
+msgstr "Поиск"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:70
+msgctxt "alt. month"
+msgid "April"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:71
+#, fuzzy
+#| msgid "Pay"
+msgctxt "alt. month"
+msgid "May"
+msgstr "Оплатить"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:72
+msgctxt "alt. month"
+msgid "June"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:73
+msgctxt "alt. month"
+msgid "July"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:74
+msgctxt "alt. month"
+msgid "August"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:75
+#, fuzzy
+#| msgid "Staff Performance"
+msgctxt "alt. month"
+msgid "September"
+msgstr "Эффективность сотрудников"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:76
+msgctxt "alt. month"
+msgid "October"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:77
+msgctxt "alt. month"
+msgid "November"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:78
+msgctxt "alt. month"
+msgid "December"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/ipv6.py:20
+msgid "This is not a valid IPv6 address."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/text.py:76
+#, python-format
+msgctxt "String to return when truncating text"
+msgid "%(truncated_text)s…"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/text.py:287
+#, fuzzy
+#| msgid "Sort By"
+msgid "or"
+msgstr "Сортировать"
+
+#. Translators: This string is used as a separator between list elements
+#: venv/lib/python3.10/site-packages/django/utils/text.py:306
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:135
+msgid ", "
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:8
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:9
+#, fuzzy, python-format
+#| msgid "From month"
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] "С месяца"
+msgstr[1] "С месяца"
+msgstr[2] "С месяца"
+msgstr[3] "С месяца"
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:10
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:11
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:12
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:13
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:29
+msgid "Forbidden"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:30
+msgid "CSRF verification failed. Request aborted."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:34
+msgid ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:40
+msgid ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:45
+msgid ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
+"including the “Referrer-Policy: no-referrer” header, please remove them. The "
+"CSRF protection requires the “Referer” header to do strict referer checking. "
+"If you’re concerned about privacy, use alternatives like <a "
+"rel=\"noreferrer\" …> for links to third-party sites."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:54
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:60
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:66
+msgid "More information is available with DEBUG=True."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:44
+#, fuzzy
+#| msgid "Not specified"
+msgid "No year specified"
+msgstr "Не указано"
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:64
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:115
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:214
+msgid "Date out of range"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:94
+#, fuzzy
+#| msgid "Not specified"
+msgid "No month specified"
+msgstr "Не указано"
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:147
+#, fuzzy
+#| msgid "Not specified"
+msgid "No day specified"
+msgstr "Не указано"
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:194
+#, fuzzy
+#| msgid "Not specified"
+msgid "No week specified"
+msgstr "Не указано"
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:353
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:384
+#, python-format
+msgid "No %(verbose_name_plural)s available"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:680
+#, python-format
+msgid ""
+"Future %(verbose_name_plural)s not available because %(class_name)s."
+"allow_future is False."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:720
+#, python-format
+msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/detail.py:56
+#, python-format
+msgid "No %(verbose_name)s found matching the query"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/list.py:70
+msgid "Page is not “last”, nor can it be converted to an int."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/list.py:77
+#, python-format
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/list.py:173
+#, python-format
+msgid "Empty list and “%(class_name)s.allow_empty” is False."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/static.py:49
+msgid "Directory indexes are not allowed here."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/static.py:51
+#, python-format
+msgid "“%(path)s” does not exist"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/static.py:68
+#: venv/lib/python3.10/site-packages/django/views/templates/directory_index.html:8
+#: venv/lib/python3.10/site-packages/django/views/templates/directory_index.html:11
+#, python-format
+msgid "Index of %(directory)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:7
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:204
+msgid "The install worked successfully! Congratulations!"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:206
+#, python-format
+msgid ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:208
+#, python-format
+msgid ""
+"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
+"%(version)s/ref/settings/#debug\" target=\"_blank\" "
+"rel=\"noopener\">DEBUG=True</a> is in your settings file and you have not "
+"configured any URLs."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:217
+msgid "Django Documentation"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:218
+msgid "Topics, references, &amp; how-to’s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:226
+msgid "Tutorial: A Polling App"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:227
+msgid "Get started with Django"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:235
+msgid "Django Community"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:236
+msgid "Connect, get help, or contribute"
+msgstr ""
+

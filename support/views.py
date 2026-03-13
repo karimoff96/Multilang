@@ -141,7 +141,6 @@ def ticket_list(request):
     page_obj = paginator.get_page(request.GET.get('page'))
 
     return render(request, 'support/ticket_list.html', {
-        'title': _('Support Tickets'),
         'subTitle': _('My Tickets') if not view_all else _('All Tickets'),
         'page_obj': page_obj,
         'stats': stats,

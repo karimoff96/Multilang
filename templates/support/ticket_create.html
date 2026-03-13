@@ -41,7 +41,7 @@
                                        style="min-height: 80px; transition: all .15s;">
                                     <iconify-icon icon="{{ cat.icon }}"
                                                   class="text-{{ cat.color }}-600 text-xxl mb-6"></iconify-icon>
-                                    <span class="text-xs fw-semibold text-dark">{{ cat.name_uz }}</span>
+                                    <span class="text-xs fw-semibold text-neutral-900">{{ cat.localized_name }}</span>
                                 </label>
                             </div>
                             {% endfor %}
@@ -124,7 +124,7 @@
                                    class="d-none" multiple
                                    accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip">
                             <p class="text-xs text-secondary-light mt-8 mb-0">
-                                JPG, PNG, PDF, DOC, DOCX, XLS, ZIP
+                                {% trans "JPG, PNG, PDF, DOC, DOCX, XLS, ZIP" %}
                             </p>
                         </div>
                         <div id="file-preview" class="mt-12 d-flex flex-wrap gap-8"></div>
@@ -212,7 +212,7 @@ function addPreviewItem(f) {
         });
     } else {
         const chip = document.createElement('div');
-        chip.className = 'badge bg-neutral-100 text-dark border px-10 py-6 text-xs d-flex align-items-center gap-4 position-relative';
+        chip.className = 'badge bg-neutral-100 text-neutral-900 border px-10 py-6 text-xs d-flex align-items-center gap-4 position-relative';
         chip.dataset.fname = f.name;
         chip.innerHTML = `<iconify-icon icon="solar:file-bold" class="text-primary-600"></iconify-icon> ${f.name}
             <button type="button" class="btn-remove-file ms-4 text-danger bg-transparent border-0 p-0 lh-1" title="Remove" style="font-size:13px;">&times;</button>`;
@@ -277,7 +277,7 @@ if (fileInput && previewEl) {
         <a id="lightboxOpen" href="#" target="_blank"
            class="btn btn-outline-light btn-sm px-20 d-inline-flex align-items-center gap-6">
           <iconify-icon icon="solar:maximize-square-bold"></iconify-icon>
-          Open full size
+          {% trans "Open full size" %}
         </a>
       </div>
     </div>
