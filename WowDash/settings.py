@@ -21,6 +21,29 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+# ── Sentry error monitoring ──────────────────────────────────────────────────
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
+
+_SENTRY_DSN = os.getenv("SENTRY_DSN")
+if _SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=_SENTRY_DSN,
+        environment=os.getenv("SENTRY_ENVIRONMENT", "production"),
+        integrations=[
+            DjangoIntegration(),
+            LoggingIntegration(
+                level=logging.INFO,        # Breadcrumbs from INFO and above
+                event_level=logging.ERROR, # Send events for ERROR and above
+            ),
+        ],
+        traces_sample_rate=0.1,   # 10 % of transactions for performance monitoring
+        send_default_pii=False,   # Do not attach user PII to events
+        release=os.getenv("SENTRY_RELEASE"),  # Optional: set via CI/deploy
+    )
+# ─────────────────────────────────────────────────────────────────────────────
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 

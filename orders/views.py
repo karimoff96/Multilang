@@ -1572,8 +1572,9 @@ def orderCreate(request):
         bot_users = BotUser.objects.none()
         products = Product.objects.none()
     
-    # Get languages (global - no filtering needed)
-    languages = Language.objects.all()  # Language model doesn't have is_active field
+    # Get languages scoped to the user's accessible branches
+    from organizations.rbac import get_user_languages
+    languages = get_user_languages(request.user).order_by('branch__name', 'name')
     
     if request.method == 'POST':
         try:
@@ -1763,6 +1764,7 @@ def orderCreate(request):
         "bot_users": bot_users,
         "payment_choices": Order.PAYMENT_TYPE,
         "is_superuser": request.user.is_superuser,
+        "languages_by_branch_url": "/services/api/languages-by-branch/",
     }
     return render(request, "orders/orderCreate.html", context)
 

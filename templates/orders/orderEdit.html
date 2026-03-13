@@ -216,24 +216,24 @@
                         </div>
                         
                         <div class="row">
-                            <div class="col-md-6 mb-20">
+                            <div class="col-md-4 mb-20">
                                 <label class="form-label fw-semibold text-primary-light text-sm mb-8"><span data-i18n="form.firstName">First Name</span> *</label>
                                 <input type="text" name="manual_first_name" id="manualFirstName" class="form-control radius-8" 
                                        value="{{ order.manual_first_name|default:'' }}" data-i18n-placeholder="form.customerFirstName" placeholder="Customer's first name"
                                        {% if order.is_manual_order %}required{% endif %}>
                             </div>
-                            <div class="col-md-6 mb-20">
+                            <div class="col-md-4 mb-20">
                                 <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.lastName">Last Name</label>
                                 <input type="text" name="manual_last_name" id="manualLastName" class="form-control radius-8" 
                                        value="{{ order.manual_last_name|default:'' }}" data-i18n-placeholder="form.customerLastName" placeholder="Customer's last name">
                             </div>
-                        </div>
-                        <div class="mb-20">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8"><span data-i18n="form.phoneNumber">Phone Number</span> *</label>
-                            <input type="tel" name="manual_phone" id="manualPhone" class="form-control radius-8" 
-                                   value="{{ order.manual_phone|default:'' }}" data-i18n-placeholder="form.phoneNumber" placeholder="+998 XX XXX XX XX"
-                                   {% if order.is_manual_order %}required{% endif %}>
-                            <small class="text-primary-light" data-i18n="orders.manualPhoneHint">Customer's contact number</small>
+                            <div class="col-md-4 mb-20">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8"><span data-i18n="form.phoneNumber">Phone Number</span> *</label>
+                                <input type="tel" name="manual_phone" id="manualPhone" class="form-control radius-8" 
+                                       value="{{ order.manual_phone|default:'' }}" data-i18n-placeholder="form.phoneNumber" placeholder="+998 XX XXX XX XX"
+                                       {% if order.is_manual_order %}required{% endif %}>
+                                <small class="text-primary-light" data-i18n="orders.manualPhoneHint">Customer's contact number</small>
+                            </div>
                         </div>
                     </div>
                     
@@ -269,26 +269,21 @@
                     </div>
                     {% endif %}
                     
-                    <!-- Product and Language -->
+                    <!-- Service: Category · Product · Language -->
                     <div class="row">
-                        <div class="col-md-4 mb-20">
+                        <div class="col-md-3 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.category">Category</label>
                             <select name="category" class="form-select radius-8" id="categorySelect">
-                                <option value="" data-i18n="orders.allCategories">-- All Categories --</option>
+                                <option value="" data-i18n="orders.allCategories">-- All --</option>
                             </select>
-                            <small class="text-primary-light" data-i18n="form.categoryHint">Filter products by category</small>
                         </div>
-                        <div class="col-md-8 mb-20">
+                        <div class="col-md-5 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.productService">Product / Service</label>
                             <select name="product" class="form-select radius-8" id="productSelect" required>
                                 <option value="" data-i18n="orders.selectProduct">-- Select Product --</option>
                             </select>
                         </div>
-                    </div>
-                    
-                    <!-- Language -->
-                    <div class="row">
-                        <div class="col-md-12 mb-20">
+                        <div class="col-md-4 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.language">Language</label>
                             <select name="language" class="form-select radius-8" id="languageSelect">
                                 <option value="" data-i18n="orders.languageOptional">-- Optional --</option>
@@ -351,18 +346,18 @@
                         <small class="text-primary-light" data-i18n="orders.paymentReceiptHint">Upload payment receipt for card transactions</small>
                     </div>
                     
-                    <!-- Description -->
-                    <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.description">Description</label>
-                        <textarea name="description" class="form-control radius-8" rows="3" data-i18n-placeholder="form.optionalDescription" placeholder="Optional description...">{{ order.description|default:'' }}</textarea>
-                    </div>
-
-                    <!-- Deadline (optional) -->
-                    <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8"><span data-i18n="orders.deadline">&#9203; Deadline</span> <span class="text-secondary-light fw-normal" data-i18n="common.optional">(optional)</span></label>
-                        <input type="date" name="deadline" class="form-control radius-8"
-                               value="{{ order.deadline|date:'Y-m-d'|default:'' }}">
-                        <small class="text-primary-light" data-i18n="orders.deadlineHint">Requested completion date. Clear the field to remove the deadline.</small>
+                    <!-- Description + Deadline -->
+                    <div class="row">
+                        <div class="col-md-8 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.description">Description</label>
+                            <textarea name="description" class="form-control radius-8" rows="3" data-i18n-placeholder="form.optionalDescription" placeholder="Optional description...">{{ order.description|default:'' }}</textarea>
+                        </div>
+                        <div class="col-md-4 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8"><span data-i18n="orders.deadline">&#9203; Deadline</span> <span class="text-secondary-light fw-normal" data-i18n="common.optional">(optional)</span></label>
+                            <input type="date" name="deadline" class="form-control radius-8"
+                                   value="{{ order.deadline|date:'Y-m-d'|default:'' }}">
+                            <small class="text-primary-light" data-i18n="orders.deadlineHint">Requested completion date. Clear to remove.</small>
+                        </div>
                     </div>
                     
                     <!-- Existing Files -->
@@ -421,14 +416,24 @@
                     </div>
                     {% endif %}
                     
-                    <!-- Add New Files -->
-                    <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                            <iconify-icon icon="mdi:file-plus" class="me-1"></iconify-icon>
-                            <span data-i18n="detail.addNewFiles">Add New Files</span>
-                        </label>
-                        <input type="file" name="new_files" class="form-control radius-8" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                        <small class="text-primary-light mt-8 d-block" data-i18n="orders.newFilesHint">You can select multiple files. Supported: PDF, DOC, DOCX, JPG, PNG</small>
+                    <!-- Upload new files -->
+                    <div class="row">
+                        <div class="col-md-6 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <iconify-icon icon="mdi:file-plus" class="me-1"></iconify-icon>
+                                <span data-i18n="detail.addNewFiles">Add New Files</span>
+                            </label>
+                            <input type="file" name="new_files" class="form-control radius-8" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                            <small class="text-primary-light mt-8 d-block" data-i18n="orders.newFilesHint">PDF, DOC, DOCX, JPG, PNG</small>
+                        </div>
+                        <div class="col-md-6 mb-20">
+                            <label class="form-label fw-semibold text-warning-600 text-sm mb-8">
+                                <iconify-icon icon="mdi:paperclip-plus" class="me-1"></iconify-icon>
+                                <span data-i18n="orders.addAdditionalSupplyDocs">Add Supply Documents</span> <span class="text-secondary-light fw-normal" data-i18n="common.optional">(Optional)</span>
+                            </label>
+                            <input type="file" name="new_additional_files" class="form-control radius-8" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.heic,.heif">
+                            <small class="text-secondary-light mt-8 d-block">Passport, certificate, reference letter, etc.</small>
+                        </div>
                     </div>
 
                     <!-- Existing Additional Supply Documents -->
@@ -482,19 +487,6 @@
                         </small>
                     </div>
                     {% endif %}
-
-                    <!-- Add New Additional Supply Documents -->
-                    <div class="mb-20">
-                        <label class="form-label fw-semibold text-warning-600 text-sm mb-8">
-                            <iconify-icon icon="mdi:paperclip-plus" class="me-1"></iconify-icon>
-                            <span data-i18n="orders.addAdditionalSupplyDocs">Add Additional Supply Documents</span> <span class="text-secondary-light fw-normal" data-i18n="common.optional">(Optional)</span>
-                        </label>
-                        <input type="file" name="new_additional_files" class="form-control radius-8" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.heic,.heif">
-                        <small class="text-secondary-light mt-8 d-block">
-                            <iconify-icon icon="mdi:information-outline" class="me-1"></iconify-icon>
-                            <span data-i18n="orders.additionalFilesHint">Supporting documents alongside main files (passport, certificate, reference letter, etc.)</span>
-                        </small>
-                    </div>
 
                     <!-- Current Price Info -->
                     <div class="mb-20 p-16 bg-success-50 radius-8">

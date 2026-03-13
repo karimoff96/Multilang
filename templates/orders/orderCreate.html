@@ -255,8 +255,7 @@
                     </div>
                     
                     <!-- Customer Selection (Bot User) -->
-                    <div class="row">
-                    <div class="col-md-6 mb-20" id="botUserSection">
+                    <div class="mb-20" id="botUserSection">
                         <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="orders.customer">Customer *</label>
                         <select name="bot_user" class="form-select radius-8" id="customerSelect">
                             <option value="" data-i18n="orders.selectCustomerPlaceholder">-- Select Customer --</option>
@@ -265,7 +264,6 @@
                             {% endfor %}
                         </select>
                         <small class="text-primary-light" data-i18n="orders.selectCustomerHint">Select from existing customers (registered via Telegram bot)</small>
-                    </div>
                     </div>
                     
                     <!-- Manual Customer Info (Hidden by default) -->
@@ -276,19 +274,19 @@
                         </div>
                         
                         <div class="row">
-                            <div class="col-md-6 mb-20">
+                            <div class="col-md-4 mb-20">
                                 <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.customerFirstName">First Name *</label>
                                 <input type="text" name="manual_first_name" id="manualFirstName" class="form-control radius-8" data-i18n-placeholder="form.customerFirstName" placeholder="Customer's first name">
                             </div>
-                            <div class="col-md-6 mb-20">
+                            <div class="col-md-4 mb-20">
                                 <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.customerLastName">Last Name</label>
                                 <input type="text" name="manual_last_name" id="manualLastName" class="form-control radius-8" data-i18n-placeholder="form.customerLastName" placeholder="Customer's last name">
                             </div>
-                        <div class="mb-20">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.phoneNumber">Phone Number *</label>
-                            <input type="tel" name="manual_phone" id="manualPhone" class="form-control radius-8" data-i18n-placeholder="form.phoneNumber" placeholder="+998 XX XXX XX XX">
-                            <small class="text-primary-light" data-i18n="orders.manualPhoneHint">Customer's contact number</small>
-                        </div>
+                            <div class="col-md-4 mb-20">
+                                <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.phoneNumber">Phone Number *</label>
+                                <input type="tel" name="manual_phone" id="manualPhone" class="form-control radius-8" data-i18n-placeholder="form.phoneNumber" placeholder="+998 XX XXX XX XX">
+                                <small class="text-primary-light" data-i18n="orders.manualPhoneHint">Customer's contact number</small>
+                            </div>
                         </div>
                     </div>
                     
@@ -324,31 +322,26 @@
                     </div>
                     {% endif %}
                     
-                    <!-- Product and Language -->
+                    <!-- Service: Category · Product · Language -->
                     <div class="row">
-                        <div class="col-md-4 mb-20">
+                        <div class="col-md-3 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.category">Category</label>
                             <select name="category" class="form-select radius-8" id="categorySelect">
-                                <option value="" data-i18n="orders.categoryPlaceholder">-- All Categories --</option>
+                                <option value="" data-i18n="orders.categoryPlaceholder">-- All --</option>
                             </select>
-                            <small class="text-primary-light" data-i18n="form.categoryHint">Filter products by category</small>
                         </div>
-                        <div class="col-md-8 mb-20">
+                        <div class="col-md-5 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.productService">Product / Service *</label>
                             <select name="product" class="form-select radius-8" required id="productSelect">
                                 <option value="" data-i18n="orders.productPlaceholder">-- Select Product --</option>
                             </select>
                         </div>
-                    </div>
-                    
-                    <!-- Language -->
-                    <div class="row">
-                        <div class="col-md-12 mb-20">
+                        <div class="col-md-4 mb-20">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.language">Language</label>
-                            <select name="language" class="form-select radius-8">
+                            <select name="language" id="languageSelect" class="form-select radius-8">
                                 <option value="" data-i18n="orders.languageOptional">-- Optional --</option>
                                 {% for language in languages %}
-                                <option value="{{ language.id }}">{{ language.name }}</option>
+                                <option value="{{ language.id }}" data-branch="{{ language.branch_id }}">{{ language.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -385,40 +378,37 @@
                         <small class="text-primary-light" data-i18n="orders.paymentReceiptHint">Upload payment receipt for card transactions</small>
                     </div>
                     
-                    <!-- Description -->
-                    <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.description">Description</label>
-                        <textarea name="description" class="form-control radius-8" rows="3" data-i18n-placeholder="form.optionalNotes" placeholder="Optional notes or special instructions..."></textarea>
-                    </div>
-
-                    <!-- Deadline (optional) -->
-                    <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">&#9203; Deadline <span class="text-secondary-light fw-normal">(optional)</span></label>
-                        <input type="date" name="deadline" class="form-control radius-8" min="{% now 'Y-m-d' %}">
-                        <small class="text-primary-light">Requested completion date for this order</small>
+                    <!-- Description + Deadline -->
+                    <div class="row">
+                        <div class="col-md-8 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="form.description">Description</label>
+                            <textarea name="description" class="form-control radius-8" rows="3" data-i18n-placeholder="form.optionalNotes" placeholder="Optional notes or special instructions..."></textarea>
+                        </div>
+                        <div class="col-md-4 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">&#9203; Deadline <span class="text-secondary-light fw-normal">(optional)</span></label>
+                            <input type="date" name="deadline" class="form-control radius-8" min="{% now 'Y-m-d' %}">
+                            <small class="text-primary-light">Requested completion date</small>
+                        </div>
                     </div>
                     
-                    <!-- File Upload -->
-                    <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.attachedFiles">
-                            <iconify-icon icon="mdi:file-document-multiple" class="me-1"></iconify-icon>
-                            Files (Optional)
-                        </label>
-                        <input type="file" name="files" class="form-control radius-8" multiple accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png">
-                        <small class="text-primary-light" data-i18n="orders.fileUploadHint">Upload the main documents to be translated/processed</small>
-                    </div>
-
-                    <!-- Additional Supply Documents -->
-                    <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">
-                            <iconify-icon icon="mdi:paperclip" class="me-1"></iconify-icon>
-                            Additional Supply Documents <span class="text-secondary-light fw-normal">(Optional)</span>
-                        </label>
-                        <input type="file" name="additional_files" class="form-control radius-8" multiple accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.heic,.heif">
-                        <small class="text-secondary-light d-block mt-4">
-                            <iconify-icon icon="mdi:information-outline" class="me-1"></iconify-icon>
-                            Supporting documents alongside main order files (e.g. passport, certificate, reference letter)
-                        </small>
+                    <!-- Files -->
+                    <div class="row">
+                        <div class="col-md-6 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="detail.attachedFiles">
+                                <iconify-icon icon="mdi:file-document-multiple" class="me-1"></iconify-icon>
+                                Files <span class="text-secondary-light fw-normal">(Optional)</span>
+                            </label>
+                            <input type="file" name="files" class="form-control radius-8" multiple accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png">
+                            <small class="text-primary-light" data-i18n="orders.fileUploadHint">Main documents to translate / process</small>
+                        </div>
+                        <div class="col-md-6 mb-20">
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                <iconify-icon icon="mdi:paperclip" class="me-1"></iconify-icon>
+                                Supply Documents <span class="text-secondary-light fw-normal">(Optional)</span>
+                            </label>
+                            <input type="file" name="additional_files" class="form-control radius-8" multiple accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.heic,.heif">
+                            <small class="text-secondary-light d-block mt-4">Supporting docs: passport, certificate, reference letter, etc.</small>
+                        </div>
                     </div>
 
                     <!-- Estimated Price Display -->
@@ -607,7 +597,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#productSelect').select2('close');
     });
     
-    // When branch changes, clear category and product selections
+    // When branch changes, clear category/product and reload languages for that branch
     $('#branchSelect').on('change', function() {
         // Clear category and product selections
         $('#categorySelect').val(null).trigger('change');
@@ -615,7 +605,43 @@ document.addEventListener('DOMContentLoaded', function() {
         // Trigger Select2 to reload with new branch filter
         $('#categorySelect').select2('close');
         $('#productSelect').select2('close');
+
+        // Reload language dropdown for the selected branch
+        const branchId = $(this).val();
+        const langSelect = document.getElementById('languageSelect');
+        if (!langSelect) return;
+        langSelect.innerHTML = '<option value="">-- Optional --</option>';
+        if (!branchId) return;
+        const apiUrl = '{{ languages_by_branch_url }}' + branchId + '/';
+        fetch(apiUrl, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.languages.length) {
+                    data.languages.forEach(lang => {
+                        const opt = document.createElement('option');
+                        opt.value = lang.id;
+                        opt.textContent = lang.name;
+                        langSelect.appendChild(opt);
+                    });
+                }
+            })
+            .catch(() => {});
     });
+
+    // On initial load, if a branch is already selected (single-branch users), filter languages
+    (function() {
+        const branchId = $('#branchSelect').val();
+        if (!branchId) return;
+        const langSelect = document.getElementById('languageSelect');
+        if (!langSelect) return;
+        // Hide options that don't belong to this branch (data-branch != branchId and != '')
+        Array.from(langSelect.options).forEach(opt => {
+            if (opt.value === '') return;
+            if (opt.dataset.branch && opt.dataset.branch !== String(branchId)) {
+                opt.hidden = true;
+            }
+        });
+    })();
     
     // Manual Order Toggle
     const manualOrderToggle = document.getElementById('manualOrderToggle');
