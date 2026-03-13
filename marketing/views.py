@@ -139,7 +139,6 @@ def marketing_list(request):
     posts_page = paginator.get_page(page)
     
     context = {
-        'title': _('Marketing Posts'),
         'subTitle': _('Broadcast & Promotions'),
         'posts': posts_page,
         'marketing_permissions': marketing_permissions,

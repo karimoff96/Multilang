@@ -427,7 +427,6 @@ def support_ticket_list(request):
     page_obj = paginator.get_page(request.GET.get('page'))
 
     return render(request, 'support/support_ticket_list.html', {
-        'title': _('Support Inbox'),
         'subTitle': _('All Tickets'),
         'page_obj': page_obj,
         'stats': stats,

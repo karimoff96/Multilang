@@ -234,7 +234,6 @@ def requests_management(request):
     
     # Initialize context
     context = {
-        'title': _('Requests Management'),
         'subTitle': _('Contact & Renewal Requests'),
         'active_tab': active_tab,
         'status_filter': status_filter,

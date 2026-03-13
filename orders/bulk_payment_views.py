@@ -163,9 +163,7 @@ def bulk_payment_page(request):
     top_10_debtors = top_debtors[:10] if len(top_debtors) > 10 else top_debtors
     
     context = {
-        'title': _('Bulk Payment'),
         'subTitle': _('Bulk Payment Management'),
-        'title_i18n': 'sidebar.bulkPayments',
         'subTitle_i18n': 'sidebar.bulkPayment',
         'page_title': _('Bulk Payment Management'),
         'active_nav': 'bulk_payments',

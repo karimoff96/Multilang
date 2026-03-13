@@ -1,9 +1,10 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-    <h6 class="fw-semibold mb-0" data-i18n="marketing.posts">Marketing Posts</h6>
+    <h6 class="fw-semibold mb-0" data-i18n="marketing.posts">{% trans "Marketing Posts" %}</h6>
     <div class="d-flex flex-wrap align-items-center gap-3">
         <!-- Filters -->
         <select class="form-select form-select-sm w-auto" id="statusFilter" onchange="applyFilters()">
@@ -153,7 +154,7 @@
                             {% elif post.status == 'draft' or post.status == 'scheduled' %}
                             <span class="text-secondary-light text-sm">
                                 <iconify-icon icon="mdi:clock-outline" class="me-1"></iconify-icon>
-                                Not sent yet
+                                {% trans "Not sent yet" %}
                             </span>
                             {% else %}
                             <span class="text-secondary-light">—</span>
@@ -215,10 +216,10 @@
         <div class="text-center py-32">
             <iconify-icon icon="mdi:bullhorn-outline" class="text-secondary-light mb-16" style="font-size: 64px;"></iconify-icon>
             <h6 class="text-secondary-light mb-8">No Marketing Posts Yet</h6>
-            <p class="text-secondary-light mb-16">Create your first broadcast to reach your customers.</p>
+            <p class="text-secondary-light mb-16">{% trans "Create your first broadcast to reach your customers." %}</p>
             <a href="{% url 'marketing_create' %}" class="btn btn-primary">
                 <iconify-icon icon="ic:round-plus" class="me-2"></iconify-icon>
-                Create Post
+                {% trans "Create Post" %}
             </a>
         </div>
         {% endif %}

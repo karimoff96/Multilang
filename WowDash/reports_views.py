@@ -1532,8 +1532,6 @@ def debtors_report(request):
     show_branch = True
     
     context = {
-        'title': _('Debtors Management'),
-        'title_i18n': 'reports.debtorsManagement',
         'debtors': page_obj,
         'page_obj': page_obj,
         'paginator': paginator,

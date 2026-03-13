@@ -29,7 +29,7 @@
             <div class="card-body p-24">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-16">
                     <div>
-                        <h5 class="fw-bold mb-0">{{ title }}</h5>
+                        <h5 class="fw-bold mb-0" data-i18n="report.customerAnalytics">{% trans "Customer Analytics" %}</h5>
                         <p class="text-secondary-light mb-0">{% trans "Customer acquisition and behavior analytics" %}</p>
                     </div>
                     <a href="{% url 'export_report' 'customers' %}?period={{ period }}&date_from={{ date_from }}&date_to={{ date_to }}{% if selected_branch %}&branch={{ selected_branch }}{% endif %}{% if selected_center %}&center={{ selected_center }}{% endif %}" class="btn btn-outline-success btn-sm d-inline-flex align-items-center gap-1">

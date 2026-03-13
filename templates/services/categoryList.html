@@ -1,5 +1,6 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
+{% load i18n %}
 {% load translation_filters %}
 {% load permission_tags %}
 
@@ -7,7 +8,7 @@
 <div class="card h-100 p-0 radius-12">
     <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
         <div class="d-flex align-items-center flex-wrap gap-3">
-            <span class="text-md fw-medium text-secondary-light mb-0" data-i18n="common.show">Show</span>
+            <span class="text-md fw-medium text-secondary-light mb-0" data-i18n="common.show">{% trans "Show" %}</span>
             <form method="get" class="d-flex flex-wrap align-items-center gap-3">
                 <select name="per_page" class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px" onchange="this.form.submit()">
                     <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
@@ -45,7 +46,7 @@
         {% if can_manage_products %}
         <a href="{% url 'addCategory' %}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
             <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
-            <span data-i18n="common.addCategory">Add Category</span>
+            <span data-i18n="common.addCategory">{% trans "Add Category" %}</span>
         </a>
         {% endif %}
     </div>
@@ -82,9 +83,9 @@
                         {% endif %}
                         <td class="hide-mobile">
                             {% if category.charging == 'static' %}
-                                <span class="badge bg-info-focus text-info-600">Static</span>
+                                <span class="badge bg-info-focus text-info-600">{% trans "Static" %}</span>
                             {% else %}
-                                <span class="badge bg-warning-focus text-warning-600">Per Page</span>
+                                <span class="badge bg-warning-focus text-warning-600">{% trans "Per Page" %}</span>
                             {% endif %}
                         </td>
                         <td>
@@ -92,9 +93,9 @@
                         </td>
                         <td class="text-center">
                             {% if category.is_active %}
-                                <span class="bg-success-focus text-success-600 px-8 py-2 radius-4 fw-medium text-xs">Active</span>
+                                <span class="bg-success-focus text-success-600 px-8 py-2 radius-4 fw-medium text-xs">{% trans "Active" %}</span>
                             {% else %}
-                                <span class="bg-neutral-200 text-neutral-600 px-8 py-2 radius-4 fw-medium text-xs">Inactive</span>
+                                <span class="bg-neutral-200 text-neutral-600 px-8 py-2 radius-4 fw-medium text-xs">{% trans "Inactive" %}</span>
                             {% endif %}
                         </td>
                         <td class="text-center">
@@ -124,7 +125,7 @@
                                         </div>
                                         <div class="modal-body">
                                             <p><span data-i18n="common.confirmDelete">Are you sure you want to delete</span> <strong>{{ category.name }}</strong>?</p>
-                                            <p class="text-danger-600 text-sm">This will also delete all products under this category.</p>
+                                            <p class="text-danger-600 text-sm">{% trans "This will also delete all products under this category." %}</p>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Cancel</button>
@@ -144,7 +145,7 @@
                         <td colspan="{% if user.is_superuser or is_owner %}7{% else %}6{% endif %}" class="text-center py-4">
                             <div class="text-secondary-light">
                                 <iconify-icon icon="ri-star-line" class="text-4xl mb-2"></iconify-icon>
-                                <p class="mb-0" data-i18n="common.noCategoriesFound">No categories found</p>
+                                <p class="mb-0" data-i18n="common.noCategoriesFound">{% trans "No categories found" %}</p>
                             </div>
                         </td>
                     </tr>
@@ -155,7 +156,7 @@
 
         {% if categories %}
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
-            <span>Showing {{ categories.start_index }} to {{ categories.end_index }} of {{ total_categories }} entries</span>
+            <span>{% trans "Showing" %} {{ categories.start_index }} {% trans "to" %} {{ categories.end_index }} {% trans "of" %} {{ total_categories }} {% trans "entries" %}</span>
             <ul class="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
                 {% if categories.has_previous %}
                 <li class="page-item">

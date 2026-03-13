@@ -14,7 +14,7 @@
     <!-- Superuser/Owner-level: Just show title, no My Orders toggle -->
     <div class="d-flex align-items-center gap-8">
         <iconify-icon icon="solar:documents-bold" class="text-primary-600 text-xl"></iconify-icon>
-        <h6 class="mb-0 fw-semibold" data-i18n="orders.allOrders">All Orders</h6>
+        <h6 class="mb-0 fw-semibold" data-i18n="orders.allOrders">{% trans "All Orders" %}</h6>
         <span class="badge bg-primary-100 text-primary-600 px-12 py-4">{{ base_stats.total }}</span>
     </div>
     {% else %}
@@ -36,7 +36,7 @@
     <!-- User can only view their own orders - show title only -->
     <div class="d-flex align-items-center gap-8">
         <iconify-icon icon="solar:user-bold" class="text-primary-600 text-xl"></iconify-icon>
-        <h6 class="mb-0 fw-semibold" data-i18n="orders.myOrders">My Orders</h6>
+        <h6 class="mb-0 fw-semibold" data-i18n="orders.myOrders">{% trans "My Orders" %}</h6>
         <span class="badge bg-primary-100 text-primary-600 px-12 py-4">{{ base_stats.total }}</span>
     </div>
     {% endif %}

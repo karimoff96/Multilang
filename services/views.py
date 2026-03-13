@@ -1738,7 +1738,6 @@ def generalExpenseAnalytics(request):
     period_total = filtered_qs.aggregate(s=Sum('amount'))['s'] or 0
 
     context = {
-        'title': _('Expense Analytics'),
         'subTitle': _('Operating Cost Analytics'),
         'branches': branches,
         'categories': categories,

@@ -351,7 +351,6 @@ def audit_logs(request):
     page_obj = paginator.get_page(page_number)
     
     context = {
-        'title': _('Audit Logs'),
         'subTitle': _('System activity and audit trail'),
         'logs': page_obj,
         'page_obj': page_obj,
