@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
+from core.fields import EncryptedCharField
 
 
 class TranslationCenter(models.Model):
@@ -35,9 +36,9 @@ class TranslationCenter(models.Model):
         help_text=_("Google Maps or Yandex Maps URL"),
     )
     # Bot integration fields
-    bot_token = models.CharField(
+    bot_token = EncryptedCharField(
         _("Bot Token"),
-        max_length=100,
+        max_length=500,          # enlarged: stores Fernet-encrypted value
         blank=True,
         null=True,
         unique=True,
@@ -70,15 +71,15 @@ class TranslationCenter(models.Model):
         blank=True,
         help_text=_("Per-center Payme merchant ID. Leave blank to use the global PAYME_MERCHANT_ID setting."),
     )
-    payme_secret_key = models.CharField(
+    payme_secret_key = EncryptedCharField(
         _("Payme Sandbox Secret Key"),
-        max_length=200,
+        max_length=500,          # enlarged: stores Fernet-encrypted value
         blank=True,
         help_text=_("Payme secret key for the sandbox/test environment (test.paycom.uz)."),
     )
-    payme_secret_key_prod = models.CharField(
+    payme_secret_key_prod = EncryptedCharField(
         _("Payme Production Secret Key"),
-        max_length=200,
+        max_length=500,          # enlarged: stores Fernet-encrypted value
         blank=True,
         help_text=_("Payme secret key for the production environment (checkout.paycom.uz)."),
     )

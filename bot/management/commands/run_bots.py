@@ -167,30 +167,65 @@ class BotThread(threading.Thread):
         self.stdout = stdout
         self.name = f"Bot-{center.id}-{center.name}"
     
+    # Health check interval in seconds (ping Telegram /getMe)
+    HEALTH_CHECK_INTERVAL = 300  # 5 minutes
+
     def run(self):
-        """Run the bot with infinity polling"""
+        """Run the bot with infinity polling and periodic /getMe health checks."""
         logger.info(f"Starting bot for center: {self.center.name} (ID: {self.center.id})")
-        
+
         try:
             # Remove any existing webhook first
             self.bot.remove_webhook()
             time.sleep(0.5)  # Brief pause to ensure webhook is cleared
-            
-            # Start polling
+
+            # Start a background health-check thread
+            import threading as _threading
+            health_thread = _threading.Thread(
+                target=self._health_watch, daemon=True,
+                name=f"Health-{self.center.id}",
+            )
+            health_thread.start()
+
+            # Start polling with exponential back-off on consecutive errors
+            consecutive_errors = 0
             while self.running:
                 try:
                     self.bot.infinity_polling(
-                        timeout=30, 
+                        timeout=30,
                         long_polling_timeout=25,
-                        allowed_updates=["message", "callback_query"]
+                        allowed_updates=["message", "callback_query"],
                     )
+                    consecutive_errors = 0  # reset on clean exit
                 except Exception as e:
-                    logger.error(f"Bot {self.center.name} polling error: {e}")
+                    consecutive_errors += 1
+                    backoff = min(5 * (2 ** (consecutive_errors - 1)), 120)  # cap at 2 min
+                    logger.error(
+                        f"Bot {self.center.name} polling error (attempt {consecutive_errors}): {e}. "
+                        f"Restarting in {backoff}s..."
+                    )
                     if self.running:
-                        logger.info(f"Restarting bot {self.center.name} in 5 seconds...")
-                        time.sleep(5)
+                        time.sleep(backoff)
         except Exception as e:
             logger.error(f"Bot thread for {self.center.name} crashed: {e}")
+
+    def _health_watch(self):
+        """Periodically call /getMe to verify the bot connection is alive."""
+        while self.running:
+            time.sleep(self.HEALTH_CHECK_INTERVAL)
+            if not self.running:
+                break
+            try:
+                me = self.bot.get_me()
+                logger.debug(
+                    "Health check OK: bot @%s for center '%s'",
+                    me.username, self.center.name,
+                )
+            except Exception as exc:
+                logger.error(
+                    "Health check FAILED for center '%s': %s — bot may be disconnected!",
+                    self.center.name, exc,
+                )
     
     def stop(self):
         """Stop the bot polling"""

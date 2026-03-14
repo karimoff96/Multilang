@@ -776,40 +776,57 @@ def marketing_send(request, post_id):
         return redirect('marketing_detail', post_id=post_id)
     
     try:
-        # Prepare recipients
+        # Prepare recipients first (fast, stays synchronous)
         service = BroadcastService(post)
         recipient_count = service.prepare_recipients()
-        
+
         if recipient_count == 0:
             messages.warning(request, _("No recipients found for this broadcast."))
             return redirect('marketing_detail', post_id=post_id)
-        
-        # Start sending (synchronous for now, can be made async with Celery)
-        result = service.execute()
-        
-        if result.success:
+
+        # Dispatch to Celery worker if available; fall back to synchronous execution
+        try:
+            from marketing.tasks import send_broadcast_task
+            send_broadcast_task.delay(post.pk)
             messages.success(
-                request, 
-                _("Broadcast completed: {} sent, {} failed in {} seconds.").format(
-                    result.sent_count, result.failed_count, result.duration_seconds
-                )
-            )
-        else:
-            messages.warning(
                 request,
-                _("Broadcast completed with issues: {} sent, {} failed.").format(
-                    result.sent_count, result.failed_count
-                )
+                _("Broadcast queued for {} recipients. It will be sent in the background.").format(
+                    recipient_count
+                ),
             )
-        
-        log_action(
-            user=request.user,
-            action='broadcast',
-            target=post,
-            details=f"Broadcast sent: {result.sent_count} delivered, {result.failed_count} failed",
-            request=request
-        )
-        
+            log_action(
+                user=request.user,
+                action='broadcast',
+                target=post,
+                details=f"Broadcast queued for {recipient_count} recipients",
+                request=request,
+            )
+        except Exception as celery_err:
+            # Celery worker not running — fall back to synchronous send
+            logger.warning("Celery unavailable (%s), falling back to sync send", celery_err)
+            result = service.execute()
+            if result.success:
+                messages.success(
+                    request,
+                    _("Broadcast completed: {} sent, {} failed in {} seconds.").format(
+                        result.sent_count, result.failed_count, result.duration_seconds
+                    ),
+                )
+            else:
+                messages.warning(
+                    request,
+                    _("Broadcast completed with issues: {} sent, {} failed.").format(
+                        result.sent_count, result.failed_count
+                    ),
+                )
+            log_action(
+                user=request.user,
+                action='broadcast',
+                target=post,
+                details=f"Broadcast sent: {result.sent_count} delivered, {result.failed_count} failed",
+                request=request,
+            )
+
     except Exception as e:
         messages.error(request, f"Broadcast failed: {str(e)}")
     

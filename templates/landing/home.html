@@ -195,7 +195,9 @@
             "Excel & CSV Data Export",
             "Custom Report Builder",
             "Multi-language Interface",
-            "Real-time Monitoring"
+            "Real-time Monitoring",
+            "Third-Party Integrations",
+            "Payme Online Payment Gateway"
           ]
         },
 
@@ -520,12 +522,27 @@
             transition: all 0.3s;
             height: 100%;
             border: 2px solid transparent;
+            position: relative;
         }
         
         .feature-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
             border-color: var(--primary-color);
+        }
+
+        .feature-on-request-badge {
+            position: absolute;
+            top: -13px;
+            right: 18px;
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            color: white;
+            padding: 0.3rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
         }
         
         .feature-icon {
@@ -1029,7 +1046,7 @@
                             {% if current_language == 'uz' %}Buyurtmalarni Boshqarish{% elif current_language == 'en' %}Order Management{% else %}Управление Заказами{% endif %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}Bot va admin panelidan buyurtmalarni qabul qiling. Holat kuzatuvi, fayllarni boshqarish, to'lovlarni nazorat qilish{% elif current_language == 'en' %}Accept orders from the bot and admin panel. Status tracking, file management, payment control{% else %}Принимайте заказы из бота и админ-панели. Отслеживание статусов, работа с файлами, контроль оплат{% endif %}
+                            {% if current_language == 'uz' %}Bot va admin paneli orqali buyurtmalarni qabul qiling va boshqaring. Xodimlarga tayinlash, holatlarni «Yangi»dan «Bajarildi»gacha yangilash, hujjatlarni biriktirish, to'lovlarni nazorat qilish va har bir bosqichda mijozlarga Telegram orqali avtomatik xabar yuborish{% elif current_language == 'en' %}Accept and manage orders from both the Telegram bot and admin panel. Assign staff, move statuses from New to Completed, attach documents, control payments and automatically notify customers via Telegram at every step of the workflow{% else %}Принимайте и управляйте заказами через бот и панель. Назначайте исполнителей, меняйте статусы от «Новый» до «Выполнен», прикрепляйте файлы, контролируйте оплаты и автоматически уведомляйте клиентов в Telegram на каждом этапе{% endif %}
                         </p>
                     </div>
                 </div>
@@ -1044,7 +1061,7 @@
                             {% if current_language == 'uz' %}Ommaviy To'lovlar{% elif current_language == 'en' %}Bulk Payments{% else %}Оптовые Оплаты{% endif %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}Bir vaqtda bir nechta buyurtma uchun to'lovlarni qayta ishlash. Qisman to'lovlar va qarz kuzatuvi{% elif current_language == 'en' %}Process payments for multiple orders at once. Partial payments and debt tracking{% else %}Обработка оплат сразу по нескольким заказам. Частичные оплаты и контроль долгов{% endif %}
+                            {% if current_language == 'uz' %}Bir vaqtda bir nechta buyurtma uchun yagona to'lov qayd eting. Qisman to'lovlarni qo'llab-quvvatlaydi, har bir mijoz bo'yicha qarz qoldig'ini kuzatadi va to'lov kvitansiyalarini avtomatik shakllantiradi{% elif current_language == 'en' %}Select multiple orders and record a single payment covering all of them at once. Supports partial payments, tracks outstanding debt per client, and automatically generates payment receipts for your records{% else %}Выберите несколько заказов и зафиксируйте одну оплату сразу по всем. Поддерживает частичные оплаты, отслеживает остаток задолженности по каждому клиенту и автоматически формирует квитанции{% endif %}
                         </p>
                     </div>
                 </div>
@@ -1134,7 +1151,7 @@
                             {% if current_language == 'uz' %}Ko'p Markazlik{% elif current_language == 'en' %}Multi-Tenant{% else %}Мульти-Тенантность{% endif %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}Cheksiz tarjima markazlari va filiallar. Har biri o'z subdomeni. To'liq izolyatsiya qilingan ma'lumotlar{% elif current_language == 'en' %}Unlimited translation centers and branches. Each with its own subdomain. Fully isolated data per tenant{% else %}Неограниченное кол-во центров и филиалов. Каждый со своим сабдоменом. Полная изоляция данных{% endif %}
+                            {% if current_language == 'uz' %}Bitta hisobdan bir yoki bir nechta mustaqil tarjima markazini boshqaring — har birida o'z subdomeni, xodimlari, mijozlari va sozlamalari. Ma'lumotlar to'liq ajratilgan: bir tashkilot boshqa hech kimning yozuvlarini ko'ra olmaydi{% elif current_language == 'en' %}Run one or many independent translation centers from a single account — each gets its own subdomain, staff, clients and settings. Data is fully isolated: one organization can never see another's records or finances{% else %}Управляйте одним или несколькими независимыми центрами переводов с единого аккаунта — у каждого свой субдомен, штат, клиенты и настройки. Данные полностью изолированы: одна организация никогда не видит записи другой{% endif %}
                         </p>
                     </div>
                 </div>
@@ -1149,7 +1166,7 @@
                             {% if current_language == 'uz' %}Excel va Filtrlar{% elif current_language == 'en' %}Excel & Filters{% else %}Excel и Фильтры{% endif %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}Barcha ma'lumotlarni Excel formatida eksport qiling. Kuchli qidiruv va filtrlash tizimi{% elif current_language == 'en' %}Export all data to Excel format. Powerful search and advanced filtering system{% else %}Экспорт всех данных в Excel. Мощная система поиска и фильтрации{% endif %}
+                            {% if current_language == 'uz' %}Buyurtmalar, to'lovlar, xarajatlar va hisobotlarni bir tugma bilan Excel formatiga eksport qiling. Kengaytirilgan filtrlar orqali sana, filial, xodim, til juftligi va buyurtma holati bo'yicha ma'lumotlarni ajrating — kerakli yozuvni soniyalar ichida toping{% elif current_language == 'en' %}Export orders, payments, expenses and reports to Excel with a single click. Advanced filters let you slice data by date range, branch, staff member, language pair and order status — find any record in seconds without scrolling through thousands of rows{% else %}Экспортируйте заказы, оплаты, расходы и отчёты в Excel одним нажатием. Мощные фильтры позволяют отбирать данные по периоду, филиалу, сотруднику, языковой паре и статусу — находите нужную запись за секунды{% endif %}
                         </p>
                     </div>
                 </div>
@@ -1179,7 +1196,7 @@
                             {% if current_language == 'uz' %}Real Vaqt Monitoringi{% elif current_language == 'en' %}Real-time Monitoring{% else %}Мониторинг в Реальном Времени{% endif %}
                         </h3>
                         <p class="feature-desc">
-                            {% if current_language == 'uz' %}Barcha jarayonlarni jonli kuzatish. Yangi buyurtmalar, to'lovlar, holat o'zgarishlari real vaqtda{% elif current_language == 'en' %}Live tracking of all processes. New orders, payments and status changes in real-time{% else %}Живое отслеживание всех процессов. Новые заказы, оплаты, смена статусов в реальном времени{% endif %}
+                            {% if current_language == 'uz' %}Biznesingizning joriy holatini istalgan vaqt ko'ring — faol buyurtmalar, kutilayotgan to'lovlar, muddati o'tganlar va xodimlar bandi. Muhim hodisalar — yangi buyurtma, to'lov, kechikish — haqida Telegram orqali darhol xabardor bo'ling{% elif current_language == 'en' %}Get an instant overview of your business at any moment — active orders, pending payments, overdue deadlines and staff workload. Receive instant Telegram alerts for critical events like new orders, incoming payments and late deliveries so nothing slips through{% else %}Мгновенный срез состояния бизнеса в любой момент — активные заказы, ожидающие оплаты, просроченные заявки и загрузка персонала. Telegram-уведомления о критических событиях: новый заказ, оплата, просрочка — ничего не упустите{% endif %}
                         </p>
                     </div>
                 </div>
@@ -1273,6 +1290,25 @@
                         </p>
                     </div>
                 </div>
+
+                <!-- Feature 19: Third-Party Integrations -->
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+                    <div class="feature-card">
+                        <div class="feature-on-request-badge">
+                            {% if current_language == 'uz' %}So'rov bo'yicha{% elif current_language == 'en' %}On Request{% else %}По Запросу{% endif %}
+                        </div>
+                        <div class="feature-icon" style="background: linear-gradient(135deg, #7c3aed, #c026d3);">
+                            <i class="fas fa-plug"></i>
+                        </div>
+                        <h3 class="feature-title">
+                            {% if current_language == 'uz' %}Uchinchi Tomon Integratsiyalari{% elif current_language == 'en' %}Third-Party Integrations{% else %}Интеграции Сторонних Сервисов{% endif %}
+                        </h3>
+                        <p class="feature-desc">
+                            {% if current_language == 'uz' %}Tashqi to'lov tizimlari va boshqa servislar bilan integratsiya. Masalan, <strong>Payme</strong> orqali onlayn to'lovlarni qabul qiling — mijozlar bank kartasi yoki Internet Banking orqali to'laydi, buyurtma avtomatik tasdiqlanadi. Yangi integratsiyalar so'rov asosida qo'shiladi{% elif current_language == 'en' %}Connect external payment gateways and services to your workflow. For example, accept online payments via <strong>Payme</strong> — customers pay by card or internet banking directly from the Telegram bot, and the order is confirmed automatically. New integrations are added on request{% else %}Подключайте внешние платёжные системы и сервисы. Например, принимайте онлайн-оплату через <strong>Payme</strong> — клиенты платят картой или интернет-банкингом прямо из Telegram-бота, заказ подтверждается автоматически. Новые интеграции добавляются по запросу{% endif %}
+                        </p>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>

@@ -25,6 +25,7 @@ from core.audit import log_action, log_order_assign, log_status_change
 from bot.notification_service import send_order_notification
 from billing.decorators import require_feature, require_active_subscription, check_order_limit
 from django.views.decorators.http import require_GET
+from core.throttling import throttle
 
 
 def has_order_permission(request, permission_name, order=None):
@@ -1322,6 +1323,7 @@ def api_order_stats(request):
 
 @login_required(login_url='admin_login')
 @require_feature('orders_basic')
+@throttle(max_calls=30, period=60, key_prefix='api_poll')  # max 30 polls/min per user
 def api_poll_new_orders(request):
     """
     Lightweight polling endpoint for real-time new-order detection.

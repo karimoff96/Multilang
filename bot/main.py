@@ -980,6 +980,39 @@ def update_user_username(message):
             logger.debug(f"Updated username for user {user_id}: {telegram_username}")
     except Exception as e:
         logger.debug(f"Error updating username for user: {e}")
+def _send_with_retry(bot_instance, chat_id, text, reply_markup=None, parse_mode="HTML", max_retries=3):
+    """
+    Send a Telegram message with exponential back-off on rate-limit (429) errors.
+    Other API errors are raised immediately after the first attempt.
+    """
+    import time as _time
+    delay = 2  # initial back-off in seconds
+    for attempt in range(max_retries + 1):
+        try:
+            return bot_instance.send_message(
+                chat_id=chat_id,
+                text=text,
+                reply_markup=reply_markup,
+                parse_mode=parse_mode,
+            )
+        except ApiTelegramException as exc:
+            if exc.error_code == 429 and attempt < max_retries:
+                retry_after = int(
+                    getattr(exc, 'result_json', {}).get('parameters', {}).get('retry_after', delay)
+                )
+                wait = max(retry_after, delay)
+                logger.warning(
+                    "Telegram 429 rate-limit: retrying in %ds (attempt %d/%d)",
+                    wait, attempt + 1, max_retries,
+                )
+                _time.sleep(wait)
+                delay *= 2  # exponential back-off
+            else:
+                raise
+    # Should not reach here
+    raise RuntimeError("send_with_retry exhausted all retries")
+
+
 def send_message(chat_id, text, reply_markup=None, parse_mode="HTML"):
     """Helper function to send messages with proper language handling"""
     try:
@@ -990,15 +1023,9 @@ def send_message(chat_id, text, reply_markup=None, parse_mode="HTML"):
         if hasattr(text, "startswith") and text.startswith("translation:"):
             text = get_text(text.replace("translation:", ""), language)
 
-        return bot.send_message(
-            chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode=parse_mode
-        )
+        return _send_with_retry(bot, chat_id, text, reply_markup, parse_mode)
     except Exception as e:
         logger.error(f"Failed to send message to {chat_id}: {e}")
-        # Fallback to direct message sending if our custom function fails
-        return bot.send_message(
-            chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode=parse_mode
-        )
 def send_branch_location(chat_id, branch, language):
     """
     Send branch location to user with pickup information.

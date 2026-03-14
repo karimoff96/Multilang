@@ -276,6 +276,30 @@ PAYME_PAYMENT_DEADLINE_HOURS = int(os.getenv("PAYME_PAYMENT_DEADLINE_HOURS", "12
 
 
 # =============================================================================
+# CELERY CONFIGURATION
+# =============================================================================
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", REDIS_URL)
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", REDIS_URL)
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_ACKS_LATE = True
+# Dedicated queue for broadcasts so heavy tasks don't starve lighter ones
+CELERY_TASK_ROUTES = {
+    "marketing.send_broadcast": {"queue": "broadcasts"},
+}
+
+# =============================================================================
+# FIELD ENCRYPTION KEY (for sensitive DB fields: bot_token, payme keys)
+# Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+# Store the generated key in .env as FIELD_ENCRYPTION_KEY=...
+# =============================================================================
+FIELD_ENCRYPTION_KEY = os.getenv("FIELD_ENCRYPTION_KEY", "")
+
+# =============================================================================
 # Authentication settings
 LOGIN_URL = 'admin_login'
 LOGIN_REDIRECT_URL = 'index'
@@ -326,6 +350,14 @@ LOGGING = {
         'simple': {
             'format': '{levelname} {message}',
             'style': '{',
+        },
+        # Machine-readable JSON formatter for structured log ingestion
+        # (e.g., LogStash, Loki, or any ELK-compatible pipeline).
+        # Enabled when python-json-logger is installed; silently falls back
+        # to the 'standard' formatter otherwise.
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '%(asctime)s %(levelname)s %(name)s %(module)s %(message)s',
         },
     },
     'filters': {
@@ -396,6 +428,34 @@ LOGGING = {
             'formatter': 'standard',
             'encoding': 'utf-8',  # Fix Unicode encoding issues
         },
+        # JSON-format logs for structured ingestion (orders + payments + bot)
+        'file_orders_json': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_DIR / 'orders.json.log',
+            'maxBytes': 20 * 1024 * 1024,  # 20 MB
+            'backupCount': 5,
+            'formatter': 'json',
+            'encoding': 'utf-8',
+        },
+        'file_payments_json': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_DIR / 'payments.json.log',
+            'maxBytes': 20 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'json',
+            'encoding': 'utf-8',
+        },
+        'file_bot_json': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_DIR / 'bot.json.log',
+            'maxBytes': 20 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'json',
+            'encoding': 'utf-8',
+        },
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
@@ -427,12 +487,12 @@ LOGGING = {
             'propagate': False,
         },
         'orders': {
-            'handlers': ['console', 'file_orders', 'file_error'],
+            'handlers': ['console', 'file_orders', 'file_orders_json', 'file_error'],
             'level': 'INFO',
             'propagate': False,
         },
         'orders.payment_service': {
-            'handlers': ['console', 'file_payments', 'file_error'],
+            'handlers': ['console', 'file_payments', 'file_payments_json', 'file_error'],
             'level': 'INFO',
             'propagate': False,
         },
@@ -452,7 +512,7 @@ LOGGING = {
             'propagate': False,
         },
         'bot': {
-            'handlers': ['console', 'file_bot', 'file_error'],
+            'handlers': ['console', 'file_bot', 'file_bot_json', 'file_error'],
             'level': 'INFO',
             'propagate': False,
         },

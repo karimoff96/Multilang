@@ -12,6 +12,7 @@ from datetime import timedelta
 from core.models import AdminNotification, AuditLog, NotificationRead
 from organizations.rbac import permission_required
 from billing.decorators import require_feature, require_active_subscription
+from core.throttling import throttle
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +93,7 @@ def mark_all_notifications_read(request):
 
 
 @login_required
+@throttle(max_calls=60, period=60, key_prefix='api_notif')  # max 60 fetches/min per user
 def get_notifications(request):
     """
     Get unread notifications for the current user (for AJAX refresh).

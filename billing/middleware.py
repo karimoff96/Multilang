@@ -1,14 +1,23 @@
+from datetime import date, timedelta
+
 from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import reverse
+
+# Grace period after subscription.end_date before the hard redirect kicks in.
+# During this window the user sees a warning banner but can still work.
+GRACE_PERIOD_DAYS = getattr(settings, "SUBSCRIPTION_GRACE_DAYS", 3)
 
 
 class SubscriptionEnforcementMiddleware:
     """Block non-superusers from the app when their center subscription is missing or expired.
 
-    Superusers are exempt. Regular users can only access a small set of safe URLs
-    (login/logout, renewal request, the expired page itself, admin, static/media) when
-    their subscription is inactive.
+    Superusers are exempt.  Subscriptions get a configurable grace period
+    (SUBSCRIPTION_GRACE_DAYS, default 3) after expiry before the hard
+    redirect kicks in — this prevents locking out users mid-task due to
+    clock skew or a missed renewal.  During the grace period the request
+    attribute `request.subscription_grace` is set to the number of days
+    remaining so templates can show a warning banner.
     """
 
     def __init__(self, get_response):
@@ -32,6 +41,9 @@ class SubscriptionEnforcementMiddleware:
         }
 
     def __call__(self, request):
+        # Always clear the grace attribute so templates can rely on its presence
+        request.subscription_grace = None
+
         if self._is_exempt(request):
             return self.get_response(request)
 
@@ -50,14 +62,25 @@ class SubscriptionEnforcementMiddleware:
             return self.get_response(request)
 
         # If dates have passed but DB status is stale, sync it now.
-        if subscription and subscription.status == 'active':
-            from datetime import date as _date
-            if subscription.end_date and subscription.end_date < _date.today():
+        if subscription and subscription.status == "active":
+            if subscription.end_date and subscription.end_date < date.today():
                 from billing.models import Subscription as _Sub
-                _Sub.objects.filter(pk=subscription.pk).update(status='expired')
-                subscription.status = 'expired'
+                _Sub.objects.filter(pk=subscription.pk).update(status="expired")
+                subscription.status = "expired"
 
-        # Inactive or missing subscription: keep user in the expired flow only.
+        # ── Grace period check ────────────────────────────────────────────
+        # Allow access for GRACE_PERIOD_DAYS days after the end_date so that
+        # users can still work while renewing.
+        if subscription and subscription.end_date:
+            grace_deadline = subscription.end_date + timedelta(days=GRACE_PERIOD_DAYS)
+            days_remaining = (grace_deadline - date.today()).days
+            if days_remaining >= 0:
+                # Within grace period: attach warning info and allow access
+                request.subscription_grace = max(days_remaining, 0)
+                return self.get_response(request)
+        # ─────────────────────────────────────────────────────────────────
+
+        # Grace period exhausted or subscription missing: hard redirect.
         expired_url = reverse("billing:subscription_expired")
         if request.path != expired_url:
             return redirect(expired_url)
