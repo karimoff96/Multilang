@@ -543,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tooltip: { theme: 'dark', y: { formatter: val => val + ' customers' } }
         }).render();
     } else {
-        document.querySelector("#acquisitionChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:users-group-rounded-line-duotone" class="text-4xl mb-2"></iconify-icon><span>No new customers in this period</span></div>';
+        document.querySelector("#acquisitionChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:users-group-rounded-line-duotone" class="text-4xl mb-2"></iconify-icon><span>' + (window.LanguageManager ? LanguageManager.translate('reports.noDataAvailable') : 'No new customers in this period') + '</span></div>';
     }
 
     // Language donut chart

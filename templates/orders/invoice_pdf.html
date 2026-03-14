@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ strings.title }} #{{ order.get_order_number }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DejaVu Sans', 'Arial', sans-serif;
+            font-size: 13px;
+            color: #1a1a2e;
+            background: {% if not is_pdf %}#F3F4F6{% else %}#fff{% endif %};
+        }
+
+        /* ── Language bar (HTML preview only) ── */
+        .lang-bar {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            flex-wrap: wrap;
+        }
+        .lang-bar .lbl { color: #9CA3AF; margin-right: 4px; }
+        .lang-btn {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            color: #D1D5DB;
+            border: 1px solid #374151;
+            transition: background 0.15s;
+        }
+        .lang-btn:hover { background: #374151; color: #fff; }
+        .lang-btn.active { background: #4F46E5; border-color: #4F46E5; color: #fff; }
+        .lang-btn.dl { background: #059669; border-color: #059669; color: #fff; margin-left: auto; }
+        .lang-btn.dl:hover { background: #047857; }
+
+        /* ── Page layout ── */
+        .page {
+            padding: 40px 48px;
+            max-width: 800px;
+            margin: {% if not is_pdf %}24px auto{% else %}0 auto{% endif %};
+            background: #fff;
+            {% if not is_pdf %}border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.10);{% endif %}
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 24px;
+            border-bottom: 2px solid #4F46E5;
+            margin-bottom: 32px;
+        }
+        .company-block { flex: 1; }
+        .company-logo {
+            max-height: 60px;
+            max-width: 180px;
+            margin-bottom: 8px;
+            object-fit: contain;
+        }
+        .company-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 2px;
+        }
+        .company-meta {
+            font-size: 11px;
+            color: #667085;
+            line-height: 1.6;
+        }
+
+        .invoice-meta-block { text-align: right; }
+        .invoice-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #4F46E5;
+            letter-spacing: -0.5px;
+        }
+        .invoice-sub {
+            font-size: 11px;
+            color: #667085;
+            margin-top: 4px;
+            line-height: 1.8;
+        }
+        .invoice-sub strong { color: #1a1a2e; }
+
+        /* ── Client / Branch section ── */
+        .two-col {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+        .two-col > div {
+            flex: 1;
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .section-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #9CA3AF;
+            margin-bottom: 8px;
+        }
+        .section-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a2e;
+            line-height: 1.5;
+        }
+        .section-value .sub {
+            font-weight: 400;
+            color: #667085;
+            font-size: 11px;
+        }
+
+        /* ── Status badge ── */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-completed       { background: #D1FAE5; color: #065F46; }
+        .status-in_progress     { background: #DBEAFE; color: #1E40AF; }
+        .status-pending         { background: #FEF3C7; color: #92400E; }
+        .status-payment_pending { background: #FEF3C7; color: #92400E; }
+        .status-payment_received{ background: #D1FAE5; color: #065F46; }
+        .status-payment_confirmed{ background: #D1FAE5; color: #065F46; }
+        .status-cancelled       { background: #FEE2E2; color: #991B1B; }
+        .status-ready           { background: #EDE9FE; color: #5B21B6; }
+        .status-other           { background: #F3F4F6; color: #374151; }
+
+        /* ── Items table ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        thead th {
+            background: #4F46E5;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 14px;
+            text-align: left;
+        }
+        thead th:last-child { text-align: right; }
+        tbody tr:nth-child(even) { background: #F9FAFB; }
+        tbody td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #E5E7EB;
+            color: #374151;
+            font-size: 12px;
+            vertical-align: top;
+        }
+        tbody td:last-child { text-align: right; font-weight: 600; }
+        tfoot td {
+            padding: 9px 14px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        tfoot tr.subtotal td { border-top: 1px solid #E5E7EB; }
+        tfoot tr.total-row td {
+            background: #4F46E5;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        tfoot tr.paid-row td {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        tfoot tr.due-row td {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        .text-right { text-align: right; }
+
+        /* ── Payment info ── */
+        .payment-block {
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        .payment-block .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+        .payment-block .row .label { color: #667085; }
+        .payment-block .row .value { font-weight: 600; color: #1a1a2e; }
+
+        /* ── Footer ── */
+        .footer {
+            border-top: 1px solid #E5E7EB;
+            padding-top: 16px;
+            text-align: center;
+            font-size: 10px;
+            color: #9CA3AF;
+            margin-top: 24px;
+        }
+
+        /* ── Notes ── */
+        .notes-block {
+            background: #FFFBEB;
+            border-left: 3px solid #F59E0B;
+            padding: 10px 14px;
+            border-radius: 0 6px 6px 0;
+            font-size: 11px;
+            color: #78350F;
+            margin-bottom: 20px;
+        }
+
+        @media print {
+            .lang-bar { display: none; }
+            body { background: #fff; }
+            .page { box-shadow: none; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+{% if not is_pdf %}
+<!-- ══ LANGUAGE SELECTOR BAR ══ -->
+<div class="lang-bar">
+    <span class="lbl">{{ strings.lang_label }}:</span>
+    <a href="?lang=uz" class="lang-btn {% if lang == 'uz' %}active{% endif %}">🇺🇿 O'zbek</a>
+    <a href="?lang=ru" class="lang-btn {% if lang == 'ru' %}active{% endif %}">🇷🇺 Русский</a>
+    <a href="?lang=en" class="lang-btn {% if lang == 'en' %}active{% endif %}">🇬🇧 English</a>
+    <a href="?lang={{ lang }}&format=pdf" class="lang-btn dl">⬇ {{ strings.download_pdf }}</a>
+</div>
+{% endif %}
+
+<div class="page">
+
+    <!-- ══ HEADER ══ -->
+    <div class="header">
+        <div class="company-block">
+            {% if center and center.logo %}
+            <img src="{{ center.logo.url }}" class="company-logo" alt="Logo">
+            {% endif %}
+            <div class="company-name">{{ center.name|default:"Translation Center" }}</div>
+            <div class="company-meta">
+                {% if center and center.phone %}📞 {{ center.phone }}<br>{% endif %}
+                {% if center and center.address %}📍 {{ center.address }}<br>{% endif %}
+                {% if order.branch and order.branch.name %}🏢 {{ order.branch.name }}{% endif %}
+            </div>
+        </div>
+
+        <div class="invoice-meta-block">
+            <div class="invoice-title">{{ strings.title }}</div>
+            <div class="invoice-sub">
+                <strong>{{ strings.invoice_num }}</strong> {{ order.get_order_number }}<br>
+                <strong>{{ strings.date }}:</strong> {{ order.created_at|date:"d M Y" }}<br>
+                <strong>{{ strings.status }}:</strong>
+                <span class="status-badge status-{{ order.status|default:'other' }}">{{ status_label }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ CLIENT & SERVICE ══ -->
+    <div class="two-col">
+        <div>
+            <div class="section-label">{{ strings.bill_to }}</div>
+            <div class="section-value">
+                {% if order.bot_user %}
+                    {{ order.bot_user.name|default:"—" }}<br>
+                    {% if order.bot_user.phone_number %}
+                    <span class="sub">📞 {{ order.bot_user.phone_number }}</span><br>
+                    {% endif %}
+                    {% if order.bot_user.is_agency %}
+                    <span class="sub">{{ strings.agency_client }}</span>
+                    {% else %}
+                    <span class="sub">{{ strings.individual_client }}</span>
+                    {% endif %}
+                {% else %}
+                    {{ order.manual_first_name|default:"" }} {{ order.manual_last_name|default:""|title }}<br>
+                    {% if order.manual_phone %}
+                    <span class="sub">📞 {{ order.manual_phone }}</span>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            <div class="section-label">{{ strings.service_details }}</div>
+            <div class="section-value">
+                {{ order.product.name }}<br>
+                <span class="sub">
+                    {{ order.product.category.name }}<br>
+                    {% if order.language %}{{ strings.translation_lang }}: {{ order.language.name }}<br>{% endif %}
+                    {{ strings.pages }}: {{ order.total_pages }}
+                    {% if order.copy_number > 0 %} &nbsp;|&nbsp; {{ strings.copies }}: {{ order.copy_number }}{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ LINE ITEMS ══ -->
+    <table>
+        <thead>
+            <tr>
+                <th style="width:40%">{{ strings.col_description }}</th>
+                <th>{{ strings.col_qty }}</th>
+                <th class="text-right">{{ strings.col_unit_price }}</th>
+                <th class="text-right">{{ strings.col_amount }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% with pb=price_breakdown %}
+
+            <!-- First Page -->
+            <tr>
+                <td>
+                    {{ order.product.name }}
+                    {% if order.language %} → {{ order.language.name }}{% endif %}
+                    <br><small style="color:#9CA3AF">{{ strings.first_page }}</small>
+                </td>
+                <td>1</td>
+                <td class="text-right">{{ pb.combined_first_page|floatformat:0 }} UZS</td>
+                <td>{{ pb.combined_first_page|floatformat:0 }} UZS</td>
+            </tr>
+
+            <!-- Additional Pages -->
+            {% if pb.total_pages > 1 %}
+            <tr>
+                <td>
+                    {{ strings.additional_pages }}<br>
+                    <small style="color:#9CA3AF">{{ strings.pages_range }}{{ pb.total_pages }}</small>
+                </td>
+                <td>{{ pb.total_pages|add:"-1" }}</td>
+                <td class="text-right">{{ pb.combined_other_page|floatformat:0 }} UZS/{{ strings.pages }}</td>
+                <td>{{ pb.original_price|floatformat:0 }} UZS ({{ strings.incl_first }})</td>
+            </tr>
+            {% endif %}
+
+            <!-- Copies -->
+            {% if pb.copy_number > 0 %}
+            <tr>
+                <td>
+                    {{ strings.extra_copies }}<br>
+                    <small style="color:#9CA3AF">{{ pb.copy_number }} {{ strings.copy_count }}</small>
+                </td>
+                <td>{{ pb.copy_number }}</td>
+                <td class="text-right">{{ pb.combined_copy_price|floatformat:0 }} UZS</td>
+                <td>{{ pb.copy_total|floatformat:0 }} UZS</td>
+            </tr>
+            {% endif %}
+
+            <!-- Extra Fee -->
+            {% if order.extra_fee and order.extra_fee > 0 %}
+            <tr>
+                <td>
+                    {{ strings.extra_fee }}
+                    {% if order.extra_fee_description %}
+                    <br><small style="color:#9CA3AF">{{ order.extra_fee_description }}</small>
+                    {% endif %}
+                </td>
+                <td>1</td>
+                <td class="text-right">{{ order.extra_fee|floatformat:0 }} UZS</td>
+                <td>{{ order.extra_fee|floatformat:0 }} UZS</td>
+            </tr>
+            {% endif %}
+
+            {% endwith %}
+        </tbody>
+        <tfoot>
+            <tr class="subtotal">
+                <td colspan="3" class="text-right">{{ strings.subtotal }}</td>
+                <td class="text-right">{{ order.total_price|floatformat:0 }} UZS</td>
+            </tr>
+            {% if order.extra_fee and order.extra_fee > 0 %}
+            <tr class="subtotal">
+                <td colspan="3" class="text-right">{{ strings.total_with_fee }}</td>
+                <td class="text-right">{{ order.total_due|floatformat:0 }} UZS</td>
+            </tr>
+            {% endif %}
+            <tr class="total-row">
+                <td colspan="3" class="text-right">{{ strings.grand_total }}</td>
+                <td class="text-right">{{ order.total_due|floatformat:0 }} UZS</td>
+            </tr>
+            {% if order.received > 0 %}
+            <tr class="paid-row">
+                <td colspan="3" class="text-right">{{ strings.amount_paid }}</td>
+                <td class="text-right">{{ order.received|floatformat:0 }} UZS</td>
+            </tr>
+            {% endif %}
+            {% if order.remaining > 0 %}
+            <tr class="due-row">
+                <td colspan="3" class="text-right">{{ strings.balance_due }}</td>
+                <td class="text-right">{{ order.remaining|floatformat:0 }} UZS</td>
+            </tr>
+            {% endif %}
+        </tfoot>
+    </table>
+
+    <!-- ══ PAYMENT INFO ══ -->
+    <div class="payment-block">
+        <div class="section-label" style="margin-bottom:10px">{{ strings.payment_info }}</div>
+        <div class="row">
+            <span class="label">{{ strings.payment_method }}</span>
+            <span class="value">{{ order.get_payment_type_display|default:"—" }}</span>
+        </div>
+        <div class="row">
+            <span class="label">{{ strings.payment_source }}</span>
+            <span class="value">{{ order.get_payment_source_display|default:"—" }}</span>
+        </div>
+        {% if order.payment_received_at %}
+        <div class="row">
+            <span class="label">{{ strings.payment_received }}</span>
+            <span class="value">{{ order.payment_received_at|date:"d M Y, H:i" }}</span>
+        </div>
+        {% endif %}
+        {% if order.payment_received_by %}
+        <div class="row">
+            <span class="label">{{ strings.received_by }}</span>
+            <span class="value">{{ order.payment_received_by.user.get_full_name|default:order.payment_received_by.user.username }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ══ NOTES ══ -->
+    {% if order.description %}
+    <div class="notes-block">
+        <strong>{{ strings.notes }}:</strong> {{ order.description }}
+    </div>
+    {% endif %}
+    {% if order.name_clarifications %}
+    <div class="notes-block">
+        <strong>{{ strings.names_on_doc }}:</strong> {{ order.name_clarifications }}
+    </div>
+    {% endif %}
+
+    <!-- ══ FOOTER ══ -->
+    <div class="footer">
+        {{ strings.generated_on }} {{ order.created_at|date:"d M Y" }} &nbsp;|&nbsp;
+        {{ center.name|default:"Translation Center" }}
+        {% if center and center.phone %} &nbsp;|&nbsp; {{ center.phone }}{% endif %}
+        <br>{{ strings.thank_you }}
+    </div>
+
+</div>
+</body>
+</html>

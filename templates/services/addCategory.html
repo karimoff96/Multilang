@@ -1,6 +1,7 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
 {% load permission_tags %}
+{% load i18n %}
 
 {% block content %}
 <div class="card h-100 p-0 radius-12">
@@ -186,7 +187,7 @@
                             <input type="number" step="0.01" class="form-control" id="agencyOtherPagePrice" value="0" placeholder="0">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label for="agencyCopyPrice" class="form-label">Copy Price</label>
+                            <label for="agencyCopyPrice" class="form-label">{% trans "Copy Price" %}</label>
                             <input type="number" step="0.01" class="form-control" id="agencyCopyPrice" value="0" placeholder="0">
                         </div>
                     </div>
@@ -202,7 +203,7 @@
                             <input type="number" step="0.01" class="form-control" id="ordinaryOtherPagePrice" value="0" placeholder="0">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label for="ordinaryCopyPrice" class="form-label">Copy Price</label>
+                            <label for="ordinaryCopyPrice" class="form-label">{% trans "Copy Price" %}</label>
                             <input type="number" step="0.01" class="form-control" id="ordinaryCopyPrice" value="0" placeholder="0">
                         </div>
                     </div>

@@ -537,6 +537,10 @@ def orderDetail(request, order_id):
     # Price change history
     price_changes = order.price_changes.select_related('changed_by', 'changed_by__user').order_by('-changed_at')
 
+    # Internal comments
+    from .models import OrderComment
+    order_comments = order.comments.select_related('author', 'author__user').order_by('created_at')
+
     # can_edit_price: dedicated permission or financial/order management masters
     can_edit_price = (
         request.user.is_superuser or bool(
@@ -577,6 +581,11 @@ def orderDetail(request, order_id):
         "order_permissions": order_permissions,
         "allowed_transitions": allowed_transitions,
         "status_choices": Order.STATUS_CHOICES,
+        "order_comments": order_comments,
+        "can_manage_comments": (
+            request.user.is_superuser or
+            bool(request.admin_profile and request.admin_profile.has_permission('can_manage_orders'))
+        ),
     }
     return render(request, "orders/orderDetail.html", context)
 
@@ -2270,3 +2279,315 @@ def edit_order_price(request, order_id):
         'changed_by': changed_by_name,
         'changed_at': timezone.now().strftime('%d %b %Y, %H:%M'),
     })
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Order Comments
+# ─────────────────────────────────────────────────────────────────────────────
+
+@login_required(login_url='admin_login')
+@require_active_subscription
+@any_permission_required('can_view_all_orders', 'can_view_own_orders', 'can_manage_orders')
+def add_order_comment(request, order_id):
+    """AJAX: add an internal comment to an order."""
+    from django.http import JsonResponse
+    from .models import OrderComment
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
+
+    order = get_object_or_404(Order, id=order_id)
+
+    # branch-scope check: staff can only comment on orders in their branch
+    if not request.user.is_superuser:
+        if not has_order_permission(request, 'can_view_all_orders', order):
+            own_ok = (
+                request.admin_profile and
+                order.assigned_to == request.admin_profile and
+                has_order_permission(request, 'can_view_own_orders', order)
+            )
+            if not own_ok:
+                return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
+
+    body = request.POST.get('body', '').strip()
+    if not body:
+        return JsonResponse({'success': False, 'error': 'Comment cannot be empty'}, status=400)
+    if len(body) > 2000:
+        return JsonResponse({'success': False, 'error': 'Comment is too long (max 2000 chars)'}, status=400)
+
+    comment = OrderComment.objects.create(
+        order=order,
+        author=request.admin_profile if hasattr(request, 'admin_profile') else None,
+        body=body,
+    )
+
+    author_name = (
+        comment.author.user.get_full_name() or comment.author.user.username
+        if comment.author else 'Superuser'
+    )
+    return JsonResponse({
+        'success': True,
+        'comment': {
+            'id': comment.id,
+            'body': comment.body,
+            'author': author_name,
+            'created_at': comment.created_at.strftime('%d %b %Y, %H:%M'),
+            'is_own': True,
+        },
+    })
+
+
+@login_required(login_url='admin_login')
+@require_active_subscription
+def delete_order_comment(request, order_id, comment_id):
+    """AJAX: delete an internal comment (own comment, or superuser/manager)."""
+    from django.http import JsonResponse
+    from .models import OrderComment
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
+
+    comment = get_object_or_404(OrderComment, id=comment_id, order_id=order_id)
+
+    # Only own comment, or superuser, or someone with can_manage_orders
+    is_own = (
+        request.admin_profile and
+        comment.author == request.admin_profile
+    )
+    is_manager = (
+        request.user.is_superuser or
+        bool(request.admin_profile and request.admin_profile.has_permission('can_manage_orders'))
+    )
+    if not (is_own or is_manager):
+        return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
+
+    comment.delete()
+    return JsonResponse({'success': True})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PDF Invoice
+# ─────────────────────────────────────────────────────────────────────────────
+
+_INVOICE_STRINGS = {
+    'uz': {
+        'title': 'HISOB-FAKTURA',
+        'invoice_num': 'Hisob-faktura №',
+        'date': 'Sana',
+        'status': 'Holat',
+        'bill_to': 'Xaridor',
+        'service_details': 'Xizmat tafsilotlari',
+        'agency_client': '💼 Agentlik mijozi',
+        'individual_client': '👤 Jismoniy mijoz',
+        'translation_lang': 'Til',
+        'pages': 'Sahifalar',
+        'copies': 'Nusxalar',
+        'col_description': 'Tavsif',
+        'col_qty': 'Miqdor',
+        'col_unit_price': 'Birlik narxi',
+        'col_amount': 'Summa',
+        'first_page': 'Birinchi sahifa',
+        'additional_pages': "Qo'shimcha sahifalar",
+        'pages_range': 'Sahifalar 2–',
+        'extra_copies': "Qo'shimcha nusxalar",
+        'copy_count': 'nusxa',
+        'extra_fee': "Qo'shimcha to'lov",
+        'subtotal': 'Oraliq jami',
+        'total_with_fee': "Jami (+ qo'shimcha to'lov)",
+        'grand_total': 'Umumiy jami',
+        'amount_paid': "To'langan summa",
+        'balance_due': 'Qoldiq',
+        'payment_info': "To'lov ma'lumotlari",
+        'payment_method': "To'lov usuli",
+        'payment_source': "To'lov manbai",
+        'payment_received': "To'lov qabul qilindi",
+        'received_by': 'Qabul qilgan',
+        'notes': 'Izohlar',
+        'names_on_doc': 'Hujjatdagi ismlar',
+        'generated_on': 'Yaratildi',
+        'thank_you': "Ishonchingiz uchun rahmat!",
+        'status_completed': 'Bajarildi',
+        'status_in_progress': 'Jarayonda',
+        'status_pending': 'Kutilmoqda',
+        'status_cancelled': 'Bekor qilindi',
+        'status_ready': 'Tayyor',
+        'status_received': 'Qabul qilindi',
+        'status_confirmed': 'Tasdiqlandi',
+        'lang_label': 'Tilni tanlang',
+        'download_pdf': 'PDF yuklab olish',
+        'incl_first': "1-sahifa bilan",
+    },
+    'ru': {
+        'title': 'СЧЁТ',
+        'invoice_num': 'Счёт №',
+        'date': 'Дата',
+        'status': 'Статус',
+        'bill_to': 'Покупатель',
+        'service_details': 'Детали услуги',
+        'agency_client': '💼 Клиент-агентство',
+        'individual_client': '👤 Физическое лицо',
+        'translation_lang': 'Язык',
+        'pages': 'Страниц',
+        'copies': 'Копий',
+        'col_description': 'Описание',
+        'col_qty': 'Кол-во',
+        'col_unit_price': 'Цена за ед.',
+        'col_amount': 'Сумма',
+        'first_page': 'Первая страница',
+        'additional_pages': 'Доп. страницы',
+        'pages_range': 'Страницы 2–',
+        'extra_copies': 'Доп. копии',
+        'copy_count': 'коп.',
+        'extra_fee': 'Доп. плата',
+        'subtotal': 'Промежуточный итог',
+        'total_with_fee': 'Итого (+ доп. плата)',
+        'grand_total': 'Итого',
+        'amount_paid': 'Оплачено',
+        'balance_due': 'Остаток',
+        'payment_info': 'Информация об оплате',
+        'payment_method': 'Способ оплаты',
+        'payment_source': 'Источник оплаты',
+        'payment_received': 'Оплата получена',
+        'received_by': 'Принял(а)',
+        'notes': 'Примечания',
+        'names_on_doc': 'Имена в документе',
+        'generated_on': 'Создано',
+        'thank_you': 'Спасибо за Ваш заказ!',
+        'status_completed': 'Завершено',
+        'status_in_progress': 'В обработке',
+        'status_pending': 'Ожидание',
+        'status_cancelled': 'Отменено',
+        'status_ready': 'Готово',
+        'status_received': 'Получено',
+        'status_confirmed': 'Подтверждено',
+        'lang_label': 'Выберите язык',
+        'download_pdf': 'Скачать PDF',
+        'incl_first': 'вкл. 1-ю стр.',
+    },
+    'en': {
+        'title': 'INVOICE',
+        'invoice_num': 'Invoice #',
+        'date': 'Date',
+        'status': 'Status',
+        'bill_to': 'Bill To',
+        'service_details': 'Service Details',
+        'agency_client': '💼 Agency Client',
+        'individual_client': '👤 Individual Client',
+        'translation_lang': 'Language',
+        'pages': 'Pages',
+        'copies': 'Copies',
+        'col_description': 'Description',
+        'col_qty': 'Qty',
+        'col_unit_price': 'Unit Price',
+        'col_amount': 'Amount',
+        'first_page': 'First page',
+        'additional_pages': 'Additional pages',
+        'pages_range': 'Pages 2–',
+        'extra_copies': 'Extra copies',
+        'copy_count': 'copy/copies',
+        'extra_fee': 'Extra fee',
+        'subtotal': 'Subtotal',
+        'total_with_fee': 'Total (+ extra fee)',
+        'grand_total': 'Grand Total',
+        'amount_paid': 'Amount Paid',
+        'balance_due': 'Balance Due',
+        'payment_info': 'Payment Information',
+        'payment_method': 'Payment Method',
+        'payment_source': 'Payment Source',
+        'payment_received': 'Payment Received',
+        'received_by': 'Received By',
+        'notes': 'Notes',
+        'names_on_doc': 'Names on Document',
+        'generated_on': 'Generated on',
+        'thank_you': 'Thank you for your business!',
+        'status_completed': 'Completed',
+        'status_in_progress': 'In Progress',
+        'status_pending': 'Pending',
+        'status_cancelled': 'Cancelled',
+        'status_ready': 'Ready',
+        'status_received': 'Received',
+        'status_confirmed': 'Confirmed',
+        'lang_label': 'Select Language',
+        'download_pdf': 'Download PDF',
+        'incl_first': 'incl. 1st',
+    },
+}
+
+
+@login_required(login_url='admin_login')
+@require_active_subscription
+@any_permission_required('can_view_all_orders', 'can_view_own_orders', 'can_manage_orders')
+def order_invoice_pdf(request, order_id):
+    """
+    Invoice preview (HTML) or PDF download for an order.
+    ?lang=uz|ru|en  — language (defaults to dashboard cookie, then uz)
+    ?format=pdf     — stream as PDF download instead of HTML preview
+    """
+    from django.http import HttpResponse
+    from django.template.loader import render_to_string
+
+    # ── Language selection ────────────────────────────────────────────────────
+    lang = request.GET.get('lang', '').strip().lower()
+    if lang not in ('uz', 'ru', 'en'):
+        lang = request.COOKIES.get('django_language', 'uz')
+    if lang not in ('uz', 'ru', 'en'):
+        lang = 'uz'
+
+    as_pdf = request.GET.get('format', '') == 'pdf'
+
+    order = get_object_or_404(
+        Order.objects.select_related(
+            'bot_user', 'product', 'product__category',
+            'language', 'branch', 'branch__center',
+        ),
+        id=order_id,
+    )
+
+    # ── Permission check (same logic as orderDetail) ─────────────────────────
+    can_view = has_order_permission(request, 'can_view_all_orders', order)
+    if not can_view and request.admin_profile and order.assigned_to == request.admin_profile:
+        can_view = has_order_permission(request, 'can_view_own_orders', order)
+    if not can_view:
+        messages.error(request, "You don't have permission to view this order.")
+        return redirect('orders:ordersList')
+
+    price_breakdown = order.get_price_breakdown()
+    center = order.center  # property on Order
+    strings = _INVOICE_STRINGS.get(lang, _INVOICE_STRINGS['en'])
+
+    # Build per-status label using the selected language strings
+    status_map = {
+        'completed':        strings['status_completed'],
+        'in_progress':      strings['status_in_progress'],
+        'pending':          strings['status_pending'],
+        'payment_pending':  strings['status_pending'],
+        'payment_received': strings['status_received'],
+        'payment_confirmed':strings['status_confirmed'],
+        'cancelled':        strings['status_cancelled'],
+        'ready':            strings['status_ready'],
+    }
+    status_label = status_map.get(order.status, order.get_status_display())
+
+    html_string = render_to_string('orders/invoice_pdf.html', {
+        'order': order,
+        'price_breakdown': price_breakdown,
+        'center': center,
+        'strings': strings,
+        'lang': lang,
+        'status_label': status_label,
+        'is_pdf': as_pdf,
+        'request': request,
+    })
+
+    if as_pdf:
+        import weasyprint
+        pdf_bytes = weasyprint.HTML(
+            string=html_string,
+            base_url=request.build_absolute_uri('/'),
+        ).write_pdf()
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        filename = f"invoice-{order.get_order_number()}.pdf"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
+    return HttpResponse(html_string)

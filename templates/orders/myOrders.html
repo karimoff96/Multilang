@@ -1,5 +1,6 @@
 {% extends '../layout/layout.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block content %}
 <div class="row gy-4">
@@ -11,7 +12,7 @@
                     <iconify-icon icon="solar:document-text-bold" class="text-primary-600 text-2xl"></iconify-icon>
                 </div>
                 <div>
-                    <span class="text-secondary-light text-sm fw-medium">Total Assigned</span>
+                    <span class="text-secondary-light text-sm fw-medium" data-i18n="stats.totalAssigned">{% trans "Total Assigned" %}</span>
                     <h6 class="mb-0 mt-1">{{ stats.total }}</h6>
                 </div>
             </div>
@@ -61,7 +62,7 @@
     <div class="col-12">
         <div class="card h-100 p-0 radius-12">
             <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
-                <h6 class="text-lg fw-semibold mb-0">My Assigned Orders</h6>
+                <h6 class="text-lg fw-semibold mb-0" data-i18n="myOrders.title">{% trans "My Assigned Orders" %}</h6>
                 
                 <!-- Filters -->
                 <form method="get" class="d-flex flex-wrap align-items-center gap-2">
@@ -224,8 +225,8 @@
                 {% else %}
                 <div class="text-center py-40">
                     <iconify-icon icon="solar:document-text-bold-duotone" class="text-primary-200 mb-16" style="font-size: 80px;"></iconify-icon>
-                    <h6 class="text-secondary-light mb-8">No Orders Assigned</h6>
-                    <p class="text-primary-light mb-0">You don't have any orders assigned to you yet.</p>
+                    <h6 class="text-secondary-light mb-8" data-i18n="myOrders.noOrders">{% trans "No Orders Assigned" %}</h6>
+                    <p class="text-primary-light mb-0" data-i18n="myOrders.noOrdersDesc">{% trans "You don't have any orders assigned to you yet." %}</p>
                 </div>
                 {% endif %}
             </div>

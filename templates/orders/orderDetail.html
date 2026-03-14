@@ -639,6 +639,88 @@
                     </div>
                 </div>
                 {% endif %}
+
+                <!-- ══ INTERNAL COMMENTS ══ -->
+                <div class="mt-32" id="internalComments">
+                    <div class="d-flex align-items-center justify-content-between mb-16">
+                        <h6 class="text-md fw-semibold mb-0 d-flex align-items-center gap-8">
+                            <iconify-icon icon="solar:chat-round-dots-bold" class="text-primary-600" style="font-size:18px;"></iconify-icon>
+                            <span data-i18n="comments.internal">Internal Comments</span>
+                            {% if order_comments %}
+                            <span class="badge bg-primary-100 text-primary-600 text-xs rounded-pill ms-4">{{ order_comments|length }}</span>
+                            {% endif %}
+                        </h6>
+                        <span class="badge bg-warning-focus text-warning-600 text-xs">
+                            <iconify-icon icon="solar:lock-bold" class="me-1"></iconify-icon>
+                            <span data-i18n="comments.staffOnly">Staff only</span>
+                        </span>
+                    </div>
+
+                    <!-- Comment list -->
+                    <div id="commentList" class="d-flex flex-column gap-12 mb-16">
+                        {% for comment in order_comments %}
+                        <div class="comment-item d-flex gap-12" id="comment-{{ comment.id }}">
+                            <!-- Avatar -->
+                            <div class="flex-shrink-0">
+                                <div class="w-36-px h-36-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center">
+                                    <span class="text-primary-600 fw-bold text-sm">
+                                        {% if comment.author %}{{ comment.author.user.get_full_name|slice:":1"|upper|default:"?" }}{% else %}S{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Bubble -->
+                            <div class="flex-grow-1">
+                                <div class="p-12 radius-8 bg-neutral-50 border border-neutral-200 position-relative">
+                                    <div class="d-flex align-items-center justify-content-between mb-6 flex-wrap gap-4">
+                                        <span class="fw-semibold text-sm text-neutral-800">
+                                            {% if comment.author %}{{ comment.author.user.get_full_name|default:comment.author.user.username }}{% else %}Superuser{% endif %}
+                                        </span>
+                                        <div class="d-flex align-items-center gap-8">
+                                            <span class="text-xs text-secondary-light">{{ comment.created_at|date:"d M Y, H:i" }}</span>
+                                            {% if request.user.is_superuser or comment.author == request.admin_profile or can_manage_comments %}
+                                            <button type="button"
+                                                    class="btn-delete-comment btn btn-icon btn-sm btn-danger-outline rounded-circle p-0"
+                                                    style="width:22px;height:22px;line-height:1;"
+                                                    data-comment-id="{{ comment.id }}"
+                                                    title="Delete comment">
+                                                <iconify-icon icon="solar:trash-bin-minimalistic-bold" style="font-size:12px;"></iconify-icon>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <p class="mb-0 text-sm text-neutral-700" style="white-space:pre-wrap;">{{ comment.body }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div id="noCommentsMsg" class="text-center py-20 text-secondary-light text-sm">
+                            <iconify-icon icon="solar:chat-round-dots-linear" style="font-size:32px;" class="mb-8 d-block"></iconify-icon>
+                            <span data-i18n="comments.noComments">No comments yet. Be the first to leave a note.</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Add comment form -->
+                    <form id="addCommentForm" class="d-flex gap-12 align-items-end">
+                        {% csrf_token %}
+                        <div class="flex-grow-1">
+                            <textarea id="commentBody"
+                                      class="form-control radius-8"
+                                      rows="2"
+                                      maxlength="2000"
+                                      placeholder="Write an internal note…"
+                                      style="resize:none; font-size:13px;"></textarea>
+                        </div>
+                        <button type="submit" id="submitCommentBtn"
+                                class="btn btn-primary d-flex align-items-center gap-6"
+                                style="white-space:nowrap;">
+                            <iconify-icon icon="solar:send-bold"></iconify-icon>
+                            <span data-i18n="comments.post">Post</span>
+                        </button>
+                    </form>
+                </div>
+                <!-- ══ END INTERNAL COMMENTS ══ -->
+
             </div>
         </div>
     </div>
@@ -734,6 +816,16 @@
                 </div>
                 <hr class="my-16">
                 {% endif %}
+
+                <!-- Invoice Preview / Download -->
+                <div class="mb-16">
+                    <a href="{% url 'orders:order_invoice_pdf' order.id %}" target="_blank"
+                       class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center">
+                        <iconify-icon icon="lucide:file-text" class="me-1"></iconify-icon>
+                        <span data-i18n="detail.downloadInvoice">View / Download Invoice</span>
+                    </a>
+                </div>
+                <hr class="my-16">
                 
                 <!-- Assignment Section -->
                 {% can_do 'orders.assign' as can_assign_order %}
@@ -1318,5 +1410,112 @@ document.getElementById('savePriceChangeBtn')?.addEventListener('click', async f
     }
 });
 {% endif %}
+
+// ── Internal Comments ────────────────────────────────────────────────────────
+(function () {
+    const ADD_URL    = "{% url 'orders:add_order_comment' order.id %}";
+    const DEL_BASE   = "/orders/{{ order.id }}/comments/";
+    const csrfToken2 = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+    function buildCommentHTML(c) {
+        const initials = c.author ? c.author[0].toUpperCase() : 'S';
+        const del = c.can_delete
+            ? `<button type="button" class="btn-delete-comment btn btn-icon btn-sm btn-danger-outline rounded-circle p-0"
+                   style="width:22px;height:22px;line-height:1;" data-comment-id="${c.id}" title="Delete comment">
+                   <iconify-icon icon="solar:trash-bin-minimalistic-bold" style="font-size:12px;"></iconify-icon></button>`
+            : '';
+        return `
+        <div class="comment-item d-flex gap-12" id="comment-${c.id}">
+            <div class="flex-shrink-0">
+                <div class="w-36-px h-36-px rounded-circle bg-primary-100 d-flex align-items-center justify-content-center">
+                    <span class="text-primary-600 fw-bold text-sm">${initials}</span>
+                </div>
+            </div>
+            <div class="flex-grow-1">
+                <div class="p-12 radius-8 bg-neutral-50 border border-neutral-200">
+                    <div class="d-flex align-items-center justify-content-between mb-6 flex-wrap gap-4">
+                        <span class="fw-semibold text-sm text-neutral-800">${c.author}</span>
+                        <div class="d-flex align-items-center gap-8">
+                            <span class="text-xs text-secondary-light">${c.created_at}</span>
+                            ${del}
+                        </div>
+                    </div>
+                    <p class="mb-0 text-sm text-neutral-700" style="white-space:pre-wrap;">${c.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // Add comment
+    document.getElementById('addCommentForm')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const textarea = document.getElementById('commentBody');
+        const body = textarea.value.trim();
+        if (!body) return;
+
+        const btn = document.getElementById('submitCommentBtn');
+        btn.disabled = true;
+
+        const fd = new FormData();
+        fd.append('body', body);
+        fd.append('csrfmiddlewaretoken', csrfToken2);
+
+        try {
+            const resp = await fetch(ADD_URL, { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const data = await resp.json();
+            if (data.success) {
+                const c = data.comment;
+                c.can_delete = true;
+                // Remove "no comments" placeholder if present
+                document.getElementById('noCommentsMsg')?.remove();
+                document.getElementById('commentList').insertAdjacentHTML('beforeend', buildCommentHTML(c));
+                textarea.value = '';
+                // Update badge count
+                const badge = document.querySelector('#internalComments .badge.bg-primary-100');
+                const list = document.querySelectorAll('#commentList .comment-item');
+                if (badge) badge.textContent = list.length;
+                else {
+                    const h6 = document.querySelector('#internalComments h6');
+                    h6.insertAdjacentHTML('beforeend', `<span class="badge bg-primary-100 text-primary-600 text-xs rounded-pill ms-4">${list.length}</span>`);
+                }
+            }
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    // Delete comment (event delegation)
+    document.getElementById('commentList')?.addEventListener('click', async function (e) {
+        const btn = e.target.closest('.btn-delete-comment');
+        if (!btn) return;
+        if (!confirm('Delete this comment?')) return;
+
+        const id = btn.dataset.commentId;
+        const fd = new FormData();
+        fd.append('csrfmiddlewaretoken', csrfToken2);
+
+        try {
+            const resp = await fetch(`${DEL_BASE}${id}/delete/`, { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const data = await resp.json();
+            if (data.success) {
+                document.getElementById(`comment-${id}`)?.remove();
+                // Update count badge
+                const remaining = document.querySelectorAll('#commentList .comment-item').length;
+                const badge = document.querySelector('#internalComments .badge.bg-primary-100');
+                if (badge) {
+                    if (remaining === 0) badge.remove();
+                    else badge.textContent = remaining;
+                }
+                if (remaining === 0) {
+                    document.getElementById('commentList').innerHTML =
+                        `<div id="noCommentsMsg" class="text-center py-20 text-secondary-light text-sm">
+                            <iconify-icon icon="solar:chat-round-dots-linear" style="font-size:32px;" class="mb-8 d-block"></iconify-icon>
+                            No comments yet. Be the first to leave a note.
+                         </div>`;
+                }
+            }
+        } catch { /* silent */ }
+    });
+})();
 </script>
 {% endblock %}

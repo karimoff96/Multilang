@@ -1319,6 +1319,37 @@ class OrderPriceChange(models.Model):
         return self.new_price - self.old_price
 
 
+class OrderComment(models.Model):
+    """
+    Internal staff-only comment thread on an order.
+    Comments are never visible to bot users / clients.
+    """
+    order = models.ForeignKey(
+        'Order',
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name=_('Order'),
+    )
+    author = models.ForeignKey(
+        AdminUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='order_comments',
+        verbose_name=_('Author'),
+    )
+    body = models.TextField(verbose_name=_('Comment'))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created At'))
+
+    class Meta:
+        verbose_name = _('Order Comment')
+        verbose_name_plural = _('Order Comments')
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Comment #{self.id} on Order #{self.order_id}"
+
+
 class PaymentOrderLink(models.Model):
     """
     Link table between BulkPayment and Orders to track which orders

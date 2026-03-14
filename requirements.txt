@@ -43,3 +43,4 @@ python-json-logger==2.0.7
 
 # Error monitoring
 sentry-sdk[django]
+weasyprint==68.1

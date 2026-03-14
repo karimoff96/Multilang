@@ -4168,6 +4168,11 @@ const translations = {
         ru: 'Детали заказа',
         en: 'Order Details'
     },
+    'detail.downloadInvoice': {
+        uz: 'Hisobni yuklab olish (PDF)',
+        ru: 'Скачать счёт (PDF)',
+        en: 'Download Invoice PDF'
+    },
     'detail.productDetails': {
         uz: 'Mahsulot tafsilotlari',
         ru: 'Детали продукта',
@@ -6713,6 +6718,21 @@ const translations = {
         uz: 'Buyurtmalar topilmadi',
         ru: 'Заказы не найдены',
         en: 'No orders found'
+    },
+    'myOrders.title': {
+        uz: 'Mening Buyurtmalarim',
+        ru: 'Мои Назначенные Заказы',
+        en: 'My Assigned Orders'
+    },
+    'myOrders.noOrders': {
+        uz: 'Buyurtmalar Biriktirilmagan',
+        ru: 'Заказы Не Назначены',
+        en: 'No Orders Assigned'
+    },
+    'myOrders.noOrdersDesc': {
+        uz: 'Sizga hali hech qanday buyurtma biriktirilmagan.',
+        ru: 'Вам ещё не назначено ни одного заказа.',
+        en: "You don't have any orders assigned to you yet."
     },
     'orders.search': {
         uz: 'Qidirish',

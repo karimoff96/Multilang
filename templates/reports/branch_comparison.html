@@ -339,8 +339,8 @@ document.addEventListener('DOMContentLoaded', function() {
             tooltip: { theme: 'dark', y: { formatter: function(val) { return val + ' orders'; }, title: { formatter: function() { return ''; } } }, marker: { show: false } }
         }).render();
     } else {
-        document.querySelector("#revenueChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:chart-square-line-duotone" class="text-4xl mb-2"></iconify-icon><span>No branch revenue data</span></div>';
-        document.querySelector("#ordersChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:chart-square-line-duotone" class="text-4xl mb-2"></iconify-icon><span>No branch order data</span></div>';
+        document.querySelector("#revenueChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:chart-square-line-duotone" class="text-4xl mb-2"></iconify-icon><span>' + (window.LanguageManager ? LanguageManager.translate('reports.noDataAvailable') : 'No branch revenue data') + '</span></div>';
+        document.querySelector("#ordersChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:chart-square-line-duotone" class="text-4xl mb-2"></iconify-icon><span>' + (window.LanguageManager ? LanguageManager.translate('reports.noDataAvailable') : 'No branch order data') + '</span></div>';
     }
 });
 </script>

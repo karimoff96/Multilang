@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-13 17:52+0500\n"
+"POT-Creation-Date: 2026-03-15 00:18+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgstr ""
 
 # Home Views Translations
 #: WowDash/home_views.py:21 WowDash/home_views.py:326 WowDash/home_views.py:342
-#: landing/models.py:23 organizations/models.py:30
+#: landing/models.py:23 organizations/models.py:31
 #: templates/billing/subscription_expired.html:38
 #: templates/landing/contact_requests.html:204
 #: templates/landing/partials/contact_table.html:7
@@ -156,18 +156,18 @@ msgstr "Статистика продаж"
 msgid "Sales"
 msgstr "Продажи"
 
-#: WowDash/home_views.py:829 core/views.py:221 orders/bulk_payment_views.py:825
+#: WowDash/home_views.py:829 core/views.py:223 orders/bulk_payment_views.py:825
 #: templates/orders/payment_history_full.html:15
 msgid "Today"
 msgstr "Сегодня"
 
-#: WowDash/home_views.py:830 core/views.py:223 orders/bulk_payment_views.py:830
+#: WowDash/home_views.py:830 core/views.py:225 orders/bulk_payment_views.py:830
 #: templates/orders/payment_history_full.html:16
 #, fuzzy
 msgid "This Week"
 msgstr "Эта неделя"
 
-#: WowDash/home_views.py:831 core/views.py:224 orders/bulk_payment_views.py:834
+#: WowDash/home_views.py:831 core/views.py:226 orders/bulk_payment_views.py:834
 #: orders/bulk_payment_views.py:851 orders/bulk_payment_views.py:856
 #: templates/orders/payment_history_full.html:17
 #: templates/services/generalExpenseAnalytics.html:13
@@ -182,7 +182,7 @@ msgstr "Этот месяц"
 msgid "This Year"
 msgstr "В этом году"
 
-#: WowDash/home_views.py:833 core/views.py:225
+#: WowDash/home_views.py:833 core/views.py:227
 #: templates/orders/payment_history_full.html:19
 #, fuzzy
 msgid "Custom Range"
@@ -299,8 +299,8 @@ msgstr "Детальный анализ расходов по центру, фи
 
 #: accounts/models.py:25 accounts/models.py:217 core/models.py:52
 #: core/models.py:143 core/models.py:226 orders/models.py:139
-#: orders/models.py:1231 organizations/models.py:245
-#: organizations/models.py:1158 services/models.py:47 services/models.py:173
+#: orders/models.py:1231 organizations/models.py:246
+#: organizations/models.py:1159 services/models.py:47 services/models.py:173
 #: services/models.py:254 services/models.py:632 services/models.py:711
 #: templates/organizations/center_detail.html:317
 #: templates/organizations/center_detail.html:362
@@ -352,7 +352,7 @@ msgid "Help text shown in bot"
 msgstr "Текст справки, показываемый в боте"
 
 #: accounts/models.py:58 billing/models.py:15 billing/models.py:33
-#: billing/models.py:882 orders/models.py:188 organizations/models.py:266
+#: billing/models.py:882 orders/models.py:188 organizations/models.py:267
 #: services/models.py:53 services/models.py:258 services/models.py:353
 #: support/models.py:133 templates/billing/tariff_create.html:72
 #: templates/landing/partials/renewal_table.html:8
@@ -445,8 +445,8 @@ msgid "Additional Info"
 msgstr ""
 
 #: accounts/models.py:206 core/models.py:151 core/models.py:234
-#: organizations/models.py:95 organizations/models.py:192
-#: organizations/models.py:1147
+#: organizations/models.py:96 organizations/models.py:193
+#: organizations/models.py:1148
 msgid "Translation Center"
 msgstr ""
 
@@ -902,8 +902,8 @@ msgstr "Категория"
 
 #: billing/models.py:17 billing/models.py:34 billing/models.py:470
 #: billing/models.py:515 core/models.py:9 core/models.py:30
-#: organizations/models.py:90 organizations/models.py:240
-#: organizations/models.py:267 organizations/models.py:1163
+#: organizations/models.py:91 organizations/models.py:241
+#: organizations/models.py:268 organizations/models.py:1164
 #: support/models.py:45 templates/billing/centers_list.html:71
 #: templates/billing/centers_list.html:137
 #: templates/billing/centers_monitoring.html:77
@@ -1180,7 +1180,7 @@ msgstr ""
 msgid "Marketing Campaign Tools"
 msgstr "Инструменты Маркетинговых Кампаний"
 
-#: billing/models.py:160 templates/billing/tariff_edit.html:523
+#: billing/models.py:160
 msgid "Create and manage marketing posts"
 msgstr ""
 
@@ -1212,7 +1212,7 @@ msgstr "Пользовательские Роли и Права"
 msgid "Create custom staff roles with RBAC"
 msgstr ""
 
-#: billing/models.py:181 billing/models.py:384 organizations/models.py:757
+#: billing/models.py:181 billing/models.py:384 organizations/models.py:758
 #: organizations/views.py:1645 templates/billing/tariff_edit.html:677
 msgid "Branch Settings"
 msgstr "Настройки Филиалов"
@@ -1221,7 +1221,7 @@ msgstr "Настройки Филиалов"
 msgid "Customize settings per branch"
 msgstr ""
 
-#: billing/models.py:186 billing/models.py:385 organizations/models.py:766
+#: billing/models.py:186 billing/models.py:385 organizations/models.py:767
 #: templates/billing/tariff_edit.html:496
 msgid "Agency Management"
 msgstr ""
@@ -1523,7 +1523,7 @@ msgstr "Подписки"
 
 #: billing/models.py:586 billing/views.py:120
 #: templates/billing/centers_monitoring.html:125
-#: templates/partials/sidebar.html:320
+#: templates/partials/sidebar.html:322
 msgid "Subscriptions"
 msgstr "Подписки"
 
@@ -1582,7 +1582,7 @@ msgid "Manual Orders"
 msgstr "Все заказы"
 
 #: billing/models.py:832 billing/models.py:833 billing/views.py:757
-#: billing/views.py:758 templates/partials/sidebar.html:326
+#: billing/views.py:758 templates/partials/sidebar.html:328
 msgid "Usage Tracking"
 msgstr "Отслеживание использования"
 
@@ -1668,7 +1668,7 @@ msgstr ""
 msgid "Subscription status updated successfully!"
 msgstr ""
 
-#: billing/views.py:361 templates/partials/sidebar.html:323
+#: billing/views.py:361 templates/partials/sidebar.html:325
 msgid "Tariff Plans"
 msgstr "Тарифные планы"
 
@@ -1807,7 +1807,7 @@ msgstr "Интеграция Telegram Бота"
 msgid "Statistics"
 msgstr ""
 
-#: core/admin.py:80 orders/models.py:759 orders/views.py:414
+#: core/admin.py:80 orders/models.py:759 orders/views.py:415
 #: templates/billing/subscription_detail.html:303
 #: templates/orders/bulk_payment.html:310
 #: templates/orders/payment_history_full.html:162
@@ -1889,8 +1889,8 @@ msgid "Archive failed: %(error)s"
 msgstr ""
 
 #: core/models.py:7 core/models.py:28 landing/models.py:22
-#: organizations/models.py:10 organizations/models.py:210
-#: organizations/models.py:264 templates/billing/centers_list.html:110
+#: organizations/models.py:11 organizations/models.py:211
+#: organizations/models.py:265 templates/billing/centers_list.html:110
 #: templates/landing/contact_requests.html:203
 #: templates/landing/partials/contact_table.html:6
 #: templates/organizations/center_detail.html:316
@@ -1903,7 +1903,7 @@ msgstr "Название"
 msgid "Code"
 msgstr ""
 
-#: core/models.py:12 core/models.py:26 organizations/models.py:200
+#: core/models.py:12 core/models.py:26 organizations/models.py:201
 msgid "Region"
 msgstr ""
 
@@ -1911,7 +1911,7 @@ msgstr ""
 msgid "Regions"
 msgstr ""
 
-#: core/models.py:33 organizations/models.py:208
+#: core/models.py:33 organizations/models.py:209
 msgid "District"
 msgstr ""
 
@@ -1936,13 +1936,13 @@ msgstr ""
 msgid "File"
 msgstr ""
 
-#: core/models.py:59 organizations/models.py:91 organizations/models.py:241
-#: organizations/models.py:411 organizations/models.py:1172
+#: core/models.py:59 organizations/models.py:92 organizations/models.py:242
+#: organizations/models.py:412 organizations/models.py:1173
 msgid "Created at"
 msgstr ""
 
-#: core/models.py:60 organizations/models.py:92 organizations/models.py:242
-#: organizations/models.py:412 organizations/models.py:1173
+#: core/models.py:60 organizations/models.py:93 organizations/models.py:243
+#: organizations/models.py:413 organizations/models.py:1174
 msgid "Updated at"
 msgstr ""
 
@@ -1991,7 +1991,7 @@ msgid "Other"
 msgstr "Другое"
 
 #: core/models.py:105 core/models.py:555 marketing/models.py:328
-#: organizations/models.py:1136 templates/reports/audit_logs.html:78
+#: organizations/models.py:1137 templates/reports/audit_logs.html:78
 msgid "User"
 msgstr "Пользователь"
 
@@ -2214,23 +2214,23 @@ msgstr "Необязательные примечания об этом прод
 msgid "File Archive"
 msgstr "Архивы Исторических Файлов"
 
-#: core/views.py:214 templates/core/notifications.html:14
+#: core/views.py:216 templates/core/notifications.html:14
 #, fuzzy
 #| msgid "Location"
 msgid "Notifications"
 msgstr "Местоположение"
 
-#: core/views.py:215
+#: core/views.py:217
 #, fuzzy
 #| msgid "All Actions"
 msgid "All Notifications"
 msgstr "Все действия"
 
-#: core/views.py:222
+#: core/views.py:224
 msgid "Yesterday"
 msgstr ""
 
-#: core/views.py:354
+#: core/views.py:356
 msgid "System activity and audit trail"
 msgstr "Системная активность и журнал аудита"
 
@@ -2271,8 +2271,8 @@ msgstr ""
 msgid "Company"
 msgstr "Компании"
 
-#: landing/models.py:25 organizations/models.py:29 organizations/models.py:212
-#: organizations/models.py:1161 templates/billing/subscription_expired.html:44
+#: landing/models.py:25 organizations/models.py:30 organizations/models.py:213
+#: organizations/models.py:1162 templates/billing/subscription_expired.html:44
 #: templates/landing/contact_requests.html:206
 #: templates/landing/partials/contact_table.html:9
 #: templates/organizations/center_form.html:86
@@ -2777,26 +2777,30 @@ msgid "No recipients found for this broadcast."
 msgstr ""
 
 #: marketing/views.py:793
+msgid "Broadcast queued for {} recipients. It will be sent in the background."
+msgstr ""
+
+#: marketing/views.py:811
 msgid "Broadcast completed: {} sent, {} failed in {} seconds."
 msgstr ""
 
-#: marketing/views.py:800
+#: marketing/views.py:818
 msgid "Broadcast completed with issues: {} sent, {} failed."
 msgstr ""
 
-#: marketing/views.py:827
+#: marketing/views.py:844
 msgid "Can only pause active broadcasts."
 msgstr ""
 
-#: marketing/views.py:833
+#: marketing/views.py:850
 msgid "Broadcast paused."
 msgstr ""
 
-#: marketing/views.py:845
+#: marketing/views.py:862
 msgid "Cannot cancel this broadcast."
 msgstr ""
 
-#: marketing/views.py:851
+#: marketing/views.py:868
 msgid "Broadcast cancelled."
 msgstr ""
 
@@ -3450,226 +3454,226 @@ msgstr "Отслеживание использования"
 msgid "Payme Transactions"
 msgstr "Отслеживание использования"
 
-#: orders/views.py:414
+#: orders/views.py:415
 msgid "Orders with Pending Receipts"
 msgstr "Заказы с ожидающими квитанциями"
 
-#: orders/views.py:414 orders/views.py:1523 templates/orders/ordersList.html:39
+#: orders/views.py:415 orders/views.py:1525 templates/orders/ordersList.html:39
 msgid "My Orders"
 msgstr "Мои заказы"
 
-#: orders/views.py:415
+#: orders/views.py:416
 msgid "Review uploaded payment receipts"
 msgstr "Проверить загруженные квитанции"
 
-#: orders/views.py:415
+#: orders/views.py:416
 msgid "Orders assigned to me"
 msgstr "Заказы, назначенные мне"
 
-#: orders/views.py:415 templates/orders/ordersList.html:17
+#: orders/views.py:416 templates/orders/ordersList.html:17
 #: templates/reports/debtors_report.html:110
 msgid "All Orders"
 msgstr "Все заказы"
 
-#: orders/views.py:558
+#: orders/views.py:559
 msgid "Order Details"
 msgstr "Детали заказа"
 
-#: orders/views.py:879
+#: orders/views.py:880
 msgid "You don't have permission to make that change: "
 msgstr ""
 
-#: orders/views.py:898
+#: orders/views.py:899
 msgid "Edit Order"
 msgstr "Редактировать заказ"
 
-#: orders/views.py:1524
+#: orders/views.py:1526
 msgid "Orders Assigned to Me"
 msgstr "Заказы, назначенные мне"
 
-#: orders/views.py:1611
+#: orders/views.py:1613
 msgid ""
 "Please select a customer or enable manual order and fill in customer details"
 msgstr ""
 
-#: orders/views.py:1615
+#: orders/views.py:1617
 msgid "Please provide customer's first name and phone number for manual orders"
 msgstr ""
 
-#: orders/views.py:1619
+#: orders/views.py:1621
 msgid "Please fill in all required fields (product and branch)"
 msgstr ""
 
-#: orders/views.py:1668
+#: orders/views.py:1670
 msgid "You don't have access to the selected customer."
 msgstr ""
 
-#: orders/views.py:1677
+#: orders/views.py:1679
 msgid "You don't have access to the selected branch."
 msgstr ""
 
-#: orders/views.py:1748
+#: orders/views.py:1750
 msgid "Order created successfully"
 msgstr ""
 
-#: orders/views.py:1756
+#: orders/views.py:1758
 #, fuzzy
 #| msgid "Created"
 msgid "Create Order"
 msgstr "Создано"
 
-#: orders/views.py:1757
+#: orders/views.py:1759
 msgid "Create a new order manually"
 msgstr ""
 
-#: organizations/models.py:12 templates/billing/centers_list.html:111
+#: organizations/models.py:13 templates/billing/centers_list.html:111
 #: templates/organizations/center_form.html:48
 msgid "Subdomain"
 msgstr ""
 
-#: organizations/models.py:17
+#: organizations/models.py:18
 msgid ""
 "Unique subdomain for this center (e.g., 'center1' for center1.alltranslation."
 "uz)"
 msgstr ""
 
-#: organizations/models.py:23 templates/billing/centers_list.html:112
+#: organizations/models.py:24 templates/billing/centers_list.html:112
 msgid "Owner"
 msgstr ""
 
-#: organizations/models.py:26
+#: organizations/models.py:27
 msgid "Logo"
 msgstr ""
 
-#: organizations/models.py:28 organizations/models.py:211
+#: organizations/models.py:29 organizations/models.py:212
 #: templates/organizations/center_form.html:104
 msgid "Address"
 msgstr ""
 
-#: organizations/models.py:32 organizations/models.py:214
+#: organizations/models.py:33 organizations/models.py:215
 #: templates/organizations/center_form.html:113
 msgid "Location URL"
 msgstr ""
 
-#: organizations/models.py:35 organizations/models.py:217
+#: organizations/models.py:36 organizations/models.py:218
 msgid "Google Maps or Yandex Maps URL"
 msgstr ""
 
-#: organizations/models.py:39
+#: organizations/models.py:40
 msgid "Bot Token"
 msgstr ""
 
-#: organizations/models.py:44
+#: organizations/models.py:45
 msgid "Telegram Bot Token for this center (unique, superuser only)"
 msgstr ""
 
-#: organizations/models.py:47
+#: organizations/models.py:48
 #, fuzzy
 #| msgid "form.username"
 msgid "Bot Username"
 msgstr "Логин"
 
-#: organizations/models.py:51
+#: organizations/models.py:52
 msgid "Telegram Bot username without @ (e.g., 'my_translation_bot')"
 msgstr ""
 
-#: organizations/models.py:54
+#: organizations/models.py:55
 msgid "Company Orders Channel ID"
 msgstr ""
 
-#: organizations/models.py:58
+#: organizations/models.py:59
 msgid "Telegram channel ID for all company orders and file archives"
 msgstr ""
 
-#: organizations/models.py:62
+#: organizations/models.py:63
 #, fuzzy
 #| msgid "Features"
 msgid "Payme Enabled"
 msgstr "Возможности"
 
-#: organizations/models.py:64
+#: organizations/models.py:65
 msgid ""
 "Enable Payme card payment integration for this center. When enabled, bot "
 "users are redirected to Payme checkout instead of uploading a receipt."
 msgstr ""
 
-#: organizations/models.py:68
+#: organizations/models.py:69
 #, fuzzy
 #| msgid "Payment"
 msgid "Payme Merchant ID"
 msgstr "Платеж"
 
-#: organizations/models.py:71
+#: organizations/models.py:72
 msgid ""
 "Per-center Payme merchant ID. Leave blank to use the global "
 "PAYME_MERCHANT_ID setting."
 msgstr ""
 
-#: organizations/models.py:74
+#: organizations/models.py:75
 msgid "Payme Sandbox Secret Key"
 msgstr ""
 
-#: organizations/models.py:77
+#: organizations/models.py:78
 msgid "Payme secret key for the sandbox/test environment (test.paycom.uz)."
 msgstr ""
 
-#: organizations/models.py:80
+#: organizations/models.py:81
 msgid "Payme Production Secret Key"
 msgstr ""
 
-#: organizations/models.py:83
+#: organizations/models.py:84
 msgid "Payme secret key for the production environment (checkout.paycom.uz)."
 msgstr ""
 
-#: organizations/models.py:86
+#: organizations/models.py:87
 #, fuzzy
 #| msgid "Payment Method"
 msgid "Payme Sandbox Mode"
 msgstr "Способ оплаты"
 
-#: organizations/models.py:88
+#: organizations/models.py:89
 msgid ""
 "Use Payme test environment (test.paycom.uz). Enable while testing; disable "
 "when going live with production credentials."
 msgstr ""
 
-#: organizations/models.py:96
+#: organizations/models.py:97
 msgid "Translation Centers"
 msgstr ""
 
-#: organizations/models.py:114
+#: organizations/models.py:115
 msgid "Cannot delete center with active bot token. Remove the bot token first."
 msgstr ""
 
-#: organizations/models.py:219
+#: organizations/models.py:220
 msgid "Main Branch"
 msgstr ""
 
-#: organizations/models.py:222
+#: organizations/models.py:223
 msgid "B2C Orders Channel ID"
 msgstr ""
 
-#: organizations/models.py:226
+#: organizations/models.py:227
 msgid "Telegram channel ID for B2C (individual customer) orders"
 msgstr ""
 
-#: organizations/models.py:229
+#: organizations/models.py:230
 msgid "B2B Orders Channel ID"
 msgstr ""
 
-#: organizations/models.py:233
+#: organizations/models.py:234
 msgid "Telegram channel ID for B2B (agency/business) orders"
 msgstr ""
 
-#: organizations/models.py:236
+#: organizations/models.py:237
 msgid "Show Price List"
 msgstr ""
 
-#: organizations/models.py:238
+#: organizations/models.py:239
 msgid "Show price list button in Telegram bot for this branch"
 msgstr ""
 
-#: organizations/models.py:246 templates/billing/convert_trial.html:54
+#: organizations/models.py:247 templates/billing/convert_trial.html:54
 #: templates/billing/request_renewal.html:47
 #: templates/billing/subscription_detail.html:206
 #: templates/billing/tariff_list.html:63
@@ -3682,510 +3686,510 @@ msgstr ""
 msgid "Branches"
 msgstr "Филиалы"
 
-#: organizations/models.py:265
+#: organizations/models.py:266
 msgid "Display Name"
 msgstr ""
 
-#: organizations/models.py:269
+#: organizations/models.py:270
 msgid "System Role"
 msgstr ""
 
-#: organizations/models.py:269
+#: organizations/models.py:270
 msgid "System roles cannot be deleted"
 msgstr ""
 
-#: organizations/models.py:273
+#: organizations/models.py:274
 msgid "Can manage centers (full access)"
 msgstr ""
 
-#: organizations/models.py:274
+#: organizations/models.py:275
 msgid "Full center management - overrides other center permissions"
 msgstr ""
 
-#: organizations/models.py:275
+#: organizations/models.py:276
 msgid "Can view centers"
 msgstr ""
 
-#: organizations/models.py:276
+#: organizations/models.py:277
 msgid "Can view translation center details"
 msgstr ""
 
-#: organizations/models.py:277
+#: organizations/models.py:278
 msgid "Can create centers"
 msgstr ""
 
-#: organizations/models.py:278
+#: organizations/models.py:279
 msgid "Can create new translation centers"
 msgstr ""
 
-#: organizations/models.py:279
+#: organizations/models.py:280
 msgid "Can edit centers"
 msgstr ""
 
-#: organizations/models.py:280
+#: organizations/models.py:281
 msgid "Can edit translation center settings"
 msgstr ""
 
-#: organizations/models.py:281
+#: organizations/models.py:282
 msgid "Can delete centers"
 msgstr ""
 
-#: organizations/models.py:282
+#: organizations/models.py:283
 msgid "Can delete translation centers"
 msgstr ""
 
-#: organizations/models.py:285
+#: organizations/models.py:286
 msgid "Can manage branches (full access)"
 msgstr ""
 
-#: organizations/models.py:286
+#: organizations/models.py:287
 msgid "Full branch management - overrides other branch permissions"
 msgstr ""
 
-#: organizations/models.py:287
+#: organizations/models.py:288
 msgid "Can view branches"
 msgstr ""
 
-#: organizations/models.py:288
+#: organizations/models.py:289
 msgid "Can view branch details"
 msgstr ""
 
-#: organizations/models.py:289
+#: organizations/models.py:290
 msgid "Can create branches"
 msgstr ""
 
-#: organizations/models.py:290
+#: organizations/models.py:291
 msgid "Can create new branches"
 msgstr ""
 
-#: organizations/models.py:291
+#: organizations/models.py:292
 msgid "Can edit branches"
 msgstr ""
 
-#: organizations/models.py:292
+#: organizations/models.py:293
 msgid "Can edit branch settings"
 msgstr ""
 
-#: organizations/models.py:293 organizations/models.py:294
+#: organizations/models.py:294 organizations/models.py:295
 msgid "Can delete branches"
 msgstr ""
 
-#: organizations/models.py:297
+#: organizations/models.py:298
 msgid "Can manage staff (full access)"
 msgstr ""
 
-#: organizations/models.py:298
+#: organizations/models.py:299
 msgid "Full staff management - overrides other staff permissions"
 msgstr ""
 
-#: organizations/models.py:299
+#: organizations/models.py:300
 msgid "Can view staff"
 msgstr ""
 
-#: organizations/models.py:300
+#: organizations/models.py:301
 msgid "Can view staff details"
 msgstr ""
 
-#: organizations/models.py:301
+#: organizations/models.py:302
 msgid "Can create staff"
 msgstr ""
 
-#: organizations/models.py:302
+#: organizations/models.py:303
 msgid "Can create new staff members"
 msgstr ""
 
-#: organizations/models.py:303
+#: organizations/models.py:304
 msgid "Can edit staff"
 msgstr ""
 
-#: organizations/models.py:304
+#: organizations/models.py:305
 msgid "Can edit staff details and roles"
 msgstr ""
 
-#: organizations/models.py:305
+#: organizations/models.py:306
 msgid "Can delete staff"
 msgstr ""
 
-#: organizations/models.py:306
+#: organizations/models.py:307
 msgid "Can delete staff members"
 msgstr ""
 
-#: organizations/models.py:309
+#: organizations/models.py:310
 msgid "Can manage orders (full access)"
 msgstr ""
 
-#: organizations/models.py:310
+#: organizations/models.py:311
 msgid "Full order management - overrides other order permissions"
 msgstr ""
 
-#: organizations/models.py:311
+#: organizations/models.py:312
 msgid "Can view all orders"
 msgstr ""
 
-#: organizations/models.py:312
+#: organizations/models.py:313
 msgid "Can view own orders"
 msgstr ""
 
-#: organizations/models.py:313
+#: organizations/models.py:314
 msgid "Can create orders"
 msgstr ""
 
-#: organizations/models.py:314
+#: organizations/models.py:315
 msgid "Can edit orders"
 msgstr ""
 
-#: organizations/models.py:315
+#: organizations/models.py:316
 msgid "Can delete orders"
 msgstr ""
 
-#: organizations/models.py:316
+#: organizations/models.py:317
 msgid "Can assign orders"
 msgstr ""
 
-#: organizations/models.py:317
+#: organizations/models.py:318
 msgid "Can update order status"
 msgstr ""
 
-#: organizations/models.py:318
+#: organizations/models.py:319
 msgid "Can complete orders"
 msgstr ""
 
-#: organizations/models.py:319
+#: organizations/models.py:320
 msgid "Can cancel orders"
 msgstr ""
 
-#: organizations/models.py:322
+#: organizations/models.py:323
 msgid "Can manage financial (full access)"
 msgstr ""
 
-#: organizations/models.py:323
+#: organizations/models.py:324
 msgid "Full financial management - overrides other financial permissions"
 msgstr ""
 
-#: organizations/models.py:324
+#: organizations/models.py:325
 msgid "Can receive payments"
 msgstr ""
 
-#: organizations/models.py:325
+#: organizations/models.py:326
 msgid "Can view financial reports"
 msgstr ""
 
-#: organizations/models.py:326
+#: organizations/models.py:327
 msgid "Can apply discounts"
 msgstr ""
 
-#: organizations/models.py:327
+#: organizations/models.py:328
 msgid "Can refund orders"
 msgstr ""
 
-#: organizations/models.py:328
+#: organizations/models.py:329
 msgid "Can edit order price"
 msgstr ""
 
-#: organizations/models.py:331
+#: organizations/models.py:332
 msgid "Can manage reports (full access)"
 msgstr ""
 
-#: organizations/models.py:332
+#: organizations/models.py:333
 msgid "Full reports management - overrides other report permissions"
 msgstr ""
 
-#: organizations/models.py:333
+#: organizations/models.py:334
 msgid "Can view reports"
 msgstr ""
 
-#: organizations/models.py:334
+#: organizations/models.py:335
 msgid "Can view analytics"
 msgstr ""
 
-#: organizations/models.py:335
+#: organizations/models.py:336
 msgid "Can export data"
 msgstr ""
 
-#: organizations/models.py:338
+#: organizations/models.py:339
 msgid "Can manage products (full access)"
 msgstr ""
 
-#: organizations/models.py:339
+#: organizations/models.py:340
 msgid "Full product management - overrides other product permissions"
 msgstr ""
 
-#: organizations/models.py:340
+#: organizations/models.py:341
 msgid "Can view products"
 msgstr ""
 
-#: organizations/models.py:341
+#: organizations/models.py:342
 msgid "Can create products"
 msgstr ""
 
-#: organizations/models.py:342
+#: organizations/models.py:343
 msgid "Can edit products"
 msgstr ""
 
-#: organizations/models.py:343
+#: organizations/models.py:344
 msgid "Can delete products"
 msgstr ""
 
-#: organizations/models.py:346
+#: organizations/models.py:347
 msgid "Can manage expenses (full access)"
 msgstr ""
 
-#: organizations/models.py:347
+#: organizations/models.py:348
 msgid "Full expense management - overrides other expense permissions"
 msgstr ""
 
-#: organizations/models.py:348
+#: organizations/models.py:349
 #, fuzzy
 #| msgid "services.expenses"
 msgid "Can view expenses"
 msgstr "Расходы"
 
-#: organizations/models.py:349
+#: organizations/models.py:350
 msgid "Can create expenses"
 msgstr ""
 
-#: organizations/models.py:350
+#: organizations/models.py:351
 msgid "Can edit expenses"
 msgstr ""
 
-#: organizations/models.py:351
+#: organizations/models.py:352
 msgid "Can delete expenses"
 msgstr ""
 
-#: organizations/models.py:354
+#: organizations/models.py:355
 msgid "Can manage languages (full access)"
 msgstr ""
 
-#: organizations/models.py:355
+#: organizations/models.py:356
 msgid "Full language management - overrides other language permissions"
 msgstr ""
 
-#: organizations/models.py:356
+#: organizations/models.py:357
 #, fuzzy
 #| msgid "services.languages"
 msgid "Can view languages"
 msgstr "Языки"
 
-#: organizations/models.py:357
+#: organizations/models.py:358
 msgid "Can create languages"
 msgstr ""
 
-#: organizations/models.py:358
+#: organizations/models.py:359
 #, fuzzy
 #| msgid "services.languages"
 msgid "Can edit languages"
 msgstr "Языки"
 
-#: organizations/models.py:359
+#: organizations/models.py:360
 msgid "Can delete languages"
 msgstr ""
 
-#: organizations/models.py:361
+#: organizations/models.py:362
 msgid "Can manage customers (full access)"
 msgstr ""
 
-#: organizations/models.py:362
+#: organizations/models.py:363
 msgid "Full customer management - overrides other customer permissions"
 msgstr ""
 
-#: organizations/models.py:363
+#: organizations/models.py:364
 msgid "Can view customers"
 msgstr ""
 
-#: organizations/models.py:364
+#: organizations/models.py:365
 #, fuzzy
 #| msgid "Customers"
 msgid "Can create customers"
 msgstr "Клиенты"
 
-#: organizations/models.py:365
+#: organizations/models.py:366
 msgid "Can create new customer profiles"
 msgstr ""
 
-#: organizations/models.py:366
+#: organizations/models.py:367
 msgid "Can edit customers"
 msgstr ""
 
-#: organizations/models.py:367
+#: organizations/models.py:368
 msgid "Can delete customers"
 msgstr ""
 
-#: organizations/models.py:370
+#: organizations/models.py:371
 msgid "Can manage marketing (full access)"
 msgstr ""
 
-#: organizations/models.py:371
+#: organizations/models.py:372
 msgid "Full marketing management - overrides other marketing permissions"
 msgstr ""
 
-#: organizations/models.py:372
+#: organizations/models.py:373
 msgid "Can create marketing posts"
 msgstr ""
 
-#: organizations/models.py:373
+#: organizations/models.py:374
 msgid "Can send branch broadcasts"
 msgstr ""
 
-#: organizations/models.py:374
+#: organizations/models.py:375
 msgid "Can send center-wide broadcasts"
 msgstr ""
 
-#: organizations/models.py:375
+#: organizations/models.py:376
 msgid "Can view broadcast statistics"
 msgstr ""
 
-#: organizations/models.py:378
+#: organizations/models.py:379
 msgid "Can manage branch settings"
 msgstr ""
 
-#: organizations/models.py:379
+#: organizations/models.py:380
 msgid "Can edit branch payment info, help texts, about us, working hours"
 msgstr ""
 
-#: organizations/models.py:380
+#: organizations/models.py:381
 msgid "Can view branch settings"
 msgstr ""
 
-#: organizations/models.py:381
+#: organizations/models.py:382
 msgid "Can view branch settings without editing"
 msgstr ""
 
-#: organizations/models.py:384
+#: organizations/models.py:385
 msgid "Can manage agencies (full access)"
 msgstr ""
 
-#: organizations/models.py:385
+#: organizations/models.py:386
 msgid "Full agency management - overrides other agency permissions"
 msgstr ""
 
-#: organizations/models.py:386
+#: organizations/models.py:387
 msgid "Can view agencies"
 msgstr ""
 
-#: organizations/models.py:387
+#: organizations/models.py:388
 msgid "Can view list of agency partners"
 msgstr ""
 
-#: organizations/models.py:388
+#: organizations/models.py:389
 msgid "Can create agencies"
 msgstr ""
 
-#: organizations/models.py:389
+#: organizations/models.py:390
 msgid "Can create new agency profiles and generate invite links"
 msgstr ""
 
-#: organizations/models.py:390
+#: organizations/models.py:391
 msgid "Can edit agencies"
 msgstr ""
 
-#: organizations/models.py:391
+#: organizations/models.py:392
 msgid "Can edit agency details and reset invite links"
 msgstr ""
 
-#: organizations/models.py:392
+#: organizations/models.py:393
 msgid "Can delete agencies"
 msgstr ""
 
-#: organizations/models.py:393
+#: organizations/models.py:394
 msgid "Can delete agency profiles"
 msgstr ""
 
-#: organizations/models.py:396
+#: organizations/models.py:397
 msgid "Can manage audit logs (full access)"
 msgstr ""
 
-#: organizations/models.py:397
+#: organizations/models.py:398
 msgid "Full audit log access - overrides other audit log permissions"
 msgstr ""
 
-#: organizations/models.py:398
+#: organizations/models.py:399
 msgid "Can view audit logs"
 msgstr ""
 
-#: organizations/models.py:399
+#: organizations/models.py:400
 msgid "Can view system audit logs and activity history"
 msgstr ""
 
-#: organizations/models.py:400
+#: organizations/models.py:401
 msgid "Can export audit logs"
 msgstr ""
 
-#: organizations/models.py:401
+#: organizations/models.py:402
 msgid "Can export audit log data to CSV/Excel"
 msgstr ""
 
-#: organizations/models.py:402
+#: organizations/models.py:403
 msgid "Can grant audit permissions"
 msgstr ""
 
-#: organizations/models.py:403
+#: organizations/models.py:404
 msgid "Can assign audit log permissions to lower-level users"
 msgstr ""
 
-#: organizations/models.py:406
+#: organizations/models.py:407
 #, fuzzy
 #| msgid "Finance & Payments"
 msgid "Can manage bulk payments"
 msgstr "Финансы и платежи"
 
-#: organizations/models.py:407
+#: organizations/models.py:408
 msgid ""
 "Can process bulk payments for customer/agency debts across multiple orders"
 msgstr ""
 
-#: organizations/models.py:408
+#: organizations/models.py:409
 msgid "Can assign bulk payment permission"
 msgstr ""
 
-#: organizations/models.py:409
+#: organizations/models.py:410
 msgid "Can grant the bulk payment permission to other users"
 msgstr ""
 
-#: organizations/models.py:415 organizations/models.py:1139
+#: organizations/models.py:416 organizations/models.py:1140
 #: templates/organizations/center_detail.html:318
 #: templates/organizations/staff_list.html:51
 msgid "Role"
 msgstr ""
 
-#: organizations/models.py:416
+#: organizations/models.py:417
 msgid "Roles"
 msgstr ""
 
-#: organizations/models.py:621
+#: organizations/models.py:622
 msgid "Center Management"
 msgstr ""
 
-#: organizations/models.py:633
+#: organizations/models.py:634
 msgid "Branch Management"
 msgstr ""
 
-#: organizations/models.py:645 templates/billing/tariff_create.html:381
+#: organizations/models.py:646 templates/billing/tariff_create.html:381
 msgid "Staff Management"
 msgstr ""
 
-#: organizations/models.py:657 templates/billing/tariff_create.html:168
+#: organizations/models.py:658 templates/billing/tariff_create.html:168
 #: templates/billing/tariff_edit.html:338
 msgid "Order Management"
 msgstr ""
 
-#: organizations/models.py:674 support/models.py:102
+#: organizations/models.py:675 support/models.py:102
 #: templates/billing/subscription_detail.html:309
 #: templates/billing/tariff_create.html:450
 msgid "Financial"
 msgstr "Финансы"
 
-#: organizations/models.py:687
+#: organizations/models.py:688
 msgid "Reports & Analytics"
 msgstr ""
 
-#: organizations/models.py:698 services/views.py:356 services/views.py:357
+#: organizations/models.py:699 services/views.py:356 services/views.py:357
 #: templates/organizations/center_detail.html:197
 #: templates/organizations/center_detail.html:393
 #: templates/partials/sidebar.html:123
 msgid "Products"
 msgstr "Товары"
 
-#: organizations/models.py:710 services/models.py:61 services/models.py:363
+#: organizations/models.py:711 services/models.py:61 services/models.py:363
 #: services/views.py:713 services/views.py:714
 #: templates/partials/sidebar.html:130
 #: templates/services/generalExpenseAnalytics.html:149
@@ -4193,598 +4197,598 @@ msgstr "Товары"
 msgid "Expenses"
 msgstr "Расходы"
 
-#: organizations/models.py:722 services/models.py:239 services/models.py:267
+#: organizations/models.py:723 services/models.py:239 services/models.py:267
 #: services/views.py:1190 templates/partials/sidebar.html:144
 msgid "Languages"
 msgstr "Языки"
 
-#: organizations/models.py:734 templates/organizations/center_detail.html:223
+#: organizations/models.py:735 templates/organizations/center_detail.html:223
 #: templates/organizations/center_detail.html:277
 #: templates/partials/sidebar.html:85
 msgid "Customers"
 msgstr "Клиенты"
 
-#: organizations/models.py:745
+#: organizations/models.py:746
 msgid "Marketing & Broadcasts"
 msgstr ""
 
-#: organizations/models.py:784
+#: organizations/models.py:785
 msgid "Full Center Management"
 msgstr ""
 
-#: organizations/models.py:785
+#: organizations/models.py:786
 msgid "View Centers"
 msgstr ""
 
-#: organizations/models.py:786
+#: organizations/models.py:787
 msgid "Create Centers"
 msgstr ""
 
-#: organizations/models.py:787
+#: organizations/models.py:788
 msgid "Edit Centers"
 msgstr ""
 
-#: organizations/models.py:788
+#: organizations/models.py:789
 msgid "Delete Centers"
 msgstr ""
 
-#: organizations/models.py:790
+#: organizations/models.py:791
 msgid "Full Branch Management"
 msgstr ""
 
-#: organizations/models.py:791
+#: organizations/models.py:792
 msgid "View Branches"
 msgstr ""
 
-#: organizations/models.py:792
+#: organizations/models.py:793
 msgid "Create Branches"
 msgstr ""
 
-#: organizations/models.py:793
+#: organizations/models.py:794
 msgid "Edit Branches"
 msgstr ""
 
-#: organizations/models.py:794
+#: organizations/models.py:795
 msgid "Delete Branches"
 msgstr ""
 
-#: organizations/models.py:796
+#: organizations/models.py:797
 msgid "Full Staff Management"
 msgstr ""
 
-#: organizations/models.py:797
+#: organizations/models.py:798
 msgid "View Staff"
 msgstr ""
 
-#: organizations/models.py:798
+#: organizations/models.py:799
 msgid "Create Staff"
 msgstr ""
 
-#: organizations/models.py:799
+#: organizations/models.py:800
 msgid "Edit Staff"
 msgstr ""
 
-#: organizations/models.py:800
+#: organizations/models.py:801
 msgid "Delete Staff"
 msgstr ""
 
-#: organizations/models.py:802
+#: organizations/models.py:803
 msgid "Full Order Management"
 msgstr ""
 
-#: organizations/models.py:803
+#: organizations/models.py:804
 msgid "View All Orders"
 msgstr ""
 
-#: organizations/models.py:804
+#: organizations/models.py:805
 msgid "View Own Orders"
 msgstr ""
 
-#: organizations/models.py:805
+#: organizations/models.py:806
 msgid "Create Orders"
 msgstr ""
 
-#: organizations/models.py:806
+#: organizations/models.py:807
 msgid "Edit Orders"
 msgstr ""
 
-#: organizations/models.py:807
+#: organizations/models.py:808
 msgid "Delete Orders"
 msgstr ""
 
-#: organizations/models.py:808
+#: organizations/models.py:809
 msgid "Assign Orders"
 msgstr ""
 
-#: organizations/models.py:809
+#: organizations/models.py:810
 msgid "Update Order Status"
 msgstr ""
 
-#: organizations/models.py:810
+#: organizations/models.py:811
 msgid "Complete Orders"
 msgstr ""
 
-#: organizations/models.py:811
+#: organizations/models.py:812
 msgid "Cancel Orders"
 msgstr ""
 
-#: organizations/models.py:813
+#: organizations/models.py:814
 msgid "Full Financial Management"
 msgstr ""
 
-#: organizations/models.py:814
+#: organizations/models.py:815
 msgid "Receive Payments"
 msgstr ""
 
-#: organizations/models.py:815
+#: organizations/models.py:816
 msgid "View Financial Reports"
 msgstr ""
 
-#: organizations/models.py:816
+#: organizations/models.py:817
 msgid "Apply Discounts"
 msgstr ""
 
-#: organizations/models.py:817
+#: organizations/models.py:818
 msgid "Refund Orders"
 msgstr ""
 
-#: organizations/models.py:819
+#: organizations/models.py:820
 msgid "Full Reports Management"
 msgstr ""
 
-#: organizations/models.py:820
+#: organizations/models.py:821
 msgid "View Reports"
 msgstr ""
 
-#: organizations/models.py:821 templates/billing/centers_monitoring.html:223
+#: organizations/models.py:822 templates/billing/centers_monitoring.html:223
 msgid "View Analytics"
 msgstr ""
 
-#: organizations/models.py:822
+#: organizations/models.py:823
 msgid "Export Data"
 msgstr ""
 
-#: organizations/models.py:824
+#: organizations/models.py:825
 msgid "Full Product Management"
 msgstr ""
 
-#: organizations/models.py:825
+#: organizations/models.py:826
 msgid "View Products"
 msgstr ""
 
-#: organizations/models.py:826
+#: organizations/models.py:827
 msgid "Create Products"
 msgstr ""
 
-#: organizations/models.py:827
+#: organizations/models.py:828
 msgid "Edit Products"
 msgstr ""
 
-#: organizations/models.py:828
+#: organizations/models.py:829
 msgid "Delete Products"
 msgstr ""
 
-#: organizations/models.py:830
+#: organizations/models.py:831
 msgid "Full Expense Management"
 msgstr ""
 
-#: organizations/models.py:831
+#: organizations/models.py:832
 #, fuzzy
 #| msgid "Expenses"
 msgid "View Expenses"
 msgstr "Расходы"
 
-#: organizations/models.py:832
+#: organizations/models.py:833
 #, fuzzy
 #| msgid "Expenses"
 msgid "Create Expenses"
 msgstr "Расходы"
 
-#: organizations/models.py:833
+#: organizations/models.py:834
 #, fuzzy
 #| msgid "Expenses"
 msgid "Edit Expenses"
 msgstr "Расходы"
 
-#: organizations/models.py:834
+#: organizations/models.py:835
 #, fuzzy
 #| msgid "Expenses"
 msgid "Delete Expenses"
 msgstr "Расходы"
 
-#: organizations/models.py:836
+#: organizations/models.py:837
 msgid "Full Language Management"
 msgstr ""
 
-#: organizations/models.py:837
+#: organizations/models.py:838
 #, fuzzy
 #| msgid "Languages"
 msgid "View Languages"
 msgstr "Языки"
 
-#: organizations/models.py:838
+#: organizations/models.py:839
 #, fuzzy
 #| msgid "Languages"
 msgid "Create Languages"
 msgstr "Языки"
 
-#: organizations/models.py:839
+#: organizations/models.py:840
 #, fuzzy
 #| msgid "Languages"
 msgid "Edit Languages"
 msgstr "Языки"
 
-#: organizations/models.py:840
+#: organizations/models.py:841
 #, fuzzy
 #| msgid "Languages"
 msgid "Delete Languages"
 msgstr "Языки"
 
-#: organizations/models.py:842
+#: organizations/models.py:843
 msgid "Full Customer Management"
 msgstr ""
 
-#: organizations/models.py:843
+#: organizations/models.py:844
 msgid "View Customers"
 msgstr ""
 
-#: organizations/models.py:844
+#: organizations/models.py:845
 msgid "Edit Customers"
 msgstr ""
 
-#: organizations/models.py:845
+#: organizations/models.py:846
 msgid "Delete Customers"
 msgstr ""
 
-#: organizations/models.py:847
+#: organizations/models.py:848
 msgid "Full Marketing Management"
 msgstr ""
 
-#: organizations/models.py:848
+#: organizations/models.py:849
 msgid "Create Marketing Posts"
 msgstr ""
 
-#: organizations/models.py:849
+#: organizations/models.py:850
 msgid "Send Branch Broadcasts"
 msgstr ""
 
-#: organizations/models.py:850
+#: organizations/models.py:851
 msgid "Send Center Broadcasts"
 msgstr ""
 
-#: organizations/models.py:851
+#: organizations/models.py:852
 msgid "View Broadcast Stats"
 msgstr ""
 
-#: organizations/models.py:853
+#: organizations/models.py:854
 msgid "Manage Branch Settings"
 msgstr ""
 
-#: organizations/models.py:854
+#: organizations/models.py:855
 msgid "View Branch Settings"
 msgstr ""
 
-#: organizations/models.py:856
+#: organizations/models.py:857
 msgid "Full Agency Management"
 msgstr ""
 
-#: organizations/models.py:857
+#: organizations/models.py:858
 msgid "View Agencies"
 msgstr ""
 
-#: organizations/models.py:858
+#: organizations/models.py:859
 msgid "Create Agencies"
 msgstr ""
 
-#: organizations/models.py:859
+#: organizations/models.py:860
 msgid "Edit Agencies"
 msgstr ""
 
-#: organizations/models.py:860
+#: organizations/models.py:861
 msgid "Delete Agencies"
 msgstr ""
 
-#: organizations/models.py:868
+#: organizations/models.py:869
 msgid ""
 "Full control over all center operations - overrides individual permissions"
 msgstr ""
 
-#: organizations/models.py:869
+#: organizations/models.py:870
 msgid "View translation center details and settings"
 msgstr ""
 
-#: organizations/models.py:870
+#: organizations/models.py:871
 msgid "Create new translation centers"
 msgstr ""
 
-#: organizations/models.py:871
+#: organizations/models.py:872
 msgid "Edit translation center settings and configuration"
 msgstr ""
 
-#: organizations/models.py:872
+#: organizations/models.py:873
 msgid "Delete translation centers (requires removing bot token first)"
 msgstr ""
 
-#: organizations/models.py:874
+#: organizations/models.py:875
 msgid ""
 "Full control over all branch operations - overrides individual permissions"
 msgstr ""
 
-#: organizations/models.py:875
+#: organizations/models.py:876
 msgid "View branch details and settings"
 msgstr ""
 
-#: organizations/models.py:876
+#: organizations/models.py:877
 msgid "Create new branches within centers"
 msgstr ""
 
-#: organizations/models.py:877
+#: organizations/models.py:878
 msgid "Edit branch settings and configuration"
 msgstr ""
 
-#: organizations/models.py:878
+#: organizations/models.py:879
 msgid "Delete branches from the system"
 msgstr ""
 
-#: organizations/models.py:880
+#: organizations/models.py:881
 msgid ""
 "Full control over all staff operations - overrides individual permissions"
 msgstr ""
 
-#: organizations/models.py:881
+#: organizations/models.py:882
 msgid "View staff profiles and details"
 msgstr ""
 
-#: organizations/models.py:882
+#: organizations/models.py:883
 msgid "Create new staff members and assign roles"
 msgstr ""
 
-#: organizations/models.py:883
+#: organizations/models.py:884
 msgid "Edit staff details and change their roles"
 msgstr ""
 
-#: organizations/models.py:884
+#: organizations/models.py:885
 msgid "Remove staff members from the system"
 msgstr ""
 
-#: organizations/models.py:886
+#: organizations/models.py:887
 msgid ""
 "Full control over all order operations - overrides individual permissions"
 msgstr ""
 
-#: organizations/models.py:887
+#: organizations/models.py:888
 msgid "View all orders in the center/branch, not just assigned ones"
 msgstr ""
 
-#: organizations/models.py:888
+#: organizations/models.py:889
 msgid "View orders assigned to this user"
 msgstr ""
 
-#: organizations/models.py:889
+#: organizations/models.py:890
 msgid "Create new translation orders"
 msgstr ""
 
-#: organizations/models.py:890
+#: organizations/models.py:891
 msgid "Modify existing order details, files, and settings"
 msgstr ""
 
-#: organizations/models.py:891
+#: organizations/models.py:892
 msgid "Permanently remove orders from the system"
 msgstr ""
 
-#: organizations/models.py:892
+#: organizations/models.py:893
 msgid "Assign orders to other staff members"
 msgstr ""
 
-#: organizations/models.py:893
+#: organizations/models.py:894
 msgid "Change order status (pending, in progress, etc.)"
 msgstr ""
 
-#: organizations/models.py:894
+#: organizations/models.py:895
 msgid "Mark orders as completed/delivered"
 msgstr ""
 
-#: organizations/models.py:895
+#: organizations/models.py:896
 msgid "Cancel active orders"
 msgstr ""
 
-#: organizations/models.py:897
+#: organizations/models.py:898
 msgid ""
 "Full control over all financial operations - overrides individual permissions"
 msgstr ""
 
-#: organizations/models.py:898
+#: organizations/models.py:899
 msgid "Accept and record customer payments"
 msgstr ""
 
-#: organizations/models.py:899
+#: organizations/models.py:900
 msgid "Access financial reports and revenue data"
 msgstr ""
 
-#: organizations/models.py:900
+#: organizations/models.py:901
 msgid "Apply discounts to orders"
 msgstr ""
 
-#: organizations/models.py:901
+#: organizations/models.py:902
 msgid "Process refunds for completed or cancelled orders"
 msgstr ""
 
-#: organizations/models.py:903
+#: organizations/models.py:904
 msgid ""
 "Full control over all report operations - overrides individual permissions"
 msgstr ""
 
-#: organizations/models.py:904
+#: organizations/models.py:905
 msgid "Access performance and activity reports"
 msgstr ""
 
-#: organizations/models.py:905
+#: organizations/models.py:906
 msgid "View analytics dashboard with charts and metrics"
 msgstr ""
 
-#: organizations/models.py:906
+#: organizations/models.py:907
 msgid "Export data to Excel, PDF, or other formats"
 msgstr ""
 
-#: organizations/models.py:908
+#: organizations/models.py:909
 msgid ""
 "Full control over all product operations - overrides individual permissions"
 msgstr ""
 
-#: organizations/models.py:909
+#: organizations/models.py:910
 msgid "View product and service listings"
 msgstr ""
 
-#: organizations/models.py:910
+#: organizations/models.py:911
 msgid "Add new services and products"
 msgstr ""
 
-#: organizations/models.py:911
+#: organizations/models.py:912
 msgid "Edit existing services and products"
 msgstr ""
 
-#: organizations/models.py:912
+#: organizations/models.py:913
 msgid "Remove services and products from the system"
 msgstr ""
 
-#: organizations/models.py:914
+#: organizations/models.py:915
 msgid ""
 "Full control over all expense operations - overrides individual permissions"
 msgstr ""
 
-#: organizations/models.py:915
+#: organizations/models.py:916
 msgid "View expense records and reports"
 msgstr ""
 
-#: organizations/models.py:916
+#: organizations/models.py:917
 msgid "Add new expense entries"
 msgstr ""
 
-#: organizations/models.py:917
+#: organizations/models.py:918
 msgid "Edit existing expense records"
 msgstr ""
 
-#: organizations/models.py:918
+#: organizations/models.py:919
 msgid "Remove expense records from the system"
 msgstr ""
 
-#: organizations/models.py:920
+#: organizations/models.py:921
 msgid ""
 "Full control over all language operations - overrides individual permissions"
 msgstr ""
 
-#: organizations/models.py:921
+#: organizations/models.py:922
 msgid "View language list and pricing"
 msgstr ""
 
-#: organizations/models.py:922
+#: organizations/models.py:923
 msgid "Add new languages with pricing"
 msgstr ""
 
-#: organizations/models.py:923
+#: organizations/models.py:924
 msgid "Edit language names and pricing"
 msgstr ""
 
-#: organizations/models.py:924
+#: organizations/models.py:925
 msgid "Remove languages from the system"
 msgstr ""
 
-#: organizations/models.py:926
+#: organizations/models.py:927
 msgid ""
 "Full control over all customer operations - overrides individual permissions"
 msgstr ""
 
-#: organizations/models.py:927
+#: organizations/models.py:928
 msgid "View customer information and history"
 msgstr ""
 
-#: organizations/models.py:928
+#: organizations/models.py:929
 msgid "Edit customer records and contact information"
 msgstr ""
 
-#: organizations/models.py:929
+#: organizations/models.py:930
 msgid "Remove customer records from the system"
 msgstr ""
 
-#: organizations/models.py:931
+#: organizations/models.py:932
 msgid ""
 "Full control over all marketing operations - overrides individual permissions"
 msgstr ""
 
-#: organizations/models.py:932
+#: organizations/models.py:933
 msgid "Create and edit marketing posts and announcements"
 msgstr ""
 
-#: organizations/models.py:933
+#: organizations/models.py:934
 msgid "Send broadcast messages to all customers in their branch"
 msgstr ""
 
-#: organizations/models.py:934
+#: organizations/models.py:935
 msgid "Send broadcast messages to all customers across the entire center"
 msgstr ""
 
-#: organizations/models.py:935
+#: organizations/models.py:936
 msgid "View broadcast delivery statistics and analytics"
 msgstr ""
 
-#: organizations/models.py:937
+#: organizations/models.py:938
 msgid "Edit branch payment info, help texts, about us, and working hours"
 msgstr ""
 
-#: organizations/models.py:938
+#: organizations/models.py:939
 msgid "View branch settings without the ability to edit"
 msgstr ""
 
-#: organizations/models.py:940
+#: organizations/models.py:941
 msgid ""
 "Full control over all agency operations - overrides individual permissions"
 msgstr ""
 
-#: organizations/models.py:941
+#: organizations/models.py:942
 msgid "View list of agency partners and their details"
 msgstr ""
 
-#: organizations/models.py:942
+#: organizations/models.py:943
 msgid "Create new agency profiles and generate invitation links"
 msgstr ""
 
-#: organizations/models.py:943
+#: organizations/models.py:944
 msgid "Edit agency information and reset invitation links"
 msgstr ""
 
-#: organizations/models.py:944
+#: organizations/models.py:945
 msgid "Remove agency profiles from the system"
 msgstr ""
 
-#: organizations/models.py:1141
+#: organizations/models.py:1142
 msgid "Role is optional for superusers"
 msgstr ""
 
-#: organizations/models.py:1150
+#: organizations/models.py:1151
 msgid "For owners, this is their primary center"
 msgstr ""
 
-#: organizations/models.py:1159
+#: organizations/models.py:1160
 msgid "Specific branch assignment for managers/staff"
 msgstr ""
 
-#: organizations/models.py:1162
+#: organizations/models.py:1163
 msgid "Avatar"
 msgstr ""
 
-#: organizations/models.py:1170
+#: organizations/models.py:1171
 msgid "Created by"
 msgstr ""
 
-#: organizations/models.py:1176
+#: organizations/models.py:1177
 msgid "Admin User"
 msgstr ""
 
-#: organizations/models.py:1177
+#: organizations/models.py:1178
 msgid "Admin Users"
 msgstr ""
 
-#: organizations/models.py:1225
+#: organizations/models.py:1226
 msgid "Only superusers can create or assign the Owner role."
 msgstr ""
 
@@ -5576,7 +5580,7 @@ msgstr "Новый запрос"
 
 # Support & Services Features (2)
 #: support/views.py:173 support/views.py:274
-#: templates/partials/sidebar.html:298 templates/support/ticket_list.html:11
+#: templates/partials/sidebar.html:299 templates/support/ticket_list.html:11
 msgid "Support Tickets"
 msgstr "Мои запросы"
 
@@ -5635,7 +5639,7 @@ msgstr "Запрос отмечен как решённый пользовате
 msgid "Ticket has been resolved."
 msgstr ""
 
-#: support/views.py:463 templates/partials/sidebar.html:335
+#: support/views.py:463 templates/partials/sidebar.html:337
 #: templates/support/support_ticket_list.html:11
 msgid "Support Inbox"
 msgstr "Служба поддержки"
@@ -5860,7 +5864,7 @@ msgid "of"
 msgstr "из"
 
 #: templates/billing/centers_monitoring.html:6
-#: templates/partials/sidebar.html:314
+#: templates/partials/sidebar.html:316
 msgid "Centers Monitoring"
 msgstr "Мониторинг центров"
 
@@ -5902,7 +5906,7 @@ msgstr "Всего подписок"
 #: templates/billing/centers_monitoring.html:105
 #: templates/billing/usage_tracking.html:83
 #: templates/organizations/staff_list.html:23
-#: templates/partials/sidebar.html:317 templates/reports/audit_logs.html:98
+#: templates/partials/sidebar.html:319 templates/reports/audit_logs.html:98
 #: templates/reports/customers.html:66 templates/reports/debtors_report.html:62
 #: templates/reports/expense_analytics.html:71
 #: templates/reports/financial.html:79
@@ -7096,7 +7100,6 @@ msgid "Custom roles and permissions"
 msgstr "Пользовательские Роли и Права"
 
 #: templates/billing/tariff_create.html:400
-#: templates/billing/tariff_edit.html:689
 msgid "Track all system activities"
 msgstr ""
 
@@ -7361,7 +7364,8 @@ msgid "Basic Products"
 msgstr "Товары"
 
 #: templates/billing/tariff_edit.html:292
-msgid "Products & services catalog"
+msgid ""
+"Define translation services with base prices (language pairs, document types)"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:302
@@ -7371,7 +7375,8 @@ msgid "Advanced Products"
 msgstr "Добавить продукт"
 
 #: templates/billing/tariff_edit.html:303
-msgid "Variants, categories, inventory"
+msgid ""
+"Multiple service variants, category grouping, and per-service customization"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:313
@@ -7381,34 +7386,37 @@ msgid "Language Pricing"
 msgstr "Ценообразование по Языкам"
 
 #: templates/billing/tariff_edit.html:314
-#, fuzzy
-#| msgid "services.language"
-msgid "Prices per language pair"
-msgstr "Язык"
+msgid "Set unique rates for each language direction (e.g. RU→EN vs RU→DE)"
+msgstr ""
 
 #: templates/billing/tariff_edit.html:325
-#, fuzzy
-#| msgid "Select Pricing Duration"
-msgid "Rule-based price calculation"
-msgstr "Выберите продолжительность"
+msgid ""
+"Auto-calculate order total by page count × per-page rate for each language "
+"pair"
+msgstr ""
 
-# Debtors Report Translations
 #: templates/billing/tariff_edit.html:353
-#, fuzzy
-#| msgid "Track and manage outstanding customer debts"
-msgid "Create, view and track orders"
-msgstr "Отслеживайте и управляйте непогашенными долгами клиентов"
+msgid ""
+"Accept orders, update statuses (New → In Progress → Done), view full order "
+"history"
+msgstr ""
 
 #: templates/billing/tariff_edit.html:364
-msgid "Bulk ops, filters, export"
+msgid ""
+"Bulk-select orders and apply actions; filter by date, status, staff, branch "
+"or language pair"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:375
-msgid "Assign orders to staff"
+msgid ""
+"Distribute orders to specific employees; track who is currently working on "
+"each order"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:386
-msgid "Pay across multiple orders"
+msgid ""
+"Record one payment covering several orders at once; supports partial "
+"payments and debt carry-over"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:396
@@ -7416,7 +7424,9 @@ msgid "Extra Fees"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:397
-msgid "Surcharges & price corrections"
+msgid ""
+"Add manual surcharges (urgency, notary, courier) or discounts to any order "
+"after creation"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:410
@@ -7432,23 +7442,27 @@ msgid "Payment Management"
 msgstr "Способ оплаты"
 
 #: templates/billing/tariff_edit.html:425
-#, fuzzy
-#| msgid "payment.paymentDetails"
-msgid "Track payments & status"
-msgstr "Детали оплаты"
+msgid ""
+"Record cash / card / online payments, upload receipts, and mark orders as "
+"fully or partially paid"
+msgstr ""
 
 #: templates/billing/tariff_edit.html:436
-msgid "Generate & send invoices"
+msgid ""
+"Create and download PDF invoices per client; essential for B2B billing and "
+"formal payments"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:447
-#, fuzzy
-#| msgid "services.expenses"
-msgid "Order-level business expenses"
-msgstr "Расходы"
+msgid ""
+"Log costs tied to specific orders (translator fees, printing, materials, "
+"postage)"
+msgstr ""
 
 #: templates/billing/tariff_edit.html:458
-msgid "Rent, salaries, operating costs"
+msgid ""
+"Record overhead not linked to orders: office rent, staff salaries, "
+"stationery, utilities"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:468
@@ -7456,10 +7470,10 @@ msgid "Archive Access"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:469
-#, fuzzy
-#| msgid "All Orders"
-msgid "Access archived orders & data"
-msgstr "Все заказы"
+msgid ""
+"View, search and restore completed orders auto-archived to Telegram channel; "
+"zero data loss"
+msgstr ""
 
 #: templates/billing/tariff_edit.html:482
 #, fuzzy
@@ -7468,7 +7482,15 @@ msgid "Customers & Agencies"
 msgstr "Аналитика клиентов"
 
 #: templates/billing/tariff_edit.html:497
-msgid "B2B agency partners with agency-specific pricing"
+msgid ""
+"Onboard B2B partners with dedicated pricing, credit limits and separate "
+"analytics per agency"
+msgstr ""
+
+#: templates/billing/tariff_edit.html:523
+msgid ""
+"Compose Telegram posts with text, images or documents; manage drafts and "
+"campaign history"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:533
@@ -7478,40 +7500,45 @@ msgid "Broadcast Messaging"
 msgstr "Массовые Рассылки Сообщений"
 
 #: templates/billing/tariff_edit.html:534
-msgid "Mass messages to customers via Telegram"
+msgid ""
+"Send a broadcast to all or filtered customers; schedule delivery and track "
+"open / delivery stats"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:562
-#, fuzzy
-#| msgid "Sales Statistics"
-msgid "Order counts & statistics"
-msgstr "Статистика продаж"
+msgid ""
+"Daily and monthly order volume, completion rate, and a summary dashboard for "
+"quick overview"
+msgstr ""
 
 #: templates/billing/tariff_edit.html:573
-#, fuzzy
-#| msgid "Customers"
-msgid "Trends, branches, customers"
-msgstr "Клиенты"
+msgid ""
+"Cross-branch comparison, revenue time-series, top clients by order count and "
+"total spend"
+msgstr ""
 
 #: templates/billing/tariff_edit.html:584
-msgid "Revenue, profit, expenses"
+msgid ""
+"Income vs. expense breakdown with profit margin per period, branch or "
+"language pair"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:595
-msgid "Individual productivity reports"
+msgid ""
+"Per-employee report: orders completed, revenue generated, avg. turnaround "
+"time"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:606
-#, fuzzy
-#| msgid "customers with debt"
-msgid "Report builder with filters"
-msgstr "клиентов с долгом"
+msgid ""
+"Build ad-hoc reports by combining any date range, branch, staff, service or "
+"status filters"
+msgstr ""
 
 #: templates/billing/tariff_edit.html:617
-#, fuzzy
-#| msgid "Export to Excel"
-msgid "Excel, PDF, CSV export"
-msgstr "Экспорт в Excel"
+msgid ""
+"Download any report or data table as Excel / PDF / CSV with a single click"
+msgstr ""
 
 #: templates/billing/tariff_edit.html:627
 #, fuzzy
@@ -7520,7 +7547,9 @@ msgid "Debt Tracking"
 msgstr "Отслеживание использования"
 
 #: templates/billing/tariff_edit.html:628
-msgid "Debtors, unit economy, receivables"
+msgid ""
+"Outstanding balance per client, top-debtors list, collection rate and "
+"overdue alerts"
 msgstr ""
 
 # Sidebar Translations
@@ -7530,12 +7559,11 @@ msgstr ""
 msgid "Organization & Staff"
 msgstr "Организация"
 
-# Organization & Staff Features (4)
 #: templates/billing/tariff_edit.html:656
-#, fuzzy
-#| msgid "Multiple Branches"
-msgid "Manage multiple locations"
-msgstr "Несколько Филиалов"
+msgid ""
+"Add multiple branches under one account; each has its own staff, orders, "
+"pricing and settings"
+msgstr ""
 
 #: templates/billing/tariff_edit.html:666
 #, fuzzy
@@ -7544,13 +7572,21 @@ msgid "Custom Roles"
 msgstr "Клиенты"
 
 #: templates/billing/tariff_edit.html:667
-#, fuzzy
-#| msgid "Roles & Permissions"
-msgid "Staff roles & permissions"
-msgstr "Роли и разрешения"
+msgid ""
+"Create roles (Translator, Manager, etc.) and precisely control what each "
+"role can view or do"
+msgstr ""
 
 #: templates/billing/tariff_edit.html:678
-msgid "Per-branch configuration"
+msgid ""
+"Override global settings per branch: working hours, pricing rules, Telegram "
+"bot, notifications"
+msgstr ""
+
+#: templates/billing/tariff_edit.html:689
+msgid ""
+"Full history of who changed what and when — order edits, payment records, "
+"status changes, logins"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:700
@@ -7560,11 +7596,15 @@ msgid "Integrations"
 msgstr "Интеграция"
 
 #: templates/billing/tariff_edit.html:715
-msgid "Customer bot for order placement"
+msgid ""
+"Customers place orders, get instant price estimates and status notifications "
+"via your Telegram bot"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:726
-msgid "Manage Telegram webhooks"
+msgid ""
+"Configure your bot's webhook URL so Telegram delivers messages to your "
+"server in real time"
 msgstr ""
 
 # Integration Features (4)
@@ -7575,7 +7615,9 @@ msgid "REST API"
 msgstr "Доступ к REST API"
 
 #: templates/billing/tariff_edit.html:740
-msgid "API for custom integrations"
+msgid ""
+"REST API to connect MultiLang data with your own tools, CRM or automation "
+"scripts"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:751
@@ -7585,7 +7627,9 @@ msgid "Third-Party"
 msgstr "Сторонние Интеграции"
 
 #: templates/billing/tariff_edit.html:754
-msgid "External service connectors"
+msgid ""
+"Connect payment gateways (Payme, etc.) and other external services to the "
+"platform"
 msgstr ""
 
 #: templates/billing/tariff_edit.html:767
@@ -8245,7 +8289,7 @@ msgstr "Запросы на контакт"
 
 #: templates/landing/requests_management.html:5
 #: templates/landing/requests_management.html:12
-#: templates/partials/sidebar.html:344
+#: templates/partials/sidebar.html:346
 #, fuzzy
 #| msgid "Debtors Management"
 msgid "Requests Management"
@@ -8572,6 +8616,22 @@ msgstr "Обработать платеж"
 msgid "Remaining Debt"
 msgstr "Остаток долга"
 
+#: templates/orders/myOrders.html:15
+msgid "Total Assigned"
+msgstr "Всего назначено"
+
+#: templates/orders/myOrders.html:65
+msgid "My Assigned Orders"
+msgstr "Мои назначенные заказы"
+
+#: templates/orders/myOrders.html:228
+msgid "No Orders Assigned"
+msgstr "Заказы не назначены"
+
+#: templates/orders/myOrders.html:229
+msgid "You don't have any orders assigned to you yet."
+msgstr "Вам ещё не назначено ни одного заказа."
+
 #: templates/orders/ordersList.html:408
 #: templates/organizations/staff_list.html:52
 #: templates/reports/debtors_report.html:273
@@ -8881,11 +8941,11 @@ msgstr "Отчет о должниках"
 msgid "General Expense Analytics"
 msgstr "Аналитика общих расходов"
 
-#: templates/partials/sidebar.html:304
+#: templates/partials/sidebar.html:306
 msgid "Superuser Tools"
 msgstr "Инструменты суперпользователя"
 
-#: templates/partials/sidebar.html:310
+#: templates/partials/sidebar.html:312
 msgid "Billing & Subscriptions"
 msgstr "Биллинг и подписки"
 
@@ -9608,6 +9668,15 @@ msgstr "Отслеживайте и управляйте непогашенны�
 msgid "Receivables and payment collection analytics"
 msgstr ""
 
+#: templates/services/addCategory.html:190
+#: templates/services/addCategory.html:206
+#: templates/services/languageList.html:240
+#: templates/services/languageList.html:259
+#, fuzzy
+#| msgid "Services"
+msgid "Copy Price"
+msgstr "Услуги"
+
 #: templates/services/categoryList.html:11
 #: templates/services/generalExpenseList.html:11
 msgid "Show"
@@ -9865,13 +9934,6 @@ msgstr "Выберите филиал…"
 #: templates/services/languageList.html:228
 msgid "Agency Pricing (UZS)"
 msgstr "Цены для агентств (UZS)"
-
-#: templates/services/languageList.html:240
-#: templates/services/languageList.html:259
-#, fuzzy
-#| msgid "Services"
-msgid "Copy Price"
-msgstr "Услуги"
 
 #: templates/services/languageList.html:247
 msgid "Ordinary User Pricing (UZS)"
@@ -10182,6 +10244,68 @@ msgstr "Отправьте новый запрос в поддержку, есл
 #: templates/support/ticket_list.html:270
 msgid "Create First Ticket"
 msgstr "Создать первый запрос"
+
+#, fuzzy
+#~| msgid "services.language"
+#~ msgid "Prices per language pair"
+#~ msgstr "Язык"
+
+#, fuzzy
+#~| msgid "Select Pricing Duration"
+#~ msgid "Rule-based price calculation"
+#~ msgstr "Выберите продолжительность"
+
+# Debtors Report Translations
+#, fuzzy
+#~| msgid "Track and manage outstanding customer debts"
+#~ msgid "Create, view and track orders"
+#~ msgstr "Отслеживайте и управляйте непогашенными долгами клиентов"
+
+#, fuzzy
+#~| msgid "payment.paymentDetails"
+#~ msgid "Track payments & status"
+#~ msgstr "Детали оплаты"
+
+#, fuzzy
+#~| msgid "services.expenses"
+#~ msgid "Order-level business expenses"
+#~ msgstr "Расходы"
+
+#, fuzzy
+#~| msgid "All Orders"
+#~ msgid "Access archived orders & data"
+#~ msgstr "Все заказы"
+
+#, fuzzy
+#~| msgid "Sales Statistics"
+#~ msgid "Order counts & statistics"
+#~ msgstr "Статистика продаж"
+
+#, fuzzy
+#~| msgid "Customers"
+#~ msgid "Trends, branches, customers"
+#~ msgstr "Клиенты"
+
+#, fuzzy
+#~| msgid "customers with debt"
+#~ msgid "Report builder with filters"
+#~ msgstr "клиентов с долгом"
+
+#, fuzzy
+#~| msgid "Export to Excel"
+#~ msgid "Excel, PDF, CSV export"
+#~ msgstr "Экспорт в Excel"
+
+# Organization & Staff Features (4)
+#, fuzzy
+#~| msgid "Multiple Branches"
+#~ msgid "Manage multiple locations"
+#~ msgstr "Несколько Филиалов"
+
+#, fuzzy
+#~| msgid "Roles & Permissions"
+#~ msgid "Staff roles & permissions"
+#~ msgstr "Роли и разрешения"
 
 #, fuzzy
 #~| msgid "message.info"

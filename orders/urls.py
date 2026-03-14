@@ -9,7 +9,8 @@ from .views import (
     api_order_stats, api_branch_staff, api_poll_new_orders, myOrders, orderCreate,
     record_order_payment, add_order_extra_fee, get_order_payment_info,
     bulk_delete_orders, search_customers, search_categories, search_products,
-    edit_order_price,
+    edit_order_price, order_invoice_pdf,
+    add_order_comment, delete_order_comment,
         api_payme_transactions,
         api_payme_transaction_detail,
 )
@@ -27,6 +28,7 @@ urlpatterns = [
     path("my-orders/", myOrders, name="myOrders"),
     path("create/", orderCreate, name="orderCreate"),
     path("<int:order_id>/", orderDetail, name="orderDetail"),
+    path("<int:order_id>/invoice/", order_invoice_pdf, name="order_invoice_pdf"),
     path("<int:order_id>/edit/", orderEdit, name="orderEdit"),
     
     # Order actions
@@ -38,6 +40,10 @@ urlpatterns = [
     path("<int:order_id>/receive-payment/", receivePayment, name="receivePayment"),
     path("<int:order_id>/complete/", completeOrder, name="completeOrder"),
     path("<int:order_id>/edit-price/", edit_order_price, name="edit_order_price"),
+
+    # Internal comments
+    path("<int:order_id>/comments/add/", add_order_comment, name="add_order_comment"),
+    path("<int:order_id>/comments/<int:comment_id>/delete/", delete_order_comment, name="delete_order_comment"),
     
     # Payment management API
     path("<int:order_id>/payment/record/", record_order_payment, name="record_order_payment"),

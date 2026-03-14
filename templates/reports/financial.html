@@ -412,7 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     } else {
         var el = document.querySelector("#dailyRevenueChart");
-        if (el) el.innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:chart-square-line-duotone" class="text-4xl mb-2"></iconify-icon><span>No revenue data for this period</span></div>';
+        if (el) el.innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:chart-square-line-duotone" class="text-4xl mb-2"></iconify-icon><span>' + (window.LanguageManager ? LanguageManager.translate('reports.noDataAvailable') : 'No revenue data for this period') + '</span></div>';
     }
     
     // Branch Revenue Chart
