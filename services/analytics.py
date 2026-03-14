@@ -10,13 +10,15 @@ from django.db.models.functions import Coalesce
 from organizations.rbac import get_user_orders
 
 
-def get_remaining_balance_summary(user, date_from=None, date_to=None):
+def get_remaining_balance_summary(user, date_from=None, date_to=None, branch_id=None, center_id=None):
     """
     Get overall remaining balance summary for the user's scope.
     Args:
         user: The requesting user
         date_from: Optional start date for filtering orders
         date_to: Optional end date for filtering orders
+        branch_id: Optional branch ID to filter by
+        center_id: Optional center ID to filter by
     Returns:
         dict with total_remaining, total_orders_with_debt, fully_paid_count, etc.
     """
@@ -27,6 +29,10 @@ def get_remaining_balance_summary(user, date_from=None, date_to=None):
         orders = orders.filter(created_at__gte=date_from)
     if date_to:
         orders = orders.filter(created_at__lte=date_to)
+    if branch_id:
+        orders = orders.filter(branch_id=branch_id)
+    if center_id:
+        orders = orders.filter(branch__center_id=center_id)
     
     # Exclude cancelled orders from debt calculations
     active_orders = orders.exclude(status='cancelled')
@@ -81,7 +87,7 @@ def get_remaining_balance_summary(user, date_from=None, date_to=None):
     }
 
 
-def get_remaining_by_branch(user, limit=10, date_from=None, date_to=None):
+def get_remaining_by_branch(user, limit=10, date_from=None, date_to=None, branch_id=None, center_id=None):
     """
     Get remaining balance grouped by branch.
     Args:
@@ -89,6 +95,8 @@ def get_remaining_by_branch(user, limit=10, date_from=None, date_to=None):
         limit: Maximum number of branches to return
         date_from: Optional start date for filtering orders
         date_to: Optional end date for filtering orders
+        branch_id: Optional branch ID to filter by
+        center_id: Optional center ID to filter by
     Returns:
         list of dicts with branch info and remaining balance
     """
@@ -99,6 +107,10 @@ def get_remaining_by_branch(user, limit=10, date_from=None, date_to=None):
         orders = orders.filter(created_at__gte=date_from)
     if date_to:
         orders = orders.filter(created_at__lte=date_to)
+    if branch_id:
+        orders = orders.filter(branch_id=branch_id)
+    if center_id:
+        orders = orders.filter(branch__center_id=center_id)
     
     orders = orders.exclude(status='cancelled')
     
@@ -142,13 +154,15 @@ def get_remaining_by_branch(user, limit=10, date_from=None, date_to=None):
     return result
 
 
-def get_remaining_by_client_type(user, date_from=None, date_to=None):
+def get_remaining_by_client_type(user, date_from=None, date_to=None, branch_id=None, center_id=None):
     """
     Get remaining balance grouped by client type (B2B/Agency vs B2C/Regular).
     Args:
         user: The requesting user
         date_from: Optional start date for filtering orders
         date_to: Optional end date for filtering orders
+        branch_id: Optional branch ID to filter by
+        center_id: Optional center ID to filter by
     Returns:
         dict with 'agency' and 'regular' categories
     """
@@ -159,6 +173,10 @@ def get_remaining_by_client_type(user, date_from=None, date_to=None):
         orders = orders.filter(created_at__gte=date_from)
     if date_to:
         orders = orders.filter(created_at__lte=date_to)
+    if branch_id:
+        orders = orders.filter(branch_id=branch_id)
+    if center_id:
+        orders = orders.filter(branch__center_id=center_id)
     
     orders = orders.exclude(status='cancelled')
     
@@ -216,7 +234,7 @@ def get_remaining_by_client_type(user, date_from=None, date_to=None):
     return result
 
 
-def get_remaining_by_center(user, limit=10, date_from=None, date_to=None):
+def get_remaining_by_center(user, limit=10, date_from=None, date_to=None, center_id=None):
     """
     Get remaining balance grouped by translation center.
     Only relevant for superusers or center owners.
@@ -225,6 +243,7 @@ def get_remaining_by_center(user, limit=10, date_from=None, date_to=None):
         limit: Maximum number of centers to return
         date_from: Optional start date for filtering orders
         date_to: Optional end date for filtering orders
+        center_id: Optional center ID to filter by
     Returns:
         list of dicts with center info and remaining balance
     """
@@ -235,6 +254,8 @@ def get_remaining_by_center(user, limit=10, date_from=None, date_to=None):
         orders = orders.filter(created_at__gte=date_from)
     if date_to:
         orders = orders.filter(created_at__lte=date_to)
+    if center_id:
+        orders = orders.filter(branch__center_id=center_id)
     
     orders = orders.exclude(status='cancelled')
     
@@ -277,7 +298,7 @@ def get_remaining_by_center(user, limit=10, date_from=None, date_to=None):
     return result
 
 
-def get_top_debtors(user, limit=10, date_from=None, date_to=None):
+def get_top_debtors(user, limit=10, date_from=None, date_to=None, branch_id=None, center_id=None):
     """
     Get top customers with outstanding balance.
     Args:
@@ -285,6 +306,8 @@ def get_top_debtors(user, limit=10, date_from=None, date_to=None):
         limit: Maximum number of debtors to return
         date_from: Optional start date for filtering orders
         date_to: Optional end date for filtering orders
+        branch_id: Optional branch ID to filter by
+        center_id: Optional center ID to filter by
     Returns:
         list of dicts with customer info and remaining balance
     """
@@ -295,6 +318,10 @@ def get_top_debtors(user, limit=10, date_from=None, date_to=None):
         orders = orders.filter(created_at__gte=date_from)
     if date_to:
         orders = orders.filter(created_at__lte=date_to)
+    if branch_id:
+        orders = orders.filter(branch_id=branch_id)
+    if center_id:
+        orders = orders.filter(branch__center_id=center_id)
     
     orders = orders.exclude(status='cancelled')
     

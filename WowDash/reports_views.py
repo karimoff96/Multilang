@@ -1288,12 +1288,12 @@ def unit_economy(request):
         if center_id:
             branches = branches.filter(center_id=center_id)
     
-    # Get analytics data with date filtering
-    summary = get_remaining_balance_summary(request.user, date_from=date_from, date_to=date_to)
-    by_branch = get_remaining_by_branch(request.user, date_from=date_from, date_to=date_to)
-    by_client_type = get_remaining_by_client_type(request.user, date_from=date_from, date_to=date_to)
-    by_center = get_remaining_by_center(request.user, date_from=date_from, date_to=date_to)
-    top_debtors = get_top_debtors(request.user, date_from=date_from, date_to=date_to)
+    # Get analytics data with date and branch/center filtering
+    summary = get_remaining_balance_summary(request.user, date_from=date_from, date_to=date_to, branch_id=branch_id, center_id=center_id)
+    by_branch = get_remaining_by_branch(request.user, date_from=date_from, date_to=date_to, branch_id=branch_id, center_id=center_id)
+    by_client_type = get_remaining_by_client_type(request.user, date_from=date_from, date_to=date_to, branch_id=branch_id, center_id=center_id)
+    by_center = get_remaining_by_center(request.user, date_from=date_from, date_to=date_to, center_id=center_id)
+    top_debtors = get_top_debtors(request.user, date_from=date_from, date_to=date_to, branch_id=branch_id, center_id=center_id)
     
     # Prepare chart data for branch remaining
     branch_labels = [b['branch_name'] for b in by_branch]

@@ -98,7 +98,7 @@
             {% for n in notifications %}
             {% with ntype=n.notification_type %}
             <a href="{{ n.link_url }}"
-               class="notif-item d-flex align-items-start gap-16 px-24 py-16 text-decoration-none {% if not n.is_read %}notif-unread{% endif %}{% if n.is_orphaned %} notif-orphaned{% endif %}"
+               class="notif-item d-flex align-items-start gap-16 px-24 py-16 text-decoration-none {% if not n.user_has_read %}notif-unread{% endif %}{% if n.is_orphaned %} notif-orphaned{% endif %}"
                {% if n.link_url == '#' %}onclick="return false;" style="cursor:default;"{% else %}onclick="markReadAndGo(event, this, {{ n.id }})"{% endif %}>
 
                 <!-- Type icon -->
@@ -158,7 +158,7 @@
                             <span class="text-xs text-secondary-light text-nowrap">
                                 <iconify-icon icon="mdi:clock-outline" class="me-1"></iconify-icon>{{ n.created_at|timesince }} {% trans "ago" %}
                             </span>
-                            {% if not n.is_read %}
+                            {% if not n.user_has_read %}
                             <span class="unread-dot rounded-circle flex-shrink-0" style="width:8px;height:8px;background:#f04438;display:inline-block;"></span>
                             {% endif %}
                         </div>

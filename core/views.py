@@ -173,13 +173,13 @@ def notifications_list(request):
         notification=OuterRef('pk'), user=request.user
     )
     # Annotate each notification with whether the current user has read it
-    qs = qs.annotate(is_read=Exists(already_read))
+    qs = qs.annotate(user_has_read=Exists(already_read))
 
     total_count = qs.count()
-    unread_count = qs.filter(is_read=False).count()
+    unread_count = qs.filter(user_has_read=False).count()
 
     if filter_type == 'unread':
-        qs = qs.filter(is_read=False)
+        qs = qs.filter(user_has_read=False)
 
     paginator = Paginator(qs, 25)
     page_number = request.GET.get('page', 1)
