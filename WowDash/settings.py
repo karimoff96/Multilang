@@ -129,6 +129,7 @@ TEMPLATES = [
                 "organizations.context_processors.site_settings",
                 "landing.context_processors.contact_requests_count",
                 "billing.context_processors.billing_context",  # Billing & subscription context
+                "support.context_processors.unread_support_replies",
             ],
         },
     },

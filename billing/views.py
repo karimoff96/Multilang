@@ -372,12 +372,16 @@ def tariff_create(request):
     if not request.user.is_superuser:
         messages.error(request, _("Access denied. This feature is only available to superusers."))
         return redirect('dashboard')
-    
+
     if request.method == 'POST':
         try:
-            title = request.POST.get('title')
+            title_uz = request.POST.get('title_uz', '')
+            title_ru = request.POST.get('title_ru', '')
+            title_en = request.POST.get('title_en', '')
             slug = request.POST.get('slug')
-            description = request.POST.get('description', '')
+            description_uz = request.POST.get('description_uz', '')
+            description_ru = request.POST.get('description_ru', '')
+            description_en = request.POST.get('description_en', '')
             is_active = request.POST.get('is_active') == 'on'
             is_featured = request.POST.get('is_featured') == 'on'
             show_prices = request.POST.get('show_prices') == 'on'
@@ -385,70 +389,80 @@ def tariff_create(request):
             is_trial = request.POST.get('is_trial') == 'on'
             trial_days = request.POST.get('trial_days') or None
             display_order = request.POST.get('display_order', 0)
-            
+
             # Limits
-            max_branches = request.POST.get('max_branches') or None
-            max_staff = request.POST.get('max_staff') or None
-            max_monthly_orders = request.POST.get('max_monthly_orders') or None
-            max_monthly_broadcasts = request.POST.get('max_monthly_broadcasts') or None
-            
+            max_branches_raw = request.POST.get('max_branches')
+            max_staff_raw = request.POST.get('max_staff')
+            max_monthly_orders_raw = request.POST.get('max_monthly_orders')
+            max_monthly_broadcasts_raw = request.POST.get('max_monthly_broadcasts')
+
             tariff = Tariff.objects.create(
-                title=title,
+                title_uz=title_uz,
+                title_ru=title_ru,
+                title_en=title_en,
+                # Fall back to first non-empty for the base field
+                title=title_uz or title_ru or title_en,
                 slug=slug,
-                description=description,
+                description_uz=description_uz,
+                description_ru=description_ru,
+                description_en=description_en,
+                description=description_uz or description_ru or description_en,
                 is_active=is_active,
                 is_featured=is_featured,
                 show_prices=show_prices,
                 is_special=is_special,
                 is_trial=is_trial,
-                trial_days=trial_days,
+                trial_days=int(trial_days) if trial_days else None,
                 display_order=display_order,
-                max_branches=max_branches,
-                max_staff=max_staff,
-                max_monthly_orders=max_monthly_orders,
-                max_monthly_broadcasts=max_monthly_broadcasts,
+                max_branches=int(max_branches_raw) if max_branches_raw else None,
+                max_staff=int(max_staff_raw) if max_staff_raw else None,
+                max_monthly_orders=int(max_monthly_orders_raw) if max_monthly_orders_raw else None,
+                max_monthly_broadcasts=int(max_monthly_broadcasts_raw) if max_monthly_broadcasts_raw else None,
             )
-            
-            # Set feature flags (aligned with Tariff model, 32 fields)
+
+            # Set all 32 feature flags
             feature_fields = [
-                # Orders (5)
-                'feature_orders_basic', 'feature_orders_advanced', 'feature_order_assignment',
-                'feature_bulk_payments', 'feature_extra_fees',
-                # Analytics (7)
-                'feature_analytics_basic', 'feature_analytics_advanced', 'feature_financial_reports',
-                'feature_staff_performance', 'feature_custom_reports', 'feature_export_reports',
-                'feature_debt_tracking',
-                # Integration (4)
-                'feature_telegram_bot', 'feature_webhooks', 'feature_api_access', 'feature_integrations',
-                # Marketing (2)
-                'feature_marketing_basic', 'feature_broadcast_messages',
-                # Organization (4)
-                'feature_multi_branch', 'feature_custom_roles', 'feature_branch_settings',
+                'feature_products_basic', 'feature_products_advanced', 'feature_language_pricing', 'feature_dynamic_pricing',
+                'feature_orders_basic', 'feature_orders_advanced', 'feature_order_assignment', 'feature_bulk_payments', 'feature_extra_fees',
+                'feature_payment_management', 'feature_invoicing', 'feature_expense_tracking', 'feature_general_expenses', 'feature_archive_access',
                 'feature_agency_management',
-                # Storage (1)
-                'feature_archive_access',
-                # Financial (4)
-                'feature_payment_management', 'feature_invoicing', 'feature_expense_tracking',
-                'feature_general_expenses',
-                # Advanced (1)
-                'feature_audit_logs',
-                # Services (4)
-                'feature_products_basic', 'feature_products_advanced', 'feature_language_pricing',
-                'feature_dynamic_pricing',
+                'feature_marketing_basic', 'feature_broadcast_messages',
+                'feature_analytics_basic', 'feature_analytics_advanced', 'feature_financial_reports',
+                'feature_staff_performance', 'feature_custom_reports', 'feature_export_reports', 'feature_debt_tracking',
+                'feature_multi_branch', 'feature_custom_roles', 'feature_branch_settings', 'feature_audit_logs',
+                'feature_telegram_bot', 'feature_webhooks', 'feature_api_access', 'feature_integrations',
             ]
-            
             for field in feature_fields:
                 setattr(tariff, field, request.POST.get(field) == 'on')
-            
             tariff.save()
-            
+
+            # Create pricing options
+            pricing_durations = request.POST.getlist('pricing_duration[]')
+            pricing_discounts = request.POST.getlist('pricing_discount[]')
+            pricing_total = request.POST.getlist('pricing_total[]')
+            pricing_currency = request.POST.getlist('pricing_currency[]')
+
+            for i in range(len(pricing_durations)):
+                duration = int(pricing_durations[i]) if pricing_durations[i] else 0
+                total = float(pricing_total[i]) if i < len(pricing_total) and pricing_total[i] else 0
+                if duration <= 0 or total <= 0:
+                    continue
+                discount = float(pricing_discounts[i]) if i < len(pricing_discounts) and pricing_discounts[i] else 0
+                currency = pricing_currency[i] if i < len(pricing_currency) else 'UZS'
+                TariffPricing.objects.create(
+                    tariff=tariff,
+                    duration_months=duration,
+                    discount_percentage=discount,
+                    price=total,
+                    currency=currency,
+                )
+
             messages.success(request, _("Tariff created successfully!"))
             return redirect('billing:tariff_list')
-            
+
         except Exception as e:
             messages.error(request, f"Error creating tariff: {str(e)}")
-    
-    
+
     return render(request, 'billing/tariff_create.html')
 
 
@@ -850,6 +864,40 @@ def centers_list(request):
     }
     
     return render(request, 'billing/centers_list.html', context)
+
+
+@login_required
+def extend_trial(request, pk):
+    """Extend the trial end date for a specific subscription - Superuser only"""
+    if not request.user.is_superuser:
+        messages.error(request, _("Access denied. This feature is only available to superusers."))
+        return redirect('dashboard')
+
+    subscription = get_object_or_404(Subscription, pk=pk)
+
+    if not subscription.is_trial:
+        messages.error(request, _("This subscription is not a trial subscription."))
+        return redirect('billing:subscription_detail', pk=pk)
+
+    if request.method == 'POST':
+        new_end_date_str = request.POST.get('new_trial_end_date')
+        try:
+            new_end_date = datetime.strptime(new_end_date_str, '%Y-%m-%d').date()
+            if new_end_date <= date.today():
+                messages.error(request, _("New trial end date must be in the future."))
+            else:
+                # Update only this subscription's trial dates directly to avoid save() recalculation
+                Subscription.objects.filter(pk=pk).update(
+                    trial_end_date=new_end_date,
+                    end_date=new_end_date,
+                    status=Subscription.STATUS_ACTIVE,
+                )
+                _invalidate_monitoring_cache()
+                messages.success(request, _("Trial period extended successfully."))
+        except (ValueError, TypeError):
+            messages.error(request, _("Invalid date format."))
+
+    return redirect('billing:subscription_detail', pk=pk)
 
 
 @login_required

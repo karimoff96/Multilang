@@ -618,11 +618,11 @@
                                 </td>
                                 <td class="text-end fw-semibold nowrap">{{ order.total_price|smart_num }} <small class="text-xs fw-normal text-secondary-light">UZS</small></td>
                                 <td>
-                                    {% if order.payment_method == 'cash' %}
+                                    {% if order.payment_type == 'cash' %}
                                     <span class="badge bg-success-100 text-success-600" data-i18n="payment.cash">Cash</span>
-                                    {% elif order.payment_method == 'card' %}
+                                    {% elif order.payment_type == 'card' %}
                                     <span class="badge bg-info-100 text-info-600" data-i18n="payment.card">Card</span>
-                                    {% elif order.payment_method == 'transfer' %}
+                                    {% elif order.payment_type == 'transfer' %}
                                     <span class="badge bg-primary-100 text-primary-600" data-i18n="payment.transfer">Transfer</span>
                                     {% else %}
                                     <span class="text-secondary-light">-</span>

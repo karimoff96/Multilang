@@ -321,7 +321,7 @@
                     {% for order in recent_orders %}
                     <tr>
                         <td class="bg-cyan-focus">
-                            <a href="{% url 'orders:orderDetail' order.id %}" class="fw-medium text-primary-600">#{{ order.id }}</a>
+                            <a href="{% url 'orders:orderDetail' order.id %}" class="fw-medium text-primary-600">#{{ order.center_order_num }}</a>
                         </td>
                         <td class="bg-cyan-focus">{{ order.bot_user.full_name|default:order.bot_user.user_id }}</td>
                         <td class="bg-cyan-focus">{{ order.product.name }}</td>

@@ -297,6 +297,9 @@
                 <a href="{% url 'support:ticket_list' %}">
                     <iconify-icon icon="solar:ticket-bold" class="menu-icon"></iconify-icon>
                     <span data-i18n="sidebar.supportTickets">{% trans "Support Tickets" %}</span>
+                    {% if unread_support_count %}
+                    <span class="badge text-xs fw-semibold px-6 py-2 rounded-pill bg-danger-main text-white ms-auto">{{ unread_support_count }}</span>
+                    {% endif %}
                 </a>
             </li>
             {% endif %}

@@ -732,14 +732,18 @@ def process_bulk_payment(request):
 @require_permission(can_manage_bulk_payments, 'You do not have permission to view payment history')
 def payment_history(request):
     """
-    View payment history with filters.
+    View payment history with filters and pagination.
     """
+    from django.core.paginator import Paginator
+    from organizations.models import Branch
+
     # Get bulk payments accessible to user
     payments = BulkPayment.objects.select_related(
         'bot_user', 'processed_by__user', 'branch'
     ).prefetch_related('order_links')
-    
+
     # Filter based on user permissions (RBAC)
+    accessible_branches = None
     if not request.user.is_superuser:
         admin_profile = getattr(request, 'admin_profile', None)
         if admin_profile:
@@ -747,25 +751,96 @@ def payment_history(request):
             payments = payments.filter(branch__in=accessible_branches)
         else:
             payments = payments.none()
-    
+
+    # Build branch list for filter dropdown
+    if request.user.is_superuser:
+        available_branches = Branch.objects.order_by('name')
+    elif accessible_branches is not None:
+        available_branches = accessible_branches.order_by('name') if hasattr(accessible_branches, 'order_by') else Branch.objects.filter(pk__in=[b.pk for b in accessible_branches]).order_by('name')
+    else:
+        available_branches = Branch.objects.none()
+
     # Apply filters from query params
-    customer_id = request.GET.get('customer_id')
-    if customer_id:
+    customer_id = request.GET.get('customer_id', '').strip()
+    if customer_id and customer_id.isdigit():
         payments = payments.filter(bot_user_id=customer_id)
-    
-    payment_method = request.GET.get('payment_method')
+
+    payment_method = request.GET.get('payment_method', '').strip()
     if payment_method:
         payments = payments.filter(payment_method=payment_method)
-    
+
+    branch_id = request.GET.get('branch_id', '').strip()
+    if branch_id and branch_id.isdigit():
+        payments = payments.filter(branch_id=branch_id)
+
+    date_from = request.GET.get('date_from', '').strip()
+    if date_from:
+        try:
+            from datetime import datetime
+            payments = payments.filter(created_at__date__gte=datetime.strptime(date_from, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+
+    date_to = request.GET.get('date_to', '').strip()
+    if date_to:
+        try:
+            from datetime import datetime
+            payments = payments.filter(created_at__date__lte=datetime.strptime(date_to, '%Y-%m-%d').date())
+        except ValueError:
+            pass
+
+    min_amount = request.GET.get('min_amount', '').strip()
+    if min_amount:
+        try:
+            payments = payments.filter(amount__gte=Decimal(min_amount))
+        except Exception:
+            pass
+
+    max_amount = request.GET.get('max_amount', '').strip()
+    if max_amount:
+        try:
+            payments = payments.filter(amount__lte=Decimal(max_amount))
+        except Exception:
+            pass
+
     # Order by newest first
-    payments = payments.order_by('-created_at')[:100]
-    
+    payments = payments.order_by('-created_at')
+
+    # Pagination
+    per_page = 20
+    paginator = Paginator(payments, per_page)
+    page_number = request.GET.get('page', 1)
+    try:
+        page_number = int(page_number)
+        if page_number < 1:
+            page_number = 1
+    except (ValueError, TypeError):
+        page_number = 1
+    page_obj = paginator.get_page(page_number)
+
+    # Build query string without 'page' for pagination links
+    query_params = request.GET.copy()
+    query_params.pop('page', None)
+    filter_query_string = query_params.urlencode()
+
     context = {
         'page_title': _('Payment History'),
-        'payments': payments,
+        'payments': page_obj,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'filter_query_string': filter_query_string,
+        'available_branches': available_branches,
         'active_nav': 'payment_history',
+        # current filter values
+        'filter_customer_id': customer_id,
+        'filter_payment_method': payment_method,
+        'filter_branch_id': branch_id,
+        'filter_date_from': date_from,
+        'filter_date_to': date_to,
+        'filter_min_amount': min_amount,
+        'filter_max_amount': max_amount,
     }
-    
+
     return render(request, 'orders/payment_history.html', context)
 
 

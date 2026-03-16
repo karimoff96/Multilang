@@ -457,7 +457,7 @@
                 <tbody>
                     {% for order in recent_orders %}
                     <tr>
-                        <td class="bg-info-focus ps-20"><a href="{% url 'orders:orderDetail' order.id %}" class="fw-medium text-primary-600 text-sm">#{{ order.id }}</a></td>
+                        <td class="bg-info-focus ps-20"><a href="{% url 'orders:orderDetail' order.id %}" class="fw-medium text-primary-600 text-sm">#{{ order.center_order_num }}</a></td>
                         <td class="bg-info-focus text-sm text-secondary-light">{% if order.bot_user %}{{ order.bot_user.name|default:order.bot_user.user_id }}{% else %}—{% endif %}</td>
                         <td class="bg-info-focus"><a href="{% url 'branch_detail' order.branch.id %}" class="text-primary-600 text-sm">{{ order.branch.name }}</a></td>
                         <td class="bg-info-focus text-sm text-secondary-light">{{ order.product.name }}</td>

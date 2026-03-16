@@ -10,6 +10,7 @@ urlpatterns = [
     path('subscriptions/<int:pk>/', views.subscription_detail, name='subscription_detail'),
     path('subscriptions/<int:pk>/update-status/', views.subscription_update_status, name='subscription_update_status'),
     path('subscriptions/<int:pk>/convert-trial/', views.convert_trial_to_paid, name='convert_trial_to_paid'),
+    path('subscriptions/<int:pk>/extend-trial/', views.extend_trial, name='extend_trial'),
     path('subscriptions/<int:pk>/renew/', views.subscription_renew, name='subscription_renew'),
     
     # Analytics and monitoring

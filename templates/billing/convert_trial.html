@@ -1,4 +1,4 @@
-{% extends 'layout/base.html' %}
+{% extends 'layout/layout.html' %}
 {% load i18n %}
 
 {% block title %}{% trans "Convert Trial to Paid" %} - {{ subscription.organization.name }}{% endblock %}
@@ -97,7 +97,7 @@ const tariffData = {
             {
                 id: {{ pricing.id }},
                 duration: {{ pricing.duration_months }},
-                price: {{ pricing.final_price }},
+                price: {{ pricing.price }},
                 currency: '{{ pricing.currency }}',
                 discount: {{ pricing.discount_percentage }}
             }{% if not forloop.last %},{% endif %}

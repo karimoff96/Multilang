@@ -93,6 +93,21 @@
                                maxlength="200" required>
                     </div>
 
+                    <!-- ── Description tip ──────────────────────── -->
+                    <div class="alert border border-warning-300 bg-warning-focus radius-8 p-16 mb-20 d-flex gap-12 align-items-start">
+                        <iconify-icon icon="solar:lightbulb-bold-duotone" class="text-warning-600 text-xl flex-shrink-0 mt-2"></iconify-icon>
+                        <div class="text-sm">
+                            <p class="fw-semibold text-warning-700 mb-6">{% trans "Help us resolve your issue faster" %}</p>
+                            <p class="text-secondary-light mb-8">{% trans "The more detail you provide, the quicker and more accurately we can help. Please include:" %}</p>
+                            <ul class="ps-16 mb-0 text-secondary-light" style="line-height:1.8;">
+                                <li>🔗 <strong>{% trans "Page URL" %}</strong> — {% trans "paste the full address of the page where the problem occurs" %}</li>
+                                <li>❌ <strong>{% trans "What is wrong" %}</strong> — {% trans "describe exactly what is happening (error message, incorrect behaviour, etc.)" %}</li>
+                                <li>✅ <strong>{% trans "What should happen" %}</strong> — {% trans "explain what the correct or expected behaviour should be" %}</li>
+                                <li>🔁 <strong>{% trans "Steps to reproduce" %}</strong> — {% trans "list the steps we can follow to see the problem ourselves" %}</li>
+                            </ul>
+                        </div>
+                    </div>
+
                     <!-- ── Description ───────────────────────────── -->
                     <div class="mb-20">
                         <label class="form-label fw-semibold text-sm mb-6" for="description">

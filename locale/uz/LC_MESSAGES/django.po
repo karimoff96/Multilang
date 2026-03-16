@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-15 00:18+0500\n"
+"POT-Creation-Date: 2026-03-16 20:22+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -83,7 +83,7 @@ msgstr "Vidjetlar"
 #: templates/billing/subscription_analytics.html:260
 #: templates/billing/subscription_create.html:57
 #: templates/billing/subscription_detail.html:22
-#: templates/billing/subscription_detail.html:165
+#: templates/billing/subscription_detail.html:172
 #: templates/billing/subscription_list.html:84
 #: templates/billing/subscription_list.html:164
 #: templates/landing/contact_requests.html:74
@@ -130,7 +130,7 @@ msgstr "Bajarildi"
 #: templates/billing/centers_monitoring.html:213
 #: templates/billing/subscription_analytics.html:178
 #: templates/billing/subscription_analytics.html:262
-#: templates/billing/subscription_detail.html:168
+#: templates/billing/subscription_detail.html:175
 #: templates/billing/subscription_list.html:85
 #: templates/core/notifications.html:144
 #: templates/landing/contact_requests.html:110
@@ -195,6 +195,7 @@ msgid "Finance"
 msgstr "Moliya"
 
 #: WowDash/reports_views.py:316 billing/models.py:110 billing/models.py:365
+#: templates/billing/tariff_create.html:505
 #: templates/billing/tariff_edit.html:583 templates/partials/sidebar.html:208
 #, fuzzy
 msgid "Financial Reports"
@@ -219,8 +220,8 @@ msgstr "Buyurtma hisobotlari"
 msgid "Reports / Orders"
 msgstr "Hisobotlar / Buyurtmalar"
 
-#: WowDash/reports_views.py:667 templates/billing/tariff_edit.html:594
-#: templates/partials/sidebar.html:249
+#: WowDash/reports_views.py:667 templates/billing/tariff_create.html:514
+#: templates/billing/tariff_edit.html:594 templates/partials/sidebar.html:249
 #: templates/reports/staff_performance.html:40
 msgid "Staff Performance"
 msgstr "Xodimlar samaradorligi"
@@ -356,9 +357,8 @@ msgstr "Botda ko'rsatiladigan yordam matni"
 #: accounts/models.py:58 billing/models.py:15 billing/models.py:33
 #: billing/models.py:882 orders/models.py:188 organizations/models.py:267
 #: services/models.py:53 services/models.py:258 services/models.py:353
-#: support/models.py:133 templates/billing/tariff_create.html:72
-#: templates/landing/partials/renewal_table.html:8
-#: templates/support/ticket_create.html:99
+#: support/models.py:133 templates/landing/partials/renewal_table.html:8
+#: templates/support/ticket_create.html:114
 msgid "Description"
 msgstr "Tavsif"
 
@@ -427,17 +427,17 @@ msgstr "Zaxira maydon 3"
 #: accounts/models.py:125 accounts/models.py:260 core/models.py:155
 #: core/models.py:250 landing/models.py:28 marketing/models.py:185
 #: orders/models.py:48 orders/models.py:179 orders/models.py:849
-#: orders/models.py:1238 orders/models.py:1378 orders/models.py:1485
-#: services/models.py:56 services/models.py:231 services/models.py:264
-#: services/models.py:354 services/models.py:634 services/models.py:721
-#: support/models.py:166 support/models.py:283 support/models.py:309
-#: support/models.py:361
+#: orders/models.py:1238 orders/models.py:1342 orders/models.py:1409
+#: orders/models.py:1516 services/models.py:56 services/models.py:231
+#: services/models.py:264 services/models.py:354 services/models.py:634
+#: services/models.py:721 support/models.py:166 support/models.py:283
+#: support/models.py:309 support/models.py:361
 msgid "Created At"
 msgstr "Yaratilgan vaqti"
 
 #: accounts/models.py:126 accounts/models.py:261 marketing/models.py:186
 #: orders/models.py:49 orders/models.py:180 orders/models.py:850
-#: orders/models.py:1486 services/models.py:57 services/models.py:232
+#: orders/models.py:1517 services/models.py:57 services/models.py:232
 #: services/models.py:265 services/models.py:355 services/models.py:722
 #: support/models.py:167 support/models.py:284
 msgid "Updated At"
@@ -583,7 +583,7 @@ msgstr "Foydalanuvchi agenti"
 msgid "Used in Tariffs"
 msgstr ""
 
-#: billing/admin.py:41 templates/billing/tariff_create.html:54
+#: billing/admin.py:41 templates/billing/tariff_create.html:48
 #: templates/billing/tariff_edit.html:72
 msgid "Basic Information"
 msgstr "Asosiy ma'lumotlar"
@@ -720,7 +720,8 @@ msgstr ""
 msgid "Features Enabled"
 msgstr ""
 
-#: billing/admin.py:167 templates/billing/tariff_edit.html:800
+#: billing/admin.py:167 templates/billing/tariff_create.html:783
+#: templates/billing/tariff_edit.html:800
 #: templates/billing/tariff_edit.html:961
 #, fuzzy
 #| msgid "Total Price"
@@ -730,10 +731,9 @@ msgstr "Jami narx"
 # Sidebar Translations
 #: billing/admin.py:201 billing/models.py:525 billing/models.py:807
 #: templates/billing/convert_trial.html:20
-#: templates/billing/subscription_detail.html:307
+#: templates/billing/subscription_detail.html:314
 #: templates/billing/subscription_list.html:134
 #: templates/billing/subscription_renew.html:21
-#: templates/billing/tariff_create.html:366
 #: templates/billing/usage_tracking.html:187
 #: templates/landing/partials/renewal_table.html:6
 #: templates/partials/sidebar.html:31
@@ -777,7 +777,7 @@ msgstr "Biz haqimizda ma'lumot"
 #: templates/billing/subscription_analytics.html:147
 #: templates/billing/subscription_analytics.html:231
 #: templates/billing/subscription_create.html:55
-#: templates/billing/subscription_detail.html:163
+#: templates/billing/subscription_detail.html:170
 #: templates/billing/subscription_list.html:79
 #: templates/billing/subscription_list.html:139
 #: templates/billing/subscription_renew.html:33
@@ -912,11 +912,11 @@ msgstr "Kategoriya"
 #: templates/billing/subscription_analytics.html:256
 #: templates/billing/subscription_create.html:58
 #: templates/billing/subscription_detail.html:18
-#: templates/billing/subscription_detail.html:166
+#: templates/billing/subscription_detail.html:173
 #: templates/billing/subscription_list.html:31
 #: templates/billing/subscription_list.html:82
 #: templates/billing/subscription_list.html:160
-#: templates/billing/tariff_create.html:88
+#: templates/billing/tariff_create.html:129
 #: templates/billing/tariff_edit.html:158
 #: templates/organizations/center_detail.html:27
 #: templates/organizations/center_detail.html:261
@@ -939,17 +939,17 @@ msgstr "Imkoniyatlar"
 msgid "Tariff Title"
 msgstr ""
 
-#: billing/models.py:32 templates/billing/tariff_create.html:64
+#: billing/models.py:32 templates/billing/tariff_create.html:52
 #: templates/billing/tariff_edit.html:76
 msgid "Slug"
 msgstr ""
 
-#: billing/models.py:35 templates/billing/tariff_create.html:94
+#: billing/models.py:35 templates/billing/tariff_create.html:135
 #: templates/billing/tariff_edit.html:165 templates/billing/tariff_list.html:41
 msgid "Featured"
 msgstr "Tavsiya etilgan"
 
-#: billing/models.py:36 templates/billing/tariff_create.html:100
+#: billing/models.py:36 templates/billing/tariff_create.html:141
 #: templates/billing/tariff_edit.html:172
 #, fuzzy
 #| msgid "Total Price"
@@ -970,7 +970,7 @@ msgstr "Yaratilgan vaqt"
 msgid "Hide from public landing page"
 msgstr ""
 
-#: billing/models.py:38 templates/billing/tariff_create.html:112
+#: billing/models.py:38 templates/billing/tariff_create.html:154
 #: templates/billing/tariff_edit.html:187
 msgid "Is Trial"
 msgstr "Sinov tarifi"
@@ -979,7 +979,7 @@ msgstr "Sinov tarifi"
 msgid "Free trial tariff"
 msgstr ""
 
-#: billing/models.py:39 templates/billing/tariff_create.html:116
+#: billing/models.py:39 templates/billing/tariff_create.html:161
 #: templates/billing/tariff_edit.html:194
 msgid "Trial Days"
 msgstr "Sinov kunlari"
@@ -989,12 +989,12 @@ msgid "Duration of trial period in days (only for trial tariffs)"
 msgstr ""
 
 #: billing/models.py:40 support/models.py:44
-#: templates/billing/tariff_create.html:78
+#: templates/billing/tariff_create.html:118
 #: templates/billing/tariff_edit.html:146
 msgid "Display Order"
 msgstr "Ko'rsatish tartibi"
 
-#: billing/models.py:46 templates/billing/tariff_create.html:132
+#: billing/models.py:46 templates/billing/tariff_create.html:174
 #: templates/billing/tariff_edit.html:208
 msgid "Max Branches"
 msgstr "Maks. filiallar"
@@ -1005,17 +1005,17 @@ msgstr "Maks. filiallar"
 msgid "Leave empty for unlimited"
 msgstr "Global/standart sozlamalar uchun bo'sh qoldiring"
 
-#: billing/models.py:52 templates/billing/tariff_create.html:138
+#: billing/models.py:52 templates/billing/tariff_create.html:183
 #: templates/billing/tariff_edit.html:218
 msgid "Max Staff"
 msgstr "Maks. xodimlar"
 
-#: billing/models.py:58 templates/billing/tariff_create.html:144
+#: billing/models.py:58 templates/billing/tariff_create.html:192
 #: templates/billing/tariff_edit.html:228
 msgid "Max Monthly Orders"
 msgstr "Oylik maks. buyurtmalar"
 
-#: billing/models.py:64 templates/billing/tariff_create.html:150
+#: billing/models.py:64 templates/billing/tariff_create.html:201
 #: templates/billing/tariff_edit.html:238
 #, fuzzy
 #| msgid "Max Monthly Orders"
@@ -1045,6 +1045,7 @@ msgid "Bulk operations, advanced filters, export"
 msgstr ""
 
 #: billing/models.py:83 billing/models.py:358
+#: templates/billing/tariff_create.html:322
 #: templates/billing/tariff_edit.html:374
 msgid "Order Assignment"
 msgstr "Buyurtmalarni Tayinlash"
@@ -1073,7 +1074,7 @@ msgstr ""
 
 # Feature Names - Analytics & Reports (6)
 #: billing/models.py:100 billing/models.py:363
-#: templates/billing/tariff_create.html:230
+#: templates/billing/tariff_create.html:487
 #: templates/billing/tariff_edit.html:561
 msgid "Basic Analytics"
 msgstr "Asosiy Analitika"
@@ -1083,7 +1084,7 @@ msgid "View order counts and basic statistics"
 msgstr ""
 
 #: billing/models.py:105 billing/models.py:364
-#: templates/billing/tariff_create.html:239
+#: templates/billing/tariff_create.html:496
 #: templates/billing/tariff_edit.html:572
 msgid "Advanced Analytics"
 msgstr "Kengaytirilgan Analitika"
@@ -1115,6 +1116,7 @@ msgid "Create custom reports with filters"
 msgstr "Maxsus Hisobot Yaratuvchi"
 
 #: billing/models.py:125 billing/models.py:368
+#: templates/billing/tariff_create.html:532
 #: templates/billing/tariff_edit.html:616
 msgid "Export Reports"
 msgstr "Hisobotlarni Eksport Qilish"
@@ -1152,7 +1154,6 @@ msgid "Configure and manage Telegram bot webhooks"
 msgstr ""
 
 #: billing/models.py:147 billing/models.py:374
-#: templates/billing/tariff_create.html:314
 msgid "Third-Party Integrations"
 msgstr "Uchinchi Tomon Integratsiyalari"
 
@@ -1206,7 +1207,8 @@ msgid "Create custom staff roles with RBAC"
 msgstr ""
 
 #: billing/models.py:181 billing/models.py:384 organizations/models.py:758
-#: organizations/views.py:1645 templates/billing/tariff_edit.html:677
+#: organizations/views.py:1665 templates/billing/tariff_create.html:585
+#: templates/billing/tariff_edit.html:677
 msgid "Branch Settings"
 msgstr "Filial Sozlamalari"
 
@@ -1215,6 +1217,7 @@ msgid "Customize settings per branch"
 msgstr ""
 
 #: billing/models.py:186 billing/models.py:385 organizations/models.py:767
+#: templates/billing/tariff_create.html:428
 #: templates/billing/tariff_edit.html:496
 msgid "Agency Management"
 msgstr ""
@@ -1241,6 +1244,7 @@ msgid "Manual payment recording and receipt verification"
 msgstr ""
 
 #: billing/models.py:205 billing/models.py:392
+#: templates/billing/tariff_create.html:384
 #: templates/billing/tariff_edit.html:446
 msgid "Expense Tracking"
 msgstr "Xarajatlarni Kuzatish"
@@ -1250,7 +1254,7 @@ msgid "Track business expenses by branch"
 msgstr ""
 
 #: billing/models.py:210 billing/models.py:393
-#: templates/billing/tariff_create.html:483
+#: templates/billing/tariff_create.html:375
 #: templates/billing/tariff_edit.html:435
 #, fuzzy
 #| msgid "Automated Invoicing"
@@ -1310,6 +1314,7 @@ msgid "Different pricing per language combination"
 msgstr ""
 
 #: billing/models.py:244 billing/models.py:403
+#: templates/billing/tariff_create.html:278
 #: templates/billing/tariff_edit.html:324
 msgid "Dynamic Pricing"
 msgstr "Dinamik Narxlash"
@@ -1326,7 +1331,7 @@ msgstr ""
 #: templates/billing/centers_list.html:114
 #: templates/billing/subscription_analytics.html:143
 #: templates/billing/subscription_analytics.html:229
-#: templates/billing/subscription_detail.html:99
+#: templates/billing/subscription_detail.html:106
 #: templates/billing/subscription_list.html:89
 #: templates/billing/subscription_list.html:135
 #: templates/billing/subscription_renew.html:22
@@ -1377,7 +1382,8 @@ msgstr ""
 msgid "Price"
 msgstr ""
 
-#: billing/models.py:460 templates/billing/tariff_edit.html:810
+#: billing/models.py:460 templates/billing/tariff_create.html:791
+#: templates/billing/tariff_edit.html:810
 #: templates/billing/tariff_edit.html:969
 msgid "Currency"
 msgstr ""
@@ -1409,7 +1415,7 @@ msgstr "Dinamik Narxlash"
 #: templates/billing/subscription_analytics.html:174
 #: templates/billing/subscription_analytics.html:258
 #: templates/billing/subscription_detail.html:20
-#: templates/billing/subscription_detail.html:167
+#: templates/billing/subscription_detail.html:174
 #: templates/billing/subscription_list.html:61
 #: templates/billing/subscription_list.html:83
 #: templates/billing/subscription_list.html:162
@@ -1427,7 +1433,7 @@ msgid "Pricing Plan"
 msgstr ""
 
 #: billing/models.py:543 templates/billing/subscription_create.html:50
-#: templates/billing/subscription_detail.html:113
+#: templates/billing/subscription_detail.html:120
 #: templates/billing/subscription_list.html:137
 #, fuzzy
 #| msgid "Extra Data"
@@ -1436,7 +1442,7 @@ msgstr "Qo'shimcha ma'lumotlar"
 
 #: billing/models.py:544 templates/billing/centers_list.html:115
 #: templates/billing/request_renewal.html:21
-#: templates/billing/subscription_detail.html:118
+#: templates/billing/subscription_detail.html:125
 #: templates/billing/subscription_list.html:138
 #, fuzzy
 #| msgid "Date"
@@ -1456,7 +1462,7 @@ msgid "Auto Renew"
 msgstr ""
 
 #: billing/models.py:565 templates/billing/subscription_create.html:66
-#: templates/billing/subscription_detail.html:132
+#: templates/billing/subscription_detail.html:139
 #: templates/billing/subscription_renew.html:84
 #, fuzzy
 #| msgid "Amount"
@@ -1471,7 +1477,7 @@ msgstr "To'lov turi"
 
 #: billing/models.py:568 orders/models.py:1194
 #: templates/billing/subscription_create.html:71
-#: templates/billing/subscription_detail.html:139
+#: templates/billing/subscription_detail.html:146
 #: templates/billing/subscription_renew.html:90
 #: templates/orders/bulk_payment.html:516
 #: templates/orders/payment_history.html:103
@@ -1480,7 +1486,7 @@ msgid "Payment Method"
 msgstr "To'lov usuli"
 
 #: billing/models.py:569 templates/billing/subscription_create.html:83
-#: templates/billing/subscription_detail.html:145
+#: templates/billing/subscription_detail.html:152
 #: templates/billing/subscription_renew.html:102
 #, fuzzy
 #| msgid "Translation Center"
@@ -1489,7 +1495,7 @@ msgstr "Tarjima markazi"
 
 #: billing/models.py:572 core/admin.py:84 core/models.py:636
 #: templates/billing/subscription_create.html:88
-#: templates/billing/subscription_detail.html:151
+#: templates/billing/subscription_detail.html:158
 #: templates/billing/subscription_renew.html:107
 msgid "Notes"
 msgstr ""
@@ -1508,7 +1514,7 @@ msgstr "Tavsif"
 
 #: billing/models.py:586 billing/views.py:120
 #: templates/billing/centers_monitoring.html:125
-#: templates/partials/sidebar.html:322
+#: templates/partials/sidebar.html:325
 #, fuzzy
 #| msgid "Description"
 msgid "Subscriptions"
@@ -1568,8 +1574,8 @@ msgstr "Buyurtmalar yo'q"
 msgid "Manual Orders"
 msgstr "Barcha buyurtmalar"
 
-#: billing/models.py:832 billing/models.py:833 billing/views.py:757
-#: billing/views.py:758 templates/partials/sidebar.html:328
+#: billing/models.py:832 billing/models.py:833 billing/views.py:771
+#: billing/views.py:772 templates/partials/sidebar.html:331
 #, fuzzy
 #| msgid "Expense Tracking"
 msgid "Usage Tracking"
@@ -1605,10 +1611,10 @@ msgid "Subscription History"
 msgstr ""
 
 #: billing/views.py:39 billing/views.py:143 billing/views.py:268
-#: billing/views.py:352 billing/views.py:373 billing/views.py:459
-#: billing/views.py:621 billing/views.py:645 billing/views.py:788
-#: billing/views.py:859 billing/views.py:905 billing/views.py:1018
-#: billing/views.py:1063
+#: billing/views.py:352 billing/views.py:373 billing/views.py:473
+#: billing/views.py:635 billing/views.py:659 billing/views.py:802
+#: billing/views.py:873 billing/views.py:907 billing/views.py:953
+#: billing/views.py:1066 billing/views.py:1111
 msgid "Access denied. This feature is only available to superusers."
 msgstr ""
 
@@ -1641,8 +1647,8 @@ msgstr "Tavsif"
 msgid "Subscription created successfully!"
 msgstr ""
 
-#: billing/views.py:304 billing/views.py:1176 billing/views.py:1193
-#: billing/views.py:1258 billing/views.py:1282
+#: billing/views.py:304 billing/views.py:1224 billing/views.py:1241
+#: billing/views.py:1306 billing/views.py:1330
 msgid "Billing"
 msgstr ""
 
@@ -1660,100 +1666,116 @@ msgstr ""
 msgid "Subscription status updated successfully!"
 msgstr ""
 
-#: billing/views.py:361 templates/partials/sidebar.html:325
+#: billing/views.py:361 templates/partials/sidebar.html:328
 msgid "Tariff Plans"
 msgstr ""
 
-#: billing/views.py:445
+#: billing/views.py:460
 msgid "Tariff created successfully!"
 msgstr ""
 
-#: billing/views.py:591
+#: billing/views.py:605
 msgid "Tariff updated successfully!"
 msgstr "Tarif muvaffaqiyatli yangilandi!"
 
-#: billing/views.py:629
+#: billing/views.py:643
 #, python-brace-format
 msgid ""
 "Cannot delete tariff '{tariff.title}'. It has {subscription_count} "
 "subscription(s) associated with it."
 msgstr ""
 
-#: billing/views.py:635
+#: billing/views.py:649
 #, python-brace-format
 msgid "Tariff '{tariff_name}' deleted successfully!"
 msgstr ""
 
-#: billing/views.py:841
+#: billing/views.py:855
 #, fuzzy
 #| msgid "Translation Center"
 msgid "All Translation Centers"
 msgstr "Tarjima markazi"
 
-#: billing/views.py:842
+#: billing/views.py:856
 #, fuzzy
 #| msgid "Center"
 msgid "Centers"
 msgstr "Markaz"
 
-#: billing/views.py:865
+#: billing/views.py:879 billing/views.py:913
 msgid "This subscription is not a trial subscription."
 msgstr ""
 
-#: billing/views.py:874
+#: billing/views.py:887
+msgid "New trial end date must be in the future."
+msgstr ""
+
+#: billing/views.py:896
+#, fuzzy
+#| msgid "Tariff updated successfully!"
+msgid "Trial period extended successfully."
+msgstr "Tarif muvaffaqiyatli yangilandi!"
+
+#: billing/views.py:898
+#, fuzzy
+#| msgid "table.status"
+msgid "Invalid date format."
+msgstr "Holat"
+
+#: billing/views.py:922
 msgid "Please select both tariff and pricing option."
 msgstr ""
 
-#: billing/views.py:883
+#: billing/views.py:931
 msgid "Trial subscription converted to paid subscription successfully!"
 msgstr ""
 
-#: billing/views.py:886
+#: billing/views.py:934
 msgid "Failed to convert trial subscription."
 msgstr ""
 
-#: billing/views.py:935
+#: billing/views.py:983
 #, fuzzy
 #| msgid "bulk.selectCustomer"
 msgid "Please select a pricing option for this tariff."
 msgstr "Mijozni tanlang"
 
-#: billing/views.py:970
+#: billing/views.py:1018
 msgid "unlimited / no pricing"
 msgstr ""
 
-#: billing/views.py:973
+#: billing/views.py:1021
 #, python-format
 msgid "Subscription renewed for %(period)s. Extended from %(old)s to %(new)s"
 msgstr ""
 
-#: billing/views.py:986
+#: billing/views.py:1034
 msgid "Subscription renewed successfully!"
 msgstr ""
 
-#: billing/views.py:1133
+#: billing/views.py:1181
 msgid "Centers Subscription Monitoring"
 msgstr ""
 
-#: billing/views.py:1134
+#: billing/views.py:1182
 msgid "Monitoring"
 msgstr ""
 
-#: billing/views.py:1151
+#: billing/views.py:1199
 msgid "You don't have an admin profile associated with your account."
 msgstr ""
 
-#: billing/views.py:1158
+#: billing/views.py:1206
 msgid "Your center doesn't have an active subscription."
 msgstr ""
 
-#: billing/views.py:1172
+#: billing/views.py:1220
 #, fuzzy
 #| msgid "bulk.selectCustomer"
 msgid "Please select a tariff plan."
 msgstr "Mijozni tanlang"
 
-#: billing/views.py:1175 billing/views.py:1192 billing/views.py:1257
+#: billing/views.py:1223 billing/views.py:1240 billing/views.py:1305
 #: templates/billing/subscription_renew.html:3
 #: templates/billing/subscription_renew.html:120
 #, fuzzy
@@ -1761,19 +1783,19 @@ msgstr "Mijozni tanlang"
 msgid "Renew Subscription"
 msgstr "Tavsif"
 
-#: billing/views.py:1189
+#: billing/views.py:1237
 #, fuzzy
 #| msgid "bulk.selectCustomer"
 msgid "Please select a subscription duration."
 msgstr "Mijozni tanlang"
 
-#: billing/views.py:1237
+#: billing/views.py:1285
 msgid ""
 "Your renewal request has been submitted successfully! Our team will contact "
 "you shortly to process the payment."
 msgstr ""
 
-#: billing/views.py:1281
+#: billing/views.py:1329
 #, fuzzy
 #| msgid "Description"
 msgid "Subscription expired"
@@ -1796,7 +1818,7 @@ msgid "Statistics"
 msgstr "Statistika"
 
 #: core/admin.py:80 orders/models.py:759 orders/views.py:415
-#: templates/billing/subscription_detail.html:303
+#: templates/billing/subscription_detail.html:310
 #: templates/orders/bulk_payment.html:310
 #: templates/orders/payment_history_full.html:162
 #: templates/organizations/center_detail.html:210
@@ -1910,8 +1932,7 @@ msgid "Districts"
 msgstr "Tumanlar"
 
 #: core/models.py:56 core/models.py:216 marketing/models.py:67
-#: services/models.py:661 templates/billing/tariff_create.html:58
-#: templates/services/generalExpenseAnalytics.html:218
+#: services/models.py:661 templates/services/generalExpenseAnalytics.html:218
 #: templates/services/generalExpenseCreate.html:31
 #: templates/services/generalExpenseEdit.html:31
 #: templates/services/generalExpenseList.html:113
@@ -1923,6 +1944,7 @@ msgid "Body"
 msgstr "Matn"
 
 #: core/models.py:58 orders/models.py:38 support/models.py:305
+#: venv/lib/python3.10/site-packages/django/db/models/fields/files.py:244
 msgid "File"
 msgstr "Fayl"
 
@@ -1940,13 +1962,14 @@ msgstr "Yangilangan vaqt"
 msgid "Create"
 msgstr "Yaratish"
 
-#: core/models.py:87 templates/billing/subscription_detail.html:175
+#: core/models.py:87 templates/billing/subscription_detail.html:182
 msgid "Update"
 msgstr "Yangilash"
 
 #: core/models.py:88 templates/billing/tariff_list.html:147
 #: templates/services/generalExpenseCategoryList.html:62
 #: templates/services/languageList.html:131
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:499
 msgid "Delete"
 msgstr "O'chirish"
 
@@ -2017,7 +2040,7 @@ msgstr "Foydalanuvchi agenti"
 msgid "Audit Log"
 msgstr "Audit yozuvi"
 
-#: core/models.py:159 templates/billing/tariff_create.html:399
+#: core/models.py:159 templates/billing/tariff_create.html:594
 #: templates/billing/tariff_edit.html:688 templates/partials/sidebar.html:271
 #: templates/reports/audit_logs.html:16
 msgid "Audit Logs"
@@ -2818,7 +2841,7 @@ msgstr "To'lov tarixi"
 msgid "Payment History - Full Report"
 msgstr "To'lov tarixi - To'liq hisobot"
 
-#: orders/bulk_payment_views.py:931 orders/models.py:1263 orders/models.py:1334
+#: orders/bulk_payment_views.py:931 orders/models.py:1263 orders/models.py:1365
 #, fuzzy
 #| msgid "Payment"
 msgid "Bulk Payment"
@@ -2948,7 +2971,8 @@ msgstr "To'lov turi"
 msgid "Receipt"
 msgstr "Kvitansiya"
 
-#: orders/models.py:221 templates/billing/tariff_edit.html:805
+#: orders/models.py:221 templates/billing/tariff_create.html:787
+#: templates/billing/tariff_edit.html:805
 #: templates/billing/tariff_edit.html:965
 msgid "Total Price"
 msgstr "Jami narx"
@@ -3076,10 +3100,12 @@ msgid "Selected language is not available for this product's category."
 msgstr ""
 
 #: orders/models.py:758 orders/models.py:784 orders/models.py:1286
-#: orders/models.py:1341 orders/models.py:1413
+#: orders/models.py:1331 orders/models.py:1372 orders/models.py:1444
 #: templates/orders/bulk_payment.html:666
 #: templates/orders/bulk_payment.html:1106 templates/orders/ordersList.html:404
 #: templates/organizations/center_detail.html:449
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:484
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:491
 msgid "Order"
 msgstr ""
 
@@ -3150,7 +3176,7 @@ msgstr ""
 msgid "Source"
 msgstr ""
 
-#: orders/models.py:830
+#: orders/models.py:830 orders/models.py:1341
 msgid "Comment"
 msgstr ""
 
@@ -3271,7 +3297,8 @@ msgstr "Qoldiq qarz"
 msgid "Customer remaining debt after this payment"
 msgstr ""
 
-#: orders/models.py:1264 templates/billing/tariff_edit.html:385
+#: orders/models.py:1264 templates/billing/tariff_create.html:331
+#: templates/billing/tariff_edit.html:385
 #, fuzzy
 #| msgid "Total Payments"
 msgid "Bulk Payments"
@@ -3321,126 +3348,142 @@ msgstr "Buyurtma fayli"
 msgid "Order Price Changes"
 msgstr "O'zgarishlarni ko'rish"
 
-#: orders/models.py:1348
+#: orders/models.py:1339
+msgid "Author"
+msgstr ""
+
+#: orders/models.py:1345
+#, fuzzy
+#| msgid "Orders Count"
+msgid "Order Comment"
+msgstr "Buyurtmalar soni"
+
+#: orders/models.py:1346
+#, fuzzy
+#| msgid "Orders Count"
+msgid "Order Comments"
+msgstr "Buyurtmalar soni"
+
+#: orders/models.py:1379
 #, fuzzy
 #| msgid "Amount"
 msgid "Amount Applied"
 msgstr "Summa"
 
-#: orders/models.py:1349
+#: orders/models.py:1380
 msgid "Portion of bulk payment applied to this order"
 msgstr ""
 
-#: orders/models.py:1357
+#: orders/models.py:1388
 #, fuzzy
 #| msgid "orders.paymentReceived"
 msgid "Previous Amount Received"
 msgstr "To'lov qabul qilindi"
 
-#: orders/models.py:1358
+#: orders/models.py:1389
 msgid "Order received amount before this payment"
 msgstr ""
 
-#: orders/models.py:1366
+#: orders/models.py:1397
 #, fuzzy
 #| msgid "Total Received"
 msgid "New Amount Received"
 msgstr "Jami qabul qilindi"
 
-#: orders/models.py:1367
+#: orders/models.py:1398
 msgid "Order received amount after this payment"
 msgstr ""
 
-#: orders/models.py:1372 templates/orders/bulk_payment.html:1100
+#: orders/models.py:1403 templates/orders/bulk_payment.html:1100
 #: templates/orders/bulk_payment.html:1196
 #: templates/orders/payment_history.html:127
 #: templates/orders/payment_history_full.html:163
 msgid "Fully Paid"
 msgstr "To'liq to'langan"
 
-#: orders/models.py:1373
+#: orders/models.py:1404
 msgid "Whether this order was fully paid by this transaction"
 msgstr ""
 
-#: orders/models.py:1382
+#: orders/models.py:1413
 msgid "Payment-Order Link"
 msgstr ""
 
-#: orders/models.py:1383
+#: orders/models.py:1414
 msgid "Payment-Order Links"
 msgstr ""
 
-#: orders/models.py:1419
+#: orders/models.py:1450
 #, fuzzy
 #| msgid "Translation Center"
 msgid "Payme Transaction ID"
 msgstr "Tarjima markazi"
 
-#: orders/models.py:1425
+#: orders/models.py:1456
 #, fuzzy
 #| msgid "Amount (UZS)"
 msgid "Amount (tiyin)"
 msgstr "Miqdor (so'm)"
 
-#: orders/models.py:1432
+#: orders/models.py:1463
 #, fuzzy
 #| msgid "Amount"
 msgid "Account Payload"
 msgstr "Summa"
 
-#: orders/models.py:1438
+#: orders/models.py:1469
 msgid "State"
 msgstr ""
 
-#: orders/models.py:1439
+#: orders/models.py:1470
 msgid "Payme transaction state: 1=created, 2=performed, -1/-2 canceled"
 msgstr ""
 
-#: orders/models.py:1445
+#: orders/models.py:1476
 #, fuzzy
 #| msgid "Created at"
 msgid "Create Time (ms)"
 msgstr "Yaratilgan vaqt"
 
-#: orders/models.py:1450
+#: orders/models.py:1481
 #, fuzzy
 #| msgid "Processed By"
 msgid "Perform Time (ms)"
 msgstr "Qayta ishlagan"
 
-#: orders/models.py:1455
+#: orders/models.py:1486
 msgid "Cancel Time (ms)"
 msgstr ""
 
-#: orders/models.py:1460
+#: orders/models.py:1491
 #, fuzzy
 #| msgid "Cancelled"
 msgid "Cancel Reason"
 msgstr "Bekor qilindi"
 
-#: orders/models.py:1467
+#: orders/models.py:1498
 msgid "Checkout URL"
 msgstr ""
 
-#: orders/models.py:1472
+#: orders/models.py:1503
 msgid "Receipt Detail Payload"
 msgstr ""
 
-#: orders/models.py:1477
+#: orders/models.py:1508
 msgid "Last Request Payload"
 msgstr ""
 
-#: orders/models.py:1482
+#: orders/models.py:1513
 msgid "Last Response Payload"
 msgstr ""
 
-#: orders/models.py:1489
+#: orders/models.py:1520
 #, fuzzy
 #| msgid "Payment Tracking & Recording"
 msgid "Payme Transaction"
 msgstr "To'lovlarni Kuzatish va Yozib Olish"
 
-#: orders/models.py:1490
+#: orders/models.py:1521
 #, fuzzy
 #| msgid "Payment Tracking & Recording"
 msgid "Payme Transactions"
@@ -3450,7 +3493,7 @@ msgstr "To'lovlarni Kuzatish va Yozib Olish"
 msgid "Orders with Pending Receipts"
 msgstr "Kutilayotgan kvitansiyali buyurtmalar"
 
-#: orders/views.py:415 orders/views.py:1525 templates/orders/ordersList.html:39
+#: orders/views.py:415 orders/views.py:1534 templates/orders/ordersList.html:39
 msgid "My Orders"
 msgstr "Mening buyurtmalarim"
 
@@ -3467,54 +3510,54 @@ msgstr "Menga tayinlangan buyurtmalar"
 msgid "All Orders"
 msgstr "Barcha buyurtmalar"
 
-#: orders/views.py:559
+#: orders/views.py:563
 msgid "Order Details"
 msgstr "Buyurtma tafsilotlari"
 
-#: orders/views.py:880
+#: orders/views.py:889
 msgid "You don't have permission to make that change: "
 msgstr ""
 
-#: orders/views.py:899
+#: orders/views.py:908
 msgid "Edit Order"
 msgstr "Buyurtmani tahrirlash"
 
-#: orders/views.py:1526
+#: orders/views.py:1535
 msgid "Orders Assigned to Me"
 msgstr "Menga tayinlangan buyurtmalar"
 
-#: orders/views.py:1613
+#: orders/views.py:1622
 msgid ""
 "Please select a customer or enable manual order and fill in customer details"
 msgstr ""
 
-#: orders/views.py:1617
+#: orders/views.py:1626
 msgid "Please provide customer's first name and phone number for manual orders"
 msgstr ""
 
-#: orders/views.py:1621
+#: orders/views.py:1630
 msgid "Please fill in all required fields (product and branch)"
 msgstr ""
 
-#: orders/views.py:1670
+#: orders/views.py:1679
 msgid "You don't have access to the selected customer."
 msgstr ""
 
-#: orders/views.py:1679
+#: orders/views.py:1688
 msgid "You don't have access to the selected branch."
 msgstr ""
 
-#: orders/views.py:1750
+#: orders/views.py:1759
 msgid "Order created successfully"
 msgstr ""
 
-#: orders/views.py:1758
+#: orders/views.py:1767
 #, fuzzy
 #| msgid "Current Order"
 msgid "Create Order"
 msgstr "Joriy buyurtma"
 
-#: orders/views.py:1759
+#: orders/views.py:1768
 msgid "Create a new order manually"
 msgstr ""
 
@@ -3670,7 +3713,7 @@ msgstr ""
 
 #: organizations/models.py:247 templates/billing/convert_trial.html:54
 #: templates/billing/request_renewal.html:47
-#: templates/billing/subscription_detail.html:206
+#: templates/billing/subscription_detail.html:213
 #: templates/billing/tariff_list.html:63
 #: templates/billing/usage_tracking.html:193
 #: templates/organizations/center_detail.html:88
@@ -4162,18 +4205,17 @@ msgstr ""
 msgid "Branch Management"
 msgstr ""
 
-#: organizations/models.py:646 templates/billing/tariff_create.html:381
+#: organizations/models.py:646
 msgid "Staff Management"
 msgstr ""
 
-#: organizations/models.py:658 templates/billing/tariff_create.html:168
+#: organizations/models.py:658 templates/billing/tariff_create.html:292
 #: templates/billing/tariff_edit.html:338
 msgid "Order Management"
 msgstr ""
 
 #: organizations/models.py:675 support/models.py:102
-#: templates/billing/subscription_detail.html:309
-#: templates/billing/tariff_create.html:450
+#: templates/billing/subscription_detail.html:316
 msgid "Financial"
 msgstr "Moliyaviy"
 
@@ -4789,16 +4831,16 @@ msgstr ""
 msgid "Only superusers can create or assign the Owner role."
 msgstr ""
 
-#: organizations/views.py:1646
+#: organizations/views.py:1666
 #, python-format
 msgid "Settings for %(name)s"
 msgstr "%(name)s uchun sozlamalar"
 
-#: organizations/views.py:1743
+#: organizations/views.py:1763
 msgid "Edit Branch Settings"
 msgstr "Filial sozlamalarini tahrirlash"
 
-#: organizations/views.py:1744
+#: organizations/views.py:1764
 #, python-format
 msgid "Edit settings for %(name)s"
 msgstr "%(name)s uchun sozlamalarni tahrirlash"
@@ -5078,6 +5120,7 @@ msgid "General Expense"
 msgstr "Umumiy xarajat"
 
 #: services/models.py:735 services/views.py:1436
+#: templates/billing/tariff_create.html:393
 #: templates/billing/tariff_edit.html:457 templates/partials/sidebar.html:134
 msgid "General Expenses"
 msgstr "Umumiy xarajatlar"
@@ -5462,7 +5505,7 @@ msgstr ""
 
 #: support/models.py:256 templates/billing/convert_trial.html:55
 #: templates/billing/request_renewal.html:56
-#: templates/billing/subscription_detail.html:215
+#: templates/billing/subscription_detail.html:222
 #: templates/billing/tariff_list.html:67
 #: templates/billing/usage_tracking.html:194
 #: templates/organizations/center_detail.html:98
@@ -5477,8 +5520,7 @@ msgstr ""
 msgid "Staff"
 msgstr "Xodimlar"
 
-#: support/models.py:257 templates/billing/subscription_detail.html:310
-#: templates/billing/tariff_create.html:497
+#: support/models.py:257 templates/billing/subscription_detail.html:317
 msgid "Support"
 msgstr "Qo'llab-quvvatlash"
 
@@ -5643,7 +5685,7 @@ msgstr "So'rov %(name)s tomonidan hal qilindi deb belgilandi."
 msgid "Ticket has been resolved."
 msgstr ""
 
-#: support/views.py:463 templates/partials/sidebar.html:337
+#: support/views.py:463 templates/partials/sidebar.html:340
 #: templates/support/support_ticket_list.html:11
 msgid "Support Inbox"
 msgstr "Qo'llab-quvvatlash xizmati"
@@ -5718,7 +5760,15 @@ msgstr "Yozuvlarni qidirish..."
 
 #: templates/billing/centers_list.html:70
 #: templates/billing/centers_monitoring.html:76
-#: templates/billing/subscription_detail.html:249
+#: templates/billing/subscription_detail.html:256
+#: templates/billing/tariff_create.html:241
+#: templates/billing/tariff_create.html:294
+#: templates/billing/tariff_create.html:356
+#: templates/billing/tariff_create.html:418
+#: templates/billing/tariff_create.html:442
+#: templates/billing/tariff_create.html:477
+#: templates/billing/tariff_create.html:557
+#: templates/billing/tariff_create.html:608
 #: templates/billing/tariff_edit.html:279
 #: templates/billing/tariff_edit.html:340
 #: templates/billing/tariff_edit.html:412
@@ -5866,7 +5916,7 @@ msgid "of"
 msgstr "dan"
 
 #: templates/billing/centers_monitoring.html:6
-#: templates/partials/sidebar.html:316
+#: templates/partials/sidebar.html:319
 msgid "Centers Monitoring"
 msgstr ""
 
@@ -5908,7 +5958,7 @@ msgstr "Tavsif"
 #: templates/billing/centers_monitoring.html:105
 #: templates/billing/usage_tracking.html:83
 #: templates/organizations/staff_list.html:23
-#: templates/partials/sidebar.html:319 templates/reports/audit_logs.html:98
+#: templates/partials/sidebar.html:322 templates/reports/audit_logs.html:98
 #: templates/reports/customers.html:66 templates/reports/debtors_report.html:62
 #: templates/reports/expense_analytics.html:71
 #: templates/reports/financial.html:79
@@ -5927,12 +5977,12 @@ msgstr "Markazlar"
 
 #: templates/billing/centers_monitoring.html:122
 #: templates/billing/subscription_analytics.html:44
-#: templates/billing/subscription_detail.html:62
+#: templates/billing/subscription_detail.html:69
 msgid "Account Age"
 msgstr ""
 
 #: templates/billing/centers_monitoring.html:123
-#: templates/billing/subscription_detail.html:81
+#: templates/billing/subscription_detail.html:88
 #, fuzzy
 #| msgid "Description"
 msgid "First Subscription"
@@ -5953,7 +6003,7 @@ msgstr ""
 #: templates/billing/subscription_analytics.html:49
 #: templates/billing/subscription_analytics.html:116
 #: templates/billing/subscription_create.html:170
-#: templates/billing/subscription_detail.html:106
+#: templates/billing/subscription_detail.html:113
 #: templates/orders/bulk_payment.html:667
 msgid "days"
 msgstr ""
@@ -6054,13 +6104,13 @@ msgid "Trial Started"
 msgstr ""
 
 #: templates/billing/convert_trial.html:22
-#: templates/billing/subscription_detail.html:118
+#: templates/billing/subscription_detail.html:125
 msgid "Trial Ends"
 msgstr ""
 
 #: templates/billing/convert_trial.html:23
 #: templates/billing/request_renewal.html:25
-#: templates/billing/subscription_detail.html:125
+#: templates/billing/subscription_detail.html:132
 #, fuzzy
 #| msgid "table.remaining"
 msgid "Days Remaining"
@@ -6109,15 +6159,16 @@ msgstr ""
 
 #: templates/billing/convert_trial.html:80
 #: templates/billing/subscription_create.html:101
+#: templates/billing/subscription_detail.html:375
 #: templates/billing/subscription_renew.html:123
-#: templates/billing/tariff_create.html:604
+#: templates/billing/tariff_create.html:697
 #: templates/billing/tariff_edit.html:854
 #: templates/landing/partials/contact_table.html:52
 #: templates/services/generalExpenseCreate.html:118
 #: templates/services/generalExpenseEdit.html:122
 #: templates/services/languageList.html:272
 #: templates/services/languageList.html:410
-#: templates/support/ticket_create.html:137
+#: templates/support/ticket_create.html:152
 #, fuzzy
 #| msgid "Cancelled"
 msgid "Cancel"
@@ -6146,7 +6197,7 @@ msgid "Tariff Plan"
 msgstr ""
 
 #: templates/billing/request_renewal.html:40
-#: templates/billing/subscription_detail.html:187
+#: templates/billing/subscription_detail.html:194
 #, fuzzy
 #| msgid "Current Order"
 msgid "Current Usage"
@@ -6310,7 +6361,7 @@ msgid "Since"
 msgstr ""
 
 #: templates/billing/subscription_analytics.html:69
-#: templates/billing/subscription_detail.html:69
+#: templates/billing/subscription_detail.html:76
 msgid "Lifetime Value"
 msgstr ""
 
@@ -6321,7 +6372,7 @@ msgid "payments"
 msgstr "Naqd"
 
 #: templates/billing/subscription_analytics.html:88
-#: templates/billing/subscription_detail.html:75
+#: templates/billing/subscription_detail.html:82
 #, fuzzy
 #| msgid "Description"
 msgid "Total Subscriptions"
@@ -6351,8 +6402,9 @@ msgstr ""
 
 #: templates/billing/subscription_analytics.html:144
 #: templates/billing/subscription_analytics.html:230
-#: templates/billing/subscription_detail.html:103
+#: templates/billing/subscription_detail.html:110
 #: templates/billing/subscription_list.html:136
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1868
 #, fuzzy
 #| msgid "Description"
 msgid "Duration"
@@ -6474,113 +6526,111 @@ msgid "Convert to Paid"
 msgstr "Summa"
 
 #: templates/billing/subscription_detail.html:38
+msgid "Extend Trial"
+msgstr "Sinov muddatini uzaytirish"
+
+#: templates/billing/subscription_detail.html:45
 msgid "Renew"
-msgstr ""
+msgstr "Yangilash"
 
 # Feature Names - Analytics & Reports (6)
-#: templates/billing/subscription_detail.html:44
-#: templates/billing/subscription_detail.html:304
+#: templates/billing/subscription_detail.html:51
+#: templates/billing/subscription_detail.html:311
 #: templates/services/generalExpenseList.html:70
-#, fuzzy
-#| msgid "Basic Analytics"
 msgid "Analytics"
-msgstr "Asosiy Analitika"
+msgstr "Analitika"
 
-#: templates/billing/subscription_detail.html:48
+#: templates/billing/subscription_detail.html:55
 #: templates/services/generalExpenseCreate.html:12
 #: templates/services/generalExpenseEdit.html:12
 msgid "Back"
 msgstr "Orqaga"
 
-#: templates/billing/subscription_detail.html:93
-#, fuzzy
-#| msgid "Description"
+#: templates/billing/subscription_detail.html:100
 msgid "Subscription Details"
-msgstr "Tavsif"
+msgstr "Obuna tafsilotlari"
 
-#: templates/billing/subscription_detail.html:108
+#: templates/billing/subscription_detail.html:115
 #: templates/billing/subscription_list.html:153
 #: templates/billing/subscription_renew.html:27
 #: templates/billing/tariff_list.html:105
 msgid "month(s)"
 msgstr "oy"
 
-#: templates/billing/subscription_detail.html:172
-#, fuzzy
-#| msgid "form.optional"
+#: templates/billing/subscription_detail.html:179
 msgid "Note (optional)"
-msgstr "Ixtiyoriy"
+msgstr "Izoh (ixtiyoriy)"
 
-#: templates/billing/subscription_detail.html:173
+#: templates/billing/subscription_detail.html:180
 msgid "Reason..."
-msgstr ""
+msgstr "Sabab..."
 
-#: templates/billing/subscription_detail.html:224
-#, fuzzy
+#: templates/billing/subscription_detail.html:231
 msgid "Orders (Month)"
-msgstr "Bu oy"
+msgstr "Buyurtmalar (oy)"
 
-#: templates/billing/subscription_detail.html:233
-#, fuzzy
-#| msgid "Last Month"
+#: templates/billing/subscription_detail.html:240
 msgid "Broadcasts (Month)"
-msgstr "O'tgan oy"
+msgstr "Xabarlar (oy)"
 
-#: templates/billing/subscription_detail.html:247
-#, fuzzy
-#| msgid "Payment History"
+#: templates/billing/subscription_detail.html:254
 msgid "History"
-msgstr "To'lov tarixi"
+msgstr "Tarix"
 
-#: templates/billing/subscription_detail.html:274
-#, fuzzy
-#| msgid "Payment History"
+#: templates/billing/subscription_detail.html:281
 msgid "No history"
-msgstr "To'lov tarixi"
+msgstr "Tarix yo'q"
 
-#: templates/billing/subscription_detail.html:289
+#: templates/billing/subscription_detail.html:296
 msgid "Plan Features"
-msgstr ""
+msgstr "Tarif imkoniyatlari"
 
-#: templates/billing/subscription_detail.html:305
-#: templates/billing/tariff_create.html:289
-#, fuzzy
-#| msgid "Third-Party Integrations"
+#: templates/billing/subscription_detail.html:312
 msgid "Integration"
-msgstr "Uchinchi Tomon Integratsiyalari"
+msgstr "Integratsiya"
 
-#: templates/billing/subscription_detail.html:306
-#: templates/billing/tariff_create.html:338
+#: templates/billing/subscription_detail.html:313
+#: templates/billing/tariff_create.html:440
 #: templates/billing/tariff_edit.html:508 templates/partials/sidebar.html:288
 msgid "Marketing"
 msgstr "Marketing"
 
-#: templates/billing/subscription_detail.html:308
-#: templates/billing/tariff_create.html:413
+#: templates/billing/subscription_detail.html:315
 msgid "Storage"
-msgstr ""
+msgstr "Saqlash"
 
-#: templates/billing/subscription_detail.html:311
-#: templates/billing/tariff_create.html:527
-#, fuzzy
-#| msgid "Advanced Analytics"
+#: templates/billing/subscription_detail.html:318
 msgid "Advanced"
-msgstr "Kengaytirilgan Analitika"
+msgstr "Kengaytirilgan"
 
-#: templates/billing/subscription_detail.html:312
+#: templates/billing/subscription_detail.html:319
 #: templates/partials/sidebar.html:114
 msgid "Services"
 msgstr "Xizmatlar"
 
-#: templates/billing/subscription_detail.html:333
+#: templates/billing/subscription_detail.html:340
 msgid "No features available in this plan"
-msgstr ""
+msgstr "Ushbu rejada imkoniyatlar mavjud emas"
+
+#: templates/billing/subscription_detail.html:358
+msgid "Extend Trial Period"
+msgstr "Sinov muddatini uzaytirish"
+
+#: templates/billing/subscription_detail.html:366
+msgid "Current trial ends"
+msgstr "Joriy sinov muddati tugaydi"
+
+#: templates/billing/subscription_detail.html:369
+msgid "New Trial End Date"
+msgstr "Sinov muddatining yangi tugash sanasi"
+
+#: templates/billing/subscription_detail.html:378
+msgid "Extend"
+msgstr "Uzaytirish"
 
 #: templates/billing/subscription_expired.html:14
-#, fuzzy
-#| msgid "Description"
 msgid "Subscription Ended"
-msgstr "Tavsif"
+msgstr "Obuna tugadi"
 
 #: templates/billing/subscription_expired.html:15
 msgid ""
@@ -6770,493 +6820,114 @@ msgid "End date unchanged (unlimited/manual)"
 msgstr ""
 
 #: templates/billing/tariff_create.html:4
-#: templates/billing/tariff_create.html:610
+#: templates/billing/tariff_create.html:700
 #: templates/billing/tariff_list.html:166
 #, fuzzy
 #| msgid "Created at"
 msgid "Create Tariff"
 msgstr "Yaratilgan vaqt"
 
-#: templates/billing/tariff_create.html:40
+#: templates/billing/tariff_create.html:36
 #: templates/billing/tariff_edit.html:60
 msgid "Back to List"
 msgstr "Ro'yxatga qaytish"
 
-#: templates/billing/tariff_create.html:60
-msgid "e.g., Starter, Professional, Enterprise"
-msgstr ""
-
-#: templates/billing/tariff_create.html:66
+#: templates/billing/tariff_create.html:54
 #: templates/billing/tariff_edit.html:79
 msgid "e.g., starter, professional, enterprise"
 msgstr ""
 
-#: templates/billing/tariff_create.html:67
+#: templates/billing/tariff_create.html:55
 #: templates/billing/tariff_edit.html:80
 msgid "Only lowercase letters, numbers, and hyphens"
 msgstr ""
 
-#: templates/billing/tariff_create.html:68
+#: templates/billing/tariff_create.html:56
 #: templates/billing/tariff_edit.html:81
 msgid "URL-friendly identifier (lowercase, no spaces)"
 msgstr ""
 
-#: templates/billing/tariff_create.html:74
-msgid "Describe this tariff plan..."
-msgstr ""
-
-#: templates/billing/tariff_create.html:80
-#: templates/billing/tariff_edit.html:148
-msgid "Lower numbers appear first"
-msgstr "Kichik raqamlar avval ko'rsatiladi"
-
-#: templates/billing/tariff_create.html:106
-#: templates/billing/tariff_edit.html:179
-msgid "Private (Hide on Landing)"
-msgstr ""
-
-#: templates/billing/tariff_create.html:118
-#: templates/billing/tariff_edit.html:197
-msgid "Number of days for free trial period"
-msgstr "Bepul sinov davri uchun kunlar soni"
-
-#: templates/billing/tariff_create.html:127
-#: templates/billing/tariff_edit.html:204
-msgid "Resource Limits"
-msgstr "Resurs chegaralari"
-
-#: templates/billing/tariff_create.html:128
-#, fuzzy
-#| msgid "Leave empty for global/default settings"
-msgid "Leave empty for unlimited access"
-msgstr "Global/standart sozlamalar uchun bo'sh qoldiring"
-
-#: templates/billing/tariff_create.html:134
-#: templates/billing/tariff_create.html:140
-#: templates/billing/tariff_create.html:146
-#: templates/billing/tariff_create.html:152
-msgid "Empty = Unlimited"
-msgstr ""
-
-#: templates/billing/tariff_create.html:153
-#, fuzzy
-#| msgid "Mass Broadcast Messaging"
-msgid "Marketing broadcasts per month"
-msgstr "Ommaviy Xabarlar Yuborish"
-
-# Feature Names - Advanced (3)
-#: templates/billing/tariff_create.html:160
-#: templates/billing/tariff_edit.html:257
-msgid "Included Features"
-msgstr "Kiritilgan xususiyatlar"
-
-#: templates/billing/tariff_create.html:174
-#: templates/billing/tariff_edit.html:352
-#, fuzzy
-#| msgid "No Orders"
-msgid "Basic Orders"
-msgstr "Buyurtmalar yo'q"
-
-# Debtors Report Translations
-#: templates/billing/tariff_create.html:175
-#, fuzzy
-#| msgid "Track and manage outstanding customer debts"
-msgid "Create, view, and manage customer orders"
-msgstr "Mijozlarning to'lanmagan qarzlarini kuzatish va boshqarish"
-
-#: templates/billing/tariff_create.html:183
-#: templates/billing/tariff_edit.html:363
-#, fuzzy
-#| msgid "Advanced Order Management"
-msgid "Advanced Orders"
-msgstr "Kengaytirilgan Buyurtmalarni Boshqarish"
-
-#: templates/billing/tariff_create.html:184
-msgid "Multi-step orders, custom workflows, templates"
-msgstr ""
-
-#: templates/billing/tariff_create.html:192
-msgid "Bulk Operations"
-msgstr ""
-
-#: templates/billing/tariff_create.html:193
-msgid "Import/export orders, bulk status updates"
-msgstr ""
-
-#: templates/billing/tariff_create.html:201
-#, fuzzy
-#| msgid "Order file"
-msgid "Order Archive"
-msgstr "Buyurtma fayli"
-
-#: templates/billing/tariff_create.html:202
-msgid "Automatic archiving with retention policies"
-msgstr ""
-
-#: templates/billing/tariff_create.html:210
-#, fuzzy
-#| msgid "Bulk Payment Processing"
-msgid "Bulk Payment Collection"
-msgstr "Ommaviy To'lovlarni Qayta Ishlash"
-
-#: templates/billing/tariff_create.html:211
-msgid "Collect payments for multiple orders at once"
-msgstr ""
-
-#: templates/billing/tariff_create.html:224
-#: templates/billing/tariff_edit.html:547 templates/partials/sidebar.html:155
-msgid "Analytics & Reports"
-msgstr "Tahlil va hisobotlar"
-
-#: templates/billing/tariff_create.html:231
-msgid "Dashboard with key metrics and statistics"
-msgstr ""
-
-#: templates/billing/tariff_create.html:240
-msgid "Detailed reports, trends, predictions"
-msgstr ""
-
-#: templates/billing/tariff_create.html:248
-#, fuzzy
-#| msgid "Order Reports"
-msgid "Sales Reports"
-msgstr "Buyurtma hisobotlari"
-
-#: templates/billing/tariff_create.html:249
-msgid "Revenue, sales performance, trends"
-msgstr ""
-
-#: templates/billing/tariff_create.html:257
-#, fuzzy
-msgid "Finance Reports"
-msgstr "Moliyaviy Hisobotlar"
-
-#: templates/billing/tariff_create.html:258
-msgid "Payments, expenses, profit analysis"
-msgstr ""
-
-#: templates/billing/tariff_create.html:266
-#: templates/billing/tariff_edit.html:605
-#, fuzzy
-#| msgid "Custom Report Builder"
-msgid "Custom Reports"
-msgstr "Maxsus Hisobot Yaratuvchi"
-
-#: templates/billing/tariff_create.html:267
-#, fuzzy
-#| msgid "customers with debt"
-msgid "Build custom reports with filters"
-msgstr "qarzdor mijozlar"
-
-#: templates/billing/tariff_create.html:275
-msgid "Data Export"
-msgstr ""
-
-#: templates/billing/tariff_create.html:276
-#, fuzzy
-#| msgid "Export to Excel"
-msgid "Export to Excel, CSV, PDF formats"
-msgstr "Excel ga eksport qilish"
-
-#: templates/billing/tariff_create.html:295
-#: templates/billing/tariff_edit.html:725
-msgid "Webhooks"
-msgstr ""
-
-#: templates/billing/tariff_create.html:296
-msgid "Receive real-time event notifications"
-msgstr ""
-
-# Feature Names - Integration (4)
-#: templates/billing/tariff_create.html:304
-#, fuzzy
-#| msgid "REST API Access"
-msgid "API Access"
-msgstr "REST API Kirish"
-
-#: templates/billing/tariff_create.html:305
-#: templates/billing/tariff_create.html:315
-#: templates/billing/tariff_edit.html:738
-#: templates/billing/tariff_edit.html:752
-msgid "On Request"
-msgstr ""
-
-#: templates/billing/tariff_create.html:306
-msgid "RESTful API for custom integrations"
-msgstr ""
-
-#: templates/billing/tariff_create.html:316
-msgid "Connect with external services"
-msgstr ""
-
-#: templates/billing/tariff_create.html:324
-#: templates/billing/tariff_edit.html:714
-#, fuzzy
-#| msgid "Telegram User"
-msgid "Telegram Bot"
-msgstr "Telegram foydalanuvchi"
-
-#: templates/billing/tariff_create.html:325
-msgid "Receive notifications and manage via Telegram"
-msgstr ""
-
-# Feature Names - Marketing (2)
-#: templates/billing/tariff_create.html:344
-#: templates/billing/tariff_edit.html:522
-#, fuzzy
-#| msgid "Marketing Campaign Tools"
-msgid "Marketing Campaigns"
-msgstr "Marketing Kampaniyasi Vositalari"
-
-#: templates/billing/tariff_create.html:345
-msgid "Create and manage campaigns"
-msgstr ""
-
-#: templates/billing/tariff_create.html:353
-#: templates/billing/usage_tracking.html:192
-msgid "Broadcasts"
-msgstr ""
-
-#: templates/billing/tariff_create.html:354
-msgid "Send bulk notifications to customers"
-msgstr ""
-
-# Feature Names - Organization (4)
-#: templates/billing/tariff_create.html:372
-#: templates/billing/tariff_edit.html:655
-#, fuzzy
-#| msgid "Multiple Branches"
-msgid "Multi-Branch"
-msgstr "Ko'plab Filiallar"
-
-#: templates/billing/tariff_create.html:373
-msgid "Manage multiple business locations"
-msgstr ""
-
-#: templates/billing/tariff_create.html:382
-msgid "Employee accounts and permissions"
-msgstr ""
-
-#: templates/billing/tariff_create.html:390
-#, fuzzy
-#| msgid "Knowledge Base Access"
-msgid "Role-Based Access Control"
-msgstr "Bilimlar Bazasiga Kirish"
-
-#: templates/billing/tariff_create.html:391
-#, fuzzy
-#| msgid "Custom Roles & Permissions"
-msgid "Custom roles and permissions"
-msgstr "Maxsus Rollar va Ruxsatlar"
-
-#: templates/billing/tariff_create.html:400
-msgid "Track all system activities"
-msgstr ""
-
-#: templates/billing/tariff_create.html:419
-msgid "File Uploads"
-msgstr ""
-
-#: templates/billing/tariff_create.html:420
-msgid "Attach files to orders and records"
-msgstr ""
-
-#: templates/billing/tariff_create.html:428
-msgid "Basic Storage"
-msgstr ""
-
-#: templates/billing/tariff_create.html:429
-msgid "Limited file storage space"
-msgstr ""
-
-#: templates/billing/tariff_create.html:437
-#, fuzzy
-#| msgid "Advanced Order Management"
-msgid "Advanced Storage"
-msgstr "Kengaytirilgan Buyurtmalarni Boshqarish"
-
-#: templates/billing/tariff_create.html:438
-msgid "Expanded storage with version control"
-msgstr ""
-
-#: templates/billing/tariff_create.html:456
-#, fuzzy
-#| msgid "Payment Tracking & Recording"
-msgid "Payment Tracking"
-msgstr "To'lovlarni Kuzatish va Yozib Olish"
-
-# Debtors Report Translations
-#: templates/billing/tariff_create.html:457
-#, fuzzy
-#| msgid "Track and manage outstanding customer debts"
-msgid "Track payments and outstanding amounts"
-msgstr "Mijozlarning to'lanmagan qarzlarini kuzatish va boshqarish"
-
-# Feature Names - All 37 Features
-# Order Management Features (5)
-#: templates/billing/tariff_create.html:465
-#, fuzzy
-#| msgid "Basic Order Management"
-msgid "Expense Management"
-msgstr "Asosiy Buyurtmalarni Boshqarish"
-
-#: templates/billing/tariff_create.html:466
-msgid "Record and categorize expenses"
-msgstr ""
-
-#: templates/billing/tariff_create.html:474
-#, fuzzy
-#| msgid "Payment Method"
-msgid "Payment Reminders"
-msgstr "To'lov usuli"
-
-#: templates/billing/tariff_create.html:475
-msgid "Automatic payment reminder notifications"
-msgstr ""
-
-#: templates/billing/tariff_create.html:484
-msgid "Generate and send invoices"
-msgstr ""
-
-#: templates/billing/tariff_create.html:503
-msgid "Priority Support"
-msgstr ""
-
-#: templates/billing/tariff_create.html:504
-#: templates/billing/tariff_create.html:514
-msgid "Docs"
-msgstr ""
-
-#: templates/billing/tariff_create.html:505
-msgid "Faster response time for issues"
-msgstr ""
-
-#: templates/billing/tariff_create.html:513
-msgid "Onboarding"
-msgstr ""
-
-#: templates/billing/tariff_create.html:515
-msgid "Personal setup assistance"
-msgstr ""
-
-#: templates/billing/tariff_create.html:533
-msgid "White Label"
-msgstr ""
-
-#: templates/billing/tariff_create.html:534
-msgid "Custom branding and domain"
-msgstr ""
-
-#: templates/billing/tariff_create.html:542
-msgid "Data Backup"
-msgstr ""
-
-#: templates/billing/tariff_create.html:543
-msgid "Automated backup and recovery"
-msgstr ""
-
-# Feature Names - All 37 Features
-# Order Management Features (5)
-#: templates/billing/tariff_create.html:556
-#, fuzzy
-#| msgid "Basic Order Management"
-msgid "Services Management"
-msgstr "Asosiy Buyurtmalarni Boshqarish"
-
-#: templates/billing/tariff_create.html:562
-#, fuzzy
-#| msgid "Services"
-msgid "Basic Services"
-msgstr "Xizmatlar"
-
-#: templates/billing/tariff_create.html:563
-msgid "Create and manage service catalog"
-msgstr ""
-
-# Feature Names - Advanced (3)
-#: templates/billing/tariff_create.html:571
-#, fuzzy
-#| msgid "Advanced Security Features"
-msgid "Advanced Services"
-msgstr "Kengaytirilgan Xavfsizlik Funksiyalari"
-
-#: templates/billing/tariff_create.html:572
-msgid "Categories, pricing tiers, variations"
-msgstr ""
-
-#: templates/billing/tariff_create.html:580
-#, fuzzy
-#| msgid "Expense Tracking"
-msgid "Service Tracking"
-msgstr "Xarajatlarni Kuzatish"
-
-#: templates/billing/tariff_create.html:581
-msgid "Track service usage and statistics"
-msgstr ""
-
-# Feature Names - Analytics & Reports (6)
-#: templates/billing/tariff_create.html:589
-#, fuzzy
-#| msgid "Basic Analytics"
-msgid "Service Analytics"
-msgstr "Asosiy Analitika"
-
-#: templates/billing/tariff_create.html:590
-msgid "Analyze service performance metrics"
-msgstr ""
-
-#: templates/billing/tariff_edit.html:4
-msgid "Edit Tariff"
-msgstr "Tarifni tahrirlash"
-
+#: templates/billing/tariff_create.html:61
 #: templates/billing/tariff_edit.html:86
 #, fuzzy
 #| msgid "Title"
 msgid "Titles"
 msgstr "Sarlavha"
 
+#: templates/billing/tariff_create.html:66
 #: templates/billing/tariff_edit.html:91
 msgid "Title (Uzbek)"
 msgstr ""
 
+#: templates/billing/tariff_create.html:74
 #: templates/billing/tariff_edit.html:100
 msgid "Title (Russian)"
 msgstr ""
 
+#: templates/billing/tariff_create.html:82
 #: templates/billing/tariff_edit.html:109
 msgid "Title (English)"
 msgstr ""
 
+#: templates/billing/tariff_create.html:90
 #: templates/billing/tariff_edit.html:118
 #, fuzzy
 #| msgid "Description"
 msgid "Descriptions"
 msgstr "Tavsif"
 
+#: templates/billing/tariff_create.html:95
 #: templates/billing/tariff_edit.html:123
 #, fuzzy
 #| msgid "Description"
 msgid "Description (Uzbek)"
 msgstr "Tavsif"
 
+#: templates/billing/tariff_create.html:103
 #: templates/billing/tariff_edit.html:131
 #, fuzzy
 #| msgid "Description"
 msgid "Description (Russian)"
 msgstr "Tavsif"
 
+#: templates/billing/tariff_create.html:111
 #: templates/billing/tariff_edit.html:139
 #, fuzzy
 #| msgid "Description"
 msgid "Description (English)"
 msgstr "Tavsif"
 
+#: templates/billing/tariff_create.html:120
+#: templates/billing/tariff_edit.html:148
+msgid "Lower numbers appear first"
+msgstr "Kichik raqamlar avval ko'rsatiladi"
+
+#: templates/billing/tariff_create.html:124
 #: templates/billing/tariff_edit.html:152
 #, fuzzy
 #| msgid "Status Change"
 msgid "Status Flags"
 msgstr "Holatni o'zgartirish"
 
+#: templates/billing/tariff_create.html:147
+#: templates/billing/tariff_edit.html:179
+msgid "Private (Hide on Landing)"
+msgstr ""
+
+#: templates/billing/tariff_create.html:163
+#: templates/billing/tariff_edit.html:197
+msgid "Number of days for free trial period"
+msgstr "Bepul sinov davri uchun kunlar soni"
+
+#: templates/billing/tariff_create.html:170
+#: templates/billing/tariff_edit.html:204
+msgid "Resource Limits"
+msgstr "Resurs chegaralari"
+
+#: templates/billing/tariff_create.html:178
+#: templates/billing/tariff_create.html:187
+#: templates/billing/tariff_create.html:196
+#: templates/billing/tariff_create.html:205
 #: templates/billing/tariff_edit.html:213
 #: templates/billing/tariff_edit.html:223
 #: templates/billing/tariff_edit.html:233
@@ -7264,30 +6935,49 @@ msgstr "Holatni o'zgartirish"
 msgid "Unlimited"
 msgstr ""
 
+#: templates/billing/tariff_create.html:209
 #: templates/billing/tariff_edit.html:247
 #, fuzzy
 #| msgid "Leave empty for global/default settings"
 msgid "Leave any field empty for unlimited access"
 msgstr "Global/standart sozlamalar uchun bo'sh qoldiring"
 
+# Feature Names - Advanced (3)
+#: templates/billing/tariff_create.html:219
+#: templates/billing/tariff_edit.html:257
+msgid "Included Features"
+msgstr "Kiritilgan xususiyatlar"
+
+#: templates/billing/tariff_create.html:222
 #: templates/billing/tariff_edit.html:260
 msgid "Select features available in this tariff plan"
 msgstr ""
 
+#: templates/billing/tariff_create.html:226
 #: templates/billing/tariff_edit.html:264
 msgid "Select All"
 msgstr ""
 
+#: templates/billing/tariff_create.html:229
 #: templates/billing/tariff_edit.html:267
 msgid "Deselect All"
 msgstr ""
 
+#: templates/billing/tariff_create.html:239
 #: templates/billing/tariff_edit.html:277
 #, fuzzy
 #| msgid "Services"
 msgid "Core Services"
 msgstr "Xizmatlar"
 
+#: templates/billing/tariff_create.html:242
+#: templates/billing/tariff_create.html:295
+#: templates/billing/tariff_create.html:357
+#: templates/billing/tariff_create.html:419
+#: templates/billing/tariff_create.html:443
+#: templates/billing/tariff_create.html:478
+#: templates/billing/tariff_create.html:558
+#: templates/billing/tariff_create.html:609
 #: templates/billing/tariff_edit.html:280
 #: templates/billing/tariff_edit.html:341
 #: templates/billing/tariff_edit.html:413
@@ -7296,200 +6986,269 @@ msgstr "Xizmatlar"
 #: templates/billing/tariff_edit.html:550
 #: templates/billing/tariff_edit.html:644
 #: templates/billing/tariff_edit.html:703
+#: venv/lib/python3.10/site-packages/modeltranslation/widgets.py:32
 msgid "None"
 msgstr ""
 
+#: templates/billing/tariff_create.html:251
 #: templates/billing/tariff_edit.html:291
 #, fuzzy
 #| msgid "Products"
 msgid "Basic Products"
 msgstr "Mahsulotlar"
 
+#: templates/billing/tariff_create.html:252
 #: templates/billing/tariff_edit.html:292
 msgid ""
 "Define translation services with base prices (language pairs, document types)"
 msgstr ""
 
+#: templates/billing/tariff_create.html:260
 #: templates/billing/tariff_edit.html:302
 #, fuzzy
 #| msgid "Add Product"
 msgid "Advanced Products"
 msgstr "Mahsulot qo'shish"
 
+#: templates/billing/tariff_create.html:261
 #: templates/billing/tariff_edit.html:303
 msgid ""
 "Multiple service variants, category grouping, and per-service customization"
 msgstr ""
 
+#: templates/billing/tariff_create.html:269
 #: templates/billing/tariff_edit.html:313
 #, fuzzy
 #| msgid "Language-Specific Pricing"
 msgid "Language Pricing"
 msgstr "Tilga Xos Narxlash"
 
+#: templates/billing/tariff_create.html:270
 #: templates/billing/tariff_edit.html:314
 msgid "Set unique rates for each language direction (e.g. RU→EN vs RU→DE)"
 msgstr ""
 
+#: templates/billing/tariff_create.html:279
 #: templates/billing/tariff_edit.html:325
 msgid ""
 "Auto-calculate order total by page count × per-page rate for each language "
 "pair"
 msgstr ""
 
+#: templates/billing/tariff_create.html:304
+#: templates/billing/tariff_edit.html:352
+#, fuzzy
+#| msgid "No Orders"
+msgid "Basic Orders"
+msgstr "Buyurtmalar yo'q"
+
+#: templates/billing/tariff_create.html:305
 #: templates/billing/tariff_edit.html:353
 msgid ""
 "Accept orders, update statuses (New → In Progress → Done), view full order "
 "history"
 msgstr ""
 
+#: templates/billing/tariff_create.html:313
+#: templates/billing/tariff_edit.html:363
+#, fuzzy
+#| msgid "Advanced Order Management"
+msgid "Advanced Orders"
+msgstr "Kengaytirilgan Buyurtmalarni Boshqarish"
+
+#: templates/billing/tariff_create.html:314
 #: templates/billing/tariff_edit.html:364
 msgid ""
 "Bulk-select orders and apply actions; filter by date, status, staff, branch "
 "or language pair"
 msgstr ""
 
+#: templates/billing/tariff_create.html:323
 #: templates/billing/tariff_edit.html:375
 msgid ""
 "Distribute orders to specific employees; track who is currently working on "
 "each order"
 msgstr ""
 
+#: templates/billing/tariff_create.html:332
 #: templates/billing/tariff_edit.html:386
 msgid ""
 "Record one payment covering several orders at once; supports partial "
 "payments and debt carry-over"
 msgstr ""
 
+#: templates/billing/tariff_create.html:340
 #: templates/billing/tariff_edit.html:396
 #, fuzzy
 #| msgid "Extra Data"
 msgid "Extra Fees"
 msgstr "Qo'shimcha ma'lumotlar"
 
+#: templates/billing/tariff_create.html:341
 #: templates/billing/tariff_edit.html:397
 msgid ""
 "Add manual surcharges (urgency, notary, courier) or discounts to any order "
 "after creation"
 msgstr ""
 
+#: templates/billing/tariff_create.html:354
 #: templates/billing/tariff_edit.html:410
 #, fuzzy
 #| msgid "General Expenses"
 msgid "Financial & Expenses"
 msgstr "Umumiy xarajatlar"
 
+#: templates/billing/tariff_create.html:366
 #: templates/billing/tariff_edit.html:424
 #, fuzzy
 #| msgid "Payment Method"
 msgid "Payment Management"
 msgstr "To'lov usuli"
 
+#: templates/billing/tariff_create.html:367
 #: templates/billing/tariff_edit.html:425
 msgid ""
 "Record cash / card / online payments, upload receipts, and mark orders as "
 "fully or partially paid"
 msgstr ""
 
+#: templates/billing/tariff_create.html:376
 #: templates/billing/tariff_edit.html:436
 msgid ""
 "Create and download PDF invoices per client; essential for B2B billing and "
 "formal payments"
 msgstr ""
 
+#: templates/billing/tariff_create.html:385
 #: templates/billing/tariff_edit.html:447
 msgid ""
 "Log costs tied to specific orders (translator fees, printing, materials, "
 "postage)"
 msgstr ""
 
+#: templates/billing/tariff_create.html:394
 #: templates/billing/tariff_edit.html:458
 msgid ""
 "Record overhead not linked to orders: office rent, staff salaries, "
 "stationery, utilities"
 msgstr ""
 
+#: templates/billing/tariff_create.html:402
 #: templates/billing/tariff_edit.html:468
 msgid "Archive Access"
 msgstr ""
 
+#: templates/billing/tariff_create.html:403
 #: templates/billing/tariff_edit.html:469
 msgid ""
 "View, search and restore completed orders auto-archived to Telegram channel; "
 "zero data loss"
 msgstr ""
 
+#: templates/billing/tariff_create.html:416
 #: templates/billing/tariff_edit.html:482
 #, fuzzy
 #| msgid "Customer Analytics"
 msgid "Customers & Agencies"
 msgstr "Mijoz tahlili"
 
+#: templates/billing/tariff_create.html:429
 #: templates/billing/tariff_edit.html:497
 msgid ""
 "Onboard B2B partners with dedicated pricing, credit limits and separate "
 "analytics per agency"
 msgstr ""
 
+# Feature Names - Marketing (2)
+#: templates/billing/tariff_create.html:452
+#: templates/billing/tariff_edit.html:522
+#, fuzzy
+#| msgid "Marketing Campaign Tools"
+msgid "Marketing Campaigns"
+msgstr "Marketing Kampaniyasi Vositalari"
+
+#: templates/billing/tariff_create.html:453
 #: templates/billing/tariff_edit.html:523
 msgid ""
 "Compose Telegram posts with text, images or documents; manage drafts and "
 "campaign history"
 msgstr ""
 
+#: templates/billing/tariff_create.html:461
 #: templates/billing/tariff_edit.html:533
 #, fuzzy
 #| msgid "Mass Broadcast Messaging"
 msgid "Broadcast Messaging"
 msgstr "Ommaviy Xabarlar Yuborish"
 
+#: templates/billing/tariff_create.html:462
 #: templates/billing/tariff_edit.html:534
 msgid ""
 "Send a broadcast to all or filtered customers; schedule delivery and track "
 "open / delivery stats"
 msgstr ""
 
+#: templates/billing/tariff_create.html:475
+#: templates/billing/tariff_edit.html:547 templates/partials/sidebar.html:155
+msgid "Analytics & Reports"
+msgstr "Tahlil va hisobotlar"
+
+#: templates/billing/tariff_create.html:488
 #: templates/billing/tariff_edit.html:562
 msgid ""
 "Daily and monthly order volume, completion rate, and a summary dashboard for "
 "quick overview"
 msgstr ""
 
+#: templates/billing/tariff_create.html:497
 #: templates/billing/tariff_edit.html:573
 msgid ""
 "Cross-branch comparison, revenue time-series, top clients by order count and "
 "total spend"
 msgstr ""
 
+#: templates/billing/tariff_create.html:506
 #: templates/billing/tariff_edit.html:584
 msgid ""
 "Income vs. expense breakdown with profit margin per period, branch or "
 "language pair"
 msgstr ""
 
+#: templates/billing/tariff_create.html:515
 #: templates/billing/tariff_edit.html:595
 msgid ""
 "Per-employee report: orders completed, revenue generated, avg. turnaround "
 "time"
 msgstr ""
 
+#: templates/billing/tariff_create.html:523
+#: templates/billing/tariff_edit.html:605
+#, fuzzy
+#| msgid "Custom Report Builder"
+msgid "Custom Reports"
+msgstr "Maxsus Hisobot Yaratuvchi"
+
+#: templates/billing/tariff_create.html:524
 #: templates/billing/tariff_edit.html:606
 msgid ""
 "Build ad-hoc reports by combining any date range, branch, staff, service or "
 "status filters"
 msgstr ""
 
+#: templates/billing/tariff_create.html:533
 #: templates/billing/tariff_edit.html:617
 msgid ""
 "Download any report or data table as Excel / PDF / CSV with a single click"
 msgstr ""
 
+#: templates/billing/tariff_create.html:541
 #: templates/billing/tariff_edit.html:627
 #, fuzzy
 #| msgid "Payment Tracking & Recording"
 msgid "Debt Tracking"
 msgstr "To'lovlarni Kuzatish va Yozib Olish"
 
+#: templates/billing/tariff_create.html:542
 #: templates/billing/tariff_edit.html:628
 msgid ""
 "Outstanding balance per client, top-debtors list, collection rate and "
@@ -7497,54 +7256,83 @@ msgid ""
 msgstr ""
 
 # Sidebar Translations
+#: templates/billing/tariff_create.html:555
 #: templates/billing/tariff_edit.html:641
 #, fuzzy
 #| msgid "Organization"
 msgid "Organization & Staff"
 msgstr "Tashkilot"
 
+# Feature Names - Organization (4)
+#: templates/billing/tariff_create.html:567
+#: templates/billing/tariff_edit.html:655
+#, fuzzy
+#| msgid "Multiple Branches"
+msgid "Multi-Branch"
+msgstr "Ko'plab Filiallar"
+
+#: templates/billing/tariff_create.html:568
 #: templates/billing/tariff_edit.html:656
 msgid ""
 "Add multiple branches under one account; each has its own staff, orders, "
 "pricing and settings"
 msgstr ""
 
+#: templates/billing/tariff_create.html:576
 #: templates/billing/tariff_edit.html:666
 #, fuzzy
 #| msgid "Custom Report Builder"
 msgid "Custom Roles"
 msgstr "Maxsus Hisobot Yaratuvchi"
 
+#: templates/billing/tariff_create.html:577
 #: templates/billing/tariff_edit.html:667
 msgid ""
 "Create roles (Translator, Manager, etc.) and precisely control what each "
 "role can view or do"
 msgstr ""
 
+#: templates/billing/tariff_create.html:586
 #: templates/billing/tariff_edit.html:678
 msgid ""
 "Override global settings per branch: working hours, pricing rules, Telegram "
 "bot, notifications"
 msgstr ""
 
+#: templates/billing/tariff_create.html:595
 #: templates/billing/tariff_edit.html:689
 msgid ""
 "Full history of who changed what and when — order edits, payment records, "
 "status changes, logins"
 msgstr ""
 
+#: templates/billing/tariff_create.html:606
 #: templates/billing/tariff_edit.html:700
 #, fuzzy
 #| msgid "Third-Party Integrations"
 msgid "Integrations"
 msgstr "Uchinchi Tomon Integratsiyalari"
 
+#: templates/billing/tariff_create.html:618
+#: templates/billing/tariff_edit.html:714
+#, fuzzy
+#| msgid "Telegram User"
+msgid "Telegram Bot"
+msgstr "Telegram foydalanuvchi"
+
+#: templates/billing/tariff_create.html:619
 #: templates/billing/tariff_edit.html:715
 msgid ""
 "Customers place orders, get instant price estimates and status notifications "
 "via your Telegram bot"
 msgstr ""
 
+#: templates/billing/tariff_create.html:627
+#: templates/billing/tariff_edit.html:725
+msgid "Webhooks"
+msgstr ""
+
+#: templates/billing/tariff_create.html:628
 #: templates/billing/tariff_edit.html:726
 msgid ""
 "Configure your bot's webhook URL so Telegram delivers messages to your "
@@ -7552,81 +7340,106 @@ msgid ""
 msgstr ""
 
 # Feature Names - Integration (4)
+#: templates/billing/tariff_create.html:637
 #: templates/billing/tariff_edit.html:737
 #, fuzzy
 #| msgid "REST API Access"
 msgid "REST API"
 msgstr "REST API Kirish"
 
+#: templates/billing/tariff_create.html:638
+#: templates/billing/tariff_create.html:650
+#: templates/billing/tariff_edit.html:738
+#: templates/billing/tariff_edit.html:752
+msgid "On Request"
+msgstr ""
+
+#: templates/billing/tariff_create.html:640
 #: templates/billing/tariff_edit.html:740
 msgid ""
 "REST API to connect MultiLang data with your own tools, CRM or automation "
 "scripts"
 msgstr ""
 
+#: templates/billing/tariff_create.html:649
 #: templates/billing/tariff_edit.html:751
 #, fuzzy
 #| msgid "Third-Party Integrations"
 msgid "Third-Party"
 msgstr "Uchinchi Tomon Integratsiyalari"
 
+#: templates/billing/tariff_create.html:652
 #: templates/billing/tariff_edit.html:754
 msgid ""
 "Connect payment gateways (Payme, etc.) and other external services to the "
 "platform"
 msgstr ""
 
+#: templates/billing/tariff_create.html:665
 #: templates/billing/tariff_edit.html:767
 #: templates/billing/tariff_list.html:101
 msgid "Pricing Options"
 msgstr "Narx variantlari"
 
+#: templates/billing/tariff_create.html:669
 #: templates/billing/tariff_edit.html:771
 #, fuzzy
 #| msgid "Total Price"
 msgid "Base Monthly Price"
 msgstr "Jami narx"
 
+#: templates/billing/tariff_create.html:673
 #: templates/billing/tariff_edit.html:775
 msgid "e.g., 299000"
 msgstr ""
 
+#: templates/billing/tariff_create.html:675
 #: templates/billing/tariff_edit.html:778
 msgid "Full price per month without any discount"
 msgstr ""
 
-#: templates/billing/tariff_edit.html:786
-#: templates/billing/tariff_edit.html:950
-#, fuzzy
-msgid "Months"
-msgstr "Bu oy"
-
-#: templates/billing/tariff_edit.html:791
-#: templates/billing/tariff_edit.html:954
-#, python-format
-msgid "Discount %%"
-msgstr ""
-
-#: templates/billing/tariff_edit.html:817
-#, fuzzy
-#| msgid "Remove receipt"
-msgid "Remove"
-msgstr "Kvitansiyani o'chirish"
-
+#: templates/billing/tariff_create.html:682
 #: templates/billing/tariff_edit.html:827
 msgid ""
 "No pricing options. Add one below or leave empty to show 'Contact admin' on "
 "the public page."
 msgstr ""
 
+#: templates/billing/tariff_create.html:686
 #: templates/billing/tariff_edit.html:831
 msgid "Add Pricing Option"
 msgstr ""
 
+#: templates/billing/tariff_create.html:689
 #: templates/billing/tariff_edit.html:834
 #, python-format
 msgid "Set discount %% for longer durations. Prices calculate automatically."
 msgstr ""
+
+#: templates/billing/tariff_create.html:772
+#: templates/billing/tariff_edit.html:786
+#: templates/billing/tariff_edit.html:950
+#, fuzzy
+msgid "Months"
+msgstr "Bu oy"
+
+#: templates/billing/tariff_create.html:776
+#: templates/billing/tariff_edit.html:791
+#: templates/billing/tariff_edit.html:954
+#, python-format
+msgid "Discount %%"
+msgstr ""
+
+#: templates/billing/tariff_create.html:798
+#: templates/billing/tariff_edit.html:817
+#, fuzzy
+#| msgid "Remove receipt"
+msgid "Remove"
+msgstr "Kvitansiyani o'chirish"
+
+#: templates/billing/tariff_edit.html:4
+msgid "Edit Tariff"
+msgstr "Tarifni tahrirlash"
 
 #: templates/billing/tariff_edit.html:843
 #, python-format
@@ -7744,56 +7557,68 @@ msgid "All Months"
 msgstr "Barcha miqdorlar"
 
 #: templates/billing/usage_tracking.html:103
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:25
 msgid "January"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:104
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:26
 msgid "February"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:105
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:27
 #, fuzzy
 #| msgid "Search"
 msgid "March"
 msgstr "Qidirish"
 
 #: templates/billing/usage_tracking.html:106
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:28
 msgid "April"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:107
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:29
 #, fuzzy
 #| msgid "Pay"
 msgid "May"
 msgstr "To'lash"
 
 #: templates/billing/usage_tracking.html:108
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:30
 msgid "June"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:109
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:31
 msgid "July"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:110
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:32
 msgid "August"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:111
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:33
 msgid "September"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:112
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:34
 msgid "October"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:113
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:35
 #, fuzzy
 #| msgid "Phone Number"
 msgid "November"
 msgstr "Telefon raqami"
 
 #: templates/billing/usage_tracking.html:114
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:36
 msgid "December"
 msgstr ""
 
@@ -7925,6 +7750,10 @@ msgstr "Ma'lumot yo'q"
 
 #: templates/billing/usage_tracking.html:180
 msgid "records"
+msgstr ""
+
+#: templates/billing/usage_tracking.html:192
+msgid "Broadcasts"
 msgstr ""
 
 #: templates/billing/usage_tracking.html:195
@@ -8091,11 +7920,13 @@ msgstr "Kompaniyalar"
 
 #: templates/landing/contact_requests.html:147
 #: templates/landing/contact_requests.html:155
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:867
 msgid "Yes"
 msgstr ""
 
 #: templates/landing/contact_requests.html:148
 #: templates/landing/contact_requests.html:156
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:868
 msgid "No"
 msgstr ""
 
@@ -8235,7 +8066,7 @@ msgstr "Qarzdarlar topilmadi"
 
 #: templates/landing/requests_management.html:5
 #: templates/landing/requests_management.html:12
-#: templates/partials/sidebar.html:346
+#: templates/partials/sidebar.html:349
 #, fuzzy
 #| msgid "Debtors Management"
 msgid "Requests Management"
@@ -8893,13 +8724,13 @@ msgstr "Buyurtma hisobotlari"
 msgid "General Expense Analytics"
 msgstr "Umumiy xarajatlar tahlili"
 
-#: templates/partials/sidebar.html:306
+#: templates/partials/sidebar.html:309
 #, fuzzy
 #| msgid "users.users"
 msgid "Superuser Tools"
 msgstr "Foydalanuvchilar"
 
-#: templates/partials/sidebar.html:312
+#: templates/partials/sidebar.html:315
 msgid "Billing & Subscriptions"
 msgstr ""
 
@@ -9113,6 +8944,7 @@ msgstr "Tillar"
 #: templates/services/generalExpenseAnalytics.html:74
 #: templates/support/support_ticket_list.html:162
 #: templates/support/ticket_list.html:151
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:527
 msgid "Clear"
 msgstr "Tozalash"
 
@@ -9986,7 +9818,7 @@ msgid "Auto-resolve at"
 msgstr "Avtomatik yechilish vaqti"
 
 #: templates/support/support_ticket_detail.html:332
-#: templates/support/ticket_create.html:280
+#: templates/support/ticket_create.html:295
 #: templates/support/ticket_detail.html:303
 msgid "Open full size"
 msgstr "To'liq o'lchamda ochish"
@@ -10060,39 +9892,88 @@ msgstr "Hujjat turi"
 msgid "Brief description of the issue"
 msgstr "Muammoni qisqacha tasvirlab bering"
 
+#: templates/support/ticket_create.html:100
+msgid "Help us resolve your issue faster"
+msgstr "Muammoni tezroq hal etishimizga yordam bering"
+
+#: templates/support/ticket_create.html:101
+msgid ""
+"The more detail you provide, the quicker and more accurately we can help. "
+"Please include:"
+msgstr ""
+"Qancha ko'proq ma'lumot bersangiz, shuncha tez va aniq yordam bera olamiz. "
+"Iltimos, quyidagilarni kiriting:"
+
+#: templates/support/ticket_create.html:103
+msgid "Page URL"
+msgstr "Sahifa URL manzili"
+
+#: templates/support/ticket_create.html:103
+msgid "paste the full address of the page where the problem occurs"
+msgstr "muammo yuzaga kelayotgan sahifaning to'liq manzilini joylashtiring"
+
 #: templates/support/ticket_create.html:104
+msgid "What is wrong"
+msgstr "Nima noto'g'ri"
+
+#: templates/support/ticket_create.html:104
+msgid ""
+"describe exactly what is happening (error message, incorrect behaviour, etc.)"
+msgstr ""
+"nima sodir bo'layotganini aniq tasvirlab bering (xato xabari, noto'g'ri "
+"xatti-harakat va h.k.)"
+
+#: templates/support/ticket_create.html:105
+msgid "What should happen"
+msgstr "Qanday bo'lishi kerak"
+
+#: templates/support/ticket_create.html:105
+msgid "explain what the correct or expected behaviour should be"
+msgstr ""
+"to'g'ri yoki kutilgan xatti-harakat qanday bo'lishi kerakligini tushuntiring"
+
+#: templates/support/ticket_create.html:106
+msgid "Steps to reproduce"
+msgstr "Takrorlash qadamlari"
+
+#: templates/support/ticket_create.html:106
+msgid "list the steps we can follow to see the problem ourselves"
+msgstr ""
+"muammoni o'zimiz ko'rishimiz uchun bajara oladigan qadamlarni sanab o'ting"
+
+#: templates/support/ticket_create.html:119
 msgid ""
 "Please describe the issue in detail. Include steps to reproduce if relevant."
 msgstr ""
 "Iltimos, muammoni batafsil tasvirlang. Agar zarur bo'lsa, takroriy ishlab "
 "chiqarish bosqichlarini kiriting."
 
-#: templates/support/ticket_create.html:114
+#: templates/support/ticket_create.html:129
 #, fuzzy
 #| msgid "payment.cash"
 msgid "Attachments"
 msgstr "Qo'shimchalar"
 
-#: templates/support/ticket_create.html:115
+#: templates/support/ticket_create.html:130
 msgid "optional, max 10 MB each"
 msgstr "ixtiyoriy, har biri maks. 10 MB"
 
-#: templates/support/ticket_create.html:119
+#: templates/support/ticket_create.html:134
 msgid "Drag & drop files here or"
 msgstr "Fayllarni bu yerga torting yoki"
 
 # Landing page
-#: templates/support/ticket_create.html:121
+#: templates/support/ticket_create.html:136
 #, fuzzy
 #| msgid "Choose Plan"
 msgid "Choose Files"
 msgstr "Fayllarni tanlash"
 
-#: templates/support/ticket_create.html:127
+#: templates/support/ticket_create.html:142
 msgid "JPG, PNG, PDF, DOC, DOCX, XLS, ZIP"
 msgstr "JPG, PNG, PDF, DOC, DOCX, XLS, ZIP"
 
-#: templates/support/ticket_create.html:141
+#: templates/support/ticket_create.html:156
 msgid "Submit Ticket"
 msgstr "Murojaatni yuborish"
 
@@ -10183,6 +10064,1679 @@ msgstr "Muammo yuzaga kelganda yangi qo'llab-quvvatlash chiptasi yuboring."
 msgid "Create First Ticket"
 msgstr "Birinchi Chiptani Yaratish"
 
+#: venv/lib/python3.10/site-packages/click/_termui_impl.py:613
+#, python-brace-format
+msgid "{editor}: Editing failed"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/_termui_impl.py:617
+#, python-brace-format
+msgid "{editor}: Editing failed: {e}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1114
+#: venv/lib/python3.10/site-packages/click/core.py:1151
+#, python-brace-format
+msgid "{text} {deprecated_message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1170
+#, fuzzy
+#| msgid "form.optional"
+msgid "Options"
+msgstr "Ixtiyoriy"
+
+#: venv/lib/python3.10/site-packages/click/core.py:1245
+#, python-brace-format
+msgid "Got unexpected extra argument ({args})"
+msgid_plural "Got unexpected extra arguments ({args})"
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1264
+msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1448
+msgid "Aborted!"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1822
+msgid "Commands"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1853
+msgid "Missing command."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:1931
+msgid "No such command {name!r}."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2355
+msgid "Value must be an iterable."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2378
+#, python-brace-format
+msgid "Takes {nargs} values but 1 was given."
+msgid_plural "Takes {nargs} values but {len} were given."
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:2567
+msgid ""
+"DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:3015
+#, python-brace-format
+msgid "env var: {var}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:3018
+#, python-brace-format
+msgid "default: {default}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/core.py:3082
+msgid "(dynamic)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/decorators.py:465
+#, python-format
+msgid "%(prog)s, version %(version)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/decorators.py:522
+msgid "Show the version and exit."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/decorators.py:548
+#, fuzzy
+#| msgid "No messages yet."
+msgid "Show this message and exit."
+msgstr "Hali xabarlar yo'q."
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:50
+#: venv/lib/python3.10/site-packages/click/exceptions.py:89
+#, python-brace-format
+msgid "Error: {message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:81
+#, python-brace-format
+msgid "Try '{command} {option}' for help."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:130
+#, python-brace-format
+msgid "Invalid value: {message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:132
+#, python-brace-format
+msgid "Invalid value for {param_hint}: {message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:190
+msgid "Missing argument"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:192
+#, fuzzy
+#| msgid "Pricing Options"
+msgid "Missing option"
+msgstr "Narx variantlari"
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:194
+msgid "Missing parameter"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:196
+#, python-brace-format
+msgid "Missing {param_type}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:203
+#, python-brace-format
+msgid "Missing parameter: {param_name}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:223
+#, python-brace-format
+msgid "No such option: {name}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:235
+#, python-brace-format
+msgid "Did you mean {possibility}?"
+msgid_plural "(Possible options: {possibilities})"
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:282
+#, fuzzy
+#| msgid "Unique Customers"
+msgid "unknown error"
+msgstr "Noyob mijozlar"
+
+#: venv/lib/python3.10/site-packages/click/exceptions.py:289
+msgid "Could not open file {filename!r}: {message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/parser.py:199
+msgid "Argument {name!r} takes {nargs} values."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/parser.py:381
+msgid "Option {name!r} does not take a value."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/parser.py:444
+msgid "Option {name!r} requires an argument."
+msgid_plural "Option {name!r} requires {nargs} arguments."
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/click/shell_completion.py:332
+msgid "Shell completion is not supported for Bash versions older than 4.4."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/shell_completion.py:339
+msgid "Couldn't detect Bash version, shell completion is not supported."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:165
+msgid "Repeat for confirmation"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:181
+msgid "Error: The value you entered was invalid."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:183
+#, python-brace-format
+msgid "Error: {e.message}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:194
+msgid "Error: The two entered values do not match."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:253
+msgid "Error: invalid input"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/termui.py:872
+msgid "Press any key to continue..."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:332
+#, python-brace-format
+msgid ""
+"Choose from:\n"
+"\t{choices}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:369
+msgid "{value!r} is not {choice}."
+msgid_plural "{value!r} is not one of {choices}."
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:460
+msgid "{value!r} does not match the format {format}."
+msgid_plural "{value!r} does not match the formats {formats}."
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:482
+msgid "{value!r} is not a valid {number_type}."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:538
+#, python-brace-format
+msgid "{value} is not in the range {range}."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:719
+msgid "{value!r} is not a valid boolean. Recognized values: {states}"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:747
+#, fuzzy
+#| msgid "Enter a valid amount."
+msgid "{value!r} is not a valid UUID."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/click/types.py:937
+msgid "file"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:939
+#, fuzzy
+#| msgid "Payment History"
+msgid "directory"
+msgstr "To'lov tarixi"
+
+#: venv/lib/python3.10/site-packages/click/types.py:941
+#, fuzzy
+#| msgid "File"
+msgid "path"
+msgstr "Fayl"
+
+#: venv/lib/python3.10/site-packages/click/types.py:988
+msgid "{name} {filename!r} does not exist."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:997
+msgid "{name} {filename!r} is a file."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:1005
+msgid "{name} {filename!r} is a directory."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:1014
+msgid "{name} {filename!r} is not readable."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:1023
+msgid "{name} {filename!r} is not writable."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:1032
+msgid "{name} {filename!r} is not executable."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/click/types.py:1099
+#, python-brace-format
+msgid "{len_type} values are required, but {len_value} was given."
+msgid_plural "{len_type} values are required, but {len_value} were given."
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/django/contrib/messages/apps.py:16
+#, fuzzy
+#| msgid "Message"
+msgid "Messages"
+msgstr "Xabar"
+
+#: venv/lib/python3.10/site-packages/django/contrib/sitemaps/apps.py:8
+msgid "Site Maps"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/contrib/staticfiles/apps.py:9
+#, fuzzy
+#| msgid "Statistics"
+msgid "Static Files"
+msgstr "Statistika"
+
+#: venv/lib/python3.10/site-packages/django/contrib/syndication/apps.py:7
+#, fuzzy
+#| msgid "Location"
+msgid "Syndication"
+msgstr "Manzil"
+
+#. Translators: String used to replace omitted page numbers in elided page
+#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
+#: venv/lib/python3.10/site-packages/django/core/paginator.py:30
+msgid "…"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/paginator.py:32
+msgid "That page number is not an integer"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/paginator.py:33
+msgid "That page number is less than 1"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/paginator.py:34
+msgid "That page contains no results"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:22
+#, fuzzy
+#| msgid "Enter a valid amount."
+msgid "Enter a valid value."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:70
+#, fuzzy
+#| msgid "Enter a valid amount."
+msgid "Enter a valid domain name."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:153
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:775
+#, fuzzy
+#| msgid "Enter a valid amount."
+msgid "Enter a valid URL."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:200
+#, fuzzy
+#| msgid "Enter a valid amount."
+msgid "Enter a valid integer."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:211
+#, fuzzy
+#| msgid "form.address"
+msgid "Enter a valid email address."
+msgstr "Manzil"
+
+#. Translators: "letters" means latin letters: a-z and A-Z.
+#: venv/lib/python3.10/site-packages/django/core/validators.py:289
+msgid ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:297
+msgid ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or "
+"hyphens."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:309
+#: venv/lib/python3.10/site-packages/django/core/validators.py:318
+#: venv/lib/python3.10/site-packages/django/core/validators.py:332
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2220
+#, fuzzy, python-format
+#| msgid "Enter a valid amount."
+msgid "Enter a valid %(protocol)s address."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:311
+msgid "IPv4"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:320
+#: venv/lib/python3.10/site-packages/django/utils/ipv6.py:43
+msgid "IPv6"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:334
+msgid "IPv4 or IPv6"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:375
+msgid "Enter only digits separated by commas."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:381
+#, python-format
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:416
+#, python-format
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:425
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:434
+#, python-format
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:441
+#, python-format
+msgid ""
+"Ensure this value is a multiple of step size %(limit_value)s, starting from "
+"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:473
+#, python-format
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:491
+#, python-format
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:514
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:366
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:405
+#, fuzzy
+#| msgid "orders.orderNumber"
+msgid "Enter a number."
+msgstr "Buyurtma raqami"
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:516
+#, python-format
+msgid "Ensure that there are no more than %(max)s digit in total."
+msgid_plural "Ensure that there are no more than %(max)s digits in total."
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:521
+#, python-format
+msgid "Ensure that there are no more than %(max)s decimal place."
+msgid_plural "Ensure that there are no more than %(max)s decimal places."
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:526
+#, python-format
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:597
+#, python-format
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/core/validators.py:659
+msgid "Null characters are not allowed."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/base.py:1600
+#: venv/lib/python3.10/site-packages/django/forms/models.py:908
+msgid "and"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/base.py:1602
+#, python-format
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/constraints.py:22
+#, python-format
+msgid "Constraint “%(name)s” is violated."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:134
+#, python-format
+msgid "Value %(value)r is not a valid choice."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:135
+#, fuzzy
+#| msgid "This action cannot be undone."
+msgid "This field cannot be null."
+msgstr "Bu amalni bekor qilib bo'lmaydi."
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:136
+#, fuzzy
+#| msgid "This action cannot be undone."
+msgid "This field cannot be blank."
+msgstr "Bu amalni bekor qilib bo'lmaydi."
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:137
+#, python-format
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr ""
+
+#. Translators: The 'lookup_type' is one of 'date', 'year' or
+#. 'month'. Eg: "Title must be unique for pub_date year"
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:141
+#, python-format
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:180
+#, python-format
+msgid "Field of type: %(field_type)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1162
+#, python-format
+msgid "“%(value)s” value must be either True or False."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1163
+#, python-format
+msgid "“%(value)s” value must be either True, False, or None."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1165
+msgid "Boolean (Either True or False)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1215
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1217
+msgid "String (unlimited)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1326
+#, fuzzy
+#| msgid "All Centers"
+msgid "Comma-separated integers"
+msgstr "Barcha markazlar"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1427
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1431
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1566
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1435
+msgid "Date (without time)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1562
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
+"uuuuuu]][TZ] format."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1570
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
+"[TZ]) but it is an invalid date/time."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1575
+msgid "Date (with time)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1702
+#, python-format
+msgid "“%(value)s” value must be a decimal number."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1704
+#, fuzzy
+#| msgid "Phone Number"
+msgid "Decimal number"
+msgstr "Telefon raqami"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1864
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[."
+"uuuuuu] format."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1920
+#, fuzzy
+#| msgid "IP Address"
+msgid "Email address"
+msgstr "IP manzil"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:1945
+#, fuzzy
+#| msgid "File"
+msgid "File path"
+msgstr "Fayl"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2023
+#, python-format
+msgid "“%(value)s” value must be a float."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2025
+msgid "Floating point number"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2065
+#, python-format
+msgid "“%(value)s” value must be an integer."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2067
+#, fuzzy
+#| msgid "Third-Party Integrations"
+msgid "Integer"
+msgstr "Uchinchi Tomon Integratsiyalari"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2163
+#, fuzzy
+#| msgid "All Centers"
+msgid "Big (8 byte) integer"
+msgstr "Barcha markazlar"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2180
+#, fuzzy
+#| msgid "All Centers"
+msgid "Small integer"
+msgstr "Barcha markazlar"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2188
+#, fuzzy
+#| msgid "IP Address"
+msgid "IPv4 address"
+msgstr "IP manzil"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2219
+#, fuzzy
+#| msgid "IP Address"
+msgid "IP address"
+msgstr "IP manzil"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2310
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2311
+#, python-format
+msgid "“%(value)s” value must be either None, True or False."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2313
+msgid "Boolean (Either True, False or None)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2364
+#, fuzzy
+#| msgid "All Centers"
+msgid "Positive big integer"
+msgstr "Barcha markazlar"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2379
+#, fuzzy
+#| msgid "All Centers"
+msgid "Positive integer"
+msgstr "Barcha markazlar"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2394
+#, fuzzy
+#| msgid "All Centers"
+msgid "Positive small integer"
+msgstr "Barcha markazlar"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2410
+#, python-format
+msgid "Slug (up to %(max_length)s)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2446
+#, fuzzy
+#| msgid "Help Text"
+msgid "Text"
+msgstr "Yordam matni"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2526
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2530
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2534
+msgid "Time"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2642
+msgid "URL"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2666
+msgid "Raw binary data"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2731
+#, python-format
+msgid "“%(value)s” is not a valid UUID."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/__init__.py:2733
+msgid "Universally unique identifier"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/files.py:420
+msgid "Image"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/json.py:24
+#, fuzzy
+#| msgid "Object ID"
+msgid "A JSON object"
+msgstr "Obyekt ID"
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/json.py:26
+#, fuzzy
+#| msgid "Enter a valid amount."
+msgid "Value must be valid JSON."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:979
+#, python-format
+msgid "%(model)s instance with %(field)s %(value)r is not a valid choice."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:982
+msgid "Foreign Key (type determined by related field)"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:1276
+msgid "One-to-one relationship"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:1333
+#, python-format
+msgid "%(from)s-%(to)s relationship"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:1335
+#, python-format
+msgid "%(from)s-%(to)s relationships"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/db/models/fields/related.py:1383
+msgid "Many-to-many relationship"
+msgstr ""
+
+#. Translators: If found as last label character, these punctuation
+#. characters will prevent the default label_suffix to be appended to the label
+#: venv/lib/python3.10/site-packages/django/forms/boundfield.py:185
+msgid ":?.!"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:95
+#, fuzzy
+#| msgid "Title is required."
+msgid "This field is required."
+msgstr "Sarlavha kiritilishi shart."
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:315
+#, fuzzy
+#| msgid "orders.orderNumber"
+msgid "Enter a whole number."
+msgstr "Buyurtma raqami"
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:486
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1267
+#, fuzzy
+#| msgid "Enter a valid amount."
+msgid "Enter a valid date."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:509
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1268
+#, fuzzy
+#| msgid "Enter a valid amount."
+msgid "Enter a valid time."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:536
+#, fuzzy
+#| msgid "Enter a valid amount."
+msgid "Enter a valid date/time."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:570
+#, fuzzy
+#| msgid "Enter a valid amount."
+msgid "Enter a valid duration."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:571
+#, python-brace-format
+msgid "The number of days must be between {min_days} and {max_days}."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:640
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:641
+msgid "No file was submitted."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:642
+msgid "The submitted file is empty."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:644
+#, python-format
+msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:649
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:717
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:889
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:975
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1592
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:977
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1096
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1590
+#, fuzzy
+#| msgid "Enter a valid amount."
+msgid "Enter a list of values."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1097
+#, fuzzy
+#| msgid "orders.orderNumber"
+msgid "Enter a complete value."
+msgstr "Buyurtma raqami"
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1339
+#, fuzzy
+#| msgid "Enter a valid amount."
+msgid "Enter a valid UUID."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/django/forms/fields.py:1369
+#, fuzzy
+#| msgid "Enter a valid amount."
+msgid "Enter a valid JSON."
+msgstr "To'g'ri miqdor kiriting."
+
+#. Translators: This is the default suffix added to form field labels
+#: venv/lib/python3.10/site-packages/django/forms/forms.py:97
+msgid ":"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/forms.py:239
+#, python-format
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:61
+#, python-format
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:65
+#, python-format
+msgid "Please submit at most %(num)d form."
+msgid_plural "Please submit at most %(num)d forms."
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/django/forms/formsets.py:70
+#, python-format
+msgid "Please submit at least %(num)d form."
+msgid_plural "Please submit at least %(num)d forms."
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:901
+#, python-format
+msgid "Please correct the duplicate data for %(field)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:906
+#, python-format
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:913
+#, python-format
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:922
+msgid "Please correct the duplicate values below."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1359
+msgid "The inline value did not match the parent instance."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1450
+msgid "Select a valid choice. That choice is not one of the available choices."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/models.py:1594
+#, fuzzy, python-format
+#| msgid "Enter a valid amount."
+msgid "“%(pk)s” is not a valid value."
+msgstr "To'g'ri miqdor kiriting."
+
+#: venv/lib/python3.10/site-packages/django/forms/utils.py:229
+#, python-format
+msgid ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:528
+#, fuzzy
+#| msgid "Current Order"
+msgid "Currently"
+msgstr "Joriy buyurtma"
+
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:529
+#, fuzzy
+#| msgid "Changes"
+msgid "Change"
+msgstr "O'zgarishlar"
+
+#: venv/lib/python3.10/site-packages/django/forms/widgets.py:866
+#, fuzzy
+#| msgid "Unique Customers"
+msgid "Unknown"
+msgstr "Noyob mijozlar"
+
+#. Translators: Please do not add spaces around commas.
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:873
+msgid "yes,no,maybe"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:903
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:920
+#, python-format
+msgid "%(size)d byte"
+msgid_plural "%(size)d bytes"
+msgstr[0] ""
+
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:922
+#, python-format
+msgid "%s KB"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:924
+#, python-format
+msgid "%s MB"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:926
+#, python-format
+msgid "%s GB"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:928
+#, python-format
+msgid "%s TB"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/template/defaultfilters.py:930
+#, python-format
+msgid "%s PB"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:74
+msgid "p.m."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:75
+msgid "a.m."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:80
+msgid "PM"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:81
+msgid "AM"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:153
+msgid "midnight"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dateformat.py:155
+msgid "noon"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:7
+msgid "Monday"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:8
+msgid "Tuesday"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:9
+msgid "Wednesday"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:10
+msgid "Thursday"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:11
+msgid "Friday"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:12
+#, fuzzy
+#| msgid "Featured"
+msgid "Saturday"
+msgstr "Tavsiya etilgan"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:13
+msgid "Sunday"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:16
+#, fuzzy
+msgid "Mon"
+msgstr "Bu oy"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:17
+msgid "Tue"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:18
+msgid "Wed"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:19
+msgid "Thu"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:20
+msgid "Fri"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:21
+#, fuzzy
+msgid "Sat"
+msgstr "da"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:22
+msgid "Sun"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:39
+msgid "jan"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:40
+msgid "feb"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:41
+#, fuzzy
+#| msgid "Pay"
+msgid "mar"
+msgstr "To'lash"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:42
+#, fuzzy
+#| msgid "Search"
+msgid "apr"
+msgstr "Qidirish"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:43
+#, fuzzy
+#| msgid "Pay"
+msgid "may"
+msgstr "To'lash"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:44
+msgid "jun"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:45
+msgid "jul"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:46
+msgid "aug"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:47
+msgid "sep"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:48
+#, fuzzy
+#| msgid "Content"
+msgid "oct"
+msgstr "Kontent"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:49
+msgid "nov"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:50
+msgid "dec"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:53
+msgctxt "abbrev. month"
+msgid "Jan."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:54
+msgctxt "abbrev. month"
+msgid "Feb."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:55
+#, fuzzy
+#| msgid "Search"
+msgctxt "abbrev. month"
+msgid "March"
+msgstr "Qidirish"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:56
+msgctxt "abbrev. month"
+msgid "April"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:57
+#, fuzzy
+#| msgid "Pay"
+msgctxt "abbrev. month"
+msgid "May"
+msgstr "To'lash"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:58
+msgctxt "abbrev. month"
+msgid "June"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:59
+msgctxt "abbrev. month"
+msgid "July"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:60
+msgctxt "abbrev. month"
+msgid "Aug."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:61
+msgctxt "abbrev. month"
+msgid "Sept."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:62
+msgctxt "abbrev. month"
+msgid "Oct."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:63
+msgctxt "abbrev. month"
+msgid "Nov."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:64
+msgctxt "abbrev. month"
+msgid "Dec."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:67
+#, fuzzy
+#| msgid "All Orders"
+msgctxt "alt. month"
+msgid "January"
+msgstr "Barcha buyurtmalar"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:68
+msgctxt "alt. month"
+msgid "February"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:69
+#, fuzzy
+#| msgid "Search"
+msgctxt "alt. month"
+msgid "March"
+msgstr "Qidirish"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:70
+msgctxt "alt. month"
+msgid "April"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:71
+#, fuzzy
+#| msgid "Pay"
+msgctxt "alt. month"
+msgid "May"
+msgstr "To'lash"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:72
+msgctxt "alt. month"
+msgid "June"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:73
+msgctxt "alt. month"
+msgid "July"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:74
+msgctxt "alt. month"
+msgid "August"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:75
+#, fuzzy
+#| msgid "Staff Performance"
+msgctxt "alt. month"
+msgid "September"
+msgstr "Xodimlar samaradorligi"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:76
+msgctxt "alt. month"
+msgid "October"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:77
+#, fuzzy
+#| msgid "Phone Number"
+msgctxt "alt. month"
+msgid "November"
+msgstr "Telefon raqami"
+
+#: venv/lib/python3.10/site-packages/django/utils/dates.py:78
+#, fuzzy
+#| msgid "Phone Number"
+msgctxt "alt. month"
+msgid "December"
+msgstr "Telefon raqami"
+
+#: venv/lib/python3.10/site-packages/django/utils/ipv6.py:20
+#, fuzzy
+#| msgid "form.address"
+msgid "This is not a valid IPv6 address."
+msgstr "Manzil"
+
+#: venv/lib/python3.10/site-packages/django/utils/text.py:76
+#, python-format
+msgctxt "String to return when truncating text"
+msgid "%(truncated_text)s…"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/text.py:287
+#, fuzzy
+#| msgid "Sort By"
+msgid "or"
+msgstr "Saralash"
+
+#. Translators: This string is used as a separator between list elements
+#: venv/lib/python3.10/site-packages/django/utils/text.py:306
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:135
+msgid ", "
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:8
+#, fuzzy, python-format
+#| msgid "From month"
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] "Oydan boshlab"
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:9
+#, fuzzy, python-format
+#| msgid "From month"
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] "Oydan boshlab"
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:10
+#, fuzzy, python-format
+#| msgid "From month"
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] "Oydan boshlab"
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:11
+#, fuzzy, python-format
+#| msgid "From month"
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] "Oydan boshlab"
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:12
+#, fuzzy, python-format
+#| msgid "From month"
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] "Oydan boshlab"
+
+#: venv/lib/python3.10/site-packages/django/utils/timesince.py:13
+#, fuzzy, python-format
+#| msgid "From month"
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] "Oydan boshlab"
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:29
+msgid "Forbidden"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:30
+msgid "CSRF verification failed. Request aborted."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:34
+msgid ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:40
+msgid ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:45
+msgid ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
+"including the “Referrer-Policy: no-referrer” header, please remove them. The "
+"CSRF protection requires the “Referer” header to do strict referer checking. "
+"If you’re concerned about privacy, use alternatives like <a "
+"rel=\"noreferrer\" …> for links to third-party sites."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:54
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:60
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/csrf.py:66
+msgid "More information is available with DEBUG=True."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:44
+msgid "No year specified"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:64
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:115
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:214
+msgid "Date out of range"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:94
+msgid "No month specified"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:147
+msgid "No day specified"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:194
+msgid "No week specified"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:353
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:384
+#, python-format
+msgid "No %(verbose_name_plural)s available"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:680
+#, python-format
+msgid ""
+"Future %(verbose_name_plural)s not available because %(class_name)s."
+"allow_future is False."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/dates.py:720
+#, python-format
+msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/detail.py:56
+#, python-format
+msgid "No %(verbose_name)s found matching the query"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/list.py:70
+msgid "Page is not “last”, nor can it be converted to an int."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/list.py:77
+#, python-format
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/generic/list.py:173
+#, python-format
+msgid "Empty list and “%(class_name)s.allow_empty” is False."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/static.py:49
+msgid "Directory indexes are not allowed here."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/static.py:51
+#, python-format
+msgid "“%(path)s” does not exist"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/static.py:68
+#: venv/lib/python3.10/site-packages/django/views/templates/directory_index.html:8
+#: venv/lib/python3.10/site-packages/django/views/templates/directory_index.html:11
+#, python-format
+msgid "Index of %(directory)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:7
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:204
+msgid "The install worked successfully! Congratulations!"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:206
+#, python-format
+msgid ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:208
+#, python-format
+msgid ""
+"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
+"%(version)s/ref/settings/#debug\" target=\"_blank\" "
+"rel=\"noopener\">DEBUG=True</a> is in your settings file and you have not "
+"configured any URLs."
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:217
+#, fuzzy
+#| msgid "Document with Caption"
+msgid "Django Documentation"
+msgstr "Izoh bilan hujjat"
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:218
+msgid "Topics, references, &amp; how-to’s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:226
+msgid "Tutorial: A Polling App"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:227
+msgid "Get started with Django"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:235
+#, fuzzy
+#| msgid "Document with Caption"
+msgid "Django Community"
+msgstr "Izoh bilan hujjat"
+
+#: venv/lib/python3.10/site-packages/django/views/templates/default_urlconf.html:236
+msgid "Connect, get help, or contribute"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/kombu/transport/qpid.py:1311
+#, python-format
+msgid "Attempting to connect to qpid with SASL mechanism %s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/kombu/transport/qpid.py:1316
+#, python-format
+msgid "Connected to qpid with SASL mechanism %s"
+msgstr ""
+
+#: venv/lib/python3.10/site-packages/kombu/transport/qpid.py:1334
+#, python-format
+msgid "Unable to connect to qpid with SASL mechanism %s"
+msgstr ""
+
+#, fuzzy
+#~| msgid "Leave empty for global/default settings"
+#~ msgid "Leave empty for unlimited access"
+#~ msgstr "Global/standart sozlamalar uchun bo'sh qoldiring"
+
+#, fuzzy
+#~| msgid "Mass Broadcast Messaging"
+#~ msgid "Marketing broadcasts per month"
+#~ msgstr "Ommaviy Xabarlar Yuborish"
+
+# Debtors Report Translations
+#, fuzzy
+#~| msgid "Track and manage outstanding customer debts"
+#~ msgid "Create, view, and manage customer orders"
+#~ msgstr "Mijozlarning to'lanmagan qarzlarini kuzatish va boshqarish"
+
+#, fuzzy
+#~| msgid "Order file"
+#~ msgid "Order Archive"
+#~ msgstr "Buyurtma fayli"
+
+#, fuzzy
+#~| msgid "Bulk Payment Processing"
+#~ msgid "Bulk Payment Collection"
+#~ msgstr "Ommaviy To'lovlarni Qayta Ishlash"
+
+#, fuzzy
+#~| msgid "Order Reports"
+#~ msgid "Sales Reports"
+#~ msgstr "Buyurtma hisobotlari"
+
+#, fuzzy
+#~ msgid "Finance Reports"
+#~ msgstr "Moliyaviy Hisobotlar"
+
+#, fuzzy
+#~| msgid "customers with debt"
+#~ msgid "Build custom reports with filters"
+#~ msgstr "qarzdor mijozlar"
+
+#, fuzzy
+#~| msgid "Export to Excel"
+#~ msgid "Export to Excel, CSV, PDF formats"
+#~ msgstr "Excel ga eksport qilish"
+
+# Feature Names - Integration (4)
+#, fuzzy
+#~| msgid "REST API Access"
+#~ msgid "API Access"
+#~ msgstr "REST API Kirish"
+
+#, fuzzy
+#~| msgid "Knowledge Base Access"
+#~ msgid "Role-Based Access Control"
+#~ msgstr "Bilimlar Bazasiga Kirish"
+
+#, fuzzy
+#~| msgid "Custom Roles & Permissions"
+#~ msgid "Custom roles and permissions"
+#~ msgstr "Maxsus Rollar va Ruxsatlar"
+
+#, fuzzy
+#~| msgid "Advanced Order Management"
+#~ msgid "Advanced Storage"
+#~ msgstr "Kengaytirilgan Buyurtmalarni Boshqarish"
+
+#, fuzzy
+#~| msgid "Payment Tracking & Recording"
+#~ msgid "Payment Tracking"
+#~ msgstr "To'lovlarni Kuzatish va Yozib Olish"
+
+# Debtors Report Translations
+#, fuzzy
+#~| msgid "Track and manage outstanding customer debts"
+#~ msgid "Track payments and outstanding amounts"
+#~ msgstr "Mijozlarning to'lanmagan qarzlarini kuzatish va boshqarish"
+
+# Feature Names - All 37 Features
+# Order Management Features (5)
+#, fuzzy
+#~| msgid "Basic Order Management"
+#~ msgid "Expense Management"
+#~ msgstr "Asosiy Buyurtmalarni Boshqarish"
+
+#, fuzzy
+#~| msgid "Payment Method"
+#~ msgid "Payment Reminders"
+#~ msgstr "To'lov usuli"
+
+# Feature Names - All 37 Features
+# Order Management Features (5)
+#, fuzzy
+#~| msgid "Basic Order Management"
+#~ msgid "Services Management"
+#~ msgstr "Asosiy Buyurtmalarni Boshqarish"
+
+#, fuzzy
+#~| msgid "Services"
+#~ msgid "Basic Services"
+#~ msgstr "Xizmatlar"
+
+# Feature Names - Advanced (3)
+#, fuzzy
+#~| msgid "Advanced Security Features"
+#~ msgid "Advanced Services"
+#~ msgstr "Kengaytirilgan Xavfsizlik Funksiyalari"
+
+#, fuzzy
+#~| msgid "Expense Tracking"
+#~ msgid "Service Tracking"
+#~ msgstr "Xarajatlarni Kuzatish"
+
+# Feature Names - Analytics & Reports (6)
+#, fuzzy
+#~| msgid "Basic Analytics"
+#~ msgid "Service Analytics"
+#~ msgstr "Asosiy Analitika"
+
 #, fuzzy
 #~| msgid "services.language"
 #~ msgid "Prices per language pair"
@@ -10245,285 +11799,3 @@ msgstr "Birinchi Chiptani Yaratish"
 #~| msgid "Roles & Permissions"
 #~ msgid "Staff roles & permissions"
 #~ msgstr "Rollar va ruxsatlar"
-
-#, fuzzy
-#~| msgid "Message"
-#~ msgid "Messages"
-#~ msgstr "Xabar"
-
-#, fuzzy
-#~| msgid "Statistics"
-#~ msgid "Static Files"
-#~ msgstr "Statistika"
-
-#, fuzzy
-#~| msgid "Location"
-#~ msgid "Syndication"
-#~ msgstr "Manzil"
-
-#, fuzzy
-#~| msgid "Enter a valid amount."
-#~ msgid "Enter a valid value."
-#~ msgstr "To'g'ri miqdor kiriting."
-
-#, fuzzy
-#~| msgid "Enter a valid amount."
-#~ msgid "Enter a valid domain name."
-#~ msgstr "To'g'ri miqdor kiriting."
-
-#, fuzzy
-#~| msgid "Enter a valid amount."
-#~ msgid "Enter a valid URL."
-#~ msgstr "To'g'ri miqdor kiriting."
-
-#, fuzzy
-#~| msgid "Enter a valid amount."
-#~ msgid "Enter a valid integer."
-#~ msgstr "To'g'ri miqdor kiriting."
-
-#, fuzzy
-#~| msgid "form.address"
-#~ msgid "Enter a valid email address."
-#~ msgstr "Manzil"
-
-#, fuzzy, python-format
-#~| msgid "Enter a valid amount."
-#~ msgid "Enter a valid %(protocol)s address."
-#~ msgstr "To'g'ri miqdor kiriting."
-
-#, fuzzy
-#~| msgid "orders.orderNumber"
-#~ msgid "Enter a number."
-#~ msgstr "Buyurtma raqami"
-
-#, fuzzy
-#~| msgid "All Centers"
-#~ msgid "Comma-separated integers"
-#~ msgstr "Barcha markazlar"
-
-#, fuzzy
-#~| msgid "Phone Number"
-#~ msgid "Decimal number"
-#~ msgstr "Telefon raqami"
-
-#, fuzzy
-#~| msgid "IP Address"
-#~ msgid "Email address"
-#~ msgstr "IP manzil"
-
-#, fuzzy
-#~| msgid "File"
-#~ msgid "File path"
-#~ msgstr "Fayl"
-
-#, fuzzy
-#~| msgid "Third-Party Integrations"
-#~ msgid "Integer"
-#~ msgstr "Uchinchi Tomon Integratsiyalari"
-
-#, fuzzy
-#~| msgid "All Centers"
-#~ msgid "Big (8 byte) integer"
-#~ msgstr "Barcha markazlar"
-
-#, fuzzy
-#~| msgid "IP Address"
-#~ msgid "IPv4 address"
-#~ msgstr "IP manzil"
-
-#, fuzzy
-#~| msgid "IP Address"
-#~ msgid "IP address"
-#~ msgstr "IP manzil"
-
-#, fuzzy
-#~| msgid "All Centers"
-#~ msgid "Positive big integer"
-#~ msgstr "Barcha markazlar"
-
-#, fuzzy
-#~| msgid "All Centers"
-#~ msgid "Positive integer"
-#~ msgstr "Barcha markazlar"
-
-#, fuzzy
-#~| msgid "All Centers"
-#~ msgid "Positive small integer"
-#~ msgstr "Barcha markazlar"
-
-#, fuzzy
-#~| msgid "Help Text"
-#~ msgid "Text"
-#~ msgstr "Yordam matni"
-
-#, fuzzy
-#~| msgid "Object ID"
-#~ msgid "A JSON object"
-#~ msgstr "Obyekt ID"
-
-#, fuzzy
-#~| msgid "Title is required."
-#~ msgid "This field is required."
-#~ msgstr "Sarlavha kiritilishi shart."
-
-#, fuzzy
-#~| msgid "orders.orderNumber"
-#~ msgid "Enter a whole number."
-#~ msgstr "Buyurtma raqami"
-
-#, fuzzy
-#~| msgid "Enter a valid amount."
-#~ msgid "Enter a valid date."
-#~ msgstr "To'g'ri miqdor kiriting."
-
-#, fuzzy
-#~| msgid "Enter a valid amount."
-#~ msgid "Enter a valid time."
-#~ msgstr "To'g'ri miqdor kiriting."
-
-#, fuzzy
-#~| msgid "Enter a valid amount."
-#~ msgid "Enter a valid date/time."
-#~ msgstr "To'g'ri miqdor kiriting."
-
-#, fuzzy
-#~| msgid "Enter a valid amount."
-#~ msgid "Enter a valid duration."
-#~ msgstr "To'g'ri miqdor kiriting."
-
-#, fuzzy
-#~| msgid "Enter a valid amount."
-#~ msgid "Enter a list of values."
-#~ msgstr "To'g'ri miqdor kiriting."
-
-#, fuzzy
-#~| msgid "orders.orderNumber"
-#~ msgid "Enter a complete value."
-#~ msgstr "Buyurtma raqami"
-
-#, fuzzy
-#~| msgid "Enter a valid amount."
-#~ msgid "Enter a valid UUID."
-#~ msgstr "To'g'ri miqdor kiriting."
-
-#, fuzzy
-#~| msgid "Enter a valid amount."
-#~ msgid "Enter a valid JSON."
-#~ msgstr "To'g'ri miqdor kiriting."
-
-#, fuzzy
-#~| msgid "Current Order"
-#~ msgid "Currently"
-#~ msgstr "Joriy buyurtma"
-
-#, fuzzy
-#~| msgid "Changes"
-#~ msgid "Change"
-#~ msgstr "O'zgarishlar"
-
-#, fuzzy
-#~| msgid "Unique Customers"
-#~ msgid "Unknown"
-#~ msgstr "Noyob mijozlar"
-
-#, fuzzy
-#~| msgid "Featured"
-#~ msgid "Saturday"
-#~ msgstr "Tavsiya etilgan"
-
-#, fuzzy
-#~ msgid "Mon"
-#~ msgstr "Bu oy"
-
-#, fuzzy
-#~ msgid "Sat"
-#~ msgstr "da"
-
-#, fuzzy
-#~| msgid "Pay"
-#~ msgid "mar"
-#~ msgstr "To'lash"
-
-#, fuzzy
-#~| msgid "Search"
-#~ msgid "apr"
-#~ msgstr "Qidirish"
-
-#, fuzzy
-#~| msgid "Pay"
-#~ msgid "may"
-#~ msgstr "To'lash"
-
-#, fuzzy
-#~| msgid "Content"
-#~ msgid "oct"
-#~ msgstr "Kontent"
-
-#, fuzzy
-#~| msgid "Search"
-#~ msgctxt "abbrev. month"
-#~ msgid "March"
-#~ msgstr "Qidirish"
-
-#, fuzzy
-#~| msgid "Pay"
-#~ msgctxt "abbrev. month"
-#~ msgid "May"
-#~ msgstr "To'lash"
-
-#, fuzzy
-#~| msgid "All Orders"
-#~ msgctxt "alt. month"
-#~ msgid "January"
-#~ msgstr "Barcha buyurtmalar"
-
-#, fuzzy
-#~| msgid "Search"
-#~ msgctxt "alt. month"
-#~ msgid "March"
-#~ msgstr "Qidirish"
-
-#, fuzzy
-#~| msgid "Pay"
-#~ msgctxt "alt. month"
-#~ msgid "May"
-#~ msgstr "To'lash"
-
-#, fuzzy
-#~| msgid "Staff Performance"
-#~ msgctxt "alt. month"
-#~ msgid "September"
-#~ msgstr "Xodimlar samaradorligi"
-
-#, fuzzy
-#~| msgid "Phone Number"
-#~ msgctxt "alt. month"
-#~ msgid "November"
-#~ msgstr "Telefon raqami"
-
-#, fuzzy
-#~| msgid "Phone Number"
-#~ msgctxt "alt. month"
-#~ msgid "December"
-#~ msgstr "Telefon raqami"
-
-#, fuzzy
-#~| msgid "Sort By"
-#~ msgid "or"
-#~ msgstr "Saralash"
-
-#, fuzzy, python-format
-#~| msgid "From month"
-#~ msgid "%(num)d month"
-#~ msgid_plural "%(num)d months"
-#~ msgstr[0] "Oydan boshlab"
-
-#, fuzzy
-#~| msgid "Document with Caption"
-#~ msgid "Django Documentation"
-#~ msgstr "Izoh bilan hujjat"
-
-#, fuzzy
-#~| msgid "Document with Caption"
-#~ msgid "Django Community"
-#~ msgstr "Izoh bilan hujjat"

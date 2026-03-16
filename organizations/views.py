@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.core.paginator import Paginator
-from django.db.models import Q, Count
+from django.db.models import Q, Count, OuterRef, Subquery
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
@@ -348,9 +348,19 @@ def center_detail(request, center_id):
     )
 
     # Get recent orders for this center
+    _center_order_num_sq = (
+        Order.objects.filter(
+            branch__center_id=OuterRef('branch__center_id'),
+            id__lte=OuterRef('id'),
+        )
+        .values('branch__center_id')
+        .annotate(cnt=Count('id'))
+        .values('cnt')
+    )
     recent_orders = (
         Order.objects.filter(branch__center=center)
         .select_related("bot_user", "branch", "product")
+        .annotate(center_order_num=Subquery(_center_order_num_sq))
         .order_by("-created_at")[:5]
     )
 
@@ -543,10 +553,20 @@ def branch_detail(request, branch_id):
         .order_by("category", "name")[:10]
     )
 
-    # Get recent orders for this branch
+    # Get recent orders for this branch, numbered per-center
+    _center_order_num_sq = (
+        Order.objects.filter(
+            branch__center_id=OuterRef('branch__center_id'),
+            id__lte=OuterRef('id'),
+        )
+        .values('branch__center_id')
+        .annotate(cnt=Count('id'))
+        .values('cnt')
+    )
     recent_orders = (
         Order.objects.filter(branch=branch)
         .select_related("bot_user", "product", "assigned_to__user")
+        .annotate(center_order_num=Subquery(_center_order_num_sq))
         .order_by("-created_at")[:10]
     )
 

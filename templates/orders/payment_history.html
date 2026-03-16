@@ -35,6 +35,13 @@
     [data-theme="dark"] .section-divider {
         border-top: 1px solid rgba(255,255,255,0.1);
     }
+    .filters-card {
+        border: 1px solid rgba(0,0,0,0.08);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    [data-theme="dark"] .filters-card {
+        border: 1px solid rgba(255,255,255,0.08);
+    }
 </style>
 {% endblock %}
 
@@ -42,6 +49,62 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
+
+            <!-- Filters -->
+            <div class="card filters-card mb-3">
+                <div class="card-body pb-2">
+                    <form method="get" action="" id="filterForm">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-sm-6 col-md-3 col-lg-2">
+                                <label class="form-label small mb-1">{% trans "Payment Method" %}</label>
+                                <select name="payment_method" class="form-select form-select-sm">
+                                    <option value="">{% trans "All Methods" %}</option>
+                                    <option value="cash" {% if filter_payment_method == 'cash' %}selected{% endif %}>{% trans "Cash" %}</option>
+                                    <option value="bank_transfer" {% if filter_payment_method == 'bank_transfer' %}selected{% endif %}>{% trans "Bank Transfer" %}</option>
+                                    <option value="card" {% if filter_payment_method == 'card' %}selected{% endif %}>{% trans "Card Payment" %}</option>
+                                    <option value="other" {% if filter_payment_method == 'other' %}selected{% endif %}>{% trans "Other" %}</option>
+                                </select>
+                            </div>
+                            {% if available_branches %}
+                            <div class="col-sm-6 col-md-3 col-lg-2">
+                                <label class="form-label small mb-1">{% trans "Branch" %}</label>
+                                <select name="branch_id" class="form-select form-select-sm">
+                                    <option value="">{% trans "All Branches" %}</option>
+                                    {% for branch in available_branches %}
+                                    <option value="{{ branch.id }}" {% if filter_branch_id == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {% endif %}
+                            <div class="col-sm-6 col-md-3 col-lg-2">
+                                <label class="form-label small mb-1">{% trans "Date From" %}</label>
+                                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ filter_date_from }}">
+                            </div>
+                            <div class="col-sm-6 col-md-3 col-lg-2">
+                                <label class="form-label small mb-1">{% trans "Date To" %}</label>
+                                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ filter_date_to }}">
+                            </div>
+                            <div class="col-sm-6 col-md-3 col-lg-2">
+                                <label class="form-label small mb-1">{% trans "Min Amount" %}</label>
+                                <input type="number" name="min_amount" class="form-control form-control-sm" placeholder="0" min="0" step="0.01" value="{{ filter_min_amount }}">
+                            </div>
+                            <div class="col-sm-6 col-md-3 col-lg-2">
+                                <label class="form-label small mb-1">{% trans "Max Amount" %}</label>
+                                <input type="number" name="max_amount" class="form-control form-control-sm" placeholder="∞" min="0" step="0.01" value="{{ filter_max_amount }}">
+                            </div>
+                            <div class="col-sm-12 col-md-auto d-flex gap-2">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-filter me-1"></i>{% trans "Filter" %}
+                                </button>
+                                <a href="{% url 'orders:payment_history' %}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-times me-1"></i>{% trans "Clear" %}
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
@@ -50,7 +113,7 @@
                             {% trans "Payment History" %}
                         </h4>
                         <p class="text-muted small mb-0 mt-1">
-                            {% trans "Recent bulk payments (last 100)" %}
+                            {% blocktrans with count=paginator.count %}{{ count }} record(s) found{% endblocktrans %}
                         </p>
                     </div>
                     <div class="d-flex gap-2">
@@ -185,6 +248,54 @@
                                 {% trans "Process First Payment" %}
                             </a>
                         </div>
+                    {% endif %}
+
+                    <!-- Pagination -->
+                    {% if page_obj.paginator.num_pages > 1 %}
+                    <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+                        <div class="text-muted small">
+                            {% blocktrans with start=page_obj.start_index end=page_obj.end_index total=page_obj.paginator.count %}
+                                Showing {{ start }}–{{ end }} of {{ total }}
+                            {% endblocktrans %}
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if filter_query_string %}{{ filter_query_string }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-left"></i></span></li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                    {% elif num >= page_obj.number|add:"-3" and num <= page_obj.number|add:"3" %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?{% if filter_query_string %}{{ filter_query_string }}&{% endif %}page={{ num }}">{{ num }}</a>
+                                    </li>
+                                    {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?{% if filter_query_string %}{{ filter_query_string }}&{% endif %}page={{ num }}">{{ num }}</a>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if filter_query_string %}{{ filter_query_string }}&{% endif %}page={{ page_obj.next_page_number }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-right"></i></span></li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
                     {% endif %}
                     
                 </div>
