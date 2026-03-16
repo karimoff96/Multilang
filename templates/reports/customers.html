@@ -561,7 +561,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tooltip: { y: { formatter: val => val + ' users' } }
         }).render();
     } else {
-        document.querySelector("#langChart").innerHTML = '<div class="text-center text-secondary-light py-4">No data</div>';
+        document.querySelector("#langChart").innerHTML = `<div class="text-center text-secondary-light py-4">${t('common.noData')}</div>`;
     }
 });
 </script>

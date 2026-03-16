@@ -16,7 +16,7 @@
                     <div class="d-flex align-items-center gap-8 mb-4">
                         <h4 class="text-xl fw-semibold mb-0">{{ branch.name }}</h4>
                         {% if branch.is_main %}
-                        <span class="badge bg-warning-focus text-warning-600">Main Branch</span>
+                        <span class="badge bg-warning-focus text-warning-600" data-i18n="branch.mainBranch">Main Branch</span>
                         {% endif %}
                     </div>
                     <div class="d-flex align-items-center gap-8 text-secondary-light">
@@ -50,12 +50,12 @@
                 <div class="w-40-px h-40-px bg-success-100 rounded-8 d-flex justify-content-center align-items-center">
                     <iconify-icon icon="fluent:payment-20-filled" class="text-success-600 text-xl"></iconify-icon>
                 </div>
-                <h6 class="mb-0 fw-semibold">Payment Information</h6>
+                <h6 class="mb-0 fw-semibold" data-i18n="branch.paymentInformation">Payment Information</h6>
             </div>
             <div class="card-body p-24">
                 <div class="row gy-3">
                     <div class="col-12">
-                        <label class="form-label fw-medium text-secondary-light mb-4">Bank Card Number</label>
+                        <label class="form-label fw-medium text-secondary-light mb-4" data-i18n="branch.bankCardNumber">Bank Card Number</label>
                         <div class="d-flex align-items-center gap-8">
                             <iconify-icon icon="fluent:card-ui-20-filled" class="text-primary-600 text-xl"></iconify-icon>
                             <span class="text-lg fw-medium {% if info.bank_card %}text-success-600{% else %}text-neutral-500{% endif %}">
@@ -64,7 +64,7 @@
                         </div>
                     </div>
                     <div class="col-12">
-                        <label class="form-label fw-medium text-secondary-light mb-4">Card Holder Name</label>
+                        <label class="form-label fw-medium text-secondary-light mb-4" data-i18n="branch.cardHolderName">Card Holder Name</label>
                         <div class="d-flex align-items-center gap-8">
                             <iconify-icon icon="fluent:person-20-filled" class="text-info-600 text-xl"></iconify-icon>
                             <span class="{% if info.holder_name %}{% else %}text-neutral-500{% endif %}">
@@ -84,12 +84,12 @@
                 <div class="w-40-px h-40-px bg-info-100 rounded-8 d-flex justify-content-center align-items-center">
                     <iconify-icon icon="fluent:call-20-filled" class="text-info-600 text-xl"></iconify-icon>
                 </div>
-                <h6 class="mb-0 fw-semibold">Contact Information</h6>
+                <h6 class="mb-0 fw-semibold" data-i18n="branch.contactInformation">Contact Information</h6>
             </div>
             <div class="card-body p-24">
                 <div class="row gy-3">
                     <div class="col-12">
-                        <label class="form-label fw-medium text-secondary-light mb-4">Support Phone</label>
+                        <label class="form-label fw-medium text-secondary-light mb-4" data-i18n="branch.supportPhone">Support Phone</label>
                         <div class="d-flex align-items-center gap-8">
                             <iconify-icon icon="fluent:phone-20-filled" class="text-success-600 text-xl"></iconify-icon>
                             <span class="{% if info.support_phone %}{% else %}text-neutral-500{% endif %}">
@@ -98,7 +98,7 @@
                         </div>
                     </div>
                     <div class="col-12">
-                        <label class="form-label fw-medium text-secondary-light mb-4">Support Telegram</label>
+                        <label class="form-label fw-medium text-secondary-light mb-4" data-i18n="branch.supportTelegram">Support Telegram</label>
                         <div class="d-flex align-items-center gap-8">
                             <iconify-icon icon="mdi:telegram" class="text-info-600 text-xl"></iconify-icon>
                             <span class="{% if info.support_telegram %}{% else %}text-neutral-500{% endif %}">
@@ -107,7 +107,7 @@
                         </div>
                     </div>
                     <div class="col-12">
-                        <label class="form-label fw-medium text-secondary-light mb-4">Working Hours</label>
+                        <label class="form-label fw-medium text-secondary-light mb-4" data-i18n="branch.workingHours">Working Hours</label>
                         <div class="d-flex align-items-center gap-8">
                             <iconify-icon icon="fluent:clock-20-filled" class="text-warning-600 text-xl"></iconify-icon>
                             <span class="{% if info.working_hours %}{% else %}text-neutral-500{% endif %}">
@@ -213,10 +213,10 @@
                 <div class="w-40-px h-40-px bg-purple-100 rounded-8 d-flex justify-content-center align-items-center">
                     <iconify-icon icon="fluent:book-20-filled" class="text-purple-600 text-xl"></iconify-icon>
                 </div>
-                <h6 class="mb-0 fw-semibold">Guide Link</h6>
+                <h6 class="mb-0 fw-semibold" data-i18n="branch.guideLink">Guide Link</h6>
             </div>
             <div class="card-body p-24">
-                <label class="form-label fw-medium text-secondary-light mb-4">Guide URL</label>
+                <label class="form-label fw-medium text-secondary-light mb-4" data-i18n="branch.guideUrl">Guide URL</label>
                 <div class="d-flex align-items-center gap-8">
                     <iconify-icon icon="fluent:link-20-filled" class="text-purple-600 text-xl"></iconify-icon>
                     {% if info.guide %}
@@ -239,7 +239,7 @@
                 <div class="w-40-px h-40-px bg-cyan-100 rounded-8 d-flex justify-content-center align-items-center">
                     <iconify-icon icon="fluent:document-text-20-filled" class="text-cyan-600 text-xl"></iconify-icon>
                 </div>
-                <h6 class="mb-0 fw-semibold">Other Services (Bot)</h6>
+                <h6 class="mb-0 fw-semibold" data-i18n="branch.otherServices">Other Services (Bot)</h6>
             </div>
             <div class="card-body p-24">
                 <!-- Language Tabs -->

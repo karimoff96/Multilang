@@ -168,7 +168,7 @@
                         <iconify-icon icon="mdi:bell-ring-outline" class="text-lilac-600 text-xl"></iconify-icon>
                     </div>
                     <div>
-                        <span class="text-secondary-light text-xs">New Orders</span>
+                        <span class="text-secondary-light text-xs" data-i18n="orders.newOrders">New Orders</span>
                         <h6 class="mb-0 text-lilac-600">{{ stats.new }}</h6>
                     </div>
                 </div>
@@ -309,8 +309,8 @@
                 <!-- Date field -->
                 <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                     <select name="date_field" class="form-select form-select-sm h-40-px w-100">
-                        <option value="created_at" {% if date_field == 'created_at' %}selected{% endif %}>Created date</option>
-                        <option value="updated_at" {% if date_field == 'updated_at' %}selected{% endif %}>Updated date</option>
+                        <option value="created_at" {% if date_field == 'created_at' %}selected{% endif %} data-i18n="orders.createdDate">Created date</option>
+                        <option value="updated_at" {% if date_field == 'updated_at' %}selected{% endif %} data-i18n="orders.updatedDate">Updated date</option>
                     </select>
                 </div>
                 <!-- Date from -->

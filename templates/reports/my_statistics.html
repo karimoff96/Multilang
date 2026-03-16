@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         });
     } else {
-        statusListEl.innerHTML = '<div class="text-center text-secondary-light py-4"><iconify-icon icon="solar:inbox-line-duotone" class="text-4xl mb-2"></iconify-icon><p class="mb-0">No orders this month</p></div>';
+        statusListEl.innerHTML = `<div class="text-center text-secondary-light py-4"><iconify-icon icon="solar:inbox-line-duotone" class="text-4xl mb-2"></iconify-icon><p class="mb-0">${t('report.noOrdersThisMonth')}</p></div>`;
     }
     
     // Populate status legend
@@ -417,7 +417,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         new ApexCharts(document.querySelector("#dailyPerformanceChart"), dailyOptions).render();
     } else {
-        document.querySelector("#dailyPerformanceChart").innerHTML = '<div class="text-center text-secondary-light py-5"><iconify-icon icon="solar:chart-2-line-duotone" class="text-4xl mb-2"></iconify-icon><p>No data for this month</p></div>';
+        document.querySelector("#dailyPerformanceChart").innerHTML = `<div class="text-center text-secondary-light py-5"><iconify-icon icon="solar:chart-2-line-duotone" class="text-4xl mb-2"></iconify-icon><p>${t('report.noDataThisMonth')}</p></div>`;
     }
 
     // Today's Orders Sparkline
@@ -481,7 +481,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }).render();
     } else {
-        document.querySelector("#statusDonutChart").innerHTML = '<div class="text-center text-secondary-light py-3"><p class="mb-0">No data</p></div>';
+        document.querySelector("#statusDonutChart").innerHTML = `<div class="text-center text-secondary-light py-3"><p class="mb-0">${t('common.noData')}</p></div>`;
     }
 });
 </script>

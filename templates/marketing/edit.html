@@ -8,10 +8,10 @@
             <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="text-lg fw-semibold mb-0">
                     <iconify-icon icon="mdi:pencil" class="me-2"></iconify-icon>
-                    Edit Marketing Post
+                    <span data-i18n="marketing.editPost">Edit Marketing Post</span>
                 </h6>
                 <a href="{% url 'marketing_detail' post.id %}" class="btn btn-outline-secondary btn-sm">
-                    <iconify-icon icon="ep:back" class="me-1"></iconify-icon> Back
+                    <iconify-icon icon="ep:back" class="me-1"></iconify-icon> <span data-i18n="common.back">Back</span>
                 </a>
             </div>
             <div class="card-body p-24">
@@ -27,7 +27,7 @@
                     
                     <!-- Content Type -->
                     <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Content Type</label>
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="marketing.contentType">Content Type</label>
                         <select name="content_type" class="form-select radius-8" id="contentType" onchange="toggleMediaUpload()">
                             {% for value, label in content_type_choices %}
                             <option value="{{ value }}" {% if post.content_type == value %}selected{% endif %}>{{ label }}</option>
@@ -38,7 +38,7 @@
                     <!-- Current Media File -->
                     {% if post.media_file %}
                     <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Current Media</label>
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="marketing.currentMedia">Current Media</label>
                         <div class="bg-neutral-100 radius-8 p-12">
                             <iconify-icon icon="mdi:file" class="me-2"></iconify-icon>
                             {{ post.media_file.name|slice:"-40:" }}
@@ -57,7 +57,7 @@
                     
                     <!-- Content -->
                     <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Message Content *</label>
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="marketing.messageContent">Message Content *</label>
                         <textarea name="content" class="form-control radius-8" rows="6" required>{{ post.content }}</textarea>
                         <small class="text-secondary-light">Supports HTML: &lt;b&gt;, &lt;i&gt;, &lt;a&gt;, &lt;code&gt;</small>
                     </div>
@@ -66,7 +66,7 @@
                     
                     <!-- Customer Type Filters -->
                     <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Customer Types</label>
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="marketing.customerTypes">Customer Types</label>
                         <div class="d-flex gap-4">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="include_b2c" id="includeB2C" 
@@ -93,7 +93,7 @@
                         <a href="{% url 'marketing_detail' post.id %}" class="btn btn-outline-secondary px-24" data-i18n="actions.cancel">Cancel</a>
                         <button type="submit" class="btn btn-primary px-24">
                             <iconify-icon icon="mdi:content-save" class="me-2"></iconify-icon>
-                            Save Changes
+                            <span data-i18n="common.saveChanges">Save Changes</span>
                         </button>
                     </div>
                 </form>
@@ -105,13 +105,13 @@
     <div class="col-lg-4">
         <div class="card radius-12">
             <div class="card-header border-bottom bg-base py-16 px-24">
-                <h6 class="text-md fw-semibold mb-0">Target Info</h6>
+                <h6 class="text-md fw-semibold mb-0" data-i18n="marketing.targetInfo">Target Info</h6>
             </div>
             <div class="card-body p-24">
                 {% if can_edit_target %}
                 <!-- Editable for draft and scheduled posts -->
                 <div class="mb-16">
-                    <label class="form-label fw-semibold text-primary-light text-sm mb-8">Target Scope</label>
+                    <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="marketing.targetScope">Target Scope</label>
                     <select name="target_scope" form="editForm" class="form-select radius-8" id="targetScope" onchange="toggleTargetFields()">
                         {% for value, label in scope_choices %}
                         <option value="{{ value }}" {% if post.target_scope == value %}selected{% endif %}>{{ label }}</option>

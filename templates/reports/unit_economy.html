@@ -506,7 +506,7 @@ document.addEventListener('DOMContentLoaded', function() {
         clientTypeChart.render();
     } else {
         var el = document.querySelector("#clientTypeChart");
-        if (el) el.innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-4 text-secondary-light"><iconify-icon icon="solar:check-circle-bold" class="text-3xl mb-2 text-success-main"></iconify-icon><span>No outstanding debts</span></div>';
+        if (el) el.innerHTML = `<div class="d-flex flex-column align-items-center justify-content-center py-4 text-secondary-light"><iconify-icon icon="solar:check-circle-bold" class="text-3xl mb-2 text-success-main"></iconify-icon><span>${t('report.noOutstandingDebts')}</span></div>`;
     }
     
     // Branch Remaining Chart
@@ -607,7 +607,7 @@ function updateBranchFilter() {
     
     if (!branchFilter || !apiData.branches) return;
     
-    branchFilter.innerHTML = '<option value="">All Branches</option>';
+    branchFilter.innerHTML = `<option value="">${t('report.allBranches')}</option>`;
     
     const branches = selectedCenter ? 
         apiData.branches.filter(b => b.center_id == selectedCenter) : 
@@ -754,7 +754,7 @@ function loadAllDebtors() {
             if (showCenter && data.centers) {
                 document.getElementById('centerFilterContainer').style.display = 'block';
                 const centerFilter = document.getElementById('centerFilter');
-                centerFilter.innerHTML = '<option value="">All Centers</option>';
+                centerFilter.innerHTML = `<option value="">${t('report.allCenters')}</option>`;
                 data.centers.forEach(center => {
                     centerFilter.innerHTML += `<option value="${center.id}">${center.name}</option>`;
                 });
@@ -870,7 +870,7 @@ function renderDebtorsTable(debtors) {
         
         tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center text-secondary-light py-4">
             <iconify-icon icon="solar:user-cross-rounded-line-duotone" class="text-3xl mb-2"></iconify-icon>
-            <div>No debtors found matching your filters</div>
+            <div>${t('report.noDebtorsFound')}</div>
         </td></tr>`;
         
         // Reset footer totals
@@ -1017,13 +1017,13 @@ function exportDebtorsToExcel() {
                     <!-- Filters Row 1 -->
                     <div class="row g-2 mb-2">
                         <div class="col-md-3">
-                            <label class="form-label form-label-sm text-light mb-1">Search Customer</label>
+                            <label class="form-label form-label-sm text-light mb-1" data-i18n="report.searchCustomer">Search Customer</label>
                             <input type="text" class="form-control form-control-sm" id="debtorSearchInput" placeholder="Name or phone...">
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label form-label-sm text-light mb-1">Client Type</label>
+                            <label class="form-label form-label-sm text-light mb-1" data-i18n="report.clientType">Client Type</label>
                             <select class="form-select form-select-sm" id="clientTypeFilter">
-                                <option value="">All Types</option>
+                                <option value="" data-i18n="report.allTypes">All Types</option>
                                 <option value="b2b">B2B Only</option>
                                 <option value="b2c">B2C Only</option>
                             </select>
@@ -1031,17 +1031,17 @@ function exportDebtorsToExcel() {
                         <div class="col-md-2" id="centerFilterContainer" style="display: none;">
                             <label class="form-label form-label-sm text-light mb-1">Center</label>
                             <select class="form-select form-select-sm" id="centerFilter">
-                                <option value="">All Centers</option>
+                                <option value="" data-i18n="report.allCenters">All Centers</option>
                             </select>
                         </div>
                         <div class="col-md-2" id="branchFilterContainer" style="display: none;">
                             <label class="form-label form-label-sm text-light mb-1">Branch</label>
                             <select class="form-select form-select-sm" id="branchFilter">
-                                <option value="">All Branches</option>
+                                <option value="" data-i18n="report.allBranches">All Branches</option>
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label form-label-sm text-light mb-1">Debt Range</label>
+                            <label class="form-label form-label-sm text-light mb-1" data-i18n="report.debtRange">Debt Range</label>
                             <select class="form-select form-select-sm" id="debtRangeFilter">
                                 <option value="">All Amounts</option>
                                 <option value="0-1000000">< 1M</option>

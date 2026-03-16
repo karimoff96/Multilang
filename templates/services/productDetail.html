@@ -145,7 +145,7 @@
                                     <div class="d-flex justify-content-between align-items-center mb-8">
                                         <span class="text-secondary-light text-sm" data-i18n="detail.copyPrice">Copy Price</span>
                                         {% if product.user_copy_price_decimal is not None %}
-                                        <span class="badge bg-primary-focus text-primary-600">Fixed Price</span>
+                                        <span class="badge bg-primary-focus text-primary-600" data-i18n="product.fixedPrice">Fixed Price</span>
                                         {% else %}
                                         <span class="badge bg-secondary-focus text-secondary-600" data-i18n="detail.percentage">Percentage (Legacy)</span>
                                         {% endif %}
@@ -198,7 +198,7 @@
                                     <div class="d-flex justify-content-between align-items-center mb-8">
                                         <span class="text-secondary-light text-sm" data-i18n="detail.copyPrice">Copy Price</span>
                                         {% if product.agency_copy_price_decimal is not None %}
-                                        <span class="badge bg-primary-focus text-primary-600">Fixed Price</span>
+                                        <span class="badge bg-primary-focus text-primary-600" data-i18n="product.fixedPrice">Fixed Price</span>
                                         {% else %}
                                         <span class="badge bg-secondary-focus text-secondary-600" data-i18n="detail.percentage">Percentage (Legacy)</span>
                                         {% endif %}
@@ -292,7 +292,7 @@
                                                 {% elif product.agency_copy_price_decimal == product.user_copy_price_decimal %}
                                                 <span class="text-secondary-light" data-i18n="detail.equal">Equal</span>
                                                 {% else %}
-                                                <span class="text-danger-600">User cheaper</span>
+                                                <span class="text-danger-600" data-i18n="product.userCheaper">User cheaper</span>
                                                 {% endif %}
                                             {% elif product.agency_copy_price_percentage < product.user_copy_price_percentage %}
                                             <span class="text-success-600" data-i18n="detail.agencyAdvantage">Agency advantage</span>

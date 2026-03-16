@@ -163,10 +163,10 @@
                     <div class="col-12 mt-16">
                         <div class="p-16 bg-neutral-50 radius-8">
                             <div class="d-flex justify-content-between align-items-center mb-12">
-                                <span class="text-md fw-semibold">Payment Progress</span>
+                                <span class="text-md fw-semibold" data-i18n="order.paymentProgress">Payment Progress</span>
                                 {% if order.is_fully_paid %}
                                 <span class="badge bg-success-focus text-success-600 px-12 py-6">
-                                    <iconify-icon icon="mdi:check-circle" class="me-1"></iconify-icon> Fully Paid
+                                    <iconify-icon icon="mdi:check-circle" class="me-1"></iconify-icon> <span data-i18n="payment.fullyPaid">Fully Paid</span>
                                 </span>
                                 {% else %}
                                 <span class="badge bg-warning-focus text-warning-600 px-12 py-6">
@@ -183,15 +183,15 @@
                             
                             <div class="row text-sm">
                                 <div class="col-4 text-center">
-                                    <span class="text-secondary-light d-block">Total Due</span>
+                                    <span class="text-secondary-light d-block" data-i18n="order.totalDue">Total Due</span>
                                     <span class="fw-semibold">{{ order.total_due|intspace }} UZS</span>
                                 </div>
                                 <div class="col-4 text-center">
-                                    <span class="text-secondary-light d-block">Received</span>
+                                    <span class="text-secondary-light d-block" data-i18n="order.receivedAmount">Received</span>
                                     <span class="fw-semibold text-success-600">{{ order.received|intspace }} UZS</span>
                                 </div>
                                 <div class="col-4 text-center">
-                                    <span class="text-secondary-light d-block">Remaining</span>
+                                    <span class="text-secondary-light d-block" data-i18n="order.remaining">Remaining</span>
                                     <span class="fw-semibold {% if order.remaining > 0 %}text-danger-600{% else %}text-success-600{% endif %}">
                                         {{ order.remaining|intspace }} UZS
                                     </span>
@@ -201,7 +201,7 @@
                             {% if order.extra_fee > 0 %}
                             <div class="mt-12 pt-12 border-top">
                                 <div class="d-flex justify-content-between">
-                                    <span class="text-secondary-light">Extra Fee:</span>
+                                    <span class="text-secondary-light" data-i18n="order.extraFee">Extra Fee:</span>
                                     <span class="fw-semibold">{{ order.extra_fee|intspace }} UZS</span>
                                 </div>
                                 {% if order.extra_fee_description %}
@@ -216,7 +216,7 @@
 
                 <!-- Branch & Assignment Info -->
                 <div class="mt-24">
-                    <h6 class="text-md fw-semibold mb-16">Branch & Assignment</h6>
+                    <h6 class="text-md fw-semibold mb-16" data-i18n="order.branchAndAssignment">Branch & Assignment</h6>
                     <div class="row gy-3">
                         <div class="col-sm-6 col-lg-4">
                             <div class="p-16 bg-neutral-50 radius-8 border border-neutral-200">
@@ -233,7 +233,7 @@
                         </div>
                         <div class="col-sm-6 col-lg-4">
                             <div class="p-16 bg-neutral-50 radius-8 border border-neutral-200">
-                                <span class="text-secondary-light text-sm d-block mb-8">Assigned To</span>
+                                <span class="text-secondary-light text-sm d-block mb-8" data-i18n="order.assignedTo">Assigned To</span>
                                 <h6 class="text-md fw-semibold mb-0">
                                     {% if order.assigned_to %}
                                         {{ order.assigned_to.user.get_full_name|default:order.assigned_to.user.username }}
@@ -249,7 +249,7 @@
                         </div>
                         <div class="col-sm-6 col-lg-4">
                             <div class="p-16 bg-neutral-50 radius-8 border border-neutral-200">
-                                <span class="text-secondary-light text-sm d-block mb-8">Created By</span>
+                                <span class="text-secondary-light text-sm d-block mb-8" data-i18n="order.createdBy">Created By</span>
                                 <h6 class="text-md fw-semibold mb-0">
                                     {% if order.created_by %}
                                         {{ order.created_by.user.get_full_name|default:order.created_by.user.username }}
@@ -296,28 +296,41 @@
                     <div class="mt-16 p-16 radius-8 border border-info-200" style="background:rgba(13,202,240,.06)">
                         <div class="d-flex align-items-center gap-2 mb-12">
                             <iconify-icon icon="mdi:credit-card-check" class="text-info-600 text-xl"></iconify-icon>
-                            <span class="fw-semibold text-info-600">Payme Transaction</span>
+                            <span class="fw-semibold text-info-600" data-i18n="order.paymeTransaction">Payme Transaction</span>
                         </div>
                         <div class="row g-2 text-sm">
                             <div class="col-sm-6">
-                                <span class="text-secondary-light">Transaction ID</span><br>
-                                <code class="text-xs">{{ tx.payme_transaction_id }}</code>
+                                <span class="text-secondary-light" data-i18n="order.transactionId">Transaction ID</span><br>
+                                <div class="d-flex align-items-center gap-1 mt-1">
+                                    <code class="text-xs" id="paymeTransactionId">{{ tx.payme_transaction_id }}</code>
+                                    <button type="button"
+                                            class="btn btn-xs btn-outline-secondary py-1 px-6 ms-1"
+                                            title="Copy transaction ID"
+                                            onclick="navigator.clipboard.writeText('{{ tx.payme_transaction_id }}').then(function(){
+                                                var btn = this;
+                                                btn.innerHTML = '<iconify-icon icon=\'mdi:check\'></iconify-icon>';
+                                                setTimeout(function(){ btn.innerHTML = '<iconify-icon icon=\'mdi:content-copy\'></iconify-icon>'; }, 1500);
+                                            }.bind(this));">
+                                        <iconify-icon icon="mdi:content-copy"></iconify-icon>
+                                    </button>
+                                </div>
                             </div>
                             <div class="col-sm-3">
                                 <span class="text-secondary-light">Amount</span><br>
                                 <span class="fw-medium">{{ tx.amount_sum|floatformat:0|intspace }} UZS</span>
                             </div>
                             <div class="col-sm-3">
-                                <span class="text-secondary-light">Confirmed at</span><br>
+                                <span class="text-secondary-light" data-i18n="order.confirmedAt">Confirmed at</span><br>
                                 <span class="fw-medium">{{ tx.updated_at|date:"d M Y H:i" }}</span>
                             </div>
                         </div>
                         <div class="mt-12">
-                            {% if payme_receipt_url %}
-                            <a href="{{ payme_receipt_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-info btn-sm py-4 px-12 d-inline-flex align-items-center gap-1">
-                                <iconify-icon icon="mdi:receipt"></iconify-icon> View Payme Receipt
+                            <a href="https://merchant.payme.uz/" target="_blank" rel="noopener noreferrer"
+                               class="btn btn-outline-info btn-sm py-4 px-12 d-inline-flex align-items-center gap-1"
+                               title="Search the transaction in Payme merchant cabinet using the Transaction ID above">
+                                <iconify-icon icon="mdi:open-in-new"></iconify-icon> Payme Cabinet
                             </a>
-                            {% endif %}
+                            <small class="text-secondary-light ms-8" data-i18n="order.useTransactionIdHint">Use the Transaction ID to find this payment</small>
                         </div>
                     </div>
                     {% endif %}
@@ -385,7 +398,7 @@
                 <div class="mt-24">
                     <h6 class="text-md fw-semibold mb-16">
                         <iconify-icon icon="mdi:calculator" class="me-2"></iconify-icon>
-                        Price Breakdown
+                        <span data-i18n="order.priceBreakdown">Price Breakdown</span>
                     </h6>
                     <div class="table-responsive">
                         <table class="table bordered-table sm-table mb-0">
@@ -401,7 +414,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td class="fw-semibold">First Page</td>
+                                    <td class="fw-semibold" data-i18n="order.firstPage">First Page</td>
                                     <td class="text-end">{{ price_breakdown.product_first_page|intspace }} UZS</td>
                                     {% if price_breakdown.language_name %}
                                     <td class="text-end text-info-600">+ {{ price_breakdown.language_first_page|intspace }} UZS</td>
@@ -419,7 +432,7 @@
                                 </tr>
                                 {% endif %}
                                 <tr class="bg-neutral-50">
-                                    <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-semibold">Original Document Total:</td>
+                                    <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-semibold" data-i18n="order.originalDocumentTotal">Original Document Total:</td>
                                     <td class="text-end fw-bold text-success-600">{{ price_breakdown.original_price|intspace }} UZS</td>
                                 </tr>
                                 {% if price_breakdown.copy_number > 0 %}
@@ -432,7 +445,7 @@
                                     <td class="text-end fw-semibold text-warning-600">{{ price_breakdown.combined_copy_price|intspace }} UZS/copy</td>
                                 </tr>
                                 <tr class="bg-neutral-50">
-                                    <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-semibold">Copies Total:</td>
+                                    <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-semibold" data-i18n="order.copiesTotal">Copies Total:</td>
                                     <td class="text-end fw-bold text-warning-600">{{ price_breakdown.copy_total|intspace }} UZS</td>
                                 </tr>
                                 {% endif %}
@@ -440,21 +453,21 @@
                             <tfoot style="border-top: 2px solid var(--bs-border-color, rgba(128,128,128,0.25)); background: transparent !important; --bs-table-bg: transparent; --bs-table-striped-bg: transparent; --bs-table-hover-bg: transparent;">
                                 {% if price_changes %}
                                 <tr>
-                                    <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-semibold text-secondary-light text-sm">Calculated Total:</td>
+                                    <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-semibold text-secondary-light text-sm" data-i18n="order.calculatedTotal">Calculated Total:</td>
                                     <td class="text-end text-secondary-light text-sm text-decoration-line-through">{{ price_breakdown.total_price|intspace }} UZS</td>
                                 </tr>
                                 <tr>
                                     <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-bold text-lg">
-                                        Grand Total:
+                                        <span data-i18n="order.grandTotal">Grand Total:</span>
                                         <span class="badge bg-warning-100 text-warning-700 text-xs ms-6 fw-semibold">
-                                            <iconify-icon icon="solar:lock-bold" class="me-1"></iconify-icon>Manually set
+                                            <iconify-icon icon="solar:lock-bold" class="me-1"></iconify-icon><span data-i18n="order.manuallySet">Manually set</span>
                                         </span>
                                     </td>
                                     <td class="text-end fw-bold text-warning-600 text-lg">{{ order.total_price|intspace }} UZS</td>
                                 </tr>
                                 {% else %}
                                 <tr>
-                                    <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-bold text-lg">Grand Total:</td>
+                                    <td colspan="{% if price_breakdown.language_name %}3{% else %}2{% endif %}" class="text-end fw-bold text-lg" data-i18n="order.grandTotal">Grand Total:</td>
                                     <td class="text-end fw-bold text-primary-600 text-lg">{{ price_breakdown.total_price|intspace }} UZS</td>
                                 </tr>
                                 {% endif %}
@@ -465,14 +478,14 @@
                     <div class="mt-12 p-12 radius-8 border border-info-300">
                         <small class="text-info-600">
                             <iconify-icon icon="mdi:information" class="me-1"></iconify-icon>
-                            This order uses <strong>Agency pricing</strong>
+                            <span data-i18n="order.thisOrderUses">This order uses</span> <strong data-i18n="order.agencyPricing">Agency pricing</strong>
                         </small>
                     </div>
                     {% else %}
                     <div class="mt-12 p-12 radius-8 border border-success-300">
                         <small class="text-success-600">
                             <iconify-icon icon="mdi:information" class="me-1"></iconify-icon>
-                            This order uses <strong>Ordinary User pricing</strong>
+                            <span data-i18n="order.thisOrderUses">This order uses</span> <strong data-i18n="order.ordinaryUserPricing">Ordinary User pricing</strong>
                         </small>
                     </div>
                     {% endif %}
@@ -484,7 +497,7 @@
                 <div class="mt-24" id="priceChangeHistory">
                     <h6 class="text-md fw-semibold mb-12">
                         <iconify-icon icon="solar:history-bold" class="me-2"></iconify-icon>
-                        Price Change History
+                        <span data-i18n="order.priceChangeHistory">Price Change History</span>
                     </h6>
                     <div class="d-flex flex-column gap-8">
                         {% for pc in price_changes %}
@@ -535,7 +548,7 @@
                 <!-- Completion Info -->
                 {% if order.completed_by %}
                 <div class="mt-24">
-                    <h6 class="text-md fw-semibold mb-16">Completion</h6>
+                    <h6 class="text-md fw-semibold mb-16" data-i18n="order.completion">Completion</h6>
                     <div class="p-16 bg-success-50 radius-8">
                         <span class="text-success-600 d-block">
                             <iconify-icon icon="mdi:check-circle" class="me-1 text-lg"></iconify-icon>
@@ -548,7 +561,7 @@
 
                 {% if order.name_clarifications %}
                 <div class="mt-24">
-                    <h6 class="text-md fw-semibold mb-16">Name Clarifications</h6>
+                    <h6 class="text-md fw-semibold mb-16" data-i18n="order.nameClarifications">Name Clarifications</h6>
                     <p class="text-secondary-light mb-0">{{ order.name_clarifications|linebreaksbr }}</p>
                 </div>
                 {% endif %}
@@ -589,7 +602,7 @@
                                             <iconify-icon icon="mdi:download"></iconify-icon>
                                         </a>
                                         {% else %}
-                                        <span class="badge bg-danger-focus text-danger-600">File unavailable</span>
+                                        <span class="badge bg-danger-focus text-danger-600" data-i18n="order.fileUnavailable">File unavailable</span>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -605,16 +618,16 @@
                 <div class="mt-24">
                     <h6 class="text-md fw-semibold mb-16">
                         <iconify-icon icon="mdi:paperclip" class="me-1 text-warning-600"></iconify-icon>
-                        Additional Supply Documents ({{ order.additional_files.count }})
+                        <span data-i18n="order.additionalSupplyDocs">Additional Supply Documents</span> ({{ order.additional_files.count }})
                     </h6>
                     <div class="table-responsive">
                         <table class="table bordered-table sm-table mb-0">
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>File</th>
-                                    <th>Uploaded</th>
-                                    <th>Action</th>
+                                    <th data-i18n="detail.file">File</th>
+                                    <th data-i18n="detail.uploaded">Uploaded</th>
+                                    <th data-i18n="table.action">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -779,12 +792,12 @@
                     </div>
                 </div>
                 <div class="mb-12">
-                    <span class="text-secondary-light text-sm">First Name</span>
+                    <span class="text-secondary-light text-sm" data-i18n="form.firstName">First Name</span>
                     <p class="text-md fw-medium mb-0">{{ order.manual_first_name|default:"N/A" }}</p>
                 </div>
                 {% if order.manual_last_name %}
                 <div class="mb-12">
-                    <span class="text-secondary-light text-sm">Last Name</span>
+                    <span class="text-secondary-light text-sm" data-i18n="form.lastName">Last Name</span>
                     <p class="text-md fw-medium mb-0">{{ order.manual_last_name }}</p>
                 </div>
                 {% endif %}
@@ -803,7 +816,7 @@
         <!-- Update Status -->
         <div class="card radius-12">
             <div class="card-header border-bottom bg-base py-16 px-24">
-                <h6 class="text-md fw-semibold mb-0">Actions</h6>
+                <h6 class="text-md fw-semibold mb-0" data-i18n="common.actions">Actions</h6>
             </div>
             <div class="card-body p-24">
                 <!-- Edit Button -->
@@ -975,13 +988,13 @@
                 <div class="row mb-24">
                     <div class="col-md-3 col-6 text-center">
                         <div class="p-12 bg-neutral-50 radius-8">
-                            <small class="text-secondary-light d-block">Total Price</small>
+                            <small class="text-secondary-light d-block" data-i18n="order.totalPrice">Total Price</small>
                             <span class="fw-bold" id="pm-total-price">{{ order.total_price|intspace }}</span> UZS
                         </div>
                     </div>
                     <div class="col-md-3 col-6 text-center">
                         <div class="p-12 bg-neutral-50 radius-8">
-                            <small class="text-secondary-light d-block">Extra Fee</small>
+                            <small class="text-secondary-light d-block" data-i18n="order.extraFee">Extra Fee</small>
                             <span class="fw-bold" id="pm-extra-fee">{{ order.extra_fee|intspace }}</span> UZS
                         </div>
                     </div>
@@ -1073,7 +1086,7 @@
                     <div id="partialPaymentSection">
                         <div class="row">
                             <div class="col-md-6 mb-16">
-                                <label class="form-label fw-semibold">Amount Received Now</label>
+                                <label class="form-label fw-semibold" data-i18n="order.amountReceivedNow">Amount Received Now</label>
                                 <div class="input-group">
                                     <input type="number" class="form-control" id="paymentAmount" 
                                            name="amount" min="0" step="100" 
@@ -1100,12 +1113,12 @@
                         <a class="text-decoration-none d-flex align-items-center" 
                            data-bs-toggle="collapse" href="#extraFeeSection">
                             <iconify-icon icon="mdi:plus-circle" class="me-2"></iconify-icon>
-                            Add Extra Fee
+                            <span data-i18n="order.addExtraFee">Add Extra Fee</span>
                         </a>
                         <div class="collapse mt-12" id="extraFeeSection">
                             <div class="row">
                                 <div class="col-md-4 mb-12">
-                                    <label class="form-label">Extra Fee Amount</label>
+                                    <label class="form-label" data-i18n="order.extraFeeAmount">Extra Fee Amount</label>
                                     <div class="input-group">
                                         <input type="number" class="form-control" id="extraFeeAmount" 
                                                name="extra_fee" min="0" step="100">
@@ -1142,7 +1155,7 @@
                 <!-- Already Fully Paid -->
                 <div class="text-center py-24">
                     <iconify-icon icon="mdi:check-circle" class="text-success-600" style="font-size: 64px;"></iconify-icon>
-                    <h5 class="mt-16 text-success-600">Payment Complete</h5>
+                    <h5 class="mt-16 text-success-600" data-i18n="order.paymentComplete">Payment Complete</h5>
                     <p class="text-secondary-light">This order has been fully paid.</p>
                 </div>
                 {% endif %}
@@ -1177,7 +1190,7 @@
             </div>
             <div class="modal-body">
                 <div class="mb-16 p-12 bg-success-50 radius-8 border border-success-200">
-                    <span class="text-secondary-light text-sm">Current Price</span>
+                    <span class="text-secondary-light text-sm" data-i18n="order.currentPrice">Current Price</span>
                     <div class="fw-bold text-success-600 fs-5" id="currentPriceDisplay">{{ order.total_price|intspace }} UZS</div>
                 </div>
                 <div class="mb-16">

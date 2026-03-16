@@ -361,7 +361,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             Region <span class="text-danger">*</span>
                         </label>
                         <select name="region" id="district-region-select" class="form-select radius-8" required>
-                            <option value="">Select Region</option>
+                            <option value="" data-i18n="form.selectRegion">Select Region</option>
                             {% for region in regions %}
                             <option value="{{ region.id }}">{{ region.name }}</option>
                             {% endfor %}

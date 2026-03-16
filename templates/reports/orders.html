@@ -408,8 +408,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if ApexCharts is loaded
     if (typeof ApexCharts === 'undefined') {
         console.error('ApexCharts is not loaded!');
-        document.querySelector("#orderTrendChart").innerHTML = '<div class="alert alert-danger">Chart library not loaded</div>';
-        document.querySelector("#statusPieChart").innerHTML = '<div class="alert alert-danger">Chart library not loaded</div>';
+        document.querySelector("#orderTrendChart").innerHTML = `<div class="alert alert-danger">${t('report.chartNotLoaded')}</div>`;
+        document.querySelector("#statusPieChart").innerHTML = `<div class="alert alert-danger">${t('report.chartNotLoaded')}</div>`;
         return;
     }
     
@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error rendering order chart:', e);
         }
     } else {
-        document.querySelector("#orderTrendChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:chart-square-line-duotone" class="text-4xl mb-2"></iconify-icon><span>No order data for this period</span></div>';
+        document.querySelector("#orderTrendChart").innerHTML = `<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:chart-square-line-duotone" class="text-4xl mb-2"></iconify-icon><span>${t('report.noOrderData')}</span></div>`;
     }
     
     // Status pie chart
@@ -497,7 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error rendering status chart:', e);
         }
     } else {
-        document.querySelector("#statusPieChart").innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:pie-chart-2-line-duotone" class="text-4xl mb-2"></iconify-icon><span>No status data</span></div>';
+        document.querySelector("#statusPieChart").innerHTML = `<div class="d-flex flex-column align-items-center justify-content-center py-5 text-secondary-light"><iconify-icon icon="solar:pie-chart-2-line-duotone" class="text-4xl mb-2"></iconify-icon><span>${t('report.noStatusData')}</span></div>`;
     }
 });
 </script>

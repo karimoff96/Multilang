@@ -29,13 +29,14 @@ _TYPE_ICONS = {
 }
 
 # Map ticket_type → Telegram forum topic thread_id
-# https://t.me/c/3166369763/1=General  /2=Finance  /4=Technical  /6=Others
+# Group: https://t.me/c/3166369763 (Multilang Support)
+# Confirmed working topic IDs: 2=Finance, 4=Technical, 6=Others
 _TYPE_THREAD_ID = {
     'financial': 2,
     'technical': 4,
-    'bug':       4,   # bugs are technical
+    'bug':       4,   # bugs → Technical
     'cr':        6,   # change requests → Others
-    'general':   1,
+    'general':   6,   # general inquiries → Others (thread 1 does not exist)
 }
 
 
@@ -124,14 +125,26 @@ def notify_support_new_ticket(ticket):
 
     try:
         thread_id = _get_thread_id(ticket)
-        sent = bot.send_message(
-            group_id, text,
-            parse_mode='HTML',
-            message_thread_id=thread_id,
-        )
+        try:
+            sent = bot.send_message(
+                group_id, text,
+                parse_mode='HTML',
+                message_thread_id=thread_id,
+            )
+        except Exception as thread_exc:
+            err_str = str(thread_exc).lower()
+            if 'message thread not found' in err_str or 'thread' in err_str:
+                logger.warning(
+                    f"Thread {thread_id} not found for ticket {ticket.ticket_number}; "
+                    f"sending to main group without thread. Original error: {thread_exc}"
+                )
+                sent = bot.send_message(group_id, text, parse_mode='HTML')
+                thread_id = None  # Don't store a bad thread_id
+            else:
+                raise
         ticket.telegram_message_id = str(sent.message_id)
         ticket.telegram_group_id = str(group_id)
-        ticket.telegram_thread_id = str(thread_id)
+        ticket.telegram_thread_id = str(thread_id) if thread_id else ''
         ticket.save(update_fields=['telegram_message_id', 'telegram_group_id', 'telegram_thread_id'])
         logger.info(f"Telegram alert sent for ticket {ticket.ticket_number} → thread {thread_id}")
     except Exception as exc:
@@ -171,13 +184,25 @@ def notify_support_staff_reply(ticket, message):
 
     try:
         reply_to = int(ticket.telegram_message_id) if ticket.telegram_message_id else None
-        thread_id = int(ticket.telegram_thread_id) if ticket.telegram_thread_id else _get_thread_id(ticket)
-        bot.send_message(
-            group_id, text,
-            parse_mode='HTML',
-            message_thread_id=thread_id,
-            reply_to_message_id=reply_to,
-        )
+        stored_thread = ticket.telegram_thread_id
+        thread_id = int(stored_thread) if stored_thread and stored_thread.strip().lstrip('-').isdigit() else _get_thread_id(ticket)
+        try:
+            bot.send_message(
+                group_id, text,
+                parse_mode='HTML',
+                message_thread_id=thread_id,
+                reply_to_message_id=reply_to,
+            )
+        except Exception as thread_exc:
+            err_str = str(thread_exc).lower()
+            if 'message thread not found' in err_str or 'thread' in err_str:
+                logger.warning(
+                    f"Thread {thread_id} not found for reply on {ticket.ticket_number}; "
+                    f"falling back to main group. Error: {thread_exc}"
+                )
+                bot.send_message(group_id, text, parse_mode='HTML')
+            else:
+                raise
     except Exception as exc:
         logger.error(
             f"Reply Telegram notification failed for {ticket.ticket_number}: {exc}"
@@ -235,13 +260,25 @@ def notify_support_status_change(ticket, new_status, changed_by=None, reason=Non
 
     try:
         reply_to = int(ticket.telegram_message_id) if ticket.telegram_message_id else None
-        thread_id = int(ticket.telegram_thread_id) if ticket.telegram_thread_id else _get_thread_id(ticket)
-        bot.send_message(
-            group_id, text,
-            parse_mode='HTML',
-            message_thread_id=thread_id,
-            reply_to_message_id=reply_to,
-        )
+        stored_thread = ticket.telegram_thread_id
+        thread_id = int(stored_thread) if stored_thread and stored_thread.strip().lstrip('-').isdigit() else _get_thread_id(ticket)
+        try:
+            bot.send_message(
+                group_id, text,
+                parse_mode='HTML',
+                message_thread_id=thread_id,
+                reply_to_message_id=reply_to,
+            )
+        except Exception as thread_exc:
+            err_str = str(thread_exc).lower()
+            if 'message thread not found' in err_str or 'thread' in err_str:
+                logger.warning(
+                    f"Thread {thread_id} not found for status change on {ticket.ticket_number}; "
+                    f"falling back to main group. Error: {thread_exc}"
+                )
+                bot.send_message(group_id, text, parse_mode='HTML')
+            else:
+                raise
         logger.info(f"Status-change notification sent for {ticket.ticket_number} → {new_status}")
     except Exception as exc:
         logger.error(f"Status-change Telegram notification failed for {ticket.ticket_number}: {exc}")

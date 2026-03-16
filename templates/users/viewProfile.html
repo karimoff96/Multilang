@@ -40,7 +40,7 @@
                             <span class="w-30 text-md fw-semibold text-primary-light" data-i18n="profile.role">Role</span>
                             <span class="w-70 text-secondary-light fw-medium">:
                                 {% if user.is_superuser %}
-                                    <span class="badge bg-danger-focus text-danger-600 px-8 py-4 radius-4">Super Admin</span>
+                                    <span class="badge bg-danger-focus text-danger-600 px-8 py-4 radius-4" data-i18n="users.superAdmin">Super Admin</span>
                                 {% elif user.admin_profile and user.admin_profile.role %}
                                     <span class="badge bg-primary-focus text-primary-600 px-8 py-4 radius-4">{{ user.admin_profile.role }}</span>
                                 {% else %}

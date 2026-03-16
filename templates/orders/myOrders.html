@@ -67,7 +67,7 @@
                 <!-- Filters -->
                 <form method="get" class="d-flex flex-wrap align-items-center gap-2">
                     <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                        <option value="">All Statuses</option>
+                        <option value="" data-i18n="common.allStatuses">All Statuses</option>
                         {% for value, label in status_choices %}
                             <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}

@@ -22,7 +22,7 @@
                     <!-- §1  Basic info -->
                     <div class="d-flex align-items-center gap-8 mb-16">
                         <span class="badge bg-primary-600 text-white px-10 py-6 radius-6 text-xs fw-bold">1</span>
-                        <h6 class="text-md fw-semibold mb-0">Post Details</h6>
+                        <h6 class="text-md fw-semibold mb-0" data-i18n="marketing.postDetails">Post Details</h6>
                     </div>
 
                     <div class="mb-20">
@@ -36,7 +36,7 @@
 
                     <div class="row gx-16 mb-20">
                         <div class="col-sm-6">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Content Type</label>
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="marketing.contentType">Content Type</label>
                             <select name="content_type" class="form-select radius-8" id="contentType" onchange="toggleMediaUpload()">
                                 {% for value, label in content_type_choices %}
                                 <option value="{{ value }}">{{ label }}</option>
@@ -44,7 +44,7 @@
                             </select>
                         </div>
                         <div class="col-sm-6" id="mediaUploadSection" style="display:none;">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Media File</label>
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="marketing.mediaFile">Media File</label>
                             <input type="file" name="media_file" class="form-control radius-8"
                                    accept="image/*,video/*,.pdf,.doc,.docx">
                         </div>
@@ -61,7 +61,7 @@
                             <button type="button" class="btn btn-sm btn-outline-secondary px-10 py-4 radius-6 fmt-btn" data-tag="b"><b>B</b></button>
                             <button type="button" class="btn btn-sm btn-outline-secondary px-10 py-4 radius-6 fmt-btn" data-tag="i"><i>I</i></button>
                             <button type="button" class="btn btn-sm btn-outline-secondary px-10 py-4 radius-6 fmt-btn" data-tag="code">code</button>
-                            <small class="text-muted align-self-center ms-4">Wrap selection in tag</small>
+                            <small class="text-muted align-self-center ms-4" data-i18n="marketing.wrapInTag">Wrap selection in tag</small>
                         </div>
                     </div>
 
@@ -70,12 +70,12 @@
                     <!-- §2  Target Audience -->
                     <div class="d-flex align-items-center gap-8 mb-16">
                         <span class="badge bg-primary-600 text-white px-10 py-6 radius-6 text-xs fw-bold">2</span>
-                        <h6 class="text-md fw-semibold mb-0">Target Audience</h6>
+                        <h6 class="text-md fw-semibold mb-0" data-i18n="marketing.targetAudience">Target Audience</h6>
                     </div>
 
                     <!-- Scope cards -->
                     <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-10">Broadcast Scope</label>
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-10" data-i18n="marketing.broadcastScope">Broadcast Scope</label>
                         <input type="hidden" name="target_scope" id="targetScope" value="">
                         <div class="d-flex flex-wrap gap-10" id="scopeCards">
                             {% for value, label in scope_choices %}
@@ -86,19 +86,19 @@
                                     <iconify-icon icon="mdi:earth" class="text-primary-600 text-xl"></iconify-icon>
                                     <div>
                                         <div class="fw-semibold text-sm">{{ label }}</div>
-                                        <div class="text-xs text-muted">Every registered bot user</div>
+                                        <div class="text-xs text-muted" data-i18n="marketing.everyRegisteredUser">Every registered bot user</div>
                                     </div>
                                 {% elif value == 'center' %}
                                     <iconify-icon icon="mdi:office-building" class="text-primary-600 text-xl"></iconify-icon>
                                     <div>
                                         <div class="fw-semibold text-sm">{{ label }}</div>
-                                        <div class="text-xs text-muted">All branches of one center</div>
+                                        <div class="text-xs text-muted" data-i18n="marketing.allBranchesOneCenter">All branches of one center</div>
                                     </div>
                                 {% else %}
                                     <iconify-icon icon="mdi:source-branch" class="text-primary-600 text-xl"></iconify-icon>
                                     <div>
                                         <div class="fw-semibold text-sm">{{ label }}</div>
-                                        <div class="text-xs text-muted">One specific branch only</div>
+                                        <div class="text-xs text-muted" data-i18n="marketing.oneBranchOnly">One specific branch only</div>
                                     </div>
                                 {% endif %}
                             </label>
@@ -110,7 +110,7 @@
                     {% if center_stats %}
                     <div id="centerCheckboxSection" style="display:none;" class="mb-20">
                         <div class="d-flex align-items-center justify-content-between mb-10">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-0" id="centerCheckboxLabel">Select Centers</label>
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-0" id="centerCheckboxLabel" data-i18n="marketing.selectCenters">Select Centers</label>
                             <div class="d-flex gap-8">
                                 <button type="button" class="btn btn-xs btn-outline-primary px-10 py-4 radius-6 text-xs" onclick="selectAllCenters(true)">All</button>
                                 <button type="button" class="btn btn-xs btn-outline-secondary px-10 py-4 radius-6 text-xs" onclick="selectAllCenters(false)">None</button>
@@ -148,7 +148,7 @@
                     <!-- Branch multi-select (grouped by center, scope=branch only) -->
                     <div id="branchCheckboxSection" style="display:none;" class="mb-20">
                         <div class="d-flex align-items-center justify-content-between mb-10">
-                            <label class="form-label fw-semibold text-primary-light text-sm mb-0">Select Branches</label>
+                            <label class="form-label fw-semibold text-primary-light text-sm mb-0" data-i18n="marketing.selectBranches">Select Branches</label>
                             <div class="d-flex gap-8">
                                 <button type="button" class="btn btn-xs btn-outline-primary px-10 py-4 radius-6 text-xs" onclick="selectAllBranches(true)">All</button>
                                 <button type="button" class="btn btn-xs btn-outline-secondary px-10 py-4 radius-6 text-xs" onclick="selectAllBranches(false)">None</button>
@@ -165,7 +165,7 @@
                                         <span class="badge badge-primary-soft px-8 py-3 radius-6 text-xs">{{ cs.total }}</span>
                                     </div>
                                     <button type="button" class="btn btn-xs btn-outline-secondary px-8 py-3 radius-6 text-xs"
-                                            onclick="selectCenterBranches({{ cs.id }}, true)">Select all</button>
+                                            onclick="selectCenterBranches({{ cs.id }}, true)" data-i18n="common.selectAll">Select all</button>
                                 </div>
                                 <!-- Branches list (rendered from JS using branch_stats_json) -->
                                 <div class="d-flex flex-column gap-0 branch-list" id="branchList_{{ cs.id }}" data-center-id="{{ cs.id }}">
@@ -186,7 +186,7 @@
                     {% else %}
                     <!-- Fallback dropdown (non-superuser / no stats) -->
                     <div id="centerDropdownSection" style="display:none;" class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Select Center</label>
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="marketing.selectCenter">Select Center</label>
                         <select name="target_center_ids" class="form-select radius-8" id="centerDropdown" onchange="onCenterDropdownChange()">
                             <option value="">-- Select Center --</option>
                             {% for center in permissions.centers %}
@@ -197,7 +197,7 @@
 
                     <!-- Fallback branch dropdown -->
                     <div id="branchDropdownSection" style="display:none;" class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Select Branch</label>
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="marketing.selectBranch">Select Branch</label>
                         <select name="target_branch_ids" class="form-select radius-8" id="targetBranch">
                             <option value="">-- Select Branch --</option>
                             {% for branch in permissions.branches %}
@@ -209,7 +209,7 @@
 
                     <!-- Customer Types -->
                     <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Customer Types</label>
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="marketing.customerTypes">Customer Types</label>
                         <div class="d-flex gap-16">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="include_b2c" id="includeB2C" checked onchange="updateRecipientCount()">
@@ -232,11 +232,11 @@
                     <div class="d-flex align-items-center gap-8 mb-16">
                         <span class="badge bg-primary-600 text-white px-10 py-6 radius-6 text-xs fw-bold">3</span>
                         <h6 class="text-md fw-semibold mb-0">
-                            Scheduling <span class="text-muted fw-normal" style="font-size:13px;">(optional)</span>
+                            <span data-i18n="marketing.scheduling">Scheduling</span> <span class="text-muted fw-normal" style="font-size:13px;">(optional)</span>
                         </h6>
                     </div>
                     <div class="mb-20">
-                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Send At</label>
+                        <label class="form-label fw-semibold text-primary-light text-sm mb-8" data-i18n="marketing.sendAt">Send At</label>
                         <input type="datetime-local" name="scheduled_at" class="form-control radius-8" id="scheduledAt">
                         <small class="text-muted">Leave empty to save as draft — send manually later</small>
                     </div>
@@ -245,14 +245,14 @@
                     <div class="d-flex justify-content-between align-items-center mt-32 pt-16 border-top">
                         <div class="d-flex align-items-center gap-8">
                             <iconify-icon icon="mdi:account-group" class="text-primary-600 text-xl"></iconify-icon>
-                            <span class="text-sm text-secondary-light">Estimated recipients:</span>
+                            <span class="text-sm text-secondary-light" data-i18n="marketing.estimatedRecipients">Estimated recipients:</span>
                             <span class="badge bg-primary-100 text-primary-600 px-10 py-6 radius-6 fw-semibold" id="countValue">—</span>
                         </div>
                         <div class="d-flex gap-3">
                             <a href="{% url 'marketing_list' %}" class="btn btn-outline-secondary px-24">Cancel</a>
                             <button type="submit" class="btn btn-primary px-24">
                                 <iconify-icon icon="mdi:content-save" class="me-2"></iconify-icon>
-                                Save Post
+                                <span data-i18n="marketing.savePost">Save Post</span>
                             </button>
                         </div>
                     </div>
@@ -269,7 +269,7 @@
             <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
                 <h6 class="text-md fw-semibold mb-0">
                     <iconify-icon icon="mdi:telegram" class="me-2 text-primary-600"></iconify-icon>
-                    Telegram Reach
+                    <span data-i18n="marketing.telegramReach">Telegram Reach</span>
                 </h6>
                 <span class="badge bg-primary-100 text-primary-600 px-10 py-4 radius-6 text-xs">Telegram</span>
             </div>
@@ -278,32 +278,32 @@
                     <div class="col-6">
                         <div class="text-center p-10 radius-8 stat-tile-primary">
                             <div class="fw-bold fs-5 stat-value">{{ sendable_bot_users }}</div>
-                            <div class="text-xs text-muted mt-1">Sendable</div>
+                            <div class="text-xs text-muted mt-1" data-i18n="marketing.sendable">Sendable</div>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="text-center p-10 radius-8 bg-success-focus">
                             <div class="fw-bold fs-5 text-success-main">{{ active_bot_users }}</div>
-                            <div class="text-xs text-muted mt-1">Active Telegram</div>
+                            <div class="text-xs text-muted mt-1" data-i18n="marketing.activeTelegram">Active Telegram</div>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="text-center p-10 radius-8 bg-danger-focus">
                             <div class="fw-bold fs-5 text-danger-main">{{ inactive_bot_users }}</div>
-                            <div class="text-xs text-muted mt-1">Inactive Telegram</div>
+                            <div class="text-xs text-muted mt-1" data-i18n="marketing.inactiveTelegram">Inactive Telegram</div>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="text-center p-10 radius-8 bg-warning-focus">
                             <div class="fw-bold fs-5 text-warning-main">{{ opted_out_bot_users }}</div>
-                            <div class="text-xs text-muted mt-1">Opted Out</div>
+                            <div class="text-xs text-muted mt-1" data-i18n="marketing.optedOut">Opted Out</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="mb-16">
                     <div class="d-flex justify-content-between text-xs text-muted mb-4">
-                        <span>Total Telegram users</span>
+                        <span data-i18n="marketing.totalUsers">Total Telegram users</span>
                         <span>{{ telegram_total_users }}</span>
                     </div>
                 </div>
@@ -311,7 +311,7 @@
                 {% if active_bot_users %}
                 <div class="mb-16">
                     <div class="d-flex justify-content-between text-xs text-muted mb-4">
-                        <span>Sendable ratio (from active)</span>
+                        <span data-i18n="marketing.sendableRatio">Sendable ratio (from active)</span>
                         <span>{{ sendable_bot_users }}/{{ active_bot_users }}</span>
                     </div>
                     <div class="progress" style="height:6px;border-radius:4px;">
@@ -506,7 +506,7 @@ function updateSectionVisibility() {
     if (scope === 'center') {
         if (hasCenterStats && cbSection) {
             cbSection.style.display = 'block';
-            document.getElementById('centerCheckboxLabel').textContent = 'Select Centers';
+            document.getElementById('centerCheckboxLabel').textContent = window.t ? t('marketing.selectCenters') : 'Select Centers';
         } else if (dropSection) {
             dropSection.style.display = 'block';
         }

@@ -18,7 +18,7 @@
                     <!-- Basic Information -->
                     <div class="row g-4 mb-24">
                         <div class="col-12">
-                            <h6 class="text-md fw-semibold mb-16 text-neutral-600">Basic Information</h6>
+                            <h6 class="text-md fw-semibold mb-16 text-neutral-600" data-i18n="form.basicInformation">Basic Information</h6>
                         </div>
                         {% if can_change_branch %}
                         <div class="col-12">
@@ -77,21 +77,21 @@
                                 First Page Price
                             </label>
                             <input type="number" step="0.01" class="form-control radius-8" id="agency_page_price" name="agency_page_price" value="{{ language.agency_page_price }}" placeholder="0.00">
-                            <small class="text-secondary-light">Additional cost for 1st page</small>
+                            <small class="text-secondary-light" data-i18n="language.additionalCostFirstPage">Additional cost for 1st page</small>
                         </div>
                         <div class="col-md-4">
                             <label for="agency_other_page_price" class="form-label fw-semibold text-primary-light text-sm mb-8">
                                 Other Pages Price
                             </label>
                             <input type="number" step="0.01" class="form-control radius-8" id="agency_other_page_price" name="agency_other_page_price" value="{{ language.agency_other_page_price }}" placeholder="0.00">
-                            <small class="text-secondary-light">Additional cost per other page</small>
+                            <small class="text-secondary-light" data-i18n="language.additionalCostOtherPage">Additional cost per other page</small>
                         </div>
                         <div class="col-md-4">
                             <label for="agency_copy_price" class="form-label fw-semibold text-primary-light text-sm mb-8">
                                 Copy Price
                             </label>
                             <input type="number" step="0.01" class="form-control radius-8" id="agency_copy_price" name="agency_copy_price" value="{{ language.agency_copy_price }}" placeholder="0.00">
-                            <small class="text-secondary-light">Additional cost per copy</small>
+                            <small class="text-secondary-light" data-i18n="language.additionalCostCopy">Additional cost per copy</small>
                         </div>
                     </div>
 
@@ -102,28 +102,28 @@
                                 <iconify-icon icon="mdi:account" class="me-2"></iconify-icon>
                                 Ordinary User Pricing (UZS)
                             </h6>
-                            <p class="text-sm text-secondary-light mb-12">Additional costs for individual customers</p>
+                            <p class="text-sm text-secondary-light mb-12" data-i18n="language.additionalCostsIndividual">Additional costs for individual customers</p>
                         </div>
                         <div class="col-md-4">
                             <label for="ordinary_page_price" class="form-label fw-semibold text-primary-light text-sm mb-8">
                                 First Page Price
                             </label>
                             <input type="number" step="0.01" class="form-control radius-8" id="ordinary_page_price" name="ordinary_page_price" value="{{ language.ordinary_page_price }}" placeholder="0.00">
-                            <small class="text-secondary-light">Additional cost for 1st page</small>
+                            <small class="text-secondary-light" data-i18n="language.additionalCostFirstPage">Additional cost for 1st page</small>
                         </div>
                         <div class="col-md-4">
                             <label for="ordinary_other_page_price" class="form-label fw-semibold text-primary-light text-sm mb-8">
                                 Other Pages Price
                             </label>
                             <input type="number" step="0.01" class="form-control radius-8" id="ordinary_other_page_price" name="ordinary_other_page_price" value="{{ language.ordinary_other_page_price }}" placeholder="0.00">
-                            <small class="text-secondary-light">Additional cost per other page</small>
+                            <small class="text-secondary-light" data-i18n="language.additionalCostOtherPage">Additional cost per other page</small>
                         </div>
                         <div class="col-md-4">
                             <label for="ordinary_copy_price" class="form-label fw-semibold text-primary-light text-sm mb-8">
                                 Copy Price
                             </label>
                             <input type="number" step="0.01" class="form-control radius-8" id="ordinary_copy_price" name="ordinary_copy_price" value="{{ language.ordinary_copy_price }}" placeholder="0.00">
-                            <small class="text-secondary-light">Additional cost per copy</small>
+                            <small class="text-secondary-light" data-i18n="language.additionalCostCopy">Additional cost per copy</small>
                         </div>
                     </div>
 

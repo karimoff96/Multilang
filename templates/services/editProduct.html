@@ -312,14 +312,14 @@
                                 <span data-i18n="form.priceOriginal">Price for Original (UZS)</span> <span class="text-danger-600">*</span>
                             </label>
                             <input type="number" step="0.01" class="form-control radius-8" id="expense_price_original" name="expense_price_original" value="0" required>
-                            <small class="text-secondary-light">Cost for the original document</small>
+                            <small class="text-secondary-light" data-i18n="expense.costForOriginal">Cost for the original document</small>
                         </div>
                         <div class="col-md-6 mb-20">
                             <label for="expense_price_copy" class="form-label fw-semibold text-primary-light text-sm mb-8">
                                 <span data-i18n="form.priceCopy">Price per Copy (UZS)</span> <span class="text-danger-600">*</span>
                             </label>
                             <input type="number" step="0.01" class="form-control radius-8" id="expense_price_copy" name="expense_price_copy" value="0" required>
-                            <small class="text-secondary-light">Cost per copy document</small>
+                            <small class="text-secondary-light" data-i18n="expense.costPerCopy">Cost per copy document</small>
                         </div>
                     </div>
                     <div class="row">
@@ -343,7 +343,7 @@
                                 <span data-i18n="form.center">Center</span> <span class="text-danger-600">*</span>
                             </label>
                             <select class="form-control radius-8 form-select" id="expense_center" name="expense_center" required>
-                                <option value="">Select Center</option>
+                                <option value="" data-i18n="form.selectCenter">Select Center</option>
                                 {% for center in centers %}
                                 <option value="{{ center.id }}" {% if product.category.branch.center_id == center.id %}selected{% endif %}>{{ center.name }}</option>
                                 {% endfor %}
@@ -354,7 +354,7 @@
                                 <span data-i18n="form.branch">Branch</span> <span class="text-danger-600">*</span>
                             </label>
                             <select class="form-control radius-8 form-select" id="expense_branch" name="expense_branch" required>
-                                <option value="">Select Branch</option>
+                                <option value="" data-i18n="form.selectBranch">Select Branch</option>
                                 {% if product.category.branch %}
                                 <option value="{{ product.category.branch.id }}" selected>{{ product.category.branch.name }}</option>
                                 {% endif %}
@@ -368,7 +368,7 @@
                             <span data-i18n="form.branch">Branch</span> <span class="text-danger-600">*</span>
                         </label>
                         <select class="form-control radius-8 form-select" id="expense_branch" name="expense_branch" required>
-                            <option value="">Select Branch</option>
+                            <option value="" data-i18n="form.selectBranch">Select Branch</option>
                             {% for branch in branches %}
                             <option value="{{ branch.id }}" {% if product.category.branch_id == branch.id %}selected{% endif %}>{{ branch.name }} ({{ branch.center.name }})</option>
                             {% endfor %}
@@ -420,7 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const initialCenterId = expenseCenterSelect.value;
     if (initialCenterId) {
         const filteredBranches = branchData.filter(b => b.centerId === initialCenterId);
-        expenseBranchSelect.innerHTML = '<option value="">Select Branch</option>';
+        expenseBranchSelect.innerHTML = `<option value="">${t('form.selectBranch')}</option>`;
         filteredBranches.forEach(branch => {
             const option = document.createElement('option');
             option.value = branch.id;
@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     expenseCenterSelect.addEventListener('change', function() {
         const centerId = this.value;
-        expenseBranchSelect.innerHTML = '<option value="">Select Branch</option>';
+        expenseBranchSelect.innerHTML = `<option value="">${t('form.selectBranch')}</option>`;
         
         if (centerId) {
             const filteredBranches = branchData.filter(b => b.centerId === centerId);
@@ -450,11 +450,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     expenseBranchSelect.appendChild(option);
                 });
             } else {
-                expenseBranchSelect.innerHTML = '<option value="">No branches available</option>';
+                expenseBranchSelect.innerHTML = `<option value="">${t('form.noBranchesAvailable')}</option>`;
                 expenseBranchSelect.disabled = true;
             }
         } else {
-            expenseBranchSelect.innerHTML = '<option value="">Select Center First</option>';
+            expenseBranchSelect.innerHTML = `<option value="">${t('form.selectCenterFirst')}</option>`;
             expenseBranchSelect.disabled = true;
         }
     });
@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 {% if product.category.branch %}
                 expenseCenterSelect.value = '{{ product.category.branch.center_id }}';
                 const resetBranches = branchData.filter(b => b.centerId === '{{ product.category.branch.center_id }}');
-                expenseBranchSelect.innerHTML = '<option value="">Select Branch</option>';
+                expenseBranchSelect.innerHTML = `<option value="">${t('form.selectBranch')}</option>`;
                 resetBranches.forEach(branch => {
                     const option = document.createElement('option');
                     option.value = branch.id;

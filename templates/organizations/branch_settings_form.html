@@ -16,7 +16,7 @@
                             <iconify-icon icon="fluent:settings-20-filled" class="text-primary-600 text-3xl"></iconify-icon>
                         </div>
                         <div>
-                            <h4 class="text-xl fw-semibold mb-4">Edit Branch Settings</h4>
+                            <h4 class="text-xl fw-semibold mb-4" data-i18n="branch.editSettings">Edit Branch Settings</h4>
                             <p class="text-secondary-light mb-0">
                                 <iconify-icon icon="fluent:building-20-filled" class="text-primary-600"></iconify-icon>
                                 {{ branch.name }} - {{ branch.center.name }}
@@ -44,7 +44,7 @@
                 <div class="w-40-px h-40-px bg-success-100 rounded-8 d-flex justify-content-center align-items-center">
                     <iconify-icon icon="fluent:payment-20-filled" class="text-success-600 text-xl"></iconify-icon>
                 </div>
-                <h6 class="mb-0 fw-semibold">Payment Information</h6>
+                <h6 class="mb-0 fw-semibold" data-i18n="branch.paymentInformation">Payment Information</h6>
             </div>
             <div class="card-body p-24">
                 <div class="row gy-3">
@@ -77,7 +77,7 @@
                 <div class="w-40-px h-40-px bg-info-100 rounded-8 d-flex justify-content-center align-items-center">
                     <iconify-icon icon="fluent:call-20-filled" class="text-info-600 text-xl"></iconify-icon>
                 </div>
-                <h6 class="mb-0 fw-semibold">Contact Information</h6>
+                <h6 class="mb-0 fw-semibold" data-i18n="branch.contactInformation">Contact Information</h6>
             </div>
             <div class="card-body p-24">
                 <div class="row gy-3">
@@ -158,8 +158,8 @@
                     <iconify-icon icon="fluent:question-circle-20-filled" class="text-primary-600 text-xl"></iconify-icon>
                 </div>
                 <div>
-                    <h6 class="mb-0 fw-semibold">Help Text</h6>
-                    <small class="text-secondary-light">Shown when user clicks Help button in bot</small>
+                    <h6 class="mb-0 fw-semibold" data-i18n="branch.helpText">Help Text</h6>
+                    <small class="text-secondary-light" data-i18n="branch.helpTextHint">Shown when user clicks Help button in bot</small>
                 </div>
             </div>
             <div class="card-body p-24">
@@ -200,8 +200,8 @@
                     <iconify-icon icon="fluent:info-20-filled" class="text-info-600 text-xl"></iconify-icon>
                 </div>
                 <div>
-                    <h6 class="mb-0 fw-semibold">About Us</h6>
-                    <small class="text-secondary-light">Shown when user clicks About Us button in bot</small>
+                    <h6 class="mb-0 fw-semibold" data-i18n="branch.aboutUs">About Us</h6>
+                    <small class="text-secondary-light" data-i18n="branch.aboutUsHint">Shown when user clicks About Us button in bot</small>
                 </div>
             </div>
             <div class="card-body p-24">
@@ -242,14 +242,14 @@
                     <iconify-icon icon="fluent:book-20-filled" class="text-purple-600 text-xl"></iconify-icon>
                 </div>
                 <div>
-                    <h6 class="mb-0 fw-semibold">Guide Link</h6>
+                    <h6 class="mb-0 fw-semibold" data-i18n="branch.guideLink">Guide Link</h6>
                     <small class="text-secondary-light">Link to guide resource (Telegram, YouTube, documentation, etc.)</small>
                 </div>
             </div>
             <div class="card-body p-24">
                 <div class="row">
                     <div class="col-12">
-                        <label for="guide" class="form-label fw-medium text-secondary-light">Guide URL</label>
+                        <label for="guide" class="form-label fw-medium text-secondary-light" data-i18n="branch.guideUrl">Guide URL</label>
                         <input type="url" class="form-control radius-8" id="guide" name="guide"
                                value="{{ info.guide|default:'' }}"
                                placeholder="https://t.me/channel/123 or https://youtube.com/watch?v=...">
@@ -268,8 +268,8 @@
                     <iconify-icon icon="fluent:document-text-20-filled" class="text-cyan-600 text-xl"></iconify-icon>
                 </div>
                 <div>
-                    <h6 class="mb-0 fw-semibold">Other Services</h6>
-                    <small class="text-secondary-light">Shown when user taps Other Services in bot</small>
+                    <h6 class="mb-0 fw-semibold" data-i18n="branch.otherServices">Other Services</h6>
+                    <small class="text-secondary-light" data-i18n="branch.otherServicesHint">Shown when user taps Other Services in bot</small>
                 </div>
             </div>
             <div class="card-body p-24">

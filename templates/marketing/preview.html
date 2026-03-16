@@ -16,7 +16,7 @@
             </div>
             <div class="card-body p-24">
                 <!-- Message Preview -->
-                <h6 class="text-md fw-semibold mb-12">Message Preview</h6>
+                <h6 class="text-md fw-semibold mb-12" data-i18n="marketing.messagePreview">Message Preview</h6>
                 <div class="bg-neutral-100 radius-12 p-20 mb-24">
                     <!-- Simulate Telegram message bubble -->
                     <div class="d-flex gap-3">
@@ -54,15 +54,15 @@
                 </div>
                 
                 <!-- Sample Recipients -->
-                <h6 class="text-md fw-semibold mb-12">Sample Recipients (first 10)</h6>
+                <h6 class="text-md fw-semibold mb-12" data-i18n="marketing.sampleRecipients">Sample Recipients (first 10)</h6>
                 <div class="table-responsive mb-24">
                     <table class="table bordered-table sm-table mb-0">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Phone</th>
-                                <th>Type</th>
-                                <th>Branch</th>
+                                <th data-i18n="common.name">Name</th>
+                                <th data-i18n="common.phone">Phone</th>
+                                <th data-i18n="marketing.customerType">Type</th>
+                                <th data-i18n="common.branch">Branch</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -81,7 +81,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="4" class="text-center text-secondary-light">No recipients found</td>
+                                <td colspan="4" class="text-center text-secondary-light" data-i18n="marketing.noRecipientsFound">No recipients found</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -94,17 +94,17 @@
                         <div class="col-md-4 text-center">
                             <iconify-icon icon="mdi:account-group" class="text-primary-600 mb-8" style="font-size: 32px;"></iconify-icon>
                             <h4 class="fw-bold text-primary-600 mb-0">{{ total_recipients }}</h4>
-                            <small class="text-secondary-light">Total Recipients</small>
+                            <small class="text-secondary-light" data-i18n="marketing.totalRecipients">Total Recipients</small>
                         </div>
                         <div class="col-md-4 text-center">
                             <iconify-icon icon="mdi:clock-outline" class="text-primary-600 mb-8" style="font-size: 32px;"></iconify-icon>
                             <h4 class="fw-bold text-primary-600 mb-0">{{ estimated_duration }}</h4>
-                            <small class="text-secondary-light">Estimated Duration</small>
+                            <small class="text-secondary-light" data-i18n="marketing.estimatedDuration">Estimated Duration</small>
                         </div>
                         <div class="col-md-4 text-center">
                             <iconify-icon icon="mdi:target" class="text-primary-600 mb-8" style="font-size: 32px;"></iconify-icon>
                             <h4 class="fw-bold text-primary-600 mb-0">{{ post.get_target_scope_display }}</h4>
-                            <small class="text-secondary-light">Target Scope</small>
+                            <small class="text-secondary-light" data-i18n="marketing.targetScope">Target Scope</small>
                         </div>
                     </div>
                 </div>

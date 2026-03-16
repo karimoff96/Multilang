@@ -255,7 +255,8 @@ class PaymeWebhookView(View):
             order.is_active = True
             order.save(update_fields=["payment_type", "status", "is_active", "updated_at"])
 
-            # Build and store the checkout URL so it can be used as a receipt link later
+            # Build and store the checkout URL (payment initiation URL, for reference/debugging)
+            # Note: to view a completed-transaction receipt use r=<payme_transaction_id> base64 format
             try:
                 import base64 as _b64
                 center = order.center

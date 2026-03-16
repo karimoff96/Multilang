@@ -15,7 +15,7 @@
                                 <iconify-icon icon="solar:wallet-bold" class="text-primary-600 text-3xl"></iconify-icon>
                             </div>
                             <div>
-                                <span class="text-secondary-light text-md">Total Expenses</span>
+                                <span class="text-secondary-light text-md" data-i18n="expense.totalExpenses">Total Expenses</span>
                                 <h4 class="text-primary-600 mb-0">{{ analytics.total|smart_num }}</h4>
                             </div>
                         </div>
@@ -61,7 +61,7 @@
             <div class="card-header border-bottom bg-base py-16 px-24">
                 <h6 class="mb-0 d-flex align-items-center">
                     <iconify-icon icon="solar:chart-linear" class="me-8 text-primary-600"></iconify-icon>
-                    <span>Expense Breakdown by Type</span>
+                    <span data-i18n="expense.breakdownByType">Expense Breakdown by Type</span>
                 </h6>
             </div>
             <div class="card-body p-24">
@@ -70,10 +70,10 @@
                     <table class="table bordered-table mb-0">
                         <thead>
                             <tr>
-                                <th>Expense Type</th>
-                                <th>Count</th>
-                                <th>Total Amount</th>
-                                <th>Percentage</th>
+                                <th data-i18n="expense.expenseType">Expense Type</th>
+                                <th data-i18n="common.count">Count</th>
+                                <th data-i18n="expense.totalAmount">Total Amount</th>
+                                <th data-i18n="common.percentage">Percentage</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,26 +120,26 @@
             <div class="card-header border-bottom bg-base py-16 px-24">
                 <h6 class="mb-0 d-flex align-items-center">
                     <iconify-icon icon="solar:filter-linear" class="me-8 text-warning-600"></iconify-icon>
-                    <span>Current Filter</span>
+                    <span data-i18n="expense.currentFilter">Current Filter</span>
                 </h6>
             </div>
             <div class="card-body p-24">
                 <div class="d-flex flex-column gap-16">
                     {% if branch %}
                     <div class="bg-primary-50 radius-8 p-16">
-                        <span class="text-secondary-light text-sm">Branch</span>
+                        <span class="text-secondary-light text-sm" data-i18n="common.branch">Branch</span>
                         <h6 class="mb-0 text-primary-600">{{ branch.name }}</h6>
                         <small class="text-secondary-light">{{ branch.center.name }}</small>
                     </div>
                     {% elif center %}
                     <div class="bg-info-50 radius-8 p-16">
-                        <span class="text-secondary-light text-sm">Center</span>
+                        <span class="text-secondary-light text-sm" data-i18n="common.center">Center</span>
                         <h6 class="mb-0 text-info-600">{{ center.name }}</h6>
                     </div>
                     {% else %}
                     <div class="bg-neutral-100 radius-8 p-16">
-                        <span class="text-secondary-light text-sm">Scope</span>
-                        <h6 class="mb-0">All Accessible Expenses</h6>
+                        <span class="text-secondary-light text-sm" data-i18n="common.scope">Scope</span>
+                        <h6 class="mb-0" data-i18n="expense.allAccessible">All Accessible Expenses</h6>
                     </div>
                     {% endif %}
                     

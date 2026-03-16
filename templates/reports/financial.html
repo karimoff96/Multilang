@@ -466,7 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error rendering branch chart:', e);
         }
     } else if (branchEl) {
-        branchEl.innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center py-4 text-secondary-light"><iconify-icon icon="solar:buildings-line-duotone" class="text-3xl mb-2"></iconify-icon><span>No branch data</span></div>';
+        branchEl.innerHTML = `<div class="d-flex flex-column align-items-center justify-content-center py-4 text-secondary-light"><iconify-icon icon="solar:buildings-line-duotone" class="text-3xl mb-2"></iconify-icon><span>${t('report.noBranchData')}</span></div>`;
     }
 });
 </script>

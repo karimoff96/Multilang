@@ -373,7 +373,7 @@ function renderPaymentDetails(data) {
                         <div class="d-flex align-items-center gap-2">
                             <iconify-icon icon="solar:dollar-bold" class="text-success text-xl"></iconify-icon>
                             <div>
-                                <small class="text-secondary-light">Payment Amount</small>
+                                <small class="text-secondary-light" data-i18n="payment.amount">Payment Amount</small>
                                 <div class="fw-bold text-success">${formatNumber(data.amount)} UZS</div>
                             </div>
                         </div>
@@ -382,7 +382,7 @@ function renderPaymentDetails(data) {
                         <div class="d-flex align-items-center gap-2">
                             <iconify-icon icon="solar:calendar-bold" class="text-info text-xl"></iconify-icon>
                             <div>
-                                <small class="text-secondary-light">Payment Date</small>
+                                <small class="text-secondary-light" data-i18n="payment.date">Payment Date</small>
                                 <div class="fw-semibold">${data.payment_date}</div>
                             </div>
                         </div>
@@ -391,7 +391,7 @@ function renderPaymentDetails(data) {
                         <div class="d-flex align-items-center gap-2">
                             <iconify-icon icon="solar:card-bold" class="text-warning text-xl"></iconify-icon>
                             <div>
-                                <small class="text-secondary-light">Payment Method</small>
+                                <small class="text-secondary-light" data-i18n="payment.method">Payment Method</small>
                                 <div class="fw-semibold">${data.payment_method}</div>
                             </div>
                         </div>
@@ -401,7 +401,7 @@ function renderPaymentDetails(data) {
                         <div class="d-flex align-items-center gap-2">
                             <iconify-icon icon="solar:user-check-bold" class="text-primary text-xl"></iconify-icon>
                             <div>
-                                <small class="text-secondary-light">Processed By</small>
+                                <small class="text-secondary-light" data-i18n="payment.processedBy">Processed By</small>
                                 <div class="fw-semibold">${data.processed_by}</div>
                             </div>
                         </div>
@@ -435,7 +435,7 @@ function renderPaymentDetails(data) {
                         <th class="text-secondary-light">Order #</th>
                         <th class="text-secondary-light">Customer</th>
                         <th class="text-secondary-light">Product</th>
-                        <th class="text-end text-secondary-light">Paid Amount</th>
+                        <th class="text-end text-secondary-light" data-i18n="payment.paidAmount">Paid Amount</th>
                         <th class="text-center text-secondary-light">Status</th>
                     </tr>
                 </thead>
@@ -445,9 +445,9 @@ function renderPaymentDetails(data) {
     data.orders.forEach(order => {
         let statusBadge = '';
         if (order.is_fully_paid) {
-            statusBadge = '<span class="badge bg-success-focus text-success-main">Fully Paid</span>';
+            statusBadge = `<span class="badge bg-success-focus text-success-main">${t('payment.fullyPaid')}</span>`;
         } else {
-            statusBadge = '<span class="badge bg-warning-focus text-warning-main">Partially Paid</span>';
+            statusBadge = `<span class="badge bg-warning-focus text-warning-main">${t('payment.partiallyPaid')}</span>`;
         }
         
         html += `
@@ -471,15 +471,15 @@ function renderPaymentDetails(data) {
             <div class="card-body py-2">
                 <div class="row text-center">
                     <div class="col-4">
-                        <small class="text-secondary-light">Total Orders</small>
+                        <small class="text-secondary-light" data-i18n="status.totalOrders">Total Orders</small>
                         <div class="fw-bold text-primary">${data.orders_count}</div>
                     </div>
                     <div class="col-4">
-                        <small class="text-secondary-light">Fully Paid</small>
+                        <small class="text-secondary-light" data-i18n="payment.fullyPaid">Fully Paid</small>
                         <div class="fw-bold text-success">${data.fully_paid_count}</div>
                     </div>
                     <div class="col-4">
-                        <small class="text-secondary-light">Remaining Debt</small>
+                        <small class="text-secondary-light">${t('payment.remainingDebt')}</small>
                         <div class="fw-bold text-danger">${formatNumber(data.remaining_debt)} UZS</div>
                     </div>
                 </div>

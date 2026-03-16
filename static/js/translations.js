@@ -8476,6 +8476,1572 @@ const translations = {
         uz: 'Sandbox rejimi o\'chirilganda faol',
         ru: 'Активен при выключённом режиме песочницы',
         en: 'Active when Sandbox Mode is OFF'
+    },
+
+    // ========== ACTIONS ==========
+    'actions.back': {
+        uz: 'Orqaga',
+        ru: 'Назад',
+        en: 'Back'
+    },
+    'actions.cancel': {
+        uz: 'Bekor qilish',
+        ru: 'Отмена',
+        en: 'Cancel'
+    },
+    'actions.delete': {
+        uz: 'O\'chirish',
+        ru: 'Удалить',
+        en: 'Delete'
+    },
+    'actions.edit': {
+        uz: 'Tahrirlash',
+        ru: 'Редактировать',
+        en: 'Edit'
+    },
+
+    // ========== AUTH ==========
+    'auth.backToSignIn': {
+        uz: 'Tizimga kirish sahifasiga qaytish',
+        ru: 'Вернуться к входу',
+        en: 'Back to Sign In'
+    },
+    'auth.forgotPasswordDesc': {
+        uz: 'Hisobingiz bilan bog\'liq email manzilingizni kiriting va biz sizga parolni tiklash havolasini yuboramiz.',
+        ru: 'Введите адрес электронной почты, связанный с вашей учётной записью, и мы отправим вам ссылку для сброса пароля.',
+        en: 'Enter the email address associated with your account and we will send you a link to reset your password.'
+    },
+    'auth.sendResetLink': {
+        uz: 'Tiklash havolasini yuborish',
+        ru: 'Отправить ссылку для сброса',
+        en: 'Send Reset Link'
+    },
+
+    // ========== CATEGORY ==========
+    'category.dynamicPrice': {
+        uz: 'Sahifa uchun',
+        ru: 'За страницу',
+        en: 'Per Page'
+    },
+    'category.staticPrice': {
+        uz: 'Belgilangan narx',
+        ru: 'Фиксированная цена',
+        en: 'Fixed Price'
+    },
+
+    // ========== COMMENTS ==========
+    'comments.internal': {
+        uz: 'Ichki izohlar',
+        ru: 'Внутренние комментарии',
+        en: 'Internal Comments'
+    },
+    'comments.noComments': {
+        uz: 'Hali izoh yo\'q. Birinchi bo\'lib qoldiring.',
+        ru: 'Комментариев нет. Будьте первым.',
+        en: 'No comments yet. Be the first to leave a note.'
+    },
+    'comments.post': {
+        uz: 'Yuborish',
+        ru: 'Опубликовать',
+        en: 'Post'
+    },
+    'comments.staffOnly': {
+        uz: 'Faqat xodimlar uchun',
+        ru: 'Только для персонала',
+        en: 'Staff only'
+    },
+
+    // ========== COMMON (additional) ==========
+    'common.average': {
+        uz: 'O\'rtacha',
+        ru: 'Среднее',
+        en: 'Avg'
+    },
+    'common.branches': {
+        uz: 'Filiallar',
+        ru: 'Филиалы',
+        en: 'Branches'
+    },
+    'common.cannotUndo': {
+        uz: 'Bu amalni ortga qaytarib bo\'lmaydi.',
+        ru: 'Это действие нельзя отменить.',
+        en: 'This action cannot be undone.'
+    },
+    'common.confirmDeleteUser': {
+        uz: 'Haqiqatan ham o\'chirishni xohlaysizmi',
+        ru: 'Вы уверены, что хотите удалить',
+        en: 'Are you sure you want to delete'
+    },
+    'common.confirmDeletion': {
+        uz: 'O\'chirishni tasdiqlash',
+        ru: 'Подтвердить удаление',
+        en: 'Confirm Deletion'
+    },
+    'common.customer': {
+        uz: 'Mijoz',
+        ru: 'Клиент',
+        en: 'Customer'
+    },
+    'common.deleteUser': {
+        uz: 'Foydalanuvchini o\'chirish',
+        ru: 'Удалить пользователя',
+        en: 'Delete User'
+    },
+    'common.exportExcel': {
+        uz: 'Excel\'ga eksport',
+        ru: 'Экспорт в Excel',
+        en: 'Export Excel'
+    },
+    'common.pay': {
+        uz: 'To\'lash',
+        ru: 'Оплатить',
+        en: 'Pay'
+    },
+    'common.totals': {
+        uz: 'JAMI:',
+        ru: 'ИТОГО:',
+        en: 'TOTALS:'
+    },
+
+    // ========== CONTACT ==========
+    'contact.changeStatus': {
+        uz: 'Statusni o\'zgartirish',
+        ru: 'Изменить статус',
+        en: 'Change Status'
+    },
+    'contact.hasCompany': {
+        uz: 'Kompaniyasi bor',
+        ru: 'Есть компания',
+        en: 'Has Company'
+    },
+    'contact.hasPhone': {
+        uz: 'Telefoni bor',
+        ru: 'Есть телефон',
+        en: 'Has Phone'
+    },
+    'contact.internalNotes': {
+        uz: 'Ichki eslatmalar:',
+        ru: 'Внутренние заметки:',
+        en: 'Internal Notes:'
+    },
+    'contact.messageFrom': {
+        uz: 'Xabar:',
+        ru: 'Сообщение от',
+        en: 'Message from'
+    },
+    'contact.saveNotes': {
+        uz: 'Eslatmalarni saqlash',
+        ru: 'Сохранить заметки',
+        en: 'Save Notes'
+    },
+    'contact.total': {
+        uz: 'Jami',
+        ru: 'Всего',
+        en: 'Total'
+    },
+
+    // ========== DASHBOARD (additional) ==========
+    'dashboard.activeTotal': {
+        uz: 'faol jami',
+        ru: 'активных всего',
+        en: 'active total'
+    },
+    'dashboard.totalBacklog': {
+        uz: 'jami navbat',
+        ru: 'всего в очереди',
+        en: 'total backlog'
+    },
+
+    // ========== DETAIL ==========
+    'detail.addExpenses': {
+        uz: 'Xarajat qo\'shish',
+        ru: 'Добавить расходы',
+        en: 'Add Expenses'
+    },
+    'detail.backToList': {
+        uz: 'Ro\'yxatga qaytish',
+        ru: 'Вернуться к списку',
+        en: 'Back to List'
+    },
+    'detail.basedOnFirstPage': {
+        uz: 'Birinchi sahifa narxiga asoslangan:',
+        ru: 'На основе цены первой страницы:',
+        en: 'Based on first page price:'
+    },
+    'detail.branch': {
+        uz: 'Filial',
+        ru: 'Филиал',
+        en: 'Branch'
+    },
+    'detail.category': {
+        uz: 'Kategoriya',
+        ru: 'Категория',
+        en: 'Category'
+    },
+    'detail.center': {
+        uz: 'Markaz',
+        ru: 'Центр',
+        en: 'Center'
+    },
+    'detail.deleteCategory': {
+        uz: 'Kategoriyani o\'chirish',
+        ru: 'Удалить категорию',
+        en: 'Delete Category'
+    },
+    'detail.editCategory': {
+        uz: 'Kategoriyani tahrirlash',
+        ru: 'Редактировать категорию',
+        en: 'Edit Category'
+    },
+    'detail.manageExpenses': {
+        uz: 'Xarajatlarni boshqarish',
+        ru: 'Управление расходами',
+        en: 'Manage Expenses'
+    },
+    'detail.noExpenses': {
+        uz: 'Ushbu mahsulot bilan bog\'liq xarajatlar yo\'q.',
+        ru: 'Нет расходов, связанных с этим продуктом.',
+        en: 'No expenses associated with this product.'
+    },
+    'detail.productExpenses': {
+        uz: 'Mahsulot xarajatlari',
+        ru: 'Расходы продукта',
+        en: 'Product Expenses'
+    },
+    'detail.profitMargin': {
+        uz: 'Foyda marjasi (oddiy foydalanuvchi)',
+        ru: 'Маржа прибыли (обычный пользователь)',
+        en: 'Profit Margin (Regular User)'
+    },
+    'detail.receipts': {
+        uz: 'Kvitansiyalar',
+        ru: 'Квитанции',
+        en: 'Receipts'
+    },
+    'detail.totalExpenses': {
+        uz: 'Jami xarajatlar:',
+        ru: 'Итого расходов:',
+        en: 'Total Expenses:'
+    },
+
+    // ========== FILTER ==========
+    'filter.defaultPeriod': {
+        uz: 'Standart davr:',
+        ru: 'Период по умолчанию:',
+        en: 'Default Period:'
+    },
+    'filter.from': {
+        uz: 'Dan',
+        ru: 'От',
+        en: 'From'
+    },
+    'filter.to': {
+        uz: 'Gacha',
+        ru: 'До',
+        en: 'To'
+    },
+    'filters.apply': {
+        uz: 'Filtrlarni qo\'llash',
+        ru: 'Применить фильтры',
+        en: 'Apply Filters'
+    },
+    'filters.dateFrom': {
+        uz: 'Sana dan',
+        ru: 'Дата от',
+        en: 'Date From'
+    },
+    'filters.dateTo': {
+        uz: 'Sana gacha',
+        ru: 'Дата до',
+        en: 'Date To'
+    },
+    'filters.nameAZ': {
+        uz: 'Nomi (A-Z)',
+        ru: 'Имя (А-Я)',
+        en: 'Name (A-Z)'
+    },
+    'filters.nameZA': {
+        uz: 'Nomi (Z-A)',
+        ru: 'Имя (Я-А)',
+        en: 'Name (Z-A)'
+    },
+    'filters.newestFirst': {
+        uz: 'Avval yangilari',
+        ru: 'Сначала новые',
+        en: 'Newest First'
+    },
+    'filters.oldestFirst': {
+        uz: 'Avval eskilari',
+        ru: 'Сначала старые',
+        en: 'Oldest First'
+    },
+    'filters.sortBy': {
+        uz: 'Saralash',
+        ru: 'Сортировать по',
+        en: 'Sort By'
+    },
+
+    // ========== FORM (additional) ==========
+    'form.active': {
+        uz: 'Faol',
+        ru: 'Активный',
+        en: 'Active'
+    },
+    'form.addNewExpense': {
+        uz: 'Yangi xarajat qo\'shish',
+        ru: 'Добавить новый расход',
+        en: 'Add New Expense'
+    },
+    'form.botChannels': {
+        uz: 'Bot kanallari',
+        ru: 'Каналы бота',
+        en: 'Bot Channels'
+    },
+    'form.branchHint': {
+        uz: 'Ushbu foydalanuvchi uchun muayyan filial',
+        ru: 'Конкретный филиал для этого пользователя',
+        en: 'Specific branch for this user'
+    },
+    'form.centerHint': {
+        uz: 'Ushbu foydalanuvchi mansub tarjima markazi',
+        ru: 'Центр перевода, к которому принадлежит этот пользователь',
+        en: 'Translation center this user belongs to'
+    },
+    'form.copyPriceFixed': {
+        uz: 'Nusxa narxi (belgilangan)',
+        ru: 'Цена копии (фиксированная)',
+        en: 'Copy Price (Fixed)'
+    },
+    'form.createExpense': {
+        uz: 'Xarajat yaratish',
+        ru: 'Создать расход',
+        en: 'Create Expense'
+    },
+    'form.expenseHint': {
+        uz: 'Ushbu mahsulotga bog\'langan xarajatlarni tanlang. Foyda marjasi hisoblarida ishlatiladi.',
+        ru: 'Выберите расходы, применимые к этому продукту. Используется для расчёта маржи прибыли.',
+        en: 'Select expenses that apply to this product. These will be used for profit margin calculations.'
+    },
+    'form.expenseName': {
+        uz: 'Xarajat nomi',
+        ru: 'Название расхода',
+        en: 'Expense Name'
+    },
+    'form.expenses': {
+        uz: 'Mahsulot xarajatlari',
+        ru: 'Расходы продукта',
+        en: 'Product Expenses'
+    },
+    'form.expenseType': {
+        uz: 'Xarajat turi',
+        ru: 'Тип расхода',
+        en: 'Expense Type'
+    },
+    'form.noExpensesAvailable': {
+        uz: 'Mavjud xarajatlar yo\'q. Yuqoridagi tugma orqali yarating.',
+        ru: 'Нет доступных расходов. Создайте с помощью кнопки выше.',
+        en: 'No expenses available. Create one using the button above.'
+    },
+    'form.priceCopy': {
+        uz: 'Nusxa narxi (UZS)',
+        ru: 'Цена за копию (UZS)',
+        en: 'Price per Copy (UZS)'
+    },
+    'form.priceOriginal': {
+        uz: 'Asl nusxa narxi (UZS)',
+        ru: 'Цена за оригинал (UZS)',
+        en: 'Price for Original (UZS)'
+    },
+    'form.selectExpenses': {
+        uz: 'Xarajatlarni tanlash',
+        ru: 'Выбрать расходы',
+        en: 'Select Expenses'
+    },
+
+    // ========== HELP ==========
+    'help.reportsPermissionsTitle': {
+        uz: 'Hisobotlar uchun ruxsatlar',
+        ru: 'Разрешения для отчётов',
+        en: 'Reports Permissions'
+    },
+    'help.reportsPermissionsDesc': {
+        uz: 'Hisobotlar, tahlillar va ma\'lumotlarni eksport qilish imkoniyatlari uchun alohida ruxsatlar.',
+        ru: 'Отдельные разрешения для отчётов, аналитики и возможностей экспорта данных.',
+        en: 'Separate permissions for reports, analytics, and data export capabilities.'
+    },
+
+    // ========== MARKETING ==========
+    'marketing.deliveryResults': {
+        uz: 'Yetkazib berish natijalari',
+        ru: 'Результаты доставки',
+        en: 'Delivery Results'
+    },
+    'marketing.totalUsers': {
+        uz: 'Jami foydalanuvchilar',
+        ru: 'Всего пользователей',
+        en: 'Total Users'
+    },
+
+    // ========== ORDER (additional) ==========
+    'order.createdAt': {
+        uz: 'Yaratildi',
+        ru: 'Создан',
+        en: 'Created'
+    },
+    'order.customer': {
+        uz: 'Mijoz',
+        ru: 'Клиент',
+        en: 'Customer'
+    },
+    'order.id': {
+        uz: 'Buyurtma ID',
+        ru: 'ID заказа',
+        en: 'Order ID'
+    },
+    'order.pages': {
+        uz: 'Sahifalar',
+        ru: 'Страницы',
+        en: 'Pages'
+    },
+    'order.product': {
+        uz: 'Mahsulot',
+        ru: 'Продукт',
+        en: 'Product'
+    },
+    'order.status': {
+        uz: 'Status',
+        ru: 'Статус',
+        en: 'Status'
+    },
+
+    // ========== ORDERS (additional) ==========
+    'orders.allStaff': {
+        uz: 'Barcha xodimlar',
+        ru: 'Все сотрудники',
+        en: 'All Staff'
+    },
+    'orders.bulkDeleteWarning': {
+        uz: 'Tanlangan buyurtmalarni o\'chirishni xohlaysizmi?',
+        ru: 'Вы уверены, что хотите удалить выбранные заказы?',
+        en: 'Are you sure you want to delete the selected orders?'
+    },
+    'orders.itemsToDelete': {
+        uz: 'O\'chiriladigan buyurtmalar:',
+        ru: 'Заказы для удаления:',
+        en: 'Orders to be deleted:'
+    },
+
+    // ========== PAYMENT (additional) ==========
+    'payment.newPayment': {
+        uz: 'Yangi to\'lov',
+        ru: 'Новый платёж',
+        en: 'New Payment'
+    },
+    'payment.transfer': {
+        uz: 'O\'tkazma',
+        ru: 'Перевод',
+        en: 'Transfer'
+    },
+
+    // ========== PERMISSIONS ==========
+    'permissions.editOrderPrice': {
+        uz: 'Buyurtma narxini tahrirlash',
+        ru: 'Редактировать цену заказа',
+        en: 'Edit Order Price'
+    },
+    'permissions.exportAuditLogsHint': {
+        uz: 'Jurnallarni CSV/Excel formatida eksport qilish',
+        ru: 'Экспорт журналов в CSV/Excel',
+        en: 'Export logs to CSV/Excel'
+    },
+    'permissions.fullMarketingAccess': {
+        uz: 'To\'liq marketing kirish huquqi',
+        ru: 'Полный доступ к маркетингу',
+        en: 'Full Marketing Access'
+    },
+    'permissions.grantAuditPermissionsHint': {
+        uz: 'Boshqa foydalanuvchilarga audit ruxsatlarini berish',
+        ru: 'Может назначать разрешения на аудит другим пользователям',
+        en: 'Can assign audit permissions to other users'
+    },
+    'permissions.updateStatusHint': {
+        uz: 'Buyurtma statusini o\'zgartirish',
+        ru: 'Изменить статус заказа',
+        en: 'Change order status'
+    },
+    'permissions.viewAuditLogsHint': {
+        uz: 'Tizim faoliyati va o\'zgarishlar tarixini ko\'rish',
+        ru: 'Просмотр активности системы и истории изменений',
+        en: 'View system activity and changes history'
+    },
+
+    // ========== PROFILE ==========
+    'profile.branch': {
+        uz: 'Filial',
+        ru: 'Филиал',
+        en: 'Branch'
+    },
+    'profile.center': {
+        uz: 'Markaz',
+        ru: 'Центр',
+        en: 'Center'
+    },
+    'profile.manager': {
+        uz: 'Menejer',
+        ru: 'Менеджер',
+        en: 'Manager'
+    },
+    'profile.role': {
+        uz: 'Rol',
+        ru: 'Роль',
+        en: 'Role'
+    },
+
+    // ========== REPORT ==========
+    'report.allDebtors': {
+        uz: 'Barcha qarzdorlar',
+        ru: 'Все должники',
+        en: 'All Debtors'
+    },
+    'report.noBranchDataDesc': {
+        uz: 'Bu davrda filiallar uchun buyurtmalar topilmadi',
+        ru: 'Заказы не найдены для филиалов в этот период',
+        en: 'No orders found for branches in this period'
+    },
+    'report.noPerformanceDataDesc': {
+        uz: 'Tanlangan davrda buyurtmalarni bajargan xodimlar yo\'q',
+        ru: 'Нет сотрудников, выполнивших заказы за выбранный период',
+        en: 'No staff members have completed orders in the selected period'
+    },
+    'report.ordersCount': {
+        uz: 'Soni',
+        ru: 'Количество',
+        en: 'Count'
+    },
+    'report.ordersReport': {
+        uz: 'Buyurtmalar hisoboti',
+        ru: 'Отчёт по заказам',
+        en: 'Orders Report'
+    },
+    'report.orderStatistics': {
+        uz: 'Buyurtmalar statistikasi va tahlili',
+        ru: 'Статистика и аналитика заказов',
+        en: 'Order statistics and analytics'
+    },
+    'report.statusBreakdown': {
+        uz: 'Status bo\'yicha taqsimot',
+        ru: 'Разбивка по статусам',
+        en: 'Status Breakdown'
+    },
+    'report.totalCompleted': {
+        uz: 'jami bajarildi',
+        ru: 'всего выполнено',
+        en: 'total completed'
+    },
+    'report.totalPages': {
+        uz: 'Jami sahifalar',
+        ru: 'Всего страниц',
+        en: 'Total Pages'
+    },
+    'reports.auditLogs': {
+        uz: 'Audit jurnallari',
+        ru: 'Журналы аудита',
+        en: 'Audit Logs'
+    },
+
+    // ========== SIDEBAR (additional) ==========
+    'sidebar.auditLogs': {
+        uz: 'Audit jurnallari',
+        ru: 'Журналы аудита',
+        en: 'Audit Logs'
+    },
+    'sidebar.debtorsReport': {
+        uz: 'Qarzdorlar hisoboti',
+        ru: 'Отчёт по должникам',
+        en: 'Debtors Report'
+    },
+    'sidebar.expenseAnalytics': {
+        uz: 'Xarajatlar tahlili',
+        ru: 'Аналитика расходов',
+        en: 'Expense Analytics'
+    },
+    'sidebar.languages': {
+        uz: 'Tillar',
+        ru: 'Языки',
+        en: 'Languages'
+    },
+    'sidebar.marketing': {
+        uz: 'Marketing',
+        ru: 'Маркетинг',
+        en: 'Marketing'
+    },
+    'sidebar.paymentHistory': {
+        uz: 'To\'lovlar tarixi',
+        ru: 'История платежей',
+        en: 'Payment History'
+    },
+    'sidebar.supportInbox': {
+        uz: 'Qo\'llab-quvvatlash murojaat qutisi',
+        ru: 'Входящие поддержки',
+        en: 'Support Inbox'
+    },
+    'sidebar.supportTickets': {
+        uz: 'Qo\'llab-quvvatlash murojaatlari',
+        ru: 'Заявки в поддержку',
+        en: 'Support Tickets'
+    },
+
+    // ========== STAFF ==========
+    'staff.createdOrders': {
+        uz: 'Yaratilgan buyurtmalar',
+        ru: 'Созданные заказы',
+        en: 'Created Orders'
+    },
+
+    // ========== STATS ==========
+    'stats.customersServed': {
+        uz: 'mijoz xizmat qilindi',
+        ru: 'клиентов обслужено',
+        en: 'customers served'
+    },
+    'stats.fullyPaid': {
+        uz: 'to\'liq to\'langan',
+        ru: 'полностью оплачено',
+        en: 'fully paid'
+    },
+    'stats.ordersPaid': {
+        uz: 'To\'langan buyurtmalar',
+        ru: 'Заказов оплачено',
+        en: 'Orders Paid'
+    },
+
+    // ========== STATUS (additional) ==========
+    'status.contacted': {
+        uz: 'Bog\'lanildi',
+        ru: 'Связались',
+        en: 'Contacted'
+    },
+    'status.converted': {
+        uz: 'Konvertatsiya qilindi',
+        ru: 'Конвертирован',
+        en: 'Converted'
+    },
+    'status.new': {
+        uz: 'Yangi',
+        ru: 'Новый',
+        en: 'New'
+    },
+    'status.totalOrders': {
+        uz: 'Jami buyurtmalar',
+        ru: 'Всего заказов',
+        en: 'Total Orders'
+    },
+
+    // ========== TABLE (additional) ==========
+    'table.company': {
+        uz: 'Kompaniya',
+        ru: 'Компания',
+        en: 'Company'
+    },
+    'table.createdAt': {
+        uz: 'Yaratilgan sana',
+        ru: 'Дата создания',
+        en: 'Created At'
+    },
+    'table.email': {
+        uz: 'Email',
+        ru: 'Email',
+        en: 'Email'
+    },
+    'table.message': {
+        uz: 'Xabar',
+        ru: 'Сообщение',
+        en: 'Message'
+    },
+    'table.number': {
+        uz: '№',
+        ru: '№',
+        en: '#'
+    },
+
+    // ========== USERS ==========
+    'users.itemsToDelete': {
+        uz: 'O\'chiriladigan foydalanuvchilar:',
+        ru: 'Пользователи для удаления:',
+        en: 'Users to be deleted:'
+    },
+    'users.superAdmin': {
+        uz: 'Super Admin',
+        ru: 'Супер Администратор',
+        en: 'Super Admin'
+    },
+
+    // ========== BRANCH SETTINGS ==========
+    'branch.mainBranch': {
+        uz: 'Asosiy filial',
+        ru: 'Главный филиал',
+        en: 'Main Branch'
+    },
+    'branch.paymentInformation': {
+        uz: 'To\'lov ma\'lumotlari',
+        ru: 'Платёжная информация',
+        en: 'Payment Information'
+    },
+    'branch.bankCardNumber': {
+        uz: 'Bank karta raqami',
+        ru: 'Номер банковской карты',
+        en: 'Bank Card Number'
+    },
+    'branch.cardHolderName': {
+        uz: 'Karta egasining ismi',
+        ru: 'Имя держателя карты',
+        en: 'Card Holder Name'
+    },
+    'branch.contactInformation': {
+        uz: 'Aloqa ma\'lumotlari',
+        ru: 'Контактная информация',
+        en: 'Contact Information'
+    },
+    'branch.supportPhone': {
+        uz: 'Qo\'llab-quvvatlash telefoni',
+        ru: 'Телефон поддержки',
+        en: 'Support Phone'
+    },
+    'branch.supportTelegram': {
+        uz: 'Qo\'llab-quvvatlash Telegram',
+        ru: 'Telegram поддержки',
+        en: 'Support Telegram'
+    },
+    'branch.workingHours': {
+        uz: 'Ish vaqti',
+        ru: 'Рабочие часы',
+        en: 'Working Hours'
+    },
+    'branch.helpText': {
+        uz: 'Yordam matni',
+        ru: 'Текст помощи',
+        en: 'Help Text'
+    },
+    'branch.helpTextHint': {
+        uz: 'Foydalanuvchi botdagi Yordam tugmasini bosganda ko\'rsatiladi',
+        ru: 'Показывается когда пользователь нажимает кнопку Помощь в боте',
+        en: 'Shown when user clicks Help button in bot'
+    },
+    'branch.aboutUs': {
+        uz: 'Biz haqimizda',
+        ru: 'О нас',
+        en: 'About Us'
+    },
+    'branch.aboutUsHint': {
+        uz: 'Foydalanuvchi botdagi Biz haqimizda tugmasini bosganda ko\'rsatiladi',
+        ru: 'Показывается когда пользователь нажимает кнопку О нас в боте',
+        en: 'Shown when user clicks About Us button in bot'
+    },
+    'branch.guideLink': {
+        uz: 'Qo\'llanma havolasi',
+        ru: 'Ссылка на руководство',
+        en: 'Guide Link'
+    },
+    'branch.guideUrl': {
+        uz: 'Qo\'llanma URL',
+        ru: 'URL руководства',
+        en: 'Guide URL'
+    },
+    'branch.guideUrlHint': {
+        uz: 'Qo\'llanma, o\'quv qo\'llanma yoki hujjat sahifasiga havola kiriting',
+        ru: 'Введите URL руководства, учебника или страницы документации',
+        en: 'Enter a valid URL to a guide, tutorial, or documentation page'
+    },
+    'branch.otherServices': {
+        uz: 'Boshqa xizmatlar',
+        ru: 'Другие услуги',
+        en: 'Other Services'
+    },
+    'branch.otherServicesHint': {
+        uz: 'Foydalanuvchi botda Boshqa xizmatlar tugmasini bosganda ko\'rsatiladi',
+        ru: 'Показывается когда пользователь нажимает кнопку Другие услуги в боте',
+        en: 'Shown when user taps Other Services in bot'
+    },
+
+    // ========== CATEGORY ==========
+    'category.selectLanguagesHint': {
+        uz: 'Bu kategoriya tarjima qilinadigan tillarni tanlang',
+        ru: 'Выберите языки, на которые может переводиться эта категория',
+        en: 'Select languages this category can be translated to'
+    },
+
+    // ========== EXPENSE ==========
+    'expense.addNew': {
+        uz: 'Yangi xarajat qo\'shish',
+        ru: 'Добавить новый расход',
+        en: 'Add New Expense'
+    },
+    'expense.allAccessible': {
+        uz: 'Barcha mavjud xarajatlar',
+        ru: 'Все доступные расходы',
+        en: 'All Accessible Expenses'
+    },
+    'expense.breakdownByType': {
+        uz: 'Tur bo\'yicha xarajatlar taqsimoti',
+        ru: 'Разбивка расходов по типу',
+        en: 'Expense Breakdown by Type'
+    },
+    'expense.costForOriginal': {
+        uz: 'Asl hujjat uchun narx',
+        ru: 'Стоимость оригинального документа',
+        en: 'Cost for the original document'
+    },
+    'expense.costPerCopy': {
+        uz: 'Nusxa hujjat uchun narx',
+        ru: 'Стоимость копии документа',
+        en: 'Cost per copy document'
+    },
+    'expense.expenseType': {
+        uz: 'Xarajat turi',
+        ru: 'Тип расхода',
+        en: 'Expense Type'
+    },
+    'expense.linkedProducts': {
+        uz: 'Bog\'liq mahsulotlar',
+        ru: 'Связанные продукты',
+        en: 'Linked Products'
+    },
+    'expense.saveExpense': {
+        uz: 'Xarajatni saqlash',
+        ru: 'Сохранить расход',
+        en: 'Save Expense'
+    },
+    'expense.totalAmount': {
+        uz: 'Jami miqdor',
+        ru: 'Общая сумма',
+        en: 'Total Amount'
+    },
+    'expense.typesExplained': {
+        uz: 'Xarajat turlari izohi',
+        ru: 'Объяснение типов расходов',
+        en: 'Expense Types Explained'
+    },
+    'expense.updateExpense': {
+        uz: 'Xarajatni yangilash',
+        ru: 'Обновить расход',
+        en: 'Update Expense'
+    },
+
+    // ========== LANGUAGE ==========
+    'language.addNew': {
+        uz: 'Yangi til qo\'shish',
+        ru: 'Добавить новый язык',
+        en: 'Add New Language'
+    },
+    'language.additionalCostFirstPage': {
+        uz: 'Birinchi sahifa uchun qo\'shimcha narx',
+        ru: 'Дополнительная стоимость за первую страницу',
+        en: 'Additional cost for first page'
+    },
+    'language.additionalCostOtherPage': {
+        uz: 'Boshqa sahifalar uchun qo\'shimcha narx',
+        ru: 'Дополнительная стоимость за другие страницы',
+        en: 'Additional cost per other page'
+    },
+    'language.additionalCostCopy': {
+        uz: 'Nusxa uchun qo\'shimcha narx',
+        ru: 'Дополнительная стоимость за копию',
+        en: 'Additional cost per copy'
+    },
+    'language.additionalCostsIndividual': {
+        uz: 'Yakka mijozlar uchun qo\'shimcha narxlar',
+        ru: 'Дополнительные расходы для индивидуальных клиентов',
+        en: 'Additional costs for individual customers'
+    },
+    'language.otherPages': {
+        uz: 'Boshqa sahifalar',
+        ru: 'Другие страницы',
+        en: 'Other Pages'
+    },
+    'language.copyPrice': {
+        uz: 'Nusxa narxi',
+        ru: 'Цена копии',
+        en: 'Copy Price'
+    },
+
+    // ========== MARKETING ==========
+    'marketing.allBranchesOneCenter': {
+        uz: 'Bir markazning barcha filiallari',
+        ru: 'Все филиалы одного центра',
+        en: 'All branches of one center'
+    },
+    'marketing.broadcastScope': {
+        uz: 'Xabar tarqatish doirasi',
+        ru: 'Охват рассылки',
+        en: 'Broadcast Scope'
+    },
+    'marketing.completedAt': {
+        uz: 'Yakunlandi',
+        ru: 'Завершено',
+        en: 'Completed At'
+    },
+    'marketing.contentType': {
+        uz: 'Kontent turi',
+        ru: 'Тип контента',
+        en: 'Content Type'
+    },
+    'marketing.createdAt': {
+        uz: 'Yaratildi',
+        ru: 'Создано',
+        en: 'Created At'
+    },
+    'marketing.customerType': {
+        uz: 'Mijoz turi',
+        ru: 'Тип клиента',
+        en: 'Customer Types'
+    },
+    'marketing.deletePost': {
+        uz: 'Postni o\'chirish',
+        ru: 'Удалить пост',
+        en: 'Delete Post'
+    },
+    'marketing.deliveryProgress': {
+        uz: 'Yetkazib berish jarayoni',
+        ru: 'Ход доставки',
+        en: 'Delivery Progress'
+    },
+    'marketing.deliveryStats': {
+        uz: 'Yetkazib berish statistikasi',
+        ru: 'Статистика доставки',
+        en: 'Delivery Stats'
+    },
+    'marketing.estimatedDuration': {
+        uz: 'Taxminiy davomiylik',
+        ru: 'Ориентировочная продолжительность',
+        en: 'Estimated Duration'
+    },
+    'marketing.everyRegisteredUser': {
+        uz: 'Barcha ro\'yxatdan o\'tgan foydalanuvchilar',
+        ru: 'Каждый зарегистрированный пользователь бота',
+        en: 'Every registered bot user'
+    },
+    'marketing.mediaFile': {
+        uz: 'Media fayl',
+        ru: 'Медиа файл',
+        en: 'Media File'
+    },
+    'marketing.messageContent': {
+        uz: 'Xabar matni',
+        ru: 'Содержимое сообщения',
+        en: 'Message Content'
+    },
+    'marketing.messagePreview': {
+        uz: 'Xabar ko\'rinishi',
+        ru: 'Предпросмотр сообщения',
+        en: 'Message Preview'
+    },
+    'marketing.noPostsYet': {
+        uz: 'Hali marketing postlari yo\'q',
+        ru: 'Маркетинговых постов пока нет',
+        en: 'No Marketing Posts Yet'
+    },
+    'marketing.noRecipientsFound': {
+        uz: 'Qabul qiluvchilar topilmadi',
+        ru: 'Получатели не найдены',
+        en: 'No recipients found'
+    },
+    'marketing.noSendPermission': {
+        uz: 'Yuborish uchun ruxsatiz',
+        ru: 'Нет разрешения на отправку',
+        en: 'No Send Permission'
+    },
+    'marketing.postDetails': {
+        uz: 'Post tafsilotlari',
+        ru: 'Детали поста',
+        en: 'Post Details'
+    },
+    'marketing.postInfo': {
+        uz: 'Post ma\'lumotlari',
+        ru: 'Информация о посте',
+        en: 'Post Info'
+    },
+    'marketing.previewAndConfirm': {
+        uz: 'Ko\'rib chiqish va tasdiqlash',
+        ru: 'Предпросмотр и подтверждение',
+        en: 'Preview & Confirm'
+    },
+    'marketing.recentRecipients': {
+        uz: 'So\'nggi qabul qiluvchilar',
+        ru: 'Последние получатели',
+        en: 'Recent Recipients'
+    },
+    'marketing.resume': {
+        uz: 'Davom ettirish',
+        ru: 'Возобновить',
+        en: 'Resume'
+    },
+    'marketing.retries': {
+        uz: 'Qayta urinishlar',
+        ru: 'Повторы',
+        en: 'Retries'
+    },
+    'marketing.sampleRecipients': {
+        uz: 'Namuna qabul qiluvchilar',
+        ru: 'Примеры получателей',
+        en: 'Sample Recipients'
+    },
+    'marketing.sendNow': {
+        uz: 'Hozir yuborish',
+        ru: 'Отправить сейчас',
+        en: 'Send Now'
+    },
+    'marketing.sentAt': {
+        uz: 'Yuborildi',
+        ru: 'Отправлено',
+        en: 'Sent At'
+    },
+    'marketing.targetAudience': {
+        uz: 'Maqsadli auditoriya',
+        ru: 'Целевая аудитория',
+        en: 'Target Audience'
+    },
+    'marketing.targetInfo': {
+        uz: 'Maqsad ma\'lumotlari',
+        ru: 'Информация о цели',
+        en: 'Target Info'
+    },
+    'marketing.targetScope': {
+        uz: 'Nishon doirasi',
+        ru: 'Охват цели',
+        en: 'Target Scope'
+    },
+    'marketing.wrapInTag': {
+        uz: 'Tegga o\'rash',
+        ru: 'Обернуть в тег',
+        en: 'Wrap selection in tag'
+    },
+    'marketing.oneBranchOnly': {
+        uz: 'Faqat bitta filial',
+        ru: 'Только одна ветка',
+        en: 'One specific branch only'
+    },
+    'marketing.selectCenters': {
+        uz: 'Markazlarni tanlang',
+        ru: 'Выберите центры',
+        en: 'Select Centers'
+    },
+    'marketing.selectBranches': {
+        uz: 'Filiallarni tanlang',
+        ru: 'Выберите філіали',
+        en: 'Select Branches'
+    },
+    'marketing.selectCenter': {
+        uz: 'Markazni tanlang',
+        ru: 'Выберите центр',
+        en: 'Select Center'
+    },
+    'marketing.selectBranch': {
+        uz: 'Filialni tanlang',
+        ru: 'Выберите филиал',
+        en: 'Select Branch'
+    },
+    'marketing.customerTypes': {
+        uz: 'Mijoz turlari',
+        ru: 'Типы клиентов',
+        en: 'Customer Types'
+    },
+    'marketing.sendAt': {
+        uz: 'Yuborish vaqti',
+        ru: 'Отправить в',
+        en: 'Send At'
+    },
+    'marketing.activeTelegram': {
+        uz: 'Faol Telegram',
+        ru: 'Активный Telegram',
+        en: 'Active Telegram'
+    },
+    'marketing.inactiveTelegram': {
+        uz: 'Nofaol Telegram',
+        ru: 'Неактивный Telegram',
+        en: 'Inactive Telegram'
+    },
+    'marketing.optedOut': {
+        uz: 'Rad etgan',
+        ru: 'Отказался',
+        en: 'Opted Out'
+    },
+    'marketing.userBlockedBot': {
+        uz: 'Foydalanuvchi botni bloklagan',
+        ru: 'Пользователь заблокировал бот',
+        en: 'User blocked the bot'
+    },
+    'marketing.userBlockedBotDesc': {
+        uz: 'Foydalanuvchi botni bloklagan yoki to\'xtatgan',
+        ru: 'Пользователь заблокировал или остановил бот',
+        en: 'User has blocked/stopped the bot'
+    },
+    'marketing.userNotFound': {
+        uz: 'Foydalanuvchi topilmadi',
+        ru: 'Пользователь не найден',
+        en: 'User not found'
+    },
+    'marketing.userNotFoundDesc': {
+        uz: 'Foydalanuvchi hisobini o\'chirgan yoki hech qachon botni ishga tushirmagan',
+        ru: 'Пользователь удалил аккаунт или никогда не запускал бот',
+        en: 'User deleted their account or never started the bot'
+    },
+    'marketing.networkError': {
+        uz: 'Tarmoq xatosi',
+        ru: 'Ошибка сети',
+        en: 'Network error'
+    },
+    'marketing.networkErrorDesc': {
+        uz: 'Vaqtinchalik ulanish muammosi (qayta urinish mumkin)',
+        ru: 'Временная проблема с подключением (возможна повторная попытка)',
+        en: 'Temporary connection issue (may retry)'
+    },
+    'marketing.viewErrorDetails': {
+        uz: 'Xato tafsilotlarini ko\'rish',
+        ru: 'Просмотреть детали ошибки',
+        en: 'View error details'
+    },
+    'marketing.currentMedia': {
+        uz: 'Joriy media',
+        ru: 'Текущие медиа',
+        en: 'Current Media'
+    },
+    'marketing.scheduling': {
+        uz: 'Rejalashtirish',
+        ru: 'Планирование',
+        en: 'Scheduling'
+    },
+    'marketing.estimatedRecipients': {
+        uz: 'Taxminiy qabul qiluvchilar:',
+        ru: 'Ожидаемые получатели:',
+        en: 'Estimated recipients:'
+    },
+    'marketing.savePost': {
+        uz: 'Postni saqlash',
+        ru: 'Сохранить пост',
+        en: 'Save Post'
+    },
+    'marketing.telegramReach': {
+        uz: 'Telegram qamrovi',
+        ru: 'Охват Telegram',
+        en: 'Telegram Reach'
+    },
+    'marketing.sendable': {
+        uz: 'Yuborish mumkin',
+        ru: 'Можно отправить',
+        en: 'Sendable'
+    },
+    'marketing.sendableRatio': {
+        uz: 'Yuborish nisbati (aktiv)',
+        ru: 'Доля отправляемых (из активных)',
+        en: 'Sendable ratio (from active)'
+    },
+
+    // ========== ORDER (more) ==========
+    'order.additionalSupplyDocs': {
+        uz: 'Qo\'shimcha ta\'minot hujjatlari',
+        ru: 'Дополнительные документы снабжения',
+        en: 'Additional Supply Documents'
+    },
+    'order.agencyPricing': {
+        uz: 'Agentlik narxi',
+        ru: 'Агентская цена',
+        en: 'Agency pricing'
+    },
+    'order.assignedTo': {
+        uz: 'Tayinlangan',
+        ru: 'Назначено',
+        en: 'Assigned To'
+    },
+    'order.branchAndAssignment': {
+        uz: 'Filial va tayinlash',
+        ru: 'Филиал и назначение',
+        en: 'Branch & Assignment'
+    },
+    'order.calculatedTotal': {
+        uz: 'Hisoblangan jami:',
+        ru: 'Рассчитанный итог:',
+        en: 'Calculated Total:'
+    },
+    'order.completion': {
+        uz: 'Bajarilish',
+        ru: 'Завершение',
+        en: 'Completion'
+    },
+    'order.confirmedAt': {
+        uz: 'Tasdiqlandi',
+        ru: 'Подтверждено',
+        en: 'Confirmed at'
+    },
+    'order.copiesTotal': {
+        uz: 'Nusxalar jami:',
+        ru: 'Итого копий:',
+        en: 'Copies Total:'
+    },
+    'order.createdBy': {
+        uz: 'Yaratdi',
+        ru: 'Создано',
+        en: 'Created By'
+    },
+    'order.extraFee': {
+        uz: 'Qo\'shimcha to\'lov:',
+        ru: 'Дополнительная оплата:',
+        en: 'Extra Fee:'
+    },
+    'order.firstPage': {
+        uz: 'Birinchi sahifa',
+        ru: 'Первая страница',
+        en: 'First Page'
+    },
+    'order.grandTotal': {
+        uz: 'Umumiy jami:',
+        ru: 'Итоговая сумма:',
+        en: 'Grand Total:'
+    },
+    'order.manuallySet': {
+        uz: 'Qo\'lda belgilangan',
+        ru: 'Установлено вручную',
+        en: 'Manually set'
+    },
+    'order.nameClarifications': {
+        uz: 'Ism aniqlashtirmalari',
+        ru: 'Уточнения имён',
+        en: 'Name Clarifications'
+    },
+    'order.ordinaryUserPricing': {
+        uz: 'Oddiy foydalanuvchi narxi',
+        ru: 'Цена обычного пользователя',
+        en: 'Ordinary User pricing'
+    },
+    'order.originalDocumentTotal': {
+        uz: 'Asl hujjat jami:',
+        ru: 'Итого за оригинал:',
+        en: 'Original Document Total:'
+    },
+    'order.paymeTransaction': {
+        uz: 'Payme tranzaksiyasi',
+        ru: 'Транзакция Payme',
+        en: 'Payme Transaction'
+    },
+    'order.paymentProgress': {
+        uz: 'To\'lov jarayoni',
+        ru: 'Ход оплаты',
+        en: 'Payment Progress'
+    },
+    'order.priceBreakdown': {
+        uz: 'Narx tafsiloti',
+        ru: 'Разбивка цены',
+        en: 'Price Breakdown'
+    },
+    'order.priceChangeHistory': {
+        uz: 'Narx o\'zgartirish tarixi',
+        ru: 'История изменения цены',
+        en: 'Price Change History'
+    },
+    'order.receivedAmount': {
+        uz: 'Qabul qilindi',
+        ru: 'Получено',
+        en: 'Received'
+    },
+    'order.remaining': {
+        uz: 'Qoldiq',
+        ru: 'Остаток',
+        en: 'Remaining'
+    },
+    'order.requestedCompletionDate': {
+        uz: 'So\'ralgan tugash sanasi',
+        ru: 'Запрошенная дата завершения',
+        en: 'Requested completion date'
+    },
+    'order.thisOrderUses': {
+        uz: 'Bu buyurtmada ishlatiladi',
+        ru: 'В этом заказе используется',
+        en: 'This order uses'
+    },
+    'order.totalDue': {
+        uz: 'Jami to\'lov',
+        ru: 'Итого к оплате',
+        en: 'Total Due'
+    },
+    'order.transactionId': {
+        uz: 'Tranzaksiya ID',
+        ru: 'ID транзакции',
+        en: 'Transaction ID'
+    },
+    'order.totalPrice': {
+        uz: 'Jami narx',
+        ru: 'Итоговая цена',
+        en: 'Total Price'
+    },
+    'order.amountReceivedNow': {
+        uz: 'Hozir qabul qilingan miqdor',
+        ru: 'Сумма полученная сейчас',
+        en: 'Amount Received Now'
+    },
+    'order.extraFeeAmount': {
+        uz: 'Qo\'shimcha to\'lov miqdori',
+        ru: 'Сумма дополнительной оплаты',
+        en: 'Extra Fee Amount'
+    },
+    'order.addExtraFee': {
+        uz: 'Qo\'shimcha to\'lov qo\'shish',
+        ru: 'Добавить доп. оплату',
+        en: 'Add Extra Fee'
+    },
+    'order.paymentComplete': {
+        uz: 'To\'lov tugallangan',
+        ru: 'Оплата завершена',
+        en: 'Payment Complete'
+    },
+    'order.currentPrice': {
+        uz: 'Joriy narx',
+        ru: 'Текущая цена',
+        en: 'Current Price'
+    },
+    'order.fileUnavailable': {
+        uz: 'Fayl mavjud emas',
+        ru: 'Файл недоступен',
+        en: 'File unavailable'
+    },
+    'order.manualOrderNote': {
+        uz: 'Qo\'lda yaratilgan buyurtma - mijoz botda ro\'yxatdan o\'tmagan',
+        ru: 'Ручной заказ — клиент не зарегистрирован в боте',
+        en: 'Manual order - customer not registered in bot'
+    },
+    'order.useTransactionIdHint': {
+        uz: 'Ushbu to\'lovni topish uchun Tranzaksiya ID dan foydalaning',
+        ru: 'Используйте ID транзакции чтобы найти этот платёж',
+        en: 'Use the Transaction ID to find this payment'
+    },
+
+    // ========== ORDERS (more) ==========
+    'orders.createdDate': {
+        uz: 'Yaratilgan sana',
+        ru: 'Дата создания',
+        en: 'Created date'
+    },
+    'orders.newOrders': {
+        uz: 'Yangi buyurtmalar',
+        ru: 'Новые заказы',
+        en: 'New Orders'
+    },
+    'orders.updatedDate': {
+        uz: 'Yangilangan sana',
+        ru: 'Дата обновления',
+        en: 'Updated date'
+    },
+
+    // ========== PAYMENT (more) ==========
+    'payment.amount': {
+        uz: 'To\'lov miqdori',
+        ru: 'Сумма платежа',
+        en: 'Payment Amount'
+    },
+    'payment.date': {
+        uz: 'To\'lov sanasi',
+        ru: 'Дата платежа',
+        en: 'Payment Date'
+    },
+    'payment.fullyPaid': {
+        uz: 'To\'liq to\'langan',
+        ru: 'Полностью оплачено',
+        en: 'Fully Paid'
+    },
+    'payment.method': {
+        uz: 'To\'lov usuli',
+        ru: 'Способ оплаты',
+        en: 'Payment Method'
+    },
+    'payment.paidAmount': {
+        uz: 'To\'langan miqdor',
+        ru: 'Оплаченная сумма',
+        en: 'Paid Amount'
+    },
+    'payment.partiallyPaid': {
+        uz: 'Qisman to\'langan',
+        ru: 'Частично оплачено',
+        en: 'Partially Paid'
+    },
+    'payment.processedBy': {
+        uz: 'Qabul qildi',
+        ru: 'Принято',
+        en: 'Processed By'
+    },
+    'payment.remainingDebt': {
+        uz: 'Qolgan qarz',
+        ru: 'Оставшийся долг',
+        en: 'Remaining Debt'
+    },
+
+    // ========== STATUS (more) ==========
+    'status.blocked': {
+        uz: 'Bloklangan',
+        ru: 'Заблокирован',
+        en: 'Blocked'
+    },
+    'status.delivered': {
+        uz: 'Yetkazildi',
+        ru: 'Доставлено',
+        en: 'Delivered'
+    },
+    'status.draft': {
+        uz: 'Qoralama',
+        ru: 'Черновик',
+        en: 'Draft'
+    },
+    'status.failed': {
+        uz: 'Muvaffaqiyatsiz',
+        ru: 'Ошибка',
+        en: 'Failed'
+    },
+    'status.paused': {
+        uz: 'To\'xtatildi',
+        ru: 'Приостановлено',
+        en: 'Paused'
+    },
+    'status.sending': {
+        uz: 'Yuborilmoqda',
+        ru: 'Отправляется',
+        en: 'Sending'
+    },
+    'status.sent': {
+        uz: 'Yuborildi',
+        ru: 'Отправлено',
+        en: 'Sent'
+    },
+    'status.skipped': {
+        uz: 'O\'tkazib yuborildi',
+        ru: 'Пропущено',
+        en: 'Skipped'
+    },
+
+    // ========== COMMON (more) ==========
+    'common.pause': {
+        uz: 'To\'xtatish',
+        ru: 'Пауза',
+        en: 'Pause'
+    },
+    'common.percentage': {
+        uz: 'Foiz',
+        ru: 'Процент',
+        en: 'Percentage'
+    },
+    'common.saveChanges': {
+        uz: 'O\'zgarishlarni saqlash',
+        ru: 'Сохранить изменения',
+        en: 'Save Changes'
+    },
+    'common.scope': {
+        uz: 'Qamrov',
+        ru: 'Охват',
+        en: 'Scope'
+    },
+    'common.user': {
+        uz: 'Foydalanuvchi',
+        ru: 'Пользователь',
+        en: 'User'
+    },
+    'common.viewFile': {
+        uz: 'Faylni ko\'rish',
+        ru: 'Просмотреть файл',
+        en: 'View File'
+    },
+    'common.allStatuses': {
+        uz: 'Barcha statuslar',
+        ru: 'Все статусы',
+        en: 'All Statuses'
+    },
+
+    // ========== FORM (more) ==========
+    'form.ordersForwardedHere': {
+        uz: 'Buyurtmalar shu yerga yo\'naltiriladi',
+        ru: 'Заказы перенаправляются сюда',
+        en: 'Orders are forwarded here'
+    },
+    'form.selectCenterFirst': {
+        uz: 'Avval markazni tanlang',
+        ru: 'Сначала выберите центр',
+        en: 'Select Center First'
+    },
+    'form.noBranchesAvailable': {
+        uz: 'Filiallar mavjud emas',
+        ru: 'Нет доступных филиалов',
+        en: 'No branches available'
+    },
+
+    // ========== HELP ==========
+    'help.fullOrderManagement': {
+        uz: 'To\'liq buyurtmalarni boshqarish',
+        ru: 'Полное управление заказами',
+        en: 'Full Order Management'
+    },
+    'help.fullOrderManagementDesc': {
+        uz: 'To\'liq buyurtmalarni boshqarish barcha buyurtma operatsiyalarini beradi. Aks holda, granular ruxsatlardan foydalaning.',
+        ru: 'Полное управление заказами предоставляет все операции с заказами. Иначе используйте детальные разрешения.',
+        en: 'Full Order Management grants all order operations. Otherwise, use granular permissions.'
+    },
+
+    // ========== REPORT / UNIT ECONOMY ==========
+    'report.noOutstandingDebts': {
+        uz: 'Muddati o\'tgan qarzlar yo\'q',
+        ru: 'Нет просроченных долгов',
+        en: 'No outstanding debts'
+    },
+    'report.noDebtorsFound': {
+        uz: 'Filtrlaringizga mos qarzdorlar topilmadi',
+        ru: 'Должников по вашим фильтрам не найдено',
+        en: 'No debtors found matching your filters'
+    },
+    'report.allBranches': {
+        uz: 'Barcha filiallar',
+        ru: 'Все филиалы',
+        en: 'All Branches'
+    },
+    'report.allCenters': {
+        uz: 'Barcha markazlar',
+        ru: 'Все центры',
+        en: 'All Centers'
+    },
+    'report.searchCustomer': {
+        uz: 'Mijozni qidirish',
+        ru: 'Поиск клиента',
+        en: 'Search Customer'
+    },
+    'report.clientType': {
+        uz: 'Mijoz turi',
+        ru: 'Тип клиента',
+        en: 'Client Type'
+    },
+    'report.allTypes': {
+        uz: 'Barcha turlar',
+        ru: 'Все типы',
+        en: 'All Types'
+    },
+    'report.debtRange': {
+        uz: 'Qarz diapazoni',
+        ru: 'Диапазон долга',
+        en: 'Debt Range'
+    },
+    'report.currentFilter': {
+        uz: 'Joriy filtr',
+        ru: 'Текущий фильтр',
+        en: 'Current Filter'
+    },
+    'report.totalExpenses': {
+        uz: 'Jami xarajatlar',
+        ru: 'Всего расходов',
+        en: 'Total Expenses'
+    },
+
+    // ========== SERVICES / PRODUCT DETAIL ==========
+    'product.fixedPrice': {
+        uz: 'Belgilangan narx',
+        ru: 'Фиксированная цена',
+        en: 'Fixed Price'
+    },
+    'product.userCheaper': {
+        uz: 'Foydalanuvchi uchun arzonroq',
+        ru: 'Дешевле для пользователя',
+        en: 'User cheaper'
     }
 };
 

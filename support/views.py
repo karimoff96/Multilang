@@ -161,6 +161,15 @@ def ticket_list(request):
 def ticket_create(request):
     """Create a new support ticket."""
     center = _get_center(request)
+
+    # Non-superusers must be linked to a center; show a friendly error otherwise.
+    if not request.user.is_superuser and center is None:
+        messages.error(
+            request,
+            _('Your account is not linked to a center. Please ask your administrator to assign you to a center before submitting tickets.')
+        )
+        return redirect('support:ticket_list')
+
     categories_qs = TicketCategory.objects.filter(is_active=True)
     if center:
         center_cats = categories_qs.filter(center=center)
