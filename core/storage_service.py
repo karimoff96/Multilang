@@ -548,7 +548,7 @@ class StorageArchiveService:
             'created_at': order.created_at.isoformat(),
             'completed_at': order.completed_at.isoformat() if order.completed_at else None,
             'branch': order.branch.name if order.branch else None,
-            'assigned_to': order.assigned_to.get_full_name() if order.assigned_to else None,
+            'assigned_to': order.assigned_to.user.get_full_name() if order.assigned_to else None,
             'description': order.description or ''
         }
     

@@ -214,6 +214,19 @@ def send_payme_deadline_expired_notification(order):
             parse_mode="HTML",
         )
         logger.info(f"Sent expiry notification to user {user.user_id} for order {order.id}")
+    except ApiTelegramException as e:
+        if e.error_code == 400 and "chat not found" in e.description.lower():
+            logger.warning(
+                f"Cannot send expiry notification to user {user.user_id} for order {order.id}: "
+                f"chat not found (user may have blocked the bot)"
+            )
+            try:
+                user.is_active = False
+                user.save(update_fields=["is_active"])
+            except Exception:
+                pass
+        else:
+            logger.error(f"send_payme_deadline_expired_notification failed for order {order.id}: {e}")
     except Exception as e:
         logger.error(f"send_payme_deadline_expired_notification failed for order {order.id}: {e}")
 
@@ -514,6 +527,20 @@ def send_order_status_notification(order, old_status, new_status):
             f"Sent status notification to user {user.user_id} for order {order.id}: {old_status} → {new_status}"
         )
 
+    except ApiTelegramException as e:
+        if e.error_code == 400 and "chat not found" in e.description.lower():
+            logger.warning(
+                f"Cannot send status notification to user {user.user_id} for order {order.id}: "
+                f"chat not found (user may have blocked the bot or never started a conversation)"
+            )
+            # Mark user as inactive so future notifications are skipped
+            try:
+                user.is_active = False
+                user.save(update_fields=["is_active"])
+            except Exception:
+                pass
+        else:
+            logger.error(f"Failed to send status notification: {e}", exc_info=True)
     except Exception as e:
         logger.error(f"Failed to send status notification: {e}", exc_info=True)
 def send_payment_received_notification(order, amount_received, total_received):
@@ -612,6 +639,19 @@ def send_payment_received_notification(order, amount_received, total_received):
             f"Sent payment notification to user {user.user_id} for order {order.id}: received {amount_received}, total {total_received}"
         )
 
+    except ApiTelegramException as e:
+        if e.error_code == 400 and "chat not found" in e.description.lower():
+            logger.warning(
+                f"Cannot send payment notification to user {user.user_id} for order {order.id}: "
+                f"chat not found (user may have blocked the bot or never started a conversation)"
+            )
+            try:
+                user.is_active = False
+                user.save(update_fields=["is_active"])
+            except Exception:
+                pass
+        else:
+            logger.error(f"Failed to send payment notification: {e}", exc_info=True)
     except Exception as e:
         logger.error(f"Failed to send payment notification: {e}", exc_info=True)
 def generate_order_summary_caption(order, language):
