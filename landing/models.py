@@ -36,7 +36,8 @@ class ContactRequest(models.Model):
     notes = models.TextField(blank=True, verbose_name=_("Internal Notes"))
     admin_telegram_message_id = models.BigIntegerField(null=True, blank=True, verbose_name=_("Admin Telegram Message ID"))
     admin_telegram_chat_id = models.BigIntegerField(null=True, blank=True, verbose_name=_("Admin Telegram Chat ID"))
-    
+    ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name=_("IP Address"))
+
     class Meta:
         verbose_name = _("Contact Request")
         verbose_name_plural = _("Contact Requests")

@@ -1719,6 +1719,12 @@
                     <div class="contact-form">
                         <form method="POST" action="{% url 'contact_form' %}">
                             {% csrf_token %}
+                            <!-- Honeypot: invisible to humans, bots fill it in -->
+                            <div style="position:absolute;left:-9999px;top:-9999px;opacity:0;height:0;overflow:hidden;" aria-hidden="true">
+                                <label for="hp_website">Website</label>
+                                <input type="text" name="website" id="hp_website" tabindex="-1" autocomplete="off">
+                            </div>
+                            <input type="hidden" name="form_token" value="{{ form_token }}">
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">

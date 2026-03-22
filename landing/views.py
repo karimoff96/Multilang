@@ -1,3 +1,4 @@
+import time
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib import messages
@@ -6,16 +7,36 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import activate
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.core import signing
+from django.core.cache import cache
 from .models import ContactRequest
+
+# Known disposable / spam email domains
+SPAM_EMAIL_DOMAINS = {
+    'immenseignite.info',
+    'mailinator.com', 'guerrillamail.com', 'tempmail.com', 'throwam.com',
+    'yopmail.com', 'trashmail.com', 'sharklasers.com', 'spam4.me',
+    'maildrop.cc', 'dispostable.com', 'getairmail.com', 'fakeinbox.com',
+    'guerrillamailblock.com', 'grr.la', 'guerrillamail.info',
+    'guerrillamail.biz', 'guerrillamail.de', 'guerrillamail.net',
+    'guerrillamail.org', 'spam.la', 'spamdecoy.net', 'spamfree24.org',
+    'spamgourmet.com', 'spamgourmet.net', 'spamgourmet.org',
+}
+
+
+def _get_client_ip(request):
+    xff = request.META.get('HTTP_X_FORWARDED_FOR')
+    if xff:
+        return xff.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '')
+
+
 from billing.models import Tariff, SubscriptionHistory
 from bot.admin_bot_service import (
     send_contact_request_notification,
     update_contact_request_notification,
     update_renewal_request_notification,
 )
-import logging
-
-logger = logging.getLogger(__name__)
 import logging
 
 logger = logging.getLogger(__name__)
@@ -37,10 +58,12 @@ def home(request):
     )
     
     canonical_map = {'ru': 'https://multilang.uz/', 'en': 'https://multilang.uz/en/', 'uz': 'https://multilang.uz/uz/'}
+    form_token = signing.dumps({'t': time.time()}, salt='contact-form-load')
     context = {
         'current_language': lang,
         'tariffs': tariffs,
         'canonical_url': canonical_map.get(lang, 'https://multilang.uz/'),
+        'form_token': form_token,
     }
     
     return render(request, 'landing/home.html', context)
@@ -58,10 +81,12 @@ def home_lang(request, lang_code):
         '-is_trial', 'display_order'
     )
     canonical_map = {'ru': 'https://multilang.uz/', 'en': 'https://multilang.uz/en/', 'uz': 'https://multilang.uz/uz/'}
+    form_token = signing.dumps({'t': time.time()}, salt='contact-form-load')
     context = {
         'current_language': lang_code,
         'tariffs': tariffs,
         'canonical_url': canonical_map.get(lang_code, 'https://multilang.uz/'),
+        'form_token': form_token,
     }
     return render(request, 'landing/home.html', context)
 
@@ -79,26 +104,70 @@ def contact_form(request):
     """Handle contact form submission"""
     if request.method == 'POST':
         try:
+            ip = _get_client_ip(request)
+
+            # --- Check 1: Honeypot ---
+            # Bots fill hidden fields; real users never see or touch it
+            if request.POST.get('website', ''):
+                logger.warning(f"[SPAM] Honeypot triggered from IP {ip}")
+                messages.success(request, _("Thank you! We will contact you soon."))
+                return redirect('landing_home')
+
+            # --- Check 2: Form token / minimum time check ---
+            # Reject submissions that arrive in under 3 seconds (bot speed)
+            form_token = request.POST.get('form_token', '')
+            try:
+                token_data = signing.loads(form_token, salt='contact-form-load', max_age=3600)
+                elapsed = time.time() - token_data.get('t', 0)
+                if elapsed < 3:
+                    logger.warning(f"[SPAM] Form submitted too fast ({elapsed:.1f}s) from IP {ip}")
+                    messages.error(request, _("Please try again."))
+                    return redirect('landing_home')
+            except signing.BadSignature:
+                logger.warning(f"[SPAM] Invalid or missing form token from IP {ip}")
+                messages.error(request, _("Please try again."))
+                return redirect('landing_home')
+
             name = request.POST.get('name', '').strip()
             email = request.POST.get('email', '').strip()
             company = request.POST.get('company', '').strip()
             phone = request.POST.get('phone', '').strip()
             message = request.POST.get('message', '').strip()
-            
+
             # Basic validation
             if not name or not email or not message:
                 messages.error(request, _("Please fill in all required fields"))
                 return redirect('landing_home')
-            
+
+            email_lower = email.lower()
+            email_domain = email_lower.split('@')[-1] if '@' in email_lower else ''
+
+            # --- Check 3: Spam / disposable email domain ---
+            if email_domain in SPAM_EMAIL_DOMAINS:
+                logger.warning(f"[SPAM] Blocked disposable email domain '{email_domain}' from IP {ip}")
+                messages.success(request, _("Thank you! We will contact you soon."))
+                return redirect('landing_home')
+
+            # --- Check 4: Duplicate email dedup (10-minute window) ---
+            dedup_key = f"contact:dedup:email:{email_lower}"
+            if cache.get(dedup_key):
+                logger.warning(f"[SPAM] Duplicate contact form submission for {email_lower} from IP {ip}")
+                messages.success(request, _("Thank you! We will contact you soon."))
+                return redirect('landing_home')
+
             # Create contact request
             contact_request = ContactRequest.objects.create(
                 name=name,
                 email=email,
                 company=company,
                 phone=phone,
-                message=message
+                message=message,
+                ip_address=ip or None,
             )
-            
+
+            # Mark email as seen to prevent duplicates for 10 minutes
+            cache.set(dedup_key, True, 600)
+
             # Send notification to admin via Telegram
             logger.info(f"About to send admin notification for contact request from {name}")
             try:
@@ -111,14 +180,14 @@ def contact_form(request):
                 logger.error(f"❌ Exception while sending admin notification for contact request: {e}")
                 import traceback
                 logger.error(traceback.format_exc())
-            
+
             messages.success(request, _("Thank you! We will contact you soon."))
-            logger.info(f"New contact request from {name} ({email})")
-            
+            logger.info(f"New contact request from {name} ({email}) IP={ip}")
+
         except Exception as e:
             logger.error(f"Contact form error: {e}")
             messages.error(request, _("An error occurred. Please try again."))
-    
+
     return redirect('landing_home')
 
 

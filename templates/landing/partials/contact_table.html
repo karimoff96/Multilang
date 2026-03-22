@@ -9,6 +9,7 @@
                 <th>{% trans "Phone" %}</th>
                 <th>{% trans "Status" %}</th>
                 <th>{% trans "Created" %}</th>
+                <th>{% trans "IP Address" %}</th>
                 <th>{% trans "Actions" %}</th>
             </tr>
         </thead>
@@ -23,6 +24,13 @@
                     <span class="badge bg-light text-dark text-capitalize">{{ req.get_status_display }}</span>
                 </td>
                 <td>{{ req.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    {% if req.ip_address %}
+                        <span class="text-secondary-light font-monospace" style="font-size:0.8em;">{{ req.ip_address }}</span>
+                    {% else %}
+                        <span class="text-secondary-light">-</span>
+                    {% endif %}
+                </td>
                 <td>
                     <div class="d-flex gap-2">
                         <form method="post" action="{% url 'contact_request_change_status' req.pk %}">
@@ -58,7 +66,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" class="text-center py-4 text-secondary-light">{% trans "No contact requests found" %}</td>
+                <td colspan="8" class="text-center py-4 text-secondary-light">{% trans "No contact requests found" %}</td>
             </tr>
             {% endfor %}
         </tbody>
