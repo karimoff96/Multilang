@@ -193,24 +193,53 @@ class BotThread(threading.Thread):
             while self.running:
                 try:
                     self.bot.infinity_polling(
-                        timeout=30,
+                        timeout=35,
                         long_polling_timeout=25,
                         allowed_updates=["message", "callback_query"],
                     )
                     consecutive_errors = 0  # reset on clean exit
                 except Exception as e:
-                    consecutive_errors += 1
-                    backoff = min(5 * (2 ** (consecutive_errors - 1)), 120)  # cap at 2 min
-                    # 502/503/504 are transient Telegram server hiccups — warn, don't error
+                    is_read_timeout = "Read timed out" in str(e) or "ReadTimeout" in type(e).__name__
                     is_gateway_error = (
                         isinstance(e, ApiTelegramException)
                         and e.error_code in (502, 503, 504)
                     )
-                    log_fn = logger.warning if is_gateway_error else logger.error
-                    log_fn(
-                        f"Bot {self.center.name} polling error (attempt {consecutive_errors}): {e}. "
-                        f"Restarting in {backoff}s..."
+                    is_webhook_conflict = (
+                        isinstance(e, ApiTelegramException)
+                        and e.error_code == 409
                     )
+                    if is_read_timeout:
+                        # Normal during long polling — no updates arrived in the window
+                        logger.warning(f"Bot {self.center.name} read timeout (no updates), resuming polling...")
+                        consecutive_errors = 0
+                        backoff = 2
+                    elif is_gateway_error:
+                        # Transient Telegram server error — retry soon without penalising backoff
+                        logger.warning(f"Bot {self.center.name} gateway error {e.error_code}, retrying in 5s...")
+                        consecutive_errors = 0
+                        backoff = 5
+                    elif is_webhook_conflict:
+                        # Webhook became active while polling — clear and retry
+                        logger.warning(
+                            f"Bot {self.center.name} 409 conflict: webhook active, removing before retry..."
+                        )
+                        try:
+                            self.bot.remove_webhook()
+                            logger.info(f"Webhook removed for {self.center.name}, resuming polling.")
+                            consecutive_errors = 0
+                            backoff = 2
+                        except Exception as remove_err:
+                            logger.error(f"Failed to remove webhook for {self.center.name}: {remove_err}")
+                            consecutive_errors += 1
+                            backoff = min(5 * (2 ** (consecutive_errors - 1)), 120)
+                    else:
+                        consecutive_errors += 1
+                        backoff = min(5 * (2 ** (consecutive_errors - 1)), 120)
+                        log_fn = logger.warning if is_gateway_error else logger.error
+                        log_fn(
+                            f"Bot {self.center.name} polling error (attempt {consecutive_errors}): {e}. "
+                            f"Restarting in {backoff}s..."
+                        )
                     if self.running:
                         time.sleep(backoff)
         except Exception as e:
@@ -218,6 +247,7 @@ class BotThread(threading.Thread):
 
     def _health_watch(self):
         """Periodically call /getMe to verify the bot connection is alive."""
+        consecutive_health_failures = 0
         while self.running:
             time.sleep(self.HEALTH_CHECK_INTERVAL)
             if not self.running:
@@ -228,11 +258,23 @@ class BotThread(threading.Thread):
                     "Health check OK: bot @%s for center '%s'",
                     me.username, self.center.name,
                 )
+                consecutive_health_failures = 0
             except Exception as exc:
-                logger.error(
-                    "Health check FAILED for center '%s': %s — bot may be disconnected!",
-                    self.center.name, exc,
-                )
+                is_transient = any(keyword in str(exc) for keyword in (
+                    "RemoteDisconnected", "Read timed out", "ConnectionError",
+                    "Connection aborted", "Connection reset", "502", "503", "504",
+                ))
+                consecutive_health_failures += 1
+                if is_transient and consecutive_health_failures < 3:
+                    logger.warning(
+                        "Health check transient error for center '%s' (attempt %d): %s",
+                        self.center.name, consecutive_health_failures, exc,
+                    )
+                else:
+                    logger.error(
+                        "Health check FAILED for center '%s' (attempt %d): %s — bot may be disconnected!",
+                        self.center.name, consecutive_health_failures, exc,
+                    )
     
     def stop(self):
         """Stop the bot polling"""

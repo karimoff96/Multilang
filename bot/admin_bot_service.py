@@ -694,25 +694,54 @@ def start_bot_polling():
         while True:
             try:
                 bot.infinity_polling(
-                    timeout=30,
-                    long_polling_timeout=30,
+                    timeout=35,
+                    long_polling_timeout=25,
                     logger_level=logging.INFO,
                     allowed_updates=['message']
                 )
                 consecutive_errors = 0  # clean exit, reset counter
             except (ConnectionError, OSError, ApiTelegramException) as e:
-                consecutive_errors += 1
-                backoff = min(5 * (2 ** (consecutive_errors - 1)), 120)
-                # 502/503/504 are transient Telegram server errors — warn, don't error
+                is_read_timeout = "Read timed out" in str(e) or "ReadTimeout" in type(e).__name__
                 is_gateway_error = (
                     isinstance(e, ApiTelegramException)
                     and e.error_code in (502, 503, 504)
                 )
-                log_fn = logger.warning if is_gateway_error else logger.error
-                log_fn(
-                    f"Admin bot polling error (attempt {consecutive_errors}): {e}. "
-                    f"Restarting in {backoff}s..."
+                is_webhook_conflict = (
+                    isinstance(e, ApiTelegramException)
+                    and e.error_code == 409
                 )
+                if is_read_timeout:
+                    # Normal during long polling — no updates arrived in the window
+                    logger.warning("Admin bot read timeout (no updates), resuming polling...")
+                    consecutive_errors = 0
+                    backoff = 2
+                elif is_gateway_error:
+                    # Transient Telegram server error — retry soon without penalising backoff
+                    logger.warning(f"Admin bot gateway error {e.error_code}, retrying in 5s...")
+                    consecutive_errors = 0
+                    backoff = 5
+                elif is_webhook_conflict:
+                    # Webhook became active while we were polling — clear it and retry
+                    logger.warning(
+                        f"Admin bot 409 conflict: webhook is active, removing it before retry..."
+                    )
+                    try:
+                        bot.remove_webhook()
+                        logger.info("Webhook removed, resuming polling.")
+                        consecutive_errors = 0  # not a real error, reset
+                        backoff = 2  # short wait after webhook removal
+                    except Exception as remove_err:
+                        logger.error(f"Failed to remove webhook: {remove_err}")
+                        consecutive_errors += 1
+                        backoff = min(5 * (2 ** (consecutive_errors - 1)), 120)
+                else:
+                    consecutive_errors += 1
+                    backoff = min(5 * (2 ** (consecutive_errors - 1)), 120)
+                    log_fn = logger.warning if is_gateway_error else logger.error
+                    log_fn(
+                        f"Admin bot polling error (attempt {consecutive_errors}): {e}. "
+                        f"Restarting in {backoff}s..."
+                    )
                 time.sleep(backoff)
     except KeyboardInterrupt:
         logger.info("Admin bot polling stopped by user")

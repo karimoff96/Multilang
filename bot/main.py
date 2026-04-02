@@ -229,10 +229,14 @@ def send_payme_deadline_expired_notification(order):
         )
         logger.info(f"Sent expiry notification to user {user.user_id} for order {order.id}")
     except ApiTelegramException as e:
-        if e.error_code == 400 and "chat not found" in e.description.lower():
+        is_user_unreachable = (
+            (e.error_code == 400 and "chat not found" in e.description.lower())
+            or (e.error_code == 403 and "blocked" in e.description.lower())
+        )
+        if is_user_unreachable:
             logger.warning(
                 f"Cannot send expiry notification to user {user.user_id} for order {order.id}: "
-                f"chat not found (user may have blocked the bot)"
+                f"{e.description} (marking user inactive)"
             )
             try:
                 user.is_active = False
@@ -542,10 +546,14 @@ def send_order_status_notification(order, old_status, new_status):
         )
 
     except ApiTelegramException as e:
-        if e.error_code == 400 and "chat not found" in e.description.lower():
+        is_user_unreachable = (
+            (e.error_code == 400 and "chat not found" in e.description.lower())
+            or (e.error_code == 403 and "blocked" in e.description.lower())
+        )
+        if is_user_unreachable:
             logger.warning(
                 f"Cannot send status notification to user {user.user_id} for order {order.id}: "
-                f"chat not found (user may have blocked the bot or never started a conversation)"
+                f"{e.description} (marking user inactive)"
             )
             # Mark user as inactive so future notifications are skipped
             try:
@@ -654,10 +662,14 @@ def send_payment_received_notification(order, amount_received, total_received):
         )
 
     except ApiTelegramException as e:
-        if e.error_code == 400 and "chat not found" in e.description.lower():
+        is_user_unreachable = (
+            (e.error_code == 400 and "chat not found" in e.description.lower())
+            or (e.error_code == 403 and "blocked" in e.description.lower())
+        )
+        if is_user_unreachable:
             logger.warning(
                 f"Cannot send payment notification to user {user.user_id} for order {order.id}: "
-                f"chat not found (user may have blocked the bot or never started a conversation)"
+                f"{e.description} (marking user inactive)"
             )
             try:
                 user.is_active = False
