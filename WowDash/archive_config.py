@@ -34,9 +34,10 @@ class ArchiveConfig:
     MIN_SIZE_MB = int(os.getenv('ARCHIVE_MIN_SIZE_MB', '100'))
     
     # Maximum archive size (in MB) - splits into multiple archives if exceeded
-    # Telegram limit is 2GB, we keep it lower for reliability
-    # Recommendation: 500-1500 MB
-    MAX_SIZE_MB = int(os.getenv('ARCHIVE_MAX_SIZE_MB', '1500'))
+    # Telegram Bot API hard limit is 50 MB per file (NOT 2GB - that's the client app limit)
+    # We use 45 MB to leave a safe margin for caption/metadata overhead
+    # Recommendation: keep at 45 MB or lower
+    MAX_SIZE_MB = int(os.getenv('ARCHIVE_MAX_SIZE_MB', '45'))
     
     # Maximum orders per archive (helps with splitting large batches)
     # Set to 0 for unlimited

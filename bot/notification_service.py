@@ -348,6 +348,17 @@ def send_document_to_channel(bot_token, channel_id, file_path, caption, retry_co
     if not bot:
         return False, "Failed to create bot instance"
     
+    # Telegram bot API hard limit is 50 MB
+    TELEGRAM_MAX_BYTES = 50 * 1024 * 1024
+    file_size = os.path.getsize(file_path)
+    if file_size > TELEGRAM_MAX_BYTES:
+        error_msg = (
+            f"File too large for Telegram ({file_size / (1024*1024):.1f} MB > 50 MB limit): "
+            f"{os.path.basename(file_path)}"
+        )
+        logger.warning(error_msg)
+        return False, error_msg
+
     for attempt in range(retry_count):
         try:
             with open(file_path, 'rb') as doc_file:
@@ -362,6 +373,13 @@ def send_document_to_channel(bot_token, channel_id, file_path, caption, retry_co
             return True, None
         except ApiTelegramException as e:
             error_msg = f"Telegram API error: {e.description}"
+            # 413 Request Entity Too Large is permanent — retrying won't help
+            if e.error_code == 413:
+                logger.warning(
+                    f"File too large for Telegram API ({file_size / (1024*1024):.1f} MB): "
+                    f"{os.path.basename(file_path)}"
+                )
+                return False, error_msg
             logger.warning(f"Attempt {attempt + 1}/{retry_count} failed: {error_msg}")
             if attempt == retry_count - 1:
                 logger.error(f"Failed to send document after {retry_count} attempts: {error_msg}")
@@ -370,7 +388,7 @@ def send_document_to_channel(bot_token, channel_id, file_path, caption, retry_co
             error_msg = f"Unexpected error: {str(e)}"
             logger.error(error_msg)
             return False, error_msg
-    
+
     return False, "Max retries exceeded"
 
 
@@ -449,6 +467,14 @@ def send_order_notification(order_id):
                     zip_path,
                     message
                 )
+                # File too large — fall back to text-only notification
+                if not success and error and ('too large' in error.lower() or '413' in error or 'Entity Too Large' in error):
+                    logger.warning(f"ZIP too large for Telegram, falling back to text for company channel")
+                    success, error = send_message_to_channel(
+                        bot_token,
+                        center.company_orders_channel_id,
+                        message + "\n\n⚠️ <i>Файлы не прикреплены (файл слишком большой)</i>"
+                    )
             else:
                 # Fallback to text message if ZIP creation failed
                 success, error = send_message_to_channel(
@@ -471,6 +497,14 @@ def send_order_notification(order_id):
                     zip_path,
                     message
                 )
+                # File too large — fall back to text-only notification
+                if not success and error and ('too large' in error.lower() or '413' in error or 'Entity Too Large' in error):
+                    logger.warning(f"ZIP too large for Telegram, falling back to text for branch channel")
+                    success, error = send_message_to_channel(
+                        bot_token,
+                        branch_channel_id,
+                        message + "\n\n⚠️ <i>Файлы не прикреплены (файл слишком большой)</i>"
+                    )
             else:
                 success, error = send_message_to_channel(
                     bot_token,

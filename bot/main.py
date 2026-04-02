@@ -34,10 +34,24 @@ from telebot import apihelper
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.poolmanager import PoolManager
+from urllib3.util.retry import Retry
+
+
 class NoSSLAdapter(HTTPAdapter):
+    def __init__(self, **kwargs):
+        retry = Retry(
+            total=3,
+            connect=3,
+            read=3,
+            backoff_factor=0.5,
+            raise_on_status=False,
+        )
+        super().__init__(max_retries=retry, **kwargs)
+
     def init_poolmanager(self, *args, **kwargs):
         kwargs["ssl_context"] = ssl._create_unverified_context()
         return super().init_poolmanager(*args, **kwargs)
+
 # Create custom session with SSL verification disabled
 session = requests.Session()
 session.mount("https://", NoSSLAdapter())
@@ -1193,15 +1207,39 @@ def extract_coordinates_from_url(url):
     except Exception as e:
         logger.warning(f"Failed to extract coordinates from URL: {e}")
         return None
+# Per-process cache: token string → TranslationCenter instance.
+# Safe because each subprocess runs exactly one center's bot with a fixed token.
+_center_token_cache: dict = {}
+
+
 def get_current_center():
     """
     Get the TranslationCenter associated with the current bot token.
-    This is essential for multi-tenant support.
+
+    bot_token is stored as an EncryptedCharField (Fernet, non-deterministic).
+    A SQL filter like filter(bot_token=bot.token) will NEVER match because
+    each Fernet encryption call produces a different ciphertext.  Instead we
+    fetch all active centers — their bot_token values are transparently
+    decrypted by from_db_value — and compare in Python.
+
+    A per-process dict cache ensures this is a one-time query per subprocess.
     """
     try:
+        current_token = bot.token
+        if not current_token or current_token == _TEMPLATE_TOKEN:
+            return None
+
+        if current_token in _center_token_cache:
+            return _center_token_cache[current_token]
+
         from organizations.models import TranslationCenter
-        center = TranslationCenter.objects.filter(bot_token=bot.token).first()
-        return center
+        for center in TranslationCenter.objects.filter(is_active=True):
+            if center.bot_token == current_token:
+                _center_token_cache[current_token] = center
+                return center
+
+        logger.warning(f"get_current_center: no center matched token {current_token[:15]}...")
+        return None
     except Exception as e:
         logger.error(f"Failed to get current center: {e}")
         return None
@@ -1689,8 +1727,8 @@ def handle_language_selection(message):
     )
     send_message(message.chat.id, language_selected_text)
 
-    # Go directly to registration (ask name first)
-    start_registration(message, language)
+    # Open WebApp — registration is completed inside the mini app
+    show_main_menu(message, language)
 # Handler for branch selection callback
 @bot.callback_query_handler(func=lambda call: call.data.startswith("select_branch_"))
 def handle_branch_selection(call):
@@ -1967,10 +2005,18 @@ def show_main_menu(message, language):
         elif user and user.center_id:
             _center_id = user.center_id
         else:
-            from accounts.models import BotUser as _BU
-            _center_id = _BU.objects.filter(
-                user_id=user_id, is_active=True
-            ).values_list('center_id', flat=True).first()
+            # Fallback: use the current bot's center directly.
+            # Each per-center subprocess has a single reliable center — NEVER
+            # do a cross-center BotUser lookup here because a user may have
+            # accounts at multiple centers; that would return the wrong one.
+            _current = get_current_center()
+            if _current:
+                _center_id = _current.id
+            else:
+                from accounts.models import BotUser as _BU
+                _center_id = _BU.objects.filter(
+                    user_id=user_id, center=_current
+                ).values_list('center_id', flat=True).first()
     except Exception as _e:
         logger.error(f"Could not resolve center_id in show_main_menu: {_e}")
 

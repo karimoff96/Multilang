@@ -61,116 +61,101 @@ def register_all_handlers(bot, center=None):
     
     @bot.message_handler(commands=["start"])
     def start(message):
-        """Handle /start command"""
+        """Handle /start command — open WebApp immediately."""
         import uuid as uuid_module
-        
+
         user_id = message.from_user.id
         username = message.from_user.username
-        first_name = message.from_user.first_name or ""
         language = "uz"
-        
+
+        # Resolve the correct center for this bot (closure > token lookup)
+        _center = center
+        if _center is None:
+            try:
+                from .main import get_current_center
+                _center = get_current_center()
+            except Exception:
+                pass
+
         # Check for agency invitation link
         is_agency_invite = False
         agency_token = None
         agency = None
         agency_center_id = None
-        
+
         if len(message.text.split()) > 1:
             param = message.text.split()[1]
             if param.startswith("agency_"):
                 try:
-                    # Parse: agency_{token} or agency_{token}_{center_id}
                     parts = param[7:].split("_")
                     if len(parts) >= 1:
-                        # First part is the UUID token (may contain hyphens from UUID format)
-                        # UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (36 chars)
-                        # But in the link it's without hyphens, so we reconstruct
                         token_part = parts[0]
-                        # Check if there are more parts that could be center_id
-                        # The token is 32 chars hex (no hyphens) or 36 chars (with hyphens)
                         if len(token_part) == 32:
                             agency_token = token_part
-                            # Check for center_id at the end
                             if len(parts) > 1:
                                 try:
                                     agency_center_id = int(parts[-1])
                                 except ValueError:
                                     pass
                         else:
-                            # Token might include hyphens, need to parse differently
-                            # Full param minus "agency_" prefix
                             full_token = param[7:]
-                            # Try to find center_id at the end
                             last_underscore = full_token.rfind("_")
                             if last_underscore > 0:
                                 try:
                                     agency_center_id = int(full_token[last_underscore + 1:])
                                     agency_token = full_token[:last_underscore]
                                 except ValueError:
-                                    # No center_id, full string is token
                                     agency_token = full_token
                             else:
                                 agency_token = full_token
-                        
+
                         uuid_obj = uuid_module.UUID(agency_token)
                         agency = BotUser.get_agency_by_token(str(uuid_obj), center_id=agency_center_id)
                         if agency:
                             is_agency_invite = True
                 except (ValueError, IndexError) as e:
                     logger.error(f"Invalid agency token: {e}")
-        
-        # Check if user exists
-        existing_user = BotUser.objects.filter(user_id=user_id).first()
-        
+
+        # Center-scoped user lookup — never mix users across centers
+        existing_user = BotUser.objects.filter(
+            user_id=user_id, center=_center
+        ).first() if _center else BotUser.objects.filter(user_id=user_id).first()
+
         if existing_user:
-            language = existing_user.language
-            
+            language = existing_user.language or "uz"
+
             if is_agency_invite and agency:
                 if existing_user.is_agency:
                     bot.send_message(message.chat.id, get_text("already_agency", language))
                 elif existing_user.agency:
-                    bot.send_message(message.chat.id, 
+                    bot.send_message(message.chat.id,
                         get_text("already_linked_to_agency", language).format(existing_user.agency.name))
                 else:
                     existing_user.agency = agency
                     existing_user.save()
                     bot.send_message(message.chat.id,
                         get_text("agency_linked_success", language).format(agency.name))
-            
-            if existing_user.is_active:
-                show_main_menu(message, language)
-            else:
-                show_language_selection(message)
-            return
-        
-        # New user
-        show_language_selection(message)
+
+        # Stamp center on message so show_main_menu builds the correct WebApp URL
+        try:
+            message._center = _center
+        except (AttributeError, TypeError):
+            pass
+
+        show_main_menu(message, language)
     
-    def show_language_selection(message):
-        """Show language selection buttons"""
-        markup = types.InlineKeyboardMarkup(row_width=3)
-        markup.add(
-            types.InlineKeyboardButton("🇺🇿 O'zbekcha", callback_data="lang_uz"),
-            types.InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru"),
-            types.InlineKeyboardButton("🇬🇧 English", callback_data="lang_en"),
-        )
-        bot.send_message(
-            message.chat.id,
-            "🌐 Tilni tanlang / Выберите язык / Select language:",
-            reply_markup=markup,
-        )
-    
-    def show_main_menu(message, language):
-        """Show main menu"""
+    def show_main_menu(message, language, center_obj=None):
+        """Show main menu — always stamps _center so main.py resolves the correct WebApp URL."""
         from .main import show_main_menu as main_show_main_menu
-        # Use the original implementation but with our bot
+        # Stamp the per-center object onto the message so show_main_menu in main.py
+        # uses it directly instead of falling back to get_current_center() (admin token).
+        _c = center_obj or center  # prefer explicit arg, fall back to closure center
+        if _c is not None:
+            try:
+                message._center = _c
+            except (AttributeError, TypeError):
+                pass
         main_show_main_menu(message, language)
-    
-    @bot.callback_query_handler(func=lambda call: call.data.startswith("lang_"))
-    def handle_language_selection(call):
-        """Handle language selection"""
-        from .main import handle_language_selection as main_handle
-        main_handle(call)
     
     @bot.message_handler(content_types=["contact"])
     def handle_contact(message):

@@ -273,10 +273,22 @@ class StorageArchiveService:
             bot = get_bot_instance(center.bot_token)
             # Use company_orders_channel_id for archives
             channel_id = center.company_orders_channel_id
-            
+
             if not channel_id:
                 logger.error(f"No company orders channel configured for center: {center.name}")
                 return False, "No company orders channel configured"
+
+            # Pre-flight size check — Telegram bot API hard limit is 50 MB
+            TELEGRAM_BOT_MAX_BYTES = 50 * 1024 * 1024
+            archive_size = os.path.getsize(archive_path)
+            if archive_size > TELEGRAM_BOT_MAX_BYTES:
+                error_msg = (
+                    f"Archive too large for Telegram bot API "
+                    f"({archive_size / (1024*1024):.1f} MB > 50 MB limit): "
+                    f"{os.path.basename(archive_path)}"
+                )
+                logger.error(error_msg)
+                return False, error_msg
             
             # Prepare caption
             if not caption:

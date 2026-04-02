@@ -22,6 +22,7 @@ from organizations.models import TranslationCenter
 from bot.webhook_manager import get_ssl_session
 import telebot
 from telebot import apihelper
+from telebot.apihelper import ApiTelegramException
 import logging
 
 logger = logging.getLogger(__name__)
@@ -200,7 +201,13 @@ class BotThread(threading.Thread):
                 except Exception as e:
                     consecutive_errors += 1
                     backoff = min(5 * (2 ** (consecutive_errors - 1)), 120)  # cap at 2 min
-                    logger.error(
+                    # 502/503/504 are transient Telegram server hiccups — warn, don't error
+                    is_gateway_error = (
+                        isinstance(e, ApiTelegramException)
+                        and e.error_code in (502, 503, 504)
+                    )
+                    log_fn = logger.warning if is_gateway_error else logger.error
+                    log_fn(
                         f"Bot {self.center.name} polling error (attempt {consecutive_errors}): {e}. "
                         f"Restarting in {backoff}s..."
                     )

@@ -383,11 +383,11 @@ def api_register(request):
     if branch_id:
         branch = Branch.objects.filter(pk=branch_id, center=center, is_active=True).first()
 
-    # If no branch chosen and only one branch exists, auto-assign
+    # Auto-select the is_main branch (or first active branch) when no valid branch_id given
     if not branch:
-        branches = list(Branch.objects.filter(center=center, is_active=True))
-        if len(branches) == 1:
-            branch = branches[0]
+        branches = list(Branch.objects.filter(center=center, is_active=True).order_by('-is_main', 'name'))
+        if branches:
+            branch = next((b for b in branches if b.is_main), branches[0])
 
     bot_user, created = BotUser.objects.get_or_create(
         user_id=tg_id,

@@ -26,12 +26,40 @@ Note: Channel/Group IDs are negative numbers (e.g., -1001234567890)
 
 import logging
 import os
+import ssl
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import telebot
+from telebot import apihelper
 from telebot.apihelper import ApiTelegramException
 from django.conf import settings
 from django.utils import timezone
 import psutil
 import time
+
+
+class _RetrySSLAdapter(HTTPAdapter):
+    """HTTPAdapter with retry logic for stale connection recovery."""
+    def __init__(self, **kwargs):
+        retry = Retry(
+            total=5,
+            connect=5,
+            read=5,
+            backoff_factor=0.5,
+            raise_on_status=False,
+        )
+        super().__init__(max_retries=retry, **kwargs)
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs["ssl_context"] = ssl._create_unverified_context()
+        return super().init_poolmanager(*args, **kwargs)
+
+
+def _make_resilient_session():
+    session = requests.Session()
+    session.mount("https://", _RetrySSLAdapter())
+    return session
 
 logger = logging.getLogger(__name__)
 
@@ -170,6 +198,7 @@ def get_admin_bot():
     if _admin_bot is None:
         try:
             _admin_bot = telebot.TeleBot(ADMIN_BOT_TOKEN, parse_mode="HTML", threaded=False)
+            apihelper.SESSION = _make_resilient_session()
             logger.info("Admin bot instance created")
         except Exception as e:
             logger.error(f"Failed to create admin bot: {e}")
@@ -659,14 +688,32 @@ def start_bot_polling():
         # Remove any existing webhooks (in case they were set before)
         bot.remove_webhook()
         logger.info("Removed any existing webhooks")
-        
-        # Start polling with auto-reconnect on network errors
-        bot.infinity_polling(
-            timeout=30,
-            long_polling_timeout=30,
-            logger_level=logging.INFO,
-            allowed_updates=['message']
-        )
+
+        # Restart loop — recovers from transient network errors (RemoteDisconnected, etc.)
+        consecutive_errors = 0
+        while True:
+            try:
+                bot.infinity_polling(
+                    timeout=30,
+                    long_polling_timeout=30,
+                    logger_level=logging.INFO,
+                    allowed_updates=['message']
+                )
+                consecutive_errors = 0  # clean exit, reset counter
+            except (ConnectionError, OSError, ApiTelegramException) as e:
+                consecutive_errors += 1
+                backoff = min(5 * (2 ** (consecutive_errors - 1)), 120)
+                # 502/503/504 are transient Telegram server errors — warn, don't error
+                is_gateway_error = (
+                    isinstance(e, ApiTelegramException)
+                    and e.error_code in (502, 503, 504)
+                )
+                log_fn = logger.warning if is_gateway_error else logger.error
+                log_fn(
+                    f"Admin bot polling error (attempt {consecutive_errors}): {e}. "
+                    f"Restarting in {backoff}s..."
+                )
+                time.sleep(backoff)
     except KeyboardInterrupt:
         logger.info("Admin bot polling stopped by user")
         remove_admin_bot_pid()

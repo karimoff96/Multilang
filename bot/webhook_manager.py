@@ -20,21 +20,32 @@ import ssl
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.poolmanager import PoolManager
+from urllib3.util.retry import Retry
 
 logger = logging.getLogger(__name__)
 
 # Cache timeout for bot instances (1 hour)
 BOT_CACHE_TIMEOUT = 3600
 
-# SSL workaround for development
+
 class NoSSLAdapter(HTTPAdapter):
+    def __init__(self, **kwargs):
+        retry = Retry(
+            total=3,
+            connect=3,
+            read=3,
+            backoff_factor=0.5,
+            raise_on_status=False,
+        )
+        super().__init__(max_retries=retry, **kwargs)
+
     def init_poolmanager(self, *args, **kwargs):
         kwargs["ssl_context"] = ssl._create_unverified_context()
         return super().init_poolmanager(*args, **kwargs)
 
 
 def get_ssl_session():
-    """Get requests session with SSL verification disabled (dev only)"""
+    """Get requests session with retry logic and SSL verification disabled"""
     session = requests.Session()
     session.mount("https://", NoSSLAdapter())
     return session
