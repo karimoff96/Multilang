@@ -11,6 +11,7 @@ import time
 import subprocess
 import hashlib
 import logging
+from django.db import close_old_connections
 from django.core.management.base import BaseCommand
 from organizations.models import TranslationCenter
 
@@ -65,7 +66,14 @@ class Command(BaseCommand):
         while True:
             try:
                 time.sleep(30)  # Check every 30 seconds
-                
+
+                # Ensure DB connections are fresh for long-running process
+                try:
+                    close_old_connections()
+                except Exception:
+                    # Best-effort: don't crash watcher if closing connections fails
+                    logger.debug('Failed to close old DB connections', exc_info=True)
+
                 current_hash = self.get_token_hash()
                 
                 if current_hash != self.last_token_hash:

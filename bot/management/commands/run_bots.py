@@ -195,6 +195,7 @@ class BotThread(threading.Thread):
                     self.bot.infinity_polling(
                         timeout=35,
                         long_polling_timeout=25,
+                        logger_level=logging.WARNING,
                         allowed_updates=["message", "callback_query"],
                     )
                     consecutive_errors = 0  # reset on clean exit

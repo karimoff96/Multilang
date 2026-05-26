@@ -40,10 +40,13 @@ from urllib3.util.retry import Retry
 class NoSSLAdapter(HTTPAdapter):
     def __init__(self, **kwargs):
         retry = Retry(
-            total=3,
-            connect=3,
-            read=3,
+            total=5,
+            connect=5,
+            read=5,
             backoff_factor=0.5,
+            status_forcelist=(429, 502, 503, 504),
+            allowed_methods=frozenset(["HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS"]),
+            respect_retry_after_header=True,
             raise_on_status=False,
         )
         super().__init__(max_retries=retry, **kwargs)
@@ -1048,10 +1051,12 @@ def update_user_username(message):
         logger.debug(f"Error updating username for user: {e}")
 def _send_with_retry(bot_instance, chat_id, text, reply_markup=None, parse_mode="HTML", max_retries=3):
     """
-    Send a Telegram message with exponential back-off on rate-limit (429) errors.
+    Send a Telegram message with exponential back-off on rate-limit (429) errors
+    and transient network errors (ReadTimeout, ConnectionError).
     Other API errors are raised immediately after the first attempt.
     """
     import time as _time
+    import requests.exceptions as _req_exc
     delay = 2  # initial back-off in seconds
     for attempt in range(max_retries + 1):
         try:
@@ -1074,6 +1079,19 @@ def _send_with_retry(bot_instance, chat_id, text, reply_markup=None, parse_mode=
                 _time.sleep(wait)
                 delay *= 2  # exponential back-off
             else:
+                raise
+        except (_req_exc.ReadTimeout, _req_exc.ConnectionError) as exc:
+            if attempt < max_retries:
+                logger.warning(
+                    "Telegram network error (%s), retrying in %ds (attempt %d/%d)",
+                    type(exc).__name__, delay, attempt + 1, max_retries,
+                )
+                _time.sleep(delay)
+                delay *= 2
+            else:
+                logger.error(
+                    "Telegram network error after %d attempts: %s", max_retries + 1, exc
+                )
                 raise
     # Should not reach here
     raise RuntimeError("send_with_retry exhausted all retries")

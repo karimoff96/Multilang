@@ -28,6 +28,29 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 
 _SENTRY_DSN = os.getenv("SENTRY_DSN")
 if _SENTRY_DSN:
+    def _sentry_before_send(event, hint):
+        """
+        Suppress expected Telegram polling ReadTimeout events.
+        ReadTimeout on api.telegram.org is normal long-polling behaviour —
+        the server returns nothing when there are no updates within the window.
+        Logging it at ERROR (pyTelegramBotAPI default) would flood Sentry.
+        """
+        exc_info = hint.get("exc_info")
+        if exc_info:
+            _, exc_value, _ = exc_info
+            exc_str = str(exc_value)
+            if "api.telegram.org" in exc_str and (
+                "Read timed out" in exc_str or "ReadTimeout" in type(exc_value).__name__
+            ):
+                return None
+        # Also suppress when the error arrives as a log-record (LoggingIntegration path)
+        log_record = hint.get("log_record")
+        if log_record:
+            msg = log_record.getMessage()
+            if ("Read timed out" in msg or "ReadTimeout" in msg) and "api.telegram.org" in msg:
+                return None
+        return event
+
     sentry_sdk.init(
         dsn=_SENTRY_DSN,
         environment=os.getenv("SENTRY_ENVIRONMENT", "production"),
@@ -38,6 +61,7 @@ if _SENTRY_DSN:
                 event_level=logging.ERROR, # Send events for ERROR and above
             ),
         ],
+        before_send=_sentry_before_send,
         traces_sample_rate=0.1,   # 10 % of transactions for performance monitoring
         send_default_pii=False,   # Do not attach user PII to events
         release=os.getenv("SENTRY_RELEASE"),  # Optional: set via CI/deploy

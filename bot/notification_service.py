@@ -11,10 +11,12 @@ Order Routing Rules:
 """
 
 import logging
+import time
 import telebot
 import os
 import tempfile
 import zipfile
+import requests.exceptions
 from telebot.apihelper import ApiTelegramException
 from functools import lru_cache
 from django.conf import settings
@@ -315,6 +317,7 @@ def send_message_to_channel(bot_token, channel_id, message, retry_count=3):
     if not bot:
         return False, "Failed to create bot instance"
     
+    delay = 2
     for attempt in range(retry_count):
         try:
             bot.send_message(channel_id, message)
@@ -326,6 +329,14 @@ def send_message_to_channel(bot_token, channel_id, message, retry_count=3):
             if attempt == retry_count - 1:
                 logger.error(f"Failed to send message after {retry_count} attempts: {error_msg}")
                 return False, error_msg
+        except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError) as e:
+            error_msg = f"Network timeout: {str(e)}"
+            logger.warning(f"Attempt {attempt + 1}/{retry_count} failed with timeout: {error_msg}")
+            if attempt == retry_count - 1:
+                logger.error(f"Failed to send message after {retry_count} attempts: {error_msg}")
+                return False, error_msg
+            time.sleep(delay)
+            delay *= 2
         except Exception as e:
             error_msg = f"Unexpected error: {str(e)}"
             logger.error(error_msg)
@@ -359,6 +370,7 @@ def send_document_to_channel(bot_token, channel_id, file_path, caption, retry_co
         logger.warning(error_msg)
         return False, error_msg
 
+    delay = 2
     for attempt in range(retry_count):
         try:
             with open(file_path, 'rb') as doc_file:
@@ -384,6 +396,14 @@ def send_document_to_channel(bot_token, channel_id, file_path, caption, retry_co
             if attempt == retry_count - 1:
                 logger.error(f"Failed to send document after {retry_count} attempts: {error_msg}")
                 return False, error_msg
+        except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError) as e:
+            error_msg = f"Network timeout: {str(e)}"
+            logger.warning(f"Attempt {attempt + 1}/{retry_count} failed with timeout: {error_msg}")
+            if attempt == retry_count - 1:
+                logger.error(f"Failed to send document after {retry_count} attempts: {error_msg}")
+                return False, error_msg
+            time.sleep(delay)
+            delay *= 2
         except Exception as e:
             error_msg = f"Unexpected error: {str(e)}"
             logger.error(error_msg)

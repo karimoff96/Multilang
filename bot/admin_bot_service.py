@@ -43,10 +43,13 @@ class _RetrySSLAdapter(HTTPAdapter):
     """HTTPAdapter with retry logic for stale connection recovery."""
     def __init__(self, **kwargs):
         retry = Retry(
-            total=5,
-            connect=5,
-            read=5,
+            total=7,
+            connect=7,
+            read=7,
             backoff_factor=0.5,
+            status_forcelist=(429, 502, 503, 504),
+            allowed_methods=frozenset(["HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS"]),
+            respect_retry_after_header=True,
             raise_on_status=False,
         )
         super().__init__(max_retries=retry, **kwargs)

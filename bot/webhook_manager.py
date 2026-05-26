@@ -31,10 +31,13 @@ BOT_CACHE_TIMEOUT = 3600
 class NoSSLAdapter(HTTPAdapter):
     def __init__(self, **kwargs):
         retry = Retry(
-            total=3,
-            connect=3,
-            read=3,
+            total=5,
+            connect=5,
+            read=5,
             backoff_factor=0.5,
+            status_forcelist=(429, 502, 503, 504),
+            allowed_methods=frozenset(["HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS"]),
+            respect_retry_after_header=True,
             raise_on_status=False,
         )
         super().__init__(max_retries=retry, **kwargs)
