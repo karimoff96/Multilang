@@ -1,0 +1,9 @@
+[Unit]
+Description=Renew MultiLang (multilang.uz) SSL certificates
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /home/Wow-dash/deployment/certbot-multilang/renew_and_reload.sh
+Nice=10
