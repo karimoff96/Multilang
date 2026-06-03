@@ -645,6 +645,15 @@ class Subscription(models.Model):
             return 0
         return (self.trial_end_date - date.today()).days
     
+    def days_since_expiration(self):
+        """Calculate days passed since subscription expired"""
+        if self.status != self.STATUS_EXPIRED:
+            return 0
+        if not self.end_date:
+            return 0
+        days_passed = (date.today() - self.end_date).days
+        return days_passed if days_passed > 0 else 0
+    
     def convert_trial_to_paid(self, tariff, pricing):
         """Convert a trial subscription to a paid subscription"""
         if not self.is_trial:
