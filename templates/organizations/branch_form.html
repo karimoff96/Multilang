@@ -167,9 +167,15 @@
                         <a href="{% url 'branch_list' %}{% if request.GET.return_page %}?page={{ request.GET.return_page }}{% endif %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8" data-i18n="common.cancel">
                             Cancel
                         </a>
-                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8" data-i18n="{% if branch %}form.updateBranch{% else %}form.createBranch{% endif %}">
-                            {% if branch %}Update{% else %}Create{% endif %} Branch
+                        {% if branch %}
+                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8" data-i18n="form.updateBranch">
+                            Update Branch
                         </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8" data-i18n="form.createBranch">
+                            Create Branch
+                        </button>
+                        {% endif %}
                     </div>
                 </form>
             </div>

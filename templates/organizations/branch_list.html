@@ -87,9 +87,11 @@
                         </div>
                         
                         <div class="d-flex align-items-center justify-content-between pt-16 border-top">
-                            <span class="{% if branch.is_active %}bg-success-focus text-success-main{% else %}bg-danger-focus text-danger-main{% endif %} px-16 py-4 radius-4 text-xs fw-medium" data-i18n="{% if branch.is_active %}common.active{% else %}common.inactive{% endif %}">
-                                {% if branch.is_active %}Active{% else %}Inactive{% endif %}
-                            </span>
+                            {% if branch.is_active %}
+                            <span class="bg-success-focus text-success-main px-16 py-4 radius-4 text-xs fw-medium" data-i18n="common.active">Active</span>
+                            {% else %}
+                            <span class="bg-danger-focus text-danger-main px-16 py-4 radius-4 text-xs fw-medium" data-i18n="common.inactive">Inactive</span>
+                            {% endif %}
                             {% can_do 'branches.manage' as can_manage_branch %}
                             {% if can_manage_branch %}
                             <div class="d-flex gap-8">

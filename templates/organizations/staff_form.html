@@ -182,9 +182,15 @@
                         <a href="{% url 'staff_list' %}{% if request.GET.return_page %}?page={{ request.GET.return_page }}{% endif %}" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8" data-i18n="common.cancel">
                             Cancel
                         </a>
-                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8" data-i18n="{% if staff_member %}form.updateStaff{% else %}form.createStaff{% endif %}">
-                            {% if staff_member %}Update{% else %}Create{% endif %} Staff
+                        {% if staff_member %}
+                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8" data-i18n="form.updateStaff">
+                            Update Staff
                         </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8" data-i18n="form.createStaff">
+                            Create Staff
+                        </button>
+                        {% endif %}
                     </div>
                 </form>
             </div>
